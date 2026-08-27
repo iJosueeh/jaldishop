@@ -394,8 +394,8 @@ La integracion de los tres casos permitira construir el **Modelo de Capacidad v1
 
 | Estado | Detalle |
 |:------:|---------|
-| `PENDIENTE` | Integracion A + B + C |
+| `CONSOLIDADO` | Incorporado a matriz de consolidacion y Modelo de Capacidad v1 |
 
-Las reglas RN-A son preliminares y podran modificarse durante la definicion del **Modelo de Capacidad v1**.
+Las reglas RN-A fueron incorporadas a las decisiones generales DP-G y al **Modelo de Capacidad v1**.
 
 </div>

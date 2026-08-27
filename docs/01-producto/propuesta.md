@@ -1,66 +1,87 @@
-# Propuesta del producto
+<div align="center">
+
+# PROPUESTA DEL PRODUCTO
+
+## JaldiShop
+
+`Producto` `MYPE` `Capacidad`
+
+</div>
+
+---
 
 ## Problema
 
-Las MYPE que venden mediante WhatsApp, Instagram y otras redes
-sociales gestionan gran parte de sus pedidos manualmente.
+<blockquote>
 
-El problema central identificado es la sobreventa causada por
-no disponer de un control de capacidad.
+> Las MYPE que venden mediante WhatsApp, Instagram y otras redes sociales gestionan gran parte de sus pedidos manualmente.
 
-## Diferencia frente al stock tradicional
+</blockquote>
 
-Un e-commerce tradicional pregunta:
+El problema central identificado es la **sobreventa** causada por no disponer de un control de capacidad.
 
-> ¿Cuántas unidades quedan disponibles?
+---
 
-La propuesta plantea una pregunta diferente:
+## Diferencia frente al Stock Tradicional
 
-> ¿Cuántos pedidos puede comprometerse a cumplir realmente
-> el negocio?
+| Enfoque | Pregunta |
+|---------|----------|
+| **E-commerce tradicional** | Cuantas unidades quedan disponibles? |
+| **JaldiShop** | Cuantos pedidos puede comprometerse a cumplir realmente el negocio? |
 
-Una pastelería puede disponer de ingredientes pero no de tiempo
-para preparar otra torta.
+<blockquote>
 
-Una dark kitchen puede disponer de alimentos pero tener su
-capacidad de cocina saturada.
+> Una panaderia puede disponer de ingredientes pero no de tiempo para preparar otra torta.
 
-Un negocio de regalos puede producir un pedido pero no disponer
-de capacidad logística para entregarlo en el horario solicitado.
+> Una dark kitchen puede disponer de alimentos pero tener su capacidad de cocina saturada.
 
-## Propuesta de solución
+> Un negocio de regalos puede producir un pedido pero no disponer de capacidad logistica para entregarlo en el horario solicitado.
 
-Crear un sistema de gestión de capacidad y pedidos para pequeñas
-empresas que ya captan clientes mediante redes sociales.
+</blockquote>
 
-La plataforma no busca reemplazar necesariamente WhatsApp o
-Instagram, sino funcionar como una capa de organización para
-gestionar los pedidos que recibe el negocio.
+---
 
-## Funciones centrales planteadas
+## Propuesta de Solucion
 
-1. Configuración de capacidad real.
-2. Gestión centralizada de pedidos.
-3. Control automático de disponibilidad.
-4. Seguimiento del pedido.
-5. Información básica de clientes frecuentes.
+Crear un sistema de gestion de capacidad y pedidos para pequenas empresas que ya captan clientes mediante redes sociales.
 
-## Público preliminar
+La plataforma no busca reemplazar necesariamente WhatsApp o Instagram, sino funcionar como una **capa de organizacion** para gestionar los pedidos que recibe el negocio.
 
-MYPE con producción o atención limitada, especialmente negocios
-que trabajan bajo pedido.
+---
 
-Ejemplos:
+## Funciones Centrales
 
-- Pastelerías.
-- Repostería.
-- Dark kitchens.
-- Comida preparada.
-- Regalos personalizados.
+| # | Funcion |
+|:-:|---------|
+| 1 | Configuracion de capacidad real |
+| 2 | Gestion centralizada de pedidos |
+| 3 | Control automatico de disponibilidad |
+| 4 | Seguimiento del pedido |
+| 5 | Datos basicos de clientes frecuentes |
+
+---
+
+## Publico Preliminar
+
+MYPE con produccion o atencion limitada, especialmente negocios que trabajan bajo pedido:
+
+| Tipo de Negocio |
+|-----------------|
+| Panaderias y reposterias |
+| Dark kitchens |
+| Comida preparada |
+| Regalos personalizados |
+
+---
 
 ## Estado
 
-Propuesta seleccionada por el equipo.
+<div align="center">
 
-El alcance definitivo será establecido después de definir el
-Modelo de Capacidad v1 y el MVP.
+| Estado | Detalle |
+|:------:|---------|
+| `APROBADO` | Propuesta seleccionada por el equipo |
+
+El alcance definitivo sera establecido despues de definir el **Modelo de Capacidad v1** y el **MVP**.
+
+</div>

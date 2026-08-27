@@ -547,8 +547,8 @@ La integracion de los tres casos permitira determinar que conceptos son generale
 
 | Estado | Detalle |
 |:------:|---------|
-| `EN REVISION` | Pendiente de integracion A + B + C |
+| `CONSOLIDADO` | Incorporado a matriz de consolidacion y Modelo de Capacidad v1 |
 
-Las reglas RN-C, decisiones DP-C y dudas D-C son preliminares y pueden modificarse durante la integracion de los Casos A, B y C.
+Las reglas RN-C fueron incorporadas a las decisiones generales DP-G y al **Modelo de Capacidad v1**.
 
 </div>

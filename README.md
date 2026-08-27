@@ -61,7 +61,7 @@
 
 | Sprint | Estado | Descripcion |
 |:------:|:------:|-------------|
-| 1 | `EN PROGRESO` | Establecimiento del modelo de capacidad |
+| 1 | `COMPLETADO` | Establecimiento del modelo de capacidad |
 | 2 | `PENDIENTE` | Desarrollo del backend |
 | 3 | `PENDIENTE` | Desarrollo del frontend |
 | 4 | `PENDIENTE` | Union y pruebas |
@@ -76,13 +76,18 @@ Toda la documentacion del proyecto se encuentra disponible en la carpeta [`/docs
 jaldishop/
 ├── docs/
 │   ├── 01-producto/
-│   │   └── propuesta.md              # Propuesta del producto
+│   │   ├── propuesta.md              # Propuesta del producto
+│   │   ├── decisiones-producto.md    # Decisiones del MVP
+│   │   ├── matriz-consolidacion.md   # Consolidacion de casos
+│   │   └── modelo-capacidad-v1.md    # Modelo de Capacidad v1
 │   ├── 02-investigacion/
 │   │   ├── caso-a-pasteleria.md      # Caso A: Capacidad en pasteleria
-│   │   └── caso-c-logistica.md       # Caso C: Capacidad logistica y delivery
+│   │   ├── caso-b-dark-kitchen.md    # Caso B: Dark Kitchen
+│   │   ├── caso-c-logistica.md       # Caso C: Capacidad logistica
+│   │   └── matriz-consolidacion.md   # Consolidacion de investigacion
 │   ├── 04-design/
 │   │   └── proceso/
-│   │   └── as-is-to-be.md        # Estudio de proceso actual vs futuro
+│   │       └── as-is-to-be.md        # Analisis de proceso actual vs futuro
 │   └── 06-scrum/
 │       └── sprint-01.md              # Sprint 1: Modelo de capacidad
 ├── backend/                          # Spring Boot
@@ -102,9 +107,9 @@ jaldishop/
 
 | Caso | Tema | Estado | Responsable |
 |:----:|------|:------:|:-----------:|
-| **A** | Capacidad en Pasteleria | `EN REVISION` | Josue |
-| **B** | Dark Kitchen | `EN PROGRESO` | Katherine |
-| **C** | Capacidad Logistica y Delivery | `EN REVISION` | Josue |
+| **A** | Capacidad en Pasteleria | `CONSOLIDADO` | Josue |
+| **B** | Dark Kitchen | `CONSOLIDADO` | Katherine |
+| **C** | Capacidad Logistica y Delivery | `CONSOLIDADO` | Josue |
 
 ### Conceptos Clave
 
