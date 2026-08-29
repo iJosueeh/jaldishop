@@ -20,24 +20,24 @@ A diferencia del e-commerce tradicional —que únicamente evalúa si hay *stock
 
 ```mermaid
 flowchart LR
-    subgraph CLIENTES["📱 Canales de Venta"]
+    subgraph CLIENTES["Canales de Venta"]
         W[WhatsApp]
         I[Instagram]
         O[Otros Medios]
     end
 
-    subgraph PLATAFORMA["⚡ JALDISHOP (Capa de Orden)"]
+    subgraph PLATAFORMA["JaldiShop - Capa de Orden"]
         direction TB
-        C1["Catálogo & Carrito Digital"]
+        C1["Catálogo y Carrito Digital"]
         C2["Motor de Validación de Capacidad"]
         C3["Checkout con Reserva Temporal"]
         C4["Panel de Control MYPE"]
     end
 
-    subgraph BENEFICIOS["🎯 Impacto Operativo"]
-        B1["🚫 Cero Sobreventa"]
-        B2["⏱️ Ahorro de Tiempo"]
-        B3["📦 Seguimiento Transparente"]
+    subgraph BENEFICIOS["Impacto Operativo"]
+        B1["Cero Sobreventa"]
+        B2["Ahorro de Tiempo"]
+        B3["Seguimiento Transparente"]
     end
 
     CLIENTES --> PLATAFORMA --> BENEFICIOS
@@ -103,11 +103,11 @@ jaldishop/
 
 ```mermaid
 flowchart TD
-    S1["✅ Sprint 1: Modelo de Capacidad y Casos de Estudio (Completado)"]
-    S2["🔄 Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio (En Progreso)"]
-    S3["⏳ Sprint 3: Backend Spring Boot, API REST y Persistencia (Pendiente)"]
-    S4["⏳ Sprint 4: Frontend Web y Panel Administrativo MYPE (Pendiente)"]
-    S5["⏳ Sprint 5: Integración, Pasarela de Pagos y QA (Pendiente)"]
+    S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
+    S2["Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio - En Progreso"]
+    S3["Sprint 3: Backend Spring Boot, API REST y Persistencia - Pendiente"]
+    S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
+    S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]
 
     S1 --> S2 --> S3 --> S4 --> S5
 ```

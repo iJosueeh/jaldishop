@@ -30,11 +30,11 @@ Un negocio de regalos, desayunos sorpresa o catering puede tener capacidad en co
 
 ```mermaid
 flowchart LR
-    subgraph PRODUCTIVA["🏭 Capacidad Productiva"]
+    subgraph PRODUCTIVA["Capacidad Productiva"]
         P1["Mide unidades a elaborar"]
     end
 
-    subgraph LOGISTICA["🛵 Capacidad Logística"]
+    subgraph LOGISTICA["Capacidad Logística"]
         L1["Mide operaciones de entrega por franja"]
     end
 
@@ -71,7 +71,7 @@ flowchart TD
     B -->|No| C[Fecha sin cupo de producción]
     B -->|Sí| D{¿Modalidad de entrega?}
     
-    D -->|Recojo en Tienda| E["Continuar al checkout (0 cupos delivery)"]
+    D -->|Recojo en Tienda| E[Continuar al checkout sin cupo delivery]
     D -->|Delivery| F[Ingresar dirección de entrega]
     
     F --> G{¿Dentro de cobertura?}
