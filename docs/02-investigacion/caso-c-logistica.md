@@ -71,7 +71,7 @@ flowchart TD
     B -->|No| C[Fecha sin cupo de producción]
     B -->|Sí| D{¿Modalidad de entrega?}
     
-    D -->|Recojo en Tienda| E[Continuar al checkout (0 cupos delivery)]
+    D -->|Recojo en Tienda| E["Continuar al checkout (0 cupos delivery)"]
     D -->|Delivery| F[Ingresar dirección de entrega]
     
     F --> G{¿Dentro de cobertura?}
