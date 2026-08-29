@@ -13,19 +13,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Propósito y Contexto](#1-propósito-y-contexto)
-- [2. Diagrama Conceptual / Flujo](#2-diagrama-conceptual--flujo)
-- [3. Especificaciones Técnicas](#3-especificaciones-técnicas)
-- [4. Reglas de Negocio](#4-reglas-de-negocio)
-- [5. Consideraciones de Implementación](#5-consideraciones-de-implementación)
-
-</details>
-
----
-
 ## 1. Propósito y Contexto
 
 > [!NOTE]

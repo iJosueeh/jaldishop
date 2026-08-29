@@ -12,30 +12,14 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Propósito](#proposito)
-- [2. DP-G01 — Modelo Simple de Capacidad](#dp-g01--modelo-simple-de-capacidad)
-- [3. DP-G02 — Capacidad Operativa Principal](#dp-g02--capacidad-operativa-principal)
-- [4. DP-G03 — Día y Franja Horaria](#dp-g03--dia-y-franja-horaria)
-- [5. DP-G04 — Reserva Temporal Durante Checkout](#dp-g04--reserva-temporal-durante-checkout)
-- [6. DP-G05 — Protección Ante Concurrencia](#dp-g05--proteccion-ante-concurrencia)
-- [7. DP-G06 — Alcance Logístico](#dp-g06--alcance-logistico)
-- [8. Matriz de Decisiones vs Pendientes](#pendientes-despues-de-aprobar-estas-decisiones)
-
-</details>
-
----
-
-## Propósito
+## 1. Propósito
 
 > [!NOTE]
 > Registrar las decisiones de diseño funcional y técnico aprobadas tras la consolidación de los Casos A, B y C, delimitando el alcance del primer MVP.
 
 ---
 
-## DP-G01 — Modelo Simple de Capacidad
+## 2. DP-G01 — Modelo Simple de Capacidad
 
 > [!IMPORTANT]
 > **Decisión:** Utilizar capacidad simple (**1 pedido = 1 cupo**) en el MVP.
@@ -46,7 +30,7 @@ El consumo ponderado por producto o nivel de complejidad queda reservado como ev
 
 ---
 
-## DP-G02 — Capacidad Operativa Principal
+## 3. DP-G02 — Capacidad Operativa Principal
 
 > [!IMPORTANT]
 > **Decisión:** Gestionar una única capacidad operativa principal por cada configuración de tienda.
@@ -55,7 +39,7 @@ La gestión de múltiples recursos simultáneos (hornos, cocina fría, empaque y
 
 ---
 
-## DP-G03 — Día y Franja Horaria
+## 4. DP-G03 — Día y Franja Horaria
 
 > [!IMPORTANT]
 > **Decisión:** Permitir configurar capacidad tanto por día completo como por franjas horarias específicas.
@@ -64,7 +48,7 @@ Esto cubre tanto a negocios con producción anticipada (pastelerías) como a neg
 
 ---
 
-## DP-G04 — Reserva Temporal Durante Checkout
+## 5. DP-G04 — Reserva Temporal Durante Checkout
 
 > [!IMPORTANT]
 > **Decisión:** Bloquear temporalmente el cupo de capacidad cuando el cliente inicia el proceso de checkout (*Hold* transaccional de 10 minutos).
@@ -85,7 +69,7 @@ flowchart LR
 
 ---
 
-## DP-G05 — Protección Ante Concurrencia
+## 6. DP-G05 — Protección Ante Concurrencia
 
 > [!WARNING]
 > **Decisión:** El backend garantizará que dos pedidos simultáneos no puedan comprometer el mismo último cupo disponible.
@@ -94,7 +78,7 @@ flowchart LR
 
 ---
 
-## DP-G06 — Alcance Logístico
+## 7. DP-G06 — Alcance Logístico
 
 > [!IMPORTANT]
 > **Decisión:** Incluir únicamente logística y delivery básico en el MVP.
@@ -110,7 +94,7 @@ flowchart LR
 
 ---
 
-## Pendientes Después de Aprobar Estas Decisiones
+## 8. Pendientes Después de Aprobar Estas Decisiones
 
 | Pendiente | Descripción | Estado |
 |---|---|:---:|

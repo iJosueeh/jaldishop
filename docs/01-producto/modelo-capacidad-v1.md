@@ -13,24 +13,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Propósito](#1-propósito)
-- [2. Principio Central](#2-principio-central)
-- [3. Componentes del Modelo](#3-componentes-del-modelo)
-- [4. Excepciones Temporales](#4-excepciones-temporales)
-- [5. Ciclo de Capacidad de un Pedido](#5-ciclo-de-capacidad-de-un-pedido)
-- [6. Concurrencia y Bloqueos](#6-concurrencia)
-- [7. Políticas de Cancelación](#7-cancelaciones)
-- [8. Delivery en el MVP](#8-delivery-en-el-mvp)
-- [9. Elementos Fuera del Modelo v1](#9-fuera-del-modelo-v1)
-- [10. Relación con Entidades del Sistema](#10-relación-con-los-entregables)
-
-</details>
-
----
-
 ## 1. Propósito
 
 > [!NOTE]

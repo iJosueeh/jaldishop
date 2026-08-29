@@ -12,21 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo](#1-objetivo)
-- [2. Contexto Operativo](#2-contexto-del-caso)
-- [3. Problema: Concentración de Demanda](#3-problema-identificado)
-- [4. Capacidad por Franja Horaria](#4-capacidad-por-franja-horaria)
-- [5. Cuellos de Botella en Cocina](#5-cuellos-de-botella)
-- [6. Ciclo de Vida y Saturación](#6-ciclo-de-vida-y-saturación)
-- [7. Reglas Preliminares RN-B](#7-reglas-preliminares-rn-b)
-
-</details>
-
----
-
 ## 1. Objetivo
 
 > [!NOTE]

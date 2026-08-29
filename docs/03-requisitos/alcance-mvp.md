@@ -12,26 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Propósito](#1-propósito)
-- [2. Descripción del Producto](#2-descripción-del-producto)
-- [3. Objetivo del MVP](#3-objetivo-del-mvp)
-- [4. Actores del Sistema](#4-actores-del-mvp)
-- [5. Modelo de Tiendas](#5-modelo-de-tiendas)
-- [6. Inventario vs Capacidad](#6-diferencia-entre-inventario-y-capacidad)
-- [7. Modelo de Capacidad del MVP](#7-modelo-de-capacidad-del-mvp)
-- [8. Reserva Temporal en Checkout](#8-reserva-temporal-de-capacidad)
-- [9. Módulos Incluidos (Must Have)](#9-módulos-incluidos-en-el-mvp)
-- [10. Máquina de Estados del Pedido](#10-máquina-de-estados-del-pedido)
-- [11. Matriz de Priorización MoSCoW](#11-priorización-general)
-- [12. Criterios de Éxito](#12-criterio-de-éxito-del-mvp)
-
-</details>
-
----
-
 ## 1. Propósito
 
 > [!NOTE]

@@ -12,21 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo](#1-objetivo)
-- [2. Contexto del Caso](#2-contexto-del-caso)
-- [3. Separación de Capacidades](#3-separación-de-capacidades)
-- [4. Capacidad por Destino vs Unidades](#4-capacidad-por-destino)
-- [5. Cobertura y Tarifas](#5-cobertura-y-ubicación)
-- [6. Flujo General Logístico](#6-flujo-completo-del-caso-c)
-- [7. Reglas Preliminares RN-C](#7-reglas-preliminares-rn-c)
-
-</details>
-
----
-
 ## 1. Objetivo
 
 > [!NOTE]

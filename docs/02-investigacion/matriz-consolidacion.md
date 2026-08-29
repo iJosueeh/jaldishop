@@ -12,19 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo](#1-objetivo)
-- [2. Matriz Comparativa](#2-matriz-comparativa)
-- [3. Conceptos Comunes Consolidados](#3-conceptos-comunes)
-- [4. Flujo Conceptual Resultante](#4-flujo-conceptual-resultante)
-- [5. Alcance en el Modelo v1](#5-alcance-en-el-modelo-v1)
-
-</details>
-
----
-
 ## 1. Objetivo
 
 > [!NOTE]

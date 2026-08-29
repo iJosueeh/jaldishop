@@ -8,19 +8,7 @@
 ---
 
 `📍 Docs` > `06-Scrum` > **Sprint 01**  
-[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Índice General](../../README.md) | [Plantilla de Docs ➡](../TEMPLATE.md)
-
----
-
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo del Sprint](#objetivo)
-- [2. Casos de Estudio](#casos-de-estudio)
-- [3. Entregas y Documentación](#entregas-recientes)
-- [4. Resultado y Estado Final](#estado-del-sprint)
-
-</details>
+[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)
 
 ---
 
@@ -73,4 +61,4 @@ flowchart LR
 
 ---
 
-[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Volver al Índice General](../../README.md) | [Plantilla de Docs ➡](../TEMPLATE.md)
+[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Volver al Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)

@@ -12,19 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Problema Identificado](#1-problema-identificado)
-- [2. Diferencia frente al Stock Tradicional](#2-diferencia-frente-al-stock-tradicional)
-- [3. Propuesta de Valor](#3-propuesta-de-valor)
-- [4. Funciones Centrales](#4-funciones-centrales)
-- [5. Público Objetivo](#5-público-objetivo)
-
-</details>
-
----
-
 ## 1. Problema Identificado
 
 > [!IMPORTANT]

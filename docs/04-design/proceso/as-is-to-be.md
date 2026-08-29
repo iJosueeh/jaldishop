@@ -12,20 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo](#1-objetivo)
-- [2. Proceso AS-IS (Actual)](#2-proceso-as-is)
-- [3. Problemas del Proceso AS-IS](#3-problemas-identificados-en-el-as-is)
-- [4. Proceso TO-BE (Propuesto con JaldiShop)](#4-proceso-to-be)
-- [5. Comparativa de Transformación](#5-comparación-as-is--to-be)
-- [6. Responsabilidades de la Plataforma](#6-qué-gestiona-la-plataforma)
-
-</details>
-
----
-
 ## 1. Objetivo
 
 > [!NOTE]

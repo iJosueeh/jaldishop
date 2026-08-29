@@ -5,7 +5,7 @@
 [![GitHub repo size](https://img.shields.io/github/repo-size/iJosueeh/jaldishop?style=flat-square&color=blue)](https://github.com/iJosueeh/jaldishop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop?style=flat-square&color=green)](https://github.com/iJosueeh/jaldishop)
 [![GitHub issues](https://img.shields.io/github/issues/iJosueeh/jaldishop?style=flat-square&color=yellow)](https://github.com/iJosueeh/jaldishop/issues)
-[![Sprint](https://img.shields.io/badge/Sprint-01%20Completado-blueviolet?style=flat-square)](./docs/06-scrum/sprint-01.md)
+[![Sprint](https://img.shields.io/badge/Sprint-02%20En%20Progreso-yellow?style=flat-square)](./docs/06-scrum/sprint-02.md)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./docs)
 
 > **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
@@ -47,11 +47,11 @@ flowchart LR
 
 ## 👥 Equipo de Desarrollo
 
-| Miembro | Rol | Responsabilidad Sprint 1 | Perfil |
+| Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | Caso A (Pastelería), Caso C (Logística) & Modelo de Capacidad | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Caso B (Dark Kitchen) & Consolidación | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | Flujo AS-IS / TO-BE & Modelado de Procesos | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | Reglas de Negocio (RN-01 a 15) & Modelo de Dominio | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Modelo de Dominio & Flujo Completo del Pedido | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | Historias de Usuario (MoSCoW) & Criterios de Aceptación | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
 ---
 
@@ -89,7 +89,8 @@ jaldishop/
 │   │   └── 📁 proceso/
 │   │       └── 📄 as-is-to-be.md       # Diagramas comparativos AS-IS vs TO-BE
 │   ├── 📁 06-scrum/                    # Gestión ágil de sprints
-│   │   └── 📄 sprint-01.md             # Sprint 1: Modelo de capacidad (Completado)
+│   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de capacidad (Completado)
+│   │   └── 📄 sprint-02.md             # Sprint 2: Definición del Producto (En Progreso)
 │   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
 ├── 📁 backend/                         # Servidor Spring Boot (Próximo Sprint)
 ├── 📁 frontend/                        # Aplicación Web (Próximo Sprint)
@@ -103,19 +104,21 @@ jaldishop/
 ```mermaid
 flowchart TD
     S1["✅ Sprint 1: Modelo de Capacidad y Casos de Estudio (Completado)"]
-    S2["🔄 Sprint 2: Backend Spring Boot, API REST y Persistencia (En Progreso)"]
-    S3["⏳ Sprint 3: Frontend Web y Panel Administrativo (Pendiente)"]
-    S4["⏳ Sprint 4: Pasarela de Pagos, Integración y Pruebas (Pendiente)"]
+    S2["🔄 Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio (En Progreso)"]
+    S3["⏳ Sprint 3: Backend Spring Boot, API REST y Persistencia (Pendiente)"]
+    S4["⏳ Sprint 4: Frontend Web y Panel Administrativo MYPE (Pendiente)"]
+    S5["⏳ Sprint 5: Integración, Pasarela de Pagos y QA (Pendiente)"]
 
-    S1 --> S2 --> S3 --> S4
+    S1 --> S2 --> S3 --> S4 --> S5
 ```
 
 | Sprint | Enfoque | Estado | Entregable Clave |
 |:---:|---|:---:|---|
 | **01** | Modelo de Capacidad y Casos de Estudio | `COMPLETADO` | [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md) |
-| **02** | Arquitectura Backend y Persistencia | `EN PROGRESO` | Diagrama ER, API REST Spring Boot |
-| **03** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Next.js / Angular |
-| **04** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
+| **02** | Definición del Producto & Modelo de Dominio | `EN PROGRESO` | [Sprint 02 Backlog & Trello](./docs/06-scrum/sprint-02.md) |
+| **03** | Arquitectura Backend y Persistencia | `PENDIENTE` | Diagrama ER, API REST Spring Boot |
+| **04** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Next.js / Angular |
+| **05** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
 
 ---
 

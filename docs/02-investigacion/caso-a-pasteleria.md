@@ -12,23 +12,6 @@
 
 ---
 
-<details open>
-<summary><b>📑 Tabla de Contenidos</b></summary>
-
-- [1. Objetivo](#1-objetivo)
-- [2. Contexto del Caso](#2-contexto-del-caso)
-- [3. Problema Identificado](#3-problema-identificado)
-- [4. Concepto de Capacidad](#4-concepto-de-capacidad)
-- [5. Capacidad Base Diaria](#5-capacidad-base)
-- [6. Excepciones Temporales](#6-excepciones-temporales)
-- [7. Modelo Básico vs Ponderado](#7-capacidad-segun-tipo-de-producto)
-- [8. Flujo Operativo del Caso A](#8-flujo-general-del-caso-a)
-- [9. Reglas de Negocio Preliminares](#9-reglas-preliminares-del-caso-a)
-
-</details>
-
----
-
 ## 1. Objetivo
 
 > [!NOTE]

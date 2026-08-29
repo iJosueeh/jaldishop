@@ -2,7 +2,7 @@
 
 ### Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE
 
-[![Sprint](https://img.shields.io/badge/Sprint-01%20Completado-blueviolet?style=flat-square)](./06-scrum/sprint-01.md)
+[![Sprint](https://img.shields.io/badge/Sprint-02%20En%20Progreso-yellow?style=flat-square)](./06-scrum/sprint-02.md)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./index.md)
 
 > **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
@@ -44,11 +44,11 @@ flowchart LR
 
 ## 👥 Equipo de Desarrollo
 
-| Miembro | Rol | Responsabilidad Sprint 1 | Perfil |
+| Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | Caso A (Pastelería), Caso C (Logística) & Modelo de Capacidad | [@iJosueeh](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Caso B (Dark Kitchen) & Consolidación | [@kath144](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | Flujo AS-IS / TO-BE & Modelado de Procesos | [@miagv](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | Reglas de Negocio (RN-01 a 15) & Modelo de Dominio | [@iJosueeh](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Modelo de Dominio & Flujo Completo del Pedido | [@kath144](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | Historias de Usuario (MoSCoW) & Criterios de Aceptación | [@miagv](https://github.com/miagv) |
 
 ---
 
@@ -68,11 +68,12 @@ flowchart LR
 ```mermaid
 flowchart TD
     S1["✅ Sprint 1: Modelo de Capacidad y Casos de Estudio (Completado)"]
-    S2["🔄 Sprint 2: Backend Spring Boot, API REST y Persistencia (En Progreso)"]
-    S3["⏳ Sprint 3: Frontend Web y Panel Administrativo (Pendiente)"]
-    S4["⏳ Sprint 4: Pasarela de Pagos, Integración y Pruebas (Pendiente)"]
+    S2["🔄 Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio (En Progreso)"]
+    S3["⏳ Sprint 3: Backend Spring Boot, API REST y Persistencia (Pendiente)"]
+    S4["⏳ Sprint 4: Frontend Web y Panel Administrativo MYPE (Pendiente)"]
+    S5["⏳ Sprint 5: Integración, Pasarela de Pagos y QA (Pendiente)"]
 
-    S1 --> S2 --> S3 --> S4
+    S1 --> S2 --> S3 --> S4 --> S5
 ```
 
 ---
