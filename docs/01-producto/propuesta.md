@@ -1,12 +1,11 @@
-<div align="center">
-
 # Propuesta del Producto
+
 ### JaldiShop — Solución de Capacidad y Pedidos para MYPE
 
 [![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./propuesta.md)
 [![Tipo](https://img.shields.io/badge/Tipo-Producto-blue?style=for-the-badge)](./propuesta.md)
 
-</div>
+---
 
 `📍 Docs` > `01-Producto` > **Propuesta del Producto**  
 [🏠 Índice General](../../README.md) | [Modelo de Capacidad v1 ➡](./modelo-capacidad-v1.md)
@@ -33,10 +32,10 @@
 
 ```mermaid
 flowchart TD
-    A[Recepción de pedidos por WhatsApp / Instagram] --> B[Registro manual en libretas o chats]
+    A[Recepción de pedidos por WhatsApp o Instagram] --> B[Registro manual en libretas o chats]
     B --> C{¿Hay capacidad real?}
     C -->|Cálculo a ciegas| D[Aceptación excesiva de pedidos]
-    D --> E[🚨 Sobreventa, saturación y clientes insatisfechos]
+    D --> E[🚨 Sobreventa, saturación y retrasos]
 ```
 
 ---
@@ -67,20 +66,14 @@ Desarrollar una **capa de orden y orquestación** para pequeños negocios digita
 ## 4. Funciones Centrales
 
 ```mermaid
-mindmap
-  root((JaldiShop))
-    1. Ajuste de Capacidad Real
-      Capacidad base diaria y franjas
-      Excepciones temporales
-    2. Centralización
-      Catálogo digital
-      Gestión unificada de órdenes
-    3. Validación Automática
-      Reserva temporal en checkout
-      Prevención de sobreventa
-    4. Seguimiento
-      Estados en tiempo real
-      Seguimiento autónomo del cliente
+flowchart LR
+    subgraph FUNCIONES["Funciones Centrales"]
+        F1["1. Ajuste de Capacidad Real"]
+        F2["2. Centralización de Pedidos"]
+        F3["3. Validación Automática"]
+        F4["4. Seguimiento de Pedido"]
+        F5["5. Datos de Clientes"]
+    end
 ```
 
 | # | Función Central | Impacto para la MYPE |
@@ -104,8 +97,4 @@ MYPE con capacidad de producción o atención limitada que trabajan principalmen
 
 ---
 
-<div align="center">
-
 [🏠 Volver al Índice General](../../README.md) | [Siguiente: Modelo de Capacidad v1 ➡](./modelo-capacidad-v1.md)
-
-</div>

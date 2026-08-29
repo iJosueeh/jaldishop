@@ -1,13 +1,12 @@
-<div align="center">
-
 # Modelo de Capacidad v1
+
 ### JaldiShop — Núcleo Operativo para MYPE
 
 [![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./decisiones-producto.md)
 [![Versión](https://img.shields.io/badge/Versión-v1.0-blue?style=for-the-badge)](./modelo-capacidad-v1.md)
 [![Fase](https://img.shields.io/badge/Fase-Sprint_01-orange?style=for-the-badge)](../06-scrum/sprint-01.md)
 
-</div>
+---
 
 `📍 Docs` > `01-Producto` > **Modelo de Capacidad v1**  
 [⬅ Propuesta de Producto](./propuesta.md) | [🏠 Índice General](../../README.md) | [Decisiones de Producto ➡](./decisiones-producto.md)
@@ -74,7 +73,7 @@ flowchart LR
 classDiagram
     class CapacidadBase {
         +int cupos_por_defecto
-        +PeriodoTipo tipo (DIA | FRANJA)
+        +PeriodoTipo tipo
     }
     class ExcepcionTemporal {
         +Date fecha
@@ -160,10 +159,10 @@ sequenceDiagram
     DB-->>API: Retornar cupos disponibles
 
     alt Sin Capacidad Disponible
-        API-->>Web: ❌ Cupo Agotado
+        API-->>Web: Cupo Agotado
         Web-->>Cliente: Bloquear selección y sugerir fechas alternas
     else Con Capacidad Disponible
-        API-->>Web: ✅ Cupo Disponible
+        API-->>Web: Cupo Disponible
         Web->>Cliente: Permitir continuar al Checkout
         Cliente->>Web: 3. Inicia Checkout
         Web->>API: 4. Crear Reserva Temporal (Hold: 10 min)
@@ -176,7 +175,7 @@ sequenceDiagram
             API-->>Web: Pedido Confirmado exitosamente
         else Pago Rechazado o Tiempo Expirado (>10 min)
             API->>DB: Liberar Reserva Hold (Incrementar Disponible)
-            API-->>Web: ⚠️ Reserva liberada por inactividad/fallo
+            API-->>Web: Reserva liberada por inactividad o fallo
         end
     end
 ```
@@ -208,7 +207,7 @@ stateDiagram-v2
     CONFIRMADO --> CANCELADO : Cancelado a tiempo (Libera 100% cupo)
 
     EN_PREPARACION --> LISTO : Producción Finalizada
-    EN_PREPARACION --> CANCELADO : Insumos/Tiempo consumidos (NO libera cupo)
+    EN_PREPARACION --> CANCELADO : Insumos o Tiempo consumidos (NO libera cupo)
 
     LISTO --> EN_ENTREGA
     EN_ENTREGA --> COMPLETADO : Entregado
@@ -218,8 +217,6 @@ stateDiagram-v2
 
 ## 8. Delivery en el MVP
 
-<div align="center">
-
 | Funcionalidad | Alcance MVP | Estado |
 |---|:---:|:---:|
 | Dirección del cliente y tienda | `Must Have` | ✅ Incluido |
@@ -228,8 +225,6 @@ stateDiagram-v2
 | Selección Delivery vs Recojo en tienda | `Must Have` | ✅ Incluido |
 | Optimización automática de rutas GPS | `Out of Scope` | ❌ Excluido v1 |
 | Tracking de repartidor en tiempo real | `Out of Scope` | ❌ Excluido v1 |
-
-</div>
 
 ---
 
@@ -249,7 +244,7 @@ Para prevenir sobreingeniería en el primer entregable, se excluyen deliberadame
 > Este modelo de capacidad constituye el **diferenciador central** de JaldiShop sobre un e-commerce estándar y servirá como base para el modelado de base de datos relacional (Entidad-Relación) y las APIs REST.
 
 ```mermaid
-graph TD
+flowchart TD
     A[Modelo de Capacidad v1] --> B[Diagrama Entidad-Relación]
     A --> C[Endpoints REST de Capacidad]
     A --> D[Controlador de Reservas y Checkout]
@@ -260,8 +255,4 @@ graph TD
 
 ---
 
-<div align="center">
-
 [⬅ Propuesta de Producto](./propuesta.md) | [🏠 Volver al Índice General](../../README.md) | [Decisiones de Producto ➡](./decisiones-producto.md)
-
-</div>

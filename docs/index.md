@@ -1,16 +1,11 @@
-<div align="center">
-
 # 🛍️ JaldiShop
+
 ### Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE
 
 [![Sprint](https://img.shields.io/badge/Sprint-01%20Completado-blueviolet?style=flat-square)](./06-scrum/sprint-01.md)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./index.md)
 
-<br/>
-
 > **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
-
-</div>
 
 ---
 
@@ -71,17 +66,13 @@ flowchart LR
 ## 🚀 Estado de los Sprints
 
 ```mermaid
-gantt
-    title Plan de Desarrollo JaldiShop
-    dateFormat  YYYY-MM-DD
-    section Fase 1: Concepción
-    Sprint 1 - Modelo de Capacidad y Casos de Uso :done, s1, 2026-08-01, 2026-08-15
-    section Fase 2: Backend
-    Sprint 2 - Modelo de Datos, API REST y Concurrencia :active, s2, 2026-08-16, 2026-09-05
-    section Fase 3: Frontend
-    Sprint 3 - Portal Cliente y Dashboard MYPE : s3, 2026-09-06, 2026-09-25
-    section Fase 4: Integración
-    Sprint 4 - Pagos, WebSockets y Pruebas End-to-End : s4, 2026-09-26, 2026-10-15
+flowchart TD
+    S1["✅ Sprint 1: Modelo de Capacidad y Casos de Estudio (Completado)"]
+    S2["🔄 Sprint 2: Backend Spring Boot, API REST y Persistencia (En Progreso)"]
+    S3["⏳ Sprint 3: Frontend Web y Panel Administrativo (Pendiente)"]
+    S4["⏳ Sprint 4: Pasarela de Pagos, Integración y Pruebas (Pendiente)"]
+
+    S1 --> S2 --> S3 --> S4
 ```
 
 ---
