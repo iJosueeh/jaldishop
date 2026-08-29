@@ -56,7 +56,7 @@ flowchart LR
 
 | Capa | Tecnologías | Propósito |
 |:---|:---|:---|
-| **Backend** | Spring Boot 3, Java 17+ | API RESTful, Reglas de Dominio y Transaccionalidad |
+| **Backend** | Spring Boot 4, Java 17+ | API RESTful, Reglas de Dominio y Transaccionalidad |
 | **Frontend** | Next.js, Angular, Tailwind CSS | Portal Cliente y Panel Administrativo MYPE |
 | **Persistencia** | PostgreSQL, Hibernate | Base de datos relacional y control concurrente |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |

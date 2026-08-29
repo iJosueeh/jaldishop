@@ -14,15 +14,13 @@
 
 ## 1. Propósito
 
-> [!NOTE]
-> Registrar las decisiones de diseño funcional y técnico aprobadas tras la consolidación de los Casos A, B y C, delimitando el alcance del primer MVP.
+> 📌 **Nota:** Registrar las decisiones de diseño funcional y técnico aprobadas tras la consolidación de los Casos A, B y C, delimitando el alcance del primer MVP.
 
 ---
 
 ## 2. DP-G01 — Modelo Simple de Capacidad
 
-> [!IMPORTANT]
-> **Decisión:** Utilizar capacidad simple (**1 pedido = 1 cupo**) en el MVP.
+> 💡 **Decisión:** Utilizar capacidad simple (**1 pedido = 1 cupo**) en el MVP.
 
 El consumo ponderado por producto o nivel de complejidad queda reservado como evolución para versiones posteriores.
 
@@ -32,8 +30,7 @@ El consumo ponderado por producto o nivel de complejidad queda reservado como ev
 
 ## 3. DP-G02 — Capacidad Operativa Principal
 
-> [!IMPORTANT]
-> **Decisión:** Gestionar una única capacidad operativa principal por cada configuración de tienda.
+> 💡 **Decisión:** Gestionar una única capacidad operativa principal por cada configuración de tienda.
 
 La gestión de múltiples recursos simultáneos (hornos, cocina fría, empaque y repartidores de forma desacoplada) queda como evolución posterior.
 
@@ -41,8 +38,7 @@ La gestión de múltiples recursos simultáneos (hornos, cocina fría, empaque y
 
 ## 4. DP-G03 — Día y Franja Horaria
 
-> [!IMPORTANT]
-> **Decisión:** Permitir configurar capacidad tanto por día completo como por franjas horarias específicas.
+> 💡 **Decisión:** Permitir configurar capacidad tanto por día completo como por franjas horarias específicas.
 
 Esto cubre tanto a negocios con producción anticipada (pastelerías) como a negocios con demanda concentrada en horas pico (dark kitchens).
 
@@ -50,8 +46,7 @@ Esto cubre tanto a negocios con producción anticipada (pastelerías) como a neg
 
 ## 5. DP-G04 — Reserva Temporal Durante Checkout
 
-> [!IMPORTANT]
-> **Decisión:** Bloquear temporalmente el cupo de capacidad cuando el cliente inicia el proceso de checkout (*Hold* transaccional de 10 minutos).
+> 💡 **Decisión:** Bloquear temporalmente el cupo de capacidad cuando el cliente inicia el proceso de checkout (*Hold* transaccional de 10 minutos).
 
 ```mermaid
 flowchart LR
@@ -71,8 +66,7 @@ flowchart LR
 
 ## 6. DP-G05 — Protección Ante Concurrencia
 
-> [!WARNING]
-> **Decisión:** El backend garantizará que dos pedidos simultáneos no puedan comprometer el mismo último cupo disponible.
+> ⚠️ **Advertencia:** El backend garantizará que dos pedidos simultáneos no puedan comprometer el mismo último cupo disponible.
 
 * La solución técnica aplicará transaccionalidad atómica a nivel de base de datos relacional (PostgreSQL).
 
@@ -80,8 +74,7 @@ flowchart LR
 
 ## 7. DP-G06 — Alcance Logístico
 
-> [!IMPORTANT]
-> **Decisión:** Incluir únicamente logística y delivery básico en el MVP.
+> 💡 **Decisión:** Incluir únicamente logística y delivery básico en el MVP.
 
 | Funcionalidad Logística | Alcance en MVP | Estado |
 |---|:---:|:---:|

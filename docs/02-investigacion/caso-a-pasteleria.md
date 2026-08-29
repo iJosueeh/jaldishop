@@ -14,8 +14,7 @@
 
 ## 1. Objetivo
 
-> [!NOTE]
-> Analizar cómo debe funcionar el **modelo de capacidad** en una pastelería que trabaja bajo pedido y cuya capacidad de producción es limitada en tiempo, equipamiento y mano de obra.
+> 📌 **Nota:** Analizar cómo debe funcionar el **modelo de capacidad** en una pastelería que trabaja bajo pedido y cuya capacidad de producción es limitada en tiempo, equipamiento y mano de obra.
 
 El caso busca determinar cómo el sistema evita que el negocio acepte **más pedidos de los que realmente puede elaborar**, incluso disponiendo de stock de ingredientes.
 
@@ -31,8 +30,7 @@ Una pastelería artesanal recibe pedidos de diversos tamaños y diseños de tort
 | **Canales de venta** | Recibe mensajes y consultas constantemente. |
 | **Restricción real** | Su tiempo de decoración, capacidad de hornos y personal solo permite producir un cupo límite diario. |
 
-> [!IMPORTANT]
-> **Conclusión clave:** Disponer de insumos físicos **no significa tener capacidad operativa** para aceptar otro pedido.
+> 💡 **Conclusión Clave:** Disponer de insumos físicos **no significa tener capacidad operativa** para aceptar otro pedido.
 
 ---
 
@@ -53,7 +51,9 @@ Pedido 3 (Cliente C):         ❌ NO ACEPTABLE (Saturado)
 
 ## 4. Concepto de Capacidad
 
-$$\text{Capacidad Disponible} = \text{Capacidad Base / Excepción} - \text{Capacidad Comprometida}$$
+```text
+Capacidad Disponible = Capacidad Base / Excepción - Capacidad Comprometida
+```
 
 * **Capacidad Base:** Límite estándar de producción habitual.
 * **Capacidad Comprometida:** Total de órdenes confirmadas y reservas temporales en checkout.

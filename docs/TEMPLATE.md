@@ -15,8 +15,7 @@
 
 ## 1. Propósito y Contexto
 
-> [!NOTE]
-> Breve resumen ejecutivo de 2 a 3 líneas describiendo la finalidad del documento y su aporte al proyecto.
+> 📌 **Nota:** Breve resumen ejecutivo de 2 a 3 líneas describiendo la finalidad del documento y su aporte al proyecto.
 
 Explica aquí el problema que aborda este entregable o módulo.
 
@@ -48,14 +47,11 @@ flowchart LR
 
 ## 4. Reglas de Negocio
 
-> [!IMPORTANT]
-> **Regla Crítica:** Destaca aquí las validaciones o invariantes fundamentales de negocio que el backend debe asegurar.
+> 💡 **Regla Crítica:** Destaca aquí las validaciones o invariantes fundamentales de negocio que el backend debe asegurar.
 
-> [!TIP]
-> **Recomendación:** Sugerencias para optimización o buenas prácticas de integración.
+> 📌 **Recomendación:** Sugerencias para optimización o buenas prácticas de integración.
 
-> [!WARNING]
-> **Riesgo Operativo:** Puntos donde pueda ocurrir concurrencia, fallo de datos o excepciones.
+> ⚠️ **Advertencia:** Puntos donde pueda ocurrir concurrencia, fallo de datos o excepciones.
 
 ---
 

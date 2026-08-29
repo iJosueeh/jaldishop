@@ -15,8 +15,7 @@
 
 ## 1. Propósito
 
-> [!NOTE]
-> Define la primera versión general del modelo de capacidad de **JaldiShop** a partir de la consolidación de los Casos A (Pastelería), B (Dark Kitchen) y C (Logística).
+> 📌 **Nota:** Define la primera versión general del modelo de capacidad de **JaldiShop** a partir de la consolidación de los Casos A (Pastelería), B (Dark Kitchen) y C (Logística).
 
 El objetivo primordial es **evitar que una MYPE confirme más pedidos** de los que su infraestructura, personal o tiempo le permiten procesar dentro de una fecha o franja determinada.
 
@@ -24,8 +23,7 @@ El objetivo primordial es **evitar que una MYPE confirme más pedidos** de los q
 
 ## 2. Principio Central
 
-> [!IMPORTANT]
-> **JaldiShop no tratará la capacidad como sinónimo de inventario.**
+> 💡 **Principio Fundamental:** **JaldiShop no tratará la capacidad como sinónimo de inventario.**
 > 
 > Un negocio puede disponer de stock de ingredientes o productos y, aun así, **no tener tiempo, personal ni disponibilidad operativa** para aceptar otro pedido.
 
@@ -94,20 +92,25 @@ La capacidad se asigna a unidades temporales específicas:
 ### 3.3 Capacidad Efectiva
 Capacidad real aplicable tras evaluar si existe una excepción configurada para el periodo:
 
-$$\text{Capacidad Efectiva} = \begin{cases} \text{Capacidad Excepcional} & \text{si existe excepción vigente} \\ \text{Capacidad Base} & \text{en caso contrario} \end{cases}$$
+```text
+Capacidad Efectiva = Capacidad Excepcional (si existe excepción) | Capacidad Base (por defecto)
+```
 
 ### 3.4 Capacidad Comprometida
 Suma de los cupos bloqueados por pedidos confirmados más las reservas activas en proceso de checkout:
 
-$$\text{Capacidad Comprometida} = \text{Pedidos Confirmados} + \text{Reservas Temporales (Hold)}$$
+```text
+Capacidad Comprometida = Pedidos Confirmados + Reservas Temporales (Hold)
+```
 
 ### 3.5 Capacidad Disponible
 Cupos netos disponibles para nuevos clientes:
 
-$$\text{Capacidad Disponible} = \text{Capacidad Efectiva} - \text{Capacidad Comprometida}$$
+```text
+Capacidad Disponible = Capacidad Efectiva - Capacidad Comprometida
+```
 
-> [!WARNING]
-> Un pedido **no podrá continuar al checkout** cuando la capacidad requerida sea mayor a la disponible ($\text{Capacidad Disponible} \le 0$).
+> ⚠️ **Advertencia:** Un pedido **no podrá continuar al checkout** cuando la capacidad requerida sea mayor a la disponible (`Capacidad Disponible <= 0`).
 
 ---
 
@@ -166,8 +169,7 @@ sequenceDiagram
 
 ## 6. Concurrencia y Bloqueos
 
-> [!IMPORTANT]
-> El sistema debe garantizar a nivel de base de datos / backend que **dos clientes no puedan comprometer simultáneamente el último cupo disponible** (condición de carrera).
+> 💡 **Regla Crítica:** El sistema debe garantizar a nivel de base de datos / backend que **dos clientes no puedan comprometer simultáneamente el último cupo disponible** (condición de carrera).
 
 * **Mecanismo:** Bloqueo transaccional o atómico al momento de solicitar la reserva temporal de checkout.
 * **Duración:** La reserva expira automáticamente a los **10 minutos** si no se confirma el pago.
@@ -176,8 +178,7 @@ sequenceDiagram
 
 ## 7. Políticas de Cancelación
 
-> [!CAUTION]
-> Cancelar un pedido **no implica necesariamente recuperar la capacidad productiva o logística**.
+> ⛔ **Precaución:** Cancelar un pedido **no implica necesariamente recuperar la capacidad productiva o logística**.
 
 ```mermaid
 stateDiagram-v2
@@ -212,18 +213,13 @@ stateDiagram-v2
 
 ## 9. Elementos Fuera del Modelo v1
 
-Para prevenir sobreingeniería en el primer entregable, se excluyen deliberadamente:
-
-1. **Pesos de capacidad ponderados** (ej. una torta de 3 pisos restando 3 cupos y un cupcake 0.2 cupos).
-2. **Capacidad multi-recurso simultánea** (repartidores + cocineros + mesas de empaque independientes).
-3. **Predicción con Inteligencia Artificial** de picos de saturación.
+Para evitar sobreingeniería en el primer entregable, se excluyen deliberadamente el cálculo de pesos ponderados por complejidad de producto, la gestión desacoplada de múltiples estaciones simultáneas (como cocineros, hornos y repartidores independientes) y los algoritmos predictivos basados en inteligencia artificial. Estas capacidades quedan reservadas como evolución arquitectónica para fases posteriores una vez validado el núcleo operativo simple del sistema.
 
 ---
 
 ## 10. Relación con los Entregables
 
-> [!NOTE]
-> Este modelo de capacidad constituye el **diferenciador central** de JaldiShop sobre un e-commerce estándar y servirá como base para el modelado de base de datos relacional (Entidad-Relación) y las APIs REST.
+> 📌 **Nota:** Este modelo de capacidad constituye el **diferenciador central** de JaldiShop sobre un e-commerce estándar y servirá como base para el modelado de base de datos relacional (Entidad-Relación) y las APIs REST.
 
 ```mermaid
 flowchart TD

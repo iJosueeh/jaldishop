@@ -14,8 +14,7 @@
 
 ## Objetivo
 
-> [!NOTE]
-> Analizar y modelar el comportamiento de la capacidad operativa en diferentes tipos de MYPE bajo pedido, consolidando los hallazgos en el **Modelo de Capacidad v1** aprobado por el equipo de desarrollo.
+> 📌 **Nota:** Analizar y modelar el comportamiento de la capacidad operativa en diferentes tipos de MYPE bajo pedido, consolidando los hallazgos en el **Modelo de Capacidad v1** aprobado por el equipo de desarrollo.
 
 ---
 

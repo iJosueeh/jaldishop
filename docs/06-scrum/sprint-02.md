@@ -15,8 +15,7 @@
 
 ## 1. Objetivo del Sprint
 
-> [!NOTE]
-> Salir con el **MVP completamente definido**, los **requisitos cerrados** y el **modelo de datos/dominio listo** para comenzar el desarrollo del backend.
+> 📌 **Nota:** Salir con el **MVP completamente definido**, los **requisitos cerrados** y el **modelo de datos/dominio listo** para comenzar el desarrollo del backend.
 
 * **Fase:** Semana 2 — *Definición del Producto*.
 * **Propósito:** Pasar de la investigación al diseño funcional y técnico de JaldiShop.

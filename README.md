@@ -59,7 +59,7 @@ flowchart LR
 
 | Capa | Tecnologías | Propósito |
 |:---|:---|:---|
-| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Java](https://img.shields.io/badge/Java_17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) | API RESTful, Reglas de Dominio y Transaccionalidad |
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Java](https://img.shields.io/badge/Java_17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) | API RESTful, Reglas de Dominio y Transaccionalidad |
 | **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) | Portal Cliente y Panel Administrativo MYPE |
 | **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white) | Base de datos relacional y control concurrente |
 | **Tiempo Real** | ![WebSocket](https://img.shields.io/badge/WebSocket-764ABC?style=for-the-badge&logo=socket.io&logoColor=white) | Actualización de estados y disponibilidad en vivo |

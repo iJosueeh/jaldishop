@@ -14,8 +14,7 @@
 
 ## 1. Objetivo
 
-> [!NOTE]
-> Representar cómo una MYPE gestiona actualmente sus pedidos de manera manual y fragmentada (AS-IS), frente a cómo operará de forma sincronizada y automatizada mediante **JaldiShop** (TO-BE).
+> 📌 **Nota:** Representar cómo una MYPE gestiona actualmente sus pedidos de manera manual y fragmentada (AS-IS), frente a cómo operará de forma sincronizada y automatizada mediante **JaldiShop** (TO-BE).
 
 ---
 

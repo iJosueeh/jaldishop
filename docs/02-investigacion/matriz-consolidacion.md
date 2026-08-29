@@ -14,8 +14,7 @@
 
 ## 1. Objetivo
 
-> [!NOTE]
-> Consolidar los hallazgos de los tres casos de estudio (Caso A: Pastelería, Caso B: Dark Kitchen, Caso C: Logística) para extraer el modelo unificado de control de capacidad de **JaldiShop**.
+> 📌 **Nota:** Consolidar los hallazgos de los tres casos de estudio (Caso A: Pastelería, Caso B: Dark Kitchen, Caso C: Logística) para extraer el modelo unificado de control de capacidad de **JaldiShop**.
 
 ---
 

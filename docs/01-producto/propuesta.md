@@ -14,8 +14,7 @@
 
 ## 1. Problema Identificado
 
-> [!IMPORTANT]
-> Las MYPE que venden mediante **WhatsApp, Instagram y redes sociales** gestionan sus pedidos de forma manual y fragmentada. El principal dolor operativo es la **sobreventa** y el incumplimiento ocasionado por la ausencia de un control de capacidad en tiempo real.
+> 💡 **Problema Central:** Las MYPE que venden mediante **WhatsApp, Instagram y redes sociales** gestionan sus pedidos de forma manual y fragmentada. El principal dolor operativo es la **sobreventa** y el incumplimiento ocasionado por la ausencia de un control de capacidad en tiempo real.
 
 ```mermaid
 flowchart TD
@@ -34,19 +33,16 @@ flowchart TD
 | **E-commerce Tradicional** | *¿Cuántas unidades físicas quedan en stock?* | Inventario de materia prima / productos terminados |
 | **JaldiShop** | *¿Cuántos pedidos puede comprometerse a cumplir realmente el negocio?* | **Tiempo, mano de obra, slots de cocina y despacho** |
 
-> [!NOTE]
-> * Una **pastelería** puede tener harina y azúcar, pero **no tener horas de horno ni personal** para decorar otra torta.
-> * Una **dark kitchen** puede tener insumos, pero tener su **línea de preparación colapsada** en hora pico.
-> * Una **tienda de regalos** puede armar el detalle, pero **no disponer de repartidor** para entregarlo a la hora exacta.
+> 📌 **Ejemplos de la realidad operativa:**
+> * Una **pastelería** puede tener harina y azúcar, pero no tener horas de horno ni personal para decorar otra torta.
+> * Una **dark kitchen** puede tener insumos, pero tener su línea de preparación colapsada en hora pico.
+> * Una **tienda de regalos** puede armar el detalle, pero no disponer de repartidor para entregarlo a la hora exacta.
 
 ---
 
 ## 3. Propuesta de Valor
 
-Desarrollar una **capa de orden y orquestación** para pequeños negocios digitales que:
-1. No busca desplazar los canales de captación (WhatsApp/Instagram), sino **complementarlos**.
-2. Centraliza pedidos y valida automáticamente disponibilidad antes de comprometer al negocio.
-3. Brinda al cliente visibilidad y certeza sobre la fecha y franja horaria de entrega.
+JaldiShop funciona como una capa de orden y orquestación para pequeños negocios que venden por canales digitales. La plataforma no busca reemplazar WhatsApp o Instagram, sino complementarlos centralizando la recepción de pedidos y validando automáticamente la disponibilidad de capacidad operativa antes de comprometer cualquier venta. De esta manera, el cliente obtiene confirmación inmediata con una franja de entrega garantizada y seguimiento en tiempo real, mientras la microempresa previene la sobreventa y organiza su producción diaria sin fricciones.
 
 ---
 

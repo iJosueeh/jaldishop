@@ -14,8 +14,7 @@
 
 ## 1. Propósito
 
-> [!NOTE]
-> Define el alcance funcional de la primera versión operativa de **JaldiShop**, estableciendo los módulos indispensables (*Must Have*), las funcionalidades complementarias y los límites claros para evitar sobreingeniería.
+> 📌 **Nota:** Define el alcance funcional de la primera versión operativa de **JaldiShop**, estableciendo los módulos indispensables (*Must Have*), las funcionalidades complementarias y los límites claros para evitar sobreingeniería.
 
 ---
 
@@ -27,13 +26,7 @@
 
 ## 3. Objetivo del MVP
 
-Demostrar un flujo completo de extremo a extremo donde:
-1. El comerciante configura su tienda, productos y capacidad base (por día y franja horaria).
-2. El cliente consulta el catálogo, añade al carrito y elige fecha/franja horaria.
-3. El sistema valida simultáneamente stock de producto y capacidad disponible.
-4. Se genera una reserva temporal (*Hold* de 10 minutos) durante el checkout.
-5. El pago confirmado compromete el cupo y envía el pedido al panel del comerciante.
-6. El cliente realiza seguimiento de estados en tiempo real.
+El objetivo principal de JaldiShop v1 es validar un flujo comercial y operativo integral de extremo a extremo. El proceso inicia cuando el comerciante registra su tienda, cataloga sus productos y establece su capacidad operativa habitual por día o franjas horarias. A partir de allí, el cliente accede al catálogo digital, selecciona productos y elige la fecha u horario deseado, momento en el cual el sistema valida simultáneamente el stock y la disponibilidad de capacidad. Durante el checkout se genera una reserva temporal de diez minutos que protege la compra ante accesos concurrentes; una vez aprobado el pago, el cupo queda formalmente comprometido, el comerciante recibe la orden en su panel de control y el cliente puede realizar el seguimiento de su pedido en tiempo real.
 
 ---
 
@@ -60,7 +53,7 @@ JaldiShop maneja tiendas independientes (*Stores*):
 
 ## 6. Diferencia entre Inventario y Capacidad
 
-> [!IMPORTANT]
+> 💡 **Principio Clave:**  
 > **Inventario:** *¿Hay stock físico del producto o insumo?*  
 > **Capacidad:** *¿Tiene el negocio tiempo, personal y slots de entrega para atender otro pedido en esa franja?*
 
@@ -71,7 +64,7 @@ JaldiShop maneja tiendas independientes (*Stores*):
 * **Regla del MVP:** 1 pedido = 1 cupo de capacidad.
 * **Granularidad:** Configuración por día completo o por franjas horarias (15 a 60 min).
 * **Excepciones:** Capacidad temporal para fechas de alta demanda o imprevistos técnicos.
-* **Saturación:** Bloqueo automático de franjas cuando $\text{Capacidad Disponible} = 0$.
+* **Saturación:** Bloqueo automático de franjas cuando `Capacidad Disponible = 0`.
 
 ---
 
@@ -142,12 +135,7 @@ stateDiagram-v2
 
 ## 12. Criterio de Éxito del MVP
 
-El MVP se considerará 100% exitoso cuando permita ejecutar de punta a punta:
-1. Configuración de tienda y capacidad base por el comerciante.
-2. Navegación del cliente y selección de franja horaria.
-3. Bloqueo automático de opciones saturadas.
-4. Reserva transaccional (*Hold*) durante el pago.
-5. Confirmación del pedido y actualización en tiempo real en el dashboard del negocio.
+El MVP se considerará completamente exitoso cuando una tienda opere de forma autónoma desde la configuración inicial hasta la entrega final. Esto implica que el comerciante pueda gestionar su catálogo y límites operativos, mientras los clientes navegan, seleccionan franjas disponibles y procesan compras con reserva temporal garantizada. El sistema debe bloquear automáticamente cualquier intento de compra en periodos saturados, confirmar pedidos tras pagos exitosos y reflejar cada actualización de estado en tiempo real tanto en el panel administrativo como en la vista de seguimiento del cliente.
 
 ---
 

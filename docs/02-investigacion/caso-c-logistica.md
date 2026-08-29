@@ -14,8 +14,7 @@
 
 ## 1. Objetivo
 
-> [!NOTE]
-> Analizar el comportamiento de la capacidad en negocios donde aceptar un pedido no solo depende de elaborar el producto, sino de disponer de repartidores o slots de entrega en el horario solicitado por el cliente.
+> 📌 **Nota:** Analizar el comportamiento de la capacidad en negocios donde aceptar un pedido no solo depende de elaborar el producto, sino de disponer de repartidores o slots de entrega en el horario solicitado por el cliente.
 
 ---
 
@@ -23,8 +22,7 @@
 
 Un negocio de regalos, desayunos sorpresa o catering puede tener capacidad en cocina para elaborar 10 pedidos, pero disponer únicamente de 2 motorizados para la franja de 7:00 a 8:00 a.m.
 
-> [!IMPORTANT]
-> **Conclusión clave:** La capacidad de producción y la capacidad logística son **dos dimensiones independientes** que deben sincronizarse.
+> 💡 **Conclusión Clave:** La capacidad de producción y la capacidad logística son **dos dimensiones independientes** que deben sincronizarse.
 
 ---
 

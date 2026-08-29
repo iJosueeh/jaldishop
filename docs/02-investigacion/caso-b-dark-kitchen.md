@@ -14,8 +14,7 @@
 
 ## 1. Objetivo
 
-> [!NOTE]
-> Analizar cómo debe funcionar el control de capacidad en una Dark Kitchen (cocina oculta) donde la demanda se concentra fuertemente en franjas horarias específicas (almuerzo/cena) y el cuello de botella es la velocidad de preparación y empaque.
+> 📌 **Nota:** Analizar cómo debe funcionar el control de capacidad en una Dark Kitchen (cocina oculta) donde la demanda se concentra fuertemente en franjas horarias específicas (almuerzo/cena) y el cuello de botella es la velocidad de preparación y empaque.
 
 ---
 
@@ -27,8 +26,7 @@ Una Dark Kitchen opera exclusivamente para canales digitales y delivery/recojo. 
 * **Cocina Fría:** Ensaladas, postres, ceviches.
 * **Mesa de Empaque y Despacho:** Consolidación de órdenes para repartidores.
 
-> [!IMPORTANT]
-> Recibir 40 pedidos en una sola ventana de 15 minutos satura la cocina y degrada la calidad, aun cuando la capacidad teórica diaria sea de 200 pedidos.
+> 💡 **Conclusión Clave:** Recibir 40 pedidos en una sola ventana de 15 minutos satura la cocina y degrada la calidad, aun cuando la capacidad teórica diaria sea de 200 pedidos.
 
 ---
 
@@ -74,7 +72,7 @@ flowchart LR
     end
 ```
 
-* **Modelo Simple para el MVP:** Límite global de **$N$ pedidos por franja** (fácil de operar para microempresas).
+* **Modelo Simple para el MVP:** Límite global de **N pedidos por franja** (fácil de operar para microempresas).
 * **Modelo Avanzado (Evolución):** Control independiente por estación y cálculo de tiempo de preparación (*Food Processing Time*).
 
 ---
