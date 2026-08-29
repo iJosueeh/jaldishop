@@ -1,264 +1,267 @@
 <div align="center">
 
-# MODELO DE CAPACIDAD v1
+# Modelo de Capacidad v1
+### JaldiShop — Núcleo Operativo para MYPE
 
-## JaldiShop
-
-`Producto` `Modelo` `Capacidad` `MVP`
+[![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./decisiones-producto.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.0-blue?style=for-the-badge)](./modelo-capacidad-v1.md)
+[![Fase](https://img.shields.io/badge/Fase-Sprint_01-orange?style=for-the-badge)](../06-scrum/sprint-01.md)
 
 </div>
 
+`📍 Docs` > `01-Producto` > **Modelo de Capacidad v1**  
+[⬅ Propuesta de Producto](./propuesta.md) | [🏠 Índice General](../../README.md) | [Decisiones de Producto ➡](./decisiones-producto.md)
+
 ---
 
-## 1. Proposito
+<details open>
+<summary><b>📑 Tabla de Contenidos</b></summary>
 
-> Definir una primera version general del modelo de capacidad de JaldiShop a partir de los Casos A, B y C.
+- [1. Propósito](#1-propósito)
+- [2. Principio Central](#2-principio-central)
+- [3. Componentes del Modelo](#3-componentes-del-modelo)
+- [4. Excepciones Temporales](#4-excepciones-temporales)
+- [5. Ciclo de Capacidad de un Pedido](#5-ciclo-de-capacidad-de-un-pedido)
+- [6. Concurrencia y Bloqueos](#6-concurrencia)
+- [7. Políticas de Cancelación](#7-cancelaciones)
+- [8. Delivery en el MVP](#8-delivery-en-el-mvp)
+- [9. Elementos Fuera del Modelo v1](#9-fuera-del-modelo-v1)
+- [10. Relación con Entidades del Sistema](#10-relación-con-los-entregables)
 
-El objetivo es **evitar que una MYPE confirme mas pedidos** de los que realmente puede cumplir durante un periodo determinado.
+</details>
+
+---
+
+## 1. Propósito
+
+> [!NOTE]
+> Define la primera versión general del modelo de capacidad de **JaldiShop** a partir de la consolidación de los Casos A (Pastelería), B (Dark Kitchen) y C (Logística).
+
+El objetivo primordial es **evitar que una MYPE confirme más pedidos** de los que su infraestructura, personal o tiempo le permiten procesar dentro de una fecha o franja determinada.
 
 ---
 
 ## 2. Principio Central
 
-<blockquote>
+> [!IMPORTANT]
+> **JaldiShop no tratará la capacidad como sinónimo de inventario.**
+> 
+> Un negocio puede disponer de stock de ingredientes o productos y, aun así, **no tener tiempo, personal ni disponibilidad operativa** para aceptar otro pedido.
 
-> JaldiShop no tratara la capacidad como sinonimo de inventario.
+```mermaid
+flowchart LR
+    subgraph INVENTARIO["📦 Inventario Tradicional"]
+        I1["¿Existe stock del insumo/producto?"]
+    end
 
-</blockquote>
+    subgraph CAPACIDAD["⚡ Capacidad Operativa JaldiShop"]
+        C1["¿Hay tiempo de preparación?"]
+        C2["¿Hay personal disponible?"]
+        C3["¿Hay slots de entrega libres?"]
+    end
 
-Un negocio puede disponer de productos o insumos y, aun asi, **no tener tiempo, personal o disponibilidad operativa** para aceptar otro pedido.
+    INVENTARIO -->|Condición Necesaria| PEDIDO{¿Aceptar Pedido?}
+    CAPACIDAD -->|Condición Suficiente| PEDIDO
+```
 
-> La capacidad representa **cuanto trabajo adicional** puede comprometer el negocio dentro de un periodo.
+> **Regla de oro:** La capacidad representa **cuánto trabajo adicional** puede comprometer el negocio dentro de un periodo.
 
 ---
 
 ## 3. Componentes del Modelo
 
+```mermaid
+classDiagram
+    class CapacidadBase {
+        +int cupos_por_defecto
+        +PeriodoTipo tipo (DIA | FRANJA)
+    }
+    class ExcepcionTemporal {
+        +Date fecha
+        +Time franja
+        +int nuevo_cupo
+        +Motivo motivo
+    }
+    class CapacidadEfectiva {
+        +int cupos_reales
+    }
+    class CapacidadComprometida {
+        +int reservas_temporales
+        +int pedidos_confirmados
+    }
+    class CapacidadDisponible {
+        +int cupos_restantes
+    }
+
+    CapacidadBase --> CapacidadEfectiva : Sobrescrita por excepción
+    ExcepcionTemporal --> CapacidadEfectiva : Aplica en fecha/hora
+    CapacidadEfectiva --> CapacidadDisponible : Resta comprometida
+    CapacidadComprometida --> CapacidadDisponible : Consume
+```
+
 ### 3.1 Capacidad Base
-
-> Valor habitual que el negocio puede atender o producir.
-
----
+Valor habitual configurado que el negocio puede atender o producir en condiciones normales.
 
 ### 3.2 Periodo
+La capacidad se asigna a unidades temporales específicas:
 
-La capacidad se asigna a un periodo.
-
-**Para el MVP se contemplan:**
-
-| Tipo de Periodo | Descripcion |
-|-----------------|-------------|
-| **Dia** | Capacidad diaria completa |
-| **Franja horaria** | Periodos mas pequeños (ej: 2 horas) |
-
----
+| Tipo de Periodo | Granularidad | Aplicación Típica |
+|:---|:---:|:---|
+| **Día** | Diario completo | Negocios bajo pedido anticipado (ej. tortas temáticas, catering) |
+| **Franja Horaria** | Bloques de 30 min / 1-2 horas | Dark kitchens, comida rápida, entregas programadas |
 
 ### 3.3 Capacidad Efectiva
+Capacidad real aplicable tras evaluar si existe una excepción configurada para el periodo:
 
-Es la capacidad aplicable realmente a un periodo despues de considerar una posible excepcion temporal.
-
-```
-capacidad_efectiva = capacidad_base o capacidad_excepcional
-```
-
----
+$$\text{Capacidad Efectiva} = \begin{cases} \text{Capacidad Excepcional} & \text{si existe excepción vigente} \\ \text{Capacidad Base} & \text{en caso contrario} \end{cases}$$
 
 ### 3.4 Capacidad Comprometida
+Suma de los cupos bloqueados por pedidos confirmados más las reservas activas en proceso de checkout:
 
-> Representa la capacidad asociada a pedidos confirmados o reservas temporales vigentes.
-
----
+$$\text{Capacidad Comprometida} = \text{Pedidos Confirmados} + \text{Reservas Temporales (Hold)}$$
 
 ### 3.5 Capacidad Disponible
+Cupos netos disponibles para nuevos clientes:
 
-```
-capacidad_disponible = capacidad_efectiva - capacidad_comprometida
-```
+$$\text{Capacidad Disponible} = \text{Capacidad Efectiva} - \text{Capacidad Comprometida}$$
 
-> Un pedido **no podra continuar** cuando la capacidad requerida sea superior a la disponible.
+> [!WARNING]
+> Un pedido **no podrá continuar al checkout** cuando la capacidad requerida sea mayor a la disponible ($\text{Capacidad Disponible} \le 0$).
 
 ---
 
 ## 4. Excepciones Temporales
 
-El negocio podra **aumentar, reducir o cerrar temporalmente** su capacidad para una fecha o franja especifica sin modificar su configuracion habitual.
+Permiten al comerciante alterar temporalmente su capacidad para una fecha o franja horaria sin reconfigurar su horario base:
 
-| Tipo de Excepcion | Ejemplo |
-|-------------------|---------|
-| Incremento | Personal adicional |
-| Reduccion | Ausencia de personal |
-| Reduccion | Falla de equipo |
-| Incremento | Fecha de alta demanda |
-| Cierre | Cierre parcial |
-
-> La excepcion tendra **prioridad** sobre la capacidad base durante su vigencia.
+| Tipo de Excepción | Causa Operativa | Efecto en Capacidad |
+|---|---|:---:|
+| 🟢 **Incremento** | Personal extra / Turno doble | Sube cupos |
+| 🔴 **Reducción** | Ausencia de personal / Mantenimiento de horno | Baja cupos |
+| ⛔ **Cierre Parcial** | Evento privado / Feriado no laborable | Cupos = 0 |
+| ⭐ **Fecha Especial** | Campaña alta demanda (Día de la Madre, Navidad) | Ajuste a medida |
 
 ---
 
 ## 5. Ciclo de Capacidad de un Pedido
 
-```
-1. Cliente selecciona productos
-          |
-          v
-2. Selecciona fecha y franja
-          |
-          v
-3. Sistema consulta capacidad disponible
-          |
-          v
-    +-----------+
-    | Existe     |
-    | capacidad? |
-    +-----------+
-     No     |     Si
-      |     |      |
-      v     v      v
-  Bloquear  Continuar
-  opcion    al checkout
-                |
-                v
-4. Sistema crea reserva temporal
-                |
-                v
-5. Cliente realiza pago
-                |
-                v
-    +-----------+
-    | Pago       |
-    | confirmado?|
-    +-----------+
-     No     |     Si
-      |     |      |
-      v     v      v
-  Liberar  Reserva
-  reserva  pasa a
-           comprometida
-                |
-                v
-6. Cancelacion posterior
-   evalua recuperacion
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Web as Frontend / Catálogo
+    participant API as Backend (Capacidad Service)
+    participant DB as Base de Datos
+    participant Pasarela as Pasarela Pagos
+
+    Cliente->>Web: 1. Selecciona producto, fecha y franja
+    Web->>API: 2. Consultar Capacidad Disponible
+    API->>DB: Leer Capacidad Efectiva y Comprometida
+    DB-->>API: Retornar cupos disponibles
+
+    alt Sin Capacidad Disponible
+        API-->>Web: ❌ Cupo Agotado
+        Web-->>Cliente: Bloquear selección y sugerir fechas alternas
+    else Con Capacidad Disponible
+        API-->>Web: ✅ Cupo Disponible
+        Web->>Cliente: Permitir continuar al Checkout
+        Cliente->>Web: 3. Inicia Checkout
+        Web->>API: 4. Crear Reserva Temporal (Hold: 10 min)
+        API->>DB: Incrementar Capacidad Comprometida (Hold)
+        Cliente->>Pasarela: 5. Realizar Pago
+        
+        alt Pago Aprobado
+            Pasarela-->>API: Callback Pago Exitoso
+            API->>DB: Convertir Reserva Hold en PEDIDO CONFIRMADO
+            API-->>Web: Pedido Confirmado exitosamente
+        else Pago Rechazado o Tiempo Expirado (>10 min)
+            API->>DB: Liberar Reserva Hold (Incrementar Disponible)
+            API-->>Web: ⚠️ Reserva liberada por inactividad/fallo
+        end
+    end
 ```
 
 ---
 
-## 6. Concurrencia
+## 6. Concurrencia y Bloqueos
 
-<blockquote>
+> [!IMPORTANT]
+> El sistema debe garantizar a nivel de base de datos / backend que **dos clientes no puedan comprometer simultáneamente el último cupo disponible** (condición de carrera).
 
-> El sistema debera impedir que dos clientes comprometan simultaneamente el ultimo cupo disponible.
-
-</blockquote>
-
-| Aspecto | Detalle |
-|---------|---------|
-| Regla | Perteneciente al dominio |
-| Implementacion | Se definira durante arquitectura |
+* **Mecanismo:** Bloqueo transaccional o atómico al momento de solicitar la reserva temporal de checkout.
+* **Duración:** La reserva expira automáticamente a los **10 minutos** si no se confirma el pago.
 
 ---
 
-## 7. Cancelaciones
+## 7. Políticas de Cancelación
 
-<blockquote>
+> [!CAUTION]
+> Cancelar un pedido **no implica necesariamente recuperar la capacidad productiva o logística**.
 
-> Cancelar un pedido **no implica necesariamente** recuperar toda la capacidad.
+```mermaid
+stateDiagram-v2
+    [*] --> PENDIENTE_PAGO
+    PENDIENTE_PAGO --> CONFIRMADO : Pago Aprobado
+    PENDIENTE_PAGO --> CANCELADO : Expiración (Libera 100% cupo)
+    
+    CONFIRMADO --> EN_PREPARACION : Inicia Producción
+    CONFIRMADO --> CANCELADO : Cancelado a tiempo (Libera 100% cupo)
 
-</blockquote>
+    EN_PREPARACION --> LISTO : Producción Finalizada
+    EN_PREPARACION --> CANCELADO : Insumos/Tiempo consumidos (NO libera cupo)
 
-La recuperacion dependera del estado operativo:
-
-| Estado del Pedido | Recuperacion |
-|-------------------|:------------:|
-| Antes de iniciar preparacion | Completa |
-| Preparacion iniciada | Parcial o no reutilizable |
-| Entrega iniciada | Recurso logistico no se libera |
-
-> Las reglas definitivas de recuperacion se detallaran al definir **estados y politicas de cancelacion**.
+    LISTO --> EN_ENTREGA
+    EN_ENTREGA --> COMPLETADO : Entregado
+```
 
 ---
 
 ## 8. Delivery en el MVP
 
-Cuando el negocio ofrezca delivery, el alcance inicial podra considerar:
-
 <div align="center">
 
-### Incluido en MVP
+| Funcionalidad | Alcance MVP | Estado |
+|---|:---:|:---:|
+| Dirección del cliente y tienda | `Must Have` | ✅ Incluido |
+| Validación de cobertura y distancia | `Must Have` | ✅ Incluido |
+| Costo básico de envío | `Must Have` | ✅ Incluido |
+| Selección Delivery vs Recojo en tienda | `Must Have` | ✅ Incluido |
+| Optimización automática de rutas GPS | `Out of Scope` | ❌ Excluido v1 |
+| Tracking de repartidor en tiempo real | `Out of Scope` | ❌ Excluido v1 |
 
 </div>
 
-| Funcionalidad | Estado |
-|---------------|:------:|
-| Direccion del cliente | Incluir |
-| Ubicacion del negocio | Incluir |
-| Cobertura | Incluir |
-| Distancia | Incluir |
-| Costo basico de entrega | Incluir |
-| Modalidad delivery/recojo | Incluir |
-| Disponibilidad por franja | Incluir |
+---
+
+## 9. Elementos Fuera del Modelo v1
+
+Para prevenir sobreingeniería en el primer entregable, se excluyen deliberadamente:
+
+1. **Pesos de capacidad ponderados** (ej. una torta de 3 pisos restando 3 cupos y un cupcake 0.2 cupos).
+2. **Capacidad multi-recurso simultánea** (repartidores + cocineros + mesas de empaque independientes).
+3. **Predicción con Inteligencia Artificial** de picos de saturación.
+
+---
+
+## 10. Relación con los Entregables
+
+> [!NOTE]
+> Este modelo de capacidad constituye el **diferenciador central** de JaldiShop sobre un e-commerce estándar y servirá como base para el modelado de base de datos relacional (Entidad-Relación) y las APIs REST.
+
+```mermaid
+graph TD
+    A[Modelo de Capacidad v1] --> B[Diagrama Entidad-Relación]
+    A --> C[Endpoints REST de Capacidad]
+    A --> D[Controlador de Reservas y Checkout]
+    B --> E[Implementación Spring Boot + JPA]
+    C --> E
+    D --> E
+```
+
+---
 
 <div align="center">
 
-### Fuera del MVP Inicial
-
-</div>
-
-| Funcionalidad | Estado |
-|---------------|:------:|
-| Optimizacion automatica de rutas | Excluir |
-| Tracking GPS en vivo | Excluir |
-| Asignacion inteligente de repartidores | Excluir |
-| Prediccion de transito | Excluir |
-
----
-
-## 9. Fuera del Modelo v1
-
-Para evitar sobreingenieria en el primer MVP, se dejan como **evolucion**:
-
-| Elemento | Tipo |
-|----------|------|
-| Pesos de capacidad por producto | Modelo avanzado |
-| Capacidad simultanea por multiples recursos | Modelo avanzado |
-| Estaciones internas de cocina | Recurso especifico |
-| Busy Mode avanzado | Modo avanzado |
-| ETA dinamico | Funcionalidad avanzada |
-| Optimizacion logistica | Funcionalidad avanzada |
-
----
-
-## 10. Relacion con los Entregables
-
-<blockquote>
-
-> Este modelo debe servir como base para el **modelado ER** y la **API** del primer entregable.
-
-</blockquote>
-
-No reemplaza las entidades obligatorias del proyecto:
-
-| Entidad Obligatoria | Descripcion |
-|---------------------|-------------|
-| Usuarios | Gestion de usuarios |
-| Productos | Catalogo de productos |
-| Categorias | Organizacion de productos |
-| Inventario | Control de stock |
-| Carrito | Carrito de compras |
-| Ordenes | Gestion de pedidos |
-| Pagos | Procesamiento de pagos |
-
-> JaldiShop agrega el **diferenciador**: la gestion de capacidad.
-
----
-
-## 11. Estado
-
-<div align="center">
-
-| Version | Estado |
-|:-------:|--------|
-| `v1` | `APROBADO` por el equipo |
-
-El siguiente paso es traducir el modelo a **requisitos de negocio** y comenzar el **modelo ER** del Entregable 1.
+[⬅ Propuesta de Producto](./propuesta.md) | [🏠 Volver al Índice General](../../README.md) | [Decisiones de Producto ➡](./decisiones-producto.md)
 
 </div>

@@ -1,0 +1,72 @@
+site_name: JaldiShop Docs
+site_description: Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE
+site_author: Equipo JaldiShop
+repo_url: https://github.com/iJosueeh/jaldishop
+repo_name: iJosueeh/jaldishop
+
+theme:
+  name: material
+  language: es
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+      generic: true
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Inicio: index.md
+  - 01 Producto:
+      - Propuesta: 01-producto/propuesta.md
+      - Modelo de Capacidad v1: 01-producto/modelo-capacidad-v1.md
+      - Decisiones de Producto: 01-producto/decisiones-producto.md
+  - 02 Investigación:
+      - Caso A (Pastelería): 02-investigacion/caso-a-pasteleria.md
+      - Caso B (Dark Kitchen): 02-investigacion/caso-b-dark-kitchen.md
+      - Caso C (Logística): 02-investigacion/caso-c-logistica.md
+      - Matriz de Consolidación: 02-investigacion/matriz-consolidacion.md
+  - 03 Requisitos:
+      - Alcance MVP: 03-requisitos/alcance-mvp.md
+  - 04 Diseño & Proceso:
+      - AS-IS vs TO-BE: 04-design/proceso/as-is-to-be.md
+  - 06 Scrum & Sprints:
+      - Sprint 01: 06-scrum/sprint-01.md
+  - Plantilla: TEMPLATE.md

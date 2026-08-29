@@ -1,170 +1,151 @@
 <div align="center">
 
-# Jaldi Shop
+# 🛍️ JaldiShop
+### Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE
 
-### Plataforma de Gestion de Pedidos y Capacidad para MYPE
+[![GitHub repo size](https://img.shields.io/github/repo-size/iJosueeh/jaldishop?style=flat-square&color=blue)](https://github.com/iJosueeh/jaldishop)
+[![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop?style=flat-square&color=green)](https://github.com/iJosueeh/jaldishop)
+[![GitHub issues](https://img.shields.io/github/issues/iJosueeh/jaldishop?style=flat-square&color=yellow)](https://github.com/iJosueeh/jaldishop/issues)
+[![Sprint](https://img.shields.io/badge/Sprint-01%20Completado-blueviolet?style=flat-square)](./docs/06-scrum/sprint-01.md)
+[![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./docs)
 
-[![GitHub repo size](https://img.shields.io/github/repo-size/iJosueeh/jaldishop)](https://github.com/iJosueeh/jaldishop)
-[![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop)](https://github.com/iJosueeh/jaldishop)
-[![GitHub issues](https://img.shields.io/github/issues/iJosueeh/jaldishop)](https://github.com/iJosueeh/jaldishop/issues)
-[![GitHub stars](https://img.shields.io/github/stars/iJosueeh/jaldishop)](https://github.com/iJosueeh/jaldishop/stargazers)
+<br/>
 
----
+> **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
 
 </div>
 
-## Descripcion
+---
+
+## 📌 Visión General
+
+Las MYPE que trabajan bajo pedido (panaderías, dark kitchens, reposterías, catering) enfrentan a diario **sobreventa, pedidos traspapelados y saturación operativa**. 
+
+A diferencia del e-commerce tradicional —que únicamente evalúa si hay *stock* de producto—, **JaldiShop** incorpora la **capacidad operativa** (tiempo de preparación, disponibilidad de personal y slots de entrega) como restricción inteligente para asegurar que el negocio solo acepte lo que verdaderamente puede cumplir.
+
+```mermaid
+flowchart LR
+    subgraph CLIENTES["📱 Canales de Venta"]
+        W[WhatsApp]
+        I[Instagram]
+        O[Otros Medios]
+    end
+
+    subgraph PLATAFORMA["⚡ JALDISHOP (Capa de Orden)"]
+        direction TB
+        C1["Catálogo & Carrito Digital"]
+        C2["Motor de Validación de Capacidad"]
+        C3["Checkout con Reserva Temporal"]
+        C4["Panel de Control MYPE"]
+    end
+
+    subgraph BENEFICIOS["🎯 Impacto Operativo"]
+        B1["🚫 Cero Sobreventa"]
+        B2["⏱️ Ahorro de Tiempo"]
+        B3["📦 Seguimiento Transparente"]
+    end
+
+    CLIENTES --> PLATAFORMA --> BENEFICIOS
+```
+
+---
+
+## 👥 Equipo de Desarrollo
+
+| Miembro | Rol | Responsabilidad Sprint 1 | Perfil |
+|---|:---:|---|:---:|
+| **Josue Royer Tanta Cieza** | Full Stack Dev | Caso A (Pastelería), Caso C (Logística) & Modelo de Capacidad | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Caso B (Dark Kitchen) & Consolidación | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | Flujo AS-IS / TO-BE & Modelado de Procesos | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
+
+---
+
+## 🛠️ Stack Tecnológico
 
 <div align="center">
 
-### Control inteligente de capacidad para MYPE
-
-</div>
-
-**JaldiShop** es una plataforma creada para micro, pequenas y medianas empresas que gestionan sus pedidos a traves de canales digitales como **WhatsApp** e **Instagram**, y cuya operacion se ve limitada por su capacidad real de produccion, atencion o entrega. Las MYPE que trabajan bajo pedido enfrentan diariamente problemas como gestion manual, datos dispersos, sobreventa y pedidos incumplidos debido a la falta de control de capacidad. JaldiShop resuelve esto funcionando como una **capa de orden** que centraliza pedidos, controla capacidad automaticamente, verifica disponibilidad en tiempo real y ofrece seguimiento al cliente, sin reemplazar WhatsApp o Instagram sino complementando la operacion del negocio.
-
----
-
-## Equipo
-
-| Miembro | Rol | Responsabilidad Sprint 1 |
-|---------|-----|--------------------------|
-| **[Josue Royer Tanta Cieza](https://github.com/iJosueeh)** | Desarrollador | Caso A y Caso C |
-| **[Katherine Patricia Salas Quiroz](https://github.com/kath144)** | Desarrolladora | Caso B |
-| **[Mia Vitalia Gual Vega](https://github.com/miagv)** | Desarrolladora | Flujo AS-IS / TO-BE |
-
----
-
-## Stack Preliminar
-
-<div align="center">
-
-| Tecnologia | Uso |
-|------------|-----|
-| ![Spring](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) | Backend |
-| ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Frontend |
-| ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white) | Frontend |
-| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) | Base de datos |
-| ![WebSocket](https://img.shields.io/badge/WebSocket-764ABC?style=for-the-badge&logo=socket.io&logoColor=white) | Tiempo real |
+| Capa | Tecnologías | Propósito |
+|:---|:---|:---|
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Java](https://img.shields.io/badge/Java_17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) | API RESTful, Reglas de Dominio y Transaccionalidad |
+| **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) | Portal Cliente y Panel Administrativo MYPE |
+| **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white) | Base de datos relacional y control concurrente |
+| **Tiempo Real** | ![WebSocket](https://img.shields.io/badge/WebSocket-764ABC?style=for-the-badge&logo=socket.io&logoColor=white) | Actualización de estados y disponibilidad en vivo |
+| **Documentación** | ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white) | Diagramas interactivos y especificaciones vivas |
 
 </div>
 
 ---
 
-## Estado Actual
+## 🗺️ Mapa de Documentación del Proyecto
 
-<div align="center">
-
-`sprint-1` `Establecimiento del modelo de capacidad`
-
-</div>
-
-| Sprint | Estado | Descripcion |
-|:------:|:------:|-------------|
-| 1 | `COMPLETADO` | Establecimiento del modelo de capacidad |
-| 2 | `PENDIENTE` | Desarrollo del backend |
-| 3 | `PENDIENTE` | Desarrollo del frontend |
-| 4 | `PENDIENTE` | Union y pruebas |
-
----
-
-## Documentacion del Proyecto
-
-Toda la documentacion del proyecto se encuentra disponible en la carpeta [`/docs`](./docs).
+Toda la documentación técnica y de producto se encuentra estructurada y versionada en [`/docs`](./docs):
 
 ```
 jaldishop/
-├── docs/
-│   ├── 01-producto/
-│   │   ├── propuesta.md              # Propuesta del producto
-│   │   ├── decisiones-producto.md    # Decisiones del MVP
-│   │   ├── matriz-consolidacion.md   # Consolidacion de casos
-│   │   └── modelo-capacidad-v1.md    # Modelo de Capacidad v1
-│   ├── 02-investigacion/
-│   │   ├── caso-a-pasteleria.md      # Caso A: Capacidad en pasteleria
-│   │   ├── caso-b-dark-kitchen.md    # Caso B: Dark Kitchen
-│   │   ├── caso-c-logistica.md       # Caso C: Capacidad logistica
-│   │   └── matriz-consolidacion.md   # Consolidacion de investigacion
-│   ├── 04-design/
-│   │   └── proceso/
-│   │       └── as-is-to-be.md        # Analisis de proceso actual vs futuro
-│   └── 06-scrum/
-│       └── sprint-01.md              # Sprint 1: Modelo de capacidad
-├── backend/                          # Spring Boot
-├── frontend/                         # Next.js / Angular
-└── README.md
+├── 📁 docs/
+│   ├── 📁 01-producto/                 # Visión de negocio y modelo operativo
+│   │   ├── 📄 propuesta.md             # Propuesta y justificación del producto
+│   │   ├── 📄 modelo-capacidad-v1.md   # Core: Algoritmo y reglas de capacidad
+│   │   └── 📄 decisiones-producto.md   # Decisiones técnicas y de negocio (DP-G01 a G06)
+│   ├── 📁 02-investigacion/            # Levantamiento de requisitos de campo
+│   │   ├── 📄 caso-a-pasteleria.md     # Caso A: Capacidad en repostería bajo pedido
+│   │   ├── 📄 caso-b-dark-kitchen.md   # Caso B: Cocina oculta y franjas horarias
+│   │   ├── 📄 caso-c-logistica.md      # Caso C: Capacidad de delivery y recojo
+│   │   └── 📄 matriz-consolidacion.md  # Matriz comparativa de hallazgos
+│   ├── 📁 03-requisitos/               # Alcance del MVP y especificaciones
+│   │   └── 📄 alcance-mvp.md           # Must / Should / Could / Won't have
+│   ├── 📁 04-design/                   # Modelado de procesos y UX
+│   │   └── 📁 proceso/
+│   │       └── 📄 as-is-to-be.md       # Diagramas comparativos AS-IS vs TO-BE
+│   ├── 📁 06-scrum/                    # Gestión ágil de sprints
+│   │   └── 📄 sprint-01.md             # Sprint 1: Modelo de capacidad (Completado)
+│   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
+├── 📁 backend/                         # Servidor Spring Boot (Próximo Sprint)
+├── 📁 frontend/                        # Aplicación Web (Próximo Sprint)
+└── 📄 README.md                        # Portal principal del repositorio
 ```
 
 ---
 
-## Casos de Estudio — Modelo de Capacidad
+## 🚀 Estado de los Sprints
 
-<div align="center">
+```mermaid
+gantt
+    title Plan de Desarrollo JaldiShop
+    dateFormat  YYYY-MM-DD
+    section Fase 1: Concepción
+    Sprint 1 - Modelo de Capacidad y Casos de Uso :done, s1, 2026-08-01, 2026-08-15
+    section Fase 2: Backend
+    Sprint 2 - Modelo de Datos, API REST y Concurrencia :active, s2, 2026-08-16, 2026-09-05
+    section Fase 3: Frontend
+    Sprint 3 - Portal Cliente y Dashboard MYPE : s3, 2026-09-06, 2026-09-25
+    section Fase 4: Integración
+    Sprint 4 - Pagos, WebSockets y Pruebas End-to-End : s4, 2026-09-26, 2026-10-15
+```
 
-### Sprint 1: Establecimiento del Modelo de Capacidad v1
-
-</div>
-
-| Caso | Tema | Estado | Responsable |
-|:----:|------|:------:|:-----------:|
-| **A** | Capacidad en Pasteleria | `CONSOLIDADO` | Josue |
-| **B** | Dark Kitchen | `CONSOLIDADO` | Katherine |
-| **C** | Capacidad Logistica y Delivery | `CONSOLIDADO` | Josue |
-
-### Conceptos Clave
-
-| Concepto | Descripcion |
-|----------|-------------|
-| **Capacidad productiva** | Cuanto puede producir o preparar el negocio |
-| **Capacidad logistica** | Cuantas operaciones de entrega puede asumir |
-| **Capacidad base** | Capacidad habitual configurada por el negocio |
-| **Excepciones temporales** | Cambios puntuales sin alterar la base |
-
----
-
-## Flujo del Proceso
-
-<div align="center">
-
-### AS-IS (Actual) vs TO-BE (Propuesto)
-
-</div>
-
-| Aspecto | AS-IS | TO-BE |
-|---------|-------|-------|
-| Gestion de pedidos | Manual, dispersa | Centralizada en plataforma |
-| Control de capacidad | Calculo manual | Verificacion automatica |
-| Confirmacion de pago | Verificacion manual | Integrada en sistema |
-| Seguimiento del pedido | Cliente pregunta | Cliente consulta en plataforma |
-
-> Ver diagramas completos en [`as-is-to-be.md`](./docs/04-design/proceso/as-is-to-be.md)
+| Sprint | Enfoque | Estado | Entregable Clave |
+|:---:|---|:---:|---|
+| **01** | Modelo de Capacidad y Casos de Estudio | `COMPLETADO` | [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md) |
+| **02** | Arquitectura Backend y Persistencia | `EN PROGRESO` | Diagrama ER, API REST Spring Boot |
+| **03** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Next.js / Angular |
+| **04** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
 
 ---
 
-## Funciones Centrales
+## 💡 Conceptos Clave del Dominio
 
-1. Ajuste de capacidad real
-2. Gestion centralizada de pedidos
-3. Control automatico de disponibilidad
-4. Seguimiento del pedido
-5. Datos basicos de clientes frecuentes
+> [!TIP]
+> Para profundizar en el funcionamiento del motor de disponibilidad, consulta el [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md).
 
----
-
-## Publico Objetivo
-
-MYPE con produccion o atencion limitada, especialmente negocios que trabajan bajo pedido:
-
-- Panaderias y reposterias
-- Dark kitchens
-- Comida preparada
-- Regalos personalizados
-- Servicios de delivery
+* **Capacidad Base:** Límite estándar de pedidos que una tienda procesa por día o bloque horario.
+* **Excepción Temporal:** Ajuste en caliente para fechas festivas o imprevistos operativos sin alterar la base semanal.
+* **Reserva Temporal (Hold):** Bloqueo transaccional de cupo durante 10 minutos mientras el cliente realiza el pago.
+* **Capacidad Comprometida:** Total de cupos bloqueados por pedidos pagados y reservas en curso.
 
 ---
 
 <div align="center">
 
-**Jaldishop** - Soluciones para MYPE
+**JaldiShop** — Construido con rigor de ingeniería de software para impulsar a las MYPE.
 
 </div>

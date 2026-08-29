@@ -1,87 +1,111 @@
 <div align="center">
 
-# PROPUESTA DEL PRODUCTO
+# Propuesta del Producto
+### JaldiShop — Solución de Capacidad y Pedidos para MYPE
 
-## JaldiShop
-
-`Producto` `MYPE` `Capacidad`
+[![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./propuesta.md)
+[![Tipo](https://img.shields.io/badge/Tipo-Producto-blue?style=for-the-badge)](./propuesta.md)
 
 </div>
 
----
-
-## Problema
-
-<blockquote>
-
-> Las MYPE que venden mediante WhatsApp, Instagram y otras redes sociales gestionan gran parte de sus pedidos manualmente.
-
-</blockquote>
-
-El problema central identificado es la **sobreventa** causada por no disponer de un control de capacidad.
+`📍 Docs` > `01-Producto` > **Propuesta del Producto**  
+[🏠 Índice General](../../README.md) | [Modelo de Capacidad v1 ➡](./modelo-capacidad-v1.md)
 
 ---
 
-## Diferencia frente al Stock Tradicional
+<details open>
+<summary><b>📑 Tabla de Contenidos</b></summary>
 
-| Enfoque | Pregunta |
-|---------|----------|
-| **E-commerce tradicional** | Cuantas unidades quedan disponibles? |
-| **JaldiShop** | Cuantos pedidos puede comprometerse a cumplir realmente el negocio? |
+- [1. Problema Identificado](#1-problema-identificado)
+- [2. Diferencia frente al Stock Tradicional](#2-diferencia-frente-al-stock-tradicional)
+- [3. Propuesta de Valor](#3-propuesta-de-valor)
+- [4. Funciones Centrales](#4-funciones-centrales)
+- [5. Público Objetivo](#5-público-objetivo)
 
-<blockquote>
-
-> Una panaderia puede disponer de ingredientes pero no de tiempo para preparar otra torta.
-
-> Una dark kitchen puede disponer de alimentos pero tener su capacidad de cocina saturada.
-
-> Un negocio de regalos puede producir un pedido pero no disponer de capacidad logistica para entregarlo en el horario solicitado.
-
-</blockquote>
+</details>
 
 ---
 
-## Propuesta de Solucion
+## 1. Problema Identificado
 
-Crear un sistema de gestion de capacidad y pedidos para pequenas empresas que ya captan clientes mediante redes sociales.
+> [!IMPORTANT]
+> Las MYPE que venden mediante **WhatsApp, Instagram y redes sociales** gestionan sus pedidos de forma manual y fragmentada. El principal dolor operativo es la **sobreventa** y el incumplimiento ocasionado por la ausencia de un control de capacidad en tiempo real.
 
-La plataforma no busca reemplazar necesariamente WhatsApp o Instagram, sino funcionar como una **capa de organizacion** para gestionar los pedidos que recibe el negocio.
-
----
-
-## Funciones Centrales
-
-| # | Funcion |
-|:-:|---------|
-| 1 | Configuracion de capacidad real |
-| 2 | Gestion centralizada de pedidos |
-| 3 | Control automatico de disponibilidad |
-| 4 | Seguimiento del pedido |
-| 5 | Datos basicos de clientes frecuentes |
+```mermaid
+flowchart TD
+    A[Recepción de pedidos por WhatsApp / Instagram] --> B[Registro manual en libretas o chats]
+    B --> C{¿Hay capacidad real?}
+    C -->|Cálculo a ciegas| D[Aceptación excesiva de pedidos]
+    D --> E[🚨 Sobreventa, saturación y clientes insatisfechos]
+```
 
 ---
 
-## Publico Preliminar
+## 2. Diferencia frente al Stock Tradicional
 
-MYPE con produccion o atencion limitada, especialmente negocios que trabajan bajo pedido:
+| Enfoque | Pregunta Clave | Factor Evaluado |
+|---|---|---|
+| **E-commerce Tradicional** | *¿Cuántas unidades físicas quedan en stock?* | Inventario de materia prima / productos terminados |
+| **JaldiShop** | *¿Cuántos pedidos puede comprometerse a cumplir realmente el negocio?* | **Tiempo, mano de obra, slots de cocina y despacho** |
 
-| Tipo de Negocio |
-|-----------------|
-| Panaderias y reposterias |
-| Dark kitchens |
-| Comida preparada |
-| Regalos personalizados |
+> [!NOTE]
+> * Una **pastelería** puede tener harina y azúcar, pero **no tener horas de horno ni personal** para decorar otra torta.
+> * Una **dark kitchen** puede tener insumos, pero tener su **línea de preparación colapsada** en hora pico.
+> * Una **tienda de regalos** puede armar el detalle, pero **no disponer de repartidor** para entregarlo a la hora exacta.
 
 ---
 
-## Estado
+## 3. Propuesta de Valor
+
+Desarrollar una **capa de orden y orquestación** para pequeños negocios digitales que:
+1. No busca desplazar los canales de captación (WhatsApp/Instagram), sino **complementarlos**.
+2. Centraliza pedidos y valida automáticamente disponibilidad antes de comprometer al negocio.
+3. Brinda al cliente visibilidad y certeza sobre la fecha y franja horaria de entrega.
+
+---
+
+## 4. Funciones Centrales
+
+```mermaid
+mindmap
+  root((JaldiShop))
+    1. Ajuste de Capacidad Real
+      Capacidad base diaria y franjas
+      Excepciones temporales
+    2. Centralización
+      Catálogo digital
+      Gestión unificada de órdenes
+    3. Validación Automática
+      Reserva temporal en checkout
+      Prevención de sobreventa
+    4. Seguimiento
+      Estados en tiempo real
+      Seguimiento autónomo del cliente
+```
+
+| # | Función Central | Impacto para la MYPE |
+|:---:|---|---|
+| **1** | Configuración de capacidad real | Define límites realistas por día y franja horaria |
+| **2** | Gestión centralizada de pedidos | Consolida ventas evitando pedidos perdidos |
+| **3** | Control automático de disponibilidad | Bloquea fechas y franjas saturadas |
+| **4** | Seguimiento del pedido | Reduce consultas repetitivas de clientes |
+| **5** | Clientes y recurrencia | Base de datos unificada de clientes frecuentes |
+
+---
+
+## 5. Público Objetivo
+
+MYPE con capacidad de producción o atención limitada que trabajan principalmente **bajo pedido o con despacho programado**:
+
+* 🎂 **Pastelerías y reposterías artesanales**
+* 🍳 **Dark kitchens y comida por delivery**
+* 🍱 **Menús y comida preparada programada**
+* 🎁 **Regalos y detalles personalizados**
+
+---
 
 <div align="center">
 
-| Estado | Detalle |
-|:------:|---------|
-| `APROBADO` | Propuesta seleccionada por el equipo |
-
-El alcance definitivo sera establecido despues de definir el **Modelo de Capacidad v1** y el **MVP**.
+[🏠 Volver al Índice General](../../README.md) | [Siguiente: Modelo de Capacidad v1 ➡](./modelo-capacidad-v1.md)
 
 </div>
