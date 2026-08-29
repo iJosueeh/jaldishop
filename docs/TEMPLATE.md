@@ -1,13 +1,12 @@
-<div align="center">
-
 # [TÍTULO DEL DOCUMENTO]
+
 ### [Subtítulo o Módulo del Sistema]
 
 [![Estado](https://img.shields.io/badge/Estado-Borrador%20%7C%20Revisión%20%7C%20Aprobado-blue?style=for-the-badge)](#)
 [![Sprint](https://img.shields.io/badge/Sprint-0X-orange?style=for-the-badge)](#)
 [![Autor](https://img.shields.io/badge/Autor-Nombre-lightgrey?style=for-the-badge)](#)
 
-</div>
+---
 
 `📍 Docs` > `XX-Categoría` > **[Nombre del Archivo]**  
 [⬅ Documento Anterior](./anterior.md) | [🏠 Índice General](../../README.md) | [Documento Siguiente ➡](./siguiente.md)
@@ -81,8 +80,4 @@ flowchart LR
 
 ---
 
-<div align="center">
-
 [⬅ Documento Anterior](./anterior.md) | [🏠 Volver al Índice General](../../README.md) | [Documento Siguiente ➡](./siguiente.md)
-
-</div>

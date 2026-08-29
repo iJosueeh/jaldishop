@@ -1,132 +1,124 @@
-<div align="center">
+# Decisiones de Producto
 
-# DECISIONES DE PRODUCTO
+### JaldiShop — Definición de Decisiones Generales del MVP
 
-## JaldiShop
-
-`Producto` `Decisiones` `MVP`
-
-</div>
+[![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./decisiones-producto.md)
+[![Tipo](https://img.shields.io/badge/Tipo-Decisiones-blue?style=for-the-badge)](./decisiones-producto.md)
 
 ---
 
-## Proposito
+`📍 Docs` > `01-Producto` > **Decisiones de Producto**  
+[⬅ Modelo de Capacidad v1](./modelo-capacidad-v1.md) | [🏠 Índice General](../../README.md) | [Investigación Caso A ➡](../02-investigacion/caso-a-pasteleria.md)
 
-> Registrar las decisiones propuestas despues de consolidar los Casos A, B y C y contrastarlas con el alcance academico de los entregables.
+---
+
+<details open>
+<summary><b>📑 Tabla de Contenidos</b></summary>
+
+- [1. Propósito](#proposito)
+- [2. DP-G01 — Modelo Simple de Capacidad](#dp-g01--modelo-simple-de-capacidad)
+- [3. DP-G02 — Capacidad Operativa Principal](#dp-g02--capacidad-operativa-principal)
+- [4. DP-G03 — Día y Franja Horaria](#dp-g03--dia-y-franja-horaria)
+- [5. DP-G04 — Reserva Temporal Durante Checkout](#dp-g04--reserva-temporal-durante-checkout)
+- [6. DP-G05 — Protección Ante Concurrencia](#dp-g05--proteccion-ante-concurrencia)
+- [7. DP-G06 — Alcance Logístico](#dp-g06--alcance-logistico)
+- [8. Matriz de Decisiones vs Pendientes](#pendientes-despues-de-aprobar-estas-decisiones)
+
+</details>
+
+---
+
+## Propósito
+
+> [!NOTE]
+> Registrar las decisiones de diseño funcional y técnico aprobadas tras la consolidación de los Casos A, B y C, delimitando el alcance del primer MVP.
 
 ---
 
 ## DP-G01 — Modelo Simple de Capacidad
 
-<blockquote>
+> [!IMPORTANT]
+> **Decisión:** Utilizar capacidad simple (**1 pedido = 1 cupo**) en el MVP.
 
-**Decision propuesta:** Utilizar capacidad simple en el MVP.
+El consumo ponderado por producto o nivel de complejidad queda reservado como evolución para versiones posteriores.
 
-</blockquote>
-
-El consumo ponderado por producto o complejidad queda como evolucion posterior.
-
-**Motivo:** Permite demostrar el diferenciador de JaldiShop sin convertir el MVP en un motor complejo de planificacion.
+* **Motivación:** Permite validar y demostrar el valor diferencial de JaldiShop sin convertir el MVP en un motor de planificación excesivamente complejo.
 
 ---
 
 ## DP-G02 — Capacidad Operativa Principal
 
-<blockquote>
+> [!IMPORTANT]
+> **Decisión:** Gestionar una única capacidad operativa principal por cada configuración de tienda.
 
-**Decision propuesta:** Manejar una capacidad operativa principal por configuracion.
-
-</blockquote>
-
-Multiples recursos simultaneos como horno, cocina, empaque o repartidores quedan para una version posterior.
+La gestión de múltiples recursos simultáneos (hornos, cocina fría, empaque y repartidores de forma desacoplada) queda como evolución posterior.
 
 ---
 
-## DP-G03 — Dia y Franja Horaria
+## DP-G03 — Día y Franja Horaria
 
-<blockquote>
+> [!IMPORTANT]
+> **Decisión:** Permitir configurar capacidad tanto por día completo como por franjas horarias específicas.
 
-**Decision propuesta:** Permitir capacidad diaria y por franja horaria.
-
-</blockquote>
-
-Esto cubre negocios con produccion anticipada y negocios con demanda concentrada durante determinadas horas.
+Esto cubre tanto a negocios con producción anticipada (pastelerías) como a negocios con demanda concentrada en horas pico (dark kitchens).
 
 ---
 
 ## DP-G04 — Reserva Temporal Durante Checkout
 
-<blockquote>
+> [!IMPORTANT]
+> **Decisión:** Bloquear temporalmente el cupo de capacidad cuando el cliente inicia el proceso de checkout (*Hold* transaccional de 10 minutos).
 
-**Decision propuesta:** Reservar temporalmente la capacidad cuando el cliente entra al proceso de checkout.
+```mermaid
+flowchart LR
+    A[Inicio Checkout] --> B[Crear Reserva Hold]
+    B --> C{¿Pago Confirmado?}
+    C -->|Sí| D[Confirmar Pedido y Capacidad]
+    C -->|No / Timeout 10 min| E[Liberar Cupo a Disponible]
+```
 
-</blockquote>
-
-| Evento | Accion |
-|--------|--------|
-| Pago confirmado | Reserva se confirma |
-| Pago falla | Reserva se libera |
-| Reserva expira | Reserva se libera |
-
-> El tiempo exacto de expiracion queda pendiente de definicion tecnica.
-
----
-
-## DP-G05 — Proteccion Ante Concurrencia
-
-<blockquote>
-
-**Decision propuesta:** El backend debera garantizar que dos pedidos no puedan comprometer el mismo ultimo cupo.
-
-</blockquote>
-
-> La solucion tecnica se definira durante arquitectura.
+| Evento | Acción en el Sistema |
+|---|---|
+| **Pago confirmado** | La reserva temporal se convierte en pedido confirmado |
+| **Pago fallido** | La reserva se cancela y se libera el cupo |
+| **Tiempo expirado (>10 min)** | El cupo vuelve a estar disponible para otros clientes |
 
 ---
 
-## DP-G06 — Alcance Logistico
+## DP-G05 — Protección Ante Concurrencia
 
-<blockquote>
+> [!WARNING]
+> **Decisión:** El backend garantizará que dos pedidos simultáneos no puedan comprometer el mismo último cupo disponible.
 
-**Decision propuesta:** Incluir unicamente logistica basica en el MVP.
-
-</blockquote>
-
-| Funcionalidad | Estado |
-|---------------|:------:|
-| Ubicacion | Incluir |
-| Cobertura | Incluir |
-| Distancia | Incluir |
-| Delivery/recojo | Incluir |
-| Costo basico | Incluir |
-| Disponibilidad por franja | Incluir |
-| Optimizacion de rutas | Excluir |
-| Tracking GPS | Excluir |
-| Asignacion inteligente | Excluir |
+* La solución técnica aplicará transaccionalidad atómica a nivel de base de datos relacional (PostgreSQL).
 
 ---
 
-## Pendientes Despues de Aprobar Estas Decisiones
+## DP-G06 — Alcance Logístico
 
-| Pendiente | Descripcion |
-|-----------|-------------|
-| Estados del pedido | Definir estados definitivos |
-| Politica de cancelacion | Definir reglas exactas |
-| Duracion de reservas | Definir tiempo de expiracion |
-| Proveedor de pagos | Seleccionar integracion |
-| Proveedor de mapas | Seleccionar integracion |
-| Modelo ER | Traducir modelo a requisitos |
+> [!IMPORTANT]
+> **Decisión:** Incluir únicamente logística y delivery básico en el MVP.
+
+| Funcionalidad Logística | Alcance en MVP | Estado |
+|---|:---:|:---:|
+| Ubicación del negocio y del cliente | Esencial | ✅ Incluido |
+| Cobertura y validación por radio | Esencial | ✅ Incluido |
+| Selección Delivery vs Recojo | Esencial | ✅ Incluido |
+| Costo fijo o por rango de distancia | Esencial | ✅ Incluido |
+| Optimización automática de rutas GPS | Evolución | ❌ Excluido v1 |
+| Tracking en vivo del motorizado | Evolución | ❌ Excluido v1 |
 
 ---
 
-## Estado
+## Pendientes Después de Aprobar Estas Decisiones
 
-<div align="center">
+| Pendiente | Descripción | Estado |
+|---|---|:---:|
+| **Estados del pedido** | Definir máquina de estados finita (`PENDIENTE_PAGO` $\rightarrow$ `COMPLETADO`) | ✅ Definido |
+| **Política de cancelación** | Reglas de liberación de capacidad según estado operativo | ✅ Definido |
+| **Duración de reservas** | Ventana estándar fijada en 10 minutos | ✅ Definido |
+| **Modelo ER** | Traducir entidades a diagrama relacional Spring Boot / JPA | 🔄 En Sprint 2 |
 
-| Estado | Detalle |
-|:------:|---------|
-| `APROBADO` | Incorporado al Modelo de Capacidad v1 |
+---
 
-Las decisiones DP-G01 a DP-G06 fueron aprobadas y formalizadas en el **Modelo de Capacidad v1**.
-
-</div>
+[⬅ Modelo de Capacidad v1](./modelo-capacidad-v1.md) | [🏠 Volver al Índice General](../../README.md) | [Investigación Caso A ➡](../02-investigacion/caso-a-pasteleria.md)

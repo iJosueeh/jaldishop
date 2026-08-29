@@ -1,83 +1,76 @@
-<div align="center">
+# Sprint 1: Modelo de Capacidad
 
-# SPRINT 1
+### JaldiShop — Gestión Ágil y Entregables del Sprint 01
 
-## Establecimiento del Modelo de Capacidad
+[![Estado](https://img.shields.io/badge/Estado-Completado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./sprint-01.md)
+[![Fase](https://img.shields.io/badge/Fase-Sprint_01-blue?style=for-the-badge)](./sprint-01.md)
 
-`Scrum` `Fase 1` `Modelo v1`
+---
 
-</div>
+`📍 Docs` > `06-Scrum` > **Sprint 01**  
+[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Índice General](../../README.md) | [Plantilla de Docs ➡](../TEMPLATE.md)
+
+---
+
+<details open>
+<summary><b>📑 Tabla de Contenidos</b></summary>
+
+- [1. Objetivo del Sprint](#objetivo)
+- [2. Casos de Estudio](#casos-de-estudio)
+- [3. Entregas y Documentación](#entregas-recientes)
+- [4. Resultado y Estado Final](#estado-del-sprint)
+
+</details>
 
 ---
 
 ## Objetivo
 
-> Comprender como funciona la capacidad en diferentes tipos de MYPE y obtener un **Modelo de Capacidad v1** aceptado por el equipo.
+> [!NOTE]
+> Analizar y modelar el comportamiento de la capacidad operativa en diferentes tipos de MYPE bajo pedido, consolidando los hallazgos en el **Modelo de Capacidad v1** aprobado por el equipo de desarrollo.
 
 ---
 
 ## Casos de Estudio
 
-| Caso | Tema | Estado | Responsable | Documento |
-|:----:|------|:------:|:-----------:|-----------|
-| **A** | Capacidad en Pasteleria | `CONSOLIDADO` | Josue | [caso-a-pasteleria.md](../02-investigacion/caso-a-pasteleria.md) |
-| **B** | Dark Kitchen | `CONSOLIDADO` | Katherine | [caso-b-dark-kitchen.md](../02-investigacion/caso-b-dark-kitchen.md) |
-| **C** | Capacidad Logistica | `CONSOLIDADO` | Josue | [caso-c-logistica.md](../02-investigacion/caso-c-logistica.md) |
+| Caso | Negocio Analizado | Responsable | Documento de Investigación |
+|:---:|---|:---:|---|
+| **A** | Capacidad en Pastelería | Josué | [caso-a-pasteleria.md](../02-investigacion/caso-a-pasteleria.md) |
+| **B** | Dark Kitchen y Franjas | Katherine | [caso-b-dark-kitchen.md](../02-investigacion/caso-b-dark-kitchen.md) |
+| **C** | Logística y Despacho | Josué | [caso-c-logistica.md](../02-investigacion/caso-c-logistica.md) |
 
 ---
 
 ## Entregas Recientes
 
-| Entrega | Estado | Responsable | Documento |
-|---------|:------:|:-----------:|-----------|
-| Caso A - Pasteleria | `CONSOLIDADO` | Josue | [caso-a-pasteleria.md](../02-investigacion/caso-a-pasteleria.md) |
-| Caso B - Dark Kitchen | `CONSOLIDADO` | Katherine | [caso-b-dark-kitchen.md](../02-investigacion/caso-b-dark-kitchen.md) |
-| Caso C - Logistica | `CONSOLIDADO` | Josue | [caso-c-logistica.md](../02-investigacion/caso-c-logistica.md) |
-| Flujo AS-IS / TO-BE | `COMPLETADO` | Mia | [as-is-to-be.md](../04-design/proceso/as-is-to-be.md) |
-| Matriz Consolidacion | `CONSOLIDADO` | Equipo | [matriz-consolidacion.md](../02-investigacion/matriz-consolidacion.md) |
-| Decisiones de Producto | `APROBADO` | Equipo | [decisiones-producto.md](../01-producto/decisiones-producto.md) |
-| **Modelo de Capacidad v1** | `APROBADO` | Equipo | [modelo-capacidad-v1.md](../01-producto/modelo-capacidad-v1.md) |
+```mermaid
+flowchart LR
+    A["Investigación (Casos A, B, C)"] --> B["Matriz de Consolidación"]
+    B --> C["Decisiones de Producto (DP-G)"]
+    C --> D["Modelo de Capacidad v1"]
+    D --> E["Alcance del MVP"]
+```
 
----
-
-## Resultado Esperado
-
-Integrar los resultados de A, B y C para identificar:
-
-| Elemento | Estado |
-|----------|:------:|
-| **Conceptos comunes** | `COMPLETADO` |
-| **Reglas generales** | `COMPLETADO` |
-| **Reglas especificas** | `COMPLETADO` |
-| **Tipos de capacidad** | `COMPLETADO` |
-| **Excepciones** | `COMPLETADO` |
-| **Cancelaciones** | `COMPLETADO` |
-| **Alcance inicial** | `COMPLETADO` |
-
----
-
-## Entregable Final
-
-<div align="center">
-
-### Modelo de Capacidad v1
-
-| Entregable | Estado |
-|:----------:|:------:|
-| [modelo-capacidad-v1.md](../01-producto/modelo-capacidad-v1.md) | `COMPLETADO` |
-
-</div>
+| Entregable | Responsable | Estado | Documento |
+|---|:---:|:---:|---|
+| **Caso A — Pastelería** | Josué | `CONSOLIDADO` | [caso-a-pasteleria.md](../02-investigacion/caso-a-pasteleria.md) |
+| **Caso B — Dark Kitchen** | Katherine | `CONSOLIDADO` | [caso-b-dark-kitchen.md](../02-investigacion/caso-b-dark-kitchen.md) |
+| **Caso C — Logística** | Josué | `CONSOLIDADO` | [caso-c-logistica.md](../02-investigacion/caso-c-logistica.md) |
+| **Flujo AS-IS / TO-BE** | Mía | `COMPLETADO` | [as-is-to-be.md](../04-design/proceso/as-is-to-be.md) |
+| **Matriz de Consolidación** | Equipo | `CONSOLIDADO` | [matriz-consolidacion.md](../02-investigacion/matriz-consolidacion.md) |
+| **Decisiones de Producto** | Equipo | `APROBADO` | [decisiones-producto.md](../01-producto/decisiones-producto.md) |
+| **Modelo de Capacidad v1** | Equipo | `APROBADO` | [modelo-capacidad-v1.md](../01-producto/modelo-capacidad-v1.md) |
 
 ---
 
 ## Estado del Sprint
 
-<div align="center">
+| Métrica del Sprint | Valor Obtenido |
+|:---|:---:|
+| Entregas completadas | 8 / 8 (100%) |
+| Decisiones pendientes de aprobación | 0 |
+| **Estado General** | `SPRINT COMPLETADO` |
 
-| Metrica | Valor |
-|:-------:|:-----:|
-| Entregas completadas | 8/8 |
-| Pendientes de aprobacion | 0 |
-| **Estado general** | `SPRINT COMPLETADO` |
+---
 
-</div>
+[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Volver al Índice General](../../README.md) | [Plantilla de Docs ➡](../TEMPLATE.md)
