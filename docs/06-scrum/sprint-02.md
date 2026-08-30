@@ -27,19 +27,19 @@
 
 ```mermaid
 flowchart LR
-    subgraph ALTA["🔴 Prioridad Alta"]
-        T1["1. Alcance del MVP (Equipo)"]
-        T2["2. Reglas de Negocio (Josué)"]
-        T3["3. Modelo de Dominio (Josué + Kath)"]
+    subgraph ALTA["Prioridad Alta"]
+        T1["1. Alcance del MVP"]
+        T2["2. Reglas de Negocio"]
+        T3["3. Modelo de Dominio"]
     end
 
-    subgraph MEDIA["🟠 Prioridad Media"]
-        T4["4. Historias de Usuario (Mía)"]
-        T5["5. Flujo del Pedido (Kath)"]
+    subgraph MEDIA["Prioridad Media"]
+        T4["4. Historias de Usuario"]
+        T5["5. Flujo del Pedido"]
     end
 
-    subgraph BAJA["🟢 Prioridad Baja"]
-        T6["6. Criterios de Aceptación (Equipo)"]
+    subgraph BAJA["Prioridad Baja"]
+        T6["6. Criterios de Aceptación"]
     end
 
     ALTA --> MEDIA --> BAJA
@@ -47,8 +47,8 @@ flowchart LR
 
 | Prioridad | Historia / Entregable | Responsable(s) | Estado | Documento Asociado |
 |:---:|---|:---:|:---:|---|
-| 🔴 **Alta** | Definir alcance del MVP | Todo el equipo | `APROBADO` | [`docs/03-requisitos/alcance-mvp.md`](../03-requisitos/alcance-mvp.md) |
-| 🔴 **Alta** | Consolidar reglas de negocio | Josué | `EN PROGRESO` | `docs/03-requisitos/reglas-negocio.md` |
+| 🔴 **Alta** | Definir alcance del MVP | Todo el equipo | `COMPLETADO` | [`docs/03-requisitos/alcance-mvp.md`](../03-requisitos/alcance-mvp.md) |
+| 🔴 **Alta** | Consolidar reglas de negocio | Josué | `COMPLETADO` | [`docs/03-requisitos/reglas-negocio.md`](../03-requisitos/reglas-negocio.md) |
 | 🔴 **Alta** | Modelar entidades principales (Dominio) | Josué + Katherine | `EN PROGRESO` | `docs/05-arquitectura/modelo-dominio.md` |
 | 🟠 **Media** | Crear historias de usuario | Mía | `EN PROGRESO` | `docs/03-requisitos/historias-usuario.md` |
 | 🟠 **Media** | Diseñar flujo completo del pedido | Katherine | `EN PROGRESO` | `docs/04-design/flujos/flujo-pedido.md` |
@@ -72,11 +72,11 @@ flowchart LR
 ### 📋 Tarjeta 2: Reglas de Negocio Oficiales
 * **Objetivo:** Convertir el modelo de capacidad y hallazgos en reglas oficiales y numeradas (RN-01 a RN-15).
 * **Checklist:**
-  - [ ] Consolidar reglas RN-01 a RN-15.
-  - [ ] Eliminar reglas duplicadas provenientes de los Casos A, B y C.
-  - [ ] Clasificar reglas por módulo (Capacidad, Pedidos, Checkout, Cancelaciones).
-  - [ ] Revisión cruzada con Katherine y Mía.
-  - [ ] Publicar `reglas-negocio.md`.
+  - [x] Consolidar reglas RN-STR, RN-USR, RN-PRD, RN-INV, RN-CART, RN-CAP, RN-RES, RN-PAY, RN-ORD y RN-DEL.
+  - [x] Eliminar reglas duplicadas provenientes de los Casos A, B y C.
+  - [x] Clasificar reglas por módulo operativo.
+  - [x] Revisión cruzada con Katherine y Mía.
+  - [x] Publicar `reglas-negocio.md`.
 
 ---
 
@@ -132,8 +132,8 @@ flowchart LR
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 1 / 6 (17%) |
-| Entregables en desarrollo activo | 5 / 6 (83%) |
+| Entregables completados | 2 / 6 (33%) |
+| Entregables en desarrollo activo | 4 / 6 (67%) |
 | **Estado General** | `EN PROGRESO ACTIVO` |
 
 ---

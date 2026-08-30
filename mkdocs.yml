@@ -65,6 +65,7 @@ nav:
       - Matriz de Consolidación: 02-investigacion/matriz-consolidacion.md
   - 03 Requisitos:
       - Alcance MVP: 03-requisitos/alcance-mvp.md
+      - Reglas de Negocio: 03-requisitos/reglas-negocio.md
   - 04 Diseño & Proceso:
       - AS-IS vs TO-BE: 04-design/proceso/as-is-to-be.md
   - 06 Scrum & Sprints:

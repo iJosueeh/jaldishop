@@ -84,7 +84,8 @@ jaldishop/
 │   │   ├── 📄 caso-c-logistica.md      # Caso C: Capacidad de delivery y recojo
 │   │   └── 📄 matriz-consolidacion.md  # Matriz comparativa de hallazgos
 │   ├── 📁 03-requisitos/               # Alcance del MVP y especificaciones
-│   │   └── 📄 alcance-mvp.md           # Must / Should / Could / Won't have
+│   │   ├── 📄 alcance-mvp.md           # Must / Should / Could / Won't have
+│   │   └── 📄 reglas-negocio.md        # Reglas e invariantes oficiales del dominio (RN-01 a 15)
 │   ├── 📁 04-design/                   # Modelado de procesos y UX
 │   │   └── 📁 proceso/
 │   │       └── 📄 as-is-to-be.md       # Diagramas comparativos AS-IS vs TO-BE
