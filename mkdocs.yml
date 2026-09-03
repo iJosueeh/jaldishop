@@ -66,6 +66,8 @@ nav:
   - 03 Requisitos:
       - Alcance MVP: 03-requisitos/alcance-mvp.md
       - Reglas de Negocio: 03-requisitos/reglas-negocio.md
+      - Historias de Usuario: 03-requisitos/historia.md
+      - Modelo de Dominio: 03-requisitos/modelo-dominio.md
   - 04 Diseño & Proceso:
       - AS-IS vs TO-BE: 04-design/proceso/as-is-to-be.md
   - 06 Scrum & Sprints:
