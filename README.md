@@ -84,11 +84,15 @@ jaldishop/
 │   │   ├── 📄 caso-c-logistica.md      # Caso C: Capacidad de delivery y recojo
 │   │   └── 📄 matriz-consolidacion.md  # Matriz comparativa de hallazgos
 │   ├── 📁 03-requisitos/               # Alcance del MVP y especificaciones
-│   │   ├── 📄 alcance-mvp.md           # Must / Should / Could / Won't have
-│   │   └── 📄 reglas-negocio.md        # Reglas e invariantes oficiales del dominio (RN-01 a 15)
+│   │   ├── 📄 alcance-mvp.md           # Must / Should / Could / Won't have (v1.1)
+│   │   ├── 📄 reglas-negocio.md        # Reglas e invariantes del dominio (RN-01 a 15) (v1.1)
+│   │   ├── 📄 historia.md              # Historias de usuario del MVP (v1.1)
+│   │   └── 📄 modelo-dominio.md        # Modelo de dominio y conceptos (v1.0)
 │   ├── 📁 04-design/                   # Modelado de procesos y UX
 │   │   └── 📁 proceso/
 │   │       └── 📄 as-is-to-be.md       # Diagramas comparativos AS-IS vs TO-BE
+│   ├── 📁 05-arquitectura/              # Decisiones arquitectónicas
+│   │   └── 📄 arquitectura-sistema.md    # Arquitectura del sistema (v0.2)
 │   ├── 📁 06-scrum/                    # Gestión ágil de sprints
 │   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de capacidad (Completado)
 │   │   └── 📄 sprint-02.md             # Sprint 2: Definición del Producto (En Progreso)
@@ -127,7 +131,7 @@ flowchart TD
 
 * **Capacidad Base:** Límite estándar de pedidos que una tienda procesa por día o bloque horario.
 * **Excepción Temporal:** Ajuste en caliente para fechas festivas o imprevistos operativos sin alterar la base semanal.
-* **Reserva Temporal (Hold):** Bloqueo transaccional de cupo durante 10 minutos mientras el cliente realiza el pago.
+* **Reserva Temporal (Hold):** Bloqueo transaccional de cupo durante **10 minutos para iniciar el pago**. El pago puede completarse después de este periodo si inició válidamente antes de la expiración.
 * **Capacidad Comprometida:** Total de cupos bloqueados por pedidos pagados y reservas en curso.
 
 ---
