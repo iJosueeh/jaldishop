@@ -1,9 +1,9 @@
 # Reglas de Negocio Oficiales
 
-### JaldiShop — Definición de Restricciones e Invariantes del Dominio v1.0
+### JaldiShop — Definición de Restricciones e Invariantes del Dominio v1.1
 
-[![Estado](https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./reglas-negocio.md)
-[![Versión](https://img.shields.io/badge/Versión-v1.0-blue?style=for-the-badge)](./reglas-negocio.md)
+[![Estado](https://img.shields.io/badge/Estado-En%20Revisión-orange?style=for-the-badge&logo=checkmarx&logoColor=white)](./reglas-negocio.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.1-blue?style=for-the-badge)](./reglas-negocio.md)
 [![Fase](https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge)](../06-scrum/sprint-02.md)
 
 ---
@@ -55,9 +55,11 @@ flowchart LR
 
 ## 3. Usuarios y Roles
 
-* **RN-USR-01 (Roles del MVP):** Los usuarios de JaldiShop operarán bajo los roles formales `CLIENTE` y `COMERCIANTE`.
+* **RN-USR-01 (Roles del MVP):** Los usuarios de JaldiShop operarán bajo los roles formales `CLIENTE`, `COMERCIANTE` y `ADMINISTRADOR`.
 * **RN-USR-02 (Operaciones según rol):** Los permisos de acceso a las funcionalidades del sistema estarán estrictamente delimitados por el rol asignado al usuario.
 * **RN-USR-03 (Propiedad de pedidos):** Un cliente únicamente podrá consultar y gestionar los pedidos asociados a su propia cuenta de usuario.
+* **RN-USR-04 (Administración de plataforma):** El administrador podrá realizar las operaciones generales de administración habilitadas para JaldiShop, principalmente relacionadas con usuarios, roles y supervisión básica.
+* **RN-USR-05 (Separación de responsabilidades):** Las funciones operativas propias de una tienda, como gestionar productos, inventario, capacidad y pedidos, corresponderán al comerciante asociado y no al cliente ni al administrador.
 
 ---
 
@@ -66,25 +68,24 @@ flowchart LR
 * **RN-PRD-01 (Pertenencia del producto):** Todo producto pertenecerá a una única tienda.
 * **RN-PRD-02 (Categoría obligatoria):** Todo producto estará asociado a una categoría registrada dentro de su misma tienda.
 * **RN-PRD-03 (Precio válido):** Todo producto habilitado para venta deberá registrar un precio unitario mayor que cero.
-* **RN-PRD-04 (Estado del producto):** Un producto podrá encontrarse activo o inactivo; únicamente los productos en estado activo estarán visibles para nuevas compras.
-* **RN-PRD-05 (Producto habilitado en compra):** Solo los productos en estado activo podrán ser agregados a órdenes de compra.
-* **RN-PRD-06 (Cantidad positiva):** La cantidad solicitada de cualquier producto en una orden deberá ser siempre un entero mayor que cero.
-* **RN-PRD-07 (Pertenencia de categoría):** Las categorías creadas por una tienda serán de uso exclusivo de dicha tienda.
-* **RN-PRD-08 (Precio de compra al momento del pago):** La confirmación de una compra registrará el precio unitario vigente del producto al momento exacto de procesar la transacción.
-* **RN-PRD-09 (Precio histórico inmutable):** Las modificaciones posteriores al catálogo de precios no alterarán los montos registrados en pedidos previamente confirmados.
+* **RN-PRD-04 (Estado del producto):** Un producto podrá encontrarse activo o inactivo; únicamente los productos en estado activo podrán ser agregados a órdenes de compra y estarán visibles para nuevos pedidos.
+* **RN-PRD-05 (Cantidad positiva):** La cantidad solicitada de cualquier producto en una orden deberá ser siempre un entero mayor que cero.
+* **RN-PRD-06 (Pertenencia de categoría):** Las categorías creadas por una tienda serán de uso exclusivo de dicha tienda.
+* **RN-PRD-07 (Precio de compra al momento del pago):** La confirmación de una compra registrará el precio unitario vigente del producto al momento exacto de procesar la transacción.
+* **RN-PRD-08 (Precio histórico inmutable):** Las modificaciones posteriores al catálogo de precios no alterarán los montos registrados en pedidos previamente confirmados.
 
 ---
 
 ## 5. Inventario
 
-* **RN-INV-01 (Inventario por tienda):** El control de stock de un producto corresponderá exclusivamente a la tienda propietaria.
+* **RN-INV-01 (Inventario por tienda):** El control de stock de un producto corresponderá exclusivamente a la tienda propietaria del producto.
 * **RN-INV-02 (Disponibilidad de stock):** Una compra no podrá confirmarse si la cantidad requerida de alguno de los productos supera el stock disponible en ese instante.
 * **RN-INV-03 (Validación previa):** El sistema comprobará la existencia de stock suficiente antes de permitir el paso al proceso de pago.
 * **RN-INV-04 (Descuento de inventario):** Las existencias se descontarán de forma definitiva únicamente cuando el pedido quede formalmente confirmado tras un pago exitoso.
 * **RN-INV-05 (Descuento exacto):** La cantidad descontada del inventario coincidirá con las unidades confirmadas en el pedido.
 * **RN-INV-06 (Stock no negativo):** Ninguna confirmación de pedido podrá provocar que el stock disponible de un producto sea menor a cero.
 * **RN-INV-07 (Umbral de stock bajo):** Un producto se marcará en estado de stock bajo cuando sus existencias disponibles sean menores o iguales al umbral configurado por el comerciante.
-* **RN-INV-08 (Integridad por tienda):** Los productos validados en una orden deberán pertenecer en su totalidad a la misma tienda de la compra.
+* **RN-INV-08 (Integridad por tienda):** Todos los productos incluidos en una única orden de compra deberán pertenecer a la misma tienda.
 * **RN-INV-09 (Revalidación previa al pago):** El stock de todos los productos de la compra se revalidará inmediatamente antes de iniciar el cobro en la pasarela; si el stock es insuficiente, la transacción se cancelará.
 
 ---
@@ -101,7 +102,7 @@ flowchart LR
 ## 7. Capacidad Operativa
 
 * **RN-CAP-01 (Configuración independiente):** Cada tienda gestionará de forma autónoma sus parámetros de capacidad operativa.
-* **RN-CAP-02 (Periodos de capacidad):** La capacidad operativa podrá definirse por día completo o por franjas horarias específicas.
+* **RN-CAP-02 (Periodos de capacidad):** La capacidad operativa podrá definirse por día completo o por franjas horarias de duración configurable según las necesidades de la tienda.
 * **RN-CAP-03 (Capacidad base):** El comerciante establecerá una capacidad base habitual para sus operaciones estándar.
 * **RN-CAP-04 (Excepciones temporales):** El comerciante podrá registrar variaciones puntuales (aumentos, reducciones o cierres) para una fecha o franja sin alterar su configuración base.
 * **RN-CAP-05 (Prioridad de excepciones):** Durante el periodo de vigencia de una excepción temporal, esta sobrescribirá la capacidad base y determinará la capacidad efectiva.
@@ -112,8 +113,7 @@ flowchart LR
 Capacidad Disponible = Capacidad Efectiva - Capacidad Reservada (Hold) - Capacidad Comprometida
 ```
 
-* **RN-CAP-08 (Saturación automática):** El sistema bloqueará de inmediato nuevas reservas cuando la capacidad disponible del periodo llegue a cero (`Capacidad Disponible = 0`).
-* **RN-CAP-09 (Capacidad mínima para compra):** Una orden solo podrá avanzar al checkout si existe al menos un (1) cupo disponible en la fecha o franja horaria solicitada.
+* **RN-CAP-08 (Bloqueo por saturación):** El sistema bloqueará nuevas reservas y no permitirá avanzar al checkout cuando la capacidad disponible del periodo llegue a cero (`Capacidad Disponible = 0`). Esta restricción se aplica tanto a nuevas reservas como a la validación de inicio de compra.
 
 ---
 
@@ -121,27 +121,28 @@ Capacidad Disponible = Capacidad Efectiva - Capacidad Reservada (Hold) - Capacid
 
 * **RN-RES-01 (Reserva previa al pago):** Al ingresar al checkout, el sistema creará una reserva temporal bloqueando un cupo en la franja horaria seleccionada.
 * **RN-RES-02 (Condición de reserva):** La reserva temporal solo se generará si `Capacidad Disponible >= 1`.
-* **RN-RES-03 (Duración de la reserva):** La reserva temporal tendrá una vigencia fija de diez (10) minutos.
-* **RN-RES-04 (Expiración automática):** Si el pago no se completa dentro de los 10 minutos, la reserva expirará de forma automática.
+* **RN-RES-03 (Duración de la reserva):** La reserva temporal tendrá una vigencia de diez (10) minutos, contados desde su creación.
+* **RN-RES-04 (Uso de la reserva):** Los diez (10) minutos representan el tiempo disponible para que el cliente inicie válidamente el proceso de pago. La compra no necesita completarse dentro de ese periodo, pero el pago debe iniciarse antes de que la reserva expire.
 * **RN-RES-05 (Liberación de cupo):** Al expirar una reserva o cancelarse el checkout, el cupo retenido retornará inmediatamente al saldo de capacidad disponible.
 * **RN-RES-06 (Exclusividad anti-concurrencia):** Un mismo cupo de capacidad no podrá ser asignado simultáneamente a más de un cliente.
 * **RN-RES-07 (Conversión a pedido):** Al confirmarse el pago exitoso, la reserva temporal se transformará en capacidad comprometida definitiva.
 * **RN-RES-08 (Revalidación de reserva):** Antes de ejecutar el cobro, el sistema verificará que la reserva temporal permanezca activa y no haya expirado.
-* **RN-RES-09 (Protección durante el cobro):** Si la pasarela de pagos está procesando la transacción al momento en que expira el temporizador, el cupo se mantendrá retenido hasta recibir la respuesta definitiva de la pasarela.
-* **RN-RES-10 (Límite de procesamiento):** La retención por procesamiento de pago tendrá una tolerancia máxima acotada para evitar bloqueos indefinidos.
-* **RN-RES-11 (Liberación por fallo de pago):** Si la pasarela rechaza la transacción o se supera el límite de tiempo, la reserva temporal se anulará y liberará el cupo.
+* **RN-RES-09 (Protección durante el cobro):** Si el pago se inicia válidamente antes del vencimiento de la reserva, el cupo quedará temporalmente protegido mientras la pasarela procesa la transacción, sujeto al límite máximo de procesamiento definido.
+* **RN-RES-10 (Límite de procesamiento):** La protección del cupo durante el procesamiento del pago tendrá una tolerancia máxima acotada para evitar bloqueos indefinidos. El valor exacto de este límite será definido durante la implementación técnica.
+* **RN-RES-11 (Liberación por fallo de pago):** Si la pasarela rechaza la transacción o se supera el límite máximo de procesamiento sin confirmación válida, la reserva temporal se anulará y liberará el cupo.
 
 ---
 
 ## 9. Pagos y Transacciones
 
-* **RN-PAY-01 (Intentos de pago):** El cliente podrá realizar múltiples intentos de pago dentro de la ventana de vigencia de su reserva temporal.
+* **RN-PAY-01 (Intentos de pago):** El cliente podrá realizar múltiples intentos de pago mientras la reserva temporal esté vigente.
 * **RN-PAY-02 (Confirmación exclusiva por pago aprobado):** Únicamente una respuesta de pago aprobado permitirá formalizar la confirmación de la orden.
 * **RN-PAY-03 (Pago rechazado):** Un intento fallido o rechazado no generará pedido ni comprometerá de forma definitiva la capacidad.
-* **RN-PAY-04 (Reserva obligatoria):** Ningún cobro podrá procesarse sin una reserva temporal de capacidad activa y válida.
-* **RN-PAY-05 (Idempotencia y unicidad):** Una misma transacción de pago no podrá generar órdenes duplicadas ni descontar inventario o capacidad más de una vez.
-* **RN-PAY-06 (Pago de uso único):** Un comprobante de pago aprobado utilizado para una orden no podrá ser reutilizado para confirmar compras posteriores.
-* **RN-PAY-07 (Resultados fuera de tiempo):** Una confirmación de pago recibida cuando la reserva ya haya expirado y el cupo haya sido tomado por otro cliente no creará automáticamente el pedido; requerirá gestión de excepción.
+* **RN-PAY-04 (Reserva obligatoria):** Ningún cobro podrá iniciarse sin una reserva temporal de capacidad activa y válida.
+* **RN-PAY-05 (Protección durante procesamiento):** Un pago iniciado válidamente antes del vencimiento de la reserva podrá continuar en procesamiento bajo la protección temporal definida, aun cuando la reserva haya expirado.
+* **RN-PAY-06 (Idempotencia y unicidad):** Una misma transacción de pago no podrá generar órdenes duplicadas ni descontar inventario o capacidad más de una vez.
+* **RN-PAY-07 (Pago de uso único):** Un comprobante de pago aprobado utilizado para una orden no podrá ser reutilizado para confirmar compras posteriores.
+* **RN-PAY-08 (Resultados fuera de tiempo):** Una confirmación de pago recibida cuando la reserva ya haya expirado y el cupo haya sido tomado por otro cliente no creará automáticamente el pedido; requerirá gestión de excepción.
 
 ---
 
@@ -182,7 +183,7 @@ stateDiagram-v2
 ## 11. Modalidades de Entrega
 
 * **RN-DEL-01 (Modalidades admitidas):** Todo pedido deberá registrarse bajo una de las dos modalidades: `RECOJO` en tienda o `DELIVERY`.
-* **RN-DEL-02 (Dirección para delivery):** Los pedidos en modalidad `DELIVERY` requerirán obligatoriamente una dirección de entrega válida dentro de la cobertura del comercio.
+* **RN-DEL-02 (Dirección para delivery):** Los pedidos en modalidad `DELIVERY` requerirán obligatoriamente información de dirección suficiente para realizar la entrega. La validación geográfica avanzada (radio de cobertura, distancia, geocodificación, tarifas por distancia) no es obligatoria para el núcleo del MVP.
 * **RN-DEL-03 (Recojo en establecimiento):** Los pedidos en modalidad `RECOJO` no requerirán datos de dirección y pasarán de `LISTO` directamente a `COMPLETADO` al retirar el producto.
 * **RN-DEL-04 (Estado de despacho):** El estado `EN_ENTREGA` será exclusivo para órdenes en modalidad `DELIVERY`.
 * **RN-DEL-05 (Cierre de entrega):** Un pedido en reparto pasará a `COMPLETADO` cuando se confirme la recepción por parte del cliente.
@@ -210,6 +211,10 @@ Las siguientes capacidades quedan registradas como evolución futura tras la val
 * Modelo ponderado de consumo de capacidad según complejidad del producto.
 * Control desacoplado por estaciones internas de cocina y dotación de personal.
 * Optimización inteligente de rutas de reparto y tracking GPS en vivo.
+* Reserva temporal de inventario durante el proceso de checkout.
+* Analítica administrativa avanzada.
+* Auditoría administrativa avanzada.
+* Validación geográfica avanzada de cobertura y tarifas por distancia.
 
 ---
 
