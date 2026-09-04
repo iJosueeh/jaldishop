@@ -1,0 +1,1770 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+        <link rel="prev" href="../alcance-mvp/">
+      
+      
+        <link rel="next" href="../historia/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Reglas de Negocio - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#reglas-de-negocio-oficiales" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Reglas de Negocio
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-design/proceso/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Proceso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-definicion-de-restricciones-e-invariantes-del-dominio-v11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Definición de Restricciones e Invariantes del Dominio v1.1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo-y-alcance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo y Alcance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tiendas-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tiendas (Store)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-usuarios-y-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Usuarios y Roles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-productos-y-categorias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Productos y Categorías
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-inventario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Inventario
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-carrito-de-compras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Carrito de Compras
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-capacidad-operativa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Capacidad Operativa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-reservas-temporales-de-capacidad-hold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Reservas Temporales de Capacidad (Hold)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-pagos-y-transacciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Pagos y Transacciones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-pedidos-y-maquina-de-estados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Pedidos y Máquina de Estados
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-modalidades-de-entrega" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Modalidades de Entrega
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-decisiones-tecnicas-y-arquitectonicas-diferidas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Decisiones Técnicas y Arquitectónicas Diferidas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-funcionalidades-reservadas-para-siguientes-versiones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Funcionalidades Reservadas para Siguientes Versiones
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Proceso
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Proceso
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-design/proceso/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-definicion-de-restricciones-e-invariantes-del-dominio-v11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Definición de Restricciones e Invariantes del Dominio v1.1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo-y-alcance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo y Alcance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-tiendas-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tiendas (Store)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-usuarios-y-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Usuarios y Roles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-productos-y-categorias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Productos y Categorías
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-inventario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Inventario
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-carrito-de-compras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Carrito de Compras
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-capacidad-operativa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Capacidad Operativa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-reservas-temporales-de-capacidad-hold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Reservas Temporales de Capacidad (Hold)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-pagos-y-transacciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Pagos y Transacciones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-pedidos-y-maquina-de-estados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Pedidos y Máquina de Estados
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-modalidades-de-entrega" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Modalidades de Entrega
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-decisiones-tecnicas-y-arquitectonicas-diferidas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Decisiones Técnicas y Arquitectónicas Diferidas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-funcionalidades-reservadas-para-siguientes-versiones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Funcionalidades Reservadas para Siguientes Versiones
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="reglas-de-negocio-oficiales">Reglas de Negocio Oficiales</h1>
+<h3 id="jaldishop-definicion-de-restricciones-e-invariantes-del-dominio-v11">JaldiShop — Definición de Restricciones e Invariantes del Dominio v1.1</h3>
+<p><a href="./"><img alt="Estado" src="https://img.shields.io/badge/Estado-En%20Revisión-orange?style=for-the-badge&amp;logo=checkmarx&amp;logoColor=white" /></a>
+<a href="./"><img alt="Versión" src="https://img.shields.io/badge/Versión-v1.1-blue?style=for-the-badge" /></a>
+<a href="../../06-scrum/sprint-02/"><img alt="Fase" src="https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>03-Requisitos</code> &gt; <strong>Reglas de Negocio</strong><br />
+<a href="../alcance-mvp/">⬅ Alcance del MVP</a> | <a href="../../README.md">🏠 Índice General</a> | <a href="../../04-design/proceso/as-is-to-be/">AS-IS vs TO-BE ➡</a></p>
+<hr />
+<h2 id="1-objetivo-y-alcance">1. Objetivo y Alcance</h2>
+<blockquote>
+<p>📌 <strong>Nota:</strong> Este documento define formalmente las reglas e invariantes de negocio que gobiernan el comportamiento operativo del MVP de <strong>JaldiShop</strong>.</p>
+</blockquote>
+<p>Las reglas aquí descritas expresan políticas, restricciones y validaciones puras del dominio. No definen detalles técnicos de implementación, tecnologías, endpoints ni mecanismos específicos de infraestructura o persistencia.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph CONFIG["🏪 Tienda &amp; Catálogo"]
+        STR["RN-STR: Tienda Aislada"]
+        PRD["RN-PRD: Precios y Estados"]
+        INV["RN-INV: Stock No Negativo"]
+        CAP["RN-CAP: Límites y Franjas"]
+    end
+
+    subgraph CHECKOUT["⚡ Validación &amp; Pago"]
+        CART["RN-CART: Carrito Consistente"]
+        RES["RN-RES: Hold Temporal 10 min"]
+        PAY["RN-PAY: Aprobación Única"]
+    end
+
+    subgraph ORDENES["📦 Cumplimiento"]
+        ORD["RN-ORD: Estados del Pedido"]
+        DEL["RN-DEL: Delivery vs Recojo"]
+    end
+
+    CONFIG --&gt; CHECKOUT --&gt; ORDENES</code></pre>
+<hr />
+<h2 id="2-tiendas-store">2. Tiendas (Store)</h2>
+<ul>
+<li><strong>RN-STR-01 (Asociación de datos a tienda):</strong> Todos los productos, categorías, inventarios, configuraciones de capacidad y pedidos deberán pertenecer obligatoriamente a una tienda específica.</li>
+<li><strong>RN-STR-02 (Separación de información):</strong> La información operativa de una tienda deberá mantenerse estrictamente aislada de los datos pertenecientes a otros comercios registrados en la plataforma.</li>
+<li><strong>RN-STR-03 (Administración única):</strong> Para el MVP, cada comerciante administrará una única tienda.</li>
+<li><strong>RN-STR-04 (Alcance de administración):</strong> Un comerciante únicamente podrá consultar y modificar la información correspondiente a la tienda que tiene asignada.</li>
+</ul>
+<hr />
+<h2 id="3-usuarios-y-roles">3. Usuarios y Roles</h2>
+<ul>
+<li><strong>RN-USR-01 (Roles del MVP):</strong> Los usuarios de JaldiShop operarán bajo los roles formales <code>CLIENTE</code>, <code>COMERCIANTE</code> y <code>ADMINISTRADOR</code>.</li>
+<li><strong>RN-USR-02 (Operaciones según rol):</strong> Los permisos de acceso a las funcionalidades del sistema estarán estrictamente delimitados por el rol asignado al usuario.</li>
+<li><strong>RN-USR-03 (Propiedad de pedidos):</strong> Un cliente únicamente podrá consultar y gestionar los pedidos asociados a su propia cuenta de usuario.</li>
+<li><strong>RN-USR-04 (Administración de plataforma):</strong> El administrador podrá realizar las operaciones generales de administración habilitadas para JaldiShop, principalmente relacionadas con usuarios, roles y supervisión básica.</li>
+<li><strong>RN-USR-05 (Separación de responsabilidades):</strong> Las funciones operativas propias de una tienda, como gestionar productos, inventario, capacidad y pedidos, corresponderán al comerciante asociado y no al cliente ni al administrador.</li>
+</ul>
+<hr />
+<h2 id="4-productos-y-categorias">4. Productos y Categorías</h2>
+<ul>
+<li><strong>RN-PRD-01 (Pertenencia del producto):</strong> Todo producto pertenecerá a una única tienda.</li>
+<li><strong>RN-PRD-02 (Categoría obligatoria):</strong> Todo producto estará asociado a una categoría registrada dentro de su misma tienda.</li>
+<li><strong>RN-PRD-03 (Precio válido):</strong> Todo producto habilitado para venta deberá registrar un precio unitario mayor que cero.</li>
+<li><strong>RN-PRD-04 (Estado del producto):</strong> Un producto podrá encontrarse activo o inactivo; únicamente los productos en estado activo podrán ser agregados a órdenes de compra y estarán visibles para nuevos pedidos.</li>
+<li><strong>RN-PRD-05 (Cantidad positiva):</strong> La cantidad solicitada de cualquier producto en una orden deberá ser siempre un entero mayor que cero.</li>
+<li><strong>RN-PRD-06 (Pertenencia de categoría):</strong> Las categorías creadas por una tienda serán de uso exclusivo de dicha tienda.</li>
+<li><strong>RN-PRD-07 (Precio de compra al momento del pago):</strong> La confirmación de una compra registrará el precio unitario vigente del producto al momento exacto de procesar la transacción.</li>
+<li><strong>RN-PRD-08 (Precio histórico inmutable):</strong> Las modificaciones posteriores al catálogo de precios no alterarán los montos registrados en pedidos previamente confirmados.</li>
+</ul>
+<hr />
+<h2 id="5-inventario">5. Inventario</h2>
+<ul>
+<li><strong>RN-INV-01 (Inventario por tienda):</strong> El control de stock de un producto corresponderá exclusivamente a la tienda propietaria del producto.</li>
+<li><strong>RN-INV-02 (Disponibilidad de stock):</strong> Una compra no podrá confirmarse si la cantidad requerida de alguno de los productos supera el stock disponible en ese instante.</li>
+<li><strong>RN-INV-03 (Validación previa):</strong> El sistema comprobará la existencia de stock suficiente antes de permitir el paso al proceso de pago.</li>
+<li><strong>RN-INV-04 (Descuento de inventario):</strong> Las existencias se descontarán de forma definitiva únicamente cuando el pedido quede formalmente confirmado tras un pago exitoso.</li>
+<li><strong>RN-INV-05 (Descuento exacto):</strong> La cantidad descontada del inventario coincidirá con las unidades confirmadas en el pedido.</li>
+<li><strong>RN-INV-06 (Stock no negativo):</strong> Ninguna confirmación de pedido podrá provocar que el stock disponible de un producto sea menor a cero.</li>
+<li><strong>RN-INV-07 (Umbral de stock bajo):</strong> Un producto se marcará en estado de stock bajo cuando sus existencias disponibles sean menores o iguales al umbral configurado por el comerciante.</li>
+<li><strong>RN-INV-08 (Integridad por tienda):</strong> Todos los productos incluidos en una única orden de compra deberán pertenecer a la misma tienda.</li>
+<li><strong>RN-INV-09 (Revalidación previa al pago):</strong> El stock de todos los productos de la compra se revalidará inmediatamente antes de iniciar el cobro en la pasarela; si el stock es insuficiente, la transacción se cancelará.</li>
+</ul>
+<hr />
+<h2 id="6-carrito-de-compras">6. Carrito de Compras</h2>
+<ul>
+<li><strong>RN-CART-01 (Asociación a tienda):</strong> Cada carrito de compra estará vinculado a una única tienda.</li>
+<li><strong>RN-CART-02 (Consistencia de productos):</strong> No se permitirá mezclar en un mismo carrito productos pertenecientes a distintas tiendas.</li>
+<li><strong>RN-CART-03 (Cantidad mínima):</strong> La cantidad de cada ítem en el carrito deberá ser mayor que cero.</li>
+<li><strong>RN-CART-04 (Carácter no reservado del carrito):</strong> Agregar productos al carrito no bloquea ni reserva stock físico ni capacidad operativa.</li>
+</ul>
+<hr />
+<h2 id="7-capacidad-operativa">7. Capacidad Operativa</h2>
+<ul>
+<li><strong>RN-CAP-01 (Configuración independiente):</strong> Cada tienda gestionará de forma autónoma sus parámetros de capacidad operativa.</li>
+<li><strong>RN-CAP-02 (Periodos de capacidad):</strong> La capacidad operativa podrá definirse por día completo o por franjas horarias de duración configurable según las necesidades de la tienda.</li>
+<li><strong>RN-CAP-03 (Capacidad base):</strong> El comerciante establecerá una capacidad base habitual para sus operaciones estándar.</li>
+<li><strong>RN-CAP-04 (Excepciones temporales):</strong> El comerciante podrá registrar variaciones puntuales (aumentos, reducciones o cierres) para una fecha o franja sin alterar su configuración base.</li>
+<li><strong>RN-CAP-05 (Prioridad de excepciones):</strong> Durante el periodo de vigencia de una excepción temporal, esta sobrescribirá la capacidad base y determinará la capacidad efectiva.</li>
+<li><strong>RN-CAP-06 (Unidad de capacidad del MVP):</strong> Cada pedido confirmado consumirá exactamente un (1) cupo de capacidad del periodo seleccionado, independientemente de la cantidad o mezcla de productos.</li>
+<li><strong>RN-CAP-07 (Cálculo de disponibilidad):</strong> La disponibilidad se calculará mediante la siguiente fórmula:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Capacidad Disponible = Capacidad Efectiva - Capacidad Reservada (Hold) - Capacidad Comprometida
+</code></pre></div>
+<ul>
+<li><strong>RN-CAP-08 (Bloqueo por saturación):</strong> El sistema bloqueará nuevas reservas y no permitirá avanzar al checkout cuando la capacidad disponible del periodo llegue a cero (<code>Capacidad Disponible = 0</code>). Esta restricción se aplica tanto a nuevas reservas como a la validación de inicio de compra.</li>
+</ul>
+<hr />
+<h2 id="8-reservas-temporales-de-capacidad-hold">8. Reservas Temporales de Capacidad (Hold)</h2>
+<ul>
+<li><strong>RN-RES-01 (Reserva previa al pago):</strong> Al ingresar al checkout, el sistema creará una reserva temporal bloqueando un cupo en la franja horaria seleccionada.</li>
+<li><strong>RN-RES-02 (Condición de reserva):</strong> La reserva temporal solo se generará si <code>Capacidad Disponible &gt;= 1</code>.</li>
+<li><strong>RN-RES-03 (Duración de la reserva):</strong> La reserva temporal tendrá una vigencia de diez (10) minutos, contados desde su creación.</li>
+<li><strong>RN-RES-04 (Uso de la reserva):</strong> Los diez (10) minutos representan el tiempo disponible para que el cliente inicie válidamente el proceso de pago. La compra no necesita completarse dentro de ese periodo, pero el pago debe iniciarse antes de que la reserva expire.</li>
+<li><strong>RN-RES-05 (Liberación de cupo):</strong> Al expirar una reserva o cancelarse el checkout, el cupo retenido retornará inmediatamente al saldo de capacidad disponible.</li>
+<li><strong>RN-RES-06 (Exclusividad anti-concurrencia):</strong> Un mismo cupo de capacidad no podrá ser asignado simultáneamente a más de un cliente.</li>
+<li><strong>RN-RES-07 (Conversión a pedido):</strong> Al confirmarse el pago exitoso, la reserva temporal se transformará en capacidad comprometida definitiva.</li>
+<li><strong>RN-RES-08 (Revalidación de reserva):</strong> Antes de ejecutar el cobro, el sistema verificará que la reserva temporal permanezca activa y no haya expirado.</li>
+<li><strong>RN-RES-09 (Protección durante el cobro):</strong> Si el pago se inicia válidamente antes del vencimiento de la reserva, el cupo quedará temporalmente protegido mientras la pasarela procesa la transacción, sujeto al límite máximo de procesamiento definido.</li>
+<li><strong>RN-RES-10 (Límite de procesamiento):</strong> La protección del cupo durante el procesamiento del pago tendrá una tolerancia máxima acotada para evitar bloqueos indefinidos. El valor exacto de este límite será definido durante la implementación técnica.</li>
+<li><strong>RN-RES-11 (Liberación por fallo de pago):</strong> Si la pasarela rechaza la transacción o se supera el límite máximo de procesamiento sin confirmación válida, la reserva temporal se anulará y liberará el cupo.</li>
+</ul>
+<hr />
+<h2 id="9-pagos-y-transacciones">9. Pagos y Transacciones</h2>
+<ul>
+<li><strong>RN-PAY-01 (Intentos de pago):</strong> El cliente podrá realizar múltiples intentos de pago mientras la reserva temporal esté vigente.</li>
+<li><strong>RN-PAY-02 (Confirmación exclusiva por pago aprobado):</strong> Únicamente una respuesta de pago aprobado permitirá formalizar la confirmación de la orden.</li>
+<li><strong>RN-PAY-03 (Pago rechazado):</strong> Un intento fallido o rechazado no generará pedido ni comprometerá de forma definitiva la capacidad.</li>
+<li><strong>RN-PAY-04 (Reserva obligatoria):</strong> Ningún cobro podrá iniciarse sin una reserva temporal de capacidad activa y válida.</li>
+<li><strong>RN-PAY-05 (Protección durante procesamiento):</strong> Un pago iniciado válidamente antes del vencimiento de la reserva podrá continuar en procesamiento bajo la protección temporal definida, aun cuando la reserva haya expirado.</li>
+<li><strong>RN-PAY-06 (Idempotencia y unicidad):</strong> Una misma transacción de pago no podrá generar órdenes duplicadas ni descontar inventario o capacidad más de una vez.</li>
+<li><strong>RN-PAY-07 (Pago de uso único):</strong> Un comprobante de pago aprobado utilizado para una orden no podrá ser reutilizado para confirmar compras posteriores.</li>
+<li><strong>RN-PAY-08 (Resultados fuera de tiempo):</strong> Una confirmación de pago recibida cuando la reserva ya haya expirado y el cupo haya sido tomado por otro cliente no creará automáticamente el pedido; requerirá gestión de excepción.</li>
+</ul>
+<hr />
+<h2 id="10-pedidos-y-maquina-de-estados">10. Pedidos y Máquina de Estados</h2>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; CONFIRMADO : Pago Aprobado (RN-ORD-04)
+    CONFIRMADO --&gt; EN_PREPARACION : Inicio de Producción (RN-ORD-05)
+    CONFIRMADO --&gt; CANCELADO : Cancelación Temprana (RN-ORD-09, Libera Cupo)
+
+    EN_PREPARACION --&gt; LISTO : Producción Terminada (RN-ORD-05)
+    EN_PREPARACION --&gt; CANCELADO : Cancelación Excepcional (RN-ORD-12, NO Libera Cupo)
+
+    LISTO --&gt; EN_ENTREGA : Asignado a Reparto Delivery (RN-ORD-06)
+    LISTO --&gt; COMPLETADO : Recogido en Tienda (RN-DEL-03)
+
+    EN_ENTREGA --&gt; COMPLETADO : Entrega Finalizada (RN-DEL-05)</code></pre>
+<ul>
+<li><strong>RN-ORD-01 (Creación de orden):</strong> Todo pedido nacerá formalmente tras la confirmación satisfactoria de la compra y el pago.</li>
+<li><strong>RN-ORD-02 (Pertenencia a tienda):</strong> Todo pedido pertenecerá a una única tienda.</li>
+<li><strong>RN-ORD-03 (Asociación al cliente):</strong> Todo pedido estará enlazado al cliente que efectuó la compra.</li>
+<li><strong>RN-ORD-04 (Estado inicial):</strong> Todo nuevo pedido comenzará directamente en estado <code>CONFIRMADO</code>.</li>
+<li><strong>RN-ORD-05 (Flujo de preparación estándar):</strong> Los pedidos avanzarán secuencialmente por: <code>CONFIRMADO</code> <span class="arithmatex">\(\rightarrow\)</span> <code>EN_PREPARACION</code> <span class="arithmatex">\(\rightarrow\)</span> <code>LISTO</code> <span class="arithmatex">\(\rightarrow\)</span> <code>COMPLETADO</code>.</li>
+<li><strong>RN-ORD-06 (Secuencia con delivery):</strong> En pedidos con despacho a domicilio, el estado <code>LISTO</code> pasará a <code>EN_ENTREGA</code> antes de marcarse como <code>COMPLETADO</code>.</li>
+<li><strong>RN-ORD-07 (Transiciones válidas):</strong> Los estados de un pedido solo podrán modificarse siguiendo estrictamente el flujo permitido.</li>
+<li><strong>RN-ORD-08 (Estados finales inmutables):</strong> Los pedidos en estado <code>COMPLETADO</code> o <code>CANCELADO</code> son terminales y no podrán reactivarse.</li>
+<li><strong>RN-ORD-09 (Cancelación por el cliente):</strong> El cliente podrá cancelar su pedido de forma directa únicamente mientras permanezca en estado <code>CONFIRMADO</code>.</li>
+<li><strong>RN-ORD-10 (Recuperación de cupo por cancelación temprana):</strong> Cancelar un pedido en estado <code>CONFIRMADO</code> devolverá de forma automática el cupo de capacidad al periodo correspondiente.</li>
+<li><strong>RN-ORD-11 (Bloqueo de cancelación en preparación):</strong> Una vez que el pedido pase a <code>EN_PREPARACION</code>, el cliente no podrá cancelarlo desde la plataforma.</li>
+<li><strong>RN-ORD-12 (Cancelación por el comerciante):</strong> El comerciante podrá cancelar una orden de su tienda ante imprevistos operacionales insalvables.</li>
+<li><strong>RN-ORD-13 (Capacidad ante cancelación del comerciante):</strong> Si el comerciante cancela antes de iniciar cocina, el cupo se libera; si cancela durante o después de la preparación, el cupo no se restituye.</li>
+<li><strong>RN-ORD-14 (Inhabilitación de orden cancelada):</strong> Un pedido <code>CANCELADO</code> no podrá ser preparado, despachado ni finalizado.</li>
+</ul>
+<hr />
+<h2 id="11-modalidades-de-entrega">11. Modalidades de Entrega</h2>
+<ul>
+<li><strong>RN-DEL-01 (Modalidades admitidas):</strong> Todo pedido deberá registrarse bajo una de las dos modalidades: <code>RECOJO</code> en tienda o <code>DELIVERY</code>.</li>
+<li><strong>RN-DEL-02 (Dirección para delivery):</strong> Los pedidos en modalidad <code>DELIVERY</code> requerirán obligatoriamente información de dirección suficiente para realizar la entrega. La validación geográfica avanzada (radio de cobertura, distancia, geocodificación, tarifas por distancia) no es obligatoria para el núcleo del MVP.</li>
+<li><strong>RN-DEL-03 (Recojo en establecimiento):</strong> Los pedidos en modalidad <code>RECOJO</code> no requerirán datos de dirección y pasarán de <code>LISTO</code> directamente a <code>COMPLETADO</code> al retirar el producto.</li>
+<li><strong>RN-DEL-04 (Estado de despacho):</strong> El estado <code>EN_ENTREGA</code> será exclusivo para órdenes en modalidad <code>DELIVERY</code>.</li>
+<li><strong>RN-DEL-05 (Cierre de entrega):</strong> Un pedido en reparto pasará a <code>COMPLETADO</code> cuando se confirme la recepción por parte del cliente.</li>
+</ul>
+<hr />
+<h2 id="12-decisiones-tecnicas-y-arquitectonicas-diferidas">12. Decisiones Técnicas y Arquitectónicas Diferidas</h2>
+<p>Las siguientes consideraciones técnicas forman parte del diseño de arquitectura y no del núcleo funcional de reglas de negocio:</p>
+<ul>
+<li>Implementación del encabezado <code>Idempotency-Key</code> en APIs REST.</li>
+<li>Estrategias de bloqueo transaccional (<code>Pessimistic Locking</code> en PostgreSQL/JPA).</li>
+<li>Generación y validación de tokens JWT para autenticación.</li>
+<li>Mensajería y sincronización bidireccional mediante WebSockets.</li>
+<li>Integración con SDK de pasarelas de pago y proveedores de mapas.</li>
+</ul>
+<hr />
+<h2 id="13-funcionalidades-reservadas-para-siguientes-versiones">13. Funcionalidades Reservadas para Siguientes Versiones</h2>
+<p>Las siguientes capacidades quedan registradas como evolución futura tras la validación del MVP:</p>
+<ul>
+<li>Gestión multi-tienda y múltiples sucursales para un mismo comerciante.</li>
+<li>Duración configurable del temporizador de reserva (<em>Hold</em>).</li>
+<li>Modelo ponderado de consumo de capacidad según complejidad del producto.</li>
+<li>Control desacoplado por estaciones internas de cocina y dotación de personal.</li>
+<li>Optimización inteligente de rutas de reparto y tracking GPS en vivo.</li>
+<li>Reserva temporal de inventario durante el proceso de checkout.</li>
+<li>Analítica administrativa avanzada.</li>
+<li>Auditoría administrativa avanzada.</li>
+<li>Validación geográfica avanzada de cobertura y tarifas por distancia.</li>
+</ul>
+<hr />
+<p><a href="../alcance-mvp/">⬅ Alcance del MVP</a> | <a href="../../README.md">🏠 Volver al Índice General</a> | <a href="../../04-design/proceso/as-is-to-be/">AS-IS vs TO-BE ➡</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

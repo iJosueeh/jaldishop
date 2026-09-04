@@ -1,0 +1,1894 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+        <link rel="prev" href="../propuesta/">
+      
+      
+        <link rel="next" href="../decisiones-producto/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Modelo de Capacidad v1 - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#modelo-de-capacidad-v1" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Modelo de Capacidad v1
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-design/proceso/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Proceso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-nucleo-operativo-para-mype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Núcleo Operativo para MYPE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Propósito
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-principio-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Principio Central
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-componentes-del-modelo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Componentes del Modelo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Componentes del Modelo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-capacidad-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Capacidad Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-periodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Periodo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-capacidad-efectiva" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Capacidad Efectiva
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-capacidad-comprometida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Capacidad Comprometida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-capacidad-disponible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Capacidad Disponible
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-excepciones-temporales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Excepciones Temporales
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ciclo-de-capacidad-de-un-pedido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Ciclo de Capacidad de un Pedido
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-concurrencia-y-bloqueos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Concurrencia y Bloqueos
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-politicas-de-cancelacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Políticas de Cancelación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-delivery-en-el-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Delivery en el MVP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-elementos-fuera-del-modelo-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Elementos Fuera del Modelo v1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-relacion-con-los-entregables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Relación con los Entregables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Proceso
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Proceso
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-design/proceso/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-nucleo-operativo-para-mype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Núcleo Operativo para MYPE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Propósito
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-principio-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Principio Central
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-componentes-del-modelo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Componentes del Modelo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Componentes del Modelo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-capacidad-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Capacidad Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-periodo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Periodo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-capacidad-efectiva" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Capacidad Efectiva
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-capacidad-comprometida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Capacidad Comprometida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-capacidad-disponible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Capacidad Disponible
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-excepciones-temporales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Excepciones Temporales
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ciclo-de-capacidad-de-un-pedido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Ciclo de Capacidad de un Pedido
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-concurrencia-y-bloqueos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Concurrencia y Bloqueos
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-politicas-de-cancelacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Políticas de Cancelación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-delivery-en-el-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Delivery en el MVP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-elementos-fuera-del-modelo-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Elementos Fuera del Modelo v1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-relacion-con-los-entregables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Relación con los Entregables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="modelo-de-capacidad-v1">Modelo de Capacidad v1</h1>
+<h3 id="jaldishop-nucleo-operativo-para-mype">JaldiShop — Núcleo Operativo para MYPE</h3>
+<p><a href="../decisiones-producto/"><img alt="Estado" src="https://img.shields.io/badge/Estado-Aprobado-success?style=for-the-badge&amp;logo=checkmarx&amp;logoColor=white" /></a>
+<a href="./"><img alt="Versión" src="https://img.shields.io/badge/Versión-v1.0-blue?style=for-the-badge" /></a>
+<a href="../../06-scrum/sprint-01/"><img alt="Fase" src="https://img.shields.io/badge/Fase-Sprint_01-orange?style=for-the-badge" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>01-Producto</code> &gt; <strong>Modelo de Capacidad v1</strong><br />
+<a href="../propuesta/">⬅ Propuesta de Producto</a> | <a href="../../README.md">🏠 Índice General</a> | <a href="../decisiones-producto/">Decisiones de Producto ➡</a></p>
+<hr />
+<h2 id="1-proposito">1. Propósito</h2>
+<blockquote>
+<p>📌 <strong>Nota:</strong> Define la primera versión general del modelo de capacidad de <strong>JaldiShop</strong> a partir de la consolidación de los Casos A (Pastelería), B (Dark Kitchen) y C (Logística).</p>
+</blockquote>
+<p>El objetivo primordial es <strong>evitar que una MYPE confirme más pedidos</strong> de los que su infraestructura, personal o tiempo le permiten procesar dentro de una fecha o franja determinada.</p>
+<hr />
+<h2 id="2-principio-central">2. Principio Central</h2>
+<blockquote>
+<p>💡 <strong>Principio Fundamental:</strong> <strong>JaldiShop no tratará la capacidad como sinónimo de inventario.</strong></p>
+<p>Un negocio puede disponer de stock de ingredientes o productos y, aun así, <strong>no tener tiempo, personal ni disponibilidad operativa</strong> para aceptar otro pedido.</p>
+</blockquote>
+<pre class="mermaid"><code>flowchart LR
+    subgraph INVENTARIO["📦 Inventario Tradicional"]
+        I1["¿Existe stock del insumo/producto?"]
+    end
+
+    subgraph CAPACIDAD["⚡ Capacidad Operativa JaldiShop"]
+        C1["¿Hay tiempo de preparación?"]
+        C2["¿Hay personal disponible?"]
+        C3["¿Hay slots de entrega libres?"]
+    end
+
+    INVENTARIO --&gt;|Condición Necesaria| PEDIDO{¿Aceptar Pedido?}
+    CAPACIDAD --&gt;|Condición Suficiente| PEDIDO</code></pre>
+<blockquote>
+<p><strong>Regla de oro:</strong> La capacidad representa <strong>cuánto trabajo adicional</strong> puede comprometer el negocio dentro de un periodo.</p>
+</blockquote>
+<hr />
+<h2 id="3-componentes-del-modelo">3. Componentes del Modelo</h2>
+<pre class="mermaid"><code>classDiagram
+    class CapacidadBase {
+        +int cupos_por_defecto
+        +PeriodoTipo tipo
+    }
+    class ExcepcionTemporal {
+        +Date fecha
+        +Time franja
+        +int nuevo_cupo
+        +Motivo motivo
+    }
+    class CapacidadEfectiva {
+        +int cupos_reales
+    }
+    class CapacidadComprometida {
+        +int reservas_temporales
+        +int pedidos_confirmados
+    }
+    class CapacidadDisponible {
+        +int cupos_restantes
+    }
+
+    CapacidadBase --&gt; CapacidadEfectiva : Sobrescrita por excepción
+    ExcepcionTemporal --&gt; CapacidadEfectiva : Aplica en fecha/hora
+    CapacidadEfectiva --&gt; CapacidadDisponible : Resta comprometida
+    CapacidadComprometida --&gt; CapacidadDisponible : Consume</code></pre>
+<h3 id="31-capacidad-base">3.1 Capacidad Base</h3>
+<p>Valor habitual configurado que el negocio puede atender o producir en condiciones normales.</p>
+<h3 id="32-periodo">3.2 Periodo</h3>
+<p>La capacidad se asigna a unidades temporales específicas:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tipo de Periodo</th>
+<th style="text-align: center;">Granularidad</th>
+<th style="text-align: left;">Aplicación Típica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Día</strong></td>
+<td style="text-align: center;">Diario completo</td>
+<td style="text-align: left;">Negocios bajo pedido anticipado (ej. tortas temáticas, catering)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Franja Horaria</strong></td>
+<td style="text-align: center;">Bloques de 30 min / 1-2 horas</td>
+<td style="text-align: left;">Dark kitchens, comida rápida, entregas programadas</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-capacidad-efectiva">3.3 Capacidad Efectiva</h3>
+<p>Capacidad real aplicable tras evaluar si existe una excepción configurada para el periodo:</p>
+<div class="highlight"><pre><span></span><code>Capacidad Efectiva = Capacidad Excepcional (si existe excepción) | Capacidad Base (por defecto)
+</code></pre></div>
+<h3 id="34-capacidad-comprometida">3.4 Capacidad Comprometida</h3>
+<p>Suma de los cupos bloqueados por pedidos confirmados más las reservas activas en proceso de checkout:</p>
+<div class="highlight"><pre><span></span><code>Capacidad Comprometida = Pedidos Confirmados + Reservas Temporales (Hold)
+</code></pre></div>
+<h3 id="35-capacidad-disponible">3.5 Capacidad Disponible</h3>
+<p>Cupos netos disponibles para nuevos clientes:</p>
+<div class="highlight"><pre><span></span><code>Capacidad Disponible = Capacidad Efectiva - Capacidad Comprometida
+</code></pre></div>
+<blockquote>
+<p>⚠️ <strong>Advertencia:</strong> Un pedido <strong>no podrá continuar al checkout</strong> cuando la capacidad requerida sea mayor a la disponible (<code>Capacidad Disponible &lt;= 0</code>).</p>
+</blockquote>
+<hr />
+<h2 id="4-excepciones-temporales">4. Excepciones Temporales</h2>
+<p>Permiten al comerciante alterar temporalmente su capacidad para una fecha o franja horaria sin reconfigurar su horario base:</p>
+<table>
+<thead>
+<tr>
+<th>Tipo de Excepción</th>
+<th>Causa Operativa</th>
+<th style="text-align: center;">Efecto en Capacidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🟢 <strong>Incremento</strong></td>
+<td>Personal extra / Turno doble</td>
+<td style="text-align: center;">Sube cupos</td>
+</tr>
+<tr>
+<td>🔴 <strong>Reducción</strong></td>
+<td>Ausencia de personal / Mantenimiento de horno</td>
+<td style="text-align: center;">Baja cupos</td>
+</tr>
+<tr>
+<td>⛔ <strong>Cierre Parcial</strong></td>
+<td>Evento privado / Feriado no laborable</td>
+<td style="text-align: center;">Cupos = 0</td>
+</tr>
+<tr>
+<td>⭐ <strong>Fecha Especial</strong></td>
+<td>Campaña alta demanda (Día de la Madre, Navidad)</td>
+<td style="text-align: center;">Ajuste a medida</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-ciclo-de-capacidad-de-un-pedido">5. Ciclo de Capacidad de un Pedido</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Web as Frontend / Catálogo
+    participant API as Backend (Capacidad Service)
+    participant DB as Base de Datos
+    participant Pasarela as Pasarela Pagos
+
+    Cliente-&gt;&gt;Web: 1. Selecciona producto, fecha y franja
+    Web-&gt;&gt;API: 2. Consultar Capacidad Disponible
+    API-&gt;&gt;DB: Leer Capacidad Efectiva y Comprometida
+    DB--&gt;&gt;API: Retornar cupos disponibles
+
+    alt Sin Capacidad Disponible
+        API--&gt;&gt;Web: Cupo Agotado
+        Web--&gt;&gt;Cliente: Bloquear selección y sugerir fechas alternas
+    else Con Capacidad Disponible
+        API--&gt;&gt;Web: Cupo Disponible
+        Web-&gt;&gt;Cliente: Permitir continuar al Checkout
+        Cliente-&gt;&gt;Web: 3. Inicia Checkout
+        Web-&gt;&gt;API: 4. Crear Reserva Temporal (Hold: 10 min)
+        API-&gt;&gt;DB: Incrementar Capacidad Comprometida (Hold)
+        Cliente-&gt;&gt;Pasarela: 5. Realizar Pago
+
+        alt Pago Aprobado
+            Pasarela--&gt;&gt;API: Callback Pago Exitoso
+            API-&gt;&gt;DB: Convertir Reserva Hold en PEDIDO CONFIRMADO
+            API--&gt;&gt;Web: Pedido Confirmado exitosamente
+        else Pago Rechazado o Tiempo Expirado (&gt;10 min)
+            API-&gt;&gt;DB: Liberar Reserva Hold (Incrementar Disponible)
+            API--&gt;&gt;Web: Reserva liberada por inactividad o fallo
+        end
+    end</code></pre>
+<hr />
+<h2 id="6-concurrencia-y-bloqueos">6. Concurrencia y Bloqueos</h2>
+<blockquote>
+<p>💡 <strong>Regla Crítica:</strong> El sistema debe garantizar a nivel de base de datos / backend que <strong>dos clientes no puedan comprometer simultáneamente el último cupo disponible</strong> (condición de carrera).</p>
+</blockquote>
+<ul>
+<li><strong>Mecanismo:</strong> Bloqueo transaccional o atómico al momento de solicitar la reserva temporal de checkout.</li>
+<li><strong>Duración:</strong> La reserva expira automáticamente a los <strong>10 minutos</strong> si no se confirma el pago.</li>
+</ul>
+<hr />
+<h2 id="7-politicas-de-cancelacion">7. Políticas de Cancelación</h2>
+<blockquote>
+<p>⛔ <strong>Precaución:</strong> Cancelar un pedido <strong>no implica necesariamente recuperar la capacidad productiva o logística</strong>.</p>
+</blockquote>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; PENDIENTE_PAGO
+    PENDIENTE_PAGO --&gt; CONFIRMADO : Pago Aprobado
+    PENDIENTE_PAGO --&gt; CANCELADO : Expiración (Libera 100% cupo)
+
+    CONFIRMADO --&gt; EN_PREPARACION : Inicia Producción
+    CONFIRMADO --&gt; CANCELADO : Cancelado a tiempo (Libera 100% cupo)
+
+    EN_PREPARACION --&gt; LISTO : Producción Finalizada
+    EN_PREPARACION --&gt; CANCELADO : Insumos o Tiempo consumidos (NO libera cupo)
+
+    LISTO --&gt; EN_ENTREGA
+    EN_ENTREGA --&gt; COMPLETADO : Entregado</code></pre>
+<hr />
+<h2 id="8-delivery-en-el-mvp">8. Delivery en el MVP</h2>
+<table>
+<thead>
+<tr>
+<th>Funcionalidad</th>
+<th style="text-align: center;">Alcance MVP</th>
+<th style="text-align: center;">Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dirección del cliente y tienda</td>
+<td style="text-align: center;"><code>Must Have</code></td>
+<td style="text-align: center;">✅ Incluido</td>
+</tr>
+<tr>
+<td>Validación de cobertura y distancia</td>
+<td style="text-align: center;"><code>Must Have</code></td>
+<td style="text-align: center;">✅ Incluido</td>
+</tr>
+<tr>
+<td>Costo básico de envío</td>
+<td style="text-align: center;"><code>Must Have</code></td>
+<td style="text-align: center;">✅ Incluido</td>
+</tr>
+<tr>
+<td>Selección Delivery vs Recojo en tienda</td>
+<td style="text-align: center;"><code>Must Have</code></td>
+<td style="text-align: center;">✅ Incluido</td>
+</tr>
+<tr>
+<td>Optimización automática de rutas GPS</td>
+<td style="text-align: center;"><code>Out of Scope</code></td>
+<td style="text-align: center;">❌ Excluido v1</td>
+</tr>
+<tr>
+<td>Tracking de repartidor en tiempo real</td>
+<td style="text-align: center;"><code>Out of Scope</code></td>
+<td style="text-align: center;">❌ Excluido v1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-elementos-fuera-del-modelo-v1">9. Elementos Fuera del Modelo v1</h2>
+<p>Para evitar sobreingeniería en el primer entregable, se excluyen deliberadamente el cálculo de pesos ponderados por complejidad de producto, la gestión desacoplada de múltiples estaciones simultáneas (como cocineros, hornos y repartidores independientes) y los algoritmos predictivos basados en inteligencia artificial. Estas capacidades quedan reservadas como evolución arquitectónica para fases posteriores una vez validado el núcleo operativo simple del sistema.</p>
+<hr />
+<h2 id="10-relacion-con-los-entregables">10. Relación con los Entregables</h2>
+<blockquote>
+<p>📌 <strong>Nota:</strong> Este modelo de capacidad constituye el <strong>diferenciador central</strong> de JaldiShop sobre un e-commerce estándar y servirá como base para el modelado de base de datos relacional (Entidad-Relación) y las APIs REST.</p>
+</blockquote>
+<pre class="mermaid"><code>flowchart TD
+    A[Modelo de Capacidad v1] --&gt; B[Diagrama Entidad-Relación]
+    A --&gt; C[Endpoints REST de Capacidad]
+    A --&gt; D[Controlador de Reservas y Checkout]
+    B --&gt; E[Implementación Spring Boot + JPA]
+    C --&gt; E
+    D --&gt; E</code></pre>
+<hr />
+<p><a href="../propuesta/">⬅ Propuesta de Producto</a> | <a href="../../README.md">🏠 Volver al Índice General</a> | <a href="../decisiones-producto/">Decisiones de Producto ➡</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

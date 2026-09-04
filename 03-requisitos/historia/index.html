@@ -1,0 +1,1878 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+        <link rel="prev" href="../reglas-negocio/">
+      
+      
+        <link rel="next" href="../modelo-dominio/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Historias de Usuario - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#historias-de-usuario" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Historias de Usuario
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-design/proceso/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Proceso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-especificacion-funcional-del-mvp-v11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Especificación Funcional del MVP v1.1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Proceso
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Proceso
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-design/proceso/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-especificacion-funcional-del-mvp-v11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Especificación Funcional del MVP v1.1
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="historias-de-usuario">Historias de Usuario</h1>
+<h3 id="jaldishop-especificacion-funcional-del-mvp-v11">JaldiShop — Especificación Funcional del MVP v1.1</h3>
+<p><a href="./"><img alt="Estado" src="https://img.shields.io/badge/Estado-En%20Revisión-orange?style=for-the-badge&amp;logo=checkmarx&amp;logoColor=white" /></a>
+<a href="./"><img alt="Versión" src="https://img.shields.io/badge/Versión-v1.1-blue?style=for-the-badge" /></a>
+<a href="../../06-scrum/sprint-02/"><img alt="Fase" src="https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>03-Requisitos</code> &gt; <strong>Historias de Usuario</strong><br />
+<a href="../reglas-negocio/">⬅ Reglas de Negocio</a> | <a href="../../README.md">🏠 Índice General</a> | <a href="../alcance-mvp/">Alcance del MVP ➡</a></p>
+<hr />
+<h2 id="1-objetivo">1. Objetivo</h2>
+<p>Definir las historias de usuario de <strong>JaldiShop</strong>, traduciendo las necesidades identificadas en la investigación y propuesta del producto hacia funcionalidades concretas del sistema.</p>
+<p>Las historias se organizan según los tres actores definidos:</p>
+<ul>
+<li><strong>Cliente:</strong> 9 historias.</li>
+<li><strong>Comerciante:</strong> 10 historias.</li>
+<li><strong>Administrador:</strong> 4 historias.</li>
+</ul>
+<hr />
+<h1 id="2-historias-de-usuario-cliente">2. Historias de Usuario – Cliente</h1>
+<h2 id="hu-cli-01-registro-e-inicio-de-sesion">HU-CLI-01 – Registro e inicio de sesión</h2>
+<h3 id="necesidad">Necesidad</h3>
+<p>El cliente necesita acceder de forma segura a la plataforma para realizar compras y consultar sus pedidos.</p>
+<h3 id="funcionalidad">Funcionalidad</h3>
+<p><strong>Autenticación de clientes:</strong> registro e inicio de sesión mediante credenciales y control de acceso por rol.</p>
+<h3 id="historia-de-usuario">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> registrarme e iniciar sesión en JaldiShop,</p>
+<p><strong>para</strong> realizar compras y consultar la información de mis pedidos de manera segura.</p>
+<h3 id="criterios-de-aceptacion">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede registrarse proporcionando los datos obligatorios.</li>
+<li>El sistema valida que los datos ingresados sean correctos.</li>
+<li>El sistema evita registros duplicados con el mismo correo.</li>
+<li>El cliente puede iniciar sesión utilizando sus credenciales.</li>
+<li>El sistema valida las credenciales antes de permitir el acceso.</li>
+<li>El sistema identifica al usuario con el rol correspondiente.</li>
+<li>Un cliente no puede acceder a funcionalidades exclusivas del comerciante o administrador.</li>
+</ul>
+<h3 id="moscow">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion">Justificación</h3>
+<p>Es indispensable para identificar al cliente, proteger sus datos y permitir el acceso a las funcionalidades asociadas a sus compras. Forma parte del flujo comercial básico del MVP.</p>
+<hr />
+<h2 id="hu-cli-02-consultar-catalogo">HU-CLI-02 – Consultar catálogo</h2>
+<h3 id="necesidad_1">Necesidad</h3>
+<p>El cliente necesita conocer los productos que ofrece una tienda antes de decidir qué comprar.</p>
+<h3 id="funcionalidad_1">Funcionalidad</h3>
+<p><strong>Catálogo digital:</strong> consulta de productos organizados por categorías con información de precio, imagen y disponibilidad.</p>
+<h3 id="historia-de-usuario_1">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> consultar el catálogo de productos de una tienda,</p>
+<p><strong>para</strong> conocer su oferta y seleccionar los productos que deseo comprar.</p>
+<h3 id="criterios-de-aceptacion_1">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede visualizar el catálogo de una tienda.</li>
+<li>Los productos muestran como mínimo nombre, precio, imagen y disponibilidad.</li>
+<li>Los productos pueden visualizarse organizados por categorías.</li>
+<li>Solo se muestran como disponibles los productos que pueden ser adquiridos.</li>
+<li>El cliente puede consultar la información de un producto antes de agregarlo al carrito.</li>
+</ul>
+<h3 id="moscow_1">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_1">Justificación</h3>
+<p>El catálogo constituye el punto de entrada al proceso de compra. Sin esta funcionalidad no es posible que el cliente seleccione productos dentro del flujo comercial.</p>
+<hr />
+<h2 id="hu-cli-03-consultar-fecha-y-franja-disponible">HU-CLI-03 – Consultar fecha y franja disponible</h2>
+<h3 id="necesidad_2">Necesidad</h3>
+<p>El cliente necesita conocer cuándo puede realizarse su pedido sin generar una sobrecarga operativa para el negocio.</p>
+<h3 id="funcionalidad_2">Funcionalidad</h3>
+<p><strong>Consulta de disponibilidad:</strong> visualización de fechas y franjas horarias disponibles según la capacidad configurada por el comerciante.</p>
+<h3 id="historia-de-usuario_2">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> consultar las fechas y franjas horarias disponibles,</p>
+<p><strong>para</strong> seleccionar un momento en el que mi pedido pueda ser atendido.</p>
+<h3 id="criterios-de-aceptacion_2">Criterios de aceptación</h3>
+<ul>
+<li>El sistema muestra las fechas disponibles para realizar pedidos.</li>
+<li>Cuando la capacidad está configurada por franjas, muestra las franjas disponibles.</li>
+<li>Las fechas o franjas sin capacidad disponible se muestran como no disponibles.</li>
+<li>La disponibilidad considera la capacidad efectiva de la tienda.</li>
+<li>El cliente no puede seleccionar una fecha o franja que haya alcanzado su capacidad.</li>
+</ul>
+<h3 id="moscow_2">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_2">Justificación</h3>
+<p>Permite que el cliente conozca cuándo el negocio realmente puede comprometerse a atender su pedido.</p>
+<hr />
+<h2 id="hu-cli-04-agregar-productos-al-carrito-y-realizar-checkout">HU-CLI-04 – Agregar productos al carrito y realizar checkout</h2>
+<h3 id="necesidad_3">Necesidad</h3>
+<p>El cliente necesita seleccionar los productos que desea comprar y preparar su pedido antes de realizar el pago.</p>
+<h3 id="funcionalidad_3">Funcionalidad</h3>
+<p><strong>Carrito y checkout:</strong> gestión de productos seleccionados y preparación de la compra.</p>
+<h3 id="historia-de-usuario_3">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> agregar y modificar productos en mi carrito antes del checkout,</p>
+<p><strong>para</strong> revisar y confirmar mi pedido antes de realizar el pago.</p>
+<h3 id="criterios-de-aceptacion_3">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede agregar productos disponibles al carrito.</li>
+<li>Puede modificar la cantidad de productos.</li>
+<li>Puede eliminar productos del carrito.</li>
+<li>El sistema calcula el subtotal y total correspondiente.</li>
+<li>Agregar productos al carrito <strong>no reserva</strong> inventario ni capacidad operativa.</li>
+<li>El stock se valida durante el proceso de checkout.</li>
+<li>Inmediatamente antes de iniciar el pago, el sistema revalida el stock de todos los productos.</li>
+<li>Antes de iniciar el pago, el sistema verifica que la reserva de capacidad siga vigente.</li>
+<li>Si el stock resulta insuficiente durante la revalidación, el pago no se inicia.</li>
+<li>Si la reserva de capacidad ya no es válida, el pago no se inicia.</li>
+<li>El cliente puede seleccionar la modalidad de entrega disponible.</li>
+</ul>
+<h3 id="moscow_3">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_3">Justificación</h3>
+<p>El carrito y checkout son necesarios para ejecutar el proceso de compra y conectar la selección de productos con la reserva de capacidad y el pago.</p>
+<hr />
+<h2 id="hu-cli-05-reservar-temporalmente-un-cupo">HU-CLI-05 – Reservar temporalmente un cupo</h2>
+<h3 id="necesidad_4">Necesidad</h3>
+<p>El cliente necesita conservar la disponibilidad seleccionada mientras inicia el proceso de pago, evitando que otro cliente comprometa simultáneamente el mismo cupo.</p>
+<h3 id="funcionalidad_4">Funcionalidad</h3>
+<p><strong>Reserva temporal de capacidad:</strong> bloqueo temporal de un cupo durante 10 minutos para que el cliente inicie válidamente el proceso de pago.</p>
+<h3 id="historia-de-usuario_4">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> reservar temporalmente un cupo durante el checkout,</p>
+<p><strong>para</strong> asegurar la disponibilidad seleccionada mientras inicio el pago.</p>
+<h3 id="criterios-de-aceptacion_4">Criterios de aceptación</h3>
+<ul>
+<li>El sistema valida la disponibilidad antes de crear la reserva.</li>
+<li>Si existe capacidad disponible, se genera un Hold temporal.</li>
+<li>El Hold tiene una duración de <strong>10 minutos</strong> desde su creación.</li>
+<li>Los 10 minutos representan el tiempo disponible para <strong>iniciar</strong> válidamente el proceso de pago.</li>
+<li>La compra no necesita completarse dentro de los 10 minutos, pero el pago debe iniciarse antes de que la reserva expire.</li>
+<li>Mientras el Hold está activo, el cupo se considera <strong>capacidad reservada</strong>.</li>
+<li>Si el pago se inicia antes de que expire la reserva, el cupo queda temporalmente protegido mientras la pasarela procesa la transacción.</li>
+<li>Si el pago es confirmado, la capacidad reservada se convierte en <strong>capacidad comprometida</strong> definitiva.</li>
+<li>Si el pago falla o se cancela, el cupo vuelve a estar disponible.</li>
+<li>Si transcurren los 10 minutos sin haber iniciado válidamente el pago, la reserva expira y libera el cupo.</li>
+<li>El sistema evita que dos clientes comprometan simultáneamente el mismo cupo.</li>
+</ul>
+<h3 id="moscow_4">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_4">Justificación</h3>
+<p>Es una funcionalidad crítica para el diferenciador de JaldiShop. Sin la reserva temporal, el sistema no podría proteger la capacidad durante el checkout ni evitar conflictos de concurrencia.</p>
+<hr />
+<h2 id="hu-cli-06-realizar-pago">HU-CLI-06 – Realizar pago</h2>
+<h3 id="necesidad_5">Necesidad</h3>
+<p>El cliente necesita completar el pago para confirmar su pedido y comprometer definitivamente la capacidad.</p>
+<h3 id="funcionalidad_5">Funcionalidad</h3>
+<p><strong>Pago electrónico:</strong> integración con una pasarela de pagos en modo sandbox.</p>
+<h3 id="historia-de-usuario_5">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> realizar el pago de mi pedido mediante la pasarela habilitada,</p>
+<p><strong>para</strong> confirmar mi compra y asegurar el cupo seleccionado.</p>
+<h3 id="criterios-de-aceptacion_5">Criterios de aceptación</h3>
+<ul>
+<li>El pago solo puede iniciarse si existe una reserva temporal de capacidad válida y activa.</li>
+<li>El stock debe haberse revalidado inmediatamente antes de iniciar el cobro.</li>
+<li>El cliente puede iniciar el proceso de pago desde el checkout.</li>
+<li>Puede existir más de un intento de pago mientras la reserva temporal esté vigente.</li>
+<li>Un pago iniciado válidamente antes del vencimiento de la reserva puede seguir procesándose bajo protección temporal.</li>
+<li>El pago se procesa mediante la pasarela configurada.</li>
+<li>El sistema registra el resultado de la operación.</li>
+<li>Si el pago es aprobado, se confirma la compra, se compromete el cupo, se actualiza el inventario y se crea el Pedido en estado <code>CONFIRMADO</code>.</li>
+<li>Si el pago es rechazado o cancelado, el pedido no se confirma y la capacidad reservada se libera.</li>
+<li>Un pago rechazado o cancelado no compromete capacidad de forma definitiva.</li>
+<li>Un resultado de pago recibido cuando la reserva ya expiró no debe crear automáticamente un pedido.</li>
+<li>Una misma confirmación lógica no debe generar pedidos duplicados ni aplicar inventario o capacidad más de una vez.</li>
+</ul>
+<h3 id="moscow_5">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_5">Justificación</h3>
+<p>El pago es necesario para completar el flujo comercial y determinar cuándo una reserva temporal pasa a convertirse en capacidad comprometida.</p>
+<hr />
+<h2 id="hu-cli-07-seleccionar-modalidad-de-entrega">HU-CLI-07 – Seleccionar modalidad de entrega</h2>
+<h3 id="necesidad_6">Necesidad</h3>
+<p>El cliente necesita conocer si su pedido puede ser entregado en su ubicación o si debe recogerlo en la tienda.</p>
+<h3 id="funcionalidad_6">Funcionalidad</h3>
+<p><strong>Delivery básico:</strong> selección entre delivery y recojo con información de dirección para la entrega.</p>
+<h3 id="historia-de-usuario_6">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> seleccionar delivery o recojo y proporcionar mi dirección cuando corresponda,</p>
+<p><strong>para</strong> recibir mi pedido en la ubicación indicada o recogerlo en tienda.</p>
+<h3 id="criterios-de-aceptacion_6">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede seleccionar entre delivery y recojo cuando ambas modalidades estén disponibles.</li>
+<li>Para delivery, el cliente ingresa la información de dirección suficiente para realizar la entrega.</li>
+<li>Para recojo, no se requiere información de dirección.</li>
+<li>La modalidad seleccionada forma parte del proceso de checkout.</li>
+<li>La validación geográfica avanzada (radio de cobertura, distancia, geocodificación) no es obligatoria para el núcleo del MVP.</li>
+<li>Si existe un costo de delivery básico, se informa al cliente antes de confirmar la compra.</li>
+</ul>
+<h3 id="moscow_6">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_6">Justificación</h3>
+<p>El delivery básico está definido explícitamente dentro del alcance del MVP y es necesario para que el negocio pueda aceptar pedidos considerando sus condiciones reales de despacho.</p>
+<hr />
+<h2 id="hu-cli-08-realizar-seguimiento-del-pedido">HU-CLI-08 – Realizar seguimiento del pedido</h2>
+<h3 id="necesidad_7">Necesidad</h3>
+<p>El cliente necesita conocer el avance de su pedido sin tener que consultar constantemente al negocio por WhatsApp o redes sociales.</p>
+<h3 id="funcionalidad_7">Funcionalidad</h3>
+<p><strong>Seguimiento de pedidos:</strong> consulta del estado actualizado del pedido.</p>
+<h3 id="historia-de-usuario_7">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> consultar el estado de mi pedido,</p>
+<p><strong>para</strong> conocer en qué etapa se encuentra hasta su entrega o recojo.</p>
+<h3 id="criterios-de-aceptacion_7">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede consultar sus pedidos.</li>
+<li>Puede visualizar el detalle de cada pedido.</li>
+<li>Puede visualizar el estado actual.</li>
+<li>Los estados visibles son: <code>CONFIRMADO</code>, <code>EN_PREPARACION</code>, <code>LISTO</code>, <code>EN_ENTREGA</code>, <code>COMPLETADO</code> y <code>CANCELADO</code>.</li>
+<li>El estado <code>EN_ENTREGA</code> solo aplica a pedidos con modalidad <code>DELIVERY</code>.</li>
+<li>El seguimiento inicia a partir de la existencia del Pedido (estado <code>CONFIRMADO</code>).</li>
+<li>Los estados reflejan los cambios realizados por el comerciante.</li>
+<li>El pedido conserva la información necesaria para realizar su seguimiento.</li>
+</ul>
+<h3 id="moscow_7">MoSCoW</h3>
+<p><strong>Should Have</strong></p>
+<h3 id="justificacion_7">Justificación</h3>
+<p>El seguimiento aporta valor directo a la propuesta de JaldiShop al reducir consultas repetitivas y mejorar la experiencia del cliente. Sin embargo, el flujo comercial básico puede completarse sin esta funcionalidad.</p>
+<hr />
+<h2 id="hu-cli-09-cancelar-pedido-confirmado">HU-CLI-09 – Cancelar pedido confirmado</h2>
+<h3 id="necesidad_8">Necesidad</h3>
+<p>El cliente necesita poder cancelar un pedido que acaba de confirmar si cambia de opinión o detecta un error, siempre que el comerciante aún no haya iniciado su preparación.</p>
+<h3 id="funcionalidad_8">Funcionalidad</h3>
+<p><strong>Cancelación de pedido:</strong> anulación de un pedido en estado <code>CONFIRMADO</code> con liberación automática de la capacidad comprometida.</p>
+<h3 id="historia-de-usuario_8">Historia de usuario</h3>
+<p><strong>Como</strong> cliente,</p>
+<p><strong>quiero</strong> cancelar un pedido que he confirmado recientemente,</p>
+<p><strong>para</strong> liberar el cupo si ya no puedo o no deseo recibir el producto.</p>
+<h3 id="criterios-de-aceptacion_8">Criterios de aceptación</h3>
+<ul>
+<li>El cliente puede cancelar un pedido mientras permanezca en estado <code>CONFIRMADO</code>.</li>
+<li>Al cancelar un pedido en estado <code>CONFIRMADO</code>, se libera automáticamente la capacidad comprometida.</li>
+<li>Una vez que el pedido avanza a <code>EN_PREPARACION</code>, el cliente no puede cancelarlo mediante el flujo ordinario.</li>
+<li>La cancelación registra el estado <code>CANCELADO</code> como estado terminal del pedido.</li>
+<li>No se definen políticas avanzadas de reembolso en el MVP.</li>
+</ul>
+<h3 id="moscow_8">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_8">Justificación</h3>
+<p>La cancelación temprana es parte del flujo comercial básico y permite recuperar capacidad operativa cuando el pedido aún no ha sido procesado.</p>
+<hr />
+<h1 id="3-historias-de-usuario-comerciante">3. Historias de Usuario – Comerciante</h1>
+<h2 id="hu-com-01-configurar-tienda">HU-COM-01 – Configurar tienda</h2>
+<h3 id="necesidad_9">Necesidad</h3>
+<p>El comerciante necesita disponer de una tienda digital propia donde pueda ofrecer sus productos y establecer sus condiciones de atención.</p>
+<h3 id="funcionalidad_9">Funcionalidad</h3>
+<p><strong>Gestión de tienda:</strong> configuración del perfil del negocio y horarios de atención.</p>
+<h3 id="historia-de-usuario_9">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> configurar la información y horarios de mi tienda,</p>
+<p><strong>para</strong> establecer las condiciones bajo las cuales los clientes pueden realizar pedidos.</p>
+<h3 id="criterios-de-aceptacion_9">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede registrar y editar la información básica de su tienda.</li>
+<li>Puede configurar sus horarios de atención.</li>
+<li>La tienda queda asociada al comerciante correspondiente.</li>
+<li>Los datos de una tienda no pueden ser modificados por otro comerciante.</li>
+<li>Los clientes pueden consultar la información publicada de la tienda.</li>
+</ul>
+<h3 id="moscow_9">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_9">Justificación</h3>
+<p>Es necesaria para establecer el contexto comercial de los productos, pedidos y capacidad que serán administrados por cada comerciante.</p>
+<hr />
+<h2 id="hu-com-02-gestionar-categorias">HU-COM-02 – Gestionar categorías</h2>
+<h3 id="necesidad_10">Necesidad</h3>
+<p>El comerciante necesita organizar sus productos para facilitar la navegación del catálogo.</p>
+<h3 id="funcionalidad_10">Funcionalidad</h3>
+<p><strong>Gestión de categorías:</strong> creación, modificación y eliminación de categorías.</p>
+<h3 id="historia-de-usuario_10">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> crear y gestionar categorías de productos,</p>
+<p><strong>para</strong> organizar mi catálogo de manera clara para los clientes.</p>
+<h3 id="criterios-de-aceptacion_10">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede crear categorías.</li>
+<li>Puede editar una categoría existente.</li>
+<li>Puede eliminar categorías cuando corresponda.</li>
+<li>Los productos pueden asociarse a una categoría.</li>
+<li>Las categorías pertenecen exclusivamente a la tienda del comerciante.</li>
+</ul>
+<h3 id="moscow_10">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_10">Justificación</h3>
+<p>Permite organizar el catálogo y forma parte de la gestión básica de productos contemplada en el MVP.</p>
+<hr />
+<h2 id="hu-com-03-gestionar-productos">HU-COM-03 – Gestionar productos</h2>
+<h3 id="necesidad_11">Necesidad</h3>
+<p>El comerciante necesita mantener actualizada su oferta comercial.</p>
+<h3 id="funcionalidad_11">Funcionalidad</h3>
+<p><strong>CRUD de productos:</strong> creación, consulta, modificación y eliminación de productos, incluyendo imágenes.</p>
+<h3 id="historia-de-usuario_11">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> crear y gestionar los productos de mi tienda,</p>
+<p><strong>para</strong> mantener actualizado el catálogo disponible para los clientes.</p>
+<h3 id="criterios-de-aceptacion_11">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede registrar un producto.</li>
+<li>Puede ingresar nombre, descripción, precio, categoría, imagen y stock.</li>
+<li>Puede modificar los datos del producto.</li>
+<li>Puede retirar o eliminar un producto.</li>
+<li>Los cambios realizados se reflejan en el catálogo de su tienda.</li>
+<li>Un comerciante no puede modificar productos pertenecientes a otra tienda.</li>
+</ul>
+<h3 id="moscow_11">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_11">Justificación</h3>
+<p>Sin productos disponibles no existe una oferta que pueda ser comprada, por lo que esta funcionalidad es indispensable para el flujo comercial.</p>
+<hr />
+<h2 id="hu-com-04-gestionar-inventario">HU-COM-04 – Gestionar inventario</h2>
+<h3 id="necesidad_12">Necesidad</h3>
+<p>El comerciante necesita controlar el stock físico disponible para evitar aceptar pedidos de productos que no puede entregar.</p>
+<h3 id="funcionalidad_12">Funcionalidad</h3>
+<p><strong>Gestión de inventario:</strong> consulta y actualización del stock de productos.</p>
+<h3 id="historia-de-usuario_12">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> gestionar el stock de mis productos,</p>
+<p><strong>para</strong> evitar aceptar pedidos que superen las existencias disponibles.</p>
+<h3 id="criterios-de-aceptacion_12">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede consultar el stock de sus productos.</li>
+<li>Puede actualizar las cantidades disponibles.</li>
+<li>El sistema valida el stock al momento de realizar una compra.</li>
+<li>El sistema no permite solicitar una cantidad superior al stock disponible.</li>
+<li>El sistema diferencia la disponibilidad de inventario de la capacidad operativa.</li>
+<li>El stock se actualiza de acuerdo con la confirmación de los pedidos.</li>
+</ul>
+<h3 id="moscow_12">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_12">Justificación</h3>
+<p>El inventario es una de las condiciones que deben validarse antes de comprometer una venta. JaldiShop debe controlar tanto el stock como la capacidad operativa.</p>
+<hr />
+<h2 id="hu-com-05-configurar-capacidad-por-dia">HU-COM-05 – Configurar capacidad por día</h2>
+<h3 id="necesidad_13">Necesidad</h3>
+<p>El comerciante necesita establecer un límite realista de pedidos que puede producir o atender diariamente.</p>
+<h3 id="funcionalidad_13">Funcionalidad</h3>
+<p><strong>Configuración de capacidad diaria:</strong> establecimiento de una cantidad máxima de pedidos por día.</p>
+<h3 id="historia-de-usuario_13">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> configurar mi capacidad de pedidos por día,</p>
+<p><strong>para</strong> evitar aceptar más pedidos de los que puedo producir o atender.</p>
+<h3 id="criterios-de-aceptacion_13">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede establecer una capacidad para una fecha.</li>
+<li>La capacidad representa el número máximo de pedidos que puede atender.</li>
+<li>Para el MVP, cada pedido consume un cupo.</li>
+<li>Los pedidos pagados incrementan la capacidad comprometida.</li>
+<li>El sistema calcula la capacidad disponible.</li>
+<li>Cuando la capacidad disponible llega a cero, la fecha queda bloqueada para nuevos pedidos.</li>
+</ul>
+<h3 id="moscow_13">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_13">Justificación</h3>
+<p>Es una de las funcionalidades centrales de JaldiShop porque permite controlar el límite operativo del negocio y prevenir la sobreventa.</p>
+<hr />
+<h2 id="hu-com-06-configurar-capacidad-por-franjas-horarias">HU-COM-06 – Configurar capacidad por franjas horarias</h2>
+<h3 id="necesidad_14">Necesidad</h3>
+<p>El comerciante necesita distribuir su capacidad según los diferentes momentos del día, especialmente durante periodos de alta demanda.</p>
+<h3 id="funcionalidad_14">Funcionalidad</h3>
+<p><strong>Configuración de capacidad por franjas:</strong> definición de cupos para franjas horarias de duración configurable.</p>
+<h3 id="historia-de-usuario_14">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> configurar cupos por franjas horarias,</p>
+<p><strong>para</strong> distribuir mi capacidad operativa durante el día y evitar saturaciones.</p>
+<h3 id="criterios-de-aceptacion_14">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede definir franjas horarias.</li>
+<li>Las franjas tienen una duración configurable según las necesidades operativas de la tienda.</li>
+<li>No existe una duración mínima o máxima obligatoria para las franjas.</li>
+<li>Puede establecer una capacidad específica para cada franja.</li>
+<li>El sistema calcula la disponibilidad de cada franja.</li>
+<li>Una franja se bloquea cuando su capacidad disponible llega a cero.</li>
+<li>Los clientes solo pueden seleccionar franjas con disponibilidad.</li>
+</ul>
+<h3 id="moscow_14">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_14">Justificación</h3>
+<p>La configuración por franjas es necesaria para negocios cuya capacidad varía durante el día, uno de los escenarios identificados en los casos de investigación.</p>
+<hr />
+<h2 id="hu-com-07-configurar-excepciones-temporales">HU-COM-07 – Configurar excepciones temporales</h2>
+<h3 id="necesidad_15">Necesidad</h3>
+<p>El comerciante necesita adaptar temporalmente su capacidad ante fechas de alta demanda, fallas o situaciones operativas imprevistas.</p>
+<h3 id="funcionalidad_15">Funcionalidad</h3>
+<p><strong>Gestión de excepciones de capacidad:</strong> modificación temporal de la capacidad efectiva para fechas o franjas específicas.</p>
+<h3 id="historia-de-usuario_15">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> configurar excepciones temporales de capacidad,</p>
+<p><strong>para</strong> adaptar mis cupos ante situaciones especiales o imprevistos operativos.</p>
+<h3 id="criterios-de-aceptacion_15">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede definir una excepción para una fecha o franja.</li>
+<li>La excepción modifica la capacidad efectiva durante el periodo establecido.</li>
+<li>El sistema considera la excepción al calcular la disponibilidad.</li>
+<li>Una excepción puede aumentar o reducir temporalmente la capacidad.</li>
+<li>Finalizado el periodo de la excepción, deja de aplicarse.</li>
+</ul>
+<h3 id="moscow_15">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_15">Justificación</h3>
+<p>Las excepciones forman parte del modelo consolidado de capacidad y permiten representar situaciones reales como fechas festivas, fallas de equipo o refuerzo temporal.</p>
+<hr />
+<h2 id="hu-com-08-controlar-reservas-y-capacidad-comprometida">HU-COM-08 – Controlar reservas y capacidad comprometida</h2>
+<h3 id="necesidad_16">Necesidad</h3>
+<p>El comerciante necesita que el sistema controle automáticamente los cupos reservados y comprometidos para evitar sobreventa.</p>
+<h3 id="funcionalidad_16">Funcionalidad</h3>
+<p><strong>Motor de capacidad:</strong> cálculo de capacidad efectiva, capacidad reservada, capacidad comprometida y capacidad disponible.</p>
+<h3 id="historia-de-usuario_16">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> que JaldiShop controle automáticamente los cupos reservados y comprometidos,</p>
+<p><strong>para</strong> evitar aceptar pedidos por encima de mi capacidad operativa.</p>
+<h3 id="criterios-de-aceptacion_16">Criterios de aceptación</h3>
+<ul>
+<li>El sistema determina la capacidad efectiva considerando la capacidad base y las excepciones.</li>
+<li><strong>Capacidad Reservada:</strong> cupos retenidos temporalmente por Hold de checkout activos.</li>
+<li><strong>Capacidad Comprometida:</strong> cupos consumidos por Pedidos ya confirmados.</li>
+<li>La capacidad disponible se obtiene descontando la capacidad reservada y la capacidad comprometida de la capacidad efectiva.</li>
+<li>Las reservas temporales duran 10 minutos para iniciar el pago.</li>
+<li>Una reserva confirmada mediante pago se convierte en capacidad comprometida.</li>
+<li>Una reserva expirada o asociada a un pago fallido libera el cupo.</li>
+<li>Cuando la capacidad disponible llega a cero, el sistema bloquea nuevos checkouts para esa fecha o franja.</li>
+</ul>
+<h3 id="moscow_16">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_16">Justificación</h3>
+<p>Es el principal diferenciador funcional de JaldiShop. El producto existe precisamente para controlar la capacidad operativa en tiempo real y prevenir la sobreventa.</p>
+<hr />
+<h2 id="hu-com-09-gestionar-pedidos">HU-COM-09 – Gestionar pedidos</h2>
+<h3 id="necesidad_17">Necesidad</h3>
+<p>El comerciante necesita centralizar los pedidos que recibe desde su tienda para evitar pérdidas o confusiones derivadas de la gestión manual.</p>
+<h3 id="funcionalidad_17">Funcionalidad</h3>
+<p><strong>Gestión centralizada de pedidos:</strong> dashboard con listado, detalle y organización de órdenes.</p>
+<h3 id="historia-de-usuario_17">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> visualizar y gestionar los pedidos de mi tienda desde un panel,</p>
+<p><strong>para</strong> centralizar las ventas y organizar su atención.</p>
+<h3 id="criterios-de-aceptacion_17">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede visualizar los pedidos de su tienda.</li>
+<li>Puede consultar el detalle de cada pedido.</li>
+<li>Puede identificar los productos, cantidades y modalidad de entrega.</li>
+<li>Puede consultar la fecha o franja seleccionada.</li>
+<li>Los pedidos de otras tiendas no aparecen en su panel.</li>
+<li>El panel permite identificar el estado actual de cada pedido.</li>
+</ul>
+<h3 id="moscow_17">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_17">Justificación</h3>
+<p>Centralizar los pedidos es una función central de la propuesta de valor de JaldiShop y permite sustituir la gestión fragmentada por WhatsApp, Instagram u otros canales.</p>
+<hr />
+<h2 id="hu-com-10-actualizar-estados-y-gestionar-cancelaciones">HU-COM-10 – Actualizar estados y gestionar cancelaciones</h2>
+<h3 id="necesidad_18">Necesidad</h3>
+<p>El comerciante necesita informar el avance operativo del pedido y aplicar las reglas de cancelación según su estado.</p>
+<h3 id="funcionalidad_18">Funcionalidad</h3>
+<p><strong>Gestión del ciclo de vida del pedido:</strong> actualización de estados y aplicación de reglas de cancelación.</p>
+<h3 id="historia-de-usuario_18">Historia de usuario</h3>
+<p><strong>Como</strong> comerciante,</p>
+<p><strong>quiero</strong> actualizar el estado de los pedidos y gestionar sus cancelaciones según la etapa operativa,</p>
+<p><strong>para</strong> mantener informado al cliente y controlar correctamente la capacidad comprometida.</p>
+<h3 id="criterios-de-aceptacion_18">Criterios de aceptación</h3>
+<ul>
+<li>El comerciante puede actualizar el estado del pedido según el flujo definido.</li>
+<li>El flujo estándar es: <code>CONFIRMADO</code> → <code>EN_PREPARACION</code> → <code>LISTO</code> → <code>COMPLETADO</code>.</li>
+<li>Para pedidos con modalidad <code>DELIVERY</code>, el estado <code>LISTO</code> pasa a <code>EN_ENTREGA</code> antes de <code>COMPLETADO</code>.</li>
+<li>Para pedidos con modalidad <code>RECOJO</code>, el estado <code>LISTO</code> pasa directamente a <code>COMPLETADO</code>.</li>
+<li>El estado <code>CANCELADO</code> es terminal y puede ocurrir desde <code>CONFIRMADO</code> o excepcionalmente desde <code>EN_PREPARACION</code>.</li>
+<li>Una cancelación en estado <code>CONFIRMADO</code> libera la capacidad comprometida.</li>
+<li>Una cancelación durante o después de la preparación no recupera el cupo operativo del periodo.</li>
+<li>El comerciante puede realizar cancelaciones excepcionales cuando no pueda continuar con la atención.</li>
+<li>Los cambios de estado son visibles para el cliente durante el seguimiento.</li>
+</ul>
+<h3 id="moscow_18">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_18">Justificación</h3>
+<p>El estado operativo determina tanto el seguimiento del cliente como el comportamiento de la capacidad ante cancelaciones.</p>
+<hr />
+<h1 id="4-historias-de-usuario-administrador">4. Historias de Usuario – Administrador</h1>
+<h2 id="hu-adm-01-gestionar-usuarios-y-roles">HU-ADM-01 – Gestionar usuarios y roles</h2>
+<h3 id="necesidad_19">Necesidad</h3>
+<p>La plataforma necesita mantener control sobre los usuarios y sus permisos para garantizar la separación entre clientes, comerciantes y administradores.</p>
+<h3 id="funcionalidad_19">Funcionalidad</h3>
+<p><strong>Administración de usuarios y roles:</strong> consulta y gestión de cuentas según su rol.</p>
+<h3 id="historia-de-usuario_19">Historia de usuario</h3>
+<p><strong>Como</strong> administrador,</p>
+<p><strong>quiero</strong> gestionar los usuarios y sus roles,</p>
+<p><strong>para</strong> mantener el control de acceso y funcionamiento de la plataforma.</p>
+<h3 id="criterios-de-aceptacion_19">Criterios de aceptación</h3>
+<ul>
+<li>El administrador puede consultar los usuarios registrados.</li>
+<li>Puede identificar el rol asignado a cada usuario.</li>
+<li>Puede gestionar las cuentas según los permisos definidos.</li>
+<li>Los usuarios no pueden acceder a funciones que no corresponden a su rol.</li>
+<li>Las acciones administrativas requieren autenticación y permisos de administrador.</li>
+</ul>
+<h3 id="moscow_19">MoSCoW</h3>
+<p><strong>Must Have</strong></p>
+<h3 id="justificacion_19">Justificación</h3>
+<p>El control de roles es necesario para garantizar el aislamiento entre las funciones de cliente, comerciante y administración de la plataforma.</p>
+<hr />
+<h2 id="hu-adm-02-supervisar-tiendas">HU-ADM-02 – Supervisar tiendas</h2>
+<h3 id="necesidad_20">Necesidad</h3>
+<p>La plataforma necesita supervisar las tiendas registradas para mantener un control general de los comercios que utilizan JaldiShop.</p>
+<h3 id="funcionalidad_20">Funcionalidad</h3>
+<p><strong>Administración de tiendas:</strong> consulta y supervisión de las tiendas registradas.</p>
+<h3 id="historia-de-usuario_20">Historia de usuario</h3>
+<p><strong>Como</strong> administrador,</p>
+<p><strong>quiero</strong> consultar las tiendas registradas en JaldiShop,</p>
+<p><strong>para</strong> supervisar los comercios que operan dentro de la plataforma.</p>
+<h3 id="criterios-de-aceptacion_20">Criterios de aceptación</h3>
+<ul>
+<li>El administrador puede consultar las tiendas registradas.</li>
+<li>Puede identificar al comerciante asociado a cada tienda.</li>
+<li>Puede consultar información general de la tienda.</li>
+<li>Una tienda mantiene sus productos, capacidad y pedidos aislados de las demás.</li>
+<li>Las acciones del administrador respetan los permisos establecidos.</li>
+</ul>
+<h3 id="moscow_20">MoSCoW</h3>
+<p><strong>Should Have</strong></p>
+<h3 id="justificacion_20">Justificación</h3>
+<p>Aporta control global sobre la plataforma, pero el flujo principal de compra y gestión de capacidad puede funcionar sin una supervisión administrativa avanzada.</p>
+<hr />
+<h2 id="hu-adm-03-supervisar-pedidos">HU-ADM-03 – Supervisar pedidos</h2>
+<h3 id="necesidad_21">Necesidad</h3>
+<p>La plataforma necesita disponer de una visión general de los pedidos para detectar problemas y supervisar el funcionamiento del servicio.</p>
+<h3 id="funcionalidad_21">Funcionalidad</h3>
+<p><strong>Supervisión global de pedidos:</strong> consulta de pedidos y sus estados a nivel de plataforma.</p>
+<h3 id="historia-de-usuario_21">Historia de usuario</h3>
+<p><strong>Como</strong> administrador,</p>
+<p><strong>quiero</strong> consultar los pedidos registrados en JaldiShop,</p>
+<p><strong>para</strong> supervisar el funcionamiento general de las operaciones.</p>
+<h3 id="criterios-de-aceptacion_21">Criterios de aceptación</h3>
+<ul>
+<li>El administrador puede consultar pedidos de las tiendas registradas.</li>
+<li>Puede identificar la tienda asociada.</li>
+<li>Puede consultar el estado actual de cada pedido.</li>
+<li>Puede consultar información básica del pedido.</li>
+<li>La consulta administrativa no modifica automáticamente los pedidos.</li>
+</ul>
+<h3 id="moscow_21">MoSCoW</h3>
+<p><strong>Should Have</strong></p>
+<h3 id="justificacion_21">Justificación</h3>
+<p>La supervisión permite controlar el funcionamiento general del sistema, pero no es necesaria para que el cliente compre ni para que el comerciante gestione sus pedidos.</p>
+<hr />
+<h2 id="hu-adm-04-supervisar-capacidad-y-disponibilidad">HU-ADM-04 – Supervisar capacidad y disponibilidad</h2>
+<h3 id="necesidad_22">Necesidad</h3>
+<p>La plataforma necesita permitir la supervisión del funcionamiento del motor de capacidad para identificar fechas o franjas saturadas.</p>
+<h3 id="funcionalidad_22">Funcionalidad</h3>
+<p><strong>Supervisión del motor de capacidad:</strong> consulta de capacidad efectiva, capacidad reservada, capacidad comprometida y capacidad disponible de las tiendas.</p>
+<h3 id="historia-de-usuario_22">Historia de usuario</h3>
+<p><strong>Como</strong> administrador,</p>
+<p><strong>quiero</strong> consultar la capacidad y disponibilidad de las tiendas,</p>
+<p><strong>para</strong> supervisar el correcto funcionamiento del control de capacidad de JaldiShop.</p>
+<h3 id="criterios-de-aceptacion_22">Criterios de aceptación</h3>
+<ul>
+<li>El administrador puede consultar la capacidad configurada por las tiendas.</li>
+<li>Puede visualizar la capacidad efectiva, reservada, comprometida y disponible.</li>
+<li>Puede identificar fechas o franjas saturadas.</li>
+<li>Puede consultar las reservas activas cuando corresponda.</li>
+<li>La consulta administrativa no altera la capacidad configurada por el comerciante.</li>
+</ul>
+<h3 id="moscow_22">MoSCoW</h3>
+<p><strong>Could Have</strong></p>
+<h3 id="justificacion_22">Justificación</h3>
+<p>Es útil para supervisar el principal componente diferenciador de JaldiShop, pero el motor de capacidad puede operar correctamente sin que el administrador necesite consultar estos datos directamente.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
