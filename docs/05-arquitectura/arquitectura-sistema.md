@@ -417,7 +417,9 @@ La llamada al proveedor de pago ocurre **fuera** de una transacción larga de ba
 
 ---
 
-## 12. Pago Aprobado pero Compra No Confirmable
+## 12. Modelo de Pago y Estados de Refund
+
+### 12.1 Pago Aprobado pero Compra No Confirmable
 
 > ⚠️ **Regla Arquitectónica:** Un pago aprobado externamente no garantiza por sí mismo la creación de un Pedido.
 
@@ -429,7 +431,98 @@ Como el inventario no se reserva en el MVP, puede ocurrir que el pago sea aproba
 - Iniciar una operación de compensación
 - Solicitar void/refund al proveedor cuando corresponda
 
-> 📌 **Nota:** Una compensación es una segunda operación de negocio, no un rollback de base de datos. Los nombres definitivos de estados de compensación/refund quedan pendientes de definir.
+### 12.2 Estados del Pago
+
+**DECIDIDO PARA MVP:**
+
+Se mantienen separados: **PaymentStatus** y **RefundStatus**. No utilizar un único enum que mezcle todos los estados.
+
+**PaymentStatus:**
+
+| Estado | Descripción |
+|---|---|
+| **PENDING** | El intento de pago fue creado pero todavía no comenzó/terminó el procesamiento. |
+| **PROCESSING** | El proveedor está procesando el pago. |
+| **APPROVED** | El cobro fue aprobado por el proveedor. |
+| **REJECTED** | El proveedor rechazó el pago. |
+| **CANCELLED** | El pago fue cancelado. |
+
+### 12.3 Estados del Refund
+
+**RefundStatus:**
+
+| Estado | Descripción |
+|---|---|
+| **NONE** | No existe una operación de devolución asociada. |
+| **PENDING** | JaldiShop solicitó una devolución/void y espera resultado. |
+| **REFUNDED** | La devolución terminó correctamente. |
+| **FAILED** | La devolución no pudo completarse y requiere revisión/reintento. |
+
+> 💡 **Concepto histórico:** Un Payment puede permanecer conceptualmente con PaymentStatus = APPROVED mientras RefundStatus = REFUNDED, porque históricamente el pago sí fue aprobado y posteriormente devuelto. No sustituir APPROVED por REFUNDED dentro de PaymentStatus.
+
+### 12.4 Cuándo se Inicia Compensación
+
+**Casos principales:**
+
+**Caso 1:**
+```
+Mercado Pago aprueba
+↓
+ConfirmPurchaseUseCase falla (ya no existe stock suficiente)
+↓
+Pedido NO creado
+↓
+RefundStatus = PENDING
+↓
+solicitar void/refund
+```
+
+**Caso 2:**
+```
+Mercado Pago aprueba
+↓
+la ReservaCapacidad ya no es válida
+↓
+Pedido NO creado
+↓
+iniciar compensación
+```
+
+**Caso 3:**
+```
+Resultado de pago aprobado llega después del timeout máximo de PROTEGIDA_PAGO
+↓
+no confirmar Pedido automáticamente
+↓
+iniciar reconciliación/compensación
+```
+
+### 12.5 Regla de Compensación
+
+> ⚠️ **Arquitectónica:** Una compensación **NO es rollback** de la transacción original. Es una segunda operación de negocio.
+
+```
+operación externa aprobada
+↓
+operación interna no confirmable
+↓
+registrar inconsistencia
+↓
+solicitar refund/void
+↓
+actualizar RefundStatus
+```
+
+### 12.6 Alcance MVP
+
+NO implementar por ahora:
+- múltiples refunds por un mismo pago
+- refund ledger
+- partial refunds avanzados
+- sistema contable
+- workflows financieros distribuidos
+
+El modelo mínimo PaymentStatus + RefundStatus es suficiente para el MVP.
 
 ---
 
@@ -474,13 +567,51 @@ Capacidad disponible =
 
 La reserva inicial dura **10 minutos**.
 
-### 15.2 Lógica de los 10 Minutos
+### 15.2 Timeout de Reserva y Protección de Pago
 
-> ⏱️ **Importante:**
-> - Los 10 minutos representan la ventana para **iniciar válidamente** el pago
-> - Si el pago comenzó antes de la expiración, la reserva puede quedar protegida temporalmente mientras el proveedor procesa
-> - Una reserva protegida por pago **no debe liberarse automáticamente** solo porque alcanzó el `expiresAt` original
-> - El timeout máximo de procesamiento del pago queda pendiente de definir
+**DECIDIDO PARA MVP:**
+
+La ReservaCapacidad tiene una ventana máxima inicial de **10 minutos** en estado ACTIVA para que el usuario inicie válidamente el pago.
+
+**Flujo conceptual:**
+
+```
+Reserva creada
+    → ACTIVA
+    → máximo 10 minutos para iniciar pago
+
+pago iniciado válidamente
+    ↓
+PROTEGIDA_PAGO
+paymentProtectionUntil = paymentStartedAt + 10 minutos
+```
+
+**Resultados durante PROTEGIDA_PAGO:**
+
+Si Mercado Pago informa:
+- **APROBADO** → ejecutar ConfirmPurchaseUseCase
+- **RECHAZADO** → liberar ReservaCapacidad (estado LIBERADA)
+- **CANCELADO** → liberar ReservaCapacidad (estado LIBERADA)
+
+Si transcurren los 10 minutos de protección sin obtener un resultado definitivo:
+- PROTEGIDA_PAGO → LIBERADA
+- La reserva deja de consumir capacidad
+
+> ⏱️ **Resultado tardío:** Un resultado aprobado recibido después de que la protección del pago haya expirado **NO debe confirmar automáticamente un Pedido**.
+
+**Ejemplo:**
+- 10:00 reserva creada
+- 10:09 pago iniciado
+- 10:19 termina protección
+- 10:21 proveedor informa aprobación
+
+JaldiShop **NO** debe ejecutar automáticamente una compra normal. Debe ocurrir:
+- resultado tardío → detectar operación expirada
+- no crear Pedido automáticamente
+- registrar inconsistencia/reconciliación
+- ejecutar void/refund cuando corresponda
+
+> ⚠️ **Justificación:** Esto evita que un pago tardío consuma capacidad o inventario que ya pudo haber sido utilizado por otra compra.
 
 ### 15.3 Estados Conceptuales
 
@@ -705,9 +836,39 @@ JWT stateless.
 
 > ⚠️ **Identificadores predecibles no sustituyen autorización:** Conocer `/orders/123` no implica poder acceder al pedido. La seguridad continúa dependiendo de autenticación, roles, ownership/resource authorization y reglas de negocio.
 
-Cuando cambien roles relevantes (ej. CUSTOMER → CUSTOMER+MERCHANT), puede emitirse un nuevo token.
+### 19.2.1 Almacenamiento Frontend del JWT
 
-> 📌 **Fuera del MVP:** Refresh Token. No se implementará persistencia de refresh tokens, rotación, token families, reuse detection ni blacklist distribuida en el MVP inicial.
+**DECIDIDO PARA MVP:**
+
+Los frontends (Next.js Marketplace y Angular Dashboard) almacenarán el Access Token en **sessionStorage**.
+
+**Flujo:**
+```
+LoginUseCase
+↓
+Spring Boot genera JWT
+↓
+frontend recibe Access Token
+↓
+sessionStorage
+↓
+cada request:
+Authorization: Bearer <JWT>
+```
+
+**WebSocket:** El mismo Access Token se utiliza para autenticar STOMP CONNECT mediante el mecanismo/interceptor definido en arquitectura. La identidad proviene del JWT validado, no del userId enviado por frontend.
+
+> ⚠️ **Limitación de sessionStorage:** sigue siendo accesible desde JavaScript y por lo tanto no elimina riesgos de XSS. No presentar esta decisión como la máxima solución de seguridad posible. Es una decisión pragmática para el MVP.
+
+> 📌 **Evolución futura:** HttpOnly + Secure Cookie como estrategia de autenticación frontend más endurecida. Si se migra a cookies en el futuro deberán reevaluarse: CSRF, SameSite, CORS, credentials y estrategia de despliegue de dominios/subdominios. **No implementar en el MVP.**
+
+### 19.2.2 Refresh Token
+
+> 📌 **Fuera del MVP:** Refresh Token no se implementará en el MVP inicial. No persistir refresh tokens, no implementar rotación, no blacklist, no Redis, no reuse detection. Cuando el Access Token expire, inicialmente puede requerirse volver a autenticar.
+
+### 19.2.3 Cambio de Roles
+
+Cuando cambien roles relevantes (ej. CUSTOMER → CUSTOMER+MERCHANT), el backend puede devolver/generar un nuevo Access Token con los roles actualizados. El frontend reemplaza el token existente en sessionStorage.
 
 ### 19.3 Spring Security
 
@@ -974,9 +1135,6 @@ Domain/Application Exception
 - Aggregates definitivos
 - Relaciones JPA definitivas (@ManyToOne, @OneToMany, etc.)
 - Entidad/fila concreta sobre la cual se aplicará el lock de Capacity
-- Timeout máximo de procesamiento de pago en estado PROTEGIDA_PAGO
-- Estados/modelo definitivo de refund y compensación
-- Almacenamiento frontend definitivo del JWT
 - Duración exacta del Access Token
 - Representación JPA definitiva de los estados de ReservaCapacidad
 - Implementación final de Specification
@@ -1052,6 +1210,7 @@ Mercado Pago (PaymentGateway Adapter)
 |---|---|---|
 | 0.1 | 2026-09-03 | Arquitectura inicial: sistema, módulos, persistencia, transacciones, concurrencia, checkout y pagos |
 | 0.2 | 2026-09-03 | Revisión y consolidación de: seguridad JWT/autorización, WebSocket/notificaciones, eventos internos, flujo crítico de pagos, compensaciones, reglas de capacidad, patrones de diseño, API versioning, errores/logging |
+| 0.2 | 2026-09-03 | Cierre de decisiones: timeout de pago protegido (10 min adicionales), modelo mínimo de refund/compensación (PaymentStatus + RefundStatus), almacenamiento frontend del JWT (sessionStorage + Bearer) |
 
 ---
 
