@@ -1,7 +1,7 @@
-package com.jaldishop.backend.ordering.application.dto;
+package com.jaldishop.backend.ordering.web.dto;
 
 import com.jaldishop.backend.ordering.domain.DeliveryMode;
-import com.jaldishop.backend.ordering.domain.validation.ValidOrderDelivery;
+import com.jaldishop.backend.ordering.web.validation.ValidOrderDelivery;
 import jakarta.validation.constraints.NotNull;
 
 @ValidOrderDelivery

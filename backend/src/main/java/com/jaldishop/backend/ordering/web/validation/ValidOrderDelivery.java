@@ -1,4 +1,4 @@
-package com.jaldishop.backend.ordering.domain.validation;
+package com.jaldishop.backend.ordering.web.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
