@@ -1,9 +1,9 @@
 # Modelo de Dominio
 
-### JaldiShop — Conceptos y Responsabilidades del Dominio v1.0
+### JaldiShop — Conceptos y Responsabilidades del Dominio v1.4
 
 [![Estado](https://img.shields.io/badge/Estado-En%20Revisión-orange?style=for-the-badge&logo=checkmarx&logoColor=white)](./modelo-dominio.md)
-[![Versión](https://img.shields.io/badge/Versión-v1.0-blue?style=for-the-badge)](./modelo-dominio.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.4-blue?style=for-the-badge)](./modelo-dominio.md)
 [![Fase](https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge)](../06-scrum/sprint-02.md)
 
 ---
@@ -16,8 +16,6 @@
 ## 1. Propósito
 
 > 📌 **Nota:** Este documento identifica los principales conceptos del dominio de **JaldiShop** y define sus responsabilidades dentro del negocio. El modelo se mantiene independiente de decisiones técnicas como frameworks, base de datos, endpoints, DTO, repositorios o mecanismos de comunicación.
-
-Las relaciones formales entre conceptos y la identificación de agregados quedan pendientes para la revisión y desarrollo correspondiente del equipo.
 
 ## 2. Principios del Dominio
 
@@ -50,87 +48,358 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 
 ### 3.1 Usuario
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar a una persona registrada en JaldiShop, manteniendo su identidad, estado y los roles mediante los cuales participa en la plataforma.
 
-> 📌 **Nota:** Un usuario puede participar mediante los roles habilitados en su cuenta, como cliente, comerciante o administrador. `Rol` y `EstadoUsuario` son conceptos simples del estado del usuario y no entidades independientes del MVP.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del usuario |
+| nombres | Nombres del usuario |
+| apellidos | Apellidos del usuario |
+| correo | Correo electrónico (único para autenticación) |
+| telefono | Teléfono de contacto para pedidos |
+| credencialAcceso | Concepto de autenticación |
+| roles | Colección de roles (CLIENTE, COMERCIANTE, ADMIN) |
+| estado | ACTIVO o SUSPENDIDO |
+| fechaRegistro | Fecha de creación de la cuenta |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- El correo identifica la cuenta para autenticación y no puede repetirse.
+- Un Usuario puede tener múltiples roles simultáneamente.
+- Roles iniciales: CUSTOMER, MERCHANT, ADMIN.
+- El teléfono sirve como medio de contacto para los pedidos.
+- Puede permitirse registro sin teléfono, pero debe existir antes de completar un checkout cuando sea necesario.
+- `nombreCompleto` es calculado a partir de nombres + apellidos, no debe persisterse como dato independiente.
+- Tienda, Pedidos, Favoritos, Reseñas y Notificaciones son relaciones, no atributos internos del aggregate.
 
 ---
 
 ### 3.2 Tienda
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar a la MYPE que opera dentro de JaldiShop, manteniendo su información comercial, estado y configuración general de operación.
 
-> ⚠️ **Alcance del MVP:** Para el MVP se considera un modelo simple de un comerciante con una única tienda. La tienda no debe asumir directamente las responsabilidades propias del catálogo, inventario, capacidad, pedidos o pagos.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único de la tienda |
+| nombreComercial | Nombre comercial de la tienda |
+| slug | Identificador URL único dentro de la plataforma |
+| descripcion | Descripción de la tienda |
+| telefonoContacto | Teléfono de contacto comercial |
+| ubicacion | UbicacionTienda (Value Object) |
+| estado | ACTIVA, INACTIVA, SUSPENDIDA, CERRADA |
+| configuracionEntrega | ConfiguracionEntrega (Value Object) |
+| configuracionTributaria | ConfiguracionTributaria (Value Object) |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Cada tienda pertenece a exactamente un comerciante responsable en el MVP.
+- Un comerciante puede tener como máximo una tienda.
+- El slug debe ser único dentro de la plataforma y se genera automáticamente a partir del nombre comercial.
+- SUSPENDIDA representa restricción administrativa/plataforma.
+- INACTIVA/CERRADA representan estados comerciales.
+- Categorías, productos, pedidos y reservas son relaciones, no contenido interno del aggregate.
+
+**Value Object: UbicacionTienda**
+
+| Atributo | Descripción |
+|---|---|
+| direccion | Dirección de la tienda |
+| referencia | Referencia opcional |
+| latitud | Coordenada opcional |
+| longitud | Coordenada opcional |
+
+> 💡 Las coordenadas son opcionales porque la integración con Maps es un plus y no requisito central.
 
 ---
 
 ### 3.3 Categoría
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Organizar los productos ofrecidos por una tienda y permitir al comerciante gestionar su clasificación comercial.
 
-> 📌 **Nota:** Las categorías son definidas dentro del contexto de cada tienda. Para el MVP no se consideran subcategorías.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único de la categoría |
+| nombre | Nombre de la categoría |
+| descripcion | Descripción opcional |
+| estado | ACTIVA o INACTIVA |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Cada Categoria pertenece a una Tienda.
+- Cada Producto pertenece exactamente a una Categoria en el MVP.
+- No pueden existir dos categorías ACTIVAS con el mismo nombre normalizado dentro de una misma Tienda.
+- El mismo nombre de categoría puede existir en tiendas diferentes.
+- No existen subcategorías en el MVP.
+- `cantidadProductos` no es atributo persistido; es calculado.
+- Solo puede eliminarse si no existe historial o registros relacionados; en caso contrario debe desactivarse.
 
 ---
 
 ### 3.4 Producto
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar el concepto comercial que una tienda ofrece a sus clientes, manteniendo su información general y disponibilidad comercial.
 
-> 💡 **Responsabilidad:** El producto representa la oferta general y no es responsable directamente del control de inventario ni de la capacidad operativa.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del producto |
+| nombre | Nombre del producto |
+| slug | Identificador URL único dentro de la tienda |
+| descripcion | Descripción del producto |
+| imagenPrincipal | Imagen principal opcional |
+| estado | ACTIVO o INACTIVO |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Cada Producto pertenece exactamente a una Tienda.
+- Cada Producto pertenece exactamente a una Categoría.
+- La Categoría asignada debe pertenecer a la misma Tienda del Producto.
+- El slug se genera automáticamente a partir del nombre y debe ser único dentro de su Tienda.
+- Producto NO almacena precio como fuente de verdad.
+- Producto NO controla directamente inventario.
+- AGOTADO no es EstadoProducto: deriva de Inventario.
+- SATURADO no es EstadoProducto: deriva de Capacidad.
+- Debe contener al menos una VarianteProducto.
+- Si un producto no presenta opciones visibles, debe existir una variante por defecto/oculta.
+- La imagen principal pertenece al Producto en el MVP. No implementar múltiples imágenes ni galería avanzada.
+
+**Contiene internamente:**
+
+#### VarianteProducto
+
+**Clasificación:** Entidad interna
+
+**Responsabilidad:** Representar la unidad/presentación realmente vendible de un producto.
+
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador interno | Identificador de la variante |
+| nombrePresentacion | Nombre de la presentación |
+| atributos | Colección de AtributoVariante |
+| precio | Dinero (precio de venta, mayor que cero) |
+| sku | Identificador comercial opcional |
+| controlaInventario | Booleano que indica si requiere control de stock |
+| estado | ACTIVA o INACTIVA |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Una VarianteProducto pertenece exactamente a un Producto.
+- El precio pertenece a VarianteProducto y utiliza el Value Object Dinero.
+- El precio debe ser mayor que cero.
+- SKU es opcional. Cuando existe, debe ser único dentro de la Tienda.
+- `controlaInventario` determina si la variante necesita Inventario.
+- Una Variante puede tener cero o múltiples AtributoVariante.
+- AGOTADA no es EstadoVariante.
+- Dentro de una misma VarianteProducto no puede repetirse el nombre de un atributo.
+- Si un Producto solo tiene una variante estándar, el frontend puede omitir el selector de variantes. No agregar `isDefault` únicamente para resolver este comportamiento.
+
+**AtributoVariante — Value Object**
+
+| Atributo | Descripción |
+|---|---|
+| nombre | Nombre del atributo (ej: Talla) |
+| valor | Valor del atributo (ej: M) |
+
+**Reglas:**
+
+- AtributoVariante es objeto interno de VarianteProducto.
+- Representa nombre + valor.
+- Una variante puede no tener atributos.
+- No utilizar un modelo EAV complejo en el MVP.
+- No convertir cada tipo de atributo en una entidad independiente.
 
 ---
 
-### 3.5 VarianteProducto
+### 3.5 Inventario
 
-**Clasificación:** Entidad
-
-**Responsabilidad:** Representar una presentación concreta y vendible de un producto, diferenciada mediante atributos y condiciones comerciales propias.
-
-> 📌 **Nota:** Todo producto vendible tendrá al menos una variante. Cuando no existan opciones visibles al cliente, podrá utilizarse una variante estándar. No todas las variantes requieren control de inventario.
-
----
-
-### 3.6 Inventario
-
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Mantener la cantidad disponible de una variante que utiliza control de existencias, permitiendo validar disponibilidad y evitar stock negativo.
 
-> ⚠️ **Alcance del MVP:** El MVP mantiene directamente las existencias actuales y permite reflejar ventas confirmadas y ajustes del comerciante. No se considera un sistema avanzado de movimientos, lotes, almacenes, proveedores, transferencias o reservas de inventario.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del inventario |
+| stockActual | Cantidad disponible actual (nunca negativa) |
+| umbralStockBajo | Umbral para notificación de stock bajo (opcional, tampoco puede ser negativo) |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Inventario pertenece a VarianteProducto, no a Producto.
+- Una Variante puede tener como máximo un Inventario asociado.
+- Solo existe Inventario para variantes con `controlaInventario = true`.
+- La cantidad nunca puede ser negativa.
+- El umbral de stock bajo, cuando exista, tampoco puede ser negativo.
+- No existe ReservaInventario en el MVP.
+- El Carrito NO reserva inventario.
+- No existen `reservedQuantity`, `committedQuantity` ni conceptos equivalentes.
+- No implementar kardex avanzado ni movimientos históricos de inventario.
+- No implementar almacenes, lotes, proveedores ni transferencias.
+- Los ajustes manuales del comerciante modifican directamente `stockActual`.
+- Si `controlaInventario` se deshabilita, no debe eliminarse físicamente la información de Inventario existente.
+- Si posteriormente se vuelve a habilitar, el inventario existente puede reutilizarse.
+- Cuando el stock alcanza o queda por debajo del umbral, puede generarse una Notificacion de tipo STOCK_BAJO.
+
+**Control de inventario:**
+
+- Si una Variante tiene control de inventario habilitado, el stock participa en las validaciones de compra.
+- Si el control está deshabilitado, el stock no determina la disponibilidad comercial.
+
+**Estrategia de concurrencia — Inventario:**
+
+> ✅ **Decisión cerrada:** El descuento de existencias se realiza mediante actualización condicional atómica.
+
+```
+UPDATE inventario
+SET cantidad = cantidad - cantidadSolicitada
+WHERE variante = varianteSolicitada
+  AND cantidad >= cantidadSolicitada
+```
+
+- Si la operación no modifica ningún registro, se interpreta como stock insuficiente.
+- No utilizar optimistic locking/@Version como estrategia principal.
+- No utilizar pessimistic locking como estrategia principal.
+- Cuando un Pedido contiene varias variantes, todos los descuentos deben formar parte de una misma transacción.
+- Si falla el descuento de una variante, los descuentos anteriores deben revertirse.
+- La restauración por cancelación debe ser idempotente.
 
 ---
 
-### 3.7 Carrito
+### 3.6 Carrito
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar la intención de compra activa de un cliente dentro de una tienda, manteniendo las variantes seleccionadas y sus cantidades antes de iniciar la confirmación de compra.
 
-> 💡 **Características:** El carrito no representa una compra confirmada, no reserva inventario ni capacidad y utiliza valores comerciales que deben revalidarse durante el checkout.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del carrito |
+| estado | ACTIVO o FINALIZADO |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Carrito representa únicamente intención de compra.
+- Pertenece exactamente a un Usuario y una Tienda.
+- Un usuario puede tener como máximo un carrito activo por Tienda.
+- Un carrito contiene productos únicamente de una misma Tienda.
+- No necesita un ciclo de estados complejo para el MVP. Si existe, se considera activo.
+- Después de una compra confirmada puede vaciarse/eliminarse porque Pedido conserva la historia.
+- Carrito NO reserva Inventario.
+- Carrito NO reserva Capacidad.
+- Carrito NO congela precios.
+- Los valores comerciales deben revalidarse durante checkout.
+
+**Conceptualmente:**
+> 💡 **Carrito = información comercial viva. Pedido = fotografía histórica definitiva.**
+
+**Contiene internamente:**
 
 #### ItemCarrito
 
-**Clasificación:** Objeto interno
+**Clasificación:** Entidad interna
 
-**Responsabilidad:** Representar una variante seleccionada por el cliente junto con la cantidad deseada y la información comercial necesaria para mostrar su valor dentro del carrito.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador interno | Identificador del item |
+| cantidad | Cantidad seleccionada (>= 1) |
+| precioReferencial | Dinero - precio mostrado al agregar (no garantiza precio final) |
+| fechaAgregado | Fecha en que se agregó |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- ItemCarrito referencia exactamente una VarianteProducto.
+- Mantiene la cantidad seleccionada. Cantidad debe ser mayor que cero.
+- Una misma Variante no puede aparecer repetida dentro del mismo Carrito.
+- Si la cantidad llega a cero, el Item debe eliminarse.
+- No almacenar stock dentro de ItemCarrito.
+- No utilizar el precio almacenado en ItemCarrito como fuente contractual.
+- El precio actual procede de VarianteProducto.
+- Si precio, stock, producto, variante o tienda cambian después de agregar el Item, se debe revalidar durante checkout.
+- `nombreProducto`, `nombreVariante` e `imagen` no se almacenan como snapshot en ItemCarrito.
 
 ---
 
-### 3.8 Descuento
+### 3.7 Descuento
 
-**Clasificación:** Entidad secundaria
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar una promoción comercial creada por una tienda que permite reducir el valor de una compra según una condición básica, vigencia y modalidad definida.
 
-> 📌 **Nota:** Para el MVP se consideran descuentos porcentuales o de monto fijo. Como simplificación, una compra puede utilizar como máximo un descuento a la vez.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del descuento |
+| nombre | Nombre de la promoción |
+| descripcion | Descripción opcional |
+| tipo | PORCENTAJE o MONTO_FIJO |
+| modalidad | AUTOMATICO o CODIGO |
+| valor | Monto o porcentaje del descuento (mayor que cero) |
+| codigoDescuento | CodigoDescuento (solo si modalidad = CODIGO) |
+| fechaInicio | Fecha de inicio de vigencia |
+| fechaFin | Fecha de fin opcional |
+| estado | Estado del descuento |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Una Tienda puede definir múltiples descuentos.
+- El valor debe ser mayor que cero.
+- Si es porcentaje, no puede superar 100%.
+- El código solo corresponde a modalidad CODIGO.
+- Los códigos son únicos dentro de una Tienda, no globalmente.
+- Puede existir una compra mínima.
+- Puede existir una ventana de vigencia.
+- Una compra utiliza como máximo un descuento.
+- No implementar descuentos acumulables, stacking de promociones ni múltiples descuentos simultáneos.
+
+**Prioridad de descuento:**
+
+> ✅ **Regla cerrada:** Cuando existe un código de descuento válido y también existe un descuento automático aplicable, el descuento mediante código tiene prioridad.
+
+> ✅ **Regla cerrada:** Una Tienda puede tener como máximo un descuento automático vigente/aplicable simultáneamente.
+
+**Value Object: CodigoDescuento**
+
+| Atributo | Descripción |
+|---|---|
+| valor | Código de promoción |
 
 ------------------------------------------------------------------------
 
@@ -138,11 +407,34 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 
 ### 4.1 ConfiguracionCapacidad
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar las condiciones operativas base mediante las cuales una tienda establece cuántos pedidos puede atender dentro de un determinado periodo.
 
-> ⚡ **Regla del MVP:** La capacidad puede configurarse por día o mediante franjas horarias configurables. Para el MVP: **1 pedido = 1 cupo**
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único |
+| diaSemana | Día de la semana al que aplica |
+| periodoCapacidad | PeriodoCapacidad (Value Object) |
+| capacidadMaxima | Cantidad máxima de pedidos/cupos (>= 0) |
+| estado | Estado de la configuración |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Pertenece a una Tienda.
+- Define capacidad base recurrente.
+- Si horaInicio y horaFin están ausentes, representa jornada completa.
+- Si se utiliza franja, ambas horas deben existir.
+- horaInicio debe ser menor que horaFin.
+- `capacidadMaxima` expresa cantidad de pedidos/cupos. MVP: **1 pedido = 1 cupo**.
+- No representa productos, kg, horas ni unidades de inventario.
+- Una Tienda puede tener varias configuraciones por días y franjas.
+- Para una misma Tienda y día no pueden existir configuraciones activas con periodos solapados.
+- Para simplificar, configuraciones recurrentes (lunes-viernes) se representan mediante configuraciones individuales por día.
 
 ---
 
@@ -150,39 +442,176 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 
 **Clasificación:** Value Object
 
-**Responsabilidad:** Representar el intervalo operacional para el cual se configura, consulta o consume capacidad.
+**Responsabilidad:** Representar exclusivamente una franja dentro de una jornada.
 
-> 📌 **Nota:** Puede representar un día completo o una franja horaria. No debe confundirse con el tiempo de vigencia de una reserva.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| horaInicio | Hora de inicio opcional |
+| horaFin | Hora de fin opcional |
+
+**Interpretación:**
+
+| Combinación | Significado |
+|---|---|
+| ambas ausentes | Jornada completa |
+| ambas presentes | Franja horaria específica |
+
+> ⚠️ La información de calendario NO pertenece al VO:
+> - ConfiguracionCapacidad define diaSemana
+> - ExcepcionCapacidad define fecha concreta
+> - ReservaCapacidad define fechaOperativa concreta
+>
+> No crear TipoCapacidad DIARIA/HORARIA en el MVP porque puede inferirse de la presencia de horas.
 
 ---
 
 ### 4.3 ExcepcionCapacidad
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
-**Responsabilidad:** Representar una modificación temporal de la capacidad operativa habitual de una tienda para un periodo específico.
+**Responsabilidad:** Representar una modificación temporal de la capacidad operativa habitual de una tienda para una fecha concreta.
 
-> 💡 **Comportamiento:** Para el MVP, cuando existe una excepción para un periodo, su valor reemplaza la capacidad base:
+**Atributos conceptuales:**
 
-```text
-Capacidad efectiva = excepción si existe; de lo contrario, capacidad base
-```
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único |
+| fecha | Fecha de la excepción |
+| periodoCapacidad | PeriodoCapacidad (Value Object) |
+| capacidadExcepcional | Capacidad para ese periodo (puede ser 0 = cierre) |
+| motivo | Motivo opcional |
+| estado | Estado de la excepción |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Reglas:**
+
+- Pertenece a una Tienda.
+- Aplica a una fecha concreta y opcionalmente a una franja.
+- Una excepción REEMPLAZA la capacidad base correspondiente; NO se suma.
+- Ejemplo: capacidad base 10 y excepción 4 → capacidad efectiva 4.
+- `capacidadExcepcional` puede ser 0 para representar cierre/no disponibilidad.
+- La capacidad excepcional nunca puede ser negativa.
+- Para una misma Tienda y fecha no pueden existir excepciones activas con periodos solapados.
 
 ---
 
 ### 4.4 ReservaCapacidad
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar la retención temporal de un cupo operativo durante el proceso de compra, evitando que dicho cupo sea utilizado simultáneamente por otra compra mientras la reserva permanezca válida.
 
-> ⏱️ **Hold de 10 Minutos:** Cada reserva consume un cupo. La reserva normal dispone de **10 minutos para que el cliente inicie el pago**. Si el pago se inicia válidamente, podrá mantenerse protegida temporalmente mientras se procesa la operación.
+**Atributos conceptuales:**
 
-> ⚠️ **Cálculo de Disponibilidad:** `CapacidadDisponible` no constituye una entidad. Es un valor calculado:
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único |
+| fechaOperativa | Fecha en que el negocio utilizará esa capacidad |
+| periodoCapacidad | PeriodoCapacidad (Value Object) |
+| estado | EstadoReservaCapacidad |
+| fechaCreacion | Fecha de creación |
+| expiraEn | Fecha/hora hasta cuándo la reserva inicial permanece válida |
+| proteccionPagoExpiraEn | Fecha/hora límite de protección de pago (opcional) |
 
-```text
-Capacidad disponible = Capacidad efectiva - Capacidad reservada - Capacidad comprometida
+**Estados:**
+
+| Estado | Descripción |
+|---|---|
+| ACTIVA | Hold temporal creado durante checkout. Consume un cupo mientras siga temporalmente vigente. Hold normal: 10 minutos para iniciar el pago. |
+| PROTEGIDA_PAGO | El cliente inició válidamente el proceso de pago. Continúa consumiendo el cupo. Protección máxima adicional: 10 minutos. |
+| COMPROMETIDA | La compra fue confirmada correctamente y existe Pedido. Consume capacidad definitivamente mientras corresponda operativamente. |
+| EXPIRADA | El hold inicial venció sin iniciar pago. No consume capacidad. |
+| LIBERADA | La reserva dejó de consumir capacidad por cancelación, fallo u otra liberación válida. No consume capacidad. |
+
+**Reglas:**
+
+- Cada ReservaCapacidad representa exactamente **1 cupo** en el MVP.
+- No almacenar `cantidadCupos` porque siempre es 1.
+- Una reserva ACTIVA dura máximo 10 minutos.
+- Si se inicia un pago válido antes de expirar: ACTIVA → PROTEGIDA_PAGO.
+- La protección de pago dura máximo 10 minutos adicionales.
+- `proteccionPagoExpiraEn` registra dicho límite.
+- Una reserva solo se vuelve COMPROMETIDA después de que ConfirmPurchaseUseCase finalice correctamente.
+
+**Transiciones válidas:**
+
 ```
+ACTIVA → PROTEGIDA_PAGO
+ACTIVA → EXPIRADA
+ACTIVA → LIBERADA
+PROTEGIDA_PAGO → COMPROMETIDA
+PROTEGIDA_PAGO → LIBERADA
+COMPROMETIDA → LIBERADA (solo cuando el Pedido se cancela antes de EN_PREPARACION)
+```
+
+**Flujo correcto de confirmación:**
+
+> ⚠️ Pago aprobado NO implica por sí mismo ReservaCapacidad = COMPROMETIDA.
+
+```
+Pago aprobado
+→ ejecutar confirmación de compra
+→ crear Pedido
+→ aplicar efectos correspondientes
+→ marcar ReservaCapacidad como COMPROMETIDA
+```
+
+**La Reserva debe conservar una fotografía del periodo operativo reservado. No debe depender exclusivamente de que la ConfiguracionCapacidad original permanezca sin cambios.**
+
+---
+
+### 4.5 Cálculo de Capacidad Disponible
+
+**CapacidadDisponible NO es una entidad.**
+
+**Conceptualmente:**
+
+```
+Capacidad disponible = capacidad efectiva - capacidad actualmente consumida
+```
+
+**Capacidad efectiva:**
+- excepción aplicable, si existe
+- de lo contrario configuración base
+
+**Consumen capacidad:**
+- ACTIVA mientras no haya expirado
+- PROTEGIDA_PAGO mientras no haya expirado su protección
+- COMPROMETIDA
+
+**No consumen:**
+- EXPIRADA
+- LIBERADA
+
+> ⚠️ La disponibilidad no puede depender exclusivamente de que un scheduler haya actualizado físicamente los estados.
+
+**Ejemplo:** Si una reserva continúa almacenada como ACTIVA pero `expiresAt` ya pasó, conceptualmente no debe seguir consumiendo capacidad. Un job periódico puede limpiar/actualizar estados posteriormente, pero NO constituye la fuente de verdad para calcular disponibilidad.
+
+---
+
+### 4.6 Estrategia de Concurrencia — Capacidad
+
+> ✅ **Decisión cerrada:** Bloqueo pesimista durante la creación de ReservaCapacidad.
+
+**Flujo conceptual:**
+
+1. Iniciar transacción.
+2. Identificar configuración/excepción aplicable al periodo.
+3. Bloquear el registro de capacidad correspondiente.
+4. Calcular capacidad efectiva.
+5. Contar reservas consumidoras temporalmente válidas.
+6. Verificar que utilizadas < capacidad efectiva.
+7. Crear ReservaCapacidad ACTIVA.
+8. Confirmar transacción.
+
+Una solicitud concurrente para el mismo periodo debe esperar y posteriormente recalcular disponibilidad.
+
+Esto impide que dos checkout consuman simultáneamente el último cupo.
+
+> 📌 Los detalles técnicos de implementación (@Lock, queries concretas) se definirán en arquitectura/diseño técnico.
 
 ---
 
@@ -190,32 +619,93 @@ Capacidad disponible = Capacidad efectiva - Capacidad reservada - Capacidad comp
 
 ### 5.1 Pago
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar el proceso financiero mediante el cual se intenta cobrar el importe correspondiente a una compra, conservando su estado y los intentos realizados hasta obtener un resultado definitivo.
 
-> 💡 **Reglas del Pago:**
-> - Un pago puede requerir varios intentos
-> - Un pago rechazado no genera un pedido
-> - Un mismo pago aprobado no puede generar más de un pedido ni producir repetidamente los efectos de una compra confirmada
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único |
+| monto | Dinero - monto a cobrar |
+| estadoPago | PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED |
+| refundStatus | NONE, PENDING, REFUNDED, FAILED |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+| fechaAprobacion | Fecha de aprobación (opcional) |
+
+**Reglas:**
+
+- Pago representa el proceso financiero lógico de JaldiShop.
+- Puede existir antes de Pedido.
+- El monto queda definido tras la revalidación del checkout y no debe modificarse arbitrariamente una vez iniciado.
+- Un Pago puede contener varios IntentoPago.
+- Todos los IntentoPago del mismo Pago intentan cobrar el mismo monto.
+- Puede existir como máximo una aprobación financiera válida por Pago.
+- Pago APPROVED no implica automáticamente que exista Pedido.
+- Un Pago APPROVED puede respaldar como máximo un Pedido.
+- EstadoPago y RefundStatus son independientes.
+- Un Pago puede permanecer APPROVED y posteriormente tener RefundStatus = REFUNDED.
+- No modelar montoReembolsado ni reembolsos parciales/múltiples en el MVP.
+- No almacenar datos sensibles de tarjeta.
 
 ---
 
 ### 5.2 IntentoPago
 
-**Clasificación:** Objeto interno
+**Clasificación:** Entidad interna
 
-**Responsabilidad:** Representar una operación individual realizada para intentar completar un pago y conservar su resultado.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador interno | Identificador del intento |
+| metodoPago | MetodoPago utilizado |
+| proveedorPago | ProveedorPago (MERCADO_PAGO, CULQI) |
+| referenciaPagoExterno | ReferenciaPagoExterno (opcional) |
+| estado | PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED |
+| fechaCreacion | Fecha del intento |
+| fechaProcesamiento | Fecha de procesamiento (opcional) |
 
 ---
 
 ### 5.3 MetodoPago
 
-**Clasificación:** Enum o Value Object simple
+**Clasificación:** Enum
 
 **Responsabilidad:** Representar el medio utilizado por el cliente para realizar un pago.
 
-> 📌 **Nota:** Las modalidades concretas dependerán del proveedor seleccionado. JaldiShop no debe almacenar información sensible de tarjetas u otros medios financieros.
+> 📌 **Nota:** Comenzar con TARJETA si la integración MVP utiliza este medio; ampliar únicamente cuando sea necesario.
+
+---
+
+### 5.4 ProveedorPago
+
+**Clasificación:** Enum
+
+**Responsabilidad:** Representar el proveedor de pagos utilizado.
+
+| Valor | Descripción |
+|---|---|
+| MERCADO_PAGO | Proveedor Mercado Pago |
+| CULQI | Proveedor Culqi |
+
+> 💡 El MVP puede implementar inicialmente solo Mercado Pago.
+
+---
+
+### 5.5 ReferenciaPagoExterno
+
+**Clasificación:** Value Object o concepto de valor
+
+**Responsabilidad:** Permitir relacionar el intento con la operación del proveedor sin acoplar el dominio a campos específicos.
+
+**Reglas:**
+
+- No agregar al dominio: datos completos de tarjeta, CVV, token, JSON del proveedor, webhookId, idempotencyKey HTTP, URL de checkout, códigos internos específicos.
+- La idempotencia se mantiene como invariante de negocio: el mismo Pago aprobado no puede generar más de un Pedido.
+- Los mecanismos técnicos de Idempotency-Key pertenecen a aplicación/infraestructura.
 
 ---
 
@@ -223,73 +713,173 @@ Capacidad disponible = Capacidad efectiva - Capacidad reservada - Capacidad comp
 
 ### 6.1 Pedido
 
-**Clasificación:** Entidad
+**Clasificación:** Aggregate Root
 
 **Responsabilidad:** Representar una compra confirmada realizada en JaldiShop, conservando de forma histórica los productos adquiridos, importes aplicados, modalidad de entrega y evolución de su atención.
 
-> 🔄 **Estado Inicial:** Un pedido nace únicamente después de una confirmación exitosa. Su estado inicial es `CONFIRMADO`; `PENDIENTE_PAGO` no es un estado de Pedido.
+**Atributos conceptuales:**
 
-> 📌 **Nota:** La composición y los importes de un pedido confirmado no se modifican en el MVP.
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único |
+| numeroPedido | Identificador comercial visible y único |
+| estado | EstadoPedido |
+| modalidadEntrega | ModalidadEntrega (RECOJO o DELIVERY) |
+| fechaAtencion | Snapshot de fecha acordada |
+| periodoCapacidad | Snapshot de PeriodoCapacidad acordado |
+| datosCliente | DatosClientePedido (Value Object) |
+| resumenMonetario | ResumenMonetario (Value Object) |
+| direccionEntrega | DireccionEntrega (opcional, solo para DELIVERY) |
+| fechaConfirmacion | Fecha de confirmación del pedido |
+| fechaActualizacion | Última modificación |
 
----
+**Reglas:**
 
-### 6.2 DetallePedido
+- Pedido solo existe después de una compra confirmada correctamente.
+- Su estado inicial es CONFIRMADO. `PENDIENTE_PAGO` no es estado de Pedido.
+- `numeroPedido` es identificador comercial visible y único, diferente al identificador interno.
+- Pedido conserva snapshots históricos: cambios posteriores en Usuario, Producto, Variante, Descuento o configuración no alteran la compra original.
+- `fechaAtencion` + `periodoCapacidad` son snapshots del compromiso operativo acordado.
+- Cada Pedido tiene exactamente un Pago, una ReservaCapacidad, un Usuario cliente y una Tienda.
 
-**Clasificación:** Objeto interno
+**Estados:**
 
-**Responsabilidad:** Conservar la información comercial correspondiente a cada variante adquirida en el momento en que la compra fue confirmada.
+| Estado | Descripción |
+|---|---|
+| CONFIRMADO | Pedido confirmado |
+| EN_PREPARACION | En preparación |
+| LISTO | Listo para recojo/entrega |
+| EN_ENTREGA | En camino (solo DELIVERY) |
+| COMPLETADO | Completado (terminal) |
+| CANCELADO | Cancelado (terminal alternativo) |
 
-> 💡 **Contenido:** Debe conservar la fotografía histórica del producto, presentación, atributos, cantidad, precio unitario y subtotal aplicados en la compra.
-
----
-
-### 6.3 EstadoPedido
-
-**Clasificación:** Enum
-
-**Flujo básico:**
-
-```text
-CONFIRMADO
-    ↓
-EN_PREPARACION
-    ↓
-LISTO
+**Flujo RECOJO:**
+```
+CONFIRMADO → EN_PREPARACION → LISTO → COMPLETADO
 ```
 
-**Para recojo:**
-
-```text
-LISTO → COMPLETADO
+**Flujo DELIVERY:**
+```
+CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 ```
 
-**Para delivery:**
-
-```text
-LISTO → EN_ENTREGA → COMPLETADO
-```
-
-> ⚠️ **Salida alternativa:** Como salida alternativa se considera `CANCELADO`, sujeto a las reglas de cancelación.
+> ⚠️ EN_ENTREGA solo aplica a DELIVERY. COMPLETADO y CANCELADO son terminales.
 
 ---
 
-### 6.4 HistorialEstadoPedido
-
-**Clasificación:** Objeto interno
-
-**Responsabilidad:** Conservar los cambios relevantes en el estado de atención de un pedido y el momento en que ocurrieron.
-
-> 📌 **Nota:** `SeguimientoPedido` no requiere ser una entidad independiente: puede derivarse del estado actual y del historial.
-
----
-
-### 6.5 ResumenMonetario
+### 6.2 DatosClientePedido
 
 **Clasificación:** Value Object
 
-**Responsabilidad:** Representar los importes definitivos que componen el total económico de una compra.
+**Responsabilidad:** Snapshot de los datos de contacto utilizados en la compra.
 
-> 💡 **Componentes:** Puede contemplar subtotal de productos, descuento, costo de entrega, IGV incluido cuando corresponda y total final.
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| nombreCompleto | Nombre completo del cliente |
+| telefono | Teléfono de contacto |
+| correo | Correo electrónico |
+
+> 💡 El Pedido continúa relacionado con Usuario para conocer qué cuenta realizó la compra, pero DatosClientePedido preserva la información histórica aunque posteriormente el Usuario actualice sus datos.
+
+---
+
+### 6.3 DetallePedido
+
+**Clasificación:** Entidad interna
+
+**Responsabilidad:** Conservar la información comercial correspondiente a cada variante adquirida en el momento en que la compra fue confirmada.
+
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador interno | Identificador del detalle |
+| nombreProducto | Snapshot del nombre del producto |
+| nombreVariante | Snapshot del nombre de la variante |
+| atributosVariante | Snapshot de atributos |
+| cantidad | Cantidad adquirida (>= 1) |
+| precioUnitario | Dinero - precio por unidad |
+| subtotal | Dinero - subtotal de la línea |
+
+**Reglas:**
+
+- Representa snapshot histórico de la unidad comprada.
+- Puede conservar referencia conceptual a VarianteProducto para trazabilidad.
+- `precioUnitario` es definitivo dentro del Pedido.
+- `subtotal` puede persistirse como snapshot histórico aunque sea calculable.
+- Cambios posteriores de Producto/Variante no modifican el DetallePedido.
+
+---
+
+### 6.4 ResumenMonetario
+
+**Clasificación:** Value Object
+
+**Responsabilidad:** Snapshot económico del Pedido.
+
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| subtotalProductos | Dinero - subtotal de productos |
+| descuentoAplicado | Dinero - monto de descuento final |
+| codigoDescuento | Código utilizado (opcional) |
+| costoDelivery | Dinero - costo de delivery |
+| igvIncluido | Dinero - parte correspondiente a impuesto |
+| total | Dinero - total final |
+
+> 💡 El comerciante registra precios finales de venta. No sumar automáticamente 18% de IGV. `igvIncluido` representa la parte del precio correspondiente al impuesto cuando aplique.
+
+---
+
+### 6.5 DireccionEntrega
+
+**Clasificación:** Value Object
+
+**Responsabilidad:** Representar el destino utilizado en un pedido con modalidad delivery.
+
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| direccion | Dirección de entrega |
+| referencia | Referencia opcional |
+| latitud | Coordenada opcional |
+| longitud | Coordenada opcional |
+
+**Reglas:**
+
+- DELIVERY requiere DireccionEntrega. RECOJO no requiere.
+- Es un snapshot dentro de Pedido.
+- Coordenadas son opcionales.
+- Maps continúa siendo un plus, no requisito obligatorio.
+
+---
+
+### 6.6 HistorialEstadoPedido
+
+**Clasificación:** Entidad interna
+
+**Responsabilidad:** Conservar los cambios relevantes en el estado de atención de un pedido y el momento en que ocurrieron.
+
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador interno | Identificador del registro |
+| estado | EstadoPedido |
+| fechaCambio | Fecha del cambio |
+| usuarioResponsable | Usuario que realizó el cambio (opcional) |
+| motivo | Motivo del cambio (opcional, principalmente para cancelaciones) |
+
+**Reglas:**
+
+- La creación de Pedido genera el primer registro CONFIRMADO.
+- Cada cambio de estado genera un nuevo registro.
+- `usuarioResponsable` puede estar ausente cuando el cambio provenga del sistema.
+- `SeguimientoPedido` e `HistorialPedidos` son vistas/consultas derivadas, no Entities.
 
 ---
 
@@ -305,17 +895,7 @@ LISTO → EN_ENTREGA → COMPLETADO
 
 ---
 
-### 7.2 DireccionEntrega
-
-**Clasificación:** Value Object
-
-**Responsabilidad:** Representar los datos necesarios para identificar el destino utilizado en un pedido con modalidad delivery.
-
-> 💡 **Diseño Flexible:** La dirección utilizada debe conservarse como fotografía de la información al momento de la compra. Las coordenadas pueden ser opcionales, permitiendo integrar mapas posteriormente sin convertirlos en dependencia del MVP.
-
----
-
-### 7.3 ConfiguracionEntrega
+### 7.2 ConfiguracionEntrega
 
 **Clasificación:** Value Object
 
@@ -327,38 +907,157 @@ LISTO → EN_ENTREGA → COMPLETADO
 
 ## 8. Experiencia del Usuario
 
-### 8.1 Notificacion
+### 8.1 Favorito
 
-**Clasificación:** Entidad secundaria
+**Clasificación:** Aggregate Root pequeño
 
-**Responsabilidad:** Representar un aviso persistente generado para informar a un usuario sobre un evento relevante ocurrido dentro de JaldiShop.
+**Responsabilidad:** Representar que un Usuario ha marcado un Producto como favorito.
 
-> 💡 **Ejemplos:** Pedido confirmado, cambio de estado, cancelación, nuevo pedido para el comerciante o stock bajo.
+**Atributos conceptuales:**
 
-> 📌 **Nota:** WebSocket, correo electrónico y otros mecanismos son canales técnicos, no entidades del dominio.
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del favorito |
+| fechaCreacion | Fecha en que se creó el favorito |
+
+**Relaciones:**
+
+| Relación | Cardinalidad |
+|---|---|
+| Favorito → Usuario | exactamente **1** |
+| Favorito → Producto | exactamente **1** |
+| Usuario → Favorito | **0..N** |
+| Producto → Favorito | **0..N** |
+
+**Invariantes:**
+
+- La combinación Usuario + Producto debe ser única.
+- Un Usuario no puede marcar dos veces como favorito el mismo Producto.
+- Favorito referencia Producto, NO VarianteProducto.
+- Favorito no pertenece internamente al aggregate Usuario.
+- Favorito no pertenece internamente al aggregate Producto.
+- No requiere EstadoFavorito en el MVP.
+- Cuando el usuario elimina un favorito, desaparece la relación.
+- Si un Producto se desactiva, sus Favoritos no tienen que eliminarse automáticamente.
+- Un producto inactivo puede mostrarse posteriormente como no disponible.
+
+**No almacenar dentro de Favorito:** nombreProducto, imagenProducto, precio, stock, estadoProducto, tienda. Estos datos pertenecen a otros conceptos y se consultan cuando sean necesarios.
 
 ---
 
-### 8.2 Favorito
+### 8.2 Reseña
 
-**Clasificación:** Entidad secundaria
+**Clasificación:** Aggregate Root pequeño
 
-**Responsabilidad:** Representar el interés explícito de un cliente por conservar un producto para consultarlo nuevamente más adelante.
+**Responsabilidad:** Representar la valoración realizada por un cliente sobre un Producto que realmente compró.
 
-> 💡 **Reglas:** Un cliente no debe registrar más de una vez el mismo producto como favorito. El favorito se realiza sobre el producto general, no sobre una variante, y no garantiza disponibilidad futura.
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único de la reseña |
+| calificacion | Valoración de 1 a 5 |
+| comentario | Comentario opcional |
+| estado | PUBLICADA o OCULTA |
+| fechaCreacion | Fecha de creación |
+| fechaActualizacion | Última modificación |
+
+**Relaciones:**
+
+| Relación | Cardinalidad |
+|---|---|
+| Reseña → Usuario | exactamente **1** |
+| Reseña → Producto | exactamente **1** |
+| Usuario → Reseña | **0..N** |
+| Producto → Reseña | **0..N** |
+
+**Reglas:**
+
+- `calificacion` debe encontrarse entre 1 y 5.
+- `comentario` es opcional.
+- Un Usuario puede tener como máximo una Reseña por Producto.
+- Si desea modificar su valoración, debe actualizar la Reseña existente.
+- Una Reseña PUBLICADA participa en la reputación visible del Producto.
+- Una Reseña OCULTA no debe mostrarse públicamente.
+- OCULTA permite preservar el historial cuando la plataforma necesita moderar sin eliminar.
+- La desactivación o modificación de un Producto no elimina ni modifica automáticamente las Reseñas históricas.
+
+**Elegibilidad para reseñar:**
+
+> ✅ **Regla aprobada:** Un Usuario solo puede crear una Reseña cuando exista al menos un Pedido COMPLETADO realizado por ese Usuario que contenga dicho Producto.
+
+- No basta con agregar al Carrito.
+- No basta con iniciar un Pago.
+- No basta con tener un Pedido CONFIRMADO.
+- No puede reseñarse mientras el pedido esté EN_PREPARACION, LISTO o EN_ENTREGA.
+- El Pedido debe estar COMPLETADO.
+- No es necesario crear una relación estructural obligatoria Reseña → Pedido.
+- La elegibilidad puede verificarse consultando los pedidos completados del Usuario.
 
 ---
 
-### 8.3 Reseña
+### 8.3 Notificacion
 
-**Clasificación:** Entidad secundaria
+**Clasificación:** Aggregate Root
 
-**Responsabilidad:** Representar la valoración que un cliente realiza sobre un producto después de haberlo adquirido mediante una compra confirmada.
+**Responsabilidad:** Representar información persistente destinada a un Usuario sobre eventos relevantes ocurridos dentro de JaldiShop.
 
-> 📌 **Restricciones del MVP:**
-> - Solo puede reseñar quien haya adquirido el producto y cuyo pedido esté `COMPLETADO`
-> - Se considera como máximo una reseña por cliente y producto
-> - La valoración promedio es información calculada, no una entidad independiente
+**Atributos conceptuales:**
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único de la notificación |
+| tipo | TipoNotificacion |
+| titulo | Título de la notificación |
+| mensaje | Contenido del mensaje |
+| estado | NO_LEIDA o LEIDA |
+| fechaCreacion | Fecha de creación |
+| fechaLectura | Fecha en que fue leída (opcional) |
+
+**Relaciones:**
+
+| Relación | Cardinalidad |
+|---|---|
+| Notificacion → Usuario | exactamente **1** (destinatario) |
+| Usuario → Notificacion | **0..N** |
+
+**Reglas:**
+
+- Una Notificacion nueva comienza como NO_LEIDA.
+- Cuando el Usuario la consulta/marca como leída puede pasar a LEIDA.
+- `fechaLectura` es opcional mientras permanezca NO_LEIDA. Cuando está LEIDA debe existir `fechaLectura`.
+- Las notificaciones deben persistir aunque el Usuario no se encuentre conectado.
+- El fallo de entrega en tiempo real NO elimina la Notificacion persistida.
+
+**No introducir estados técnicos:** ENVIADA, ENTREGADA, ERROR_WEBSOCKET, FALLIDA_TRANSPORTE. Estos pertenecen a infraestructura, no al dominio.
+
+**Notificacion y WebSocket:**
+
+```
+ocurre un evento relevante
+        ↓
+se crea Notificacion
+        ↓
+se persiste
+        ↓
+puede intentarse entrega en tiempo real
+        ↓
+si Usuario está conectado:
+    puede recibirla inmediatamente
+si Usuario no está conectado:
+    permanece disponible como NO_LEIDA
+```
+
+La persistencia de la Notificacion no debe depender del éxito de WebSocket.
+
+**Tipos de Notificacion:**
+
+| Tipo | Interpretación |
+|---|---|
+| NUEVO_PEDIDO | Dirigida al comerciante cuando se confirma una nueva compra |
+| CAMBIO_ESTADO_PEDIDO | Informa al cliente de cambios relevantes en el ciclo del Pedido |
+| STOCK_BAJO | Informa al comerciante cuando Inventario alcanza el umbral configurado |
+| SISTEMA | Mensajes relevantes propios de la plataforma |
 
 ---
 
@@ -368,30 +1067,47 @@ LISTO → EN_ENTREGA → COMPLETADO
 |---|---|
 | **Dinero** | Representar un importe monetario junto con su moneda |
 | **AtributoVariante** | Representar una característica y su valor dentro de una variante |
-| **PeriodoCapacidad** | Representar un día o intervalo operativo |
+| **PeriodoCapacidad** | Representar una franja horaria dentro de una jornada |
 | **ResumenMonetario** | Representar la composición económica de una compra |
 | **DireccionEntrega** | Representar el destino utilizado para un delivery |
 | **ConfiguracionEntrega** | Representar las condiciones básicas de entrega de una tienda |
 | **ConfiguracionTributaria** | Representar las condiciones tributarias básicas aplicables a los precios de una tienda |
 | **CodigoDescuento** | Representar un código de promoción cuando la modalidad lo requiera |
+| **UbicacionTienda** | Representar la ubicación física de una tienda |
+| **DatosClientePedido** | Snapshot de datos de contacto del cliente en un pedido |
+| **ReferenciaPagoExterno** | Referencia para relacionar con operaciones del proveedor de pagos |
 
 ---
 
 ### Dinero
 
-Representa tanto una cantidad como su moneda. Para la primera versión JaldiShop operará principalmente con soles peruanos, sin acoplar conceptualmente el dominio de forma permanente a una única moneda.
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| monto | Cantidad monetaria |
+| moneda | Moneda (MVP: PEN) |
+
+> 💡 Para la primera versión JaldiShop operará principalmente con soles peruanos, sin acoplar conceptualmente el dominio de forma permanente a una única moneda.
 
 ---
 
 ### AtributoVariante
 
-Representa una característica que diferencia una variante, por ejemplo `Talla = M`, `Color = Negro` o `Tamaño = Grande`. Dentro de una misma variante no debe repetirse el mismo tipo de atributo.
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| nombre | Nombre del atributo (ej: Talla) |
+| valor | Valor del atributo (ej: M) |
+
+> 💡 Dentro de una misma VarianteProducto no puede repetirse el nombre de un atributo.
 
 ---
 
 ### ConfiguracionTributaria
 
-Representa las condiciones tributarias básicas utilizadas por una tienda para interpretar sus precios.
+**Responsabilidad:** Representar las condiciones tributarias básicas utilizadas por una tienda para interpretar sus precios.
 
 > 💡 **Precios con IGV Incluido:** Los precios registrados en JaldiShop representan el precio final de venta. Cuando corresponda aplicar IGV, este se considera incluido en dicho precio.
 
@@ -399,26 +1115,48 @@ Representa las condiciones tributarias básicas utilizadas por una tienda para i
 
 ---
 
+### PeriodoCapacidad
+
+**Atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| horaInicio | Hora de inicio opcional |
+| horaFin | Hora de fin opcional |
+
+> 📌 Ambas ausentes = jornada completa. Ambas presentes = franja horaria.
+
+---
+
+### ReferenciaPagoExterno
+
+**Responsabilidad:** Value Object o concepto de valor que permita relacionar el intento con la operación del proveedor sin acoplar el dominio a campos específicos de Mercado Pago/Culqi.
+
+---
+
 ## 10. Enumeraciones Identificadas
 
 | Enum | Propósito |
 |---|---|
-| **Rol** | Distinguir CLIENTE, COMERCIANTE y ADMINISTRADOR |
-| **EstadoUsuario** | Representar el estado operativo de un usuario |
-| **EstadoTienda** | Representar el estado operativo de una tienda |
-| **EstadoCategoria** | Representar la disponibilidad de una categoría |
-| **EstadoProducto** | Representar la disponibilidad comercial de un producto |
-| **EstadoVariante** | Representar la disponibilidad comercial de una variante |
+| **Rol** | Distinguir CUSTOMER, MERCHANT y ADMIN |
+| **EstadoUsuario** | Representar el estado operativo de un usuario (ACTIVO, SUSPENDIDO) |
+| **EstadoTienda** | Representar el estado operativo de una tienda (ACTIVA, INACTIVA, SUSPENDIDA, CERRADA) |
+| **EstadoCategoria** | Representar la disponibilidad de una categoría (ACTIVA, INACTIVA) |
+| **EstadoProducto** | Representar la disponibilidad comercial de un producto (ACTIVO, INACTIVO) |
+| **EstadoVariante** | Representar la disponibilidad comercial de una variante (ACTIVA, INACTIVA) |
 | **EstadoPedido** | Representar la etapa actual de atención de un pedido |
-| **EstadoPago** | Representar la situación actual de un pago |
+| **EstadoPago** | Representar la situación actual de un pago (PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED) |
+| **EstadoIntentoPago** | Representar el estado de un intento de pago |
 | **EstadoReservaCapacidad** | Representar el estado de una reserva temporal |
+| **RefundStatus** | Representar el estado de reembolso (NONE, PENDING, REFUNDED, FAILED) |
 | **ModalidadEntrega** | Distinguir RECOJO y DELIVERY |
 | **MetodoPago** | Representar el medio utilizado para realizar un pago |
-| **TipoDescuento** | Distinguir porcentaje y monto fijo |
-| **ModalidadDescuento** | Distinguir automático y mediante código |
-| **EstadoNotificacion** | Distinguir notificaciones leídas y no leídas |
+| **ProveedorPago** | Representar el proveedor de pagos (MERCADO_PAGO, CULQI) |
+| **TipoDescuento** | Distinguir PORCENTAJE y MONTO_FIJO |
+| **ModalidadDescuento** | Distinguir AUTOMATICO y CODIGO |
+| **EstadoNotificacion** | Distinguir NO_LEIDA y LEIDA |
 | **TipoNotificacion** | Clasificar el evento que origina una notificación |
-| **EstadoReseña** | Representar si una reseña está activa u oculta |
+| **EstadoReseña** | Representar si una reseña está PUBLICADA u OCULTA |
 
 > 📌 **Nota:** Los valores definitivos podrán ajustarse durante la revisión del equipo sin modificar la responsabilidad de las entidades.
 
@@ -436,13 +1174,16 @@ Representa las condiciones tributarias básicas utilizadas por una tienda para i
 | **CapacidadDisponible** | Valor calculado |
 | **RepetirPedido** | Funcionalidad que reconstruye un carrito desde un pedido anterior |
 | **WebSocket** | Mecanismo técnico de comunicación en tiempo real |
+| **STOMP** | Protocolo de transporte, no concepto de dominio |
 | **Maps** | Integración externa opcional |
-| **ReputacionProducto** | Valor calculado a partir de reseñas |
+| **GPS tracking** | Infraestructura de seguimiento, no dominio |
+| **ReputacionProducto** | Valor calculado a partir de Reseñas PUBLICADAS |
 | **CostoDelivery** | Importe representado mediante `Dinero` |
 | **Impuesto** | Regla/configuración tributaria, no entidad independiente |
 | **MetodoPagoGuardado** | Fuera del alcance actual |
 | **DireccionUsuario** | Fuera del alcance actual |
 | **Entrega** | No requiere ciclo de vida independiente en el MVP |
+| **TipoProducto** | Concepto no definido en el MVP |
 
 ---
 
@@ -467,92 +1208,722 @@ Representa las condiciones tributarias básicas utilizadas por una tienda para i
 | 13 | Los datos históricos de un pedido no cambian por modificaciones posteriores del catálogo |
 | 14 | Los precios registrados representan el precio final de venta; cuando corresponda IGV, se considera incluido |
 | 15 | Una compra puede utilizar como máximo un descuento en el MVP |
-| 16 | Un producto solo puede ser reseñado por quien lo haya adquirido en un pedido completado |
+| 16 | Un producto solo puede ser reseñado por quien lo haya adquirido en un pedido COMPLETADO |
 | 17 | Un cliente no puede registrar repetidamente el mismo producto como favorito |
 | 18 | Una entidad solo puede eliminarse físicamente cuando no posea registros o historial asociado; en caso contrario debe conservarse mediante el estado que corresponda |
+| 19 | El correo del usuario debe ser único en la plataforma |
+| 20 | El slug de tienda debe ser único dentro de la plataforma |
+| 21 | El slug de producto debe ser único dentro de su tienda |
+| 22 | No deben existir dos categorías activas con el mismo nombre dentro de una misma tienda |
+| 23 | Un carrito solo puede contener items de variantes de una misma tienda |
+| 24 | ItemCarrito con cantidad 0 debe eliminarse |
+| 25 | La misma VarianteProducto no puede aparecer como múltiples items del mismo Carrito |
+| 26 | El descuento aplicado al carrito no queda garantizado hasta checkout |
+| 27 | El precio referencial del ItemCarrito no garantiza el precio final |
+| 28 | Un pedido tiene exactamente un pago aprobado |
+| 29 | Un pedido tiene exactamente una reserva de capacidad comprometida |
+| 30 | El mismo pago aprobado no puede generar múltiples pedidos |
+| 31 | El precio de VarianteProducto debe ser mayor que cero |
+| 32 | SKU, cuando existe, debe ser único dentro de la Tienda |
+| 33 | No pueden existir dos categorías ACTIVAS con el mismo nombre normalizado dentro de una misma Tienda |
+| 34 | El descuento por código tiene prioridad sobre el descuento automático si ambos son aplicables |
+| 35 | Una Tienda puede tener como máximo un descuento automático vigente simultáneamente |
+| 36 | Un descuento porcentaje no puede superar 100% |
+| 37 | horaInicio debe ser menor que horaFin en PeriodoCapacidad |
+| 38 | No pueden existir configuraciones de capacidad activas con periodos solapados para la misma Tienda/día |
+| 39 | No pueden existir excepciones de capacidad activas con periodos solapados para la misma Tienda y fecha |
+| 40 | La capacidad excepcional no puede ser negativa |
+| 41 | El descuento de inventario debe ser atómico y condicional; si no hay stock suficiente, no se modifica |
+| 42 | La restauración de inventario por cancelación debe ser idempotente |
+| 43 | La liberación de capacidad por cancelación debe ser idempotente |
 
 ---
 
-## 13. Fuera del Modelo de Dominio MVP
+## 13. Cancelación: Capacidad e Inventario
+
+> 📌 **Regla aprobada:** La cancelación de pedidos tiene efectos diferenciados según el estado en que se encuentre el pedido.
+
+### Cancelación antes de EN_PREPARACION
+
+Si un Pedido es cancelado mientras permanece en **CONFIRMADO**, antes de iniciar preparación:
+
+1. La ReservaCapacidad COMPROMETIDA pasa a **LIBERADA**.
+2. El inventario descontado al confirmar la compra debe **restaurarse**.
+3. El proceso de reembolso se maneja mediante `RefundStatus` del Pago según corresponda.
+
+### Cancelación desde EN_PREPARACION en adelante
+
+Una vez que el Pedido entra en **EN_PREPARACION** o un estado posterior:
+
+- **NO** se restaura automáticamente el inventario.
+- **NO** se libera automáticamente la capacidad.
+- La capacidad operativa pudo haber sido consumida internamente por el negocio.
+- Cualquier compensación excepcional quedaría fuera de la regla automática del MVP.
+
+### Invariantes de cancelación
+
+- Si un Pedido todavía está CONFIRMADO y una cancelación válida devuelve el cupo, ReservaCapacidad pasa de COMPROMETIDA a LIBERADA.
+- La liberación/restauración debe ser **idempotente**: una misma cancelación no puede devolver existencias varias veces.
+- El mecanismo técnico de concurrencia/idempotencia se definirá en arquitectura/diseño técnico.
+
+---
+
+## 14. Fuera del Modelo de Dominio MVP
 
 > ⚠️ **Límites del MVP:** Quedan fuera del modelo funcional actual:
 
+- Reserva de inventario (el inventario se descuenta directamente, no se reserva anticipadamente)
+- Kardex avanzado y movimientos históricos de inventario
+- Múltiples almacenes
+- Lotes
+- Proveedores
+- Transferencias de inventario
 - Capacidad ponderada por producto
 - Capacidad por múltiples recursos o estaciones
-- Reserva de inventario
-- Múltiples almacenes
-- Lotes y kardex avanzado
-- Proveedores
-- Múltiples tiendas por comerciante
-- Sucursales
-- Empleados con permisos avanzados
-- Promociones complejas o acumulables
+- Múltiples imágenes de producto y galería avanzada
+- EAV complejo de atributos (cada tipo de atributo no es una entidad independiente)
+- Motor avanzado de promociones y descuentos acumulables
+- Stacking de promociones
+- Múltiples descuentos simultáneos
 - Métodos de pago almacenados
+- Reserva anticipada de inventario
 - Seguimiento GPS
 - Repartidores
 - Optimización de rutas
 - Cobertura geográfica avanzada
 - Facturación electrónica completa
 - Respuestas e imágenes en reseñas
-- Moderación avanzada
+- Moderación avanzada de reseñas
 - Historial de búsquedas
+- Subcategorías
+- Capacidad slots como entidad independiente (salvo que posteriormente se demuestre necesario)
 
 ---
 
-## 14. Pendiente — Relaciones del Dominio
+## 15. Relaciones del Dominio
 
-> 🔧 **Pendiente de revisión y completado por el equipo asignado.**
+### 15.1 Usuario y Tienda
 
-Esta sección deberá definir cómo se relacionan los conceptos identificados, incluyendo cardinalidades y dependencias conceptuales.
+| Relación | Descripción |
+|---|---|
+| Usuario → Tienda | Un Usuario puede administrar **0..1** Tienda en el MVP. |
+| Tienda → Usuario | Cada Tienda tiene exactamente **un** Usuario responsable con rol COMERCIANTE. |
 
-No se establecen relaciones definitivas en esta versión para no adelantar decisiones correspondientes a la siguiente etapa del modelado.
-
----
-
-## 15. Pendiente — Agregados
-
-> 🔧 **Pendiente de revisión y completado por el equipo asignado.**
-
-Esta sección deberá identificar los posibles agregados y sus límites después de revisar las relaciones y las invariantes del dominio.
-
-No se definen agregados definitivos en esta versión.
+> 💡 Un Usuario puede existir sin Tienda. Usuario y Tienda son entidades independientes.
 
 ---
 
-## 16. Resumen de Conceptos
+### 15.2 Tienda, Categoría, Producto y VarianteProducto
 
-### Entidades principales
+```
+Tienda 1——0..N Categoria
+Categoria 1——0..N Producto
+Producto 1——1..N VarianteProducto
+```
 
-Usuario, Tienda, Categoria, Producto, VarianteProducto, Inventario, Carrito, Descuento, ConfiguracionCapacidad, ExcepcionCapacidad, ReservaCapacidad, Pago y Pedido.
+| Relación | Cardinalidad |
+|---|---|
+| Tienda → Categoria | **0..N** Categorias por Tienda |
+| Categoria → Tienda | exactamente **1** Tienda |
+| Categoria → Producto | **0..N** Productos por Categoria |
+| Producto → Categoria | exactamente **1** Categoria en el MVP |
+| Producto → VarianteProducto | **1..N** Variantes (al menos una) |
+| VarianteProducto → Producto | exactamente **1** Producto |
 
-### Entidades secundarias
-
-Notificacion, Favorito y Reseña.
-
-### Objetos internos
-
-ItemCarrito, IntentoPago, DetallePedido e HistorialEstadoPedido.
-
-### Value Objects principales
-
-Dinero, AtributoVariante, PeriodoCapacidad, ResumenMonetario, DireccionEntrega, ConfiguracionEntrega, ConfiguracionTributaria y CodigoDescuento.
+> ⚠️ Todo producto vendible debe disponer al menos de una variante, incluso si esta es una variante estándar no visible para el cliente.
 
 ---
 
-## 17. Estado del Documento
+### 15.3 VarianteProducto e Inventario
 
-> 📌 **Nota:** La identificación de conceptos y la definición inicial de responsabilidades se consideran completadas para esta versión.
+| Relación | Descripción |
+|---|---|
+| VarianteProducto → Inventario | **0..1** Inventario (no todas las variantes requieren control de stock) |
+| Inventario → VarianteProducto | exactamente **1** VarianteProducto |
 
-**Quedan pendientes:**
+> 💡 La disponibilidad comercial, la disponibilidad por inventario y la disponibilidad por capacidad son conceptos diferentes.
 
-- Revisión de los conceptos propuestos
-- Definición de relaciones
-- Definición de cardinalidades
-- Identificación de agregados
-- Revisión final del modelo de dominio
-- Aprobación del equipo
+---
 
-Una vez completadas estas etapas, el modelo podrá utilizarse como base conceptual para el posterior modelo entidad-relación y el diseño técnico de JaldiShop.
+### 15.4 Usuario, Tienda y Carrito
+
+```
+Usuario 1——0..N Carrito
+Carrito N——1 Tienda
+```
+
+| Relación | Cardinalidad |
+|---|---|
+| Usuario → Carrito | **0..N** Carritos a lo largo del tiempo |
+| Carrito → Usuario | exactamente **1** Usuario |
+| Carrito → Tienda | exactamente **1** Tienda |
+
+> ⚠️ Un Usuario puede tener como máximo **un** Carrito activo por Tienda. Un Carrito nunca puede contener productos de distintas tiendas.
+
+---
+
+### 15.5 Carrito e ItemCarrito
+
+| Relación | Descripción |
+|---|---|
+| Carrito → ItemCarrito | **0..N** ItemCarrito |
+| ItemCarrito → VarianteProducto | exactamente **1** VarianteProducto |
+
+**Invariantes:**
+- Una misma VarianteProducto no puede aparecer en varios items del mismo Carrito.
+- La cantidad de un ItemCarrito debe ser mayor que cero.
+
+> 💡 Los precios mostrados en Carrito son referenciales y deben revalidarse durante checkout. El Carrito no reserva inventario ni capacidad.
+
+---
+
+### 15.6 Descuento
+
+| Relación | Descripción |
+|---|---|
+| Tienda → Descuento | **0..N** Descuentos por Tienda |
+| Descuento → Tienda | exactamente **1** Tienda |
+| Carrito → Descuento | **0..1** Descuento aplicado en el MVP |
+
+> ⚠️ El descuento aplicado debe pertenecer a la misma Tienda que el Carrito. Descuento no forma parte internamente del Carrito. CodigoDescuento continúa siendo Value Object cuando la modalidad del descuento utiliza código.
+
+---
+
+### 15.7 ConfiguracionCapacidad y ExcepcionCapacidad
+
+```
+Tienda 1——0..N ConfiguracionCapacidad
+Tienda 1——0..N ExcepcionCapacidad
+```
+
+| Entidad | Descripción |
+|---|---|
+| ConfiguracionCapacidad | Regla habitual/base de capacidad. Contiene PeriodoCapacidad como Value Object. |
+| ExcepcionCapacidad | Reemplaza la capacidad base para un periodo específico. Contiene PeriodoCapacidad. |
+
+> 💡 No existe dependencia obligatoria directa entre ExcepcionCapacidad y ConfiguracionCapacidad. Ambas se resuelven mediante Tienda + periodo.
+
+---
+
+### 15.8 ReservaCapacidad
+
+| Relación | Descripción |
+|---|---|
+| Tienda → ReservaCapacidad | **0..N** Reservas por Tienda |
+| ReservaCapacidad → PeriodoCapacidad | contiene el periodo consumido |
+
+**Estados y consumo de capacidad:**
+
+| Estado | Consume capacidad | Vigencia |
+|---|---|---|
+| ACTIVA | Sí | 10 minutos máximo |
+| PROTEGIDA_PAGO | Sí | 10 minutos adicionales |
+| COMPROMETIDA | Sí | hasta completarse o cancelarse |
+| EXPIRADA | No | — |
+| LIBERADA | No | — |
+
+> ⚠️ No debe existir más de una reserva ACTIVA o PROTEGIDA_PAGO simultánea para la misma intención de checkout.
+
+**Fórmula:**
+```
+Capacidad disponible = Capacidad efectiva - Capacidad reservada - Capacidad comprometida
+```
+
+En el MVP: **1 pedido = 1 cupo**.
+
+---
+
+### 15.9 Carrito, ReservaCapacidad y Pago
+
+| Relación | Descripción |
+|---|---|
+| Carrito → Pago | **0..N** Pagos históricamente (no más de uno activo simultáneo) |
+| Pago → ReservaCapacidad | Association (cada pago vinculado a la reserva que protegía la compra) |
+
+> ⚠️ ReservaCapacidad y Pago son entidades independientes; ninguna pertenece internamente a la otra.
+
+---
+
+### 15.10 Pago e IntentoPago
+
+| Relación | Descripción |
+|---|---|
+| Pago → IntentoPago | **1..N** Intentos |
+| IntentoPago | Objeto interno, sin ciclo de vida independiente |
+
+**Estados de Pago:**
+
+| EstadoPago | Descripción |
+|---|---|
+| PENDING | Inicial |
+| PROCESSING | En proceso |
+| APPROVED | Aprobado |
+| REJECTED | Rechazado |
+| CANCELLED | Cancelado |
+
+**RefundStatus:**
+
+| Valor | Descripción |
+|---|---|
+| NONE | Sin reembolso |
+| PENDING | Reembolso pendiente |
+| REFUNDED | Reembolsado |
+| FAILED | Falló el reembolso |
+
+> 💡 Un pago históricamente APPROVED puede posteriormente estar REFUNDED sin modificar falsamente su estado financiero original. No crear entidad Reembolso en el MVP.
+
+---
+
+### 15.11 Pago y Pedido
+
+| Relación | Descripción |
+|---|---|
+| Pago → Pedido | **0..1** Pedido |
+| Pedido → Pago | exactamente **1** Pago aprobado |
+
+> ⚠️ Un Pago aprobado no crea automáticamente un Pedido: primero debe completarse correctamente el proceso de confirmación de compra. Si la confirmación interna falla después de que el proveedor aprobó el pago, no se crea Pedido y se inicia el proceso de compensación/void/refund.
+
+---
+
+### 15.12 ReservaCapacidad y Pedido
+
+| Relación | Descripción |
+|---|---|
+| ReservaCapacidad → Pedido | **0..1** Pedido |
+| Pedido → ReservaCapacidad | Association |
+
+> ⚠️ Una ReservaCapacidad en estado COMPROMETIDA debe estar asociada a exactamente un Pedido. Confirmar el Pedido cambia el cupo de reservado a comprometido; no libera capacidad.
+
+---
+
+### 15.13 Usuario, Tienda y Pedido
+
+```
+Usuario 1——0..N Pedido
+Tienda 1——0..N Pedido
+```
+
+| Relación | Cardinalidad |
+|---|---|
+| Usuario → Pedido | **0..N** Pedidos del cliente |
+| Tienda → Pedido | **0..N** Pedidos recibidos |
+| Pedido → Usuario | exactamente **1** Usuario cliente |
+| Pedido → Tienda | exactamente **1** Tienda |
+
+> ⚠️ Un Pedido nunca contiene productos de distintas tiendas.
+
+---
+
+### 15.14 Pedido y DetallePedido
+
+| Relación | Descripción |
+|---|---|
+| Pedido → DetallePedido | **1..N** DetallePedido |
+| DetallePedido → VarianteProducto | Originado a partir de exactamente **1** VarianteProducto |
+
+> 💡 DetallePedido conserva un snapshot histórico. Los cambios futuros en Producto o VarianteProducto no deben modificar un Pedido ya confirmado.
+
+---
+
+### 15.15 Pedido e HistorialEstadoPedido
+
+| Relación | Descripción |
+|---|---|
+| Pedido → HistorialEstadoPedido | **1..N** entradas (el primer registro corresponde a CONFIRMADO) |
+
+**Flujo de estados:**
+
+```
+RECOJO:
+CONFIRMADO → EN_PREPARACION → LISTO → COMPLETADO
+
+DELIVERY:
+CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
+
+CANCELADO (terminal alternativo)
+```
+
+> ⚠️ EN_ENTREGA solo aplica para DELIVERY. COMPLETADO y CANCELADO son estados terminales. La cancelación operativa no modifica falsamente un Pago APPROVED a REJECTED o CANCELLED.
+
+---
+
+### 15.16 Entrega
+
+| Concepto | Tratamiento |
+|---|---|
+| ModalidadEntrega | Enum: RECOJO o DELIVERY. Cada Pedido posee exactamente una. |
+| DireccionEntrega | Value Object histórico. Obligatorio cuando ModalidadEntrega = DELIVERY. Para RECOJO se utiliza la información de Tienda. |
+| ConfiguracionEntrega | Value Object de Tienda. |
+
+> ⚠️ No crear entidad Entrega en el MVP. No crear DireccionUsuario.
+
+---
+
+### 15.17 ResumenMonetario
+
+| Relación | Descripción |
+|---|---|
+| Pedido → ResumenMonetario | exactamente **1** (Value Object histórico) |
+
+> 💡 Debe preservar subtotal, descuento aplicado, costo de delivery, total e información tributaria. Una modificación posterior de precio, descuento o configuración de entrega no modifica pedidos históricos.
+
+---
+
+### 15.18 Favorito
+
+| Relación | Descripción |
+|---|---|
+| Usuario → Favorito | **0..N** Favoritos |
+| Favorito → Usuario | exactamente **1** |
+| Favorito → Producto | exactamente **1** |
+| Producto → Favorito | **0..N** |
+
+> ⚠️ La combinación Usuario + Producto debe ser única. Favorito referencia Producto, no VarianteProducto. No establecer relación directa obligatoria Favorito → Tienda.
+
+---
+
+### 15.19 Reseña
+
+| Relación | Descripción |
+|---|---|
+| Usuario → Reseña | **0..N** Reseñas |
+| Reseña → Usuario | exactamente **1** |
+| Reseña → Producto | exactamente **1** |
+| Producto → Reseña | **0..N** |
+
+> ⚠️ Máximo una Reseña por combinación Usuario + Producto. Para ser elegible, el usuario debe haber adquirido el producto en un Pedido COMPLETADO. No establecer relación obligatoria Reseña → Pedido.
+
+---
+
+### 15.20 Notificacion
+
+| Relación | Descripción |
+|---|---|
+| Usuario → Notificacion | **0..N** Notificaciones |
+| Notificacion → Usuario | exactamente **1** Usuario destinatario |
+
+> ⚠️ No obligar Notificacion a pertenecer a Pedido, porque también puede originarse desde inventario u otros eventos. WebSocket/STOMP es infraestructura y no forma parte del modelo de entidades. La Notificacion debe poder persistir aunque el usuario esté desconectado.
+
+---
+
+## 16. Agregados del Dominio
+
+> 💡 **Concepto:** Un Aggregate representa una frontera de consistencia. El Aggregate Root es el único punto de entrada para modificar las entidades y Value Objects internos del agregado. Una relación entre dos entidades **no implica** que pertenezcan al mismo Aggregate.
+
+---
+
+### 16.1 Usuario — Aggregate Root
+
+**Contiene conceptualmente:**
+- Rol
+- EstadoUsuario
+
+**No contiene:** Tienda, Favorito, Reseña ni Notificacion.
+
+---
+
+### 16.2 Tienda — Aggregate Root
+
+**Contiene:**
+- ConfiguracionEntrega
+- ConfiguracionTributaria
+
+**No contiene:** Categoria, Producto, Inventario, Capacidad, Carrito, Pago ni Pedido.
+
+---
+
+### 16.3 Categoria — Aggregate Root
+
+Aggregate pequeño e independiente.
+
+**Referencia:** Tienda
+
+**Ciclo de vida propio:** creación, cambio de nombre, activación, desactivación y eliminación cuando las reglas de historial lo permitan.
+
+---
+
+### 16.4 Producto — Aggregate Root
+
+**Contiene:**
+- VarianteProducto como entidad interna
+- AtributoVariante como Value Object de VarianteProducto
+
+**Protege:** la invariante de poseer al menos una variante vendible.
+
+**No contiene:** Inventario.
+
+---
+
+### 16.5 Inventario — Aggregate Root
+
+Aggregate independiente.
+
+**Referencia:** VarianteProducto
+
+**Justificación:** Su separación se justifica por su ciclo de vida propio y por las necesidades de actualización/concurrencia del stock.
+
+---
+
+### 16.6 Carrito — Aggregate Root
+
+**Contiene:**
+- ItemCarrito
+
+**Protege:**
+- unicidad de variante dentro del carrito
+- cantidades mayores a cero
+- pertenencia de todos los items a la misma Tienda
+- reglas básicas de descuento del carrito
+
+**No contiene:** Descuento.
+
+---
+
+### 16.7 Descuento — Aggregate Root
+
+Aggregate independiente.
+
+**Referencia:** Tienda
+
+**Contiene:** CodigoDescuento, TipoDescuento y ModalidadDescuento.
+
+---
+
+### 16.8 ConfiguracionCapacidad — Aggregate Root
+
+Aggregate independiente.
+
+**Contiene:** PeriodoCapacidad como Value Object.
+
+---
+
+### 16.9 ExcepcionCapacidad — Aggregate Root
+
+Aggregate independiente.
+
+**Contiene:** PeriodoCapacidad como Value Object.
+
+**No pertenece internamente a** ConfiguracionCapacidad.
+
+---
+
+### 16.10 ReservaCapacidad — Aggregate Root
+
+Aggregate independiente.
+
+**Contiene:**
+- PeriodoCapacidad
+- EstadoReservaCapacidad
+
+**Protege su propio ciclo:**
+
+```
+ACTIVA → PROTEGIDA_PAGO → COMPROMETIDA
+         ↓                    ↓
+      EXPIRADA            LIBERADA
+```
+
+**No contiene:** Pago ni Pedido.
+
+---
+
+### 16.11 Pago — Aggregate Root
+
+**Contiene:**
+- IntentoPago
+
+**Protege:**
+- evitar múltiples aprobaciones válidas
+- cambios permitidos de EstadoPago
+- RefundStatus
+
+**No contiene:** ReservaCapacidad ni Pedido.
+
+---
+
+### 16.12 Pedido — Aggregate Root
+
+**Contiene:**
+- DetallePedido
+- HistorialEstadoPedido
+- ResumenMonetario
+- DireccionEntrega
+- ModalidadEntrega
+
+**Protege:**
+- composición histórica de la compra
+- transición válida de estados
+- historial de estados
+- inmutabilidad de sus datos confirmados
+
+**No contiene:** Pago, ReservaCapacidad, Inventario ni Tienda aunque los referencie.
+
+---
+
+### 16.13 Favorito — Aggregate Root pequeño
+
+**Atributos:**
+- identificador
+- fechaCreacion
+
+**Referencias:**
+- Usuario
+- Producto
+
+**Protege:** la unicidad Usuario + Producto.
+
+> 💡 Aggregate secundario y deliberadamente simple. No almacenar nombreProducto, imagenProducto, precio, stock, estadoProducto ni tienda dentro de Favorito.
+
+---
+
+### 16.14 Reseña — Aggregate Root pequeño
+
+**Atributos:**
+- identificador
+- calificacion (1-5)
+- comentario (opcional)
+- estado (PUBLICADA, OCULTA)
+- fechaCreacion
+- fechaActualizacion
+
+**Referencias:**
+- Usuario
+- Producto
+
+**Protege:**
+- una reseña por Usuario + Producto
+- reglas propias de publicación/estado
+
+> 💡 La elegibilidad de compra puede requer consultar Pedido sin incorporar Pedido al aggregate. La calificación debe ser entre 1 y 5.
+
+---
+
+### 16.15 Notificacion — Aggregate Root
+
+**Atributos:**
+- identificador
+- tipo (TipoNotificacion)
+- titulo
+- mensaje
+- estado (NO_LEIDA, LEIDA)
+- fechaCreacion
+- fechaLectura (opcional)
+
+**Referencia:** Usuario destinatario
+
+**Ciclo propio:**
+- creación
+- estado de lectura
+- consulta
+
+**TipoNotificacion:**
+- NUEVO_PEDIDO
+- CAMBIO_ESTADO_PEDIDO
+- STOCK_BAJO
+- SISTEMA
+
+**No pertenece internamente a:** Usuario ni Pedido.
+
+---
+
+## 17. Coordinación Entre Agregados
+
+> 💡 Las operaciones de negocio pueden coordinar varios Aggregate Roots sin necesidad de fusionarlos en uno solo.
+
+### Ejemplo: ConfirmPurchaseUseCase
+
+Coordina conceptualmente los siguientes Aggregate Roots:
+
+- **Pago**
+- **ReservaCapacidad**
+- **Inventario**
+- **Pedido**
+
+**Flujo conceptual:**
+
+1. Verificar que el Pago esté APPROVED.
+2. Verificar que no exista ya un Pedido para el mismo Pago.
+3. Verificar que la ReservaCapacidad siga PROTEGIDA_PAGO y válida.
+4. Verificar inventario suficiente en las variantes controladas.
+5. Crear Pedido con todos sus snapshots.
+6. Descontar Inventario.
+7. Cambiar ReservaCapacidad a COMPROMETIDA.
+8. Finalizar el Carrito.
+9. Confirmar la operación como una única unidad consistente.
+
+> ⚠️ Esta coordinación no convierte Pago, ReservaCapacidad, Inventario y Pedido en un único Aggregate. Cada uno mantiene su propia frontera de consistencia y ciclo de vida independiente.
+
+La transacción, concurrencia e idempotencia técnicas se detallarán posteriormente en arquitectura/diseño.
+
+---
+
+## 18. Resumen de Conceptos
+
+### Aggregate Roots principales
+
+Usuario, Tienda, Categoria, Producto, Inventario, Carrito, Descuento, ConfiguracionCapacidad, ExcepcionCapacidad, ReservaCapacidad, Pago y Pedido.
+
+### Aggregate Roots secundarios
+
+Favorito, Reseña y Notificacion.
+
+### Entidades internas
+
+- VarianteProducto → Producto
+- ItemCarrito → Carrito
+- IntentoPago → Pago
+- DetallePedido → Pedido
+- HistorialEstadoPedido → Pedido
+
+### Value Objects
+
+Dinero, AtributoVariante, UbicacionTienda, ConfiguracionEntrega, ConfiguracionTributaria, CodigoDescuento, PeriodoCapacidad, ReferenciaPagoExterno, DatosClientePedido, ResumenMonetario y DireccionEntrega.
+
+---
+
+## 19. Estado del Documento
+
+| Aspecto | Estado |
+|---|---|
+| Identificación de entidades y Value Objects | ✅ Completado |
+| Responsabilidades y invariantes | ✅ Completado |
+| Enumeraciones | ✅ Completado |
+| Relaciones del Dominio | ✅ Completado |
+| Agregados del Dominio | ✅ Completado |
+| Coordinación entre Agregados | ✅ Completado |
+| Atributos detallados - Todos los aggregates | ✅ Completado |
+| Catálogo (Categoría, Producto, Variante) | ✅ Completado |
+| Reglas de Inventario y estrategia de concurrencia | ✅ Cerrada |
+| Reglas de Capacidad y estrategia de concurrencia | ✅ Cerrada |
+| Carrito e ItemCarrito | ✅ Completado |
+| Descuento (reglas y prioridad) | ✅ Completado |
+| Cancelación: capacidad e inventario | ✅ Completado |
+| Elegibilidad para reseñar | ✅ Aprobada |
+| Pago, IntentoPago, Pedido, DetallePedido, HistorialEstadoPedido | 🔄 Pendiente |
+| ResumenMonetario y relaciones finales | 🔄 Pendiente |
+| Confirmación transaccional completa | 🔄 Pendiente |
+| Refund/compensación y estados | 🔄 Pendiente |
+| Revisión final del equipo | 🔄 Pendiente |
+
+**Decisiones tomadas en esta versión (v1.4):**
+
+- Catálogo: reglas de Categoría, Producto y Variante confirmadas.
+- Inventario: relación con VarianteProducto, control de inventario, estrategia de concurrencia (actualización condicional atómica).
+- Carrito e ItemCarrito: información comercial viva vs Pedido como fotografía histórica.
+- Descuento: reglas de prioridad y límite de un descuento automático simultáneo.
+- Capacidad: reglas de ConfiguracionCapacidad, ExcepcionCapacidad y PeriodoCapacidad.
+- ReservaCapacidad: estados definitivos (ACTIVA, PROTEGIDA_PAGO, COMPROMETIDA, EXPIRADA, LIBERADA) y flujo correcto.
+- Capacidad disponible: no depende de scheduler como fuente de verdad.
+- Estrategia de concurrencia de Capacidad: bloqueo pesimista durante creación de ReservaCapacidad.
+- Cancelación: idempotencia de liberación/restauración.
+
+**Decisiones de arquitectura técnica pendientes:**
+
+- Detalles de implementación de transacciones (@Transactional, eventos de dominio, etc.)
+- Mechanismos técnicos de idempotencia
+- queries concretas de bloqueo pesimista
+
+> 📌 Modelo de dominio v1.4 conceptualmente cerrado para: catálogo, inventario, carrito, descuento y capacidad. Pendiente: pago, pedido y validación final antes del modelo entidad-relación.
 
 ---
 
