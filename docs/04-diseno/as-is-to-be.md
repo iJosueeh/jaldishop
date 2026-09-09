@@ -2,13 +2,13 @@
 
 ### JaldiShop — Modelado de Procesos de Negocio
 
-[![Estado](https://img.shields.io/badge/Estado-Completado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](./as-is-to-be.md)
-[![Fase](https://img.shields.io/badge/Fase-Diseño_de_Proceso-blue?style=for-the-badge)](./as-is-to-be.md)
+[![Estado](https://img.shields.io/badge/Estado-Completado-success?style=for-the-badge&logo=checkmarx&logoColor=white)](as-is-to-be.md)
+[![Fase](https://img.shields.io/badge/Fase-Diseño_de_Proceso-blue?style=for-the-badge)](as-is-to-be.md)
 
 ---
 
 `📍 Docs` > `04-Diseño` > `Proceso` > **AS-IS vs TO-BE**  
-[⬅ Alcance del MVP](../../03-requisitos/alcance-mvp.md) | [🏠 Índice General](../../../README.md) | [Sprint 01 ➡](../../06-scrum/sprint-01.md)
+[⬅ Alcance del MVP](../03-requisitos/alcance-mvp.md) | [🏠 Índice General](../../README.md) | [Sprint 01 ➡](../06-scrum/sprint-01.md)
 
 ---
 
@@ -117,4 +117,4 @@ flowchart TD
 
 ---
 
-[⬅ Alcance del MVP](../../03-requisitos/alcance-mvp.md) | [🏠 Volver al Índice General](../../../README.md) | [Sprint 01 ➡](../../06-scrum/sprint-01.md)
+[⬅ Alcance del MVP](../03-requisitos/alcance-mvp.md) | [🏠 Volver al Índice General](../../README.md) | [Sprint 01 ➡](../06-scrum/sprint-01.md)

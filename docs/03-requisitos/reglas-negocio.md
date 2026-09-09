@@ -9,7 +9,7 @@
 ---
 
 `📍 Docs` > `03-Requisitos` > **Reglas de Negocio**  
-[⬅ Alcance del MVP](./alcance-mvp.md) | [🏠 Índice General](../../README.md) | [AS-IS vs TO-BE ➡](../04-design/proceso/as-is-to-be.md)
+[⬅ Alcance del MVP](./alcance-mvp.md) | [🏠 Índice General](../../README.md) | [AS-IS vs TO-BE ➡](../04-diseno/as-is-to-be.md)
 
 ---
 
@@ -218,4 +218,4 @@ Las siguientes capacidades quedan registradas como evolución futura tras la val
 
 ---
 
-[⬅ Alcance del MVP](./alcance-mvp.md) | [🏠 Volver al Índice General](../../README.md) | [AS-IS vs TO-BE ➡](../04-design/proceso/as-is-to-be.md)
+[⬅ Alcance del MVP](./alcance-mvp.md) | [🏠 Volver al Índice General](../../README.md) | [AS-IS vs TO-BE ➡](../04-diseno/as-is-to-be.md)

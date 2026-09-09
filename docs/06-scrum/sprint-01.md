@@ -8,7 +8,7 @@
 ---
 
 `📍 Docs` > `06-Scrum` > **Sprint 01**  
-[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)
+[⬅ AS-IS vs TO-BE](../04-diseno/as-is-to-be.md) | [🏠 Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)
 
 ---
 
@@ -43,7 +43,7 @@ flowchart LR
 | **Caso A — Pastelería** | Josué | `CONSOLIDADO` | [caso-a-pasteleria.md](../02-investigacion/caso-a-pasteleria.md) |
 | **Caso B — Dark Kitchen** | Katherine | `CONSOLIDADO` | [caso-b-dark-kitchen.md](../02-investigacion/caso-b-dark-kitchen.md) |
 | **Caso C — Logística** | Josué | `CONSOLIDADO` | [caso-c-logistica.md](../02-investigacion/caso-c-logistica.md) |
-| **Flujo AS-IS / TO-BE** | Mía | `COMPLETADO` | [as-is-to-be.md](../04-design/proceso/as-is-to-be.md) |
+| **Flujo AS-IS / TO-BE** | Mía | `COMPLETADO` | [as-is-to-be.md](../04-diseno/as-is-to-be.md) |
 | **Matriz de Consolidación** | Equipo | `CONSOLIDADO` | [matriz-consolidacion.md](../02-investigacion/matriz-consolidacion.md) |
 | **Decisiones de Producto** | Equipo | `APROBADO` | [decisiones-producto.md](../01-producto/decisiones-producto.md) |
 | **Modelo de Capacidad v1** | Equipo | `APROBADO` | [modelo-capacidad-v1.md](../01-producto/modelo-capacidad-v1.md) |
@@ -60,4 +60,4 @@ flowchart LR
 
 ---
 
-[⬅ AS-IS vs TO-BE](../04-design/proceso/as-is-to-be.md) | [🏠 Volver al Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)
+[⬅ AS-IS vs TO-BE](../04-diseno/as-is-to-be.md) | [🏠 Volver al Índice General](../../README.md) | [Alcance del MVP ➡](../03-requisitos/alcance-mvp.md)

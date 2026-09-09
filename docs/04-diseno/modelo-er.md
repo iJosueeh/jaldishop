@@ -1,10 +1,10 @@
 # Modelo Entidad-Relación
 
-### JaldiShop — Diseño de Persistencia v1.2
+### JaldiShop — Diseño de Persistencia v1.6.1
 
-[![Estado](https://img.shields.io/badge/Estado-En%20Revisión%20Final-green?style=for-the-badge&logo=checkmarx&logoColor=white)](./modelo-er.md)
-[![Versión](https://img.shields.io/badge/Versión-v1.2-blue?style=for-the-badge)](./modelo-er.md)
-[![Fase](https://img.shields.io/badge/Fase-Diseño%20previo%20a%20implementación-orange?style=for-the-badge)](../03-requisitos/modelo-dominio.md)
+[![Estado](https://img.shields.io/badge/Estado-Listo%20para%20DDL-green?style=for-the-badge&logo=checkmarx&logoColor=white)](./modelo-er.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.6.1-blue?style=for-the-badge)](./modelo-er.md)
+[![Fase](https://img.shields.io/badge/Fase-Listo%20para%20implementación-orange?style=for-the-badge)](../03-requisitos/modelo-dominio.md)
 
 ---
 
@@ -143,7 +143,7 @@ private UUID id;
 | Cantidades | INTEGER | quantities, capacities |
 | Booleanos | BOOLEAN | flags (pickup_enabled, etc.) |
 | Moneda | CHAR(3) | ISO currency codes |
-| Fechas operativas | DATE | service_date, operating_date |
+| Fechas operativas | DATE | service_date |
 | Horas operativas | TIME | start_time, end_time |
 | Instantes/auditoría | TIMESTAMPTZ | created_at, updated_at, changed_at |
 | Coordenadas | NUMERIC(9,6) | latitude, longitude |
@@ -165,7 +165,6 @@ private UUID id;
 | stores.slug | VARCHAR(180) | — |
 | stores.description | TEXT | — |
 | categories.name | VARCHAR(120) | — |
-| categories.normalized_name | VARCHAR(120) | — |
 | products.name | VARCHAR(160) | — |
 | products.slug | VARCHAR(180) | — |
 | products.description | TEXT | — |
@@ -181,6 +180,7 @@ private UUID id;
 | notifications.title | VARCHAR(180) | — |
 | notifications.message | TEXT | — |
 | payment_attempts.provider | VARCHAR(30) | MERCADO_PAGO |
+| payment_attempts.payment_method | VARCHAR(30) | CARD |
 | payment_attempts.idempotency_key | VARCHAR(64) | UUID extendido |
 | payment_attempts.provider_payment_id | VARCHAR(100) | ID de Mercado Pago |
 | payment_attempts.provider_status | VARCHAR(50) | Estado del proveedor |
@@ -206,13 +206,13 @@ private UUID id;
 - cart_items.reference_price_amount
 - payments.amount
 - payments.refund_amount
-- orders.products_subtotal
+- orders.products_subtotal_amount
 - orders.discount_amount
-- orders.delivery_fee
-- orders.included_tax
+- orders.delivery_fee_amount
+- orders.included_tax_amount
 - orders.total_amount
-- order_items.unit_price
-- order_items.subtotal
+- order_items.unit_price_amount
+- order_items.subtotal_amount
 
 ### Campos con NUMERIC(5,2)
 
@@ -253,45 +253,46 @@ private UUID id;
 
 ### Valores de estados por entidad
 
-**users.status:** VARCHAR(20)
+**users.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 - SUSPENDED
 
-**stores.status:** VARCHAR(20)
+**stores.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 - SUSPENDED
+- CLOSED
 
-**categories.status:** VARCHAR(20)
+**categories.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
-**products.status:** VARCHAR(20)
+**products.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
-**product_variants.status:** VARCHAR(20)
+**product_variants.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
-**discounts.type:** VARCHAR(20)
+**discounts.type:** VARCHAR(30)
 - PERCENTAGE
 - FIXED_AMOUNT
 
-**discounts.modality:** VARCHAR(20)
+**discounts.modality:** VARCHAR(30)
 - AUTOMATIC
 - CODE
 
-**discounts.status:** VARCHAR(20)
+**discounts.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
-**capacity_configurations.status:** VARCHAR(20)
+**capacity_configurations.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
-**capacity_exceptions.status:** VARCHAR(20)
+**capacity_exceptions.status:** VARCHAR(30)
 - ACTIVE
 - INACTIVE
 
@@ -302,39 +303,39 @@ private UUID id;
 - EXPIRED
 - RELEASED
 
-**payments.status:** VARCHAR(20)
+**payments.status:** VARCHAR(30)
 - PENDING
 - PROCESSING
 - APPROVED
 - FAILED
 
-**payments.refund_status:** VARCHAR(20)
+**payments.refund_status:** VARCHAR(30)
 - NOT_REQUIRED
 - PENDING
 - PROCESSING
 - COMPLETED
 - FAILED
 
-**payment_attempts.status:** VARCHAR(20)
-- STARTED
+**payment_attempts.status:** VARCHAR(30)
+- CREATED
 - PROCESSING
 - APPROVED
 - REJECTED
 - ERROR
 
 **orders.status:** VARCHAR(30)
-- PENDING_CONFIRMATION
 - CONFIRMED
 - IN_PREPARATION
 - READY
-- DELIVERED
+- OUT_FOR_DELIVERY
+- COMPLETED
 - CANCELLED
 
-**orders.delivery_mode:** VARCHAR(20)
+**orders.delivery_mode:** VARCHAR(30)
 - PICKUP
 - DELIVERY
 
-**reviews.status:** VARCHAR(20)
+**reviews.status:** VARCHAR(30)
 - PUBLISHED
 - HIDDEN
 
@@ -344,7 +345,7 @@ private UUID id;
 - LOW_STOCK
 - SYSTEM
 
-**notifications.status:** VARCHAR(20)
+**notifications.status:** VARCHAR(30)
 - UNREAD
 - READ
 
@@ -356,11 +357,11 @@ private UUID id;
 |---|---|---|
 | id | UUID | PK |
 | email | VARCHAR(254) | NOT NULL, UNIQUE |
-| password_hash | VARCHAR(?) | NOT NULL |
+| password_encoded | VARCHAR(255) | NOT NULL |
 | first_name | VARCHAR(100) | NOT NULL |
 | last_name | VARCHAR(100) | NOT NULL |
 | phone | VARCHAR(30) | NULL |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE, SUSPENDED) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE, SUSPENDED) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -412,9 +413,9 @@ private UUID id;
 | delivery_enabled | BOOLEAN | NOT NULL |
 | delivery_fee_amount | NUMERIC(12,2) | CHECK >= 0 |
 | delivery_fee_currency | CHAR(3) | |
-| applies_tax | BOOLEAN | NOT NULL |
+| tax_applies | BOOLEAN | NOT NULL |
 | tax_rate | NUMERIC(5,2) | CHECK > 0 AND <= 100 |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE, SUSPENDED) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE, SUSPENDED, CLOSED) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -429,7 +430,7 @@ private UUID id;
 | false | NULL | Delivery no disponible |
 
 **Semántica tributaria:**
-| applies_tax | tax_rate | Significado |
+| tax_applies | tax_rate | Significado |
 |---|---|---|
 | false | NULL | Sin impuesto |
 | true | > 0 | Impuesto aplicado |
@@ -443,23 +444,24 @@ private UUID id;
 | id | UUID | PK |
 | store_id | UUID | FK -> stores.id, ON DELETE RESTRICT |
 | name | VARCHAR(120) | NOT NULL |
-| normalized_name | VARCHAR(120) | NOT NULL |
 | description | TEXT | |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
 **Índice:** INDEX(store_id)
 
-**UNIQUE parcial:**
+**UNIQUE funcional parcial:**
 ```
-UNIQUE(store_id, normalized_name) WHERE status = 'ACTIVE'
+UNIQUE(store_id, (lower(trim(name)))) WHERE status = 'ACTIVE'
 ```
 
-**Normalización de nombre:**
+**Normalización de nombre (aplicación/backend):**
 - trim
 - lowercase
 - espacios repetidos normalizados
+
+**Invariante de aplicación:** Categorías activas con nombre normalizado equivalente único dentro de la Tienda.
 
 ---
 
@@ -474,7 +476,7 @@ UNIQUE(store_id, normalized_name) WHERE status = 'ACTIVE'
 | slug | VARCHAR(180) | NOT NULL |
 | description | TEXT | |
 | image_url | TEXT | |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -498,7 +500,7 @@ UNIQUE(store_id, normalized_name) WHERE status = 'ACTIVE'
 | price_amount | NUMERIC(12,2) | NOT NULL, CHECK > 0 |
 | price_currency | CHAR(3) | NOT NULL |
 | tracks_inventory | BOOLEAN | NOT NULL |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -578,14 +580,14 @@ UNIQUE(store_id, normalized_name) WHERE status = 'ACTIVE'
 | id | UUID | PK |
 | store_id | UUID | FK -> stores.id, ON DELETE RESTRICT |
 | name | VARCHAR(160) | NOT NULL |
-| type | VARCHAR(20) | NOT NULL, CHECK IN (PERCENTAGE, FIXED_AMOUNT) |
-| modality | VARCHAR(20) | NOT NULL, CHECK IN (AUTOMATIC, CODE) |
+| type | VARCHAR(30) | NOT NULL, CHECK IN (PERCENTAGE, FIXED_AMOUNT) |
+| modality | VARCHAR(30) | NOT NULL, CHECK IN (AUTOMATIC, CODE) |
 | value | NUMERIC(12,2) | NOT NULL, CHECK > 0 |
 | code | VARCHAR(80) | NULL |
 | minimum_purchase_amount | NUMERIC(12,2) | CHECK >= 0 |
 | starts_at | TIMESTAMPTZ | |
 | ends_at | TIMESTAMPTZ | |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -616,7 +618,7 @@ UNIQUE(store_id, code) WHERE code IS NOT NULL
 | start_time | TIME | |
 | end_time | TIME | |
 | max_capacity | INTEGER | NOT NULL, CHECK >= 0 |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -637,12 +639,12 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 |---|---|---|
 | id | UUID | PK |
 | store_id | UUID | FK -> stores.id, ON DELETE RESTRICT |
-| operating_date | DATE | NOT NULL |
+| service_date | DATE | NOT NULL |
 | start_time | TIME | |
 | end_time | TIME | |
 | exception_capacity | INTEGER | NOT NULL, CHECK >= 0 |
 | reason | TEXT | |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -650,7 +652,7 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 - (start_time IS NULL) = (end_time IS NULL)
 - start_time < end_time (si existen)
 
-**Índice:** INDEX(store_id, operating_date, status)
+**Índice:** INDEX(store_id, service_date, status)
 
 ---
 
@@ -661,7 +663,7 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 | id | UUID | PK |
 | store_id | UUID | FK -> stores.id, ON DELETE RESTRICT |
 | user_id | UUID | FK -> users.id, ON DELETE RESTRICT |
-| operating_date | DATE | NOT NULL |
+| service_date | DATE | NOT NULL |
 | start_time | TIME | |
 | end_time | TIME | |
 | status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, PAYMENT_PROTECTED, COMMITTED, EXPIRED, RELEASED) |
@@ -675,7 +677,7 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 **No consumen:** EXPIRED, RELEASED
 
 **Índices:**
-- INDEX(store_id, operating_date, start_time, end_time, status)
+- INDEX(store_id, service_date, start_time, end_time, status)
 - INDEX(expires_at) WHERE status = 'ACTIVE'
 - INDEX(payment_protection_expires_at) WHERE status = 'PAYMENT_PROTECTED'
 
@@ -688,9 +690,9 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 | id | UUID | PK |
 | capacity_reservation_id | UUID | FK -> capacity_reservations.id, UNIQUE, ON DELETE RESTRICT |
 | amount | NUMERIC(12,2) | NOT NULL, CHECK > 0 |
-| currency | CHAR(3) | NOT NULL |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (PENDING, PROCESSING, APPROVED, FAILED) |
-| refund_status | VARCHAR(20) | NOT NULL, CHECK IN (NOT_REQUIRED, PENDING, PROCESSING, COMPLETED, FAILED) |
+| currency | CHAR(3) | NOT NULL, CHECK = 'PEN' |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (PENDING, PROCESSING, APPROVED, FAILED) |
+| refund_status | VARCHAR(30) | NOT NULL, CHECK IN (NOT_REQUIRED, PENDING, PROCESSING, COMPLETED, FAILED) |
 | refund_amount | NUMERIC(12,2) | CHECK >= 0 |
 | refund_reference | VARCHAR(100) | NULL |
 | approved_at | TIMESTAMPTZ | NULL |
@@ -713,24 +715,34 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 |---|---|---|
 | id | UUID | PK |
 | payment_id | UUID | FK -> payments.id, ON DELETE CASCADE |
-| provider | VARCHAR(30) | NOT NULL |
+| attempt_number | SMALLINT | NOT NULL, CHECK > 0 |
+| provider | VARCHAR(30) | NOT NULL, CHECK = 'MERCADO_PAGO' |
+| payment_method | VARCHAR(30) | NOT NULL, CHECK = 'CARD' |
 | idempotency_key | VARCHAR(64) | NOT NULL |
 | provider_payment_id | VARCHAR(100) | NULL |
 | provider_status | VARCHAR(50) | NULL |
 | provider_status_detail | VARCHAR(100) | NULL |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (STARTED, PROCESSING, APPROVED, REJECTED, ERROR) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (CREATED, PROCESSING, APPROVED, REJECTED, ERROR) |
 | error_code | VARCHAR(100) | NULL |
 | error_message | TEXT | NULL |
 | created_at | TIMESTAMPTZ | NOT NULL |
+| completed_at | TIMESTAMPTZ | NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
 **Restricciones:**
+- UNIQUE(payment_id, attempt_number)
 - UNIQUE(provider, idempotency_key)
 
 **Constraints adicionales:**
 - UNIQUE(provider, provider_payment_id) WHERE provider_payment_id IS NOT NULL
 
 **Relación:** IntentoPago pertenece a un Pago. payment_id es obligatorio.
+
+**Semántica de completed_at:**
+- CREATED / PROCESSING → completed_at permanece NULL
+- APPROVED / REJECTED / ERROR → completed_at contiene el instante de finalización
+
+**Nota:** Esta coherencia es una invariante de aplicación.
 
 ### Conceptos diferenciados
 
@@ -758,7 +770,7 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 
 ### Estados internos vs Estados del proveedor
 
-- **status:** Estado interno de JaldiShop (STARTED, PROCESSING, APPROVED, REJECTED, ERROR)
+- **status:** Estado interno de JaldiShop (CREATED, PROCESSING, APPROVED, REJECTED, ERROR)
 - **provider_status / provider_status_detail:** Información opcional recibida del proveedor
 
 **No se copian directamente los estados de Mercado Pago como estados del dominio.**
@@ -830,8 +842,8 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 | store_id | UUID | FK -> stores.id, ON DELETE RESTRICT |
 | payment_id | UUID | FK -> payments.id, UNIQUE, ON DELETE RESTRICT |
 | capacity_reservation_id | UUID | FK -> capacity_reservations.id, UNIQUE, ON DELETE RESTRICT |
-| status | VARCHAR(30) | NOT NULL, CHECK IN (PENDING_CONFIRMATION, CONFIRMED, IN_PREPARATION, READY, DELIVERED, CANCELLED) |
-| delivery_mode | VARCHAR(20) | NOT NULL, CHECK IN (PICKUP, DELIVERY) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (CONFIRMED, IN_PREPARATION, READY, OUT_FOR_DELIVERY, COMPLETED, CANCELLED) |
+| delivery_mode | VARCHAR(30) | NOT NULL, CHECK IN (PICKUP, DELIVERY) |
 | service_date | DATE | NOT NULL |
 | service_start_time | TIME | |
 | service_end_time | TIME | |
@@ -842,12 +854,12 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 | delivery_reference | TEXT | |
 | delivery_latitude | NUMERIC(9,6) | CHECK BETWEEN -90 AND 90 |
 | delivery_longitude | NUMERIC(9,6) | CHECK BETWEEN -180 AND 180 |
-| currency | CHAR(3) | NOT NULL |
-| products_subtotal | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
+| currency | CHAR(3) | NOT NULL, CHECK = 'PEN' |
+| products_subtotal_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
 | discount_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
 | discount_code | VARCHAR(80) | NULL |
-| delivery_fee | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
-| included_tax | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
+| delivery_fee_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
+| included_tax_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
 | total_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
 | confirmed_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
@@ -855,9 +867,9 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 **Restricciones:**
 - delivery_mode = DELIVERY → delivery_address NOT NULL
 - service_start_time < service_end_time (si existen)
-- discount_amount <= products_subtotal
+- discount_amount <= products_subtotal_amount
 
-**Fórmula:** total = products_subtotal - discount_amount + delivery_fee
+**Fórmula:** total = products_subtotal_amount - discount_amount + delivery_fee_amount
 
 **Índices:**
 - INDEX(store_id, confirmed_at DESC)
@@ -878,8 +890,8 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 | variant_name | VARCHAR(120) | NOT NULL |
 | attributes_snapshot | JSONB | |
 | quantity | INTEGER | NOT NULL, CHECK > 0 |
-| unit_price | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
-| subtotal | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
+| unit_price_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
+| subtotal_amount | NUMERIC(12,2) | NOT NULL, CHECK >= 0 |
 
 **Índices:**
 - INDEX(order_id)
@@ -893,7 +905,7 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 |---|---|---|
 | id | UUID | PK |
 | order_id | UUID | FK -> orders.id, ON DELETE CASCADE |
-| responsible_user_id | UUID | FK -> users.id, ON DELETE SET NULL |
+| changed_by_user_id | UUID | FK -> users.id, ON DELETE SET NULL |
 | status | VARCHAR(30) | NOT NULL |
 | reason | TEXT | |
 | changed_at | TIMESTAMPTZ | NOT NULL |
@@ -923,7 +935,7 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 | product_id | UUID | FK -> products.id, ON DELETE RESTRICT |
 | rating | INTEGER | NOT NULL, CHECK >= 1 AND <= 5 |
 | comment | TEXT | |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (PUBLISHED, HIDDEN) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (PUBLISHED, HIDDEN) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
@@ -943,7 +955,7 @@ La recepción repetida de una confirmación o resultado correspondiente al mismo
 | type | VARCHAR(30) | NOT NULL, CHECK IN (NEW_ORDER, ORDER_STATUS_CHANGED, LOW_STOCK, SYSTEM) |
 | title | VARCHAR(180) | NOT NULL |
 | message | TEXT | NOT NULL |
-| status | VARCHAR(20) | NOT NULL, CHECK IN (UNREAD, READ) |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (UNREAD, READ) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | read_at | TIMESTAMPTZ | |
 
@@ -1021,7 +1033,7 @@ Las PK/UUID no deben modificarse una vez creadas.
 | order_items.order_id | orders.id | CASCADE |
 | order_items.variant_id | product_variants.id | RESTRICT |
 | order_status_history.order_id | orders.id | CASCADE |
-| order_status_history.responsible_user_id | users.id | SET NULL |
+| order_status_history.changed_by_user_id | users.id | SET NULL |
 | favorites.user_id | users.id | CASCADE |
 | favorites.product_id | products.id | CASCADE |
 | reviews.user_id | users.id | RESTRICT |
@@ -1048,7 +1060,7 @@ OrderItem.variant_id tiene RESTRICT, bloqueando la eliminación de Variant si ti
 
 ### SET NULL — Referencia histórica opcional
 
-order_status_history.responsible_user_id → users.id
+order_status_history.changed_by_user_id → users.id
 
 El usuario puede eliminarse, pero queremos mantener el historial de quién hizo cada transición.
 
@@ -1096,16 +1108,18 @@ slug: "torta-tres-leches"  (sin cambios)
 |---|---|---|
 | user_roles | INDEX(role_id) | Consultar usuarios por rol |
 | categories | INDEX(store_id) | Categorías por tienda |
+| categories | UNIQUE(store_id, lower(trim(name))) WHERE status = 'ACTIVE' | Unicidad de nombre normalizado |
 | products | INDEX(category_id) | Productos por categoría |
 | products | INDEX(store_id, status) | Productos por tienda y estado |
 | product_variants | INDEX(product_id, status) | Variantes por producto y estado |
 | product_variants | INDEX(sku) WHERE sku IS NOT NULL | Búsqueda/validación SKU |
 | discounts | INDEX(store_id, modality, status) | Descuentos por tienda y modalidad |
 | capacity_configurations | INDEX(store_id, day_of_week, status, start_time, end_time) | Configuraciones por tienda y día |
-| capacity_exceptions | INDEX(store_id, operating_date, status) | Excepciones por tienda y fecha |
-| capacity_reservations | INDEX(store_id, operating_date, start_time, end_time, status) | Disponibilidad por periodo |
+| capacity_exceptions | INDEX(store_id, service_date, status) | Excepciones por tienda y fecha |
+| capacity_reservations | INDEX(store_id, service_date, start_time, end_time, status) | Disponibilidad por periodo |
 | capacity_reservations | INDEX(expires_at) WHERE status = 'ACTIVE' | Limpieza de reservas expiradas |
 | capacity_reservations | INDEX(payment_protection_expires_at) WHERE status = 'PAYMENT_PROTECTED' | Limpieza de protecciones expiradas |
+| payment_attempts | UNIQUE(payment_id, attempt_number) | Numeración ordinal por Pago |
 | payment_attempts | UNIQUE(provider, idempotency_key) | Idempotencia de operaciones |
 | payment_attempts | UNIQUE(provider, provider_payment_id) WHERE provider_payment_id IS NOT NULL | Evitar duplicación de operaciones externas |
 | payment_attempts | INDEX(payment_id) | Consultas por Pago |
@@ -1172,7 +1186,7 @@ El modelo se considera conceptualmente compatible con 3FN.
 | Entidad | Atributos históricos |
 |---|---|
 | orders | customer_name, customer_phone, customer_email, delivery_address, valores monetarios |
-| order_items | product_name, variant_name, attributes_snapshot, unit_price, subtotal |
+| order_items | product_name, variant_name, attributes_snapshot, unit_price_amount, subtotal_amount |
 
 **Justificación:** Estos campos representan hechos históricos propios de una transacción y no deben reconstruirse con datos actuales. No deben tratarse como errores de normalización.
 
@@ -1191,7 +1205,7 @@ El modelo se considera conceptualmente compatible con 3FN.
 | PeriodoCapacidad | Atributos sueltos (start_time, end_time) |
 | DatosClientePedido | Atributos en orders (customer_*) |
 | DireccionEntrega | Atributos en orders (delivery_*) |
-| ResumenMonetario | Atributos en orders (*_amount, *_fee, included_tax, total) |
+| ResumenMonetario | Atributos en orders (*_amount, total_amount) |
 | CodigoDescuento | Atributo code en discounts (normalizado uppercase) |
 | AtributoVariante | Tabla variant_attributes |
 | ReputacionProducto | Calculada, no almacenada |
@@ -1214,7 +1228,7 @@ Las siguientes reglas permanecen en dominio/aplicación y no como constraints de
 1. merchant_user_id debe pertenecer a un Usuario con rol MERCHANT
 2. Producto debe tener al menos una Variante
 3. SKU único dentro de la Tienda (cuando existe)
-4. Categorías activas con nombre normalizado único dentro de la Tienda
+4. Categorías activas con nombre normalizado equivalente único dentro de la Tienda (invariante de aplicación, no columna)
 5. Configuraciones de capacidad activas no solapadas por tienda/día
 6. Excepciones de capacidad activas no solapadas por tienda/fecha
 7. Prioridad de excepción full-day > franja > base
@@ -1237,6 +1251,57 @@ Las siguientes reglas permanecen en dominio/aplicación y no como constraints de
 24. Un mismo Pago aprobado no puede generar múltiples Pedidos
 25. Notificaciones repetidas del proveedor no deben repetir efectos de confirmación
 26. Credenciales de Mercado Pago nunca se persisten en tablas del dominio
+27. tracks_inventory = true requiere Inventory asociado
+28. Variant con tracks_inventory = false no participa en disponibilidad comercial
+29. 1 Pedido = 1 Cupo en el MVP
+
+---
+
+## 41.1 Invariantes de Aplicación / Backend
+
+Las siguientes invariantes son verificables y mantenidas por la capa de aplicación/backend, no por constraints de base de datos:
+
+**Normalización:**
+- email: trim + lowercase antes de persistir
+- discount code: trim + uppercase antes de persistir
+- SKU: trim + uppercase antes de persistir
+- category name: trim + lowercase + normalizar espacios antes de verificar unicidad
+
+**Integridad de catálogo:**
+- Producto vendible debe tener al menos una Variant ACTIVE
+- Variant con tracks_inventory = true debe tener Inventory asociado
+- SKU único dentro de la misma Tienda (no solo único global)
+
+**Carrito y Store:**
+- Toda Variant agregada a Cart debe pertenecer al Product de la misma Store del Cart
+- CartItem.quantity > 0; si llega a cero, eliminar el CartItem
+
+**Capacidad:**
+- Configuraciones de capacidad activas del mismo día/franja no deben solaparse dentro de una Tienda
+- Excepciones activas no deben solaparse por fecha dentro de una Tienda
+- Excepción de día completo tiene prioridad sobre franja
+- Excepción reemplaza capacidad base configurada
+- Una excepción debe corresponder coherentemente al periodo configurado
+
+**Descuentos:**
+- Máximo un descuento por compra
+- Máximo un descuento automático simultáneamente vigente por Tienda
+- Código válido tiene prioridad sobre descuento automático
+- code IS NOT NULL cuando modality = CODE
+- code IS NULL cuando modality = AUTOMATIC
+
+**Pagos:**
+- Retry técnico reutiliza el mismo PaymentAttempt e idempotency_key
+- Nuevo intento financiero utiliza nuevo PaymentAttempt y nueva idempotency_key
+- ConfirmPurchase es atómico e idempotente
+- CancelOrder es idempotente
+- Efectos de confirmación no se repiten ante notificaciones duplicadas del proveedor
+
+**Revisión de elegibilidad:**
+- Review solo puede ser creada por usuario que tuvo Order COMPLETED conteniendo ese Product
+
+**Stores operativos:**
+- Tienda operativa requiere al menos pickup_enabled = true o delivery_enabled = true
 
 ---
 
@@ -1258,7 +1323,7 @@ Las siguientes decisiones están **CERRADAS** y no deben reabrirse:
 | VARCHAR + CHECK para estados (no ENUM) | ✅ Cerrada |
 | Email normalizado lowercase por aplicación | ✅ Cerrada |
 | Slug generado por backend, estable | ✅ Cerrada |
-| normalized_name para categorías | ✅ Cerrada |
+| categories.normalized_name eliminado (índice funcional代替) | ✅ Cerrada v1.6 |
 | Código descuento normalizado uppercase | ✅ Cerrada |
 | SKU normalizado uppercase | ✅ Cerrada |
 | order_number con SEQUENCE, formato JAL-AAAA-NNNNNN | ✅ Cerrada |
@@ -1278,6 +1343,17 @@ Las siguientes decisiones están **CERRADAS** y no deben reabrirse:
 | **UNIQUE(orders.payment_id)** | ✅ Cerrada |
 | **Confirmación de compra idempotente** | ✅ Cerrada |
 | **Credenciales del proveedor fuera del modelo relacional** | ✅ Cerrada |
+| **password_encoded VARCHAR(255) NOT NULL** | ✅ Cerrada |
+| **Flyway utilizado desde migración inicial** | ✅ Cerrada |
+| **stores.status: ACTIVE, INACTIVE, SUSPENDED, CLOSED** | ✅ Cerrada |
+| **orders.status: CONFIRMED, IN_PREPARATION, READY, OUT_FOR_DELIVERY, COMPLETED, CANCELLED** | ✅ Cerrada |
+| **payment_attempts.status: CREATED, PROCESSING, APPROVED, REJECTED, ERROR** | ✅ Cerrada |
+| **currency CHECK = 'PEN' para payments y orders** | ✅ Cerrada |
+| **provider CHECK = 'MERCADO_PAGO'** | ✅ Cerrada |
+| **payment_method CHECK = 'CARD'** | ✅ Cerrada |
+| **payment_attempts.attempt_number SMALLINT CHECK > 0 + UNIQUE(payment_id, attempt_number)** | ✅ Cerrada |
+| **payment_attempts.completed_at TIMESTAMPTZ NULL como invariante de aplicación** | ✅ Cerrada |
+| **Flyway forward-only + backup/restore para rollback** | ✅ Cerrada |
 
 ---
 
@@ -1285,17 +1361,17 @@ Las siguientes decisiones están **CERRADAS** y no deben reabrirse:
 
 Después de esta actualización, quedan como pendientes:
 
-1. Revisión final de nombres físicos exactos de tablas/columnas
-2. Confirmar valores VARCHAR exactos de todos los CHECK de estados
-3. Revisar si se utilizará Flyway desde el primer commit de esquema
-4. Definir estrategia de rollback para migraciones Flyway
+1. ~~Revisión final de nombres físicos exactos de tablas/columnas~~ ✅ Completada en v1.3
+2. ~~Confirmar valores VARCHAR exactos de todos los CHECK de estados~~ ✅ Cerrado en v1.4
+3. ~~Revisar si se utilizará Flyway desde el primer commit de esquema~~ ✅ Cerrado: Flyway será utilizado
+4. ~~Definir estrategia de rollback para migraciones Flyway~~ ✅ Cerrado: forward-only + backup/restore
 5. Generar diagrama ER final
 6. Generar V1__initial_schema.sql
 7. Ejecutar migración sobre Neon PostgreSQL
 8. Revisar errores/restricciones reales del DDL
 9. Validar consultas críticas con EXPLAIN ANALYZE posteriormente
 10. Realizar mapeo JPA después de estabilizar el esquema
-11. Definir longitud exacta de password_hash según algoritmo
+11. ~~Definir longitud exacta de password_hash según algoritmo~~ ✅ Cerrado: VARCHAR(255)
 12. Diseño técnico del procesamiento de webhooks de Mercado Pago
 
 **NO vuelven a listarse como pendientes:**
@@ -1332,6 +1408,90 @@ Candidates seguros/obvios:
 
 ---
 
+## 46. Inventario Completo de CHECK
+
+### CHECK de Valores Discretos (VARCHAR + CHECK)
+
+| Tabla | Columna | Tipo | Valores |
+|---|---|---|---|
+| users | status | VARCHAR(30) | ACTIVE, INACTIVE, SUSPENDED |
+| stores | status | VARCHAR(30) | ACTIVE, INACTIVE, SUSPENDED, CLOSED |
+| categories | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| products | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| product_variants | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| discounts | type | VARCHAR(30) | PERCENTAGE, FIXED_AMOUNT |
+| discounts | modality | VARCHAR(30) | AUTOMATIC, CODE |
+| discounts | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| capacity_configurations | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| capacity_exceptions | status | VARCHAR(30) | ACTIVE, INACTIVE |
+| capacity_reservations | status | VARCHAR(30) | ACTIVE, PAYMENT_PROTECTED, COMMITTED, EXPIRED, RELEASED |
+| payments | status | VARCHAR(30) | PENDING, PROCESSING, APPROVED, FAILED |
+| payments | refund_status | VARCHAR(30) | NOT_REQUIRED, PENDING, PROCESSING, COMPLETED, FAILED |
+| payments | currency | CHAR(3) | PEN |
+| payment_attempts | provider | VARCHAR(30) | MERCADO_PAGO |
+| payment_attempts | payment_method | VARCHAR(30) | CARD |
+| payment_attempts | status | VARCHAR(30) | CREATED, PROCESSING, APPROVED, REJECTED, ERROR |
+| orders | status | VARCHAR(30) | CONFIRMED, IN_PREPARATION, READY, OUT_FOR_DELIVERY, COMPLETED, CANCELLED |
+| orders | delivery_mode | VARCHAR(30) | PICKUP, DELIVERY |
+| orders | currency | CHAR(3) | PEN |
+| reviews | status | VARCHAR(30) | PUBLISHED, HIDDEN |
+| notifications | type | VARCHAR(30) | NEW_ORDER, ORDER_STATUS_CHANGED, LOW_STOCK, SYSTEM |
+| notifications | status | VARCHAR(30) | UNREAD, READ |
+| roles | name | VARCHAR(20) | CUSTOMER, MERCHANT, ADMIN |
+
+### CHECK Numéricos y Estructurales
+
+| Tabla | Columna | Constraint |
+|---|---|---|
+| inventories | quantity | >= 0 |
+| inventories | low_stock_threshold | IS NULL OR >= 0 |
+| cart_items | quantity | > 0 |
+| cart_items | reference_price_amount | >= 0 |
+| product_variants | price_amount | > 0 |
+| discounts | value | > 0 |
+| discounts | value | <= 100 (when type = PERCENTAGE) |
+| discounts | minimum_purchase_amount | >= 0 |
+| capacity_configurations | day_of_week | 0-6 |
+| capacity_configurations | max_capacity | >= 0 |
+| capacity_exceptions | exception_capacity | >= 0 |
+| payments | amount | > 0 |
+| payments | refund_amount | >= 0 |
+| payments | refund_amount | <= amount |
+| order_items | quantity | > 0 |
+| order_items | unit_price_amount | >= 0 |
+| order_items | subtotal_amount | >= 0 |
+| orders | products_subtotal_amount | >= 0 |
+| orders | discount_amount | >= 0 |
+| orders | discount_amount | <= products_subtotal_amount |
+| orders | delivery_fee_amount | >= 0 |
+| orders | included_tax_amount | >= 0 |
+| orders | total_amount | >= 0 |
+| orders | delivery_latitude | BETWEEN -90 AND 90 |
+| orders | delivery_longitude | BETWEEN -180 AND 180 |
+| reviews | rating | BETWEEN 1 AND 5 |
+| stores | latitude | BETWEEN -90 AND 90 |
+| stores | longitude | BETWEEN -180 AND 180 |
+| stores | delivery_fee_amount | >= 0 |
+| stores | tax_rate | > 0 AND <= 100 |
+
+### CHECK de Coherencia Semántica
+
+| Tabla | Constraint |
+|---|---|
+| capacity_configurations | (start_time IS NULL) = (end_time IS NULL) |
+| capacity_configurations | start_time < end_time (when both exist) |
+| capacity_exceptions | (start_time IS NULL) = (end_time IS NULL) |
+| capacity_exceptions | start_time < end_time (when both exist) |
+| orders | delivery_mode = 'DELIVERY' → delivery_address NOT NULL |
+| orders | service_start_time < service_end_time (when both exist) |
+| discounts | code IS NOT NULL (when modality = CODE) |
+| discounts | code IS NULL (when modality = AUTOMATIC) |
+| discounts | ends_at > starts_at (when both exist) |
+| notifications | status = 'UNREAD' → read_at IS NULL |
+| notifications | status = 'READ' → read_at IS NOT NULL |
+
+---
+
 ## 45. Estado del Documento
 
 | Aspecto | Estado |
@@ -1341,12 +1501,19 @@ Candidates seguros/obvios:
 | Constraints conceptuales | ✅ Definidos |
 | Índices iniciales | ✅ Definidos |
 | Normalización 3FN | ✅ Revisada conceptualmente |
-| Decisiones físicas | ✅ Cerradas v1.2 |
+| Decisiones físicas | ✅ Cerradas v1.6 |
 | Políticas ON DELETE/UPDATE | ✅ Definidas |
 | Integración pagos | ✅ Proveedor y estrategia definidos |
-| Estado general | ✅ En Revisión Final |
+| Nomenclatura física | ✅ Congelada v1.3 |
+| Valores CHECK | ✅ Cerrados v1.5 |
+| categories.normalized_name | ✅ Eliminado en v1.6 (índice funcional) |
+| Estrategia Flyway | ✅ Aceptada |
+| Estrategia rollback | ✅ Forward-only + backup |
+| payment_method | ✅ Cerrado: CARD |
+| Invariantes de aplicación | ✅ Documentadas |
+| Estado general | ✅ Listo para DDL |
 
-> 📌 El diseño relacional v1.2 de JaldiShop cuenta con tablas, relaciones, PK/FK, constraints conceptuales, índices iniciales, tipos físicos, estrategias de normalización y políticas de eliminación definidas. El proveedor de pagos del MVP (Mercado Pago) y la estrategia de idempotencia están definidos. Permanece pendiente la generación y validación del DDL inicial.
+> 📌 El diseño relacional v1.6 de JaldiShop cuenta con tablas, relaciones, PK/FK, constraints conceptuales, índices iniciales, tipos físicos, estrategias de normalización y políticas de eliminación definidas. La columna normalized_name fue eliminada de categories y reemplazada por un índice funcional parcial. Todas las decisiones físicas necesarias para la migración inicial V1 están cerradas. El modelo está listo para generar V1__initial_schema.sql.
 
 ---
 
