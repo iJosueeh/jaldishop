@@ -1,9 +1,9 @@
 # Modelo de Dominio
 
-### JaldiShop — Conceptos y Responsabilidades del Dominio v1.4
+### JaldiShop — Conceptos y Responsabilidades del Dominio v1.5
 
 [![Estado](https://img.shields.io/badge/Estado-En%20Revisión-orange?style=for-the-badge&logo=checkmarx&logoColor=white)](./modelo-dominio.md)
-[![Versión](https://img.shields.io/badge/Versión-v1.4-blue?style=for-the-badge)](./modelo-dominio.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.5-blue?style=for-the-badge)](./modelo-dominio.md)
 [![Fase](https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge)](../06-scrum/sprint-02.md)
 
 ---
@@ -621,7 +621,7 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 
 **Clasificación:** Aggregate Root
 
-**Responsabilidad:** Representar el proceso financiero mediante el cual se intenta cobrar el importe correspondiente a una compra, conservando su estado y los intentos realizados hasta obtener un resultado definitivo.
+**Responsabilidad:** Representar el proceso financiero lógico asociado a una intención de compra protegida por una ReservaCapacidad.
 
 **Atributos conceptuales:**
 
@@ -629,30 +629,56 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 |---|---|
 | identificador | Identificador único |
 | monto | Dinero - monto a cobrar |
-| estadoPago | PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED |
-| refundStatus | NONE, PENDING, REFUNDED, FAILED |
+| estadoPago | EstadoPago |
+| estadoReembolso | EstadoReembolso |
+| montoReembolsado | Dinero - monto reembolsado (>= 0) |
+| referenciaReembolso | Referencia de reembolso (opcional) |
 | fechaCreacion | Fecha de creación |
 | fechaActualizacion | Última modificación |
 | fechaAprobacion | Fecha de aprobación (opcional) |
+| fechaReembolso | Fecha de reembolso (opcional) |
+
+**Relaciones conceptuales:**
+
+- Una ReservaCapacidad puede tener como máximo un Pago lógico asociado.
+- Un Pago pertenece al proceso protegido por una ReservaCapacidad.
+- Pago y ReservaCapacidad son Aggregate Roots independientes.
+- Un Pago puede terminar asociado a 0..1 Pedido.
+- Un Pedido confirmado debe estar respaldado por exactamente un Pago aprobado.
 
 **Reglas:**
 
-- Pago representa el proceso financiero lógico de JaldiShop.
-- Puede existir antes de Pedido.
-- El monto queda definido tras la revalidación del checkout y no debe modificarse arbitrariamente una vez iniciado.
-- Un Pago puede contener varios IntentoPago.
+- Pago puede existir antes que Pedido.
+- El monto se determina luego de la revalidación del checkout.
+- Una vez iniciado el proceso de pago, el monto no debe modificarse arbitrariamente.
+- Un Pago puede contener múltiples IntentoPago.
 - Todos los IntentoPago del mismo Pago intentan cobrar el mismo monto.
-- Puede existir como máximo una aprobación financiera válida por Pago.
-- Pago APPROVED no implica automáticamente que exista Pedido.
-- Un Pago APPROVED puede respaldar como máximo un Pedido.
-- EstadoPago y RefundStatus son independientes.
-- Un Pago puede permanecer APPROVED y posteriormente tener RefundStatus = REFUNDED.
-- No modelar montoReembolsado ni reembolsos parciales/múltiples en el MVP.
-- No almacenar datos sensibles de tarjeta.
+- Un mismo Pago puede tener como máximo una aprobación financiera válida.
+- Pago APROBADO NO implica automáticamente que exista Pedido.
+- Un mismo Pago aprobado puede generar como máximo un Pedido.
+- Un Pago rechazado o fallido no genera Pedido.
+- Los datos sensibles del medio de pago nunca se almacenan dentro del dominio de JaldiShop.
 
 ---
 
-### 5.2 IntentoPago
+### 5.2 EstadoPago
+
+**Clasificación:** Enum
+
+**Estados definitivos del MVP:**
+
+| Estado | Descripción |
+|---|---|
+| PENDIENTE | El Pago fue creado pero todavía no se encuentra ejecutando un intento activo. |
+| PROCESANDO | Existe un intento de pago en procesamiento. |
+| APROBADO | El proveedor confirmó una aprobación financiera válida. |
+| FALLIDO | El proceso financiero terminó definitivamente sin obtener una aprobación válida. |
+
+> ⚠️ Un IntentoPago rechazado NO implica automáticamente Pago = FALLIDO si todavía puede ejecutarse otro intento dentro de la ventana permitida.
+
+---
+
+### 5.3 IntentoPago
 
 **Clasificación:** Entidad interna
 
@@ -661,26 +687,52 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 | Atributo | Descripción |
 |---|---|
 | identificador interno | Identificador del intento |
+| numeroIntento | Número de intento para preservar orden histórico |
 | metodoPago | MetodoPago utilizado |
 | proveedorPago | ProveedorPago (MERCADO_PAGO, CULQI) |
 | referenciaPagoExterno | ReferenciaPagoExterno (opcional) |
-| estado | PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED |
-| fechaCreacion | Fecha del intento |
-| fechaProcesamiento | Fecha de procesamiento (opcional) |
+| estado | EstadoIntentoPago |
+| mensajeError | Mensaje de error (opcional) |
+| fechaInicio | Fecha de inicio del intento |
+| fechaFinalizacion | Fecha de finalización (opcional) |
+
+**Reglas:**
+
+- Pago 1 → 1..N IntentoPago.
+- Un Pago puede registrar varios intentos.
+- Un intento no tiene ciclo de vida independiente de Pago.
+- Los reintentos NO extienden la protección máxima de ReservaCapacidad.
+- Todos los intentos están sujetos al mismo límite temporal de protección del checkout.
 
 ---
 
-### 5.3 MetodoPago
+### 5.4 EstadoIntentoPago
+
+**Clasificación:** Enum
+
+| Estado | Descripción |
+|---|---|
+| INICIADO | Intento iniciado |
+| PROCESANDO | Operación en procesamiento con el proveedor |
+| APROBADO | El proveedor aceptó el cobro |
+| RECHAZADO | El proveedor respondió correctamente que el cobro no fue aceptado |
+| ERROR | No fue posible completar correctamente la operación técnica o de comunicación |
+
+> ⚠️ No reutilizar EstadoPago como EstadoIntentoPago aunque algunos valores se parezcan.
+
+---
+
+### 5.5 MetodoPago
 
 **Clasificación:** Enum
 
 **Responsabilidad:** Representar el medio utilizado por el cliente para realizar un pago.
 
-> 📌 **Nota:** Comenzar con TARJETA si la integración MVP utiliza este medio; ampliar únicamente cuando sea necesario.
+> 📌 **Nota:** MetodoPago pertenece principalmente a IntentoPago, no como fuente de verdad obligatoria dentro de Pago.
 
 ---
 
-### 5.4 ProveedorPago
+### 5.6 ProveedorPago
 
 **Clasificación:** Enum
 
@@ -691,21 +743,91 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 | MERCADO_PAGO | Proveedor Mercado Pago |
 | CULQI | Proveedor Culqi |
 
-> 💡 El MVP puede implementar inicialmente solo Mercado Pago.
+> 💡 El MVP puede implementar inicialmente solo Mercado Pago. No acoplar el dominio a nombres internos del SDK del proveedor.
 
 ---
 
-### 5.5 ReferenciaPagoExterno
+### 5.7 ReferenciaPagoExterno
 
-**Clasificación:** Value Object o concepto de valor
+**Clasificación:** Value Object
 
-**Responsabilidad:** Permitir relacionar el intento con la operación del proveedor sin acoplar el dominio a campos específicos.
+**Responsabilidad:** Representar la referencia externa necesaria para identificar, reconciliar y verificar la operación sin acoplar el dominio a campos específicos del proveedor.
 
 **Reglas:**
 
-- No agregar al dominio: datos completos de tarjeta, CVV, token, JSON del proveedor, webhookId, idempotencyKey HTTP, URL de checkout, códigos internos específicos.
-- La idempotencia se mantiene como invariante de negocio: el mismo Pago aprobado no puede generar más de un Pedido.
-- Los mecanismos técnicos de Idempotency-Key pertenecen a aplicación/infraestructura.
+- Puede utilizarse para verificación, compensación e idempotencia.
+- NO almacenar: número de tarjeta, CVV, fecha de vencimiento, PIN, token sensible, JSON completo del proveedor ni datos equivalentes sensibles.
+
+---
+
+### 5.8 EstadoReembolso
+
+**Clasificación:** Enum
+
+**Dimensión diferente de EstadoPago.**
+
+| Estado | Descripción |
+|---|---|
+| NO_REQUERIDO | El pago no requiere reembolso |
+| PENDIENTE | Reembolso pendiente de procesamiento |
+| PROCESANDO | Reembolso en procesamiento |
+| COMPLETADO | Reembolso completado |
+| FALLIDO | El proceso de reembolso falló |
+
+**Ejemplo válido:**
+
+```
+Pago:
+  estadoPago = APROBADO
+  estadoReembolso = COMPLETADO
+```
+
+Esto conserva el hecho histórico de que el Pago sí fue aprobado. No cambiar falsamente APROBADO → FALLIDO solo porque posteriormente se realizó una devolución.
+
+---
+
+### 5.9 Protección Temporal del Pago
+
+**Regla de dominio:**
+
+ReservaCapacidad.PROTEGIDA_PAGO representa máximo 10 minutos adicionales de protección de capacidad.
+
+Esto NO significa que una petición HTTP al proveedor pueda durar 10 minutos. El timeout técnico exacto del SDK/HTTP pertenece a infraestructura.
+
+> ⚠️ Ningún IntentoPago ni reintento puede prolongar la protección de capacidad más allá de `paymentProtectionExpiresAt` de la ReservaCapacidad. Los reintentos no reinician ni extienden esa ventana.
+
+---
+
+### 5.10 Pago Aprobado y Confirmación
+
+**Flujo correcto:**
+
+```
+Proveedor aprueba Pago
+        ↓
+Pago = APROBADO
+        ↓
+ConfirmPurchaseUseCase
+        ↓
+validar ReservaCapacidad
+validar idempotencia
+descontar Inventario
+crear Pedido
+comprometer ReservaCapacidad
+finalizar Carrito
+        ↓
+Compra confirmada
+```
+
+**Si ConfirmPurchase falla después de una aprobación externa:**
+
+- no crear un Pedido inconsistente
+- iniciar compensación/reembolso
+- EstadoPago permanece APROBADO
+- EstadoReembolso pasa a PENDIENTE y luego PROCESANDO/COMPLETADO/FALLIDO
+- liberar ReservaCapacidad cuando corresponda
+
+> ⚠️ JaldiShop NO utiliza una transacción distribuida con el proveedor externo. La consistencia se obtiene mediante: idempotencia, transacción local y compensación/reembolso.
 
 ---
 
@@ -715,7 +837,7 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 
 **Clasificación:** Aggregate Root
 
-**Responsabilidad:** Representar una compra confirmada realizada en JaldiShop, conservando de forma histórica los productos adquiridos, importes aplicados, modalidad de entrega y evolución de su atención.
+**Responsabilidad:** Representar una compra confirmada y preservar su fotografía histórica.
 
 **Atributos conceptuales:**
 
@@ -733,14 +855,28 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 | fechaConfirmacion | Fecha de confirmación del pedido |
 | fechaActualizacion | Última modificación |
 
+**Relaciones conceptuales:**
+
+- Pedido pertenece exactamente a un Usuario cliente.
+- Pedido pertenece exactamente a una Tienda.
+- Pedido está respaldado por exactamente un Pago.
+- Pedido está respaldado por exactamente una ReservaCapacidad.
+- Un Pago puede originar 0..1 Pedido.
+- Una ReservaCapacidad puede originar 0..1 Pedido.
+- Una misma ReservaCapacidad no puede producir múltiples Pedidos.
+
 **Reglas:**
 
-- Pedido solo existe después de una compra confirmada correctamente.
-- Su estado inicial es CONFIRMADO. `PENDIENTE_PAGO` no es estado de Pedido.
-- `numeroPedido` es identificador comercial visible y único, diferente al identificador interno.
-- Pedido conserva snapshots históricos: cambios posteriores en Usuario, Producto, Variante, Descuento o configuración no alteran la compra original.
-- `fechaAtencion` + `periodoCapacidad` son snapshots del compromiso operativo acordado.
-- Cada Pedido tiene exactamente un Pago, una ReservaCapacidad, un Usuario cliente y una Tienda.
+- Pedido solo nace luego de ConfirmPurchase exitoso.
+- Estado inicial: CONFIRMADO.
+- `numeroPedido` es único y visible para cliente/comerciante, diferente al identificador interno. El formato exacto se definirá posteriormente en diseño/implementación.
+- Pedido conserva snapshots y no depende de modificaciones posteriores del catálogo, usuario, descuento o configuración de capacidad.
+
+---
+
+### 6.2 EstadoPedido
+
+**Clasificación:** Enum
 
 **Estados:**
 
@@ -754,24 +890,47 @@ Esto impide que dos checkout consuman simultáneamente el último cupo.
 | CANCELADO | Cancelado (terminal alternativo) |
 
 **Flujo RECOJO:**
+
 ```
 CONFIRMADO → EN_PREPARACION → LISTO → COMPLETADO
 ```
 
 **Flujo DELIVERY:**
+
 ```
 CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 ```
 
-> ⚠️ EN_ENTREGA solo aplica a DELIVERY. COMPLETADO y CANCELADO son terminales.
+**Reglas:**
+
+- EN_ENTREGA solo es válido para DELIVERY.
+- COMPLETADO es terminal. Un Pedido COMPLETADO no puede posteriormente pasar a CANCELADO.
+- CANCELADO es terminal. Un Pedido CANCELADO no reanuda el flujo normal.
 
 ---
 
-### 6.2 DatosClientePedido
+### 6.3 Fecha y Periodo Comprometido
+
+**Regla:**
+
+Pedido debe conservar `fechaAtencion` y `PeriodoCapacidad` como snapshot del compromiso operativo realizado.
+
+**Ejemplo:**
+
+```
+fechaAtencion = 2026-09-10
+PeriodoCapacidad = 18:00 - 20:00
+```
+
+Cambios posteriores de ConfiguracionCapacidad o ExcepcionCapacidad no deben modificar la fecha/periodo comprometido del Pedido.
+
+---
+
+### 6.4 DatosClientePedido
 
 **Clasificación:** Value Object
 
-**Responsabilidad:** Snapshot de los datos de contacto utilizados en la compra.
+**Responsabilidad:** Snapshot de los datos de contacto utilizados al confirmar la compra.
 
 **Atributos:**
 
@@ -781,39 +940,45 @@ CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 | telefono | Teléfono de contacto |
 | correo | Correo electrónico |
 
-> 💡 El Pedido continúa relacionado con Usuario para conocer qué cuenta realizó la compra, pero DatosClientePedido preserva la información histórica aunque posteriormente el Usuario actualice sus datos.
+**Reglas:**
+
+- Pedido continúa relacionado con Usuario para identificar qué cuenta realizó la compra.
+- Si el Usuario cambia su teléfono/correo posteriormente, el Pedido histórico no cambia.
 
 ---
 
-### 6.3 DetallePedido
+### 6.5 DetallePedido
 
 **Clasificación:** Entidad interna
 
-**Responsabilidad:** Conservar la información comercial correspondiente a cada variante adquirida en el momento en que la compra fue confirmada.
+**Responsabilidad:** Conservar la información comercial de cada variante adquirida en el momento de la confirmación.
 
 **Atributos conceptuales:**
 
 | Atributo | Descripción |
 |---|---|
 | identificador interno | Identificador del detalle |
+| referenciaVariante | Referencia conceptual a VarianteProducto (trazabilidad) |
 | nombreProducto | Snapshot del nombre del producto |
 | nombreVariante | Snapshot del nombre de la variante |
 | atributosVariante | Snapshot de atributos |
 | cantidad | Cantidad adquirida (>= 1) |
-| precioUnitario | Dinero - precio por unidad |
-| subtotal | Dinero - subtotal de la línea |
+| precioUnitario | Dinero - precio por unidad definitivo |
+| subtotal | Dinero - subtotal histórico de la línea |
 
 **Reglas:**
 
-- Representa snapshot histórico de la unidad comprada.
-- Puede conservar referencia conceptual a VarianteProducto para trazabilidad.
+- Pedido contiene 1..N DetallePedido. Un Pedido confirmado no puede estar vacío.
 - `precioUnitario` es definitivo dentro del Pedido.
-- `subtotal` puede persistirse como snapshot histórico aunque sea calculable.
-- Cambios posteriores de Producto/Variante no modifican el DetallePedido.
+- `subtotal` puede conservarse como snapshot aunque sea calculable.
+- nombreProducto, nombreVariante y atributos son fotografías históricas.
+- Cambios posteriores de Producto/Variante no modifican DetallePedido.
+- La referencia a VarianteProducto sirve para trazabilidad, pero la visualización histórica no debe depender de datos actuales.
+- Un snapshot de atributos puede persistirse de forma técnica sin cambiar la naturaleza conceptual de DetallePedido.
 
 ---
 
-### 6.4 ResumenMonetario
+### 6.6 ResumenMonetario
 
 **Clasificación:** Value Object
 
@@ -823,24 +988,44 @@ CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 
 | Atributo | Descripción |
 |---|---|
-| subtotalProductos | Dinero - subtotal de productos |
-| descuentoAplicado | Dinero - monto de descuento final |
+| subtotalProductos | Dinero (>= 0) |
+| descuentoAplicado | Dinero (>= 0) |
 | codigoDescuento | Código utilizado (opcional) |
-| costoDelivery | Dinero - costo de delivery |
-| igvIncluido | Dinero - parte correspondiente a impuesto |
-| total | Dinero - total final |
+| costoDelivery | Dinero (>= 0) |
+| igvIncluido | Dinero (>= 0) |
+| total | Dinero (>= 0) |
 
-> 💡 El comerciante registra precios finales de venta. No sumar automáticamente 18% de IGV. `igvIncluido` representa la parte del precio correspondiente al impuesto cuando aplique.
+**Reglas:**
+
+- descuentoAplicado no puede superar subtotalProductos en el MVP.
+- El descuento no se aplica al costo de delivery salvo cambio futuro explícito.
+- codigoDescuento es opcional; descuentos automáticos pueden dejarlo vacío.
+
+**Fórmula conceptual:**
+
+```
+total = subtotalProductos - descuentoAplicado + costoDelivery
+```
+
+> ⚠️ igvIncluido NO se suma nuevamente al total. Los precios registrados son finales y el IGV, cuando corresponde, ya está incluido.
 
 ---
 
-### 6.5 DireccionEntrega
+### 6.7 DireccionEntrega y Modalidad
 
-**Clasificación:** Value Object
+**ModalidadEntrega:**
 
-**Responsabilidad:** Representar el destino utilizado en un pedido con modalidad delivery.
+| Valor | Descripción |
+|---|---|
+| RECOJO | Cliente recoje en tienda |
+| DELIVERY | Envío a dirección del cliente |
 
-**Atributos:**
+**Reglas:**
+
+- DELIVERY: DireccionEntrega obligatoria.
+- RECOJO: DireccionEntrega no requerida. Se utiliza la ubicación actual/configurada de la Tienda para el punto de recojo en el MVP.
+
+**DireccionEntrega — Value Object histórico:**
 
 | Atributo | Descripción |
 |---|---|
@@ -849,16 +1034,11 @@ CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 | latitud | Coordenada opcional |
 | longitud | Coordenada opcional |
 
-**Reglas:**
-
-- DELIVERY requiere DireccionEntrega. RECOJO no requiere.
-- Es un snapshot dentro de Pedido.
-- Coordenadas son opcionales.
-- Maps continúa siendo un plus, no requisito obligatorio.
+> 💡 Las coordenadas son opcionales. Maps continúa siendo una mejora opcional. No crear Entity Entrega ni DireccionUsuario.
 
 ---
 
-### 6.6 HistorialEstadoPedido
+### 6.8 HistorialEstadoPedido
 
 **Clasificación:** Entidad interna
 
@@ -872,14 +1052,21 @@ CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 | estado | EstadoPedido |
 | fechaCambio | Fecha del cambio |
 | usuarioResponsable | Usuario que realizó el cambio (opcional) |
-| motivo | Motivo del cambio (opcional, principalmente para cancelaciones) |
+| motivo | Motivo del cambio (opcional) |
 
 **Reglas:**
 
-- La creación de Pedido genera el primer registro CONFIRMADO.
-- Cada cambio de estado genera un nuevo registro.
-- `usuarioResponsable` puede estar ausente cuando el cambio provenga del sistema.
-- `SeguimientoPedido` e `HistorialPedidos` son vistas/consultas derivadas, no Entities.
+- Al crear Pedido debe existir inmediatamente un primer historial CONFIRMADO.
+- Todo cambio efectivo del EstadoPedido genera un nuevo registro de historial.
+- `usuarioResponsable` es opcional cuando el cambio proviene del sistema.
+- El motivo puede utilizarse principalmente para cancelaciones u otros cambios relevantes. No duplicar motivoCancelacion directamente en Pedido.
+
+**Conceptualmente:**
+
+- `Pedido.estadoActual` responde rápidamente la situación actual.
+- `HistorialEstadoPedido` preserva la evolución completa.
+
+> 💡 SeguimientoPedido es información derivada del estado actual + historial.
 
 ---
 
@@ -1144,11 +1331,11 @@ La persistencia de la Notificacion no debe depender del éxito de WebSocket.
 | **EstadoCategoria** | Representar la disponibilidad de una categoría (ACTIVA, INACTIVA) |
 | **EstadoProducto** | Representar la disponibilidad comercial de un producto (ACTIVO, INACTIVO) |
 | **EstadoVariante** | Representar la disponibilidad comercial de una variante (ACTIVA, INACTIVA) |
-| **EstadoPedido** | Representar la etapa actual de atención de un pedido |
-| **EstadoPago** | Representar la situación actual de un pago (PENDING, PROCESSING, APPROVED, REJECTED, CANCELLED) |
-| **EstadoIntentoPago** | Representar el estado de un intento de pago |
-| **EstadoReservaCapacidad** | Representar el estado de una reserva temporal |
-| **RefundStatus** | Representar el estado de reembolso (NONE, PENDING, REFUNDED, FAILED) |
+| **EstadoPedido** | Representar la etapa actual de atención de un pedido (CONFIRMADO, EN_PREPARACION, LISTO, EN_ENTREGA, COMPLETADO, CANCELADO) |
+| **EstadoPago** | Representar la situación actual de un pago (PENDIENTE, PROCESANDO, APROBADO, FALLIDO) |
+| **EstadoIntentoPago** | Representar el estado de un intento (INICIADO, PROCESANDO, APROBADO, RECHAZADO, ERROR) |
+| **EstadoReembolso** | Representar el estado de reembolso (NO_REQUERIDO, PENDIENTE, PROCESANDO, COMPLETADO, FALLIDO) |
+| **EstadoReservaCapacidad** | Representar el estado de una reserva temporal (ACTIVA, PROTEGIDA_PAGO, COMPROMETIDA, EXPIRADA, LIBERADA) |
 | **ModalidadEntrega** | Distinguir RECOJO y DELIVERY |
 | **MetodoPago** | Representar el medio utilizado para realizar un pago |
 | **ProveedorPago** | Representar el proveedor de pagos (MERCADO_PAGO, CULQI) |
@@ -1236,6 +1423,19 @@ La persistencia de la Notificacion no debe depender del éxito de WebSocket.
 | 41 | El descuento de inventario debe ser atómico y condicional; si no hay stock suficiente, no se modifica |
 | 42 | La restauración de inventario por cancelación debe ser idempotente |
 | 43 | La liberación de capacidad por cancelación debe ser idempotente |
+| 44 | Un Pago puede tener como máximo una aprobación financiera válida |
+| 45 | Un IntentoPago rechazado no implica automáticamente Pago = FALLIDO si todavía pueden ejecutarse más intentos |
+| 46 | Los reintentos de pago no extienden la protección de capacidad más allá de proteccionPagoExpiraEn |
+| 47 | Pago APROBADO no crea automáticamente un Pedido |
+| 48 | Un Pedido debe estar respaldado por exactamente un Pago aprobado |
+| 49 | Un Pedido debe estar respaldado por exactamente una ReservaCapacidad comprometida |
+| 50 | montoReembolsado >= 0 y <= monto del Pago |
+| 51 | Un Pedido confirmado no puede estar vacío; debe contener al menos un DetallePedido |
+| 52 | cantidad en DetallePedido debe ser > 0 |
+| 53 | subtotalProductos, descuentoAplicado, costoDelivery, igvIncluido y total en ResumenMonetario deben ser >= 0 |
+| 54 | descuentoAplicado no puede superar subtotalProductos en el MVP |
+| 55 | ConfirmPurchase puede reintentarse sin duplicar efectos (idempotencia) |
+| 56 | Cancelar un Pedido puede reintentarse sin duplicar restauración de stock, capacidad o reembolso |
 
 ---
 
@@ -1455,22 +1655,22 @@ En el MVP: **1 pedido = 1 cupo**.
 
 | EstadoPago | Descripción |
 |---|---|
-| PENDING | Inicial |
-| PROCESSING | En proceso |
-| APPROVED | Aprobado |
-| REJECTED | Rechazado |
-| CANCELLED | Cancelado |
+| PENDIENTE | El Pago fue creado pero todavía no se encuentra ejecutando un intento activo |
+| PROCESANDO | Existe un intento de pago en procesamiento |
+| APROBADO | El proveedor confirmó una aprobación financiera válida |
+| FALLIDO | El proceso financiero terminó definitivamente sin obtener una aprobación válida |
 
-**RefundStatus:**
+**EstadoReembolso:**
 
 | Valor | Descripción |
 |---|---|
-| NONE | Sin reembolso |
-| PENDING | Reembolso pendiente |
-| REFUNDED | Reembolsado |
-| FAILED | Falló el reembolso |
+| NO_REQUERIDO | El pago no requiere reembolso |
+| PENDIENTE | Reembolso pendiente de procesamiento |
+| PROCESANDO | Reembolso en procesamiento |
+| COMPLETADO | Reembolso completado |
+| FALLIDO | El proceso de reembolso falló |
 
-> 💡 Un pago históricamente APPROVED puede posteriormente estar REFUNDED sin modificar falsamente su estado financiero original. No crear entidad Reembolso en el MVP.
+> 💡 Pago APROBADO con posterior reembolso COMPLETADO conserva el hecho histórico de aprobación. No modificar falsamente APROBADO → FALLIDO. No crear entidad Reembolso en el MVP.
 
 ---
 
@@ -1543,7 +1743,7 @@ CONFIRMADO → EN_PREPARACION → LISTO → EN_ENTREGA → COMPLETADO
 CANCELADO (terminal alternativo)
 ```
 
-> ⚠️ EN_ENTREGA solo aplica para DELIVERY. COMPLETADO y CANCELADO son estados terminales. La cancelación operativa no modifica falsamente un Pago APPROVED a REJECTED o CANCELLED.
+> ⚠️ EN_ENTREGA solo aplica para DELIVERY. COMPLETADO y CANCELADO son estados terminales. La cancelación operativa no modifica falsamente un Pago APROBADO a FALLIDO.
 
 ---
 
@@ -1830,7 +2030,7 @@ ACTIVA → PROTEGIDA_PAGO → COMPROMETIDA
 
 > 💡 Las operaciones de negocio pueden coordinar varios Aggregate Roots sin necesidad de fusionarlos en uno solo.
 
-### Ejemplo: ConfirmPurchaseUseCase
+### ConfirmPurchaseUseCase
 
 Coordina conceptualmente los siguientes Aggregate Roots:
 
@@ -1838,22 +2038,85 @@ Coordina conceptualmente los siguientes Aggregate Roots:
 - **ReservaCapacidad**
 - **Inventario**
 - **Pedido**
+- **Carrito**
 
-**Flujo conceptual:**
+**Precondiciones:**
 
-1. Verificar que el Pago esté APPROVED.
-2. Verificar que no exista ya un Pedido para el mismo Pago.
-3. Verificar que la ReservaCapacidad siga PROTEGIDA_PAGO y válida.
-4. Verificar inventario suficiente en las variantes controladas.
-5. Crear Pedido con todos sus snapshots.
-6. Descontar Inventario.
-7. Cambiar ReservaCapacidad a COMPROMETIDA.
-8. Finalizar el Carrito.
-9. Confirmar la operación como una única unidad consistente.
+1. Pago = APROBADO
+2. No existe Pedido para ese Pago
+3. ReservaCapacidad = PROTEGIDA_PAGO
+4. La protección temporal sigue vigente
+5. Las variantes controladas tienen inventario suficiente
 
-> ⚠️ Esta coordinación no convierte Pago, ReservaCapacidad, Inventario y Pedido en un único Aggregate. Cada uno mantiene su propia frontera de consistencia y ciclo de vida independiente.
+**Operación local conceptual:**
 
-La transacción, concurrencia e idempotencia técnicas se detallarán posteriormente en arquitectura/diseño.
+1. Descontar todos los Inventarios necesarios (de forma atómica y condicional)
+2. Crear Pedido
+3. Crear sus DetallePedido
+4. Crear primer HistorialEstadoPedido = CONFIRMADO
+5. Asociar Pedido con Pago
+6. Asociar Pedido con ReservaCapacidad
+7. ReservaCapacidad → COMPROMETIDA
+8. Finalizar/vaciar el Carrito
+9. Confirmar la operación local
+
+**Si falla cualquier paso local:**
+
+- Revertir la transacción local
+- No dejar Pedido parcial
+- No dejar descuentos parciales de Inventario
+- No dejar ReservaCapacidad incorrectamente COMPROMETIDA
+
+**Si el Pago ya fue aprobado externamente:**
+
+- Iniciar compensación/reembolso después del fallo local.
+
+> ⚠️ La coordinación de múltiples Aggregate Roots NO implica que pertenezcan al mismo Aggregate. Cada uno mantiene su propia frontera de consistencia y ciclo de vida independiente.
+
+---
+
+### Cancelación Temprana
+
+**Regla APROBADA:**
+
+Si un Pedido se cancela mientras permanece en CONFIRMADO, antes de EN_PREPARACION:
+
+1. Pedido → CANCELADO
+2. ReservaCapacidad COMPROMETIDA → LIBERADA
+3. Restaurar el inventario previamente descontado
+4. Iniciar reembolso/compensación cuando corresponda
+5. Registrar HistorialEstadoPedido = CANCELADO con motivo
+
+**Idempotencia:**
+
+Todo debe realizarse de forma idempotente. Una misma cancelación no puede:
+
+- Restaurar inventario dos veces
+- Liberar capacidad dos veces
+- Iniciar múltiples reembolsos por error
+
+---
+
+### Cancelación desde EN_PREPARACION en adelante
+
+Desde EN_PREPARACION en adelante:
+
+- Una eventual cancelación NO restaura automáticamente inventario
+- NO libera automáticamente capacidad
+
+**Motivo:** El negocio pudo haber consumido materiales y capacidad operativa. La política de reembolso correspondiente puede ser parcial según las reglas ya definidas. No agregar lógica avanzada de recuperación de insumos al MVP.
+
+---
+
+### Invariantes de Idempotencia
+
+- Un mismo Pago aprobado puede producir máximo un Pedido.
+- Una misma ReservaCapacidad puede respaldar máximo un Pedido.
+- ConfirmPurchase puede recibirse/reintentarse varias veces sin duplicar efectos.
+- Cancelar un Pedido puede reintentarse sin duplicar restauración de stock/capacidad/reembolso.
+- Un callback/webhook repetido del proveedor no debe generar múltiples Pedidos.
+
+> 📌 Los mecanismos técnicos concretos (Idempotency-Key HTTP, Redis, locks distribuidos) pertenecen a arquitectura/infraestructura, no al modelo de dominio.
 
 ---
 
@@ -1891,39 +2154,46 @@ Dinero, AtributoVariante, UbicacionTienda, ConfiguracionEntrega, ConfiguracionTr
 | Relaciones del Dominio | ✅ Completado |
 | Agregados del Dominio | ✅ Completado |
 | Coordinación entre Agregados | ✅ Completado |
-| Atributos detallados - Todos los aggregates | ✅ Completado |
-| Catálogo (Categoría, Producto, Variante) | ✅ Completado |
-| Reglas de Inventario y estrategia de concurrencia | ✅ Cerrada |
-| Reglas de Capacidad y estrategia de concurrencia | ✅ Cerrada |
-| Carrito e ItemCarrito | ✅ Completado |
-| Descuento (reglas y prioridad) | ✅ Completado |
-| Cancelación: capacidad e inventario | ✅ Completado |
-| Elegibilidad para reseñar | ✅ Aprobada |
-| Pago, IntentoPago, Pedido, DetallePedido, HistorialEstadoPedido | 🔄 Pendiente |
-| ResumenMonetario y relaciones finales | 🔄 Pendiente |
-| Confirmación transaccional completa | 🔄 Pendiente |
-| Refund/compensación y estados | 🔄 Pendiente |
-| Revisión final del equipo | 🔄 Pendiente |
+| Catálogo (Categoría, Producto, Variante) | ✅ Cerrado |
+| Inventario y estrategia de concurrencia | ✅ Cerrado |
+| Carrito e ItemCarrito | ✅ Cerrado |
+| Descuento (reglas y prioridad) | ✅ Cerrado |
+| Capacidad y estrategia de concurrencia | ✅ Cerrado |
+| Pago, EstadoPago, IntentoPago, EstadoIntentoPago | ✅ Cerrado |
+| Estados de Reembolso/Compensación | ✅ Cerrado |
+| Pedido, DetallePedido, HistorialEstadoPedido | ✅ Cerrado |
+| ResumenMonetario, DatosClientePedido, DireccionEntrega | ✅ Cerrado |
+| ConfirmPurchaseUseCase e idempotencia | ✅ Cerrado |
+| Cancelación temprana e idempotencia | ✅ Cerrado |
+| Favorito, Reseña, Notificacion | 🔄 Revisión pendiente |
+| Revisión final de normalización y modelo ER | 🔄 Pendiente |
+| Definición de PK/FK físicas, índices, constraints | 🔄 Pendiente |
+| Definición de nombres finales de tablas/columnas | 🔄 Pendiente |
+| Posterior mapeo JPA y migración Flyway | 🔄 Pendiente |
 
-**Decisiones tomadas en esta versión (v1.4):**
+**Decisiones tomadas en esta versión (v1.5):**
 
-- Catálogo: reglas de Categoría, Producto y Variante confirmadas.
-- Inventario: relación con VarianteProducto, control de inventario, estrategia de concurrencia (actualización condicional atómica).
-- Carrito e ItemCarrito: información comercial viva vs Pedido como fotografía histórica.
-- Descuento: reglas de prioridad y límite de un descuento automático simultáneo.
-- Capacidad: reglas de ConfiguracionCapacidad, ExcepcionCapacidad y PeriodoCapacidad.
-- ReservaCapacidad: estados definitivos (ACTIVA, PROTEGIDA_PAGO, COMPROMETIDA, EXPIRADA, LIBERADA) y flujo correcto.
-- Capacidad disponible: no depende de scheduler como fuente de verdad.
-- Estrategia de concurrencia de Capacidad: bloqueo pesimista durante creación de ReservaCapacidad.
-- Cancelación: idempotencia de liberación/restauración.
+- Pago: estados definitivos (PENDIENTE, PROCESANDO, APROBADO, FALLIDO), atributos completos incluyendo montoReembolsado y referenciaReembolso.
+- IntentoPago: numeroIntento, EstadoIntentoPago (INICIADO, PROCESANDO, APROBADO, RECHAZADO, ERROR).
+- EstadoReembolso: dimensión separada de EstadoPago (NO_REQUERIDO, PENDIENTE, PROCESANDO, COMPLETADO, FALLIDO).
+- Protección temporal: reintentos no extienden protección de capacidad.
+- Pago aprobado ≠ Pedido automático: flujo correcto documentado.
+- Pedido: relaciones confirmadas con Pago, ReservaCapacidad, Usuario y Tienda.
+- DetallePedido: referencia conceptual a VarianteProducto para trazabilidad.
+- ResumenMonetario: restricciones de importes y fórmula.
+- ConfirmPurchaseUseCase: precondiciones, flujo completo, manejo de fallos.
+- Idempotencia conceptual: invariance de confirmación y cancelación.
+- Cancelación temprana: efectos sobre Pedido, ReservaCapacidad, Inventario y reembolso.
 
 **Decisiones de arquitectura técnica pendientes:**
 
 - Detalles de implementación de transacciones (@Transactional, eventos de dominio, etc.)
-- Mechanismos técnicos de idempotencia
-- queries concretas de bloqueo pesimista
+- Mecanismos técnicos de idempotencia (Idempotency-Key HTTP, Redis, locks distribuidos)
+- Queries concretas de bloqueo pesimista y actualización condicional
+- Timeouts técnicos del SDK/HTTP del proveedor de pagos
+- Posterior mapeo JPA y migración Flyway inicial
 
-> 📌 Modelo de dominio v1.4 conceptualmente cerrado para: catálogo, inventario, carrito, descuento y capacidad. Pendiente: pago, pedido y validación final antes del modelo entidad-relación.
+> 📌 El núcleo transaccional del dominio se encuentra definido. El modelo queda pendiente de revisión final y traducción al modelo entidad-relación físico.
 
 ---
 
