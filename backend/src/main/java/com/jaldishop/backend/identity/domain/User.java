@@ -57,6 +57,32 @@ public class User {
         );
     }
 
+    public static User reconstitute(
+            UUID id,
+            String email,
+            String password,
+            String firstName,
+            String lastName,
+            String phone,
+            UserStatus status,
+            Set<Role> roles,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        return new User(
+                id,
+                firstName,
+                lastName,
+                email,
+                password,
+                status,
+                phone,
+                createdAt,
+                updatedAt,
+                roles
+        );
+    }
+
     public static void validateRequired(String value, String field) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(
@@ -91,6 +117,10 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 
     public UserStatus getStatus() {
