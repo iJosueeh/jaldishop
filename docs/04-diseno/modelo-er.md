@@ -1365,14 +1365,14 @@ Después de esta actualización, quedan como pendientes:
 2. ~~Confirmar valores VARCHAR exactos de todos los CHECK de estados~~ ✅ Cerrado en v1.4
 3. ~~Revisar si se utilizará Flyway desde el primer commit de esquema~~ ✅ Cerrado: Flyway será utilizado
 4. ~~Definir estrategia de rollback para migraciones Flyway~~ ✅ Cerrado: forward-only + backup/restore
-5. Generar diagrama ER final
-6. Generar V1__initial_schema.sql
-7. Ejecutar migración sobre Neon PostgreSQL
-8. Revisar errores/restricciones reales del DDL
-9. Validar consultas críticas con EXPLAIN ANALYZE posteriormente
-10. Realizar mapeo JPA después de estabilizar el esquema
+5. Generar diagrama ER final → **EN PROGRESO** (asignado Sprint 2)
+6. Generar V1__initial_schema.sql → **EN PROGRESO** (asignado Sprint 2)
+7. Ejecutar migración sobre Neon PostgreSQL → Pendiente post-DDL
+8. Revisar errores/restricciones reales del DDL → Pendiente post-DDL
+9. Validar consultas críticas con EXPLAIN ANALYZE posteriormente → Pendiente post-DDL
+10. Realizar mapeo JPA después de estabilizar el esquema → Pendiente post-DDL
 11. ~~Definir longitud exacta de password_hash según algoritmo~~ ✅ Cerrado: VARCHAR(255)
-12. Diseño técnico del procesamiento de webhooks de Mercado Pago
+12. Diseño técnico del procesamiento de webhooks de Mercado Pago → Pendiente futura
 
 **NO vuelven a listarse como pendientes:**
 - UUID vs BIGINT (cerrado)
@@ -1388,6 +1388,9 @@ Después de esta actualización, quedan como pendientes:
 - **Proveedor de pagos MVP (cerrado: Mercado Pago)**
 - **Estrategia de idempotencia de pagos (cerrada)**
 - **Diferenciación idempotency_key / provider_payment_id (cerrada)**
+- **Flyway desde primer commit (cerrado)**
+- **Estrategia rollback Flyway (cerrada: forward-only + backup)**
+- **password_hash VARCHAR(255) (cerrado)**
 
 ---
 

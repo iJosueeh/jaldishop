@@ -49,9 +49,9 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | Reglas de Negocio (RN-01 a 15) & Modelo de Dominio | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Modelo de Dominio & Flujo Completo del Pedido | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | Historias de Usuario (MoSCoW) & Criterios de Aceptación | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | BE-01 Dominio Identity + BE-05 JPA + BE-06 JWT | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | BE-02 Migración Roles Iniciales | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | BE-03 Casos de Uso Auth (Registro/Login) | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
 ---
 
@@ -88,16 +88,17 @@ jaldishop/
 │   │   ├── 📄 reglas-negocio.md        # Reglas e invariantes del dominio (RN-01 a 15) (v1.1)
 │   │   ├── 📄 historia.md              # Historias de usuario del MVP (v1.1)
 │   │   └── 📄 modelo-dominio.md        # Modelo de dominio y conceptos (v1.0)
-│   ├── 📁 04-design/                   # Modelado de procesos y UX
-│   │   └── 📁 proceso/
-│   │       └── 📄 as-is-to-be.md       # Diagramas comparativos AS-IS vs TO-BE
-│   ├── 📁 05-arquitectura/              # Decisiones arquitectónicas
-│   │   └── 📄 arquitectura-sistema.md    # Arquitectura del sistema (v0.2)
+│   ├── 📁 04-diseno/                   # Modelado de persistencia
+│   │   ├── 📄 modelo-er.md             # Modelo Entidad-Relación v1.6 (Listo para DDL)
+│   │   ├── 📄 diagrama-er.md           # Diagrama ER visual
+│   │   └── 📄 as-is-to-be.md           # Diagramas comparativos AS-IS vs TO-BE
+│   ├── 📁 05-arquitectura/             # Decisiones arquitectónicas
+│   │   └── 📄 arquitectura-sistema.md  # Arquitectura del sistema (v0.2)
 │   ├── 📁 06-scrum/                    # Gestión ágil de sprints
-│   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de capacidad (Completado)
-│   │   └── 📄 sprint-02.md             # Sprint 2: Definición del Producto (En Progreso)
+│   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de Capacidad (Completado)
+│   │   └── 📄 sprint-02.md             # Sprint 2: Backend Base (En Progreso)
 │   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
-├── 📁 backend/                         # Servidor Spring Boot (Próximo Sprint)
+├── 📁 backend/                         # Servidor Spring Boot (En Desarrollo)
 ├── 📁 frontend/                        # Aplicación Web (Próximo Sprint)
 └── 📄 README.md                        # Portal principal del repositorio
 ```
@@ -109,8 +110,8 @@ jaldishop/
 ```mermaid
 flowchart TD
     S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
-    S2["Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio - En Progreso"]
-    S3["Sprint 3: Backend Spring Boot, API REST y Persistencia - Pendiente"]
+    S2["Sprint 2: Backend Base (Identity + JWT) - En Progreso"]
+    S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Pendiente"]
     S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
     S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]
 
@@ -120,8 +121,8 @@ flowchart TD
 | Sprint | Enfoque | Estado | Entregable Clave |
 |:---:|---|:---:|---|
 | **01** | Modelo de Capacidad y Casos de Estudio | `COMPLETADO` | [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md) |
-| **02** | Definición del Producto & Modelo de Dominio | `EN PROGRESO` | [Sprint 02 Backlog & Trello](./docs/06-scrum/sprint-02.md) |
-| **03** | Arquitectura Backend y Persistencia | `PENDIENTE` | Diagrama ER, API REST Spring Boot |
+| **02** | Backend Base (Identity + JWT) | `EN PROGRESO` | [Sprint 02 Backlog](./docs/06-scrum/sprint-02.md) |
+| **03** | Backend - Pedidos, Capacidad y Pagos | `PENDIENTE` | Módulos de dominio completos |
 | **04** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Next.js / Angular |
 | **05** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
 
