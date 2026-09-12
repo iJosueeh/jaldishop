@@ -47,12 +47,12 @@ flowchart LR
 
 | Prioridad | Tarjeta | Responsable | Estado | Entregable |
 |:---:|---|:---:|:---:|---|
-| 🔴 **Alta** | BE-01 · Implementar dominio Identity | Josué | `EN PROGRESO` | User, Role, enums y ports |
+| 🔴 **Alta** | BE-01 · Implementar dominio Identity | Josué | `COMPLETADO` | User, Role, enums y ports |
 | 🔴 **Alta** | BE-02 · Preparar datos iniciales roles | Katherine | `PENDIENTE` | Diseño + migración V2__seed_roles.sql |
 | 🔴 **Alta** | BE-03 · Diseñar casos de uso Auth | Mia | `PENDIENTE` | Flujos Registro/Login + DTOs/errores |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
-| 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `PENDIENTE` | Entities + repositories + adapter |
-| 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `PENDIENTE` | Security/JWT funcionando |
+| 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
+| 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
 
 ---
 
@@ -66,21 +66,21 @@ flowchart LR
 **Objetivo:** Implementar el modelo de dominio inicial del módulo Identity siguiendo el modelo físico V1 ya validado. El dominio debe permanecer independiente de Spring, JPA, JWT y PostgreSQL.
 
 **Checklist:**
-- [ ] Crear UserStatus (enum)
-- [ ] Crear RoleName (enum)
-- [ ] Crear Role (entidad)
-- [ ] Crear User (entidad)
-- [ ] Implementar User.create(...)
-- [ ] Generar UUID desde aplicación/dominio
-- [ ] Normalizar email
-- [ ] Implementar canAuthenticate()
-- [ ] Implementar getFullName()
-- [ ] Crear UserRepository (puerto)
-- [ ] Crear RoleRepository (puerto)
-- [ ] Crear UserTest
-- [ ] Crear RoleTest
-- [ ] Ejecutar tests
-- [ ] Abrir Pull Request
+- [x] Crear UserStatus (enum)
+- [x] Crear RoleName (enum)
+- [x] Crear Role (entidad)
+- [x] Crear User (entidad)
+- [x] Implementar User.create(...)
+- [x] Generar UUID desde aplicación/dominio
+- [x] Normalizar email
+- [x] Implementar canAuthenticate()
+- [x] Implementar getFullName()
+- [x] Crear UserRepository (puerto)
+- [x] Crear RoleRepository (puerto)
+- [x] Crear UserTest
+- [x] Crear RoleTest
+- [x] Ejecutar tests
+- [x] Abrir Pull Request
 
 **Decisiones cerradas que aplican:**
 - UUID generado por JPA, no PostgreSQL
@@ -210,12 +210,12 @@ AuthResponse
 **Objetivo:** Implementar la capa de persistencia con JPA siguiendo el modelo físico V1.
 
 **Checklist:**
-- [ ] Crear JPA Entities (User, Role)
-- [ ] Crear Repositorios JPA
-- [ ] Crear Adapter de puertos
-- [ ] Configurar schema en application.properties
-- [ ] Ejecutar tests de integración
-- [ ] Abrir Pull Request
+- [x] Crear JPA Entities (User, Role)
+- [x] Crear Repositorios JPA
+- [x] Crear Adapter de puertos
+- [x] Configurar schema en application.properties
+- [x] Ejecutar tests de integración
+- [x] Abrir Pull Request
 
 ---
 
@@ -227,13 +227,13 @@ AuthResponse
 **Objetivo:** Integrar JWT con la autenticación usando UUID como identificador.
 
 **Checklist:**
-- [ ] Configurar Spring Security
-- [ ] Implementar JwtTokenProvider
-- [ ] Implementar JwtAuthenticationFilter
-- [ ] Configurar endpoints públicos/privados
-- [ ] Probar login completo
-- [ ] Probar access/refresh tokens
-- [ ] Abrir Pull Request
+- [x] Configurar Spring Security
+- [x] Implementar JwtTokenProvider
+- [x] Implementar JwtAuthenticationFilter
+- [x] Configurar endpoints públicos/privados
+- [x] Probar login completo
+- [x] Probar access/refresh tokens
+- [x] Abrir Pull Request
 
 ---
 
@@ -241,10 +241,10 @@ AuthResponse
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 0 / 6 (0%) |
-| Entregables en desarrollo activo | 1 / 6 (17%) |
-| Entregables pendientes | 5 / 6 (83%) |
-| **Estado General** | `EN PROGRESO INICIAL` |
+| Entregables completados | 3 / 6 (50%) |
+| Entregables en desarrollo activo | 0 / 6 (0%) |
+| Entregables pendientes | 3 / 6 (50%) |
+| **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---
 
