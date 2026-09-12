@@ -1,0 +1,2083 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+        <link rel="prev" href="../sprint-01/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Sprint 02 (En Progreso) - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sprint-2-backend-base" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sprint 02 (En Progreso)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-design/proceso/as-is-to-be.md" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Proceso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Proceso
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Proceso
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-design/proceso/as-is-to-be.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-gestion-agil-backlog-y-entregables-del-sprint-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 02
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-backlog-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Backlog del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tarjetas-de-trabajo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Tarjetas de Trabajo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tarjetas de Trabajo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#be-01-implementar-dominio-y-puertos-de-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-01 | Implementar dominio y puertos de Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-02-preparar-migracion-de-roles-iniciales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-02 | Preparar migración de roles iniciales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-03-disenar-e-implementar-casos-de-uso-registro-y-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-03 | Diseñar e implementar casos de uso Registro y Login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-04-code-review-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-04 | Code Review Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-05-persistencia-jpa-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-05 | Persistencia JPA Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-06-integrar-jwt-con-uuid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-06 | Integrar JWT con UUID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-10-implementar-modulo-de-notificaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-10 | Implementar módulo de Notificaciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-11-implementar-modulo-base-de-tienda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-11 | Implementar módulo base de Tienda
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-estado-de-avance-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Estado de Avance del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-decisiones-cerradas-del-modelo-que-aplian-a-este-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Decisiones Cerradas del Modelo que Aplian a Este Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dependencias-entre-tarjetas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Dependencias entre Tarjetas
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-gestion-agil-backlog-y-entregables-del-sprint-02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 02
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-backlog-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Backlog del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tarjetas-de-trabajo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Tarjetas de Trabajo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tarjetas de Trabajo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#be-01-implementar-dominio-y-puertos-de-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-01 | Implementar dominio y puertos de Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-02-preparar-migracion-de-roles-iniciales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-02 | Preparar migración de roles iniciales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-03-disenar-e-implementar-casos-de-uso-registro-y-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-03 | Diseñar e implementar casos de uso Registro y Login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-04-code-review-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-04 | Code Review Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-05-persistencia-jpa-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-05 | Persistencia JPA Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-06-integrar-jwt-con-uuid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-06 | Integrar JWT con UUID
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-10-implementar-modulo-de-notificaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-10 | Implementar módulo de Notificaciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-11-implementar-modulo-base-de-tienda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-11 | Implementar módulo base de Tienda
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-estado-de-avance-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Estado de Avance del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-decisiones-cerradas-del-modelo-que-aplian-a-este-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Decisiones Cerradas del Modelo que Aplian a Este Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dependencias-entre-tarjetas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Dependencias entre Tarjetas
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="sprint-2-backend-base">Sprint 2: Backend Base</h1>
+<h3 id="jaldishop-gestion-agil-backlog-y-entregables-del-sprint-02">JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 02</h3>
+<p><a href="./"><img alt="Estado" src="https://img.shields.io/badge/Estado-En_Progreso-yellow?style=for-the-badge&amp;logo=clockify&amp;logoColor=white" /></a>
+<a href="./"><img alt="Fase" src="https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge" /></a>
+<a href="./"><img alt="Duración" src="https://img.shields.io/badge/Duración-1_Semana-blue?style=for-the-badge" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>06-Scrum</code> &gt; <strong>Sprint 02</strong><br />
+<a href="../sprint-01/">⬅ Sprint 01</a> | <a href="../../README.md">🏠 Índice General</a> | <a href="../../03-requisitos/alcance-mvp/">Alcance del MVP ➡</a></p>
+<hr />
+<h2 id="1-objetivo-del-sprint">1. Objetivo del Sprint</h2>
+<blockquote>
+<p>📌 <strong>Nota:</strong> Iniciar la implementación del backend de JaldiShop con el módulo Identity (autenticación y usuarios).</p>
+</blockquote>
+<ul>
+<li><strong>Fase:</strong> Semana 3 — <em>Backend Base</em>.</li>
+<li><strong>Propósito:</strong> Implementar el dominio, puertos, persistencia y autenticación JWT.</li>
+<li><strong>Meta Central:</strong> Tener el módulo Identity completo y funcionando con JWT.</li>
+</ul>
+<hr />
+<h2 id="2-backlog-del-sprint">2. Backlog del Sprint</h2>
+<pre class="mermaid"><code>flowchart LR
+    subgraph ALTA["Prioridad Alta"]
+        T1["BE-01 · Dominio Identity"]
+        T2["BE-02 · Migración Roles"]
+        T3["BE-03 · Casos de Uso Auth"]
+        T7["BE-10 · Módulo Notificaciones (Mia)"]
+        T8["BE-11 · Módulo Base Tienda (Josué)"]
+    end
+
+    subgraph MEDIA["Prioridad Media"]
+        T4["BE-04 · Code Review Identity"]
+        T5["BE-05 · Persistencia JPA"]
+    end
+
+    subgraph BAJA["Prioridad Baja"]
+        T6["BE-06 · Integrar JWT"]
+    end
+
+    ALTA --&gt; MEDIA --&gt; BAJA</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Prioridad</th>
+<th>Tarjeta</th>
+<th style="text-align: center;">Responsable</th>
+<th style="text-align: center;">Estado</th>
+<th>Entregable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">🔴 <strong>Alta</strong></td>
+<td>BE-01 · Implementar dominio Identity</td>
+<td style="text-align: center;">Josué</td>
+<td style="text-align: center;"><code>COMPLETADO</code></td>
+<td>User, Role, enums y ports</td>
+</tr>
+<tr>
+<td style="text-align: center;">🔴 <strong>Alta</strong></td>
+<td>BE-02 · Preparar datos iniciales roles</td>
+<td style="text-align: center;">Katherine</td>
+<td style="text-align: center;"><code>PENDIENTE</code></td>
+<td>Diseño + migración V2__seed_roles.sql</td>
+</tr>
+<tr>
+<td style="text-align: center;">🔴 <strong>Alta</strong></td>
+<td>BE-03 · Casos de uso Auth (Registro y Login)</td>
+<td style="text-align: center;">Josué</td>
+<td style="text-align: center;"><code>COMPLETADO</code></td>
+<td>Flujos Registro/Login + DTOs + AuthController</td>
+</tr>
+<tr>
+<td style="text-align: center;">🔴 <strong>Alta</strong></td>
+<td>BE-10 · Implementar módulo de Notificaciones</td>
+<td style="text-align: center;">Mia</td>
+<td style="text-align: center;"><code>PENDIENTE</code></td>
+<td>Módulo Notification completo (dominio, JPA, casos de uso, REST, tests)</td>
+</tr>
+<tr>
+<td style="text-align: center;">🔴 <strong>Alta</strong></td>
+<td>BE-11 · Implementar módulo base de Tienda</td>
+<td style="text-align: center;">Josué</td>
+<td style="text-align: center;"><code>COMPLETADO</code></td>
+<td>Store completo (dominio, JPA, casos de uso, REST, 29 tests)</td>
+</tr>
+<tr>
+<td style="text-align: center;">🟠 <strong>Media</strong></td>
+<td>BE-04 · Code Review Identity</td>
+<td style="text-align: center;">Equipo</td>
+<td style="text-align: center;"><code>PENDIENTE</code></td>
+<td>Revisión cruzada antes de JPA</td>
+</tr>
+<tr>
+<td style="text-align: center;">🟠 <strong>Media</strong></td>
+<td>BE-05 · Persistencia JPA Identity</td>
+<td style="text-align: center;">Josué</td>
+<td style="text-align: center;"><code>COMPLETADO</code></td>
+<td>Entities + repositories + adapter</td>
+</tr>
+<tr>
+<td style="text-align: center;">🟢 <strong>Baja</strong></td>
+<td>BE-06 · Integrar JWT con UUID</td>
+<td style="text-align: center;">Josué</td>
+<td style="text-align: center;"><code>COMPLETADO</code></td>
+<td>Security/JWT funcionando</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-tarjetas-de-trabajo">3. Tarjetas de Trabajo</h2>
+<h3 id="be-01-implementar-dominio-y-puertos-de-identity">📋 BE-01 | Implementar dominio y puertos de Identity</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Entregable:</strong> User, Role, enums y ports</p>
+<p><strong>Objetivo:</strong> Implementar el modelo de dominio inicial del módulo Identity siguiendo el modelo físico V1 ya validado. El dominio debe permanecer independiente de Spring, JPA, JWT y PostgreSQL.</p>
+<p><strong>Checklist:</strong>
+- [x] Crear UserStatus (enum)
+- [x] Crear RoleName (enum)
+- [x] Crear Role (entidad)
+- [x] Crear User (entidad)
+- [x] Implementar User.create(...)
+- [x] Generar UUID desde aplicación/dominio
+- [x] Normalizar email
+- [x] Implementar canAuthenticate()
+- [x] Implementar getFullName()
+- [x] Crear UserRepository (puerto)
+- [x] Crear RoleRepository (puerto)
+- [x] Crear UserTest
+- [x] Crear RoleTest
+- [x] Ejecutar tests
+- [x] Abrir Pull Request</p>
+<p><strong>Decisiones cerradas que aplican:</strong>
+- UUID generado por JPA, no PostgreSQL
+- Email normalizado lowercase por aplicación
+- roles.id es SMALLINT
+- UserStatus: ACTIVE, INACTIVE, SUSPENDED
+- RoleName: CUSTOMER, MERCHANT, ADMIN
+- password_encoded VARCHAR(255) NOT NULL</p>
+<hr />
+<h3 id="be-02-preparar-migracion-de-roles-iniciales">📋 BE-02 | Preparar migración de roles iniciales</h3>
+<p><strong>Responsable:</strong> Katherine<br />
+<strong>Entregable:</strong> Diseño + migración V2__seed_roles.sql</p>
+<p><strong>Objetivo:</strong> La BD tiene la estructura roles, pero necesitamos garantizar que existan los roles iniciales: CUSTOMER, MERCHANT, ADMIN.</p>
+<p><strong>Checklist:</strong>
+- [ ] Revisar tabla roles en modelo-er.md
+- [ ] Confirmar IDs SMALLINT
+- [ ] Definir IDs estables para CUSTOMER/MERCHANT/ADMIN
+- [ ] Crear V2__seed_roles.sql
+- [ ] No modificar V1
+- [ ] Ejecutar Flyway
+- [ ] Verificar flyway_schema_history
+- [ ] Consultar roles insertados
+- [ ] Documentar resultado
+- [ ] Abrir Pull Request</p>
+<p><strong>Decisión de IDs estables:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">-- IDs estables para catálogo de roles</span>
+<span class="c1">-- 1 → CUSTOMER</span>
+<span class="c1">-- 2 → MERCHANT  </span>
+<span class="c1">-- 3 → ADMIN</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">roles</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">)</span>
+<span class="k">VALUES</span>
+<span class="w">    </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">'CUSTOMER'</span><span class="p">),</span>
+<span class="w">    </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">'MERCHANT'</span><span class="p">),</span>
+<span class="w">    </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s1">'ADMIN'</span><span class="p">);</span>
+</code></pre></div></p>
+<hr />
+<h3 id="be-03-disenar-e-implementar-casos-de-uso-registro-y-login">📋 BE-03 | Diseñar e implementar casos de uso Registro y Login</h3>
+<p><strong>Responsable:</strong> Josué (implementado en conjunto con BE-06)<br />
+<strong>Entregable:</strong> Flujos Registro/Login + DTOs + Servicios + AuthController</p>
+<p><strong>Objetivo:</strong> Definir e implementar los casos de uso de Registration y Login en la capa de aplicación y web.</p>
+<p><strong>Checklist:</strong>
+- [x] Documentar flujo Register Customer
+- [x] Documentar flujo Register Merchant
+- [x] Documentar flujo Login
+- [x] Definir campos de RegisterRequest
+- [x] Definir campos de LoginRequest
+- [x] Definir AuthResult / UserResponse
+- [x] Definir errores esperados
+- [x] Definir asignación CUSTOMER/MERCHANT
+- [x] Confirmar que ADMIN no tiene registro público
+- [x] Documentar validación de UserStatus
+- [x] Documentar comportamiento de email duplicado
+- [x] Implementar RegisterCustomerService y AuthenticateUserService
+- [x] Implementar AuthController REST con validaciones Bean Validation
+- [x] Pasar a Code Review</p>
+<p><strong>Flujo Register Customer (ejemplo):</strong>
+<div class="highlight"><pre><span></span><code>Register Customer
+       ↓
+validar request
+       ↓
+normalizar email
+       ↓
+¿email existente?
+   ↙        ↘
+ sí         no
+409       encode password
+              ↓
+       obtener CUSTOMER
+              ↓
+          crear User
+              ↓
+            save
+</code></pre></div></p>
+<p><strong>Flujo Login (ejemplo):</strong>
+<div class="highlight"><pre><span></span><code>email + password
+       ↓
+buscar User
+       ↓
+PasswordEncoder.matches()
+       ↓
+¿ACTIVE?
+       ↓
+obtener roles
+       ↓
+JWT
+       ↓
+AuthResponse
+</code></pre></div></p>
+<p><strong>Flujo Register Merchant (Onboarding Atómico con Tienda - RN-STR-03):</strong>
+<div class="highlight"><pre><span></span><code>Register Merchant (Datos Comerciante + Datos Tienda)
+       ↓
+validar request (Bean Validation)
+       ↓
+normalizar email y slug (lowercase)
+       ↓
+¿email existente? ── sí ──&gt; 409 Conflict (EMAIL_ALREADY_EXISTS)
+       ↓ no
+¿slug existente en stores? ── sí ──&gt; 409 Conflict (STORE_SLUG_ALREADY_EXISTS)
+       ↓ no
+encode password (BCrypt)
+       ↓
+obtener rol MERCHANT (RoleRepository)
+       ↓
+crear User con rol MERCHANT (User.create)
+       ↓
+guardar User (UserRepository.save)
+       ↓
+crear Store con merchant_user_id (Store.create)
+       ↓
+guardar Store (StoreRepository.save)
+       ↓
+generar JWT para el comerciante
+       ↓
+MerchantAuthResponse (201 CREATED)
+</code></pre></div></p>
+<p><strong>Reglas de Asignación de Roles (CUSTOMER vs MERCHANT vs ADMIN):</strong>
+- <strong>Inmutabilidad por cliente:</strong> Ningún DTO de registro recibe el parámetro <code>role</code>. El rol nunca lo decide el cliente para evitar escalamiento de privilegios.
+- <strong>Asignación de CUSTOMER:</strong> El endpoint público <code>POST /api/v1/auth/register</code> asigna única y automáticamente el rol <code>CUSTOMER</code>.
+- <strong>Asignación de MERCHANT:</strong> El endpoint <code>POST /api/v1/auth/register/merchant</code> asigna el rol <code>MERCHANT</code> de forma atómica únicamente si se registra y valida la información de su primera y única tienda (<code>RN-STR-03</code>).
+- <strong>Exclusión de ADMIN:</strong> No existe endpoint de registro público para <code>ADMIN</code>. Solo se precarga por migraciones SQL o se gestiona internamente.</p>
+<hr />
+<h3 id="be-04-code-review-identity">📋 BE-04 | Code Review Identity</h3>
+<p><strong>Responsable:</strong> Todo el equipo<br />
+<strong>Entregable:</strong> Revisión cruzada antes de JPA</p>
+<p><strong>Objetivo:</strong> Revisar el código del dominio y puertos antes de proceder a la persistencia JPA.</p>
+<p><strong>Checklist:</strong>
+- [ ] Revisar entidades de dominio
+- [ ] Verificar independencia de Spring/JPA
+- [ ] Validar tests unitarios
+- [ ] Confirmar puertos correctos
+- [ ] Aprobar para JPA</p>
+<hr />
+<h3 id="be-05-persistencia-jpa-identity">📋 BE-05 | Persistencia JPA Identity</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Entregable:</strong> Entities + repositories + adapter</p>
+<p><strong>Objetivo:</strong> Implementar la capa de persistencia con JPA siguiendo el modelo físico V1.</p>
+<p><strong>Checklist:</strong>
+- [x] Crear JPA Entities (User, Role)
+- [x] Crear Repositorios JPA
+- [x] Crear Adapter de puertos
+- [x] Configurar schema en application.properties
+- [x] Ejecutar tests de integración
+- [x] Abrir Pull Request</p>
+<hr />
+<h3 id="be-06-integrar-jwt-con-uuid">📋 BE-06 | Integrar JWT con UUID</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Entregable:</strong> Security/JJWT funcionando</p>
+<p><strong>Objetivo:</strong> Integrar JWT con la autenticación usando UUID como identificador.</p>
+<p><strong>Checklist:</strong>
+- [x] Configurar Spring Security
+- [x] Implementar JwtTokenProvider
+- [x] Implementar JwtAuthenticationFilter
+- [x] Configurar endpoints públicos/privados
+- [x] Probar login completo
+- [x] Probar access/refresh tokens
+- [x] Abrir Pull Request</p>
+<hr />
+<h3 id="be-10-implementar-modulo-de-notificaciones">📋 BE-10 | Implementar módulo de Notificaciones</h3>
+<p><strong>Responsable:</strong> Mia<br />
+<strong>Entregable:</strong> Notification domain, JPA persistence, use cases, REST controller, tests y documentación</p>
+<p><strong>Objetivo:</strong>
+Implementar la gestión básica de notificaciones persistentes de JaldiShop, permitiendo consultar las notificaciones de un usuario y marcarlas como leídas, sin acoplar todavía el módulo a eventos de Pedido, Inventario o WebSocket.</p>
+<p><strong>Checklist:</strong>
+- [ ] Crear Notification domain
+- [ ] Crear NotificationStatus
+- [ ] Crear NotificationType
+- [ ] Crear NotificationRepository port
+- [ ] Crear NotificationEntity
+- [ ] Crear NotificationJpaRepository
+- [ ] Crear NotificationPersistenceMapper
+- [ ] Crear NotificationRepositoryAdapter
+- [ ] Caso de uso ListUserNotifications
+- [ ] Caso de uso MarkNotificationAsRead
+- [ ] Caso de uso CountUnreadNotifications
+- [ ] Caso de uso CreateNotification
+- [ ] DTO NotificationResponse
+- [ ] Controller REST
+- [ ] Tests dominio
+- [ ] Tests application
+- [ ] Tests mapper
+- [ ] Tests repository/adapters
+- [ ] Tests endpoint
+- [ ] Documentar endpoints
+- [ ] Abrir Pull Request</p>
+<p><strong>Decisiones cerradas que aplican (modelo-er.md Sección 31):</strong>
+- Tabla: <code>notifications</code> (ya creada en <code>V1__initial_schema.sql</code>)
+- ID: <code>UUID</code> generado por JPA/aplicación
+- <code>user_id</code>: <code>UUID</code> (FK -&gt; <code>users.id</code>, <code>ON DELETE CASCADE</code>)
+- <code>NotificationType</code>: <code>NEW_ORDER</code>, <code>ORDER_STATUS_CHANGED</code>, <code>LOW_STOCK</code>, <code>SYSTEM</code> (VARCHAR(30) NOT NULL)
+- <code>NotificationStatus</code>: <code>UNREAD</code>, <code>READ</code> (VARCHAR(30) NOT NULL)
+- Restricciones semánticas:
+  - <code>status = 'UNREAD'</code> <span class="arithmatex">\(\rightarrow\)</span> <code>read_at IS NULL</code>
+  - <code>status = 'READ'</code> <span class="arithmatex">\(\rightarrow\)</span> <code>read_at IS NOT NULL</code>
+- <code>title</code>: <code>VARCHAR(180) NOT NULL</code>
+- <code>message</code>: <code>TEXT NOT NULL</code>
+- Índices existentes en PostgreSQL:
+  - <code>INDEX(user_id, created_at DESC)</code>
+  - <code>INDEX(user_id, created_at DESC) WHERE status = 'UNREAD'</code>
+- Estructura de paquetes canónica: <code>com.jaldishop.backend.notification</code> (<code>domain</code>, <code>application</code>, <code>infrastructure.persistence</code>, <code>web</code>)</p>
+<hr />
+<h3 id="be-11-implementar-modulo-base-de-tienda">📋 BE-11 | Implementar módulo base de Tienda</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Entregable:</strong> Módulo Store completo (dominio, JPA, casos de uso, REST, 29 tests)</p>
+<p><strong>Objetivo:</strong> Implementar la gestión base de Tiendas de JaldiShop, permitiendo la creación/onboarding por parte de usuarios con rol <code>MERCHANT</code>, consulta de la tienda propia y actualización de configuración, aplicando la regla de negocio <code>1 merchant = 1 store</code> (RN-STR-03) y unicidad de slug.</p>
+<p><strong>Checklist:</strong>
+- [x] Revisar stores en V1 (<code>V1__initial_schema.sql</code> y <code>modelo-er.md</code>)
+- [x] Crear StoreStatus (enum con <code>ACTIVE</code>, <code>INACTIVE</code>, <code>SUSPENDED</code>, <code>CLOSED</code>)
+- [x] Crear Store (entidad de dominio pura con invariantes y métodos de negocio)
+- [x] Crear StoreRepository (puerto de dominio)
+- [x] Tests de dominio (<code>StoreTest.java</code> - 13 tests)
+- [x] Crear StoreEntity (entidad JPA con mapeo exacto de DDL)
+- [x] Crear StoreJpaRepository (Spring Data JPA)
+- [x] Crear StorePersistenceMapper (conversión bidireccional limpia)
+- [x] Crear StoreRepositoryAdapter (adaptador de infraestructura con <code>@Repository</code>)
+- [x] Tests persistencia (<code>StorePersistenceMapperTest.java</code> - 3 tests)
+- [x] CreateStoreService (con validación de <code>1 merchant = 1 store</code> y slug)
+- [x] GetMyStoreService (consulta de tienda propia por <code>merchantUserId</code>)
+- [x] UpdateStoreService (actualización de perfil y configuración de entrega)
+- [x] CreateStoreRequest (DTO de entrada con Bean Validation)
+- [x] UpdateStoreRequest (DTO de entrada)
+- [x] StoreResponse (DTO de salida con factory <code>fromDomain</code>)
+- [x] StoreController (controlador REST en <code>/api/v1/stores</code>)
+- [x] Validar rol <code>MERCHANT</code> (rechaza <code>CUSTOMER</code> con 403 Forbidden)
+- [x] Validar <code>1 merchant = 1 store</code> (rechaza con 409 Conflict)
+- [x] Generar slug (autogeneración en formato kebab-case si viene nulo)
+- [x] Manejar slug duplicado (rechaza con 409 Conflict)
+- [x] Tests application (<code>CreateStoreServiceTest</code>, <code>GetMyStoreServiceTest</code>, <code>UpdateStoreServiceTest</code> - 8 tests)
+- [x] Tests endpoint (<code>StoreControllerTest</code> - 5 tests)
+- [x] Documentar API
+- [x] Pasar a Code Review / PR</p>
+<p><strong>Endpoints expuestos:</strong>
+* <code>POST /api/v1/stores</code>: Crea tienda para el comerciante autenticado (201 CREATED). Valida rol <code>MERCHANT</code>, unicidad de tienda y slug.
+* <code>GET /api/v1/stores/me</code>: Obtiene la tienda del comerciante autenticado (200 OK / 404 NOT FOUND).
+* <code>PUT /api/v1/stores/me</code>: Actualiza perfil y opciones de delivery (200 OK / 400 BAD REQUEST / 404 NOT FOUND).</p>
+<hr />
+<h2 id="4-estado-de-avance-del-sprint">4. Estado de Avance del Sprint</h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th style="text-align: center;">Estado Actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entregables completados</td>
+<td style="text-align: center;">5 / 8 (63%)</td>
+</tr>
+<tr>
+<td>Entregables en desarrollo activo</td>
+<td style="text-align: center;">0 / 8 (0%)</td>
+</tr>
+<tr>
+<td>Entregables pendientes</td>
+<td style="text-align: center;">3 / 8 (37%)</td>
+</tr>
+<tr>
+<td><strong>Estado General</strong></td>
+<td style="text-align: center;"><code>EN PROGRESO AVANZADO</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-decisiones-cerradas-del-modelo-que-aplian-a-este-sprint">5. Decisiones Cerradas del Modelo que Aplian a Este Sprint</h2>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Valor</th>
+<th>Documento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UUID generado por JPA</td>
+<td><code>GenerationType.UUID</code></td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>Email normalizado</td>
+<td>lowercase, trim antes de persistir</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>roles.id</td>
+<td>SMALLINT</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>UserStatus</td>
+<td>ACTIVE, INACTIVE, SUSPENDED</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>RoleName</td>
+<td>CUSTOMER, MERCHANT, ADMIN</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>StoreStatus</td>
+<td>ACTIVE, INACTIVE, SUSPENDED, CLOSED</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>Regla 1 merchant = 1 store</td>
+<td>Restricción UNIQUE(merchant_user_id)</td>
+<td>modelo-er.md / RN-STR-03</td>
+</tr>
+<tr>
+<td>password_encoded</td>
+<td>VARCHAR(255) NOT NULL</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>Flyway</td>
+<td>Utilizado desde migración inicial</td>
+<td>modelo-er.md</td>
+</tr>
+<tr>
+<td>Rollback</td>
+<td>Forward-only + backup/restore</td>
+<td>modelo-er.md</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-dependencias-entre-tarjetas">6. Dependencias entre Tarjetas</h2>
+<pre class="mermaid"><code>graph TD
+    BE01[BE-01 · Dominio Identity] --&gt; BE04[BE-04 · Code Review]
+    BE02[BE-02 · Migración Roles] --&gt; BE04
+    BE03[BE-03 · Casos de Uso Auth] --&gt; BE04
+    BE04 --&gt; BE05[BE-05 · Persistencia JPA]
+    BE05 --&gt; BE06[BE-06 · Integrar JWT]
+    BE06 --&gt; BE11[BE-11 · Módulo Base Store (Josué)]
+    BE01 --&gt; BE10[BE-10 · Notificaciones (Mia)]</code></pre>
+<p><strong>Notas:</strong>
+- BE-01, BE-02 y BE-03 pueden ejecutarse en paralelo
+- BE-04 requiere que las tres tarjetas anteriores estén completas
+- BE-05 depende de BE-04
+- BE-06 depende de BE-05
+- BE-11 utiliza el <code>merchantUserId</code> y la seguridad JWT establecida en BE-06
+- BE-10 puede desarrollarse de forma independiente tras contar con el dominio de Identity (user_id)</p>
+<hr />
+<p><a href="../sprint-01/">⬅ Volver a Sprint 01</a> | <a href="../../README.md">🏠 Volver al Índice General</a> | <a href="../../04-diseno/modelo-er/">Modelo ER ➡</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
