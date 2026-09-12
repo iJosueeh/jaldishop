@@ -188,6 +188,41 @@ JWT
 AuthResponse
 ```
 
+**Flujo Register Merchant (Onboarding Atómico con Tienda - RN-STR-03):**
+```
+Register Merchant (Datos Comerciante + Datos Tienda)
+       ↓
+validar request (Bean Validation)
+       ↓
+normalizar email y slug (lowercase)
+       ↓
+¿email existente? ── sí ──> 409 Conflict (EMAIL_ALREADY_EXISTS)
+       ↓ no
+¿slug existente en stores? ── sí ──> 409 Conflict (STORE_SLUG_ALREADY_EXISTS)
+       ↓ no
+encode password (BCrypt)
+       ↓
+obtener rol MERCHANT (RoleRepository)
+       ↓
+crear User con rol MERCHANT (User.create)
+       ↓
+guardar User (UserRepository.save)
+       ↓
+crear Store con merchant_user_id (Store.create)
+       ↓
+guardar Store (StoreRepository.save)
+       ↓
+generar JWT para el comerciante
+       ↓
+MerchantAuthResponse (201 CREATED)
+```
+
+**Reglas de Asignación de Roles (CUSTOMER vs MERCHANT vs ADMIN):**
+- **Inmutabilidad por cliente:** Ningún DTO de registro recibe el parámetro `role`. El rol nunca lo decide el cliente para evitar escalamiento de privilegios.
+- **Asignación de CUSTOMER:** El endpoint público `POST /api/v1/auth/register` asigna única y automáticamente el rol `CUSTOMER`.
+- **Asignación de MERCHANT:** El endpoint `POST /api/v1/auth/register/merchant` asigna el rol `MERCHANT` de forma atómica únicamente si se registra y valida la información de su primera y única tienda (`RN-STR-03`).
+- **Exclusión de ADMIN:** No existe endpoint de registro público para `ADMIN`. Solo se precarga por migraciones SQL o se gestiona internamente.
+
 ---
 
 ### 📋 BE-04 | Code Review Identity
