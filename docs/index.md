@@ -46,9 +46,9 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | Reglas de Negocio (RN-01 a 15) & Modelo de Dominio | [@iJosueeh](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | Modelo de Dominio & Flujo Completo del Pedido | [@kath144](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | Historias de Usuario (MoSCoW) & Criterios de Aceptación | [@miagv](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | BE-01 Identity + BE-03 Auth + BE-05 JPA + BE-06 JWT + BE-11 Store Base | [@iJosueeh](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | BE-02 Migración Roles Iniciales | [@kath144](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | BE-10 Módulo de Notificaciones | [@miagv](https://github.com/miagv) |
 
 ---
 
@@ -56,9 +56,11 @@ flowchart LR
 
 | Capa | Tecnologías | Propósito |
 |:---|:---|:---|
-| **Backend** | Spring Boot 4, Java 17+ | API RESTful, Reglas de Dominio y Transaccionalidad |
-| **Frontend** | Next.js, Angular, Tailwind CSS | Portal Cliente y Panel Administrativo MYPE |
-| **Persistencia** | PostgreSQL, Hibernate | Base de datos relacional y control concurrente |
+| **Backend** | Spring Boot 4.1.1, Java 21 | API RESTful, Arquitectura Hexagonal/DDD y Transaccionalidad |
+| **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
+| **Frontend** | Next.js, Tailwind CSS | Portal Cliente y Panel Administrativo MYPE |
+| **Persistencia** | PostgreSQL 18.6 (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
+| **Calidad / QA** | JUnit 5, Mockito | 78 pruebas automatizadas pasando al 100% |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---
@@ -68,8 +70,8 @@ flowchart LR
 ```mermaid
 flowchart TD
     S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
-    S2["Sprint 2: Definición del Producto, Requisitos y Modelo de Dominio - En Progreso"]
-    S3["Sprint 3: Backend Spring Boot, API REST y Persistencia - Pendiente"]
+    S2["Sprint 2: Backend Base (Identity + Store) - 63% Completado"]
+    S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Pendiente"]
     S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
     S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]
 
