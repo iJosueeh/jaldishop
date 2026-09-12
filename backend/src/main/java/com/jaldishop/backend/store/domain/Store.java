@@ -24,7 +24,7 @@ public class Store {
     private boolean taxApplies;
     private BigDecimal taxRate;
     private StoreStatus status;
-    private Instant createdAt;
+    private final Instant createdAt;
     private Instant updatedAt;
 
     private Store(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, boolean taxApplies, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {

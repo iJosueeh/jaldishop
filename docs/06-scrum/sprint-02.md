@@ -32,6 +32,7 @@ flowchart LR
         T2["BE-02 · Migración Roles"]
         T3["BE-03 · Casos de Uso Auth"]
         T7["BE-10 · Módulo Notificaciones (Mia)"]
+        T8["BE-11 · Módulo Base Tienda (Josué)"]
     end
 
     subgraph MEDIA["Prioridad Media"]
@@ -52,6 +53,7 @@ flowchart LR
 | 🔴 **Alta** | BE-02 · Preparar datos iniciales roles | Katherine | `PENDIENTE` | Diseño + migración V2__seed_roles.sql |
 | 🔴 **Alta** | BE-03 · Casos de uso Auth (Registro y Login) | Josué | `COMPLETADO` | Flujos Registro/Login + DTOs + AuthController |
 | 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `PENDIENTE` | Módulo Notification completo (dominio, JPA, casos de uso, REST, tests) |
+| 🔴 **Alta** | BE-11 · Implementar módulo base de Tienda | Josué | `COMPLETADO` | Store completo (dominio, JPA, casos de uso, REST, 29 tests) |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
@@ -325,13 +327,54 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 ---
 
+### 📋 BE-11 | Implementar módulo base de Tienda
+
+**Responsable:** Josué  
+**Entregable:** Módulo Store completo (dominio, JPA, casos de uso, REST, 29 tests)
+
+**Objetivo:** Implementar la gestión base de Tiendas de JaldiShop, permitiendo la creación/onboarding por parte de usuarios con rol `MERCHANT`, consulta de la tienda propia y actualización de configuración, aplicando la regla de negocio `1 merchant = 1 store` (RN-STR-03) y unicidad de slug.
+
+**Checklist:**
+- [x] Revisar stores en V1 (`V1__initial_schema.sql` y `modelo-er.md`)
+- [x] Crear StoreStatus (enum con `ACTIVE`, `INACTIVE`, `SUSPENDED`, `CLOSED`)
+- [x] Crear Store (entidad de dominio pura con invariantes y métodos de negocio)
+- [x] Crear StoreRepository (puerto de dominio)
+- [x] Tests de dominio (`StoreTest.java` - 13 tests)
+- [x] Crear StoreEntity (entidad JPA con mapeo exacto de DDL)
+- [x] Crear StoreJpaRepository (Spring Data JPA)
+- [x] Crear StorePersistenceMapper (conversión bidireccional limpia)
+- [x] Crear StoreRepositoryAdapter (adaptador de infraestructura con `@Repository`)
+- [x] Tests persistencia (`StorePersistenceMapperTest.java` - 3 tests)
+- [x] CreateStoreService (con validación de `1 merchant = 1 store` y slug)
+- [x] GetMyStoreService (consulta de tienda propia por `merchantUserId`)
+- [x] UpdateStoreService (actualización de perfil y configuración de entrega)
+- [x] CreateStoreRequest (DTO de entrada con Bean Validation)
+- [x] UpdateStoreRequest (DTO de entrada)
+- [x] StoreResponse (DTO de salida con factory `fromDomain`)
+- [x] StoreController (controlador REST en `/api/v1/stores`)
+- [x] Validar rol `MERCHANT` (rechaza `CUSTOMER` con 403 Forbidden)
+- [x] Validar `1 merchant = 1 store` (rechaza con 409 Conflict)
+- [x] Generar slug (autogeneración en formato kebab-case si viene nulo)
+- [x] Manejar slug duplicado (rechaza con 409 Conflict)
+- [x] Tests application (`CreateStoreServiceTest`, `GetMyStoreServiceTest`, `UpdateStoreServiceTest` - 8 tests)
+- [x] Tests endpoint (`StoreControllerTest` - 5 tests)
+- [x] Documentar API
+- [x] Pasar a Code Review / PR
+
+**Endpoints expuestos:**
+* `POST /api/v1/stores`: Crea tienda para el comerciante autenticado (201 CREATED). Valida rol `MERCHANT`, unicidad de tienda y slug.
+* `GET /api/v1/stores/me`: Obtiene la tienda del comerciante autenticado (200 OK / 404 NOT FOUND).
+* `PUT /api/v1/stores/me`: Actualiza perfil y opciones de delivery (200 OK / 400 BAD REQUEST / 404 NOT FOUND).
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 4 / 7 (57%) |
-| Entregables en desarrollo activo | 0 / 7 (0%) |
-| Entregables pendientes | 3 / 7 (43%) |
+| Entregables completados | 5 / 8 (63%) |
+| Entregables en desarrollo activo | 0 / 8 (0%) |
+| Entregables pendientes | 3 / 8 (37%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---
@@ -345,6 +388,8 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 | roles.id | SMALLINT | modelo-er.md |
 | UserStatus | ACTIVE, INACTIVE, SUSPENDED | modelo-er.md |
 | RoleName | CUSTOMER, MERCHANT, ADMIN | modelo-er.md |
+| StoreStatus | ACTIVE, INACTIVE, SUSPENDED, CLOSED | modelo-er.md |
+| Regla 1 merchant = 1 store | Restricción UNIQUE(merchant_user_id) | modelo-er.md / RN-STR-03 |
 | password_encoded | VARCHAR(255) NOT NULL | modelo-er.md |
 | Flyway | Utilizado desde migración inicial | modelo-er.md |
 | Rollback | Forward-only + backup/restore | modelo-er.md |
@@ -360,6 +405,7 @@ graph TD
     BE03[BE-03 · Casos de Uso Auth] --> BE04
     BE04 --> BE05[BE-05 · Persistencia JPA]
     BE05 --> BE06[BE-06 · Integrar JWT]
+    BE06 --> BE11[BE-11 · Módulo Base Store (Josué)]
     BE01 --> BE10[BE-10 · Notificaciones (Mia)]
 ```
 
@@ -368,6 +414,7 @@ graph TD
 - BE-04 requiere que las tres tarjetas anteriores estén completas
 - BE-05 depende de BE-04
 - BE-06 depende de BE-05
+- BE-11 utiliza el `merchantUserId` y la seguridad JWT establecida en BE-06
 - BE-10 puede desarrollarse de forma independiente tras contar con el dominio de Identity (user_id)
 
 ---
