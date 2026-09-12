@@ -31,6 +31,7 @@ flowchart LR
         T1["BE-01 · Dominio Identity"]
         T2["BE-02 · Migración Roles"]
         T3["BE-03 · Casos de Uso Auth"]
+        T7["BE-10 · Módulo Notificaciones (Mia)"]
     end
 
     subgraph MEDIA["Prioridad Media"]
@@ -49,7 +50,8 @@ flowchart LR
 |:---:|---|:---:|:---:|---|
 | 🔴 **Alta** | BE-01 · Implementar dominio Identity | Josué | `COMPLETADO` | User, Role, enums y ports |
 | 🔴 **Alta** | BE-02 · Preparar datos iniciales roles | Katherine | `PENDIENTE` | Diseño + migración V2__seed_roles.sql |
-| 🔴 **Alta** | BE-03 · Diseñar casos de uso Auth | Mia | `PENDIENTE` | Flujos Registro/Login + DTOs/errores |
+| 🔴 **Alta** | BE-03 · Casos de uso Auth (Registro y Login) | Josué | `COMPLETADO` | Flujos Registro/Login + DTOs + AuthController |
+| 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `PENDIENTE` | Módulo Notification completo (dominio, JPA, casos de uso, REST, tests) |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
@@ -126,26 +128,28 @@ VALUES
 
 ---
 
-### 📋 BE-03 | Diseñar casos de uso Registro y Login
+### 📋 BE-03 | Diseñar e implementar casos de uso Registro y Login
 
-**Responsable:** Mia  
-**Entregable:** Flujos Registro/Login + DTOs/errores documentados
+**Responsable:** Josué (implementado en conjunto con BE-06)  
+**Entregable:** Flujos Registro/Login + DTOs + Servicios + AuthController
 
-**Objetivo:** Definir exactamente qué necesitarán Registration y Login. No es hacer pantallas, es bajar el flujo funcional a contrato de backend.
+**Objetivo:** Definir e implementar los casos de uso de Registration y Login en la capa de aplicación y web.
 
 **Checklist:**
-- [ ] Documentar flujo Register Customer
-- [ ] Documentar flujo Register Merchant
-- [ ] Documentar flujo Login
-- [ ] Definir campos de RegisterRequest
-- [ ] Definir campos de LoginRequest
-- [ ] Definir AuthResponse
-- [ ] Definir errores esperados
-- [ ] Definir asignación CUSTOMER/MERCHANT
-- [ ] Confirmar que ADMIN no tiene registro público
-- [ ] Documentar validación de UserStatus
-- [ ] Documentar comportamiento de email duplicado
-- [ ] Pasar a Code Review
+- [x] Documentar flujo Register Customer
+- [x] Documentar flujo Register Merchant
+- [x] Documentar flujo Login
+- [x] Definir campos de RegisterRequest
+- [x] Definir campos de LoginRequest
+- [x] Definir AuthResult / UserResponse
+- [x] Definir errores esperados
+- [x] Definir asignación CUSTOMER/MERCHANT
+- [x] Confirmar que ADMIN no tiene registro público
+- [x] Documentar validación de UserStatus
+- [x] Documentar comportamiento de email duplicado
+- [x] Implementar RegisterCustomerService y AuthenticateUserService
+- [x] Implementar AuthController REST con validaciones Bean Validation
+- [x] Pasar a Code Review
 
 **Flujo Register Customer (ejemplo):**
 ```
@@ -237,13 +241,62 @@ AuthResponse
 
 ---
 
+### 📋 BE-10 | Implementar módulo de Notificaciones
+
+**Responsable:** Mia  
+**Entregable:** Notification domain, JPA persistence, use cases, REST controller, tests y documentación
+
+**Objetivo:**
+Implementar la gestión básica de notificaciones persistentes de JaldiShop, permitiendo consultar las notificaciones de un usuario y marcarlas como leídas, sin acoplar todavía el módulo a eventos de Pedido, Inventario o WebSocket.
+
+**Checklist:**
+- [ ] Crear Notification domain
+- [ ] Crear NotificationStatus
+- [ ] Crear NotificationType
+- [ ] Crear NotificationRepository port
+- [ ] Crear NotificationEntity
+- [ ] Crear NotificationJpaRepository
+- [ ] Crear NotificationPersistenceMapper
+- [ ] Crear NotificationRepositoryAdapter
+- [ ] Caso de uso ListUserNotifications
+- [ ] Caso de uso MarkNotificationAsRead
+- [ ] Caso de uso CountUnreadNotifications
+- [ ] Caso de uso CreateNotification
+- [ ] DTO NotificationResponse
+- [ ] Controller REST
+- [ ] Tests dominio
+- [ ] Tests application
+- [ ] Tests mapper
+- [ ] Tests repository/adapters
+- [ ] Tests endpoint
+- [ ] Documentar endpoints
+- [ ] Abrir Pull Request
+
+**Decisiones cerradas que aplican (modelo-er.md Sección 31):**
+- Tabla: `notifications` (ya creada en `V1__initial_schema.sql`)
+- ID: `UUID` generado por JPA/aplicación
+- `user_id`: `UUID` (FK -> `users.id`, `ON DELETE CASCADE`)
+- `NotificationType`: `NEW_ORDER`, `ORDER_STATUS_CHANGED`, `LOW_STOCK`, `SYSTEM` (VARCHAR(30) NOT NULL)
+- `NotificationStatus`: `UNREAD`, `READ` (VARCHAR(30) NOT NULL)
+- Restricciones semánticas:
+  - `status = 'UNREAD'` $\rightarrow$ `read_at IS NULL`
+  - `status = 'READ'` $\rightarrow$ `read_at IS NOT NULL`
+- `title`: `VARCHAR(180) NOT NULL`
+- `message`: `TEXT NOT NULL`
+- Índices existentes en PostgreSQL:
+  - `INDEX(user_id, created_at DESC)`
+  - `INDEX(user_id, created_at DESC) WHERE status = 'UNREAD'`
+- Estructura de paquetes canónica: `com.jaldishop.backend.notification` (`domain`, `application`, `infrastructure.persistence`, `web`)
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 3 / 6 (50%) |
-| Entregables en desarrollo activo | 0 / 6 (0%) |
-| Entregables pendientes | 3 / 6 (50%) |
+| Entregables completados | 4 / 7 (57%) |
+| Entregables en desarrollo activo | 0 / 7 (0%) |
+| Entregables pendientes | 3 / 7 (43%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---
@@ -272,6 +325,7 @@ graph TD
     BE03[BE-03 · Casos de Uso Auth] --> BE04
     BE04 --> BE05[BE-05 · Persistencia JPA]
     BE05 --> BE06[BE-06 · Integrar JWT]
+    BE01 --> BE10[BE-10 · Notificaciones (Mia)]
 ```
 
 **Notas:**
@@ -279,6 +333,7 @@ graph TD
 - BE-04 requiere que las tres tarjetas anteriores estén completas
 - BE-05 depende de BE-04
 - BE-06 depende de BE-05
+- BE-10 puede desarrollarse de forma independiente tras contar con el dominio de Identity (user_id)
 
 ---
 
