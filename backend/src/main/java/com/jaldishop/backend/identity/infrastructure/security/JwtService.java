@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,9 +27,9 @@ public class JwtService {
         this.expiration = expiration;
     }
 
-    public String generateToken(Long userId, Set<String> roles) {
+    public String generateToken(UUID userId, Set<String> roles) {
         Date now = new Date();
-        Date expirationDate = new Date(now.getTime() * expiration);
+        Date expirationDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(userId.toString())
@@ -49,7 +50,7 @@ public class JwtService {
 
     public JwtPrincipal getPrincipal(String token) {
         Claims claims = parseToken(token);
-        Long userId = Long.valueOf(claims.getSubject());
+        UUID userId = UUID.fromString(claims.getSubject());
 
         List<?> rawRoles = claims.get("roles", List.class);
         Set<String> roles = rawRoles.stream()
