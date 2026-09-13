@@ -1,0 +1,37 @@
+<div class="h-screen w-screen bg-warmCream font-sans text-stone-800 antialiased overflow-hidden">
+  <div class="h-full w-full flex flex-col lg:flex-row">
+    @if (currentStep() == 1) {
+      <!-- Panel Izquierdo: Beneficios (50% en escritorio, oculto en móvil) -->
+      <app-register-brand-panel
+        class="hidden lg:flex lg:w-1/2 h-full flex-col"
+      ></app-register-brand-panel>
+      <!-- Panel Derecho: Formulario Paso 1 (100% en móvil, 50% en escritorio) -->
+      <app-register-form-panel
+        class="flex flex-col w-full lg:w-1/2 h-full"
+        [isLoading]="isLoading()"
+        [errorMessage]="errorMessage()"
+        (step1Submit)="onStep1Submit($event)"
+      />
+    }
+
+    @if (currentStep() == 2) {
+      <app-register-step2-brand
+        class="hidden lg:flex lg:w-1/2 h-full flex-col"
+        [storeName]="step2Data()?.name || 'Dulces Clara'"
+        [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
+        [contactPhone]="step2Data()?.contactPhone || '999999999'"
+        [pickupEnabled]="step2Data()?.pickupEnabled ?? true"
+        [deliveryEnabled]="step2Data()?.deliveryEnabled ?? true"
+      />
+      <app-register-step2-form
+        class="flex flex-col w-full lg:w-1/2 h-full"
+        [isLoading]="isLoading()"
+        [errorMessage]="errorMessage()"
+        (back)="onStep2Back()"
+        (formChange)="onStep2Change($event)"
+        (step2Submit)="onStep2Submit($event)"
+        (skip)="onStep2Skip()"
+      />
+    }
+  </div>
+</div>

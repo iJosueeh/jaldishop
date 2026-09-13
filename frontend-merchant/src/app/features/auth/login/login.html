@@ -1,0 +1,14 @@
+<div class="h-screen w-screen bg-surface font-sans text-on-surface antialiased overflow-hidden">
+  <div class="h-full w-full flex flex-col lg:flex-row">
+    <!-- PANEL IZQUIERDO: Branding, Identidad & Experiencia de Taller -->
+    <app-brand-panel class="hidden lg:flex lg:w-1/2 h-full flex-col"></app-brand-panel>
+
+    <!-- PANEL DERECHO: Formulario de Acceso Ergonómico -->
+    <app-form-panel 
+      class="flex flex-col w-full lg:w-1/2 h-full"
+      [isLoading]="isLoading()"
+      [errorMessage]="errorMessage()"
+      (loginSubmit)="onLogin($event)"
+    />
+  </div>
+</div>

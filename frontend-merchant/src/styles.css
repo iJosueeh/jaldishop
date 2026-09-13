@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-dim: #dfdacb;
+  --color-secondary-container: #feae2c;
+  --color-on-secondary-container: #6b4500;
+  --color-surface-container: #f3eede;
+  --color-inverse-primary: #89d5be;
+  --color-inverse-on-surface: #f6f0e1;
+  --color-on-primary-container: #9ce9d0;
+  --color-on-surface: #1d1c12;
+  --color-primary-fixed-dim: #89d5be;
+  --color-on-secondary-fixed-variant: #633f00;
+  --color-secondary-fixed: #ffddb4;
+  --color-tertiary: #920917;
+  --color-on-tertiary-fixed: #410004;
+  --color-surface: #fff9ea;
+  --color-on-tertiary-container: #ffceca;
+  --color-on-secondary-fixed: #291800;
+  --color-secondary-fixed-dim: #ffb955;
+  --color-error: #ba1a1a;
+  --color-primary-fixed: #a5f2d9;
+  --color-on-primary-fixed-variant: #005141;
+  --color-on-primary: #ffffff;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed-variant: #910817;
+  --color-tertiary-fixed: #ffdad7;
+  --color-on-surface-variant: #3f4945;
+  --color-surface-tint: #166a57;
+  --color-primary: #005141;
+  --color-background: #fff9ea;
+  --color-on-primary-fixed: #002019;
+  --color-primary-container: #176b58;
+  --color-on-secondary: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-surface-bright: #fff9ea;
+  --color-on-error: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-inverse-surface: #333026;
+  --color-outline: #6f7975;
+  --color-tertiary-fixed-dim: #ffb3ae;
+  --color-surface-container-low: #f9f3e4;
+  --color-surface-container-highest: #e8e2d3;
+  --color-on-background: #1d1c12;
+  --color-secondary: #835500;
+  --color-surface-variant: #e8e2d3;
+  --color-tertiary-container: #b4282c;
+  --color-outline-variant: #bec9c4;
+  --color-surface-container-high: #eee8d9;
+
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+
+  --color-jade-50: #f0f9f6;
+  --color-jade-100: #dbf0e9;
+  --color-jade-600: #1e856e;
+  --color-jade-700: #176b58;
+  --color-jade-800: #125445;
+  --color-jade-900: #0c3d32;
+  --color-warmCream: #fff9ea;
+  --color-softSand: #f8f3e6;
+  --color-amberAccent: #e89f3c;
+  --color-terracotta: #d96b43;
+}

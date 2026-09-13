@@ -1,0 +1,13 @@
+<div class="min-h-screen bg-warmCream text-stone-800 font-sans antialiased flex flex-col justify-between">
+    <!-- Header de Navegación -->
+    <app-legal-header />
+
+    <!-- Contenedor Principal -->
+    <app-legal-hero 
+        [activeTab]="activeTab()"
+        (tabChange)="setTab($event)"
+    />
+
+    <!-- Footer -->
+    <app-legal-footer />
+</div>

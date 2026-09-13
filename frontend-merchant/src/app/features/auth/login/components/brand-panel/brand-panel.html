@@ -1,0 +1,133 @@
+<section
+    class="w-full h-full bg-primary-container text-white relative overflow-hidden flex flex-col justify-between p-10 xl:p-14 z-10">
+    <!-- Luces ambientales de fondo -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none">
+    </div>
+    <div
+        class="absolute -bottom-28 -right-28 w-96 h-96 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none">
+    </div>
+    <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-black/15 pointer-events-none">
+    </div>
+
+    <!-- Encabezado Izquierdo: Brand & Tagline -->
+    <div class="relative z-20">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-xl bg-surface-container-lowest p-1 shadow-md flex items-center justify-center">
+                <img alt="Logotipo JaldiShop" class="w-full h-full object-contain rounded-lg"
+                    src="https://lh3.googleusercontent.com/aida/AEtjO1UJv3NpkcgKGc59-jQv2Z7eOUjY5Kk-djtIq8jK0D5uSqOvEP5WWnAhHb78RR-coOaf893MYoiEKwQ8qT5zbquUnXEa0ATnhl-J93SnzXxueSJrEF1T413jOWoZexADxt8MQ9tQ7mp9uQcHFmkAQPcX9SEUrxBam_6wifqNQZgRqkngcUrqaL9mecTiNU6KzNY5LnJRCNxTxEJ3yqZduu1R0h3N0ptnRUm1ZuJPluAGylfKXzdPkuTUxc26" />
+            </div>
+            <div>
+                <span class="font-bold text-2xl tracking-tight text-white block leading-none">JaldiShop</span>
+                <span class="text-[11px] font-medium tracking-wide text-primary-fixed-dim uppercase">TU NEGOCIO EN
+                    MARCHA</span>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-3">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-primary-fixed text-xs font-semibold tracking-wide">
+                <span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+                Plataforma para Pequeños Negocios
+            </div>
+            <h1 class="text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                Tu negocio tiene un ritmo único.<br />
+                <span class="text-primary-fixed-dim">JaldiShop lo mantiene bajo control.</span>
+            </h1>
+            <p class="text-white/80 text-sm xl:text-base leading-relaxed max-w-lg font-normal">
+                Gestiona pedidos, organiza tu capacidad diaria y atiende a tiempo a tus clientes de redes
+                sociales y mostrador.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tarjeta Flotante Realista: Preview Operativo -->
+    <div class="relative z-20 my-auto py-4">
+        <div
+            class="bg-surface-container-lowest/95 backdrop-blur-md rounded-2xl p-5 text-on-surface shadow-2xl border border-white/40 max-w-lg space-y-4">
+            <!-- Encabezado de la comanda en vivo -->
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest">
+                <div class="flex items-center gap-2.5">
+                    <span class="relative flex h-3 w-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+                    </span>
+                    <span class="font-semibold text-xs tracking-wide text-on-surface uppercase">TU NEGOCIO HOY · EJEMPLO
+                        EN VIVO</span>
+                </div>
+                <span
+                    class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                    En Vivo
+                </span>
+            </div>
+
+            <!-- Métricas de Capacidad & Ritmo -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-surface-container-low p-3 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-on-surface-variant font-medium">Capacidad ocupada</span>
+                        <span class="text-xs font-bold text-primary-container">80%</span>
+                    </div>
+                    <p class="text-lg font-bold text-on-surface mt-1">8 / 10 Cupos</p>
+                    <div class="flex gap-1 mt-2">
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-primary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-secondary-container"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-surface-container-highest"></div>
+                        <div class="h-2 flex-1 rounded-sm bg-surface-container-highest"></div>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-low p-3 rounded-xl flex flex-col justify-between">
+                    <span class="text-xs text-on-surface-variant font-medium">Tiempo para preparar</span>
+                    <div>
+                        <p class="text-lg font-bold text-on-surface mt-1">18 min</p>
+                        <div class="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold mt-0.5">
+                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                            <span>Ritmo óptimo de entrega</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Micro-comanda destacada -->
+            <div
+                class="bg-surface-container-low border border-outline-variant/40 rounded-xl p-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-9 h-9 rounded-lg bg-primary-fixed/60 text-primary flex items-center justify-center font-bold text-xs">
+                        #1039
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-xs text-on-surface">Valeria Ramos</h4>
+                            <span class="text-[10px] text-on-surface-variant">hace 7m</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant font-medium">1x Brownies x12</p>
+                    </div>
+                </div>
+                <span
+                    class="text-[11px] font-semibold text-secondary px-2.5 py-1 bg-secondary-fixed/50 rounded-full border border-secondary/20">En
+                    preparación</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonio Social Proof -->
+    <div class="relative z-20 pt-3 border-t border-white/15">
+        <blockquote class="text-xs text-white/90 italic leading-relaxed">
+            “Desde que usamos JaldiShop, organizamos nuestros pedidos y nunca más sobrevendemos un cupo en
+            fechas clave.”
+        </blockquote>
+        <p class="text-[11px] text-primary-fixed-dim font-medium mt-1">
+            — Pequeño negocio en JaldiShop
+        </p>
+    </div>
+</section>

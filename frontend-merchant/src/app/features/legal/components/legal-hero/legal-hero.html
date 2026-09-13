@@ -1,0 +1,45 @@
+<main class="max-w-4xl w-full mx-auto px-6 py-10 sm:py-14 flex-1">
+    <!-- Hero / Encabezado -->
+    <div class="mb-8">
+        <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-jade-50 border border-jade-100 text-jade-800 text-xs font-semibold mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-jade-700"></span>
+            Última actualización: Septiembre 2026
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
+            Términos de Servicio y Privacidad
+        </h1>
+        <p class="text-stone-600 text-sm sm:text-base mt-2 leading-relaxed">
+            Conoce los lineamientos de uso, responsabilidades y tratamiento seguro de datos para
+            comerciantes en la plataforma JaldiShop.
+        </p>
+
+        <!-- Selector de Pestañas -->
+        <div class="flex gap-2 mt-6 border-b border-stone-200 pb-2">
+            <button type="button" (click)="setTab('terms')" [class]="
+          activeTab() === 'terms'
+            ? 'bg-jade-700 text-white shadow-sm'
+            : 'text-stone-600 hover:bg-stone-100'
+        " class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+                1. Términos y Condiciones
+            </button>
+            <button type="button" (click)="setTab('privacy')" [class]="
+          activeTab() === 'privacy'
+            ? 'bg-jade-700 text-white shadow-sm'
+            : 'text-stone-600 hover:bg-stone-100'
+        " class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+                2. Política de Privacidad
+            </button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 1: TÉRMINOS Y CONDICIONES -->
+    @if (activeTab() === 'terms') {
+    <app-legal-content />
+    }
+
+    <!-- PESTAÑA 2: POLÍTICA DE PRIVACIDAD -->
+    @if (activeTab() === 'privacy') {
+    <app-privacy-content />
+    }
+</main>

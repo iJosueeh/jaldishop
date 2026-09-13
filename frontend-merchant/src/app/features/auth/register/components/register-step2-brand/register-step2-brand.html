@@ -1,0 +1,119 @@
+<aside aria-label="Identidad y modalidades" class="relative w-full h-full bg-jade-700 text-white p-8 lg:p-12 xl:p-14 flex flex-col
+justify-between overflow-hidden shadow-2xl z-10">
+    <!-- Luces sutiles de fondo -->
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none">
+    </div>
+
+    <!-- Marca Superior -->
+    <div class="relative z-10">
+        <header class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-jade-700 shadow-sm">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+            </div>
+            <div>
+                <div class="font-bold text-xl tracking-tight text-white leading-tight">JaldiShop</div>
+                <div class="text-[10px] tracking-widest uppercase font-semibold text-emerald-200">TU NEGOCIO EN MARCHA
+                </div>
+            </div>
+        </header>
+
+        <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-100 text-xs font-medium border
+border-white/15">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            Paso 2 de 3 · Identidad y modalidades
+        </div>
+
+        <!-- Encabezado Editorial -->
+        <div class="mt-8">
+            <h1 class="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-[1.2]">
+                Dale identidad a tu negocio.
+            </h1>
+            <p class="mt-3 text-sm xl:text-base text-emerald-100/90 leading-relaxed font-normal">
+                Esta información nos ayudará a preparar tu espacio y mantener organizada tu operación desde el primer
+                día.
+            </p>
+        </div>
+    </div>
+
+    <!-- TARJETA DE PREVIEW DEL NEGOCIO (Reactiva en Vivo) -->
+    <div class="my-8 relative z-10">
+        <div class="bg-white text-stone-900 rounded-2xl p-6 shadow-xl border border-white/20">
+            <div class="flex items-center justify-between pb-4 border-b border-stone-100">
+                <span class="text-[11px] font-bold tracking-wider uppercase text-stone-400">VISTA PREVIA DEL
+                    NEGOCIO</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-jade-700 border
+border-emerald-200">
+                    ● En vivo
+                </span>
+            </div>
+
+            <!-- Ficha del negocio -->
+            <div class="mt-5 flex items-start gap-4">
+                <!-- Inicial del negocio o logo -->
+                <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 font-extrabold text-2xl flex items-center justify-center border-2
+border-amber-200 shadow-sm shrink-0">
+                    {{ initialLetter() }}
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-stone-900 truncate">
+                            {{ storeName() || 'Nombre de tu negocio' }}
+                        </h3>
+                        <span
+                            class="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600">Activo</span>
+                    </div>
+                    <p class="text-xs font-medium text-stone-500 mt-0.5">
+                        {{ businessType() || 'Giro del negocio' }}
+                    </p>
+
+                    <!-- Badges de Modalidades de Entrega Reactivas -->
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                        @if (pickupEnabled()) {
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-jade-50 text-jade-700
+border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-jade-700"></span>
+                            Recojo en local
+                        </span>
+                        }
+                        @if (deliveryEnabled()) {
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-jade-50 text-jade-700
+border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-jade-700"></span>
+                            Delivery propio
+                        </span>
+                        }
+                    </div>
+
+                    <!-- Teléfono de contacto -->
+                    <div
+                        class="mt-3 pt-3 border-t border-dashed border-stone-200 flex items-center justify-between text-xs text-stone-600">
+                        <span class="text-stone-400">Contacto de ventas:</span>
+                        <span class="font-semibold text-stone-800">
+                            {{ contactPhone() ? ('+51 ' + contactPhone()) : 'Sin registrar' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 bg-[#f9f3e4] rounded-xl p-3 flex items-center gap-2.5 text-xs text-amber-900/80">
+                <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
+0118 0z"></path>
+                </svg>
+                <span>Tus clientes verán estos datos en las notas de pedido y confirmaciones.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonio / Pie -->
+    <div class="pt-6 border-t border-white/15 relative z-10 text-xs text-emerald-100/80">
+        <p class="italic">“Configurar el nombre y las entregas nos tomó menos de 2 minutos y empezamos a recibir pedidos
+            al instante.”</p>
+        <span class="block mt-1 font-semibold text-white/90">— Pequeño negocio en JaldiShop</span>
+    </div>
+</aside>
