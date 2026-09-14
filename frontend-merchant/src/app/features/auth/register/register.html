@@ -33,5 +33,26 @@
         (skip)="onStep2Skip()"
       />
     }
+
+    @if (currentStep() == 3) {
+        <app-register-step3-brand
+            class="hidden lg:flex lg:w-1/2 h-full flex-col"
+            [storeName]="step2Data()?.name || 'Dulces Clara'"
+            [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
+            [dailyOrderLimit]="step3Data()?.dailyOrderLimit ?? 12"
+            [prepTime]="step3Data()?.prepTime || '30 - 60 min'"
+            [openingTime]="step3Data()?.openingTime || '09:00'"
+            [closingTime]="step3Data()?.closingTime || '19:00'"
+        />
+        <app-register-step3-form
+            class="flex flex-col w-full lg:w-1/2 h-full"
+            [isLoading]="isLoading()"
+            [errorMessage]="errorMessage()"
+            (back)="onStep3Back()"
+            (formChange)="onStep3Change($event)"
+            (step3Submit)="onStep3Submit($event)"
+        />
+    }
+
   </div>
 </div>

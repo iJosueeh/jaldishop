@@ -2,9 +2,10 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { outputFromObservable, toSignal } from '@angular/core/rxjs-interop'
 import { RegisterStep2Data } from '../register-step2-brand/register-step2-brand';
+import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RegisterFooter],
   selector: 'app-register-step2-form',
   styleUrl: './register-step2-form.css',
   templateUrl: './register-step2-form.html',

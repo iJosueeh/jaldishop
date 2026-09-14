@@ -1,6 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
 
 export interface RegisterStep1Data {
   firstName: string;
@@ -12,7 +13,7 @@ export interface RegisterStep1Data {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, RegisterFooter],
   selector: 'app-register-form-panel',
   styleUrl: './register-form-panel.css',
   templateUrl: './register-form-panel.html',
