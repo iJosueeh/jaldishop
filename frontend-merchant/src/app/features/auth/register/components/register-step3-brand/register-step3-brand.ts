@@ -1,7 +1,8 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { BusinessAvatar } from '../../../../../shared/components/business-avatar/business-avatar';
 
 @Component({
-  imports: [],
+  imports: [BusinessAvatar],
   selector: 'app-register-step3-brand',
   styleUrl: './register-step3-brand.css',
   templateUrl: './register-step3-brand.html',
@@ -13,10 +14,6 @@ export class RegisterStep3Brand {
   readonly prepTime = input<string>('30 - 60 min');
   readonly openingTime = input<string>('09:00');
   readonly closingTime = input<string>('19:00');
-
-  readonly initialLetter = computed(() => 
-    this.storeName()?.trim().charAt(0).toUpperCase() || 'B'
-  );
 
   readonly segmentBlocks = Array.from({ length: 12 }, (_, i) => i);
 }

@@ -1,33 +1,24 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
-
-export interface RegisterStep3Data {
-  dailyOrderLimit: number | null;
-  prepTime: string;
-  openingTime: string;
-  closingTime: string;
-  operatingDays: string[];
-  autoPauseOnLimit: boolean;
-}
-
-export interface DayOption {
-  key: string;
-  label: string;
-}
+import { RegisterStepHeader } from '../../../../../shared/components/register-step-header/register-step-header';
+import { AlertError } from '../../../../../shared/components/alert-error/alert-error';
+import { DayOption, RegisterStep3Data } from '../../interface/register.models';
 
 @Component({
-  imports: [ReactiveFormsModule, RegisterFooter],
+  imports: [ReactiveFormsModule, RegisterFooter, RegisterStepHeader, AlertError],
   selector: 'app-register-step3-form',
   styleUrl: './register-step3-form.css',
   templateUrl: './register-step3-form.html',
 })
-export class RegisterStep3Form {
+export class RegisterStep3Form implements OnInit {
   private fb = inject(FormBuilder);
 
   readonly isLoading = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
+
+  readonly initialData = input<RegisterStep3Data | null>();
 
   readonly back = output<void>();
   readonly step3Submit = output<RegisterStep3Data>();
@@ -50,6 +41,13 @@ export class RegisterStep3Form {
     operatingDays: [['L', 'M', 'X', 'J', 'V', 'S']],
     autoPauseOnLimit: [true],
   });
+
+  ngOnInit(): void {
+    const data = this.initialData();
+    if (data) {
+      this.step3Form.patchValue(data);
+    }
+  }
 
   readonly formChange = outputFromObservable<RegisterStep3Data>(this.step3Form.valueChanges);
 

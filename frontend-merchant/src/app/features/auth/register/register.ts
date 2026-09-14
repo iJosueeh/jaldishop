@@ -1,19 +1,25 @@
 import { Component, signal } from '@angular/core';
 import { RegisterBrandPanel } from './components/register-brand-panel/register-brand-panel';
-import {
-  RegisterFormPanel,
-  RegisterStep1Data,
-} from './components/register-form-panel/register-form-panel';
-import {
-  RegisterStep2Data,
-  RegisterStep2Brand,
-} from './components/register-step2-brand/register-step2-brand';
+import { RegisterFormPanel } from './components/register-form-panel/register-form-panel';
+import { RegisterStep2Brand } from './components/register-step2-brand/register-step2-brand';
 import { RegisterStep2Form } from './components/register-step2-form/register-step2-form';
-import { RegisterStep3Data, RegisterStep3Form } from './components/register-step3-form/register-step3-form';
 import { RegisterStep3Brand } from './components/register-step3-brand/register-step3-brand';
+import { RegisterStep3Form } from './components/register-step3-form/register-step3-form';
+import {
+  RegisterStep1Data,
+  RegisterStep2Data,
+  RegisterStep3Data,
+} from './interface/register.models';
 
 @Component({
-  imports: [RegisterBrandPanel, RegisterFormPanel, RegisterStep2Brand, RegisterStep2Form, RegisterStep3Brand, RegisterStep3Form],
+  imports: [
+    RegisterBrandPanel,
+    RegisterFormPanel,
+    RegisterStep2Brand,
+    RegisterStep2Form,
+    RegisterStep3Brand,
+    RegisterStep3Form,
+  ],
   selector: 'app-register',
   styleUrl: './register.css',
   templateUrl: './register.html',
@@ -57,7 +63,7 @@ export class Register {
       });
     }
     console.log('Paso 2 omitido, avanzando...');
-    this.currentStep.set(3)
+    this.currentStep.set(3);
   }
 
   onStep3Back(): void {

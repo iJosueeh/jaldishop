@@ -1,261 +1,307 @@
-<main class="w-full h-full bg-warmCream flex flex-col justify-between p-6 sm:p-10 lg:p-14 overflow-y-auto">
-    <!-- Barra Superior de Navegación & Progreso -->
-    <div>
-        <div class="flex items-center justify-between">
-            <button type="button" (click)="onBack()"
-                class="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-jade-700 transition-colors cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Volver al paso 1
-            </button>
-            <span class="text-xs font-bold tracking-wider text-emerald-800 uppercase">
-                PASO 2 DE 3 · TU NEGOCIO
-            </span>
-        </div>
+<main
+  class="w-full h-full bg-warmCream flex flex-col justify-between p-6 sm:p-10 lg:p-14 overflow-y-auto"
+>
+  <!-- Barra Superior de Navegación & Progreso -->
+  <app-register-step-header [currentStep]="2" (back)="onBack()" />
 
-        <!-- Barra de Progreso Superior (2/3 de progreso) -->
-        <div class="mt-3 w-full bg-[#dfdacb] h-1.5 rounded-full overflow-hidden">
-            <div class="bg-jade-700 h-full w-2/3 rounded-full transition-all duration-300"></div>
-        </div>
+  <!-- Contenedor Principal del Formulario -->
+  <div class="my-8 max-w-xl w-full mx-auto">
+    <div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+        Cuéntanos sobre tu negocio
+      </h2>
+      <p class="mt-2 text-sm text-stone-600 leading-relaxed">
+        Configura la información básica que verán tus clientes y que utilizaremos para preparar tu
+        espacio en JaldiShop.
+      </p>
     </div>
 
-    <!-- Contenedor Principal del Formulario -->
-    <div class="my-8 max-w-xl w-full mx-auto">
+    <!-- Alerta de Error -->
+    <app-alert-error [message]="errorMessage()" class="block mt-4" />
+
+    <form [formGroup]="step2Form" (ngSubmit)="handleContinue()" class="mt-8 space-y-6">
+      <!-- SECCIÓN 1: NOMBRE Y TIPO DE NEGOCIO -->
+      <div class="space-y-4">
+        <!-- Nombre del Negocio -->
         <div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Cuéntanos sobre tu negocio
-            </h2>
-            <p class="mt-2 text-sm text-stone-600 leading-relaxed">
-                Configura la información básica que verán tus clientes y que utilizaremos para preparar tu
-                espacio en JaldiShop.
-            </p>
-        </div>
-
-        <!-- Alerta de Error -->
-        @if (errorMessage()) {
-        <div
-            class="mt-4 p-3.5 text-xs rounded-xl bg-red-50 text-red-700 border border-red-200 flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg text-red-600">error</span>
-            <span class="font-medium">{{ errorMessage() }}</span>
-        </div>
-        }
-
-        <form [formGroup]="step2Form" (ngSubmit)="handleContinue()" class="mt-8 space-y-6">
-            <!-- SECCIÓN 1: NOMBRE Y TIPO DE NEGOCIO -->
-            <div class="space-y-4">
-                <!-- Nombre del Negocio -->
-                <div>
-                    <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
-                        for="store-name">
-                        Nombre del negocio <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div
-                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
-                        </div>
-                        <input id="store-name" type="text" formControlName="name" placeholder="Ej. Dulces Clara"
-                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none shadow-sm transition"
-                            [class.border-red-500]="
+          <label
+            class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
+            for="store-name"
+          >
+            Nombre del negocio <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                ></path>
+              </svg>
+            </div>
+            <input
+              id="store-name"
+              type="text"
+              formControlName="name"
+              placeholder="Ej. Dulces Clara"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none shadow-sm transition"
+              [class.border-red-500]="
                 step2Form.get('name')?.touched && step2Form.get('name')?.invalid
-              " />
-                    </div>
-                    @if (step2Form.get('name')?.touched && step2Form.get('name')?.hasError('required')) {
-                    <p class="mt-1 text-[11px] text-red-600 font-medium">
-                        El nombre del negocio es obligatorio.
-                    </p>
-                    } @else {
-                    <p class="mt-1.5 text-xs text-stone-500">
-                        Este será el nombre que verán tus clientes en catálogos y mensajes.
-                    </p>
-                    }
-                </div>
+              "
+            />
+          </div>
+          @if (step2Form.get('name')?.touched && step2Form.get('name')?.hasError('required')) {
+            <p class="mt-1 text-[11px] text-red-600 font-medium">
+              El nombre del negocio es obligatorio.
+            </p>
+          } @else {
+            <p class="mt-1.5 text-xs text-stone-500">
+              Este será el nombre que verán tus clientes en catálogos y mensajes.
+            </p>
+          }
+        </div>
 
-                <!-- Tipo de Negocio -->
-                <div>
-                    <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
-                        for="business-type">
-                        Tipo de negocio <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <select id="business-type" formControlName="businessType"
-                            class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none shadow-sm transition appearance-none pr-10">
-                            <option value="Repostería y pastelería">Repostería y pastelería</option>
-                            <option value="Comida y bebidas">Comida y bebidas</option>
-                            <option value="Regalos y personalizados">Regalos y personalizados</option>
-                            <option value="Ropa y accesorios">Ropa y accesorios</option>
-                            <option value="Belleza y cuidado personal">Belleza y cuidado personal</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                        <div
-                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-stone-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <p class="mt-1 text-xs text-stone-500">
-                        Selecciona el rubro principal que mejor describe lo que vendes.
-                    </p>
-                </div>
+        <!-- Tipo de Negocio -->
+        <div>
+          <label
+            class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
+            for="business-type"
+          >
+            Tipo de negocio <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <select
+              id="business-type"
+              formControlName="businessType"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none shadow-sm transition appearance-none pr-10"
+            >
+              <option value="Repostería y pastelería">Repostería y pastelería</option>
+              <option value="Comida y bebidas">Comida y bebidas</option>
+              <option value="Regalos y personalizados">Regalos y personalizados</option>
+              <option value="Ropa y accesorios">Ropa y accesorios</option>
+              <option value="Belleza y cuidado personal">Belleza y cuidado personal</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <div
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-stone-500"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
             </div>
+          </div>
+          <p class="mt-1 text-xs text-stone-500">
+            Selecciona el rubro principal que mejor describe lo que vendes.
+          </p>
+        </div>
+      </div>
 
-            <!-- SECCIÓN 2: IDENTIDAD DEL NEGOCIO (LOGO OPCIONAL) -->
-            <div class="pt-4 border-t border-stone-200/70">
-                <div class="flex items-center justify-between mb-2">
-                    <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider">
-                        Identidad de tu negocio
-                    </label>
-                    <span class="text-[11px] font-semibold text-stone-400">Opcional</span>
-                </div>
+      <!-- SECCIÓN 2: IDENTIDAD DEL NEGOCIO (LOGO OPCIONAL) -->
+      <div class="pt-4 border-t border-stone-200/70">
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider">
+            Identidad de tu negocio
+          </label>
+          <span class="text-[11px] font-semibold text-stone-400">Opcional</span>
+        </div>
 
-                <div
-                    class="bg-white rounded-xl p-3.5 border border-stone-200 shadow-sm flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 font-extrabold text-xl flex items-center justify-center border border-amber-200 shrink-0">
-                            {{ previewInitial() }}
-                        </div>
-                        <div>
-                            <div class="text-xs font-bold text-stone-800">Logo del negocio</div>
-                            <div class="text-[11px] text-stone-500">
-                                PNG, JPG o SVG (máx. 2MB). Podrás cambiarlo luego.
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button"
-                        class="px-3.5 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 bg-stone-50 hover:bg-white hover:border-jade-700 hover:text-jade-700 transition shadow-xs shrink-0 cursor-pointer">
-                        Subir logo
-                    </button>
-                </div>
+        <div
+          class="bg-white rounded-xl p-3.5 border border-stone-200 shadow-sm flex items-center justify-between gap-4"
+        >
+          <div class="flex items-center gap-3">
+            <app-business-avatar [name]="formValues().name" size="md" />
+            <div>
+              <div class="text-xs font-bold text-stone-800">Logo del negocio</div>
+              <div class="text-[11px] text-stone-500">
+                PNG, JPG o SVG (máx. 2MB). Podrás cambiarlo luego.
+              </div>
             </div>
+          </div>
+          <button
+            type="button"
+            class="px-3.5 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 bg-stone-50 hover:bg-white hover:border-jade-700 hover:text-jade-700 transition shadow-xs shrink-0 cursor-pointer"
+          >
+            Subir logo
+          </button>
+        </div>
+      </div>
 
-            <!-- SECCIÓN 3: NÚMERO DE CONTACTO -->
-            <div class="pt-4 border-t border-stone-200/70">
-                <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
-                    for="contact-phone">
-                    Número de contacto <span class="text-red-500">*</span>
-                </label>
-                <div class="flex rounded-xl shadow-sm overflow-hidden border border-stone-300 focus-within:ring-2 focus-within:ring-jade-700 focus-within:border-jade-700"
-                    [class.border-red-500]="
+      <!-- SECCIÓN 3: NÚMERO DE CONTACTO -->
+      <div class="pt-4 border-t border-stone-200/70">
+        <label
+          class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5"
+          for="contact-phone"
+        >
+          Número de contacto <span class="text-red-500">*</span>
+        </label>
+        <div
+          class="flex rounded-xl shadow-sm overflow-hidden border border-stone-300 focus-within:ring-2 focus-within:ring-jade-700 focus-within:border-jade-700"
+          [class.border-red-500]="
             step2Form.get('contactPhone')?.touched && step2Form.get('contactPhone')?.invalid
-          ">
-                    <span
-                        class="inline-flex items-center px-3.5 bg-stone-100 text-stone-700 text-sm font-semibold border-r border-stone-300">
-                        +51
-                    </span>
-                    <input id="contact-phone" type="tel" formControlName="contactPhone" placeholder="999 999 999"
-                        maxlength="9"
-                        class="flex-1 px-3.5 py-2.5 bg-white text-stone-900 text-sm font-medium outline-none" />
-                </div>
-                @if (step2Form.get('contactPhone')?.touched && step2Form.get('contactPhone')?.invalid) {
-                <p class="mt-1 text-[11px] text-red-600 font-medium">
-                    Ingresa un celular válido de 9 dígitos que empiece con 9.
-                </p>
-                } @else {
-                <p class="mt-1.5 text-xs text-stone-500">
-                    Lo utilizaremos como información de contacto de tu negocio.
-                </p>
-                }
-            </div>
+          "
+        >
+          <span
+            class="inline-flex items-center px-3.5 bg-stone-100 text-stone-700 text-sm font-semibold border-r border-stone-300"
+          >
+            +51
+          </span>
+          <input
+            id="contact-phone"
+            type="tel"
+            formControlName="contactPhone"
+            placeholder="999 999 999"
+            maxlength="9"
+            class="flex-1 px-3.5 py-2.5 bg-white text-stone-900 text-sm font-medium outline-none"
+          />
+        </div>
+        @if (step2Form.get('contactPhone')?.touched && step2Form.get('contactPhone')?.invalid) {
+          <p class="mt-1 text-[11px] text-red-600 font-medium">
+            Ingresa un celular válido de 9 dígitos que empiece con 9.
+          </p>
+        } @else {
+          <p class="mt-1.5 text-xs text-stone-500">
+            Lo utilizaremos como información de contacto de tu negocio.
+          </p>
+        }
+      </div>
 
-            <!-- SECCIÓN 4: MODALIDAD DE ENTREGA -->
-            <div class="pt-4 border-t border-stone-200/70">
-                <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-2">
-                    ¿Cómo reciben sus pedidos tus clientes?
-                </label>
+      <!-- SECCIÓN 4: MODALIDAD DE ENTREGA -->
+      <div class="pt-4 border-t border-stone-200/70">
+        <label class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-2">
+          ¿Cómo reciben sus pedidos tus clientes?
+        </label>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Opción: Recojo -->
-                    <label
-                        class="relative flex items-start p-3.5 rounded-xl border-2 cursor-pointer transition shadow-xs"
-                        [class]="
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Opción: Recojo -->
+          <label
+            class="relative flex items-start p-3.5 rounded-xl border-2 cursor-pointer transition shadow-xs"
+            [class]="
               step2Form.get('pickupEnabled')?.value
                 ? 'border-jade-700 bg-jade-50/60'
                 : 'border-stone-200 bg-white'
-            ">
-                        <div class="flex items-center h-5">
-                            <input type="checkbox" formControlName="pickupEnabled"
-                                class="w-4 h-4 text-jade-700 rounded border-stone-300 focus:ring-jade-700" />
-                        </div>
-                        <div class="ml-3 text-xs">
-                            <span class="font-bold text-stone-900 block">Recojo en local</span>
-                            <span class="text-stone-600 text-[11px]">Tus clientes retiran en tu punto de entrega.</span>
-                        </div>
-                    </label>
+            "
+          >
+            <div class="flex items-center h-5">
+              <input
+                type="checkbox"
+                formControlName="pickupEnabled"
+                class="w-4 h-4 text-jade-700 rounded border-stone-300 focus:ring-jade-700"
+              />
+            </div>
+            <div class="ml-3 text-xs">
+              <span class="font-bold text-stone-900 block">Recojo en local</span>
+              <span class="text-stone-600 text-[11px]"
+                >Tus clientes retiran en tu punto de entrega.</span
+              >
+            </div>
+          </label>
 
-                    <!-- Opción: Delivery -->
-                    <label
-                        class="relative flex items-start p-3.5 rounded-xl border-2 cursor-pointer transition shadow-xs"
-                        [class]="
+          <!-- Opción: Delivery -->
+          <label
+            class="relative flex items-start p-3.5 rounded-xl border-2 cursor-pointer transition shadow-xs"
+            [class]="
               step2Form.get('deliveryEnabled')?.value
                 ? 'border-jade-700 bg-jade-50/60'
                 : 'border-stone-200 bg-white'
-            ">
-                        <div class="flex items-center h-5">
-                            <input type="checkbox" formControlName="deliveryEnabled"
-                                class="w-4 h-4 text-jade-700 rounded border-stone-300 focus:ring-jade-700" />
-                        </div>
-                        <div class="ml-3 text-xs">
-                            <span class="font-bold text-stone-900 block">Delivery</span>
-                            <span class="text-stone-600 text-[11px]">Envío propio o por aplicativo a domicilio.</span>
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Campo Condicional: Dirección de recojo -->
-                @if (step2Form.get('pickupEnabled')?.value) {
-                <div class="mt-3 bg-white p-3.5 rounded-xl border border-stone-200 animate-in fade-in duration-200">
-                    <label class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1"
-                        for="pickup-address">
-                        Dirección de recojo
-                        <span class="text-stone-400 font-normal lowercase">(opcional)</span>
-                    </label>
-                    <input id="pickup-address" type="text" formControlName="address"
-                        placeholder="Ej. Calle Los Cedros 123, Miraflores"
-                        class="w-full px-3 py-2 rounded-lg border border-stone-300 text-xs text-stone-900 font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none" />
-                    <p class="mt-1 text-[10px] text-stone-400">
-                        Podrás definir horarios y zonas de cobertura más adelante.
-                    </p>
-                </div>
-                }
+            "
+          >
+            <div class="flex items-center h-5">
+              <input
+                type="checkbox"
+                formControlName="deliveryEnabled"
+                class="w-4 h-4 text-jade-700 rounded border-stone-300 focus:ring-jade-700"
+              />
             </div>
-
-            <!-- ACCIONES PRINCIPALES -->
-            <div class="pt-6 space-y-3">
-                <button type="submit" [disabled]="step2Form.invalid || isLoading()"
-                    class="w-full py-3 px-4 rounded-xl bg-jade-700 hover:bg-jade-800 active:scale-[0.99] text-white text-sm font-bold tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:pointer-events-none">
-                    @if (isLoading()) {
-                    <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    <span>Guardando...</span>
-                    } @else {
-                    <span>Guardar y continuar</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                    </svg>
-                    }
-                </button>
-
-                <div class="text-center">
-                    <span class="text-xs text-stone-500 font-medium block">
-                        Siguiente: Paso 3 · Configuración de capacidad
-                    </span>
-                    <button type="button" (click)="handleSkip()"
-                        class="mt-2 text-xs font-semibold text-stone-500 hover:text-stone-800 transition underline decoration-stone-300 hover:decoration-stone-700 cursor-pointer">
-                        Configurar esto más tarde
-                    </button>
-                </div>
+            <div class="ml-3 text-xs">
+              <span class="font-bold text-stone-900 block">Delivery</span>
+              <span class="text-stone-600 text-[11px]"
+                >Envío propio o por aplicativo a domicilio.</span
+              >
             </div>
-        </form>
-    </div>
+          </label>
+        </div>
 
-    <!-- Pie de página -->
-    <app-register-footer/>
+        <!-- Campo Condicional: Dirección de recojo -->
+        @if (step2Form.get('pickupEnabled')?.value) {
+          <div
+            class="mt-3 bg-white p-3.5 rounded-xl border border-stone-200 animate-in fade-in duration-200"
+          >
+            <label
+              class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1"
+              for="pickup-address"
+            >
+              Dirección de recojo
+              <span class="text-stone-400 font-normal lowercase">(opcional)</span>
+            </label>
+            <input
+              id="pickup-address"
+              type="text"
+              formControlName="address"
+              placeholder="Ej. Calle Los Cedros 123, Miraflores"
+              class="w-full px-3 py-2 rounded-lg border border-stone-300 text-xs text-stone-900 font-medium focus:ring-2 focus:ring-jade-700 focus:border-jade-700 outline-none"
+            />
+            <p class="mt-1 text-[10px] text-stone-400">
+              Podrás definir horarios y zonas de cobertura más adelante.
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- ACCIONES PRINCIPALES -->
+      <div class="pt-6 space-y-3">
+        <button
+          type="submit"
+          [disabled]="step2Form.invalid || isLoading()"
+          class="w-full py-3 px-4 rounded-xl bg-jade-700 hover:bg-jade-800 active:scale-[0.99] text-white text-sm font-bold tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+        >
+          @if (isLoading()) {
+            <span
+              class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+            ></span>
+            <span>Guardando...</span>
+          } @else {
+            <span>Guardar y continuar</span>
+            <svg
+              class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              ></path>
+            </svg>
+          }
+        </button>
+
+        <div class="text-center">
+          <span class="text-xs text-stone-500 font-medium block">
+            Siguiente: Paso 3 · Configuración de capacidad
+          </span>
+          <button
+            type="button"
+            (click)="handleSkip()"
+            class="mt-2 text-xs font-semibold text-stone-500 hover:text-stone-800 transition underline decoration-stone-300 hover:decoration-stone-700 cursor-pointer"
+          >
+            Configurar esto más tarde
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Pie de página -->
+  <app-register-footer />
 </main>

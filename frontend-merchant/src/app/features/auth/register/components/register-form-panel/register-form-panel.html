@@ -1,258 +1,360 @@
 <main
-    class="w-full h-full bg-warmCream px-6 py-10 sm:px-12 lg:px-16 xl:px-24 flex flex-col justify-between overflow-y-auto">
-    <!-- Encabezado de Progreso -->
-    <div class="w-full max-w-xl mx-auto space-y-2.5 pb-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="text-xs font-bold tracking-wider uppercase text-jade-700">Paso 1 de 3</span>
-                <span class="text-stone-400 text-xs">·</span>
-                <span class="text-xs font-semibold text-stone-600 tracking-wide">Datos de la cuenta</span>
-            </div>
-            <span
-                class="px-2.5 py-0.5 rounded-full bg-[#f2e9d2] text-stone-700 font-bold text-[10px] tracking-wider uppercase">Paso
-                1 de 3</span>
-        </div>
-        <div aria-valuemax="100" aria-valuemin="0" class="w-full bg-stone-200/80 h-1.5 rounded-full overflow-hidden"
-            role="progressbar">
-            <div class="bg-jade-700 h-full w-1/3 rounded-full transition-all duration-300"></div>
-        </div>
+  class="w-full h-full bg-warmCream px-6 py-10 sm:px-12 lg:px-16 xl:px-24 flex flex-col justify-between overflow-y-auto"
+>
+  <!-- Encabezado de Progreso -->
+  <app-register-step-header [currentStep]="1" />
+
+  <!-- Contenedor del Formulario -->
+  <div class="max-w-xl w-full mx-auto space-y-6 my-auto">
+    <div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+        Crea tu cuenta en JaldiShop
+      </h2>
+      <p class="mt-1.5 text-stone-600 text-sm sm:text-base font-normal">
+        Usaremos estos datos para crear tu acceso a la plataforma. En el siguiente paso
+        configuraremos tu negocio.
+      </p>
     </div>
 
-    <!-- Contenedor del Formulario -->
-    <div class="max-w-xl w-full mx-auto space-y-6 my-auto">
+    <!-- Alerta de Error Reactiva -->
+    <app-alert-error [message]="errorMessage()" />
+
+    <form [formGroup]="registerForm" (ngSubmit)="handleContinue()" class="space-y-5">
+      <!-- Nombres y Apellidos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Crea tu cuenta en JaldiShop
-            </h2>
-            <p class="mt-1.5 text-stone-600 text-sm sm:text-base font-normal">
-                Usaremos estos datos para crear tu acceso a la plataforma. En el siguiente paso
-                configuraremos tu negocio.
-            </p>
-        </div>
-
-        <!-- Alerta de Error Reactiva -->
-        @if (errorMessage()) {
-        <div class="p-3.5 text-xs rounded-xl bg-red-50 text-red-700 border border-red-200 flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg text-red-600">error</span>
-            <span class="font-medium">{{ errorMessage() }}</span>
-        </div>
-        }
-
-        <form [formGroup]="registerForm" (ngSubmit)="handleContinue()" class="space-y-5">
-            <!-- Nombres y Apellidos -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
-                        for="first-name">Nombres</label>
-                    <div class="relative rounded-xl shadow-sm">
-                        <div
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </div>
-                        <input id="first-name" type="text" formControlName="firstName" placeholder="Ingresa tus nombres"
-                            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
-                            [class.border-red-500]="
+          <label
+            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            for="first-name"
+            >Nombres</label
+          >
+          <div class="relative rounded-xl shadow-sm">
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <input
+              id="first-name"
+              type="text"
+              formControlName="firstName"
+              placeholder="Ingresa tus nombres"
+              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              [class.border-red-500]="
                 registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid
-              " />
-                    </div>
-                    @if (
-                    registerForm.get('firstName')?.touched &&
-                    registerForm.get('firstName')?.hasError('required')
-                    ) {
-                    <p class="text-[11px] text-red-600 font-medium mt-1">El nombre es obligatorio.</p>
-                    }
-                </div>
+              "
+            />
+          </div>
+          @if (
+            registerForm.get('firstName')?.touched &&
+            registerForm.get('firstName')?.hasError('required')
+          ) {
+            <p class="text-[11px] text-red-600 font-medium mt-1">El nombre es obligatorio.</p>
+          }
+        </div>
 
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
-                        for="last-name">Apellidos</label>
-                    <div class="relative rounded-xl shadow-sm">
-                        <div
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </div>
-                        <input id="last-name" type="text" formControlName="lastName" placeholder="Ingresa tus apellidos"
-                            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
-                            [class.border-red-500]="
+        <div>
+          <label
+            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            for="last-name"
+            >Apellidos</label
+          >
+          <div class="relative rounded-xl shadow-sm">
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <input
+              id="last-name"
+              type="text"
+              formControlName="lastName"
+              placeholder="Ingresa tus apellidos"
+              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              [class.border-red-500]="
                 registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid
-              " />
-                    </div>
-                    @if (
-                    registerForm.get('lastName')?.touched &&
-                    registerForm.get('lastName')?.hasError('required')
-                    ) {
-                    <p class="text-[11px] text-red-600 font-medium mt-1">El apellido es obligatorio.</p>
-                    }
-                </div>
-            </div>
+              "
+            />
+          </div>
+          @if (
+            registerForm.get('lastName')?.touched &&
+            registerForm.get('lastName')?.hasError('required')
+          ) {
+            <p class="text-[11px] text-red-600 font-medium mt-1">El apellido es obligatorio.</p>
+          }
+        </div>
+      </div>
 
-            <!-- Correo Electrónico -->
-            <div>
-                <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5" for="user-email">Correo
-                    electrónico</label>
-                <div class="relative rounded-xl shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
-                    </div>
-                    <input id="user-email" type="email" formControlName="email" placeholder="nombre@correo.com"
-                        class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
-                        [class.border-red-500]="
+      <!-- Correo Electrónico -->
+      <div>
+        <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5" for="user-email"
+          >Correo electrónico</label
+        >
+        <div class="relative rounded-xl shadow-sm">
+          <div
+            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+          </div>
+          <input
+            id="user-email"
+            type="email"
+            formControlName="email"
+            placeholder="nombre@correo.com"
+            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+            [class.border-red-500]="
               registerForm.get('email')?.touched && registerForm.get('email')?.invalid
-            " />
-                </div>
-                @if (
-                registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')
-                ) {
-                <p class="text-[11px] text-red-600 font-medium mt-1">El correo es obligatorio.</p>
-                } @else if (
-                registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')
-                ) {
-                <p class="text-[11px] text-red-600 font-medium mt-1">Ingresa un correo válido.</p>
-                }
+            "
+          />
+        </div>
+        @if (
+          registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')
+        ) {
+          <p class="text-[11px] text-red-600 font-medium mt-1">El correo es obligatorio.</p>
+        } @else if (
+          registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')
+        ) {
+          <p class="text-[11px] text-red-600 font-medium mt-1">Ingresa un correo válido.</p>
+        }
+      </div>
+
+      <!-- Contraseña y Confirmar Contraseña -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Contraseña -->
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5" for="password"
+            >Contraseña</label
+          >
+          <div class="relative rounded-xl shadow-sm">
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
             </div>
-
-            <!-- Contraseña y Confirmar Contraseña -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Contraseña -->
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
-                        for="password">Contraseña</label>
-                    <div class="relative rounded-xl shadow-sm">
-                        <div
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </div>
-                        <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
-                            placeholder="Crea una contraseña"
-                            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
-                            [class.border-red-500]="
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Crea una contraseña"
+              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              [class.border-red-500]="
                 registerForm.get('password')?.touched && registerForm.get('password')?.invalid
-              " />
-                        <button type="button" (click)="togglePassword()" aria-label="Mostrar u ocultar contraseña"
-                            class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors">
-                            <span class="material-symbols-outlined text-lg">{{
-                                showPassword() ? 'visibility_off' : 'visibility'
-                                }}</span>
-                        </button>
-                    </div>
-                </div>
+              "
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              aria-label="Mostrar u ocultar contraseña"
+              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">{{
+                showPassword() ? 'visibility_off' : 'visibility'
+              }}</span>
+            </button>
+          </div>
+        </div>
 
-                <!-- Confirmar Contraseña -->
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
-                        for="password-confirm">Confirmar contraseña</label>
-                    <div class="relative rounded-xl shadow-sm">
-                        <div
-                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                        </div>
-                        <input id="password-confirm" [type]="showConfirmPassword() ? 'text' : 'password'"
-                            formControlName="passwordConfirm" placeholder="Repite tu contraseña"
-                            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
-                            [class.border-red-500]="
+        <!-- Confirmar Contraseña -->
+        <div>
+          <label
+            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            for="password-confirm"
+            >Confirmar contraseña</label
+          >
+          <div class="relative rounded-xl shadow-sm">
+            <div
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+            <input
+              id="password-confirm"
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              formControlName="passwordConfirm"
+              placeholder="Repite tu contraseña"
+              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              [class.border-red-500]="
                 registerForm.get('passwordConfirm')?.touched &&
                 (registerForm.get('passwordConfirm')?.invalid || registerForm.hasError('mismatch'))
-              " />
-                        <button type="button" (click)="toggleConfirmPassword()"
-                            aria-label="Mostrar u ocultar contraseña"
-                            class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors">
-                            <span class="material-symbols-outlined text-lg">{{
-                                showConfirmPassword() ? 'visibility_off' : 'visibility'
-                                }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Indicador de longitud de contraseña y error de coincidencia -->
-            <div class="space-y-1.5">
-                <div class="flex items-center gap-1.5">
-                    <div class="h-1.5 flex-1 rounded-full" [class]="
-              registerForm.get('password')?.value?.length >= 6
-                ? 'bg-emerald-500'
-                : 'bg-stone-200'
-            "></div>
-                    <div class="h-1.5 flex-1 rounded-full" [class]="
-              registerForm.get('password')?.value?.length >= 8
-                ? 'bg-emerald-500'
-                : 'bg-stone-200'
-            "></div>
-                    <div class="h-1.5 flex-1 rounded-full" [class]="
-              registerForm.get('password')?.value?.length >= 10
-                ? 'bg-emerald-500'
-                : 'bg-stone-200'
-            "></div>
-                </div>
-                <p class="text-[11px] text-stone-500">La contraseña debe tener al menos 8 caracteres</p>
-                @if (registerForm.get('passwordConfirm')?.touched && registerForm.hasError('mismatch')) {
-                <p class="text-[11px] text-red-600 font-medium">Las contraseñas no coinciden.</p>
-                }
-            </div>
-
-            <!-- Términos y Condiciones -->
-            <div class="flex items-start gap-2.5 pt-1">
-                <input id="terms" type="checkbox" formControlName="terms"
-                    class="h-4 w-4 mt-0.5 rounded border-stone-300 text-jade-700 focus:ring-jade-700 cursor-pointer shrink-0" />
-                <label class="text-xs text-stone-700 leading-relaxed cursor-pointer" for="terms">
-                    Al crear mi cuenta, acepto los
-                    <a routerLink="/terms" target="_blank" class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
-                        >Términos y condiciones</a>
-                    y la
-                    <a routerLink="/terms" target="_blank" class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
-                        >Política de privacidad</a>.
-                </label>
-            </div>
-
-            <!-- Botón Continuar -->
-            <div class="space-y-1.5">
-                <button type="submit" [disabled]="registerForm.invalid || isLoading()"
-                    class="w-full flex items-center justify-center gap-2 rounded-xl bg-jade-700 px-5 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-jade-700/20 hover:bg-jade-800 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-jade-700 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none">
-                    @if (isLoading()) {
-                    <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    <span>Guardando...</span>
-                    } @else {
-                    <span>Continuar</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    }
-                </button>
-                <p class="text-center text-xs text-stone-500 font-medium">
-                    Paso siguiente: Configuración básica de tu negocio
-                </p>
-            </div>
-        </form>
-
-        <!-- Enlace a Login -->
-        <div class="text-center pt-2">
-            <p class="text-xs sm:text-sm text-stone-600">
-                ¿Ya tienes una cuenta?
-                <a routerLink="/login"
-                    class="font-bold text-jade-700 hover:text-jade-800 hover:underline transition-colors ml-1">
-                    Iniciar sesión
-                </a>
-            </p>
+              "
+            />
+            <button
+              type="button"
+              (click)="toggleConfirmPassword()"
+              aria-label="Mostrar u ocultar contraseña"
+              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">{{
+                showConfirmPassword() ? 'visibility_off' : 'visibility'
+              }}</span>
+            </button>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Footer Discreto -->
-    <app-register-footer/>
+      <!-- Indicador de longitud de contraseña y error de coincidencia -->
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-1.5">
+          <div
+            class="h-1.5 flex-1 rounded-full"
+            [class]="
+              registerForm.get('password')?.value?.length >= 6 ? 'bg-emerald-500' : 'bg-stone-200'
+            "
+          ></div>
+          <div
+            class="h-1.5 flex-1 rounded-full"
+            [class]="
+              registerForm.get('password')?.value?.length >= 8 ? 'bg-emerald-500' : 'bg-stone-200'
+            "
+          ></div>
+          <div
+            class="h-1.5 flex-1 rounded-full"
+            [class]="
+              registerForm.get('password')?.value?.length >= 10 ? 'bg-emerald-500' : 'bg-stone-200'
+            "
+          ></div>
+        </div>
+        <p class="text-[11px] text-stone-500">La contraseña debe tener al menos 8 caracteres</p>
+        @if (registerForm.get('passwordConfirm')?.touched && registerForm.hasError('mismatch')) {
+          <p class="text-[11px] text-red-600 font-medium">Las contraseñas no coinciden.</p>
+        }
+      </div>
+
+      <!-- Términos y Condiciones -->
+      <div class="flex items-start gap-2.5 pt-1">
+        <input
+          id="terms"
+          type="checkbox"
+          formControlName="terms"
+          class="h-4 w-4 mt-0.5 rounded border-stone-300 text-jade-700 focus:ring-jade-700 cursor-pointer shrink-0"
+        />
+        <label class="text-xs text-stone-700 leading-relaxed cursor-pointer" for="terms">
+          Al crear mi cuenta, acepto los
+          <a
+            routerLink="/terms"
+            target="_blank"
+            class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
+            >Términos y condiciones</a
+          >
+          y la
+          <a
+            routerLink="/terms"
+            target="_blank"
+            class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
+            >Política de privacidad</a
+          >.
+        </label>
+      </div>
+
+      <!-- Botón Continuar -->
+      <div class="space-y-1.5">
+        <button
+          type="submit"
+          [disabled]="registerForm.invalid || isLoading()"
+          class="w-full flex items-center justify-center gap-2 rounded-xl bg-jade-700 px-5 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-jade-700/20 hover:bg-jade-800 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-jade-700 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+        >
+          @if (isLoading()) {
+            <span
+              class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+            ></span>
+            <span>Guardando...</span>
+          } @else {
+            <span>Continuar</span>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+          }
+        </button>
+        <p class="text-center text-xs text-stone-500 font-medium">
+          Paso siguiente: Configuración básica de tu negocio
+        </p>
+      </div>
+    </form>
+
+    <!-- Enlace a Login -->
+    <div class="text-center pt-2">
+      <p class="text-xs sm:text-sm text-stone-600">
+        ¿Ya tienes una cuenta?
+        <a
+          routerLink="/login"
+          class="font-bold text-jade-700 hover:text-jade-800 hover:underline transition-colors ml-1"
+        >
+          Iniciar sesión
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer Discreto -->
+  <app-register-footer />
 </main>

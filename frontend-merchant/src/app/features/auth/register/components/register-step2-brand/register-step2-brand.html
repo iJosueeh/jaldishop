@@ -54,10 +54,7 @@ border-emerald-200">
             <!-- Ficha del negocio -->
             <div class="mt-5 flex items-start gap-4">
                 <!-- Inicial del negocio o logo -->
-                <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 font-extrabold text-2xl flex items-center justify-center border-2
-border-amber-200 shadow-sm shrink-0">
-                    {{ initialLetter() }}
-                </div>
+                <app-business-avatar [name]="storeName()" size="lg" />
 
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">

@@ -1,16 +1,8 @@
-import { Component, computed, input } from '@angular/core';
-
-export interface RegisterStep2Data {
-  name: string;
-  businessType: string;
-  contactPhone: string;
-  pickupEnabled: boolean;
-  deliveryEnabled: boolean;
-  address?: string;
-}
+import { Component, input } from '@angular/core';
+import { BusinessAvatar } from '../../../../../shared/components/business-avatar/business-avatar';
 
 @Component({
-  imports: [],
+  imports: [BusinessAvatar],
   selector: 'app-register-step2-brand',
   styleUrl: './register-step2-brand.css',
   templateUrl: './register-step2-brand.html',
@@ -21,8 +13,4 @@ export class RegisterStep2Brand {
   readonly contactPhone = input<string>('999 999 999');
   readonly pickupEnabled = input<boolean>(true);
   readonly deliveryEnabled = input<boolean>(true);
-
-  readonly initialLetter = computed(() => 
-    this.storeName()?.trim().charAt(0).toUpperCase() || 'B'
-  );
 }

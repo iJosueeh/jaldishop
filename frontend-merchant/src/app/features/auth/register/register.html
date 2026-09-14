@@ -1,13 +1,12 @@
 <div class="h-screen w-screen bg-warmCream font-sans text-stone-800 antialiased overflow-hidden">
   <div class="h-full w-full flex flex-col lg:flex-row">
     @if (currentStep() == 1) {
-      <!-- Panel Izquierdo: Beneficios (50% en escritorio, oculto en móvil) -->
       <app-register-brand-panel
         class="hidden lg:flex lg:w-1/2 h-full flex-col"
       ></app-register-brand-panel>
-      <!-- Panel Derecho: Formulario Paso 1 (100% en móvil, 50% en escritorio) -->
       <app-register-form-panel
         class="flex flex-col w-full lg:w-1/2 h-full"
+        [initialData]="step1Data()"
         [isLoading]="isLoading()"
         [errorMessage]="errorMessage()"
         (step1Submit)="onStep1Submit($event)"
@@ -25,6 +24,7 @@
       />
       <app-register-step2-form
         class="flex flex-col w-full lg:w-1/2 h-full"
+        [initialData]="step2Data()"
         [isLoading]="isLoading()"
         [errorMessage]="errorMessage()"
         (back)="onStep2Back()"
@@ -35,24 +35,24 @@
     }
 
     @if (currentStep() == 3) {
-        <app-register-step3-brand
-            class="hidden lg:flex lg:w-1/2 h-full flex-col"
-            [storeName]="step2Data()?.name || 'Dulces Clara'"
-            [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
-            [dailyOrderLimit]="step3Data()?.dailyOrderLimit ?? 12"
-            [prepTime]="step3Data()?.prepTime || '30 - 60 min'"
-            [openingTime]="step3Data()?.openingTime || '09:00'"
-            [closingTime]="step3Data()?.closingTime || '19:00'"
-        />
-        <app-register-step3-form
-            class="flex flex-col w-full lg:w-1/2 h-full"
-            [isLoading]="isLoading()"
-            [errorMessage]="errorMessage()"
-            (back)="onStep3Back()"
-            (formChange)="onStep3Change($event)"
-            (step3Submit)="onStep3Submit($event)"
-        />
+      <app-register-step3-brand
+        class="hidden lg:flex lg:w-1/2 h-full flex-col"
+        [storeName]="step2Data()?.name || 'Dulces Clara'"
+        [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
+        [dailyOrderLimit]="step3Data()?.dailyOrderLimit ?? 12"
+        [prepTime]="step3Data()?.prepTime || '30 - 60 min'"
+        [openingTime]="step3Data()?.openingTime || '09:00'"
+        [closingTime]="step3Data()?.closingTime || '19:00'"
+      />
+      <app-register-step3-form
+        class="flex flex-col w-full lg:w-1/2 h-full"
+        [initialData]="step3Data()"
+        [isLoading]="isLoading()"
+        [errorMessage]="errorMessage()"
+        (back)="onStep3Back()"
+        (formChange)="onStep3Change($event)"
+        (step3Submit)="onStep3Submit($event)"
+      />
     }
-
   </div>
 </div>

@@ -1,20 +1,25 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { outputFromObservable, toSignal } from '@angular/core/rxjs-interop'
-import { RegisterStep2Data } from '../register-step2-brand/register-step2-brand';
 import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
+import { RegisterStepHeader } from '../../../../../shared/components/register-step-header/register-step-header';
+import { AlertError } from '../../../../../shared/components/alert-error/alert-error';
+import { BusinessAvatar } from '../../../../../shared/components/business-avatar/business-avatar';
+import { RegisterStep2Data } from '../../interface/register.models';
 
 @Component({
-  imports: [ReactiveFormsModule, RegisterFooter],
+  imports: [ReactiveFormsModule, RegisterFooter, RegisterStepHeader, AlertError, BusinessAvatar],
   selector: 'app-register-step2-form',
   styleUrl: './register-step2-form.css',
   templateUrl: './register-step2-form.html',
 })
-export class RegisterStep2Form {
+export class RegisterStep2Form implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly isLoading = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
+
+  readonly initialData = input<RegisterStep2Data | null>(null);
 
   readonly back = output<void>();
   readonly step2Submit = output<RegisterStep2Data>();
@@ -29,15 +34,18 @@ export class RegisterStep2Form {
     address: ['Av. Primavera 452, Santiago de Surco'],
   });
 
+  ngOnInit(): void {
+    const data = this.initialData();
+    if (data) {
+      this.step2Form.patchValue(data);
+    }
+  }
+
   readonly formChange = outputFromObservable<RegisterStep2Data>(this.step2Form.valueChanges);
 
-  private readonly formValues = toSignal(this.step2Form.valueChanges, {
+  readonly formValues = toSignal(this.step2Form.valueChanges, {
     initialValue: this.step2Form.getRawValue(),
   });
-
-  readonly previewInitial = computed(
-    () => this.formValues().name?.trim()?.charAt(0)?.toUpperCase() || 'D',
-  );
 
   onBack(): void {
     this.back.emit();
