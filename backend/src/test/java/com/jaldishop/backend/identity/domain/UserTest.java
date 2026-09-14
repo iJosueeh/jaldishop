@@ -317,4 +317,80 @@ class UserTest {
         assertDoesNotThrow(() -> User.validateRequired("validValue", "testField"));
     }
 
+    @Test
+    @DisplayName("addRole() debe agregar un nuevo rol y actualizar updatedAt")
+    void addRoleShouldAddRoleAndSetUpdatedAt() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        assertFalse(user.hasRole(RoleName.MERCHANT));
+        assertEquals(1, user.getRoles().size());
+
+        user.addRole(merchantRole);
+
+        assertTrue(user.hasRole(RoleName.MERCHANT));
+        assertTrue(user.hasRole(RoleName.CUSTOMER));
+        assertEquals(2, user.getRoles().size());
+        assertNotNull(user.getUpdatedAt());
+    }
+
+    @Test
+    @DisplayName("addRole() debe lanzar excepción cuando el rol es nulo")
+    void addRoleWithNullShouldThrowException() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> user.addRole(null)
+        );
+        assertTrue(exception.getMessage().contains("rol"));
+    }
+
+    @Test
+    @DisplayName("hasRole() debe retornar false cuando el rol no está asignado o es nulo")
+    void hasRoleShouldReturnFalseWhenNotAssignedOrNull() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        assertFalse(user.hasRole(RoleName.MERCHANT));
+        assertFalse(user.hasRole(null));
+    }
+
+    @Test
+    @DisplayName("getRoles() debe retornar un Set inmutable")
+    void getRolesShouldReturnUnmodifiableSet() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> user.getRoles().add(merchantRole)
+        );
+    }
+
 }

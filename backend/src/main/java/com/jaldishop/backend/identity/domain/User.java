@@ -1,9 +1,7 @@
 package com.jaldishop.backend.identity.domain;
 
 import java.time.Instant;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class User {
 
@@ -16,7 +14,7 @@ public class User {
     private final String phone;
     private final Set<Role> roles;
     private final Instant createdAt;
-    private final Instant updatedAt;
+    private Instant updatedAt;
 
     public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles) {
         this.id = id;
@@ -28,7 +26,7 @@ public class User {
         this.phone = phone;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.roles = Set.copyOf(roles);
+        this.roles = new HashSet<>(roles);
     }
 
     public static User create(String email, String password, String firstName, String lastName, String phone, Set<Role> roles) {
@@ -91,6 +89,21 @@ public class User {
         }
     }
 
+    public void addRole(Role role) {
+        if (role == null) {
+            throw new IllegalArgumentException("El rol no puede ser nulo.");
+        }
+        this.roles.add(role);
+        this.updatedAt = Instant.now();
+    }
+
+    public boolean hasRole(RoleName roleName) {
+        if (roleName == null) {
+            return false;
+        }
+        return roles.stream().anyMatch(r -> r.getName() == roleName);
+    }
+
     public boolean canAuthenticate() {
         return status == UserStatus.ACTIVE;
     }
@@ -136,7 +149,7 @@ public class User {
     }
 
     public Set<Role> getRoles() {
-        return roles;
+        return Collections.unmodifiableSet(this.roles);
     }
 
 }

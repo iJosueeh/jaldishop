@@ -230,6 +230,12 @@
           </label>
         </div>
 
+        @if (step2Form.hasError('noDeliveryMethod')) {
+            <p class="mt-2 text-xs text-red-600 font-medium animate-in fade-in duration-200">
+              Debes seleccionar al menos una modalidad de entrega (Recojo o Delivery).
+            </p>
+          }
+
         <!-- Campo Condicional: Dirección de recojo -->
         @if (step2Form.get('pickupEnabled')?.value) {
           <div

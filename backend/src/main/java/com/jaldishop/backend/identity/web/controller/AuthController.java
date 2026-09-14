@@ -3,6 +3,7 @@ package com.jaldishop.backend.identity.web.controller;
 import com.jaldishop.backend.identity.application.*;
 import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.web.dto.LoginRequest;
+import com.jaldishop.backend.identity.web.dto.RegisterMerchantRequest;
 import com.jaldishop.backend.identity.web.dto.RegisterRequest;
 import com.jaldishop.backend.identity.web.dto.UserResponse;
 import jakarta.validation.Valid;
@@ -19,10 +20,16 @@ public class AuthController {
 
     private final AuthenticateUserService authenticateUserService;
     private final RegisterCustomerService registerCustomerService;
+    private final RegisterMerchantService registerMerchantService;
 
-    public AuthController(AuthenticateUserService authenticateUserService, RegisterCustomerService registerCustomerService) {
+    public AuthController(
+            AuthenticateUserService authenticateUserService,
+            RegisterCustomerService registerCustomerService,
+            RegisterMerchantService registerMerchantService
+    ) {
         this.authenticateUserService = authenticateUserService;
         this.registerCustomerService = registerCustomerService;
+        this.registerMerchantService = registerMerchantService;
     }
 
     @PostMapping("/register")
@@ -55,6 +62,26 @@ public class AuthController {
         AuthResult authResult = authenticateUserService.execute(command);
 
         return ResponseEntity.ok(authResult);
+    }
+
+    @PostMapping("/register/merchant")
+    public ResponseEntity<AuthResult> registerMerchant(@Valid @RequestBody RegisterMerchantRequest request) {
+        RegisterMerchantCommand command = new RegisterMerchantCommand(
+                request.email(),
+                request.password(),
+                request.firstName(),
+                request.lastName(),
+                request.phone(),
+                request.storeName(),
+                request.businessType(),
+                request.storeContactPhone(),
+                request.address(),
+                request.pickupEnabled(),
+                request.deliveryEnabled()
+        );
+
+        AuthResult result = registerMerchantService.execute(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
 }
