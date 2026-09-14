@@ -63,8 +63,8 @@ flowchart LR
 | **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot_4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) | API RESTful, Arquitectura Hexagonal/DDD, Bean Validation y Transaccionalidad |
 | **Seguridad** | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) | Autenticación sin estado, RBAC (CUSTOMER, MERCHANT, ADMIN) y control de acceso |
 | **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white) ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white) | Base de datos NeonDB en la nube, versionamiento DDL forward-only y JPA |
-| **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) | Portal Cliente y Panel de Control MYPE |
-| **Calidad / QA** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-C5D8B3?style=for-the-badge&logoColor=white) | 78 pruebas unitarias y de integración pasando al 100% |
+| **Frontend** | ![Angular](https://img.shields.io/badge/Angular_20-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Panel de Comerciante (Angular Standalone/Signals) y Portal Cliente (Next.js) |
+| **Calidad / QA** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-C5D8B3?style=for-the-badge&logoColor=white) | 89 pruebas unitarias y de integración pasando al 100% |
 | **Documentación** | ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white) | Diagramas interactivos y especificaciones de arquitectura viva |
 
 ---
@@ -101,7 +101,8 @@ jaldishop/
 │   │   └── 📄 sprint-02.md             # Sprint 2: Backend Base (En Progreso)
 │   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
 ├── 📁 backend/                         # Servidor Spring Boot (En Desarrollo)
-├── 📁 frontend/                        # Aplicación Web (Próximo Sprint)
+├── 📁 frontend-merchant/               # Panel de Comerciante (Angular 20 Standalone)
+├── 📁 frontend/                        # Portal Cliente (Próximo Sprint)
 └── 📄 README.md                        # Portal principal del repositorio
 ```
 
@@ -112,7 +113,7 @@ jaldishop/
 ```mermaid
 flowchart TD
     S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
-    S2["Sprint 2: Backend Base (Identity + Store) - 63% Completado"]
+    S2["Sprint 2: Backend Base (Identity + Store + Onboarding Merchant) - 75% Completado"]
     S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Pendiente"]
     S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
     S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]
@@ -123,9 +124,9 @@ flowchart TD
 | Sprint | Enfoque | Estado | Entregable Clave |
 |:---:|---|:---:|---|
 | **01** | Modelo de Capacidad y Casos de Estudio | `COMPLETADO` | [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md) |
-| **02** | Backend Base (Identity + Store + JWT) | `EN PROGRESO AVANZADO` | [Sprint 02 Backlog](./docs/06-scrum/sprint-02.md) (Identity + Store completados, 78 tests) |
+| **02** | Backend Base (Identity + Store + JWT + Onboarding) | `EN PROGRESO AVANZADO` | [Sprint 02 Backlog](./docs/06-scrum/sprint-02.md) (Identity + Store + Onboarding completados, 89 tests) |
 | **03** | Backend - Pedidos, Capacidad y Pagos | `PENDIENTE` | Módulos de dominio completos |
-| **04** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Next.js / Tailwind |
+| **04** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Angular / Next.js |
 | **05** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
 
 ---

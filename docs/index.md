@@ -58,9 +58,9 @@ flowchart LR
 |:---|:---|:---|
 | **Backend** | Spring Boot 4.1.1, Java 21 | API RESTful, Arquitectura Hexagonal/DDD y Transaccionalidad |
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
-| **Frontend** | Next.js, Tailwind CSS | Portal Cliente y Panel Administrativo MYPE |
+| **Frontend** | Angular 20 Standalone, Next.js, Tailwind CSS | Panel de Comerciante (Angular) y Portal Cliente (Next.js) |
 | **Persistencia** | PostgreSQL 18.6 (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
-| **Calidad / QA** | JUnit 5, Mockito | 78 pruebas automatizadas pasando al 100% |
+| **Calidad / QA** | JUnit 5, Mockito | 89 pruebas automatizadas pasando al 100% |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---
@@ -70,7 +70,7 @@ flowchart LR
 ```mermaid
 flowchart TD
     S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
-    S2["Sprint 2: Backend Base (Identity + Store) - 63% Completado"]
+    S2["Sprint 2: Backend Base (Identity + Store + Onboarding Merchant) - 75% Completado"]
     S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Pendiente"]
     S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
     S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]

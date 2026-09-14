@@ -150,7 +150,9 @@ VALUES
 - [x] Documentar validación de UserStatus
 - [x] Documentar comportamiento de email duplicado
 - [x] Implementar RegisterCustomerService y AuthenticateUserService
-- [x] Implementar AuthController REST con validaciones Bean Validation
+- [x] Implementar RegisterMerchantService con onboarding atómico transaccional y upgrade de rol
+- [x] Implementar AuthController REST con endpoints /register, /login y /register/merchant
+- [x] Implementar suite de pruebas unitarias y web de Auth (UserTest, RegisterMerchantServiceTest, AuthControllerTest)
 - [x] Pasar a Code Review
 
 **Flujo Register Customer (ejemplo):**
