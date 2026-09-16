@@ -57,7 +57,7 @@ flowchart LR
 | 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `PENDIENTE` | Módulo Notification completo (dominio, JPA, casos de uso, REST, tests) |
 | 🔴 **Alta** | BE-11 · Implementar módulo base de Tienda | Josué | `COMPLETADO` | Store completo (dominio, JPA, casos de uso, REST, 29 tests) |
 | 🔴 **Alta** | FE-01 · Auth & Onboarding Comerciante | Josué | `COMPLETADO` | Login, Register 3-pasos, ForgotPassword, Shared 404/403, 31 tests |
-| 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `EN PROGRESO` | MerchantLayout, Sidebar, Header, Mi Tienda, Editar Tienda, Integración API |
+| 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `COMPLETADO` | MerchantLayout, Sidebar, Header, Mi Tienda, Subcomponentes, Integración API, 42 tests |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
@@ -407,24 +407,26 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 **Objetivo:** Implementar el área privada base de JaldiShop Merchant para que un comerciante autenticado pueda acceder a su panel, visualizar la información real de su tienda y modificar su configuración mediante los endpoints existentes del módulo Store.
 
 **Checklist:**
-- [ ] Crear `MerchantLayout` (contenedor base autenticado)
-- [ ] Crear `Sidebar` responsive con navegación (`/dashboard`, `/store`, `/orders`, `/capacity`, `/settings`)
-- [ ] Crear `Header` responsive con perfil de comerciante y estado del negocio
-- [ ] Proteger rutas hijas privadas bajo `MerchantGuard` (rol `MERCHANT`)
-- [ ] Implementar vista inicial de `Dashboard` (resumen operativo y accesos rápidos)
-- [ ] Implementar servicio `StoreService` consumiendo `GET /api/v1/stores/me`
-- [ ] Crear vista "Mi tienda" (`MyStoreComponent`):
-  - [ ] Mostrar datos generales (nombre, slug, bio, moneda, estado operativo)
-  - [ ] Mostrar configuración de entrega (recojo en tienda, delivery propio, costo base)
-- [ ] Crear formulario "Editar tienda" (`EditStoreComponent`):
-  - [ ] Formulario reactivo tipado con validaciones
-  - [ ] Consumir `PUT /api/v1/stores/me` con feedback inmediato
-- [ ] Manejar estados de UI: Loading skeleton / Spinner, Empty state, Error alerts
-- [ ] Manejo granular de respuestas HTTP (401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict)
-- [ ] Integrar acción de `Logout` en el Layout (limpieza de token y redirección a `/login`)
-- [ ] Mantener módulos futuros (Pedidos, Capacidad, Productos) completamente desacoplados
-- [ ] Agregar tests unitarios en Vitest para componentes y servicios
-- [ ] Validar diseño responsive (Mobile, Tablet, Desktop)
+- [x] Crear `MerchantLayout` (contenedor base autenticado)
+- [x] Crear `Sidebar` responsive con navegación (`/dashboard`, `/store`, `/orders`, `/capacity`, `/settings`)
+- [x] Crear `Header` responsive con perfil de comerciante y estado del negocio
+- [x] Proteger rutas hijas privadas bajo `MerchantGuard` (rol `MERCHANT`)
+- [x] Implementar vista inicial de `Dashboard` (resumen operativo y accesos rápidos)
+- [x] Implementar servicio `StoreService` consumiendo `GET /api/v1/stores/me` y `PUT /api/v1/stores/me`
+- [x] Crear vista "Mi tienda" (`Store`):
+  - [x] Mostrar datos generales (nombre, slug, bio, contacto, estado operativo)
+  - [x] Mostrar configuración de entrega (recojo en tienda, delivery propio, costo base, IGV)
+  - [x] Vista previa pública en vivo con enlace copiable y feedback
+- [x] Crear formulario y sincronización reactiva (`Store`):
+  - [x] Formulario reactivo tipado con `NonNullableFormBuilder` y validaciones
+  - [x] Consumir `PUT /api/v1/stores/me` con feedback inmediato y manejo de estados
+- [x] Manejar estados de UI: Loading spinner, Empty state (`@empty`), Error / Success alerts
+- [x] Manejo granular de respuestas HTTP y retroalimentación reactiva
+- [x] Integrar acción de `Logout` en el Layout (limpieza de token y redirección a `/login`)
+- [x] Adaptar `NotFound` (404) para redirigir a `/dashboard` si el usuario está autenticado
+- [x] Mantener módulos futuros (Pedidos, Capacidad, Productos) completamente desacoplados
+- [x] Agregar tests unitarios en Vitest para componentes y servicios (42 tests pasando al 100%)
+- [x] Validar diseño responsive (Mobile, Tablet, Desktop)
 
 ---
 
@@ -432,8 +434,8 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 6 / 10 (60%) |
-| Entregables en desarrollo activo | 1 / 10 (10%) |
+| Entregables completados | 7 / 10 (70%) |
+| Entregables en desarrollo activo | 0 / 10 (0%) |
 | Entregables pendientes | 3 / 10 (30%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 

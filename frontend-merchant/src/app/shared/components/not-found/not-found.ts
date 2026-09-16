@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth-service';
 
 @Component({
   imports: [RouterLink],
@@ -7,4 +8,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './not-found.css',
   templateUrl: './not-found.html',
 })
-export class NotFound {}
+export class NotFound {
+  private readonly authService = inject(AuthService);
+
+  readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
+}

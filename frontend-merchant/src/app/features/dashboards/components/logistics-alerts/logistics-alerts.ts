@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { StockAlertItem, UpcomingDeliveryItem } from '../../interface/dashboard.models';
 
 @Component({
   imports: [RouterLink],
@@ -7,4 +8,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './logistics-alerts.css',
   templateUrl: './logistics-alerts.html',
 })
-export class LogisticsAlerts {}
+export class LogisticsAlerts {
+  readonly upcomingDeliveries = signal<UpcomingDeliveryItem[]>([]);
+  readonly stockAlerts = signal<StockAlertItem[]>([]);
+}

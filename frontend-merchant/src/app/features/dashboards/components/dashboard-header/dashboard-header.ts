@@ -11,6 +11,8 @@ export class DashboardHeader {
   private readonly storeService = inject(StoreService);
 
   readonly storeName = computed(() => this.storeService.storeName());
+  readonly storeStatus = computed(() => this.storeService.storeStatus());
+  readonly isOpen = computed(() => this.storeStatus() === 'ACTIVE');
 
   readonly currentDate = computed(() => {
     const today = new Date();

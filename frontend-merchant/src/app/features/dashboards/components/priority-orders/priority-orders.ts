@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DashboardPriorityOrder } from '../../interface/dashboard.models';
 
 @Component({
   imports: [RouterLink],
@@ -7,4 +8,16 @@ import { RouterLink } from '@angular/router';
   styleUrl: './priority-orders.css',
   templateUrl: './priority-orders.html',
 })
-export class PriorityOrders {}
+export class PriorityOrders {
+  readonly orders = signal<DashboardPriorityOrder[]>([]);
+
+  onMarkAsReady(order: DashboardPriorityOrder): void {
+    this.orders.update((list) =>
+      list.map((o) => (o.id === order.id ? { ...o, status: 'READY' } : o)),
+    );
+  }
+
+  onNotifyCustomer(order: DashboardPriorityOrder): void {
+    this.orders.update((list) => list.filter((o) => o.id !== order.id));
+  }
+}

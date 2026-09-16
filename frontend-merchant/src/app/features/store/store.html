@@ -1,0 +1,93 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-8">
+  <!-- 1. Cabecera de Página: Título, Estado y Acciones Principales -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
+          Mi Tienda
+        </h1>
+        <span
+          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-surface-container text-primary-container text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
+        >
+          <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+          Abierto al público
+        </span>
+      </div>
+      <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
+        Configura los datos comerciales, modalidades de despacho y enlaces públicos de tu catálogo.
+      </p>
+    </div>
+
+    <!-- Acciones de Cabecera -->
+    <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+      <button
+        type="button"
+        class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+      >
+        <span class="material-symbols-outlined text-[18px] text-primary-container">open_in_new</span>
+        <span>Ver catálogo</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="onSave()"
+        [disabled]="storeService.isLoading()"
+        class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container text-white hover:bg-primary transition-colors text-xs font-bold shadow-2xs cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (storeService.isLoading()) {
+          <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span>Guardando...</span>
+        } @else {
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Guardar cambios</span>
+        }
+      </button>
+    </div>
+  </header>
+
+  <!-- Banners de Notificación Reactiva -->
+  @if (saveSuccess()) {
+    <div
+      class="p-4 rounded-xl bg-surface-container text-primary-container border border-primary-container/20 text-xs font-bold flex items-center gap-2.5 shadow-xs animate-fade-in"
+    >
+      <span class="material-symbols-outlined text-[20px]">check_circle</span>
+      <span>¡Los cambios de tu tienda se guardaron exitosamente!</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div
+      class="p-4 rounded-xl bg-error-container text-on-error-container text-xs font-semibold flex items-center gap-2.5 shadow-xs"
+    >
+      <span class="material-symbols-outlined text-[20px]">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- 2. Grilla Principal en 2 Columnas (8/12 Formulario + 4/12 Vista Previa) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 w-full items-start">
+    <!-- Columna Izquierda (8/12): Secciones de Formulario y Configuración -->
+    <div class="lg:col-span-8 flex flex-col gap-5 sm:gap-6">
+      <!-- Tarjeta 1: Identidad & Datos Comerciales -->
+      <app-store-identity-card
+        [form]="storeForm"
+        [slug]="storeService.currentStore()?.slug ?? ''"
+      />
+
+      <!-- Tarjeta 2: Modalidades de Entrega y Tarifas -->
+      <app-store-delivery-card [form]="storeForm" />
+
+      <!-- Tarjeta 3: Ubicación Física del Negocio -->
+      <app-store-location-card [form]="storeForm" />
+    </div>
+
+    <!-- Columna Derecha (4/12): Vista Previa en Vivo & Estado Operativo -->
+    <div class="lg:col-span-4 flex flex-col gap-5 sm:gap-6 lg:sticky lg:top-20">
+      <!-- Tarjeta: Ficha pública de la tienda y Link para Compartir -->
+      <app-store-preview-card
+        [form]="storeForm"
+        [store]="storeService.currentStore()"
+      />
+    </div>
+  </div>
+</div>

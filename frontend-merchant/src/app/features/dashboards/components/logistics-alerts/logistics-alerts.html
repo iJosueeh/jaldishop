@@ -10,52 +10,42 @@
     </div>
 
     <div class="flex flex-col gap-3 pt-1">
-      <!-- Item 1 -->
-      <div class="flex items-start gap-3">
-        <div class="flex flex-col items-center">
-          <span class="w-2.5 h-2.5 rounded-full bg-primary-container mt-1"></span>
-          <span class="w-0.5 h-8 bg-surface-container-high mt-1"></span>
-        </div>
-        <div class="flex flex-col min-w-0 flex-1">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold text-on-surface">15:15</span>
-            <span class="text-[11px] font-bold text-error">En 15 min</span>
+      @for (delivery of upcomingDeliveries(); track delivery.id; let last = $last) {
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center">
+            <span
+              class="w-2.5 h-2.5 rounded-full mt-1"
+              [class.bg-primary-container]="delivery.urgency === 'NORMAL'"
+              [class.bg-secondary]="delivery.urgency === 'WARNING'"
+              [class.bg-error]="delivery.urgency === 'CRITICAL'"
+            ></span>
+            @if (!last) {
+              <span class="w-0.5 h-8 bg-surface-container-high mt-1"></span>
+            }
           </div>
-          <span class="text-xs font-semibold text-on-surface truncate">Valeria Ramos</span>
-          <span class="text-[11px] text-on-surface-variant">Delivery</span>
-        </div>
-      </div>
-
-      <!-- Item 2 -->
-      <div class="flex items-start gap-3">
-        <div class="flex flex-col items-center">
-          <span class="w-2.5 h-2.5 rounded-full bg-secondary mt-1"></span>
-          <span class="w-0.5 h-8 bg-surface-container-high mt-1"></span>
-        </div>
-        <div class="flex flex-col min-w-0 flex-1">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold text-on-surface">16:30</span>
-            <span class="text-[11px] text-on-surface-variant">En 30 min</span>
+          <div class="flex flex-col min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-on-surface">{{ delivery.scheduledTime }}</span>
+              <span
+                class="text-[11px] font-bold"
+                [class.text-error]="delivery.urgency === 'CRITICAL'"
+                [class.text-on-surface-variant]="delivery.urgency !== 'CRITICAL'"
+              >
+                {{ delivery.timeLabel }}
+              </span>
+            </div>
+            <span class="text-xs font-semibold text-on-surface truncate">{{ delivery.customerName }}</span>
+            <span class="text-[11px] text-on-surface-variant">{{ delivery.deliveryMode === 'DELIVERY' ? 'Delivery' : 'Recojo en local' }}</span>
           </div>
-          <span class="text-xs font-semibold text-on-surface truncate">Mariana Torres</span>
-          <span class="text-[11px] text-on-surface-variant">Recojo en local</span>
         </div>
-      </div>
-
-      <!-- Item 3 -->
-      <div class="flex items-start gap-3">
-        <div class="flex flex-col items-center">
-          <span class="w-2.5 h-2.5 rounded-full bg-surface-variant mt-1"></span>
+      } @empty {
+        <!-- Estado Vacío (@empty) -->
+        <div class="py-4 text-center">
+          <p class="text-xs text-on-surface-variant">
+            Sin entregas programadas para este bloque horario.
+          </p>
         </div>
-        <div class="flex flex-col min-w-0 flex-1">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold text-on-surface">17:00</span>
-            <span class="text-[11px] text-on-surface-variant">En 1h</span>
-          </div>
-          <span class="text-xs font-semibold text-on-surface truncate">Carlos Benavides</span>
-          <span class="text-[11px] text-on-surface-variant">Delivery</span>
-        </div>
-      </div>
+      }
     </div>
   </div>
 
@@ -67,9 +57,11 @@
         <h3 class="text-sm font-bold text-on-surface truncate">Stock para revisar</h3>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider">
-          Atención
-        </span>
+        @if (stockAlerts().length > 0) {
+          <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider">
+            {{ stockAlerts().length }} {{ stockAlerts().length === 1 ? 'alerta' : 'alertas' }}
+          </span>
+        }
         <a
           routerLink="/inventory"
           class="text-xs font-bold text-primary-container hover:text-primary transition-colors inline-flex items-center gap-0.5 cursor-pointer"
@@ -81,38 +73,37 @@
     </div>
 
     <div class="flex flex-col gap-2 pt-1">
-      <!-- Producto 1 -->
-      <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between gap-3 border border-outline-variant/10">
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs font-bold text-on-surface truncate">Brownies — Caja x6</span>
-          <span class="text-[11px] text-secondary font-semibold">3 disponibles</span>
+      @for (item of stockAlerts(); track item.id) {
+        <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between gap-3 border border-outline-variant/10">
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs font-bold text-on-surface truncate">{{ item.productName }}</span>
+            <span
+              class="text-[11px] font-semibold"
+              [class.text-error]="item.stockStatus === 'OUT_OF_STOCK'"
+              [class.text-secondary]="item.stockStatus === 'LOW_STOCK'"
+            >
+              {{ item.availableUnits }} disponibles
+            </span>
+          </div>
+          <span
+            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0"
+            [class.bg-error-container]="item.stockStatus === 'OUT_OF_STOCK'"
+            [class.text-error]="item.stockStatus === 'OUT_OF_STOCK'"
+            [class.bg-surface-container-high]="item.stockStatus === 'LOW_STOCK'"
+            [class.text-secondary]="item.stockStatus === 'LOW_STOCK'"
+          >
+            {{ item.stockStatus === 'OUT_OF_STOCK' ? 'Agotado' : 'Stock bajo' }}
+          </span>
         </div>
-        <span class="px-2 py-0.5 rounded bg-surface-container-high text-secondary text-[10px] font-bold uppercase tracking-wider shrink-0">
-          Stock bajo
-        </span>
-      </div>
-
-      <!-- Producto 2 -->
-      <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between gap-3 border border-outline-variant/10">
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs font-bold text-on-surface truncate">Cheesecake de fresa — Grande</span>
-          <span class="text-[11px] text-error font-semibold">0 disponibles</span>
+      } @empty {
+        <!-- Estado Vacío (@empty) -->
+        <div class="py-4 text-center">
+          <span class="material-symbols-outlined text-primary-container text-xl block mb-1">inventory_2</span>
+          <p class="text-xs text-on-surface-variant font-medium">
+            ¡Excelente! Todo el stock está abastecido.
+          </p>
         </div>
-        <span class="px-2 py-0.5 rounded bg-error-container text-error text-[10px] font-bold uppercase tracking-wider shrink-0">
-          Agotado
-        </span>
-      </div>
-
-      <!-- Producto 3 -->
-      <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between gap-3 border border-outline-variant/10">
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs font-bold text-on-surface truncate">Torta de chocolate — Mediana</span>
-          <span class="text-[11px] text-secondary font-semibold">2 disponibles</span>
-        </div>
-        <span class="px-2 py-0.5 rounded bg-surface-container-high text-secondary text-[10px] font-bold uppercase tracking-wider shrink-0">
-          Stock bajo
-        </span>
-      </div>
+      }
     </div>
   </div>
 </div>

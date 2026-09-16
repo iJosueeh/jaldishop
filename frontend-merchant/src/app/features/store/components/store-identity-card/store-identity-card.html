@@ -1,0 +1,91 @@
+<section [formGroup]="form()" class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col gap-5 font-sans">
+  <!-- Encabezado de la Tarjeta -->
+  <div class="flex items-center justify-between border-b border-surface-container-highest pb-3">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container shrink-0">
+        <span class="material-symbols-outlined text-[20px]">badge</span>
+      </div>
+      <div class="flex flex-col">
+        <h2 class="text-sm sm:text-base font-bold text-on-surface">Identidad del Negocio</h2>
+        <p class="text-xs text-on-surface-variant">Información comercial básica visible para tus clientes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Campos de Identidad -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Nombre de la Tienda -->
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="store-name" class="text-xs font-bold text-on-surface flex items-center justify-between">
+        <span>Nombre Comercial <span class="text-error">*</span></span>
+        <span class="text-[11px] font-normal text-on-surface-variant">Máx. 160 caracteres</span>
+      </label>
+      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">storefront</span>
+        <input
+          id="store-name"
+          type="text"
+          formControlName="name"
+          placeholder="Ej. Panadería & Pastelería Don Pepe"
+          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+        />
+      </div>
+    </div>
+
+    <!-- Slug / Enlace Público Permanente (Read-only) -->
+    <div class="flex flex-col gap-1.5">
+      <label for="store-slug" class="text-xs font-bold text-on-surface flex items-center justify-between">
+        <span>Enlace Único (Slug)</span>
+        <span class="text-[10px] font-bold text-primary-container uppercase tracking-wider">Permanente</span>
+      </label>
+      <div class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-on-surface-variant cursor-not-allowed">
+        <span class="text-xs text-on-surface-variant/80 font-mono select-none">jaldishop.pe/</span>
+        <input
+          id="store-slug"
+          type="text"
+          readonly
+          [value]="slug()"
+          placeholder="mi-tienda"
+          class="w-full bg-transparent text-xs sm:text-sm text-on-surface font-mono font-semibold focus:outline-none cursor-not-allowed"
+        />
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant/70">lock</span>
+      </div>
+      <span class="text-[11px] text-on-surface-variant">Se asigna automáticamente al registrarte.</span>
+    </div>
+
+    <!-- Teléfono de Contacto / WhatsApp -->
+    <div class="flex flex-col gap-1.5">
+      <label for="store-phone" class="text-xs font-bold text-on-surface flex items-center justify-between">
+        <span>Teléfono / WhatsApp</span>
+        <span class="text-[10px] text-primary-container font-bold">Pedidos y Notificaciones</span>
+      </label>
+      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+        <span class="text-xs font-bold text-on-surface-variant/80 font-mono select-none">+51</span>
+        <span class="w-px h-4 bg-outline-variant/40"></span>
+        <input
+          id="store-phone"
+          type="tel"
+          formControlName="contactPhone"
+          placeholder="987 654 321"
+          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+        />
+        <span class="material-symbols-outlined text-[18px] text-primary-container">chat</span>
+      </div>
+      <span class="text-[11px] text-on-surface-variant">Los clientes recibirán confirmaciones a este número.</span>
+    </div>
+
+    <!-- Descripción / Biografía -->
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="store-desc" class="text-xs font-bold text-on-surface">
+        Biografía / Descripción del Negocio
+      </label>
+      <textarea
+        id="store-desc"
+        rows="3"
+        formControlName="description"
+        placeholder="Cuéntale a tus clientes qué preparas, tus especialidades o tu horario de horneado..."
+        class="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none resize-none transition-all"
+      ></textarea>
+    </div>
+  </div>
+</section>

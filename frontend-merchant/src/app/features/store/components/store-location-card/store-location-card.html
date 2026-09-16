@@ -1,0 +1,50 @@
+<section [formGroup]="form()" class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col gap-5 font-sans">
+  <!-- Encabezado de la Tarjeta -->
+  <div class="flex items-center justify-between border-b border-surface-container-highest pb-3">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container shrink-0">
+        <span class="material-symbols-outlined text-[20px]">location_on</span>
+      </div>
+      <div class="flex flex-col">
+        <h2 class="text-sm sm:text-base font-bold text-on-surface">Ubicación del Negocio</h2>
+        <p class="text-xs text-on-surface-variant">Dirección física para cálculo de rutas y retiro de pedidos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Dirección Principal -->
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="store-address" class="text-xs font-bold text-on-surface">
+        Dirección del Local / Taller
+      </label>
+      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">pin_drop</span>
+        <input
+          id="store-address"
+          type="text"
+          formControlName="address"
+          placeholder="Ej. Av. Larco 450, Miraflores, Lima"
+          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+        />
+      </div>
+    </div>
+
+    <!-- Referencia de Ubicación -->
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <label for="store-ref" class="text-xs font-bold text-on-surface">
+        Referencia de Entrega
+      </label>
+      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">near_me</span>
+        <input
+          id="store-ref"
+          type="text"
+          formControlName="addressReference"
+          placeholder="Ej. Frente al Parque Kennedy, portón negro"
+          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+        />
+      </div>
+    </div>
+  </div>
+</section>

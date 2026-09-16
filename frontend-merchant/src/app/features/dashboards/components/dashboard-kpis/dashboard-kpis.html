@@ -1,8 +1,8 @@
-<section class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- KPI 1: Capacidad de Hoy -->
-  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4">
     <div class="flex items-center justify-between">
-      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
         Capacidad de Hoy
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
@@ -10,40 +10,47 @@
       </span>
     </div>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline justify-between">
-        <span class="text-3xl font-extrabold text-on-surface tracking-tight">
-          8 <span class="text-lg font-bold text-on-surface-variant">/ 10 Cupos</span>
+        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+          {{ metrics().capacityOccupied }}
+          <span class="text-base sm:text-lg font-bold text-on-surface-variant">
+            / {{ metrics().capacityTotal > 0 ? metrics().capacityTotal : 0 }} Cupos
+          </span>
         </span>
-        <span class="text-xs font-bold text-primary-container bg-surface-container px-2.5 py-1 rounded-md">
-          80% ocupado
+        <span class="text-[11px] sm:text-xs font-bold text-primary-container bg-surface-container px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
+          {{ capacityPercentage() }}% ocupado
         </span>
       </div>
 
+      <!-- Barra dinámica de 10 bloques escalables -->
       <div class="flex items-center gap-1 pt-1">
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-surface-container-highest"></span>
-        <span class="h-3.5 flex-1 rounded-xs bg-surface-container-highest"></span>
+        @for (block of capacityBlocks(); track block.index) {
+          <span
+            class="h-3 sm:h-3.5 flex-1 rounded-xs transition-colors"
+            [class.bg-primary-container]="block.isFilled"
+            [class.bg-surface-container-highest]="!block.isFilled"
+          ></span>
+        }
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
-      <span class="text-xs text-on-surface-variant">Turno de 14:00 a 20:00</span>
-      <span class="text-xs font-bold text-primary-container">Quedan 2 cupos</span>
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest text-xs">
+      <span class="text-on-surface-variant truncate">{{ metrics().shiftSchedule }}</span>
+      <span class="font-bold text-primary-container shrink-0">
+        @if (metrics().capacityTotal > 0) {
+          Quedan {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
+        } @else {
+          Sin límite configurado
+        }
+      </span>
     </div>
   </div>
 
   <!-- KPI 2: Pedidos de Hoy -->
-  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4">
     <div class="flex items-center justify-between">
-      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
         Pedidos de Hoy
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
@@ -51,36 +58,36 @@
       </span>
     </div>
 
-    <div class="flex flex-col gap-2">
-      <span class="text-3xl font-extrabold text-on-surface tracking-tight">
-        14 pedidos
+    <div class="flex flex-col gap-1.5 sm:gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        {{ metrics().totalOrdersToday }} {{ metrics().totalOrdersToday === 1 ? 'pedido' : 'pedidos' }}
       </span>
       <div class="flex items-center gap-1.5 flex-wrap pt-1">
-        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface text-xs font-medium">
-          3 confirmados
+        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface text-[11px] sm:text-xs font-medium">
+          {{ metrics().confirmedOrders }} confirmados
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-xs font-bold">
-          6 en preparación
+        <span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[11px] sm:text-xs font-bold">
+          {{ metrics().inPrepOrders }} en preparación
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container text-xs font-bold">
-          3 listos
+        <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container text-[11px] sm:text-xs font-bold">
+          {{ metrics().readyOrders }} listos
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant text-xs">
-          2 completados
+        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant text-[11px] sm:text-xs">
+          {{ metrics().completedOrders }} completados
         </span>
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
-      <span class="text-xs text-on-surface-variant">Total programados para el día</span>
-      <span class="text-xs font-bold text-primary-container">Al día</span>
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest text-xs">
+      <span class="text-on-surface-variant">Total programados para el día</span>
+      <span class="font-bold text-primary-container">Al día</span>
     </div>
   </div>
 
   <!-- KPI 3: Ritmo Operativo -->
-  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4 sm:col-span-2 lg:col-span-1">
     <div class="flex items-center justify-between">
-      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
         Ritmo Operativo
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
@@ -88,25 +95,31 @@
       </span>
     </div>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline gap-2">
-        <span class="text-3xl font-extrabold text-on-surface tracking-tight">18</span>
-        <span class="text-sm font-semibold text-on-surface-variant">min / pedido</span>
+        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+          {{ metrics().operatingRhythmMin }}
+        </span>
+        <span class="text-xs sm:text-sm font-semibold text-on-surface-variant">min / pedido</span>
       </div>
       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
-        <span class="inline-flex items-center gap-1 text-xs font-bold text-primary-container bg-surface-container px-2 py-0.5 rounded-md">
-          <span class="material-symbols-outlined text-[16px]">check_circle</span>
-          Dentro del ritmo
+        <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-primary-container bg-surface-container px-2 py-0.5 rounded-md">
+          <span class="material-symbols-outlined text-[15px]">check_circle</span>
+          {{ metrics().operatingRhythmMin > 0 ? 'Dentro del ritmo' : 'Sin registros' }}
         </span>
-        <span class="text-xs text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-md">
-          Meta: &lt; 22 min
-        </span>
+        @if (metrics().targetRhythmMin > 0) {
+          <span class="text-[11px] sm:text-xs text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-md">
+            Meta: &lt; {{ metrics().targetRhythmMin }} min
+          </span>
+        }
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
-      <span class="text-xs text-on-surface-variant">Promedio de preparación</span>
-      <span class="text-xs font-bold text-primary-container">Operación ágil</span>
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest text-xs">
+      <span class="text-on-surface-variant">Promedio de preparación</span>
+      <span class="font-bold text-primary-container">
+        {{ metrics().operatingRhythmMin > 0 ? 'Operación ágil' : 'Pendiente' }}
+      </span>
     </div>
   </div>
 </section>
