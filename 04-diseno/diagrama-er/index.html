@@ -1,0 +1,2021 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Diagrama Entidad-Relación — JaldiShop - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#diagrama-entidad-relacion-jaldishop" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Diagrama Entidad-Relación — JaldiShop
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-design/proceso/as-is-to-be.md" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Proceso
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Proceso
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Proceso
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-design/proceso/as-is-to-be.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#resumen-de-relaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resumen de Relaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resumen de Relaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#relaciones-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relaciones 1:1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relaciones-1n" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relaciones 1:N
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convenciones-del-diagrama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Convenciones del Diagrama
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tablas-con-pk-compuesta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tablas con PK Compuesta
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notas-sobre-cardinalidades" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notas sobre Cardinalidades
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notas sobre Cardinalidades">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#users-stores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        users → stores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#product_variants-inventories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        product_variants → inventories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orders-order_status_history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orders → order_status_history
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-delete-restrict-no-es-inconsistencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ON DELETE RESTRICT — No es inconsistencia
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="diagrama-entidad-relacion-jaldishop">Diagrama Entidad-Relación — JaldiShop</h1>
+<p><strong>Modelo Físico v1.6.1</strong>
+<strong>Fuente:</strong> <code>docs/04-diseno/modelo-er.md</code>
+<strong>Generado:</strong> 2026-09-09</p>
+<hr />
+<blockquote>
+<p><strong>Nota:</strong> Este diagrama es una representación visual del modelo físico documentado en <code>modelo-er.md</code>. Las definiciones físicas completas (tipos, constraints, índices, defaults) permanecen en dicho documento. Este diagrama muestra únicamente PK, FK y atributos relevantes para comprender las relaciones.</p>
+</blockquote>
+<pre class="mermaid"><code>erDiagram
+
+%% ============================================
+%% USERS
+%% ============================================
+users {
+    uuid id PK
+    varchar email UK
+    varchar password_encoded
+    varchar first_name
+    varchar last_name
+    varchar phone
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+%% ============================================
+%% ROLES Y USER_ROLES
+%% ============================================
+roles {
+    smallint id PK
+    varchar name UK
+}
+
+user_roles {
+    uuid user_id PK,FK
+    smallint role_id PK,FK
+}
+
+users ||--o{ user_roles : "CASCADE"
+roles ||--o{ user_roles : "RESTRICT"
+
+%% ============================================
+%% STORES
+%% ============================================
+stores {
+    uuid id PK
+    uuid merchant_user_id UK,FK
+    varchar name
+    varchar slug UK
+    text description
+    varchar contact_phone
+    text address
+    text address_reference
+    numeric latitude
+    numeric longitude
+    boolean pickup_enabled
+    boolean delivery_enabled
+    numeric delivery_fee_amount
+    char delivery_fee_currency
+    boolean tax_applies
+    numeric tax_rate
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+users ||--o| stores : "UNIQUE + RESTRICT"
+
+%% ============================================
+%% CATEGORIES
+%% ============================================
+categories {
+    uuid id PK
+    uuid store_id FK
+    varchar name
+    varchar description
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ categories : "RESTRICT"
+
+%% ============================================
+%% PRODUCTS
+%% ============================================
+products {
+    uuid id PK
+    uuid store_id FK
+    uuid category_id FK
+    varchar name
+    varchar slug UK
+    text description
+    text image_url
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ products : "RESTRICT"
+categories ||--o{ products : "RESTRICT"
+
+%% ============================================
+%% PRODUCT_VARIANTS
+%% ============================================
+product_variants {
+    uuid id PK
+    uuid product_id FK
+    varchar presentation_name
+    varchar sku
+    numeric price_amount
+    char price_currency
+    boolean tracks_inventory
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+products ||--o{ product_variants : "CASCADE"
+
+%% ============================================
+%% VARIANT_ATTRIBUTES
+%% ============================================
+variant_attributes {
+    uuid variant_id PK,FK
+    varchar name PK
+    text value
+}
+
+product_variants ||--o{ variant_attributes : "CASCADE"
+
+%% ============================================
+%% INVENTORIES
+%% ============================================
+inventories {
+    uuid variant_id PK,FK
+    integer quantity
+    integer low_stock_threshold
+    timestamptz updated_at
+}
+
+product_variants ||--o| inventories : "CASCADE"
+
+%% ============================================
+%% CARTS
+%% ============================================
+carts {
+    uuid id PK
+    uuid user_id FK
+    uuid store_id FK
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+users ||--o{ carts : "CASCADE"
+stores ||--o{ carts : "CASCADE"
+
+%% ============================================
+%% CART_ITEMS
+%% ============================================
+cart_items {
+    uuid cart_id PK,FK
+    uuid variant_id PK,FK
+    integer quantity
+    numeric reference_price_amount
+    char reference_price_currency
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+carts ||--o{ cart_items : "CASCADE"
+product_variants ||--o{ cart_items : "CASCADE"
+
+%% ============================================
+%% DISCOUNTS
+%% ============================================
+discounts {
+    uuid id PK
+    uuid store_id FK
+    varchar name
+    varchar type
+    varchar modality
+    numeric value
+    varchar code
+    numeric minimum_purchase_amount
+    timestamptz starts_at
+    timestamptz ends_at
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ discounts : "RESTRICT"
+
+%% ============================================
+%% CAPACITY_CONFIGURATIONS
+%% ============================================
+capacity_configurations {
+    uuid id PK
+    uuid store_id FK
+    integer day_of_week
+    time start_time
+    time end_time
+    integer max_capacity
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ capacity_configurations : "RESTRICT"
+
+%% ============================================
+%% CAPACITY_EXCEPTIONS
+%% ============================================
+capacity_exceptions {
+    uuid id PK
+    uuid store_id FK
+    date service_date
+    time start_time
+    time end_time
+    integer exception_capacity
+    text reason
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ capacity_exceptions : "RESTRICT"
+
+%% ============================================
+%% CAPACITY_RESERVATIONS
+%% ============================================
+capacity_reservations {
+    uuid id PK
+    uuid store_id FK
+    uuid user_id FK
+    date service_date
+    time start_time
+    time end_time
+    varchar status
+    timestamptz expires_at
+    timestamptz payment_protection_expires_at
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+stores ||--o{ capacity_reservations : "RESTRICT"
+users ||--o{ capacity_reservations : "RESTRICT"
+
+%% ============================================
+%% PAYMENTS
+%% ============================================
+payments {
+    uuid id PK
+    uuid capacity_reservation_id UK,FK
+    numeric amount
+    char currency
+    varchar status
+    varchar refund_status
+    numeric refund_amount
+    varchar refund_reference
+    timestamptz approved_at
+    timestamptz refunded_at
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+capacity_reservations ||--o| payments : "RESTRICT"
+
+%% ============================================
+%% PAYMENT_ATTEMPTS
+%% ============================================
+payment_attempts {
+    uuid id PK
+    uuid payment_id FK
+    smallint attempt_number
+    varchar provider
+    varchar payment_method
+    varchar idempotency_key
+    varchar provider_payment_id
+    varchar provider_status
+    varchar provider_status_detail
+    varchar status
+    varchar error_code
+    text error_message
+    timestamptz created_at
+    timestamptz completed_at
+    timestamptz updated_at
+}
+
+payments ||--o{ payment_attempts : "CASCADE"
+
+%% ============================================
+%% ORDERS
+%% ============================================
+orders {
+    uuid id PK
+    varchar order_number UK
+    uuid user_id FK
+    uuid store_id FK
+    uuid payment_id UK,FK
+    uuid capacity_reservation_id UK,FK
+    varchar status
+    varchar delivery_mode
+    date service_date
+    time service_start_time
+    time service_end_time
+    varchar customer_name
+    varchar customer_phone
+    varchar customer_email
+    text delivery_address
+    text delivery_reference
+    numeric delivery_latitude
+    numeric delivery_longitude
+    char currency
+    numeric products_subtotal_amount
+    numeric discount_amount
+    varchar discount_code
+    numeric delivery_fee_amount
+    numeric included_tax_amount
+    numeric total_amount
+    timestamptz confirmed_at
+    timestamptz updated_at
+}
+
+users ||--o{ orders : "RESTRICT"
+stores ||--o{ orders : "RESTRICT"
+payments ||--o| orders : "RESTRICT"
+capacity_reservations ||--o| orders : "RESTRICT"
+
+%% ============================================
+%% ORDER_ITEMS
+%% ============================================
+order_items {
+    uuid id PK
+    uuid order_id FK
+    uuid variant_id FK
+    varchar product_name
+    varchar variant_name
+    jsonb attributes_snapshot
+    integer quantity
+    numeric unit_price_amount
+    numeric subtotal_amount
+}
+
+orders ||--o{ order_items : "CASCADE"
+product_variants ||--o{ order_items : "RESTRICT"
+
+%% ============================================
+%% ORDER_STATUS_HISTORY
+%% ============================================
+order_status_history {
+    uuid id PK
+    uuid order_id FK
+    uuid changed_by_user_id FK
+    varchar status
+    text reason
+    timestamptz changed_at
+}
+
+orders ||--o{ order_status_history : "CASCADE"
+users ||--o{ order_status_history : "SET NULL"
+
+%% ============================================
+%% FAVORITES
+%% ============================================
+favorites {
+    uuid user_id PK,FK
+    uuid product_id PK,FK
+    timestamptz created_at
+}
+
+users ||--o{ favorites : "CASCADE"
+products ||--o{ favorites : "CASCADE"
+
+%% ============================================
+%% REVIEWS
+%% ============================================
+reviews {
+    uuid id PK
+    uuid user_id FK
+    uuid product_id FK
+    integer rating
+    text comment
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+users ||--o{ reviews : "RESTRICT"
+products ||--o{ reviews : "RESTRICT"
+
+%% ============================================
+%% NOTIFICATIONS
+%% ============================================
+notifications {
+    uuid id PK
+    uuid user_id FK
+    varchar type
+    varchar title
+    text message
+    varchar status
+    timestamptz created_at
+    timestamptz read_at
+}
+
+users ||--o{ notifications : "CASCADE"</code></pre>
+<hr />
+<h2 id="resumen-de-relaciones">Resumen de Relaciones</h2>
+<h3 id="relaciones-11">Relaciones 1:1</h3>
+<table>
+<thead>
+<tr>
+<th>Relación</th>
+<th>Tabla A</th>
+<th>Tabla B</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Merchant ↔ Store</td>
+<td>users.merchant_user_id</td>
+<td>stores.id</td>
+<td>UNIQUE en stores.merchant_user_id</td>
+</tr>
+<tr>
+<td>Payment ↔ Reservation</td>
+<td>payments.capacity_reservation_id</td>
+<td>capacity_reservations.id</td>
+<td>UNIQUE en payments</td>
+</tr>
+<tr>
+<td>Order ↔ Payment</td>
+<td>orders.payment_id</td>
+<td>payments.id</td>
+<td>UNIQUE en orders</td>
+</tr>
+<tr>
+<td>Order ↔ Reservation</td>
+<td>orders.capacity_reservation_id</td>
+<td>capacity_reservations.id</td>
+<td>UNIQUE en orders</td>
+</tr>
+<tr>
+<td>Inventory ↔ Variant</td>
+<td>inventories.variant_id</td>
+<td>product_variants.id</td>
+<td>PK coincide con FK</td>
+</tr>
+</tbody>
+</table>
+<h3 id="relaciones-1n">Relaciones 1:N</h3>
+<table>
+<thead>
+<tr>
+<th>Tabla Padre</th>
+<th>Tabla Hija</th>
+<th>ON DELETE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>users</td>
+<td>user_roles</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>roles</td>
+<td>user_roles</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>categories</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>products</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>carts</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>discounts</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>capacity_configurations</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>capacity_exceptions</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>capacity_reservations</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>stores</td>
+<td>orders</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>users</td>
+<td>capacity_reservations</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>users</td>
+<td>orders</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>users</td>
+<td>carts</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>users</td>
+<td>favorites</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>users</td>
+<td>reviews</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>users</td>
+<td>notifications</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>users</td>
+<td>order_status_history</td>
+<td>SET NULL</td>
+</tr>
+<tr>
+<td>categories</td>
+<td>products</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>products</td>
+<td>product_variants</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>products</td>
+<td>favorites</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>products</td>
+<td>reviews</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>product_variants</td>
+<td>variant_attributes</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>product_variants</td>
+<td>inventories</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>product_variants</td>
+<td>cart_items</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>product_variants</td>
+<td>order_items</td>
+<td>RESTRICT</td>
+</tr>
+<tr>
+<td>carts</td>
+<td>cart_items</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>payments</td>
+<td>payment_attempts</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>orders</td>
+<td>order_items</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>orders</td>
+<td>order_status_history</td>
+<td>CASCADE</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="convenciones-del-diagrama">Convenciones del Diagrama</h2>
+<ul>
+<li><strong>PK</strong> = Primary Key</li>
+<li><strong>FK</strong> = Foreign Key</li>
+<li><strong>UK</strong> = UNIQUE constraint</li>
+<li>** Compound PK** = Primary Key Compuesta</li>
+<li>Nombres de columnas según <code>modelo-er.md v1.6.1</code></li>
+<li>Timestamps omitidos para legibilidad (<code>created_at</code>, <code>updated_at</code>, <code>changed_at</code>)</li>
+<li>Constraints CHECK no representados (consúltese <code>modelo-er.md</code>)</li>
+</ul>
+<hr />
+<h2 id="tablas-con-pk-compuesta">Tablas con PK Compuesta</h2>
+<table>
+<thead>
+<tr>
+<th>Tabla</th>
+<th>PK Compuesta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user_roles</td>
+<td>(user_id, role_id)</td>
+</tr>
+<tr>
+<td>variant_attributes</td>
+<td>(variant_id, name)</td>
+</tr>
+<tr>
+<td>cart_items</td>
+<td>(cart_id, variant_id)</td>
+</tr>
+<tr>
+<td>favorites</td>
+<td>(user_id, product_id)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="notas-sobre-cardinalidades">Notas sobre Cardinalidades</h2>
+<h3 id="users-stores">users → stores</h3>
+<p>La relación <code>users ||--o| stores</code> indica:</p>
+<ul>
+<li><strong>users (lado N):</strong> Un Usuario puede no administrar ninguna Tienda, o administrar como máximo una (UNIQUE en <code>stores.merchant_user_id</code>).</li>
+<li><strong>stores (lado 1):</strong> Toda Tienda posee exactamente un <code>merchant_user_id NOT NULL</code>.</li>
+</ul>
+<p>No existe el caso "Tienda sin merchant" en el modelo físico; toda Tienda requiere un <code>merchant_user_id</code> válido.</p>
+<h3 id="product_variants-inventories">product_variants → inventories</h3>
+<p>La relación <code>product_variants ||--o| inventories</code> indica:</p>
+<ul>
+<li><strong>1:0..1 opcional:</strong> Cada Variant puede tener como máximo un Inventory asociado, pero no es obligatorio.</li>
+<li><strong>Invariante de aplicación:</strong> <code>tracks_inventory = true</code> requiere que exista un Inventory asociado. <code>tracks_inventory = false</code> implica que el stock no participa comercialmente.</li>
+<li>La PK de <code>inventories</code> coincide con su FK a <code>product_variants</code>, garantizando máximo una fila.</li>
+</ul>
+<h3 id="orders-order_status_history">orders → order_status_history</h3>
+<ul>
+<li><strong>Cardinalidad física:</strong> <code>orders ||--o{ order_status_history</code> indica que un Order puede tener cero o muchos OrderStatusHistory.</li>
+<li><strong>Invariante de aplicación:</strong> Al confirmarse un Pedido se genera inmediatamente el primer registro de historial con estado CONFIRMED. Por tanto, funcionalmente todo Pedido confirmado tiene al menos 1 registro de historial.</li>
+<li>La FK <code>order_status_history.order_id</code> es NOT NULL, garantizando que todo historial pertenece a un Pedido.</li>
+</ul>
+<h3 id="on-delete-restrict-no-es-inconsistencia">ON DELETE RESTRICT — No es inconsistencia</h3>
+<p>Las relaciones con ON DELETE RESTRICT en orders:</p>
+<ul>
+<li><code>orders.payment_id → payments.id</code></li>
+<li><code>orders.capacity_reservation_id → capacity_reservations.id</code></li>
+</ul>
+<p>indican que <strong>no se pueden eliminar</strong> Payments o CapacityReservations que tengan Pedidos asociados.</p>
+<p>Esto es <strong>intencional</strong> para preservar el historial transaccional:</p>
+<ul>
+<li>Un Pago puede estar asociado a un Pedido confirmado → no se elimina.</li>
+<li>Una Reserva de Cupo puede estar asociada a un Pedido → no se elimina.</li>
+</ul>
+<p>Cardinalidad (qué puede existir) y política de borrado (qué puede eliminarse) son concerns ortogonales.</p>
+<hr />
+<p><strong>Siguiente paso:</strong> Generar <code>V1__initial_schema.sql</code> basándose en este modelo.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
