@@ -15,5 +15,7 @@ export class RegisterStep3Brand {
   readonly openingTime = input<string>('09:00');
   readonly closingTime = input<string>('19:00');
 
-  readonly segmentBlocks = Array.from({ length: 12 }, (_, i) => i);
+  readonly maxCapacity = 20;
+  readonly segmentBlocks = Array.from({ length: 20 }, (_, i) => i);
 }
+

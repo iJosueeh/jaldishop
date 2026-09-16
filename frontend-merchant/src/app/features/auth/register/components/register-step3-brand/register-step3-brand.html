@@ -73,18 +73,16 @@ border border-emerald-200">
                     </span>
                 </div>
 
-                <!-- 12 Bloques representativos -->
-                <div class="grid grid-cols-12 gap-1 mb-3">
+                <!-- 20 Bloques representativos reactivos (Escala al valor máximo de presets) -->
+                <div class="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-0.5 sm:gap-1 mb-3">
                     @for (i of segmentBlocks; track i) {
-                    <div class="h-2.5 rounded-sm transition-colors duration-300"
+                    <div class="h-2.5 rounded-xs transition-all duration-300"
                         [class]="
                             dailyOrderLimit() === null
-                                ? 'bg-jade-700'
-                                : i < 6
-                                    ? 'bg-jade-700'
-                                    : i < 8
-                                        ? 'bg-jade-700/40'
-                                        : 'bg-stone-200'
+                                ? 'bg-jade-700 shadow-xs'
+                                : i < (dailyOrderLimit()! >= 20 ? 20 : dailyOrderLimit()!)
+                                    ? 'bg-jade-700 shadow-xs'
+                                    : 'bg-stone-200'
                         "></div>
                     }
                 </div>
