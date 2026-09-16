@@ -267,7 +267,12 @@
 
       <!-- SECCIÓN 4: SWITCH DE PROTECCIÓN CONTRA SOBREDEMANDA -->
       <div
-        class="bg-jade-50/60 border border-emerald-200/80 rounded-2xl p-4 flex items-center justify-between"
+        class="border rounded-2xl p-4 flex items-center justify-between transition-all"
+        [class]="
+          step3Form.get('dailyOrderLimit')?.value === null
+            ? 'bg-stone-100/70 border-stone-200 opacity-60'
+            : 'bg-jade-50/60 border-emerald-200/80'
+        "
       >
         <div class="pr-4">
           <div class="flex items-center gap-2">
@@ -289,7 +294,11 @@
             >
           </div>
           <p class="text-xs text-stone-600 mt-1 ml-6">
-            Evita retrasos y clientes inconformes pausando automáticamente tu catálogo.
+            @if (step3Form.get('dailyOrderLimit')?.value === null) {
+              <span>Inactivo porque seleccionaste operación sin límite diario fijo.</span>
+            } @else {
+              <span>Evita retrasos y clientes inconformes pausando automáticamente tu catálogo.</span>
+            }
           </p>
         </div>
 
@@ -298,11 +307,20 @@
           type="button"
           role="switch"
           (click)="toggleAutoPause()"
-          [class]="step3Form.get('autoPauseOnLimit')?.value ? 'bg-jade-700' : 'bg-stone-300'"
-          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+          [disabled]="step3Form.get('dailyOrderLimit')?.value === null"
+          [class]="
+            step3Form.get('autoPauseOnLimit')?.value && step3Form.get('dailyOrderLimit')?.value !== null
+              ? 'bg-jade-700'
+              : 'bg-stone-300'
+          "
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed"
         >
           <span
-            [class]="step3Form.get('autoPauseOnLimit')?.value ? 'translate-x-5' : 'translate-x-0'"
+            [class]="
+              step3Form.get('autoPauseOnLimit')?.value && step3Form.get('dailyOrderLimit')?.value !== null
+                ? 'translate-x-5'
+                : 'translate-x-0'
+            "
             class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
           ></span>
         </button>

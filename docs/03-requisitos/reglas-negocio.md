@@ -113,7 +113,7 @@ flowchart LR
 Capacidad Disponible = Capacidad Efectiva - Capacidad Reservada (Hold) - Capacidad Comprometida
 ```
 
-* **RN-CAP-08 (Bloqueo por saturación):** El sistema bloqueará nuevas reservas y no permitirá avanzar al checkout cuando la capacidad disponible del periodo llegue a cero (`Capacidad Disponible = 0`). Esta restricción se aplica tanto a nuevas reservas como a la validación de inicio de compra.
+* **RN-CAP-08 (Política de saturación y auto-pausa):** Por defecto, el sistema bloqueará nuevas reservas y no permitirá avanzar al checkout cuando la capacidad disponible del periodo llegue a cero (`Capacidad Disponible = 0` - *Hard Cap*). Si el comerciante desactiva la auto-pausa en su configuración operativa (*Soft Cap*), el sistema emitirá alertas de sobre-demanda sin bloquear automáticamente el catálogo. En tiendas configuradas bajo modalidad de "Sin límite fijo", no aplica bloqueo por saturación.
 
 ---
 
