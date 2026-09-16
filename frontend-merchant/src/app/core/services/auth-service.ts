@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { TokenService } from './token-service';
 import { Router } from '@angular/router';
-import { AuthResult, LoginRequest, RegisterMerchantRequest, UserResponse } from '../models/auth.models';
+import { AuthResult, LoginRequest, RegisterMerchantRequest } from '../models/auth.models';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 

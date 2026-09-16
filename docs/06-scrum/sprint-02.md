@@ -58,6 +58,7 @@ flowchart LR
 | 🔴 **Alta** | BE-11 · Implementar módulo base de Tienda | Josué | `COMPLETADO` | Store completo (dominio, JPA, casos de uso, REST, 29 tests) |
 | 🔴 **Alta** | FE-01 · Auth & Onboarding Comerciante | Josué | `COMPLETADO` | Login, Register 3-pasos, ForgotPassword, Shared 404/403, 31 tests |
 | 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `COMPLETADO` | MerchantLayout, Sidebar, Header, Mi Tienda, Subcomponentes, Integración API, 42 tests |
+| 🔴 **Alta** | FE-03 · Estandarizar Manejo de API y Errores | Josué | `COMPLETADO` | ApiError, ErrorHandlerService, ToastService, ToastContainer, ErrorInterceptor, 62 tests |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
@@ -430,13 +431,38 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 ---
 
+### 📋 FE-03 | Estandarizar Manejo de API y Errores del Frontend Merchant
+
+**Responsable:** Josué  
+**Entregable:** `ApiError`, `ErrorHandlerService`, `ToastService`, `ToastContainer`, `errorInterceptor`, Documentación
+
+**Objetivo:** Centralizar el consumo de la API y el tratamiento de errores HTTP para que los próximos módulos de Catálogo, Inventario, Capacidad, Pedidos y Notificaciones utilicen el mismo contrato predecible.
+
+**Checklist:**
+- [x] Definir modelo `ApiError` y `NormalizedApiError` del frontend (`src/app/core/models/api-error.models.ts`)
+- [x] Centralizar interpretación de errores HTTP (`ErrorHandlerService.normalize()`)
+- [x] Estandarizar 400 Validation Error (extracción de `fieldErrors`)
+- [x] Estandarizar 401 Unauthorized (limpieza de token y redirección a `/login?expired=true`)
+- [x] Estandarizar 403 Forbidden (notificación de acceso denegado)
+- [x] Estandarizar 404 Not Found (recurso inexistente o ruta no encontrada)
+- [x] Estandarizar 409 Conflict (conflictos de duplicados de negocio)
+- [x] Estandarizar 422 Unprocessable Content (reglas de negocio `BusinessRuleException`)
+- [x] Estandarizar error de red / status 0 (`NETWORK_ERROR`)
+- [x] Evitar manejo duplicado de errores por componente mediante `errorInterceptor`
+- [x] Crear feedback/toast reutilizable (`ToastService` con Signals + `ToastContainer` global)
+- [x] Revisar `authInterceptor` y validar expiración de JWT (`isTokenExpired()` en `TokenService`)
+- [x] Agregar tests unitarios en Vitest (62 tests pasando al 100%)
+- [x] Documentar contrato frontend ↔ backend ([`docs/04-diseno/contrato-api-errores.md`](../04-diseno/contrato-api-errores.md))
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 7 / 10 (70%) |
-| Entregables en desarrollo activo | 0 / 10 (0%) |
-| Entregables pendientes | 3 / 10 (30%) |
+| Entregables completados | 8 / 11 (73%) |
+| Entregables en desarrollo activo | 0 / 11 (0%) |
+| Entregables pendientes | 3 / 11 (27%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---
