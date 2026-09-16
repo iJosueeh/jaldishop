@@ -2,9 +2,10 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginRequest } from '../../../../../core/models/auth.models';
 import { RouterLink } from '@angular/router';
+import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, RegisterFooter],
   selector: 'app-form-panel',
   styleUrl: './form-panel.css',
   templateUrl: './form-panel.html',

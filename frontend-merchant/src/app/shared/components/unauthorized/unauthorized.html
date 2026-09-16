@@ -1,123 +1,99 @@
 <main
-  class="min-h-screen w-full bg-warmCream text-stone-900 flex flex-col justify-between p-6 sm:p-10 lg:p-14 font-sans antialiased overflow-y-auto"
->
-  <!-- Encabezado con Logotipo de JaldiShop -->
-  <header class="w-full max-w-5xl mx-auto flex items-center justify-between">
+  class="min-h-screen w-full bg-warmCream text-on-surface flex flex-col justify-between p-6 sm:p-10 lg:p-12 font-sans antialiased relative overflow-hidden">
+  <!-- Luces ambientales de fondo con la paleta JaldiShop -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-tertiary-container/15 rounded-full blur-3xl pointer-events-none">
+  </div>
+  <div class="absolute -bottom-28 -right-28 w-96 h-96 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none">
+  </div>
+
+  <!-- Encabezado de Navegación -->
+  <header class="w-full max-w-4xl mx-auto flex items-center justify-between relative z-10">
     <a routerLink="/login" class="flex items-center gap-3 group transition-transform active:scale-95">
       <div
-        class="w-10 h-10 rounded-xl bg-jade-700 flex items-center justify-center text-white shadow-md shadow-jade-700/20 group-hover:bg-jade-800 transition-colors"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-          ></path>
-        </svg>
+        class="w-10 h-10 rounded-xl bg-surface-container-lowest p-1 shadow-md flex items-center justify-center border border-outline-variant/30">
+        <img alt="Logotipo JaldiShop" class="w-full h-full object-contain rounded-lg"
+          src="https://lh3.googleusercontent.com/aida/AEtjO1UJv3NpkcgKGc59-jQv2Z7eOUjY5Kk-djtIq8jK0D5uSqOvEP5WWnAhHb78RR-coOaf893MYoiEKwQ8qT5zbquUnXEa0ATnhl-J93SnzXxueSJrEF1T413jOWoZexADxt8MQ9tQ7mp9uQcHFmkAQPcX9SEUrxBam_6wifqNQZgRqkngcUrqaL9mecTiNU6KzNY5LnJRCNxTxEJ3yqZduu1R0h3N0ptnRUm1ZuJPluAGylfKXzdPkuTUxc26" />
       </div>
       <div>
-        <span class="font-black text-xl tracking-tight text-stone-900 block leading-none">JaldiShop</span>
-        <span class="text-[10px] font-bold tracking-widest text-jade-700 uppercase block mt-0.5">
-          PANEL COMERCIANTE
+        <span class="font-bold text-xl tracking-tight text-on-surface block leading-none">JaldiShop</span>
+        <span class="text-[10px] font-bold tracking-widest text-primary-container uppercase block mt-0.5">
+          CONTROL DE ACCESO
         </span>
       </div>
     </a>
 
     @if (isLogged()) {
-      <button
-        type="button"
-        (click)="handleLogout()"
-        class="text-xs sm:text-sm font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer"
-      >
-        Cerrar sesión
-      </button>
+    <button type="button" (click)="handleLogout()"
+      class="text-xs sm:text-sm font-bold text-error hover:text-tertiary transition-colors cursor-pointer flex items-center gap-1">
+      <span class="material-symbols-outlined text-sm">logout</span>
+      <span>Cerrar sesión</span>
+    </button>
     } @else {
-      <a
-        routerLink="/login"
-        class="text-xs sm:text-sm font-bold text-stone-600 hover:text-jade-700 transition-colors"
-      >
-        Iniciar sesión
-      </a>
+    <a routerLink="/login"
+      class="text-xs sm:text-sm font-bold text-on-surface-variant hover:text-primary-container transition-colors">
+      Ingresar al panel
+    </a>
     }
   </header>
 
-  <!-- Contenido Central de Error 403 -->
-  <div class="my-auto max-w-lg w-full mx-auto text-center py-10">
-    <!-- Badge de Estado -->
+  <!-- Contenido Central Estructurado -->
+  <div class="my-auto max-w-lg w-full mx-auto py-6 relative z-10">
     <div
-      class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-semibold mb-6 shadow-2xs"
-    >
-      <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-      <span>Error 403 · Acceso restringido</span>
-    </div>
-
-    <!-- Icono de Seguridad / Escudo -->
-    <div class="flex items-center justify-center mb-4">
+      class="bg-surface-container-lowest/95 backdrop-blur-md rounded-2xl p-8 sm:p-10 border border-outline-variant/40 shadow-xl text-center space-y-5">
+      <!-- Icono contextual de seguridad -->
       <div
-        class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-red-100/80 border border-red-200 shadow-sm flex items-center justify-center text-red-600"
-      >
-        <svg class="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.8"
-            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-          ></path>
-        </svg>
+        class="w-16 h-16 rounded-2xl bg-error-container/60 border border-error/20 text-error mx-auto flex items-center justify-center shadow-xs">
+        <span class="material-symbols-outlined text-3xl text-error">shield_lock</span>
       </div>
-    </div>
 
-    <!-- Tipografía 403 Nítida -->
-    <span class="text-7xl sm:text-8xl font-black text-stone-900 tracking-tight block leading-none">
-      403
-    </span>
+      <!-- Badge de Estado Nítido -->
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-error-container/40 text-error text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+        <span>Error 403 · Permisos insuficientes</span>
+      </div>
 
-    <h1 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight mt-6">
-      No tienes permisos para esta sección
-    </h1>
-    <p class="mt-3 text-sm sm:text-base text-stone-600 leading-relaxed max-w-md mx-auto">
-      Este panel está reservado exclusivamente para comerciantes y administradores de JaldiShop. Si tienes una cuenta de comerciante, inicia sesión con las credenciales correspondientes.
-    </p>
+      <div>
+        <span class="text-6xl sm:text-7xl font-black text-on-surface tracking-tight block leading-none">
+          403
+        </span>
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight mt-3">
+          No tienes permisos para esta sección
+        </h1>
+        <p class="mt-2 text-sm text-on-surface-variant leading-relaxed max-w-sm mx-auto">
+          Este panel y sus herramientas de capacidad operativa están reservados exclusivamente para cuentas con rol de
+          comerciante o administrador.
+        </p>
+      </div>
 
-    <!-- Botones de Acción -->
-    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-      @if (isLogged()) {
-        <button
-          type="button"
-          (click)="handleLogout()"
-          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-jade-700 hover:bg-jade-800 active:scale-95 text-white text-sm font-bold shadow-md shadow-jade-700/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            ></path>
-          </svg>
-          <span>Iniciar sesión con otra cuenta</span>
+      <!-- Botones de Acción -->
+      <div
+        class="pt-4 border-t border-surface-container-highest flex flex-col sm:flex-row items-center justify-center gap-3">
+        @if (isLogged()) {
+        <button type="button" (click)="handleLogout()"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span class="material-symbols-outlined text-lg">switch_account</span>
+          <span>Cambiar de cuenta</span>
         </button>
-      } @else {
-        <a
-          routerLink="/login"
-          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-jade-700 hover:bg-jade-800 active:scale-95 text-white text-sm font-bold shadow-md shadow-jade-700/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-        >
+        } @else {
+        <a routerLink="/login"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span class="material-symbols-outlined text-lg">storefront</span>
           <span>Iniciar sesión como comerciante</span>
         </a>
-      }
+        }
 
-      <a
-        routerLink="/register"
-        class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-stone-50 active:scale-95 border border-stone-300 text-stone-700 text-sm font-bold shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <span>Registrar mi tienda MYPE</span>
-      </a>
+        <a routerLink="/register"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.99] border border-outline-variant/30 text-on-surface text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span>Registrar nueva tienda</span>
+        </a>
+      </div>
     </div>
   </div>
 
-  <!-- Pie de Página -->
-  <footer class="w-full max-w-5xl mx-auto text-center pt-8 border-t border-stone-200/80 text-xs text-stone-500">
-    <p>© JaldiShop — Tu Negocio en Marcha.</p>
+  <!-- Pie de Página Minimalista -->
+  <footer
+    class="w-full max-w-4xl mx-auto text-center pt-6 border-t border-outline-variant/30 text-xs text-on-surface-variant relative z-10">
+    <p>© JaldiShop — Plataforma operativa para pedidos por lotes y capacidad en tiempo real.</p>
   </footer>
 </main>

@@ -19,6 +19,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password').then(
+        (m) => m.ForgotPassword,
+      )
+  },
+  {
     path: 'unauthorized',
     loadComponent: () =>
       import('./shared/components/unauthorized/unauthorized').then(
