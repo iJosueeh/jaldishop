@@ -10,5 +10,9 @@ export const merchantGuard: CanActivateFn = () => {
     return true;
   }
 
+  if (authService.isAuthenticated()) {
+    return router.createUrlTree(['/unauthorized']);
+  }
+
   return router.createUrlTree(['/login']);
 };

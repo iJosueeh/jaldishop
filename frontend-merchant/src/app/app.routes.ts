@@ -19,8 +19,26 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'unauthorized',
+    loadComponent: () =>
+      import('./shared/components/unauthorized/unauthorized').then(
+        (m) => m.Unauthorized,
+      ),
+  },
+  {
+    path: '404',
+    loadComponent: () =>
+      import('./shared/components/not-found/not-found').then(
+        (m) => m.NotFound,
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: '404',
   },
 ];
