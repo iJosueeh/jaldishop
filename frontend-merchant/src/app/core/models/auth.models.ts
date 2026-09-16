@@ -8,13 +8,21 @@ export interface RegisterMerchantRequest {
     password: string;
     firstName: string;
     lastName: string;
-    phone: string;
+    phone?: string;
+    storeName: string;
+    businessType?: string;
+    storeContactPhone?: string;
+    address?: string;
+    pickupEnabled: boolean;
+    deliveryEnabled: boolean;
 }
 
 export interface AuthResult {
     token: string;
-    expiresAt: number;
-    user: UserResponse;
+    userId: string;
+    email: string;
+    fullName: string;
+    roles: string[];
 }
 
 export interface UserResponse {

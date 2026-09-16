@@ -6,15 +6,15 @@ export class TokenService {
 
 
     getToken(): string | null {
-        return localStorage.getItem(this.TOKEN_KEY);
+        return sessionStorage.getItem(this.TOKEN_KEY);
     }
 
     setToken(token: string): void {
-        localStorage.setItem(this.TOKEN_KEY, token);
+        sessionStorage.setItem(this.TOKEN_KEY, token);
     }
 
     removeToken(): void {
-        localStorage.removeItem(this.TOKEN_KEY);
+        sessionStorage.removeItem(this.TOKEN_KEY);
     }
 
     getPayload(): any | null {

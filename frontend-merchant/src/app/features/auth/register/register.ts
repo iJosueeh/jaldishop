@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RegisterBrandPanel } from './components/register-brand-panel/register-brand-panel';
 import { RegisterFormPanel } from './components/register-form-panel/register-form-panel';
 import { RegisterStep2Brand } from './components/register-step2-brand/register-step2-brand';
@@ -10,6 +10,9 @@ import {
   RegisterStep2Data,
   RegisterStep3Data,
 } from './interface/register.models';
+import { AuthService } from '../../../core/services/auth-service';
+import { Router } from '@angular/router';
+import { AuthResult, RegisterMerchantRequest } from '../../../core/models/auth.models';
 
 @Component({
   imports: [
@@ -25,8 +28,10 @@ import {
   templateUrl: './register.html',
 })
 export class Register {
-  readonly currentStep = signal<1 | 2 | 3>(1);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
+  readonly currentStep = signal<1 | 2 | 3>(1);
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
@@ -37,14 +42,17 @@ export class Register {
   onStep1Submit(data: RegisterStep1Data): void {
     this.step1Data.set(data);
     this.currentStep.set(2);
+    this.errorMessage.set(null);
   }
 
   onStep2Back(): void {
+    this.errorMessage.set(null)
     this.currentStep.set(1);
   }
 
   onStep2Submit(data: RegisterStep2Data): void {
     this.step2Data.set(data);
+    this.errorMessage.set(null)
     this.currentStep.set(3);
   }
 
@@ -62,11 +70,12 @@ export class Register {
         deliveryEnabled: true,
       });
     }
-    console.log('Paso 2 omitido, avanzando...');
+    this.errorMessage.set(null)
     this.currentStep.set(3);
   }
 
   onStep3Back(): void {
+    this.errorMessage.set(null);
     this.currentStep.set(2);
   }
 
@@ -76,10 +85,69 @@ export class Register {
 
   onStep3Submit(data: RegisterStep3Data): void {
     this.step3Data.set(data);
-    console.log('Todo listo para crear usuario y tienda:', {
-      step1: this.step1Data(),
-      step2: this.step2Data(),
-      step3: this.step3Data(),
+
+    if (!this.validatePrerequisites()) {
+      return;
+    }
+
+    this.executeMerchantRegistration();
+  }
+
+  private validatePrerequisites(): boolean {
+    if (!this.step1Data()) {
+      this.currentStep.set(1);
+      return false;
+    }
+
+    if (!this.step2Data()) {
+      this.currentStep.set(2);
+      return false;
+    }
+    return true;
+  }
+
+  private buildRegisterPayload(): RegisterMerchantRequest {
+    const step1 = this.step1Data()!;
+    const step2 = this.step2Data()!;
+
+    return {
+      firstName: step1.firstName.trim(),
+      lastName: step1.lastName.trim(),
+      email: step1.email.trim().toLowerCase(),
+      password: step1.password,
+      phone: step2.contactPhone?.trim(),
+      storeName: step2.name.trim(),
+      businessType: step2.businessType,
+      storeContactPhone: step2.contactPhone?.trim(),
+      address: step2.address?.trim() || undefined,
+      pickupEnabled: step2.pickupEnabled,
+      deliveryEnabled: step2.deliveryEnabled
+    };
+  }
+
+  private executeMerchantRegistration(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    const payload = this.buildRegisterPayload();
+
+    this.authService.registerMerchant(payload).subscribe({
+      next: (result) => this.handleRegistrationSuccess(result),
+      error: (err) => this.handleRegistrationError(err),
     });
   }
+
+  private handleRegistrationSuccess(result: AuthResult): void {
+    this.isLoading.set(false);
+    this.router.navigate(['/login']);
+  }
+
+  private handleRegistrationError(err: any): void {
+    this.isLoading.set(false);
+    const message =
+      err?.error?.message ||
+      'Ocurrió un error al registrar tu cuenta y negocio. Inténtalo nuevamente.';
+    this.errorMessage.set(message);
+  }
+
 }
