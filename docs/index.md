@@ -46,7 +46,7 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | BE-01 Identity + BE-03 Auth + BE-05 JPA + BE-06 JWT + BE-11 Store Base | [@iJosueeh](https://github.com/iJosueeh) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | BE-01 Identity + BE-03 Auth + BE-05 JPA + BE-06 JWT + BE-11 Store Base + Onboarding Frontend | [@iJosueeh](https://github.com/iJosueeh) |
 | **Katherine Patricia Salas Quiroz** | Full Stack Dev | BE-02 Migración Roles Iniciales | [@kath144](https://github.com/kath144) |
 | **Mia Vitalia Gual Vega** | Full Stack Dev | BE-10 Módulo de Notificaciones | [@miagv](https://github.com/miagv) |
 
@@ -60,7 +60,7 @@ flowchart LR
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
 | **Frontend** | Angular 20 Standalone, Next.js, Tailwind CSS | Panel de Comerciante (Angular) y Portal Cliente (Next.js) |
 | **Persistencia** | PostgreSQL 18.6 (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
-| **Calidad / QA** | JUnit 5, Mockito | 89 pruebas automatizadas pasando al 100% |
+| **Calidad / QA** | JUnit 5, Mockito, Vitest | 110 pruebas automatizadas pasando al 100% (89 Backend + 21 Frontend) |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---

@@ -153,6 +153,7 @@ VALUES
 - [x] Implementar RegisterMerchantService con onboarding atómico transaccional y upgrade de rol
 - [x] Implementar AuthController REST con endpoints /register, /login y /register/merchant
 - [x] Implementar suite de pruebas unitarias y web de Auth (UserTest, RegisterMerchantServiceTest, AuthControllerTest)
+- [x] Integrar flujo de onboarding frontend merchant (Wizard 3 pasos, AuthService REST, TokenService con sessionStorage y 21 tests Vitest pasando)
 - [x] Pasar a Code Review
 
 **Flujo Register Customer (ejemplo):**
