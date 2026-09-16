@@ -1,0 +1,15 @@
+<div class="min-h-screen bg-surface font-sans text-on-surface antialiased">
+  <!-- Barra lateral fija -->
+  <app-siderbar />
+
+  <!-- Contenedor Principal con margen para la sidebar fija de 240px (w-60) -->
+  <div class="pl-60">
+    <!-- Header fijo -->
+    <app-header />
+
+    <!-- Área de Contenido Dinámico con compensación para header de 64px (h-16) -->
+    <main class="relative pt-20 bg-surface min-h-screen w-full px-6 lg:px-8 pb-12">
+      <router-outlet />
+    </main>
+  </div>
+</div>

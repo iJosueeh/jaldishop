@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { merchantGuard } from './core/guards/merchant-guard';
 
 export const routes: Routes = [
   {
@@ -41,8 +42,23 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'login',
-    pathMatch: 'full',
+    loadComponent: () =>
+      import('./layouts/merchant-layout/merchant-layout').then(
+        (m) => m.MerchantLayout
+      ),
+    // canActivate: [merchantGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => 
+          import('./features/dashboards/dashboards').then((m) => m.Dashboards),
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
   },
   {
     path: '**',

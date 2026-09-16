@@ -33,6 +33,8 @@ flowchart LR
         T3["BE-03 · Casos de Uso Auth"]
         T7["BE-10 · Módulo Notificaciones (Mia)"]
         T8["BE-11 · Módulo Base Tienda (Josué)"]
+        T9["FE-01 · Onboarding Comerciante (Josué)"]
+        T10["FE-02 · Dashboard y Gestión Tienda (Josué)"]
     end
 
     subgraph MEDIA["Prioridad Media"]
@@ -54,6 +56,8 @@ flowchart LR
 | 🔴 **Alta** | BE-03 · Casos de uso Auth (Registro y Login) | Josué | `COMPLETADO` | Flujos Registro/Login + DTOs + AuthController |
 | 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `PENDIENTE` | Módulo Notification completo (dominio, JPA, casos de uso, REST, tests) |
 | 🔴 **Alta** | BE-11 · Implementar módulo base de Tienda | Josué | `COMPLETADO` | Store completo (dominio, JPA, casos de uso, REST, 29 tests) |
+| 🔴 **Alta** | FE-01 · Auth & Onboarding Comerciante | Josué | `COMPLETADO` | Login, Register 3-pasos, ForgotPassword, Shared 404/403, 31 tests |
+| 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `EN PROGRESO` | MerchantLayout, Sidebar, Header, Mi Tienda, Editar Tienda, Integración API |
 | 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
@@ -371,13 +375,66 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 ---
 
+### 📋 FE-01 | Auth & Onboarding del Comerciante
+
+**Responsable:** Josué  
+**Entregable:** Login, Register 3-Pasos, Forgot Password, Vistas de Error (404/403), DTOs y Servicios Core
+
+**Objetivo:** Construir la base del frontend Angular Standalone para la autenticación, registro modular por pasos de comerciantes y manejo global de errores de acceso.
+
+**Checklist:**
+- [x] Crear arquitectura base Angular 20 Standalone con Signals
+- [x] Implementar `TokenService` con `sessionStorage` (Sección 19.2.1)
+- [x] Implementar `AuthService` conectando con `/api/v1/auth/register-merchant` y `/login`
+- [x] Implementar `MerchantGuard` protegiendo rutas y redirigiendo a `/unauthorized` o `/login`
+- [x] Formulario de Login con validación reactiva y manejo de errores
+- [x] Wizard de Registro en 3 pasos:
+  - [x] Paso 1: Datos de Acceso (`RegisterStep1Account`)
+  - [x] Paso 2: Información del Negocio (`RegisterStep2Business`)
+  - [x] Paso 3: Identidad y Capacidad (`RegisterStep3Brand`) con visualizador interactivo de bloques
+- [x] Flujo de Recuperación de Contraseña (`ForgotPassword`) con validación y estados de envío
+- [x] Vistas compartidas de error: `NotFound` (404) y `Unauthorized` (403)
+- [x] Diseño enriquecido con Tailwind CSS, paleta cálida JaldiShop y Material Symbols
+- [x] Cobertura de pruebas unitarias en Vitest (31 tests pasando al 100%)
+
+---
+
+### 📋 FE-02 | Dashboard y Gestión de Tienda del Comerciante
+
+**Responsable:** Josué  
+**Entregable:** MerchantLayout, Sidebar, Header, Mi Tienda, Editar Tienda, Integración API Store
+
+**Objetivo:** Implementar el área privada base de JaldiShop Merchant para que un comerciante autenticado pueda acceder a su panel, visualizar la información real de su tienda y modificar su configuración mediante los endpoints existentes del módulo Store.
+
+**Checklist:**
+- [ ] Crear `MerchantLayout` (contenedor base autenticado)
+- [ ] Crear `Sidebar` responsive con navegación (`/dashboard`, `/store`, `/orders`, `/capacity`, `/settings`)
+- [ ] Crear `Header` responsive con perfil de comerciante y estado del negocio
+- [ ] Proteger rutas hijas privadas bajo `MerchantGuard` (rol `MERCHANT`)
+- [ ] Implementar vista inicial de `Dashboard` (resumen operativo y accesos rápidos)
+- [ ] Implementar servicio `StoreService` consumiendo `GET /api/v1/stores/me`
+- [ ] Crear vista "Mi tienda" (`MyStoreComponent`):
+  - [ ] Mostrar datos generales (nombre, slug, bio, moneda, estado operativo)
+  - [ ] Mostrar configuración de entrega (recojo en tienda, delivery propio, costo base)
+- [ ] Crear formulario "Editar tienda" (`EditStoreComponent`):
+  - [ ] Formulario reactivo tipado con validaciones
+  - [ ] Consumir `PUT /api/v1/stores/me` con feedback inmediato
+- [ ] Manejar estados de UI: Loading skeleton / Spinner, Empty state, Error alerts
+- [ ] Manejo granular de respuestas HTTP (401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict)
+- [ ] Integrar acción de `Logout` en el Layout (limpieza de token y redirección a `/login`)
+- [ ] Mantener módulos futuros (Pedidos, Capacidad, Productos) completamente desacoplados
+- [ ] Agregar tests unitarios en Vitest para componentes y servicios
+- [ ] Validar diseño responsive (Mobile, Tablet, Desktop)
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 5 / 8 (63%) |
-| Entregables en desarrollo activo | 0 / 8 (0%) |
-| Entregables pendientes | 3 / 8 (37%) |
+| Entregables completados | 6 / 10 (60%) |
+| Entregables en desarrollo activo | 1 / 10 (10%) |
+| Entregables pendientes | 3 / 10 (30%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---

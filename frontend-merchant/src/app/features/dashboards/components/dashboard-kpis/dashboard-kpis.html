@@ -1,0 +1,112 @@
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
+  <!-- KPI 1: Capacidad de Hoy -->
+  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Capacidad de Hoy
+      </span>
+      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">view_week</span>
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex items-baseline justify-between">
+        <span class="text-3xl font-extrabold text-on-surface tracking-tight">
+          8 <span class="text-lg font-bold text-on-surface-variant">/ 10 Cupos</span>
+        </span>
+        <span class="text-xs font-bold text-primary-container bg-surface-container px-2.5 py-1 rounded-md">
+          80% ocupado
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1 pt-1">
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-primary-container"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-surface-container-highest"></span>
+        <span class="h-3.5 flex-1 rounded-xs bg-surface-container-highest"></span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
+      <span class="text-xs text-on-surface-variant">Turno de 14:00 a 20:00</span>
+      <span class="text-xs font-bold text-primary-container">Quedan 2 cupos</span>
+    </div>
+  </div>
+
+  <!-- KPI 2: Pedidos de Hoy -->
+  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Pedidos de Hoy
+      </span>
+      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <span class="text-3xl font-extrabold text-on-surface tracking-tight">
+        14 pedidos
+      </span>
+      <div class="flex items-center gap-1.5 flex-wrap pt-1">
+        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface text-xs font-medium">
+          3 confirmados
+        </span>
+        <span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-xs font-bold">
+          6 en preparación
+        </span>
+        <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container text-xs font-bold">
+          3 listos
+        </span>
+        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant text-xs">
+          2 completados
+        </span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
+      <span class="text-xs text-on-surface-variant">Total programados para el día</span>
+      <span class="text-xs font-bold text-primary-container">Al día</span>
+    </div>
+  </div>
+
+  <!-- KPI 3: Ritmo Operativo -->
+  <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-4">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Ritmo Operativo
+      </span>
+      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">timer</span>
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex items-baseline gap-2">
+        <span class="text-3xl font-extrabold text-on-surface tracking-tight">18</span>
+        <span class="text-sm font-semibold text-on-surface-variant">min / pedido</span>
+      </div>
+      <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-primary-container bg-surface-container px-2 py-0.5 rounded-md">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          Dentro del ritmo
+        </span>
+        <span class="text-xs text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-md">
+          Meta: &lt; 22 min
+        </span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest">
+      <span class="text-xs text-on-surface-variant">Promedio de preparación</span>
+      <span class="text-xs font-bold text-primary-container">Operación ágil</span>
+    </div>
+  </div>
+</section>

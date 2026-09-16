@@ -60,7 +60,7 @@ flowchart LR
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
 | **Frontend** | Angular 20 Standalone, Next.js, Tailwind CSS | Panel de Comerciante (Angular) y Portal Cliente (Next.js) |
 | **Persistencia** | PostgreSQL 18.6 (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
-| **Calidad / QA** | JUnit 5, Mockito, Vitest | 110 pruebas automatizadas pasando al 100% (89 Backend + 21 Frontend) |
+| **Calidad / QA** | JUnit 5, Mockito, Vitest | 120 pruebas automatizadas pasando al 100% (89 Backend + 31 Frontend) |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---
