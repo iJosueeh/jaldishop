@@ -4,9 +4,9 @@
 
 [![GitHub repo size](https://img.shields.io/github/repo-size/iJosueeh/jaldishop?style=flat-square&color=blue)](https://github.com/iJosueeh/jaldishop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop?style=flat-square&color=green)](https://github.com/iJosueeh/jaldishop)
-[![GitHub issues](https://img.shields.io/github/issues/iJosueeh/jaldishop?style=flat-square&color=yellow)](https://github.com/iJosueeh/jaldishop/issues)
+[![CI](https://github.com/iJosueeh/jaldishop/actions/workflows/ci.yml/badge.svg)](https://github.com/iJosueeh/jaldishop/actions/workflows/ci.yml)
 [![Sprint](https://img.shields.io/badge/Sprint-03%20En%20Progreso-yellow?style=flat-square)](./docs/06-scrum/sprint-03.md)
-[![Tests](https://img.shields.io/badge/Tests-156%20Passing%20(89%20BE%20+%2067%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
+[![Tests](https://img.shields.io/badge/Tests-187%20Passing%20(120%20BE%20+%2067%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./docs)
 
 > **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
