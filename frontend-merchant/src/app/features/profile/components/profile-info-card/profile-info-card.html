@@ -1,0 +1,81 @@
+<div class="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 border border-outline-variant/30 shadow-xs flex flex-col gap-5">
+  <div class="flex items-center gap-3 pb-3 border-b border-outline-variant/20">
+    <div class="w-10 h-10 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center">
+      <span class="material-symbols-outlined text-[22px]">badge</span>
+    </div>
+    <div>
+      <h2 class="text-base font-bold text-on-surface">Información Personal</h2>
+      <p class="text-xs text-on-surface-variant">Actualiza tu nombre, apellido y número de contacto</p>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Nombre -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-on-surface">Nombre *</label>
+        <input
+          type="text"
+          formControlName="firstName"
+          placeholder="Tu nombre"
+          class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-sm text-on-surface focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="form.get('firstName')?.touched && form.get('firstName')?.invalid"
+        />
+        @if (form.get('firstName')?.touched && form.get('firstName')?.hasError('required')) {
+          <span class="text-[11px] text-error">El nombre es obligatorio</span>
+        }
+      </div>
+
+      <!-- Apellido -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-on-surface">Apellido *</label>
+        <input
+          type="text"
+          formControlName="lastName"
+          placeholder="Tu apellido"
+          class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-sm text-on-surface focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="form.get('lastName')?.touched && form.get('lastName')?.invalid"
+        />
+        @if (form.get('lastName')?.touched && form.get('lastName')?.hasError('required')) {
+          <span class="text-[11px] text-error">El apellido es obligatorio</span>
+        }
+      </div>
+    </div>
+
+    <!-- Teléfono -->
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-semibold text-on-surface">Teléfono / WhatsApp</label>
+      <div class="relative">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-on-surface-variant">+51</span>
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="987654321"
+          maxlength="9"
+          class="w-full pl-12 pr-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-sm text-on-surface focus:outline-none focus:border-primary transition-colors"
+          [class.border-error]="form.get('phone')?.touched && form.get('phone')?.invalid"
+        />
+      </div>
+      @if (form.get('phone')?.touched && form.get('phone')?.hasError('pattern')) {
+        <span class="text-[11px] text-error">Debe ser un número celular de 9 dígitos (iniciando con 9)</span>
+      }
+    </div>
+
+    <!-- Botón Guardar -->
+    <div class="flex justify-end pt-2">
+      <button
+        type="submit"
+        [disabled]="form.invalid || isLoading()"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all cursor-pointer shadow-xs active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (isLoading()) {
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <span>Guardando...</span>
+        } @else {
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Guardar Cambios</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

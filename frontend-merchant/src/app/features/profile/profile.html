@@ -1,0 +1,36 @@
+<div class="max-w-5xl mx-auto flex flex-col gap-6 py-2">
+  <!-- Cabecera de Página con Avatar y Datos Principales -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
+    <div class="flex items-center gap-3.5">
+      <div class="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl shadow-xs shrink-0">
+        {{ profileService.userInitials() }}
+      </div>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-bold text-on-surface tracking-tight">{{ profileService.fullName() }}</h1>
+          <span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container text-[11px] font-bold">
+            Comerciante
+          </span>
+        </div>
+        <p class="text-xs text-on-surface-variant">Gestiona tu información personal y los accesos de tu cuenta</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Tarjetas Informativas y de Edición -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Formulario de Información Personal (7 columnas en desktop) -->
+    <div class="lg:col-span-7">
+      <app-profile-info-card
+        [profile]="profileService.currentProfile()"
+        [isLoading]="profileService.isLoading()"
+        (save)="onSaveProfile($event)"
+      />
+    </div>
+
+    <!-- Información de Cuenta y Seguridad (5 columnas en desktop) -->
+    <div class="lg:col-span-5">
+      <app-profile-security-card [profile]="profileService.currentProfile()" />
+    </div>
+  </div>
+</div>
