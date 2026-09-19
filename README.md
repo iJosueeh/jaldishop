@@ -50,9 +50,9 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 3 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | **CI-01** · Pipeline de validación automática (GitHub Actions) & Arquitectura Core | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-12** · Módulo de Catálogo (Categorías, Productos, Variantes, SKUs) | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-14** · Configuración base de Capacidad (Franjas horarias y reglas de tienda) | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | **CI-01** · Pipeline CI/CD (✅ Hecho) & **BE-17** · Módulo de Carrito (🔒 Bloqueada por BE-12) | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-12** · Módulo de Catálogo (🟢 En Progreso) & **BE-13** · Módulo de Inventario (🔒 Bloqueada por BE-12) | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-14** · Capacidad Base (🟡 PR Aprobado), **BE-15** · Excepciones (⏳ Siguiente) & **BE-16** · Capacidad Efectiva (🔒) | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
 ---
 
@@ -64,7 +64,7 @@ flowchart LR
 | **Seguridad** | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) | Autenticación sin estado, RBAC (CUSTOMER, MERCHANT, ADMIN) y control de acceso |
 | **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white) ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white) | Base de datos NeonDB en la nube, versionamiento DDL forward-only y JPA |
 | **Frontend** | ![Angular](https://img.shields.io/badge/Angular_20-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Panel de Comerciante (Angular Standalone/Signals) y Portal Cliente (Next.js) |
-| **Calidad / QA & CI** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) | 156 pruebas automatizadas pasando al 100% y pipeline de CI continuo |
+| **Calidad / QA & CI** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) | 187 pruebas automatizadas pasando al 100% y pipeline de CI continuo |
 | **Documentación** | ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white) | Diagramas interactivos y especificaciones de arquitectura viva |
 
 ---
