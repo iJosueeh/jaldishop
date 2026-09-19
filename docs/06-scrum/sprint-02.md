@@ -108,16 +108,16 @@ flowchart LR
 **Objetivo:** La BD tiene la estructura roles, pero necesitamos garantizar que existan los roles iniciales: CUSTOMER, MERCHANT, ADMIN.
 
 **Checklist:**
-- [ ] Revisar tabla roles en modelo-er.md
-- [ ] Confirmar IDs SMALLINT
-- [ ] Definir IDs estables para CUSTOMER/MERCHANT/ADMIN
-- [ ] Crear V2__seed_roles.sql
-- [ ] No modificar V1
-- [ ] Ejecutar Flyway
-- [ ] Verificar flyway_schema_history
-- [ ] Consultar roles insertados
-- [ ] Documentar resultado
-- [ ] Abrir Pull Request
+- [x] Revisar tabla roles en modelo-er.md
+- [x] Confirmar IDs SMALLINT
+- [x] Definir IDs estables para CUSTOMER/MERCHANT/ADMIN
+- [x] Crear V2__seed_roles.sql
+- [x] No modificar V1
+- [x] Ejecutar Flyway
+- [x] Verificar flyway_schema_history
+- [x] Consultar roles insertados
+- [x] Documentar resultado
+- [x] Abrir Pull Request
 
 **Decisión de IDs estables:**
 ```sql
@@ -242,11 +242,11 @@ MerchantAuthResponse (201 CREATED)
 **Objetivo:** Revisar el código del dominio y puertos antes de proceder a la persistencia JPA.
 
 **Checklist:**
-- [ ] Revisar entidades de dominio
-- [ ] Verificar independencia de Spring/JPA
-- [ ] Validar tests unitarios
-- [ ] Confirmar puertos correctos
-- [ ] Aprobar para JPA
+- [x] Revisar entidades de dominio
+- [x] Verificar independencia de Spring/JPA
+- [x] Validar tests unitarios
+- [x] Confirmar puertos correctos
+- [x] Aprobar para JPA
 
 ---
 
@@ -294,27 +294,27 @@ MerchantAuthResponse (201 CREATED)
 Implementar la gestión básica de notificaciones persistentes de JaldiShop, permitiendo consultar las notificaciones de un usuario y marcarlas como leídas, sin acoplar todavía el módulo a eventos de Pedido, Inventario o WebSocket.
 
 **Checklist:**
-- [ ] Crear Notification domain
-- [ ] Crear NotificationStatus
-- [ ] Crear NotificationType
-- [ ] Crear NotificationRepository port
-- [ ] Crear NotificationEntity
-- [ ] Crear NotificationJpaRepository
-- [ ] Crear NotificationPersistenceMapper
-- [ ] Crear NotificationRepositoryAdapter
-- [ ] Caso de uso ListUserNotifications
-- [ ] Caso de uso MarkNotificationAsRead
-- [ ] Caso de uso CountUnreadNotifications
-- [ ] Caso de uso CreateNotification
-- [ ] DTO NotificationResponse
-- [ ] Controller REST
-- [ ] Tests dominio
-- [ ] Tests application
-- [ ] Tests mapper
-- [ ] Tests repository/adapters
-- [ ] Tests endpoint
-- [ ] Documentar endpoints
-- [ ] Abrir Pull Request
+- [x] Crear Notification domain
+- [x] Crear NotificationStatus
+- [x] Crear NotificationType
+- [x] Crear NotificationRepository port
+- [x] Crear NotificationEntity
+- [x] Crear NotificationJpaRepository
+- [x] Crear NotificationPersistenceMapper
+- [x] Crear NotificationRepositoryAdapter
+- [x] Caso de uso ListUserNotifications
+- [x] Caso de uso MarkNotificationAsRead
+- [x] Caso de uso CountUnreadNotifications
+- [x] Caso de uso CreateNotification
+- [x] DTO NotificationResponse
+- [x] Controller REST
+- [x] Tests dominio
+- [x] Tests application
+- [x] Tests mapper
+- [x] Tests repository/adapters
+- [x] Tests endpoint
+- [x] Documentar endpoints
+- [x] Abrir Pull Request
 
 **Decisiones cerradas que aplican (modelo-er.md Sección 31):**
 - Tabla: `notifications` (ya creada en `V1__initial_schema.sql`)
