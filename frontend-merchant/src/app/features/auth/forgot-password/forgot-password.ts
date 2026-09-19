@@ -2,9 +2,28 @@ import { Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AlertError } from '../../../shared/components/alert-error/alert-error';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matLockResetOutline,
+  matMailOutline,
+  matArrowForwardOutline,
+  matArrowBackOutline,
+  matMarkEmailReadOutline,
+  matLoginOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink, AlertError],
+  imports: [ReactiveFormsModule, RouterLink, AlertError, NgIcon],
+  providers: [
+    provideIcons({
+      matLockResetOutline,
+      matMailOutline,
+      matArrowForwardOutline,
+      matArrowBackOutline,
+      matMarkEmailReadOutline,
+      matLoginOutline,
+    }),
+  ],
   selector: 'app-forgot-password',
   styleUrl: './forgot-password.css',
   templateUrl: './forgot-password.html',

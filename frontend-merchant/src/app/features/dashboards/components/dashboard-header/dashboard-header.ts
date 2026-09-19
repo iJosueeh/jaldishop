@@ -1,9 +1,20 @@
 import { Component, computed, inject } from '@angular/core';
 import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matCalendarMonthOutline,
+  matAddCircleOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [],
+  imports: [NgIcon],
+  providers: [
+    provideIcons({
+      matCalendarMonthOutline,
+      matAddCircleOutline,
+    }),
+  ],
   selector: 'app-dashboard-header',
   styleUrl: './dashboard-header.css',
   templateUrl: './dashboard-header.html',

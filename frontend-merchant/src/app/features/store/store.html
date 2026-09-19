@@ -24,7 +24,7 @@
         type="button"
         class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
       >
-        <span class="material-symbols-outlined text-[18px] text-primary-container">open_in_new</span>
+        <ng-icon name="matOpenInNewOutline" class="text-[18px] text-primary-container" />
         <span>Ver catálogo</span>
       </button>
 
@@ -38,7 +38,7 @@
           <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
           <span>Guardando...</span>
         } @else {
-          <span class="material-symbols-outlined text-[18px]">save</span>
+          <ng-icon name="matSaveOutline" class="text-[18px]" />
           <span>Guardar cambios</span>
         }
       </button>
@@ -50,7 +50,7 @@
     <div
       class="p-4 rounded-xl bg-surface-container text-primary-container border border-primary-container/20 text-xs font-bold flex items-center gap-2.5 shadow-xs animate-fade-in"
     >
-      <span class="material-symbols-outlined text-[20px]">check_circle</span>
+      <ng-icon name="matCheckCircleOutline" class="text-[20px]" />
       <span>¡Los cambios de tu tienda se guardaron exitosamente!</span>
     </div>
   }
@@ -59,7 +59,7 @@
     <div
       class="p-4 rounded-xl bg-error-container text-on-error-container text-xs font-semibold flex items-center gap-2.5 shadow-xs"
     >
-      <span class="material-symbols-outlined text-[20px]">error</span>
+      <ng-icon name="matErrorOutline" class="text-[20px]" />
       <span>{{ errorMessage() }}</span>
     </div>
   }

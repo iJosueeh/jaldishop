@@ -1,9 +1,32 @@
 import { Component, input, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matPreviewOutline,
+  matStorefrontOutline,
+  matStoreOutline,
+  matMopedOutline,
+  matCheckOutline,
+  matContentCopyOutline,
+  matPowerSettingsNewOutline,
+  matPauseCircleOutline,
+} from '@ng-icons/material-symbols/outline';
 import { StoreResponse } from '../../../../core/models/store.models';
 
 @Component({
-  imports: [],
+  imports: [NgIcon],
+  providers: [
+    provideIcons({
+      matPreviewOutline,
+      matStorefrontOutline,
+      matStoreOutline,
+      matMopedOutline,
+      matCheckOutline,
+      matContentCopyOutline,
+      matPowerSettingsNewOutline,
+      matPauseCircleOutline,
+    }),
+  ],
   selector: 'app-store-preview-card',
   styleUrl: './store-preview-card.css',
   templateUrl: './store-preview-card.html',
@@ -23,3 +46,4 @@ export class StorePreviewCard {
     });
   }
 }
+

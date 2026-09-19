@@ -6,7 +6,7 @@
         Capacidad de Hoy
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
-        <span class="material-symbols-outlined text-[18px]">view_week</span>
+        <ng-icon name="matViewWeekOutline" class="text-[18px]" />
       </span>
     </div>
 
@@ -54,7 +54,7 @@
         Pedidos de Hoy
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
-        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+        <ng-icon name="matReceiptLongOutline" class="text-[18px]" />
       </span>
     </div>
 
@@ -91,7 +91,7 @@
         Ritmo Operativo
       </span>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
-        <span class="material-symbols-outlined text-[18px]">timer</span>
+        <ng-icon name="matTimerOutline" class="text-[18px]" />
       </span>
     </div>
 
@@ -104,7 +104,7 @@
       </div>
       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
         <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-primary-container bg-surface-container px-2 py-0.5 rounded-md">
-          <span class="material-symbols-outlined text-[15px]">check_circle</span>
+          <ng-icon name="matCheckCircleOutline" class="text-[15px]" />
           {{ metrics().operatingRhythmMin > 0 ? 'Dentro del ritmo' : 'Sin registros' }}
         </span>
         @if (metrics().targetRhythmMin > 0) {
@@ -123,3 +123,4 @@
     </div>
   </div>
 </section>
+

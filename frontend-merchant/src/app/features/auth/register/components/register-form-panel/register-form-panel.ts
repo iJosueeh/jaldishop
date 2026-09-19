@@ -5,9 +5,27 @@ import { RegisterFooter } from '../../../../../shared/components/register-footer
 import { RegisterStepHeader } from '../../../../../shared/components/register-step-header/register-step-header';
 import { AlertError } from '../../../../../shared/components/alert-error/alert-error';
 import { RegisterStep1Data } from '../../../../../core/models/register.models';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matVisibilityOutline,
+  matVisibilityOffOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink, RegisterFooter, RegisterStepHeader, AlertError],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    RegisterFooter,
+    RegisterStepHeader,
+    AlertError,
+    NgIcon,
+  ],
+  providers: [
+    provideIcons({
+      matVisibilityOutline,
+      matVisibilityOffOutline,
+    }),
+  ],
   selector: 'app-register-form-panel',
   styleUrl: './register-form-panel.css',
   templateUrl: './register-form-panel.html',

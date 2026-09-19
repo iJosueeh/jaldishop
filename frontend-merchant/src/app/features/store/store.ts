@@ -6,9 +6,30 @@ import { StorePreviewCard } from './components/store-preview-card/store-preview-
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { StoreService } from '../../core/services/store.service';
 import { StoreResponse, UpdateStoreRequest } from '../../core/models/store.models';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matOpenInNewOutline,
+  matSaveOutline,
+  matCheckCircleOutline,
+  matErrorOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [StoreIdentityCard, StoreDeliveryCard, StoreLocationCard, StorePreviewCard],
+  imports: [
+    StoreIdentityCard,
+    StoreDeliveryCard,
+    StoreLocationCard,
+    StorePreviewCard,
+    NgIcon,
+  ],
+  providers: [
+    provideIcons({
+      matOpenInNewOutline,
+      matSaveOutline,
+      matCheckCircleOutline,
+      matErrorOutline,
+    }),
+  ],
   selector: 'app-store',
   styleUrl: './store.css',
   templateUrl: './store.html',

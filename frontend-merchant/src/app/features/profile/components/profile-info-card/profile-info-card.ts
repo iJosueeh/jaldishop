@@ -1,8 +1,27 @@
 import { Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matPersonOutline,
+  matMailOutline,
+  matCallOutline,
+  matNotificationsOutline,
+  matShieldOutline,
+  matSupportAgentOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgIcon],
+  providers: [
+    provideIcons({
+      matPersonOutline,
+      matMailOutline,
+      matCallOutline,
+      matNotificationsOutline,
+      matShieldOutline,
+      matSupportAgentOutline,
+    }),
+  ],
   selector: 'app-profile-info-card',
   styleUrl: './profile-info-card.css',
   templateUrl: './profile-info-card.html',
@@ -25,3 +44,4 @@ export class ProfileInfoCard {
     this.save.emit();
   }
 }
+

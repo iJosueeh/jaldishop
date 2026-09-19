@@ -30,7 +30,7 @@
         @if (errorMessage()) {
         <div
             class="mb-4 p-3.5 text-xs rounded-xl bg-error-container text-on-error-container border border-error/20 flex items-center gap-2.5 animate-in fade-in duration-200">
-            <span class="material-symbols-outlined text-lg text-error">error</span>
+            <ng-icon name="matErrorOutline" class="text-lg text-error" />
             <span class="font-medium">{{ errorMessage() }}</span>
         </div>
         }
@@ -43,7 +43,7 @@
                 <div class="relative rounded-xl shadow-xs">
                     <div
                         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-on-surface-variant">
-                        <span class="material-symbols-outlined text-lg">mail</span>
+                        <ng-icon name="matMailOutline" class="text-lg" />
                     </div>
                     <input id="login-email" type="email" formControlName="email" placeholder="nombre@correo.com"
                         class="w-full h-11 pl-10 pr-3.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -67,7 +67,7 @@
                 <div class="relative rounded-xl shadow-xs">
                     <div
                         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-on-surface-variant">
-                        <span class="material-symbols-outlined text-lg">lock</span>
+                        <ng-icon name="matLockOutline" class="text-lg" />
                     </div>
                     <input id="login-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                         placeholder="Ingresa tu contraseña"
@@ -78,9 +78,11 @@
                     <button type="button" id="toggle-password" (click)="togglePassword()"
                         aria-label="Mostrar u ocultar contraseña"
                         class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-on-surface focus:outline-none transition-colors">
-                        <span class="material-symbols-outlined text-lg">
-                            {{ showPassword() ? 'visibility_off' : 'visibility' }}
-                        </span>
+                        @if (showPassword()) {
+                            <ng-icon name="matVisibilityOffOutline" class="text-lg" />
+                        } @else {
+                            <ng-icon name="matVisibilityOutline" class="text-lg" />
+                        }
                     </button>
                 </div>
                 @if (
@@ -104,8 +106,9 @@
                     <span>Iniciando sesión...</span>
                     } @else {
                     <span>Iniciar sesión</span>
-                    <span
-                        class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">arrow_forward</span>
+                    <ng-icon
+                        name="matArrowForwardOutline"
+                        class="text-lg transition-transform group-hover:translate-x-1" />
                     }
                 </button>
             </div>

@@ -4,9 +4,36 @@ import { AuthService } from '../../../../core/services/auth-service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matStorefrontOutline,
+  matCloseOutline,
+  matHomeOutline,
+  matStoreOutline,
+  matReceiptLongOutline,
+  matViewWeekOutline,
+  matBakeryDiningOutline,
+  matGroupOutline,
+  matTuneOutline,
+  matLogoutOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgIcon],
+  providers: [
+    provideIcons({
+      matStorefrontOutline,
+      matCloseOutline,
+      matHomeOutline,
+      matStoreOutline,
+      matReceiptLongOutline,
+      matViewWeekOutline,
+      matBakeryDiningOutline,
+      matGroupOutline,
+      matTuneOutline,
+      matLogoutOutline,
+    }),
+  ],
   selector: 'app-siderbar',
   styleUrl: './siderbar.css',
   templateUrl: './siderbar.html',
