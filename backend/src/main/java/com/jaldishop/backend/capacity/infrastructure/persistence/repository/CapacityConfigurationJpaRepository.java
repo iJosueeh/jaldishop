@@ -12,8 +12,8 @@ import java.util.UUID;
 
 @Repository
 public interface CapacityConfigurationJpaRepository extends JpaRepository<CapacityConfigurationEntity, UUID> {
-
-    List<CapacityConfigurationEntity> findByStoreIdOrderByDayOfWeekAscStartTimeAsc(UUID storeId);
+    List<CapacityConfigurationEntity> findByStoreIdOrderByDayOfWeekAscStartTimeAsc(UUID
+                                                                                           storeId);
 
     @Query("""
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
@@ -23,9 +23,9 @@ public interface CapacityConfigurationJpaRepository extends JpaRepository<Capaci
               AND c.startTime IS NOT NULL
               AND c.endTime IS NOT NULL
               AND (:excludeId IS NULL OR c.id <> :excludeId)
-              AND (:endTime <= c.startTime OR :startTime >= c.endTime)
+              AND (c.startTime < :endTime AND c.endTime > :startTime)
             """)
-    boolean existsNonOverlappingByStoreIdAndDayOfWeek(
+    boolean existsOverlappingByStoreIdAndDayOfWeek(
             @Param("storeId") UUID storeId,
             @Param("dayOfWeek") int dayOfWeek,
             @Param("startTime") LocalTime startTime,
