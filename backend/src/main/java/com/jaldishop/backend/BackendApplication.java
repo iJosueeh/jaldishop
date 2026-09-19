@@ -9,7 +9,11 @@ public class BackendApplication {
 
     public static void main(String[] args) {
 
+        String envDir = new java.io.File("backend/.env").exists() ? "./backend" : "./";
+
         Dotenv dotenv = Dotenv.configure()
+                .directory(envDir)
+                .ignoreIfMissing()
                 .ignoreIfMalformed()
                 .load();
 

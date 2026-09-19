@@ -6,12 +6,12 @@ import java.util.*;
 public class User {
 
     private final UUID id;
-    private final String firstName;
-    private final String lastName;
+    private String firstName;
+    private String lastName;
     private final String email;
     private final String password;
     private final UserStatus status;
-    private final String phone;
+    private String phone;
     private final Set<Role> roles;
     private final Instant createdAt;
     private Instant updatedAt;
@@ -79,6 +79,16 @@ public class User {
                 updatedAt,
                 roles
         );
+    }
+
+    public void updateProfile(String firstName, String lastName, String phone) {
+        validateRequired(firstName, "First Name");
+        validateRequired(lastName, "Last Name");
+
+        this.firstName = firstName.trim();
+        this.lastName = lastName.trim();
+        this.phone = phone != null ? phone.trim() : null;
+        this.updatedAt = Instant.now();
     }
 
     public static void validateRequired(String value, String field) {
