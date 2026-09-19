@@ -144,9 +144,14 @@
 
     <div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-2 border border-outline-variant/20">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-white">
-            <span class="material-symbols-outlined text-[18px]">person</span>
+        <a
+          routerLink="/profile"
+          (click)="closeSidebar.emit()"
+          title="Ver mi perfil"
+          class="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-85 transition-opacity"
+        >
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-2xs">
+            {{ userInitials() }}
           </div>
           <div class="flex flex-col min-w-0">
             <span class="text-xs font-bold text-on-surface truncate">
@@ -156,13 +161,13 @@
               Comerciante
             </span>
           </div>
-        </div>
+        </a>
 
         <button
           type="button"
           (click)="handleLogout()"
           title="Cerrar sesión"
-          class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors cursor-pointer"
+          class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors cursor-pointer shrink-0"
         >
           <span class="material-symbols-outlined text-[18px]">logout</span>
         </button>

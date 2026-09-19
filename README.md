@@ -5,8 +5,8 @@
 [![GitHub repo size](https://img.shields.io/github/repo-size/iJosueeh/jaldishop?style=flat-square&color=blue)](https://github.com/iJosueeh/jaldishop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop?style=flat-square&color=green)](https://github.com/iJosueeh/jaldishop)
 [![GitHub issues](https://img.shields.io/github/issues/iJosueeh/jaldishop?style=flat-square&color=yellow)](https://github.com/iJosueeh/jaldishop/issues)
-[![Sprint](https://img.shields.io/badge/Sprint-02%20En%20Progreso%20Avanzado%20(73%25)-green?style=flat-square)](./docs/06-scrum/sprint-02.md)
-[![Tests](https://img.shields.io/badge/Tests-151%20Passing%20(89%20BE%20+%2062%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
+[![Sprint](https://img.shields.io/badge/Sprint-02%20Completado%20(100%25)-brightgreen?style=flat-square)](./docs/06-scrum/sprint-02.md)
+[![Tests](https://img.shields.io/badge/Tests-156%20Passing%20(89%20BE%20+%2067%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./docs)
 
 > **Capa de orden operativa** para micro y pequeñas empresas que comercializan por WhatsApp e Instagram, eliminando la sobreventa y sincronizando pedidos con su capacidad real.
@@ -50,7 +50,7 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 2 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | BE-01 Identity + BE-03 Auth + BE-05 JPA + BE-06 JWT + BE-11 Store Base + Onboarding Frontend | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | Identity (BE-01/03/05/06) + Store Base (BE-11) + Frontend Merchant (FE-01 Onboarding, FE-02 Dashboard/Store, FE-03 API Errors, FE-04 Mi Perfil) | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
 | **Katherine Patricia Salas Quiroz** | Full Stack Dev | BE-02 Migración Roles Iniciales | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
 | **Mia Vitalia Gual Vega** | Full Stack Dev | BE-10 Módulo de Notificaciones | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
@@ -64,7 +64,7 @@ flowchart LR
 | **Seguridad** | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) | Autenticación sin estado, RBAC (CUSTOMER, MERCHANT, ADMIN) y control de acceso |
 | **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white) ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white) | Base de datos NeonDB en la nube, versionamiento DDL forward-only y JPA |
 | **Frontend** | ![Angular](https://img.shields.io/badge/Angular_20-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Panel de Comerciante (Angular Standalone/Signals) y Portal Cliente (Next.js) |
-| **Calidad / QA** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) | 110 pruebas automatizadas pasando al 100% (89 Backend + 21 Frontend) |
+| **Calidad / QA** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) | 156 pruebas automatizadas pasando al 100% (89 Backend + 67 Frontend) |
 | **Documentación** | ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white) | Diagramas interactivos y especificaciones de arquitectura viva |
 
 ---
@@ -90,18 +90,19 @@ jaldishop/
 │   │   ├── 📄 reglas-negocio.md        # Reglas e invariantes del dominio (RN-01 a 15) (v1.1)
 │   │   ├── 📄 historia.md              # Historias de usuario del MVP (v1.1)
 │   │   └── 📄 modelo-dominio.md        # Modelo de dominio y conceptos (v1.0)
-│   ├── 📁 04-diseno/                   # Modelado de persistencia
+│   ├── 📁 04-diseno/                   # Modelado de persistencia y API
 │   │   ├── 📄 modelo-er.md             # Modelo Entidad-Relación v1.6 (Listo para DDL)
 │   │   ├── 📄 diagrama-er.md           # Diagrama ER visual
+│   │   ├── 📄 contrato-api-errores.md  # Contrato estandarizado de respuestas y errores HTTP
 │   │   └── 📄 as-is-to-be.md           # Diagramas comparativos AS-IS vs TO-BE
 │   ├── 📁 05-arquitectura/             # Decisiones arquitectónicas
 │   │   └── 📄 arquitectura-sistema.md  # Arquitectura del sistema (v0.2)
 │   ├── 📁 06-scrum/                    # Gestión ágil de sprints
 │   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de Capacidad (Completado)
-│   │   └── 📄 sprint-02.md             # Sprint 2: Backend Base (En Progreso)
+│   │   └── 📄 sprint-02.md             # Sprint 2: Backend Base y Frontend Merchant Core (Completado)
 │   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
-├── 📁 backend/                         # Servidor Spring Boot (En Desarrollo)
-├── 📁 frontend-merchant/               # Panel de Comerciante (Angular 20 Standalone)
+├── 📁 backend/                         # Servidor Spring Boot (Identity + Store + Notification)
+├── 📁 frontend-merchant/               # Panel de Comerciante (Angular 20 Standalone con Signals)
 ├── 📁 frontend/                        # Portal Cliente (Próximo Sprint)
 └── 📄 README.md                        # Portal principal del repositorio
 ```
@@ -112,9 +113,9 @@ jaldishop/
 
 ```mermaid
 flowchart TD
-    S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado"]
-    S2["Sprint 2: Backend Base (Identity + Store + Onboarding Merchant) - 75% Completado"]
-    S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Pendiente"]
+    S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado ✅"]
+    S2["Sprint 2: Backend Base & Frontend Merchant Core - Completado ✅"]
+    S3["Sprint 3: Backend - Pedidos, Capacidad y Pagos - Próximo Sprint"]
     S4["Sprint 4: Frontend Web y Panel Administrativo MYPE - Pendiente"]
     S5["Sprint 5: Integración, Pasarela de Pagos y QA - Pendiente"]
 
@@ -124,9 +125,9 @@ flowchart TD
 | Sprint | Enfoque | Estado | Entregable Clave |
 |:---:|---|:---:|---|
 | **01** | Modelo de Capacidad y Casos de Estudio | `COMPLETADO` | [Modelo de Capacidad v1](./docs/01-producto/modelo-capacidad-v1.md) |
-| **02** | Backend Base (Identity + Store + JWT + Onboarding) | `EN PROGRESO AVANZADO` | [Sprint 02 Backlog](./docs/06-scrum/sprint-02.md) (Identity + Store + Onboarding completados, 89 tests) |
-| **03** | Backend - Pedidos, Capacidad y Pagos | `PENDIENTE` | Módulos de dominio completos |
-| **04** | Frontend Web & Panel de Control | `PENDIENTE` | Interfaz Angular / Next.js |
+| **02** | Backend Base & Frontend Merchant Core | `COMPLETADO` | [Sprint 02 Backlog](./docs/06-scrum/sprint-02.md) (Identity + Store + Notificaciones + Onboarding + Dashboards + Tienda + API Errors + Mi Perfil, 156 tests) |
+| **03** | Backend - Pedidos, Capacidad y Pagos | `PRÓXIMO SPRINT` | Módulos de dominio transaccionales completos |
+| **04** | Frontend Web & Panel de Control Avanzado | `PENDIENTE` | Interfaz de Catálogo y Capacidad en vivo |
 | **05** | Integración, Pasarela de Pagos & QA | `PENDIENTE` | MVP Funcional Desplegado |
 
 ---
