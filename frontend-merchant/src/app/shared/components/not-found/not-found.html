@@ -35,7 +35,7 @@
       <!-- Icono contextual con acento cálido -->
       <div
         class="w-16 h-16 rounded-2xl bg-secondary-fixed/50 border border-secondary-container/40 text-secondary mx-auto flex items-center justify-center shadow-xs">
-        <span class="material-symbols-outlined text-3xl text-secondary">travel_explore</span>
+        <ng-icon name="matTravelExploreOutline" class="text-3xl text-secondary" />
       </div>
 
       <!-- Badge de Estado Nítido -->
@@ -63,13 +63,13 @@
         @if (isAuthenticated()) {
           <a routerLink="/dashboard"
             class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
-            <span class="material-symbols-outlined text-lg">home</span>
+            <ng-icon name="matHomeOutline" class="text-lg" />
             <span>Ir al Dashboard</span>
           </a>
         } @else {
           <a routerLink="/login"
             class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
-            <span class="material-symbols-outlined text-lg">storefront</span>
+            <ng-icon name="matStorefrontOutline" class="text-lg" />
             <span>Ir al inicio de sesión</span>
           </a>
 

@@ -9,7 +9,7 @@ import {
   RegisterStep1Data,
   RegisterStep2Data,
   RegisterStep3Data,
-} from './interface/register.models';
+} from '../../../core/models/register.models';
 import { AuthService } from '../../../core/services/auth-service';
 import { Router } from '@angular/router';
 import { AuthResult, RegisterMerchantRequest } from '../../../core/models/auth.models';

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { UpdateUserProfileRequest, UserProfile } from '../models/user-profile.models';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { Observable, tap, catchError, throwError, of } from 'rxjs';
 
 @Service()
 export class ProfileService {
@@ -25,7 +25,11 @@ export class ProfileService {
     return `${first}${last}` || 'U';
   });
 
-  getMyProfile(): Observable<UserProfile> {
+  getMyProfile(forceRefresh = false): Observable<UserProfile> {
+    if (this.currentProfile() !== null && !forceRefresh) {
+      return of(this.currentProfile()!);
+    }
+    
     this.isLoading.set(true);
     return this.http.get<UserProfile>(`${this.baseUrl}/me`).pipe(
       tap((profile) => {

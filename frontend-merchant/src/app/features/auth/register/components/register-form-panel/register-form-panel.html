@@ -195,9 +195,11 @@
               aria-label="Mostrar u ocultar contraseña"
               class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
             >
-              <span class="material-symbols-outlined text-lg">{{
-                showPassword() ? 'visibility_off' : 'visibility'
-              }}</span>
+              @if (showPassword()) {
+                <ng-icon name="matVisibilityOffOutline" class="text-lg" />
+              } @else {
+                <ng-icon name="matVisibilityOutline" class="text-lg" />
+              }
             </button>
           </div>
         </div>
@@ -244,9 +246,11 @@
               aria-label="Mostrar u ocultar contraseña"
               class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
             >
-              <span class="material-symbols-outlined text-lg">{{
-                showConfirmPassword() ? 'visibility_off' : 'visibility'
-              }}</span>
+              @if (showConfirmPassword()) {
+                <ng-icon name="matVisibilityOffOutline" class="text-lg" />
+              } @else {
+                <ng-icon name="matVisibilityOutline" class="text-lg" />
+              }
             </button>
           </div>
         </div>

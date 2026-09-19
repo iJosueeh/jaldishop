@@ -25,7 +25,7 @@
     @if (isLogged()) {
     <button type="button" (click)="handleLogout()"
       class="text-xs sm:text-sm font-bold text-error hover:text-tertiary transition-colors cursor-pointer flex items-center gap-1">
-      <span class="material-symbols-outlined text-sm">logout</span>
+      <ng-icon name="matLogoutOutline" class="text-sm" />
       <span>Cerrar sesión</span>
     </button>
     } @else {
@@ -43,7 +43,7 @@
       <!-- Icono contextual de seguridad -->
       <div
         class="w-16 h-16 rounded-2xl bg-error-container/60 border border-error/20 text-error mx-auto flex items-center justify-center shadow-xs">
-        <span class="material-symbols-outlined text-3xl text-error">shield_lock</span>
+        <ng-icon name="matShieldOutline" class="text-3xl text-error" />
       </div>
 
       <!-- Badge de Estado Nítido -->
@@ -72,13 +72,13 @@
         @if (isLogged()) {
         <button type="button" (click)="handleLogout()"
           class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <span class="material-symbols-outlined text-lg">switch_account</span>
+          <ng-icon name="matSwitchAccountOutline" class="text-lg" />
           <span>Cambiar de cuenta</span>
         </button>
         } @else {
         <a routerLink="/login"
           class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary-container hover:bg-primary active:scale-[0.99] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <span class="material-symbols-outlined text-lg">storefront</span>
+          <ng-icon name="matStorefrontOutline" class="text-lg" />
           <span>Iniciar sesión como comerciante</span>
         </a>
         }

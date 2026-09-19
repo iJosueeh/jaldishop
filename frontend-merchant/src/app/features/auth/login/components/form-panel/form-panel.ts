@@ -3,9 +3,28 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { LoginRequest } from '../../../../../core/models/auth.models';
 import { RouterLink } from '@angular/router';
 import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matErrorOutline,
+  matMailOutline,
+  matLockOutline,
+  matVisibilityOutline,
+  matVisibilityOffOutline,
+  matArrowForwardOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink, RegisterFooter],
+  imports: [ReactiveFormsModule, RouterLink, RegisterFooter, NgIcon],
+  providers: [
+    provideIcons({
+      matErrorOutline,
+      matMailOutline,
+      matLockOutline,
+      matVisibilityOutline,
+      matVisibilityOffOutline,
+      matArrowForwardOutline,
+    }),
+  ],
   selector: 'app-form-panel',
   styleUrl: './form-panel.css',
   templateUrl: './form-panel.html',

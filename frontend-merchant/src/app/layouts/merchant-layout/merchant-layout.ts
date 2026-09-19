@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Siderbar } from './components/siderbar/siderbar';
 import { Header } from './components/header/header';
 import { RouterOutlet } from '@angular/router';
-import { StoreService } from '../../features/store/services/store.service';
+import { StoreService } from '../../core/services/store.service';
 import { ProfileService } from '../../core/services/profile.service';
 
 @Component({

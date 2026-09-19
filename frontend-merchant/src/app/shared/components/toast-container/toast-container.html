@@ -23,22 +23,20 @@
         [class.bg-surface-container-high]="toast.type === 'info'"
         [class.text-on-surface-variant]="toast.type === 'info'"
       >
-        <span class="material-symbols-outlined text-[20px]">
-          @switch (toast.type) {
-            @case ('success') {
-              check_circle
-            }
-            @case ('error') {
-              error
-            }
-            @case ('warning') {
-              warning
-            }
-            @default {
-              info
-            }
+        @switch (toast.type) {
+          @case ('success') {
+            <ng-icon name="matCheckCircleOutline" class="text-[20px]" />
           }
-        </span>
+          @case ('error') {
+            <ng-icon name="matErrorOutline" class="text-[20px]" />
+          }
+          @case ('warning') {
+            <ng-icon name="matWarningOutline" class="text-[20px]" />
+          }
+          @default {
+            <ng-icon name="matInfoOutline" class="text-[20px]" />
+          }
+        }
       </div>
 
       <!-- Contenido de Texto -->
@@ -60,7 +58,7 @@
         class="p-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer shrink-0 -mr-1 -mt-1"
         aria-label="Cerrar notificación"
       >
-        <span class="material-symbols-outlined text-[18px]">close</span>
+        <ng-icon name="matCloseOutline" class="text-[18px]" />
       </button>
     </div>
   }

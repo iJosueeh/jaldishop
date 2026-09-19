@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { StoreService } from '../../features/store/services/store.service';
+import { StoreService } from '../services/store.service';
 import { map } from 'rxjs';
 
 export const hasStoreGuard: CanActivateFn = () => {

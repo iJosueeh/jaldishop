@@ -41,7 +41,7 @@ public class CapacityConfigurationRepositoryAdapter implements CapacityConfigura
     public boolean existsOverlappingByStoreIdAndDayOfWeek(UUID storeId, int dayOfWeek,
                                                           LocalTime startTime, LocalTime endTime,
                                                           UUID excludeId) {
-        return !jpaRepository.existsNonOverlappingByStoreIdAndDayOfWeek(
+        return jpaRepository.existsOverlappingByStoreIdAndDayOfWeek(
                 storeId, dayOfWeek, startTime, endTime, excludeId);
     }
 

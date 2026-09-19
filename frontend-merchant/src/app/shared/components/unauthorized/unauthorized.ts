@@ -1,9 +1,24 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth-service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matLogoutOutline,
+  matShieldOutline,
+  matSwitchAccountOutline,
+  matStorefrontOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, NgIcon],
+  providers: [
+    provideIcons({
+      matLogoutOutline,
+      matShieldOutline,
+      matSwitchAccountOutline,
+      matStorefrontOutline,
+    }),
+  ],
   selector: 'app-unauthorized',
   styleUrl: './unauthorized.css',
   templateUrl: './unauthorized.html',
@@ -17,3 +32,4 @@ export class Unauthorized {
     this.authService.logout();
   }
 }
+

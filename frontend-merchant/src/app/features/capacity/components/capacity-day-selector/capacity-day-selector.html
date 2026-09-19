@@ -1,0 +1,39 @@
+<section class="flex flex-col gap-2">
+  <div class="flex items-center justify-between">
+    <h2 class="text-sm sm:text-base font-bold text-on-surface">
+      Planificación Semanal
+    </h2>
+    <span class="text-xs text-on-surface-variant">
+      Selecciona un día para ver o gestionar sus franjas
+    </span>
+  </div>
+
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+    @for (day of days(); track day.dayOfWeek) {
+      <button
+        type="button"
+        (click)="dayChange.emit(day.dayOfWeek)"
+        [class.bg-primary-container]="selectedDay() === day.dayOfWeek"
+        [class.text-white]="selectedDay() === day.dayOfWeek"
+        [class.shadow-xs]="selectedDay() === day.dayOfWeek"
+        [class.bg-surface-container-lowest]="selectedDay() !== day.dayOfWeek"
+        [class.text-on-surface]="selectedDay() !== day.dayOfWeek"
+        [class.hover:bg-surface-container-high]="selectedDay() !== day.dayOfWeek"
+        class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border border-outline-variant/30 cursor-pointer transition-all duration-150 shrink-0"
+      >
+        <span>{{ day.label }}</span>
+        @if (getActiveCount(day.dayOfWeek) > 0) {
+          <span
+            [class.bg-white/20]="selectedDay() === day.dayOfWeek"
+            [class.text-white]="selectedDay() === day.dayOfWeek"
+            [class.bg-primary-container/10]="selectedDay() !== day.dayOfWeek"
+            [class.text-primary-container]="selectedDay() !== day.dayOfWeek"
+            class="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+          >
+            {{ getActiveCount(day.dayOfWeek) }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+</section>

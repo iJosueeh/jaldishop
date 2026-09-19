@@ -1,8 +1,23 @@
 import { Component, computed, signal } from '@angular/core';
-import { DashboardMetrics } from '../../interface/dashboard.models';
+import { DashboardMetrics } from '../../../../core/models/dashboard.models';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matViewWeekOutline,
+  matReceiptLongOutline,
+  matTimerOutline,
+  matCheckCircleOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [],
+  imports: [NgIcon],
+  providers: [
+    provideIcons({
+      matViewWeekOutline,
+      matReceiptLongOutline,
+      matTimerOutline,
+      matCheckCircleOutline,
+    }),
+  ],
   selector: 'app-dashboard-kpis',
   styleUrl: './dashboard-kpis.css',
   templateUrl: './dashboard-kpis.html',

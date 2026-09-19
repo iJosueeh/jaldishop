@@ -13,7 +13,7 @@ import { RegisterFooter } from '../../../../../shared/components/register-footer
 import { RegisterStepHeader } from '../../../../../shared/components/register-step-header/register-step-header';
 import { AlertError } from '../../../../../shared/components/alert-error/alert-error';
 import { BusinessAvatar } from '../../../../../shared/components/business-avatar/business-avatar';
-import { RegisterStep2Data } from '../../interface/register.models';
+import { RegisterStep2Data } from '../../../../../core/models/register.models';
 
 @Component({
   imports: [ReactiveFormsModule, RegisterFooter, RegisterStepHeader, AlertError, BusinessAvatar],
