@@ -1,8 +1,10 @@
-<header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1 font-sans">
+<header
+  class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1 font-sans"
+>
   <div class="flex flex-col gap-1">
     <div class="flex items-center gap-2 flex-wrap">
       <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
-        Buenos días, {{ storeName() }}
+        Buenos días, {{ firstName() }}
       </h1>
       <span
         class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
@@ -19,13 +21,9 @@
         ></span>
         {{ isOpen() ? 'En operación' : 'En pausa' }}
       </span>
-      <span class="text-xs text-on-surface-variant hidden sm:inline">
-        · {{ currentDate() }}
-      </span>
+      <span class="text-xs text-on-surface-variant hidden sm:inline"> · {{ currentDate() }} </span>
     </div>
-    <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
-      Así marcha tu negocio hoy.
-    </p>
+    <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">Así marcha tu negocio hoy.</p>
   </div>
 
   <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
@@ -33,7 +31,9 @@
       type="button"
       class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer"
     >
-      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">calendar_month</span>
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant"
+        >calendar_month</span
+      >
       <span>Agenda</span>
     </button>
 
