@@ -102,13 +102,39 @@ public class CapacityConfiguration {
         return startTime != null && endTime != null;
     }
 
-    public UUID getId() { return id; }
-    public UUID getStoreId() { return storeId; }
-    public int getDayOfWeek() { return dayOfWeek; }
-    public LocalTime getStartTime() { return startTime; }
-    public LocalTime getEndTime() { return endTime; }
-    public int getMaxCapacity() { return maxCapacity; }
-    public CapacityConfigurationStatus getStatus() { return status; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public int getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public CapacityConfigurationStatus getStatus() {
+        return status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

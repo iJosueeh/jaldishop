@@ -7,6 +7,8 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+
 @Service
 @Transactional
 public class UpdateCapacityConfigurationService {
@@ -47,7 +49,7 @@ public class UpdateCapacityConfigurationService {
         return repository.save(config);
     }
 
-    private boolean safeEquals(java.time.LocalTime a, java.time.LocalTime b) {
+    private boolean safeEquals(LocalTime a, LocalTime b) {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
         return a.equals(b);

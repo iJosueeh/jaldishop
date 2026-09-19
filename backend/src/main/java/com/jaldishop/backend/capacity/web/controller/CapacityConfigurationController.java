@@ -7,6 +7,7 @@ import com.jaldishop.backend.capacity.web.dto.CreateCapacityConfigurationRequest
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityConfigurationRequest;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.GetMyStoreService;
+import com.jaldishop.backend.store.application.StoreContextService;
 import com.jaldishop.backend.store.domain.Store;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,18 +24,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/capacity-configurations")
 public class CapacityConfigurationController {
 
-    private final GetMyStoreService getMyStoreService;
+    private final StoreContextService storeContextService;
     private final CreateCapacityConfigurationService createService;
     private final GetStoreCapacityConfigurationsService listService;
     private final UpdateCapacityConfigurationService updateService;
     private final ToggleCapacityConfigurationStatusService toggleService;
 
-    public CapacityConfigurationController(GetMyStoreService getMyStoreService,
-                                           CreateCapacityConfigurationService createService,
-                                           GetStoreCapacityConfigurationsService listService,
-                                           UpdateCapacityConfigurationService updateService,
-                                           ToggleCapacityConfigurationStatusService toggleService) {
-        this.getMyStoreService = getMyStoreService;
+    public CapacityConfigurationController(
+            StoreContextService storeContextService,
+            CreateCapacityConfigurationService createService,
+            GetStoreCapacityConfigurationsService listService,
+            UpdateCapacityConfigurationService updateService,
+            ToggleCapacityConfigurationStatusService toggleService
+    ) {
+        this.storeContextService = storeContextService;
         this.createService = createService;
         this.listService = listService;
         this.updateService = updateService;
@@ -44,9 +47,9 @@ public class CapacityConfigurationController {
     @PostMapping
     public ResponseEntity<CapacityConfigurationResponse> create(
             @AuthenticationPrincipal JwtPrincipal principal,
-            @Valid @RequestBody CreateCapacityConfigurationRequest request) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+            @Valid @RequestBody CreateCapacityConfigurationRequest request
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CreateCapacityConfigurationCommand command = new CreateCapacityConfigurationCommand(
                 storeId, request.dayOfWeek(), request.startTime(), request.endTime(), request.maxCapacity());
@@ -57,9 +60,9 @@ public class CapacityConfigurationController {
 
     @GetMapping
     public ResponseEntity<List<CapacityConfigurationResponse>> list(
-            @AuthenticationPrincipal JwtPrincipal principal) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+            @AuthenticationPrincipal JwtPrincipal principal
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         List<CapacityConfiguration> configs = listService.execute(storeId);
         List<CapacityConfigurationResponse> response = configs.stream()
@@ -72,9 +75,9 @@ public class CapacityConfigurationController {
     public ResponseEntity<CapacityConfigurationResponse> update(
             @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateCapacityConfigurationRequest request) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+            @Valid @RequestBody UpdateCapacityConfigurationRequest request
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         UpdateCapacityConfigurationCommand command = new UpdateCapacityConfigurationCommand(
                 id, storeId, request.dayOfWeek(), request.startTime(), request.endTime(), request.maxCapacity());
@@ -86,9 +89,9 @@ public class CapacityConfigurationController {
     @PatchMapping("/{id}/activate")
     public ResponseEntity<CapacityConfigurationResponse> activate(
             @AuthenticationPrincipal JwtPrincipal principal,
-            @PathVariable UUID id) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+            @PathVariable UUID id
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CapacityConfiguration config = toggleService.activate(id, storeId);
         return ResponseEntity.ok(CapacityConfigurationResponse.fromDomain(config));
@@ -97,22 +100,12 @@ public class CapacityConfigurationController {
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<CapacityConfigurationResponse> deactivate(
             @AuthenticationPrincipal JwtPrincipal principal,
-            @PathVariable UUID id) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+            @PathVariable UUID id
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CapacityConfiguration config = toggleService.deactivate(id, storeId);
         return ResponseEntity.ok(CapacityConfigurationResponse.fromDomain(config));
     }
 
-    private UUID resolveStoreId(JwtPrincipal principal) {
-        Store store = getMyStoreService.execute(principal.userId());
-        return store.getId();
-    }
-
-    private void requireMerchantRole(JwtPrincipal principal) {
-        if (!principal.roles().contains("MERCHANT")) {
-            throw new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden gestionar capacidad.");
-        }
-    }
 }
