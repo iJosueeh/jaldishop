@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { DashboardMetrics } from '../../interface/dashboard.models';
+import { DashboardMetrics } from '../../../../core/models/dashboard.models';
 
 @Component({
   imports: [],

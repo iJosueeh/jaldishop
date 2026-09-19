@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { StoreService } from '../../../store/services/store.service';
+import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 
 @Component({

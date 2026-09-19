@@ -7,12 +7,18 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { AuthResult, LoginRequest, RegisterMerchantRequest } from '../models/auth.models';
 import { environment } from '../../../environments/environment';
+import { CapacityService } from './capacity.service';
+import { StoreService } from './store.service';
+import { ProfileService } from './profile.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   let httpTesting: HttpTestingController;
   let tokenService: TokenService;
   let router: Router;
+  let capacityService: CapacityService;
+  let storeService: StoreService;
+  let profileService: ProfileService;
 
   const mockAuthResult: AuthResult = {
     token: 'jwt.token.here',
@@ -27,6 +33,9 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         TokenService,
+        CapacityService,
+        StoreService,
+        ProfileService,
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([{ path: 'login', component: class {} }]),
@@ -37,6 +46,9 @@ describe('AuthService', () => {
     httpTesting = TestBed.inject(HttpTestingController);
     tokenService = TestBed.inject(TokenService);
     router = TestBed.inject(Router);
+    capacityService = TestBed.inject(CapacityService);
+    storeService = TestBed.inject(StoreService);
+    profileService = TestBed.inject(ProfileService);
 
     sessionStorage.clear();
   });
@@ -57,7 +69,6 @@ describe('AuthService', () => {
         password: 'password123',
       };
 
-      // Simular que tokenService retorna roles válidos tras setToken
       vi.spyOn(tokenService, 'getRoles').mockReturnValue(['MERCHANT', 'CUSTOMER']);
 
       service.login(credentials).subscribe((result) => {
@@ -128,14 +139,20 @@ describe('AuthService', () => {
   });
 
   describe('logout()', () => {
-    it('debe limpiar token, currentUser y redirigir a /login', () => {
+    it('debe limpiar token, currentUser, cachés de servicios y redirigir a /login', () => {
       const navigateSpy = vi.spyOn(router, 'navigate');
+      const capacitySpy = vi.spyOn(capacityService, 'clearCache');
+      const storeSpy = vi.spyOn(storeService, 'clearStore');
+      const profileSpy = vi.spyOn(profileService, 'clearProfile');
 
       service.logout();
 
       expect(service.token()).toBeNull();
       expect(service.currentUser()).toBeNull();
       expect(service.isAuthenticated()).toBe(false);
+      expect(capacitySpy).toHaveBeenCalled();
+      expect(storeSpy).toHaveBeenCalled();
+      expect(profileSpy).toHaveBeenCalled();
       expect(navigateSpy).toHaveBeenCalledWith(['/login']);
     });
   });

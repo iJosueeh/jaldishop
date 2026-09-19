@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth-service';
-import { StoreService } from '../../../../features/store/services/store.service';
+import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
 

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DashboardPriorityOrder } from '../../interface/dashboard.models';
+import { DashboardPriorityOrder } from '../../../../core/models/dashboard.models';
 
 @Component({
   imports: [RouterLink],

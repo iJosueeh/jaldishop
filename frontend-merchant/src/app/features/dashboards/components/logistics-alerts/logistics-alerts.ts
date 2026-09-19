@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StockAlertItem, UpcomingDeliveryItem } from '../../interface/dashboard.models';
+import { StockAlertItem, UpcomingDeliveryItem } from '../../../../core/models/dashboard.models';
 
 @Component({
   imports: [RouterLink],

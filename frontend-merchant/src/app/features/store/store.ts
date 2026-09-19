@@ -4,8 +4,8 @@ import { StoreDeliveryCard } from './components/store-delivery-card/store-delive
 import { StoreLocationCard } from './components/store-location-card/store-location-card';
 import { StorePreviewCard } from './components/store-preview-card/store-preview-card';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
-import { StoreService } from './services/store.service';
-import { StoreResponse, UpdateStoreRequest } from './models/store.models';
+import { StoreService } from '../../core/services/store.service';
+import { StoreResponse, UpdateStoreRequest } from '../../core/models/store.models';
 
 @Component({
   imports: [StoreIdentityCard, StoreDeliveryCard, StoreLocationCard, StorePreviewCard],

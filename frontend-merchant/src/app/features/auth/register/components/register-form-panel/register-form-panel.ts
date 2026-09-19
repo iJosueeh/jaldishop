@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { RegisterFooter } from '../../../../../shared/components/register-footer/register-footer';
 import { RegisterStepHeader } from '../../../../../shared/components/register-step-header/register-step-header';
 import { AlertError } from '../../../../../shared/components/alert-error/alert-error';
-import { RegisterStep1Data } from '../../interface/register.models';
+import { RegisterStep1Data } from '../../../../../core/models/register.models';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, RegisterFooter, RegisterStepHeader, AlertError],

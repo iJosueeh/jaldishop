@@ -1,6 +1,6 @@
 import { Component, input, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { StoreResponse } from '../../models/store.models';
+import { StoreResponse } from '../../../../core/models/store.models';
 
 @Component({
   imports: [],

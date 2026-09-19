@@ -10,7 +10,7 @@ import {
   RegisterStep1Data,
   RegisterStep2Data,
   RegisterStep3Data,
-} from './interface/register.models';
+} from '../../../core/models/register.models';
 import { AuthResult } from '../../../core/models/auth.models';
 
 describe('Register (Componente Principal del Flujo de Registro)', () => {

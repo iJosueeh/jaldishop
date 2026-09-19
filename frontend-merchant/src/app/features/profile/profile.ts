@@ -6,7 +6,7 @@ import { ErrorHandlerService } from '../../core/services/error-handler.service';
 import { UpdateUserProfileRequest } from '../../core/models/user-profile.models';
 import { ProfileInfoCard } from './components/profile-info-card/profile-info-card';
 import { ProfileSecurityCard } from './components/profile-security-card/profile-security-card';
-import { StoreService } from '../store/services/store.service';
+import { StoreService } from '../../core/services/store.service';
 
 @Component({
   imports: [ProfileInfoCard, ProfileSecurityCard],
