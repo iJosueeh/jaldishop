@@ -5,10 +5,7 @@ import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
 import com.jaldishop.backend.capacity.domain.CapacityConfigurationStatus;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
-import com.jaldishop.backend.store.application.GetMyStoreService;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -25,7 +23,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
@@ -41,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CapacityConfigurationControllerTest {
 
     @Mock
-    private GetMyStoreService getMyStoreService;
+    private StoreContextService storeContextService;
     @Mock
     private CreateCapacityConfigurationService createService;
     @Mock
@@ -55,7 +52,6 @@ class CapacityConfigurationControllerTest {
     private UUID testMerchantId;
     private UUID testStoreId;
     private JwtPrincipal currentPrincipal;
-    private Store store;
 
     @BeforeEach
     void setUp() {
@@ -63,14 +59,8 @@ class CapacityConfigurationControllerTest {
         testStoreId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("MERCHANT"));
 
-        store = Store.reconstitute(
-                testStoreId, testMerchantId, "Mi Tienda", "mi-tienda",
-                null, null, null, null, null, null,
-                true, false, null, null, false, null,
-                StoreStatus.ACTIVE, Instant.now(), Instant.now());
-
         CapacityConfigurationController controller = new CapacityConfigurationController(
-                getMyStoreService, createService, listService, updateService, toggleService);
+                storeContextService, createService, listService, updateService, toggleService);
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -98,7 +88,7 @@ class CapacityConfigurationControllerTest {
         CapacityConfiguration config = CapacityConfiguration.create(
                 testStoreId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 15);
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(createService.execute(any(CreateCapacityConfigurationCommand.class))).thenReturn(config);
 
         String json = """
@@ -121,7 +111,7 @@ class CapacityConfigurationControllerTest {
                 CapacityConfiguration.create(testStoreId, 0, null, null, 10),
                 CapacityConfiguration.create(testStoreId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20));
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(listService.execute(testStoreId)).thenReturn(configs);
 
         mockMvc.perform(get("/api/v1/capacity-configurations"))
@@ -138,7 +128,7 @@ class CapacityConfigurationControllerTest {
                 configId, testStoreId, 3, LocalTime.of(10, 0), LocalTime.of(14, 0), 25,
                 CapacityConfigurationStatus.ACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(updateService.execute(any(UpdateCapacityConfigurationCommand.class))).thenReturn(config);
 
         String json = """
@@ -161,7 +151,7 @@ class CapacityConfigurationControllerTest {
                 configId, testStoreId, 0, null, null, 10,
                 CapacityConfigurationStatus.ACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(toggleService.activate(configId, testStoreId)).thenReturn(config);
 
         mockMvc.perform(patch("/api/v1/capacity-configurations/" + configId + "/activate"))
@@ -177,7 +167,7 @@ class CapacityConfigurationControllerTest {
                 configId, testStoreId, 0, null, null, 10,
                 CapacityConfigurationStatus.INACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(toggleService.deactivate(configId, testStoreId)).thenReturn(config);
 
         mockMvc.perform(patch("/api/v1/capacity-configurations/" + configId + "/deactivate"))
@@ -188,7 +178,8 @@ class CapacityConfigurationControllerTest {
     @Test
     @DisplayName("POST sin rol MERCHANT - 403 Forbidden")
     void createForbiddenWhenNotMerchant() throws Exception {
-        currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("CUSTOMER"));
+        when(storeContextService.requireStoreId(any()))
+                .thenThrow(new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden realizar esta operación."));
 
         String json = """
                 {"dayOfWeek": 1, "maxCapacity": 10}

@@ -46,7 +46,7 @@ export const routes: Routes = [
       import('./layouts/merchant-layout/merchant-layout').then(
         (m) => m.MerchantLayout
       ),
-    // canActivate: [merchantGuard],
+    canActivate: [merchantGuard],
     children: [
       {
         path: 'dashboard',

@@ -39,7 +39,8 @@ public class CapacityConfigurationEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    protected CapacityConfigurationEntity() {}
+    protected CapacityConfigurationEntity() {
+    }
 
     public CapacityConfigurationEntity(UUID id, UUID storeId, int dayOfWeek, LocalTime startTime,
                                        LocalTime endTime, int maxCapacity, CapacityConfigurationStatus status,
@@ -55,13 +56,39 @@ public class CapacityConfigurationEntity {
         this.updatedAt = updatedAt;
     }
 
-    public UUID getId() { return id; }
-    public UUID getStoreId() { return storeId; }
-    public int getDayOfWeek() { return dayOfWeek; }
-    public LocalTime getStartTime() { return startTime; }
-    public LocalTime getEndTime() { return endTime; }
-    public int getMaxCapacity() { return maxCapacity; }
-    public CapacityConfigurationStatus getStatus() { return status; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public int getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public CapacityConfigurationStatus getStatus() {
+        return status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

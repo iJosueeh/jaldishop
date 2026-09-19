@@ -39,10 +39,10 @@ flowchart TD
     end
 
     subgraph CAPACIDAD["Cadena de Capacidad Operativa"]
-        BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>🟡 PR APROBADO (Pendiente Merge)"]
-        BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>⏳ SIGUIENTE TRAS MERGE"]
+        BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
+        BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>🟢 EN PROGRESO (Desbloqueada)"]
         BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>🔒 BLOQUEADA POR BE-15"]
-        BE14 -->|Merge desbloquea| BE15
+        BE14 -->|Desbloqueó| BE15
         BE15 -->|Desbloquea| BE16
     end
 
@@ -53,9 +53,9 @@ flowchart TD
 | Prioridad | Tarjeta | Responsable | Estado | Dependencia | Entregable |
 |:---:|---|:---:|:---:|:---:|---|
 | 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Ninguna | Workflow GitHub Actions con validación paralela Maven y Vitest |
+| 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
-| 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `PR APROBADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Al mergear desbloquea BE-15)* |
-| 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `PENDIENTE` | Merge de BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloquea BE-16)* |
+| 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `EN PROGRESO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloquea BE-16)* |
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `BLOQUEADA` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST |
 | 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `BLOQUEADA` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento |
 | 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `BLOQUEADA` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
@@ -132,9 +132,9 @@ Implementar el módulo de catálogo de JaldiShop para permitir que cada comercia
 ### 📋 BE-14 | Configuración base de Capacidad
 
 **Responsable:** Mia  
-**Estado:** `PR APROBADO — PENDIENTE MERGE` 🟡  
+**Estado:** `COMPLETADO` ✅  
 **Entregable:** Dominio `CapacityConfiguration`, persistencia JPA, casos de uso, REST controller, validaciones de franjas y suite de tests.  
-**Desbloquea:** Al realizar merge a `develop`, pasa a `Done` ✅ y desbloquea automáticamente **BE-15**.
+**Desbloqueó:** **BE-15** (Excepciones de Capacidad).
 
 **Descripción:**  
 Permitir al comerciante configurar la capacidad operativa base de su tienda por día de la semana y franja horaria, respetando las reglas de negocio definidas en el modelo de capacidad de JaldiShop.
@@ -145,14 +145,14 @@ Permitir al comerciante configurar la capacidad operativa base de su tienda por 
 - [x] Code Review realizado
 - [x] Correcciones solicitadas realizadas
 - [x] PR aprobado
-- [ ] Merge a `develop`
+- [x] Merge a `main` / `develop`
 
 ---
 
 ### 📋 BE-15 | Implementar Excepciones de Capacidad
 
 **Responsable:** Mia  
-**Estado:** `PENDIENTE` ⏳ *(Siguiente después del merge de BE-14)*  
+**Estado:** `EN PROGRESO` 🟢 *(Desbloqueada tras merge de BE-14)*  
 **Entregable:** Dominio `CapacityException`, persistencia JPA, casos de uso, validación de reglas de sobreescritura y endpoints REST.  
 **Desbloquea:** **BE-16** (Cálculo de Capacidad Efectiva).
 
@@ -285,10 +285,9 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **1 / 7 (14%)** | `CI-01` |
-| Entregables en revisión / PR | **1 / 7 (14%)** | `BE-14` (Aprobado, pendiente merge) |
-| Entregables en desarrollo activo | **1 / 7 (14%)** | `BE-12` |
-| Entregables pendientes / bloqueados | **4 / 7 (58%)** | `BE-15`, `BE-13`, `BE-17`, `BE-16` |
+| Entregables completados | **2 / 7 (29%)** | `CI-01`, `BE-14` |
+| Entregables en desarrollo activo | **2 / 7 (29%)** | `BE-12`, `BE-15` (Desbloqueada) |
+| Entregables pendientes / bloqueados | **3 / 7 (42%)** | `BE-13`, `BE-17`, `BE-16` |
 | **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
 
 ---
@@ -317,19 +316,19 @@ graph TD
     classDef locked fill:#f8d7da,stroke:#dc3545,stroke-width:1px,stroke-dasharray: 5 5;
 
     CI01["CI-01 · Pipeline CI/CD<br/>(Josué)"]:::done
+    BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
+    BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::progress
     BE12["BE-12 · Módulo Catálogo<br/>(Katherine)"]:::progress
-    BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::review
-    BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::locked
     BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::locked
     BE13["BE-13 · Módulo Inventario<br/>(Katherine)"]:::locked
     BE17["BE-17 · Módulo Carrito<br/>(Josué)"]:::locked
 
     CI01 -. Valida PRs .-> BE12
     CI01 -. Valida PRs .-> BE14
+    BE14 -->|Desbloqueó| BE15
+    BE15 -->|Desbloquea| BE16
     BE12 -->|Desbloquea| BE13
     BE12 -->|Desbloquea| BE17
-    BE14 -->|Merge a develop| BE15
-    BE15 -->|Desbloquea| BE16
 ```
 
 ---
