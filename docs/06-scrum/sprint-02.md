@@ -375,6 +375,43 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 ---
 
+### 📋 BE-XX | Implementar módulo de Configuración de Capacidad
+
+**Responsable:** Josué  
+**Entregable:** Capacity domain, JPA persistence, use cases, REST controller, tests y documentación
+
+**Objetivo:**
+Implementar la gestión de configuración de capacidad por tienda, permitiendo a los comerciantes definir reglas de disponibilidad por día y franja horaria.
+
+**Checklist:**
+- [x] Crear CapacityConfigurationStatus (enum con ACTIVE, INACTIVE)
+- [x] Crear CapacityConfiguration (entidad de dominio con invariantes)
+- [x] Crear CapacityConfigurationRepository (puerto de dominio)
+- [x] Crear CapacityConfigurationEntity (entidad JPA)
+- [x] Crear CapacityConfigurationJpaRepository (Spring Data JPA)
+- [x] Crear CapacityConfigurationPersistenceMapper (conversión bidireccional)
+- [x] Crear CapacityConfigurationRepositoryAdapter (adaptador de infraestructura)
+- [x] Caso de uso CreateCapacityConfiguration
+- [x] Caso de uso GetStoreCapacityConfigurations
+- [x] Caso de uso UpdateCapacityConfiguration
+- [x] Caso de uso ToggleCapacityConfigurationStatus
+- [x] DTOs: CreateCapacityConfigurationRequest, UpdateCapacityConfigurationRequest, CapacityConfigurationResponse
+- [x] Controller REST en `/api/v1/capacity-configurations`
+- [x] Tests dominio (15 tests)
+- [x] Tests application (4 tests)
+- [x] Tests mapper (4 tests)
+- [x] Tests endpoint (6 tests)
+- [x] Documentar API
+- [ ] Abrir Pull Request
+
+**Decisiones cerradas:**
+- Endpoint independiente (no anidado bajo `/stores/{storeId}/...`)
+- Múltiples configuraciones por store+day+timeslot permitidas
+- Validación de solapamiento en aplicación (servicio consulta DB)
+- Controller resuelve merchantUserId→storeId via `GetMyStoreService`
+
+---
+
 ### 📋 FE-01 | Auth & Onboarding del Comerciante
 
 **Responsable:** Josué  
@@ -515,8 +552,9 @@ graph TD
     BE03[BE-03 · Casos de Uso Auth] --> BE04
     BE04 --> BE05[BE-05 · Persistencia JPA]
     BE05 --> BE06[BE-06 · Integrar JWT]
-    BE06 --> BE11[BE-11 · Módulo Base Store (Josué)]
-    BE01 --> BE10[BE-10 · Notificaciones (Mia)]
+    BE06 --> BE11[BE-11 · Módulo Base Store]
+    BE01 --> BE10[BE-10 · Notificaciones]
+    BE11 --> BEXX[BE-XX · Configuración Capacidad]
 ```
 
 **Notas:**
@@ -526,6 +564,7 @@ graph TD
 - BE-06 depende de BE-05
 - BE-11 utiliza el `merchantUserId` y la seguridad JWT establecida en BE-06
 - BE-10 puede desarrollarse de forma independiente tras contar con el dominio de Identity (user_id)
+- BE-XX (Capacidad) depende de BE-11 (Store) para resolver merchantUserId→storeId
 
 ---
 
