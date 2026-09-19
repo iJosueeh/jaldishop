@@ -14,109 +14,60 @@
 
 ## 1. Objetivo del Sprint
 
-> 📌 **Nota:** Implementar el núcleo de negocio de JaldiShop compuesto por la configuración operativa de capacidad por franjas, el catálogo de productos con variantes y la infraestructura de CI/CD para aseguramiento continuo de la calidad.
+> 📌 **Nota:** Implementar el núcleo transaccional y operativo de JaldiShop. Se desarrollan en paralelo la cadena de catálogo (Categorías, Productos, Variantes, Inventario y Carrito) y la cadena de capacidad operativa (Configuración base, Excepciones y Capacidad efectiva), asegurando la calidad mediante el pipeline automatizado de CI/CD.
 
-* **Fase:** *Catálogo, Capacidad Operativa y Pipeline CI/CD*.
-* **Propósito:** Desarrollar los módulos de dominio de `CapacityConfiguration` y `Catalog` (Categorías, Productos, Variantes) y establecer el pipeline de GitHub Actions para validación automática de pull requests.
-* **Meta Central:** Disponer de los contratos REST y lógica de dominio de Catálogo y Capacidad listos para su consumo por los módulos de Carrito/Inventario y Frontend.
+* **Fase:** *Catálogo, Capacidad Operativa, Inventario, Carrito y Pipeline CI/CD*.
+* **Propósito:** Construir los dominios centrales de `Catalog`, `Inventory`, `Cart`, `CapacityConfiguration` y `CapacityException` respetando las dependencias de negocio para desbloquear flujos transaccionales.
+* **Meta Central:** Disponer de los contratos REST y servicios de aplicación de Catálogo y Capacidad listos para su integración en Checkout y Frontend.
 
 ---
 
-## 2. Backlog del Sprint
+## 2. Backlog del Sprint y Cadena de Desbloqueo
 
 ```mermaid
-flowchart LR
-    subgraph BACKEND["Backend Core"]
-        T1["BE-14 · Configuración Base Capacidad<br/>(Mia)"]
-        T2["BE-12 · Módulo de Catálogo<br/>(Katherine)"]
+flowchart TD
+    subgraph CI["DevOps & Calidad"]
+        CI01["CI-01 · Pipeline CI/CD<br/>(Josué)<br/>✅ COMPLETADO"]
     end
 
-    subgraph DEVOPS["DevOps & Calidad"]
-        T3["CI-01 · Pipeline Validación Automática<br/>(Josué)"]
+    subgraph CATALOGO["Cadena de Catálogo & Carrito"]
+        BE12["BE-12 · Catálogo (Categorías, Productos, Variantes)<br/>(Katherine)<br/>🟢 EN PROGRESO"]
+        BE13["BE-13 · Inventario<br/>(Katherine)<br/>🔒 BLOQUEADA POR BE-12"]
+        BE17["BE-17 · Carrito de Compras<br/>(Josué)<br/>🔒 BLOQUEADA POR BE-12"]
+        BE12 -->|Desbloquea| BE13
+        BE12 -->|Desbloquea| BE17
     end
 
-    BACKEND --> DEVOPS
+    subgraph CAPACIDAD["Cadena de Capacidad Operativa"]
+        BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>🟡 PR APROBADO (Pendiente Merge)"]
+        BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>⏳ SIGUIENTE TRAS MERGE"]
+        BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>🔒 BLOQUEADA POR BE-15"]
+        BE14 -->|Merge desbloquea| BE15
+        BE15 -->|Desbloquea| BE16
+    end
+
+    CI01 -. Protege PRs .-> BE12
+    CI01 -. Protege PRs .-> BE14
 ```
 
-| Prioridad | Tarjeta | Responsable | Estado | Entregable |
-|:---:|---|:---:|:---:|---|
-| 🔴 **Alta** | **BE-14** · Implementar configuración base de Capacidad | Mia | `EN PROGRESO` | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones de franjas y tests |
-| 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests |
-| 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Workflow `.github/workflows/ci.yml` con verificación Backend (Maven) y Frontend (Node/Vitest) |
+| Prioridad | Tarjeta | Responsable | Estado | Dependencia | Entregable |
+|:---:|---|:---:|:---:|:---:|---|
+| 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Ninguna | Workflow GitHub Actions con validación paralela Maven y Vitest |
+| 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
+| 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `PR APROBADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Al mergear desbloquea BE-15)* |
+| 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `PENDIENTE` | Merge de BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloquea BE-16)* |
+| 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `BLOQUEADA` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST |
+| 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `BLOQUEADA` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento |
+| 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `BLOQUEADA` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
 
 ---
 
 ## 3. Tarjetas de Trabajo
 
-### 📋 BE-14 | Implementar configuración base de Capacidad
-
-**Responsable:** Mia  
-**Entregable:** Dominio `CapacityConfiguration`, persistencia JPA, casos de uso, REST controller, validaciones de solapamiento y suite de tests.
-
-**Objetivo:** Permitir al comerciante configurar la capacidad operativa base de su tienda por día de la semana y franja horaria, respetando las reglas de negocio definidas en el modelo de capacidad de JaldiShop.
-
-**Checklist:**
-- [ ] Implementar dominio `CapacityConfiguration`
-- [ ] Crear puerto de repositorio `CapacityConfigurationRepository`
-- [ ] Crear entidad JPA `CapacityConfigurationEntity`
-- [ ] Crear `CapacityConfigurationJpaRepository`
-- [ ] Crear `CapacityConfigurationPersistenceMapper`
-- [ ] Crear `CapacityConfigurationRepositoryAdapter`
-- [ ] Caso de uso Crear configuración de capacidad
-- [ ] Caso de uso Consultar configuración de Store
-- [ ] Caso de uso Actualizar configuración
-- [ ] Caso de uso Activar/desactivar configuración
-- [ ] Validar `day_of_week` (1=Lunes a 7=Domingo)
-- [ ] Validar `start_time` / `end_time` (`start_time < end_time`)
-- [ ] Validar capacidad máxima (entero positivo mayor a cero)
-- [ ] Validar pertenencia a Store (`store_id` coincidente con el merchant)
-- [ ] Validar no solapamiento de franjas horarias en el mismo día
-- [ ] Crear DTOs de entrada y salida (`CreateCapacityConfigRequest`, `CapacityConfigResponse`, etc.)
-- [ ] Crear endpoints REST Merchant (`/api/v1/capacity-configurations/**`)
-- [ ] Tests de dominio
-- [ ] Tests de aplicación
-- [ ] Tests de persistencia
-- [ ] Tests web
-- [ ] Documentar contrato REST
-
----
-
-### 📋 BE-12 | Implementar módulo de Catálogo
-
-**Responsable:** Katherine  
-**Entregable:** Dominio `Category`, `Product`, `ProductVariant`, persistencia JPA, casos de uso de gestión, REST controller y tests.
-
-**Objetivo:** Implementar la gestión del catálogo de cada tienda mediante categorías, productos y variantes, estableciendo la base necesaria para Inventario y Carrito de compras.
-
-**Checklist:**
-- [ ] Implementar dominio `Category`
-- [ ] Implementar dominio `Product`
-- [ ] Implementar dominio `ProductVariant`
-- [ ] Crear puertos de repositorio (`CategoryRepository`, `ProductRepository`, `ProductVariantRepository`)
-- [ ] Crear entidades JPA (`CategoryEntity`, `ProductEntity`, `ProductVariantEntity`)
-- [ ] Crear repositorios JPA (`CategoryJpaRepository`, `ProductJpaRepository`, `ProductVariantJpaRepository`)
-- [ ] Crear mappers de persistencia
-- [ ] Crear adaptadores de infraestructura
-- [ ] Implementar casos de uso para gestión de categorías
-- [ ] Implementar casos de uso para gestión de productos
-- [ ] Implementar casos de uso para gestión de variantes
-- [ ] Validar pertenencia de recursos a la tienda del comerciante (`store_id`)
-- [ ] Implementar reglas de slug único de producto por tienda
-- [ ] Implementar reglas de generación y unicidad de SKU
-- [ ] Respetar estados definidos en el esquema físico V1 (`ACTIVE`, `INACTIVE`, `ARCHIVED`)
-- [ ] Crear DTOs de entrada y salida con Bean Validation
-- [ ] Crear endpoints REST Merchant para Catálogo (`/api/v1/categories/**`, `/api/v1/products/**`)
-- [ ] Agregar tests de dominio
-- [ ] Agregar tests de aplicación
-- [ ] Agregar tests de persistencia
-- [ ] Agregar tests web
-- [ ] Documentar contrato REST
-
----
-
 ### 📋 CI-01 | Pipeline de validación automática
 
 **Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
 **Entregable:** Archivo `.github/workflows/ci.yml` configurado con jobs paralelos para Backend y Frontend Merchant, protegiendo ramas clave.
 
 **Objetivo:** Automatizar la compilación y ejecución de pruebas de todo el proyecto en Pull Requests para detectar regresiones de forma temprana antes de integrar cambios a `develop` o `main`.
@@ -124,57 +75,261 @@ flowchart LR
 **Checklist:**
 - [x] Crear archivo `.github/workflows/ci.yml`
 - [x] **Backend Job:**
-  - [x] Configurar runner `ubuntu-latest`
+  - [x] Configurar runner `ubuntu-latest` con servicio PostgreSQL 16
   - [x] Configurar JDK 21 (Eclipse Temurin)
   - [x] Configurar caché de dependencias Maven
-  - [x] Ejecutar compilación y verificación (`./mvnw clean test`)
+  - [x] Ejecutar compilación y verificación (`./mvnw clean test`) con 120 tests pasando
 - [x] **Frontend Merchant Job:**
-  - [x] Configurar Node.js (v20 / v22)
+  - [x] Configurar Node.js (v22.x)
   - [x] Configurar caché de dependencias npm
   - [x] Ejecutar instalación limpia (`npm ci`)
-  - [x] Ejecutar suite de pruebas (`npm test -- --watch=false`)
+  - [x] Ejecutar suite de pruebas (`npm test -- --watch=false`) con 67 tests pasando
   - [x] Ejecutar compilación de producción (`npm run build`)
 - [x] **Integración & Verificación:**
   - [x] Configurar triggers para Pull Requests hacia `develop` y `main`
   - [x] Configurar triggers para pushes en `develop` y `main`
   - [x] Probar ejecución exitosa del pipeline
-  - [x] Probar detección de fallo ante errores de compilación o tests
-  - [x] Documentar flujo de CI en la guía del repositorio
+  - [x] Documentar reglas de branch protection en GitHub
+
+---
+
+### 📋 BE-12 | Implementar módulo de Catálogo
+
+**Responsable:** Katherine  
+**Estado:** `READY / EN PROGRESO` 🟢  
+**Entregable:** Dominio `Category`, `Product`, `ProductVariant`, persistencia JPA, casos de uso de gestión, REST controller y tests.  
+**Desbloquea:** **BE-13** (Inventario) y **BE-17** (Carrito).
+
+**Descripción:**  
+Implementar el módulo de catálogo de JaldiShop para permitir que cada comerciante gestione las categorías, productos y variantes pertenecientes a su tienda. Este módulo servirá como base para Inventario, Carrito y las interfaces de catálogo.
+
+**Checklist:**
+- [ ] Implementar `Category`
+- [ ] Implementar `Product`
+- [ ] Implementar `ProductVariant`
+- [ ] Implementar puertos de repositorio (`CategoryRepository`, `ProductRepository`, `ProductVariantRepository`)
+- [ ] Implementar entidades JPA (`CategoryEntity`, `ProductEntity`, `ProductVariantEntity`)
+- [ ] Implementar `JpaRepository`
+- [ ] Implementar mappers de persistencia
+- [ ] Implementar adapters de persistencia
+- [ ] Casos de uso de categorías (Crear, Listar por Tienda, Actualizar, Cambiar Estado)
+- [ ] Casos de uso de productos (Crear con Variantes, Listar por Tienda/Categoría, Actualizar, Cambiar Estado)
+- [ ] Casos de uso de variantes (Agregar Variante, Actualizar Precio/SKU, Desactivar)
+- [ ] Validar pertenencia a Store (`store_id` del merchant)
+- [ ] Implementar reglas de slug único de producto por tienda
+- [ ] Implementar reglas de generación y unicidad de SKU por tienda
+- [ ] Respetar estados definidos en el modelo (`ACTIVE`, `INACTIVE`, `ARCHIVED`)
+- [ ] Implementar DTOs con Bean Validation
+- [ ] Implementar endpoints REST Merchant (`/api/v1/categories/**`, `/api/v1/products/**`)
+- [ ] Tests de dominio
+- [ ] Tests de aplicación
+- [ ] Tests de persistencia
+- [ ] Tests web
+- [ ] Documentar endpoints y contratos REST
+
+---
+
+### 📋 BE-14 | Configuración base de Capacidad
+
+**Responsable:** Mia  
+**Estado:** `PR APROBADO — PENDIENTE MERGE` 🟡  
+**Entregable:** Dominio `CapacityConfiguration`, persistencia JPA, casos de uso, REST controller, validaciones de franjas y suite de tests.  
+**Desbloquea:** Al realizar merge a `develop`, pasa a `Done` ✅ y desbloquea automáticamente **BE-15**.
+
+**Descripción:**  
+Permitir al comerciante configurar la capacidad operativa base de su tienda por día de la semana y franja horaria, respetando las reglas de negocio definidas en el modelo de capacidad de JaldiShop.
+
+**Checklist Trello:**
+- [x] Implementación completada
+- [x] Tests completados
+- [x] Code Review realizado
+- [x] Correcciones solicitadas realizadas
+- [x] PR aprobado
+- [ ] Merge a `develop`
+
+---
+
+### 📋 BE-15 | Implementar Excepciones de Capacidad
+
+**Responsable:** Mia  
+**Estado:** `PENDIENTE` ⏳ *(Siguiente después del merge de BE-14)*  
+**Entregable:** Dominio `CapacityException`, persistencia JPA, casos de uso, validación de reglas de sobreescritura y endpoints REST.  
+**Desbloquea:** **BE-16** (Cálculo de Capacidad Efectiva).
+
+**Descripción:**  
+Permitir que un comerciante establezca una capacidad diferente para una fecha o franja específica sin modificar su configuración base (ej. feriados, eventos especiales, días de mantenimiento).
+
+**Checklist:**
+- [ ] Implementar `CapacityException`
+- [ ] Implementar reglas e invariantes de dominio
+- [ ] Implementar Repository Port (`CapacityExceptionRepository`)
+- [ ] Implementar JPA Entity (`CapacityExceptionEntity`)
+- [ ] Implementar `CapacityExceptionJpaRepository`
+- [ ] Implementar mapper de persistencia
+- [ ] Implementar Repository Adapter
+- [ ] Caso de uso Crear excepción
+- [ ] Caso de uso Consultar excepciones por Store y rango de fechas
+- [ ] Caso de uso Actualizar excepción
+- [ ] Caso de uso Desactivar/eliminar según modelo
+- [ ] Validar Store (`store_id` del merchant)
+- [ ] Validar fecha (`exception_date >= today`)
+- [ ] Validar rango horario (`start_time < end_time` si aplica a franja parcial)
+- [ ] Validar capacidad (`capacity >= 0`)
+- [ ] **Aplicar regla central:** la excepción *reemplaza* la capacidad base para esa fecha/franja, **no se suma a ella**
+- [ ] Implementar DTOs con Bean Validation
+- [ ] Implementar endpoints REST (`/api/v1/capacity-exceptions/**`)
+- [ ] Tests de dominio
+- [ ] Tests de aplicación
+- [ ] Tests de persistencia
+- [ ] Tests web
+
+---
+
+### 📋 BE-16 | Cálculo y consulta de Capacidad Efectiva
+
+**Responsable:** Mia  
+**Estado:** `BLOQUEADA POR BE-15` 🔒  
+**Entregable:** Servicio de dominio/aplicación para resolución de capacidad efectiva y endpoint de consulta para clientes y comerciantes.
+
+**Descripción:**  
+Implementar el servicio que determine qué capacidad corresponde realmente a una tienda para una fecha y franja determinadas, resolviendo la jerarquía entre configuración base y excepciones aplicables.
+
+**Checklist:**
+- [ ] Recibir Store + fecha + franja horaria
+- [ ] Determinar configuración base aplicable según `day_of_week`
+- [ ] Buscar excepción aplicable para la fecha exacta y franja
+- [ ] **Priorizar excepción cuando exista** frente a la base
+- [ ] Calcular `effectiveCapacity` final
+- [ ] Manejar capacidad 0 (tienda cerrada o bloqueada ese día/franja)
+- [ ] Manejar fecha sin configuración base ni excepción (cerrado por defecto)
+- [ ] Manejar franja no disponible / fuera de horario
+- [ ] Exponer consulta desde Application Service
+- [ ] Crear endpoint REST de consulta de capacidad efectiva
+- [ ] Tests sin excepción (aplica base)
+- [ ] Tests con excepción (sobreescribe base)
+- [ ] Tests con capacidad 0
+- [ ] Tests sin configuración
+- [ ] Tests de límites de franja
+- [ ] *(Nota: Todavía NO debe implementar el hold/reserva temporal de 10 minutos; eso corresponde a Checkout/Holds).*
+
+---
+
+### 📋 BE-13 | Implementar módulo de Inventario
+
+**Responsable:** Katherine  
+**Estado:** `BLOQUEADA POR BE-12` 🔒  
+**Entregable:** Dominio `Inventory`, control de stock por variante, umbrales de alerta y endpoints REST Merchant.
+
+**Descripción:**  
+Implementar la gestión de inventario asociada a las variantes de productos (`ProductVariant`), permitiendo controlar existencias actuales y umbrales de stock bajo para notificaciones oportunas.
+
+**Checklist:**
+- [ ] Implementar dominio `Inventory`
+- [ ] Asociar `Inventory` con `ProductVariant` (1 a 1 por variante rastreable)
+- [ ] Implementar Repository Port (`InventoryRepository`)
+- [ ] Implementar JPA Entity (`InventoryEntity`)
+- [ ] Implementar `InventoryJpaRepository`
+- [ ] Implementar mapper y adapter de persistencia
+- [ ] Caso de uso Consultar stock de producto/variante
+- [ ] Caso de uso Actualizar stock disponible (ajuste manual)
+- [ ] Caso de uso Configurar umbral de stock bajo (`low_stock_threshold`)
+- [ ] Validar `stock_quantity >= 0`
+- [ ] Respetar bandera `tracks_inventory` de `ProductVariant` (ignorar si es falso)
+- [ ] Impedir operaciones sobre variantes de otra Store
+- [ ] Implementar DTOs de entrada y salida
+- [ ] Implementar endpoints REST Merchant (`/api/v1/inventory/**`)
+- [ ] Tests de dominio
+- [ ] Tests de aplicación
+- [ ] Tests de persistencia
+- [ ] Tests web
+- [ ] *(Nota: Todavía NO incluye descontar stock por compra; eso se conectará en ConfirmPurchase/Checkout).*
+
+---
+
+### 📋 BE-17 | Implementar módulo de Carrito
+
+**Responsable:** Josué  
+**Estado:** `BLOQUEADA POR BE-12` 🔒  
+**Entregable:** Dominio `Cart`, `CartItem`, persistencia JPA, casos de uso de gestión de carrito cliente y endpoints REST Customer.
+
+**Descripción:**  
+Implementar el carrito de compra del cliente para una tienda específica, permitiendo agregar, modificar y administrar variantes de productos antes de proceder a la selección de horario y Checkout.
+
+**Checklist:**
+- [ ] Implementar dominio `Cart`
+- [ ] Implementar dominio `CartItem`
+- [ ] Implementar Repository Port (`CartRepository`)
+- [ ] Implementar persistencia JPA (`CartEntity`, `CartItemEntity`, `CartJpaRepository`)
+- [ ] Implementar mapper y adapter de persistencia
+- [ ] Caso de uso Obtener carrito activo del usuario para la tienda
+- [ ] Caso de uso Agregar variante al carrito
+- [ ] Caso de uso Modificar cantidad de ítem
+- [ ] Caso de uso Eliminar ítem del carrito
+- [ ] Caso de uso Vaciar carrito
+- [ ] Validar `quantity > 0`
+- [ ] Validar existencia y estado activo de `ProductVariant`
+- [ ] Validar pertenencia de productos a la misma `Store`
+- [ ] Impedir mezclar productos de distintas tiendas en un mismo carrito
+- [ ] Mantener un único carrito activo por tupla `(User, Store)`
+- [ ] **Regla de negocio:** El carrito **NO reserva inventario ni capacidad**
+- [ ] Crear DTOs de entrada y salida
+- [ ] Implementar endpoints REST Customer (`/api/v1/cart/**`)
+- [ ] Tests de dominio
+- [ ] Tests de aplicación
+- [ ] Tests de persistencia
+- [ ] Tests web
 
 ---
 
 ## 4. Estado de Avance del Sprint
 
-| Métrica | Estado Actual |
-|---|:---:|
-| Entregables completados | 1 / 3 (33%) |
-| Entregables en desarrollo activo | 2 / 3 (67%) |
-| Entregables pendientes | 0 / 3 (0%) |
-| **Estado General** | `EN PROGRESO` |
+| Métrica | Estado Actual | Detalle |
+|---|:---:|---|
+| Entregables completados | **1 / 7 (14%)** | `CI-01` |
+| Entregables en revisión / PR | **1 / 7 (14%)** | `BE-14` (Aprobado, pendiente merge) |
+| Entregables en desarrollo activo | **1 / 7 (14%)** | `BE-12` |
+| Entregables pendientes / bloqueados | **4 / 7 (58%)** | `BE-15`, `BE-13`, `BE-17`, `BE-16` |
+| **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
 
 ---
 
 ## 5. Decisiones Cerradas del Modelo que Aplican a Este Sprint
 
-| Decisión | Valor | Documento |
-|---|---|---|
-| UUID para llaves primarias | `UUID` v4 generado en aplicación/JPA | modelo-er.md |
-| Unicidad de SKU | `UNIQUE(store_id, sku)` | modelo-er.md |
-| Unicidad de Slug de Producto | `UNIQUE(store_id, slug)` | modelo-er.md |
-| Días de la semana | `SMALLINT` (1 = Lunes, 7 = Domingo) | modelo-er.md / modelo-capacidad-v1.md |
-| No solapamiento de franjas | `start_time < end_time` sin superposición por tienda/día | modelo-capacidad-v1.md |
-| CI Runner | GitHub Actions `ubuntu-latest` | arquitectura-sistema.md |
+| Decisión | Valor | Regla de Negocio | Documento |
+|---|---|---|---|
+| UUID para llaves primarias | `UUID` v4 generado en aplicación/JPA | Identificadores globales únicos en todas las entidades | modelo-er.md |
+| Unicidad de SKU | `UNIQUE(store_id, sku)` | No se pueden repetir SKUs dentro de la misma tienda | modelo-er.md |
+| Unicidad de Slug de Producto | `UNIQUE(store_id, slug)` | URLs amigables únicas por tienda | modelo-er.md |
+| Aislamiento de Carrito | 1 Carrito activo por `(user_id, store_id)` | No mezclar tiendas en un mismo pedido | modelo-er.md |
+| Carrito sin reserva | Solo informativo | No descuenta stock ni bloquea capacidad | alcance-mvp.md |
+| Prioridad de Capacidad | `Excepción > Configuración Base` | La excepción sustituye por completo la capacidad base | modelo-capacidad-v1.md |
+| CI Runner | GitHub Actions `ubuntu-latest` | Build & Test automatizado con PostgreSQL 16 y Node 22 | arquitectura-sistema.md |
 
 ---
 
-## 6. Dependencias entre Tarjetas
+## 6. Diagrama de Dependencias y Bloqueos
 
 ```mermaid
 graph TD
-    CI01[CI-01 · Pipeline CI/CD] --> BE12[BE-12 · Catálogo]
-    CI01 --> BE14[BE-14 · Configuración Capacidad]
-    BE12 --> INVENTARIO[Próximo: Inventario y Carrito]
-    BE14 --> MOTOR[Próximo: Motor de Validación de Capacidad]
+    classDef done fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    classDef progress fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px;
+    classDef review fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    classDef locked fill:#f8d7da,stroke:#dc3545,stroke-width:1px,stroke-dasharray: 5 5;
+
+    CI01["CI-01 · Pipeline CI/CD<br/>(Josué)"]:::done
+    BE12["BE-12 · Módulo Catálogo<br/>(Katherine)"]:::progress
+    BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::review
+    BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::locked
+    BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::locked
+    BE13["BE-13 · Módulo Inventario<br/>(Katherine)"]:::locked
+    BE17["BE-17 · Módulo Carrito<br/>(Josué)"]:::locked
+
+    CI01 -. Valida PRs .-> BE12
+    CI01 -. Valida PRs .-> BE14
+    BE12 -->|Desbloquea| BE13
+    BE12 -->|Desbloquea| BE17
+    BE14 -->|Merge a develop| BE15
+    BE15 -->|Desbloquea| BE16
 ```
 
 ---
