@@ -1,8 +1,9 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth-service';
 import { StoreService } from '../../../../features/store/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
+import { CapacityService } from '../../../../core/services/capacity.service';
 
 @Component({
   imports: [RouterLink, RouterLinkActive],
@@ -10,14 +11,16 @@ import { ProfileService } from '../../../../core/services/profile.service';
   styleUrl: './siderbar.css',
   templateUrl: './siderbar.html',
 })
-export class Siderbar {
+export class Siderbar implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly storeService = inject(StoreService);
   private readonly profileService = inject(ProfileService);
+  private readonly capacityService = inject(CapacityService);
 
   readonly activeOrdersCount = signal<number>(0);
   readonly capacityOccupied = signal<number>(0);
-  readonly capacityTotal = signal<number>(0);
+
+  readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
 
   readonly isOpen = input<boolean>(false);
   readonly closeSidebar = output<void>();
@@ -37,6 +40,12 @@ export class Siderbar {
       isFilled: i < Math.round(percentage),
     }));
   });
+
+  ngOnInit(): void {
+    if (this.capacityService.configurations().length === 0) {
+      this.capacityService.getConfigurations().subscribe();
+    }
+  }
 
   handleLogout(): void {
     this.authService.logout();
