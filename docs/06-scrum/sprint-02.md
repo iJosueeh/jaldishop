@@ -295,26 +295,26 @@ MerchantAuthResponse (201 CREATED)
 Implementar la gestión básica de notificaciones persistentes de JaldiShop, permitiendo consultar las notificaciones de un usuario y marcarlas como leídas, sin acoplar todavía el módulo a eventos de Pedido, Inventario o WebSocket.
 
 **Checklist:**
-- [ ] Crear Notification domain
-- [ ] Crear NotificationStatus
-- [ ] Crear NotificationType
-- [ ] Crear NotificationRepository port
-- [ ] Crear NotificationEntity
-- [ ] Crear NotificationJpaRepository
-- [ ] Crear NotificationPersistenceMapper
-- [ ] Crear NotificationRepositoryAdapter
-- [ ] Caso de uso ListUserNotifications
-- [ ] Caso de uso MarkNotificationAsRead
-- [ ] Caso de uso CountUnreadNotifications
-- [ ] Caso de uso CreateNotification
-- [ ] DTO NotificationResponse
-- [ ] Controller REST
-- [ ] Tests dominio
-- [ ] Tests application
-- [ ] Tests mapper
+- [x] Crear Notification domain
+- [x] Crear NotificationStatus
+- [x] Crear NotificationType
+- [x] Crear NotificationRepository port
+- [x] Crear NotificationEntity
+- [x] Crear NotificationJpaRepository
+- [x] Crear NotificationPersistenceMapper
+- [x] Crear NotificationRepositoryAdapter
+- [x] Caso de uso ListUserNotifications
+- [x] Caso de uso MarkNotificationAsRead
+- [x] Caso de uso CountUnreadNotifications
+- [x] Caso de uso CreateNotification
+- [x] DTO NotificationResponse
+- [x] Controller REST
+- [x] Tests dominio
+- [x] Tests application
+- [x] Tests mapper
 - [ ] Tests repository/adapters
-- [ ] Tests endpoint
-- [ ] Documentar endpoints
+- [x] Tests endpoint
+- [x] Documentar endpoints
 - [ ] Abrir Pull Request
 
 **Decisiones cerradas que aplican (modelo-er.md Sección 31):**
@@ -373,6 +373,43 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 * `POST /api/v1/stores`: Crea tienda para el comerciante autenticado (201 CREATED). Valida rol `MERCHANT`, unicidad de tienda y slug.
 * `GET /api/v1/stores/me`: Obtiene la tienda del comerciante autenticado (200 OK / 404 NOT FOUND).
 * `PUT /api/v1/stores/me`: Actualiza perfil y opciones de delivery (200 OK / 400 BAD REQUEST / 404 NOT FOUND).
+
+---
+
+### 📋 BE-XX | Implementar módulo de Configuración de Capacidad
+
+**Responsable:** Josué  
+**Entregable:** Capacity domain, JPA persistence, use cases, REST controller, tests y documentación
+
+**Objetivo:**
+Implementar la gestión de configuración de capacidad por tienda, permitiendo a los comerciantes definir reglas de disponibilidad por día y franja horaria.
+
+**Checklist:**
+- [x] Crear CapacityConfigurationStatus (enum con ACTIVE, INACTIVE)
+- [x] Crear CapacityConfiguration (entidad de dominio con invariantes)
+- [x] Crear CapacityConfigurationRepository (puerto de dominio)
+- [x] Crear CapacityConfigurationEntity (entidad JPA)
+- [x] Crear CapacityConfigurationJpaRepository (Spring Data JPA)
+- [x] Crear CapacityConfigurationPersistenceMapper (conversión bidireccional)
+- [x] Crear CapacityConfigurationRepositoryAdapter (adaptador de infraestructura)
+- [x] Caso de uso CreateCapacityConfiguration
+- [x] Caso de uso GetStoreCapacityConfigurations
+- [x] Caso de uso UpdateCapacityConfiguration
+- [x] Caso de uso ToggleCapacityConfigurationStatus
+- [x] DTOs: CreateCapacityConfigurationRequest, UpdateCapacityConfigurationRequest, CapacityConfigurationResponse
+- [x] Controller REST en `/api/v1/capacity-configurations`
+- [x] Tests dominio (15 tests)
+- [x] Tests application (4 tests)
+- [x] Tests mapper (4 tests)
+- [x] Tests endpoint (6 tests)
+- [x] Documentar API
+- [ ] Abrir Pull Request
+
+**Decisiones cerradas:**
+- Endpoint independiente (no anidado bajo `/stores/{storeId}/...`)
+- Múltiples configuraciones por store+day+timeslot permitidas
+- Validación de solapamiento en aplicación (servicio consulta DB)
+- Controller resuelve merchantUserId→storeId via `GetMyStoreService`
 
 ---
 
@@ -460,9 +497,9 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 8 / 11 (73%) |
-| Entregables en desarrollo activo | 0 / 11 (0%) |
-| Entregables pendientes | 3 / 11 (27%) |
+| Entregables completados | 10 / 12 (83%) |
+| Entregables en desarrollo activo | 0 / 12 (0%) |
+| Entregables pendientes | 2 / 12 (17%) |
 | **Estado General** | `EN PROGRESO AVANZADO` |
 
 ---
@@ -493,8 +530,9 @@ graph TD
     BE03[BE-03 · Casos de Uso Auth] --> BE04
     BE04 --> BE05[BE-05 · Persistencia JPA]
     BE05 --> BE06[BE-06 · Integrar JWT]
-    BE06 --> BE11[BE-11 · Módulo Base Store (Josué)]
-    BE01 --> BE10[BE-10 · Notificaciones (Mia)]
+    BE06 --> BE11[BE-11 · Módulo Base Store]
+    BE01 --> BE10[BE-10 · Notificaciones]
+    BE11 --> BEXX[BE-XX · Configuración Capacidad]
 ```
 
 **Notas:**
@@ -504,6 +542,7 @@ graph TD
 - BE-06 depende de BE-05
 - BE-11 utiliza el `merchantUserId` y la seguridad JWT establecida en BE-06
 - BE-10 puede desarrollarse de forma independiente tras contar con el dominio de Identity (user_id)
+- BE-XX (Capacidad) depende de BE-11 (Store) para resolver merchantUserId→storeId
 
 ---
 
