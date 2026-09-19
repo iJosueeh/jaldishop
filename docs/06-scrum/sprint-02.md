@@ -2,7 +2,7 @@
 
 ### JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 02
 
-[![Estado](https://img.shields.io/badge/Estado-En_Progreso-yellow?style=for-the-badge&logo=clockify&logoColor=white)](./sprint-02.md)
+[![Estado](https://img.shields.io/badge/Estado-Completado-brightgreen?style=for-the-badge&logo=clockify&logoColor=white)](./sprint-02.md)
 [![Fase](https://img.shields.io/badge/Fase-Sprint_02-orange?style=for-the-badge)](./sprint-02.md)
 [![Duración](https://img.shields.io/badge/Duración-1_Semana-blue?style=for-the-badge)](./sprint-02.md)
 
@@ -15,11 +15,11 @@
 
 ## 1. Objetivo del Sprint
 
-> 📌 **Nota:** Iniciar la implementación del backend de JaldiShop con el módulo Identity (autenticación y usuarios).
+> 📌 **Nota:** Iniciar la implementación del backend de JaldiShop con el módulo Identity (autenticación y usuarios), Store base, Notificaciones y el área privada de Frontend Merchant.
 
-* **Fase:** Semana 3 — *Backend Base*.
-* **Propósito:** Implementar el dominio, puertos, persistencia y autenticación JWT.
-* **Meta Central:** Tener el módulo Identity completo y funcionando con JWT.
+* **Fase:** Semana 3 — *Backend Base & Frontend Merchant Core*.
+* **Propósito:** Implementar el dominio, puertos, persistencia, autenticación JWT, gestión de Tienda, Notificaciones persistentes y panel Merchant.
+* **Meta Central:** Tener la base sólida operativa completa de Backend y Frontend Merchant verificada con tests.
 
 ---
 
@@ -27,39 +27,38 @@
 
 ```mermaid
 flowchart LR
-    subgraph ALTA["Prioridad Alta"]
-        T1["BE-01 · Dominio Identity"]
-        T2["BE-02 · Migración Roles"]
-        T3["BE-03 · Casos de Uso Auth"]
-        T7["BE-10 · Módulo Notificaciones (Mia)"]
-        T8["BE-11 · Módulo Base Tienda (Josué)"]
-        T9["FE-01 · Onboarding Comerciante (Josué)"]
-        T10["FE-02 · Dashboard y Gestión Tienda (Josué)"]
+    subgraph BACKEND["Backend (Spring Boot)"]
+        BE1["BE-01 · Dominio Identity ✅"]
+        BE2["BE-02 · Migración Roles ✅"]
+        BE3["BE-03 · Casos de Uso Auth ✅"]
+        BE5["BE-05 · Persistencia JPA ✅"]
+        BE6["BE-06 · Integrar JWT ✅"]
+        BE11["BE-11 · Módulo Tienda ✅"]
+        BE10["BE-10 · Notificaciones ✅"]
     end
 
-    subgraph MEDIA["Prioridad Media"]
-        T4["BE-04 · Code Review Identity"]
-        T5["BE-05 · Persistencia JPA"]
+    subgraph FRONTEND["Frontend Merchant (Angular)"]
+        FE1["FE-01 · Auth & Onboarding ✅"]
+        FE2["FE-02 · Dashboard & Store ✅"]
+        FE3["FE-03 · Estandarizar API/Errores ✅"]
+        FE4["FE-04 · Mi Perfil Merchant ✅"]
     end
 
-    subgraph BAJA["Prioridad Baja"]
-        T6["BE-06 · Integrar JWT"]
-    end
-
-    ALTA --> MEDIA --> BAJA
+    BACKEND --> FRONTEND
 ```
 
 | Prioridad | Tarjeta | Responsable | Estado | Entregable |
 |:---:|---|:---:|:---:|---|
 | 🔴 **Alta** | BE-01 · Implementar dominio Identity | Josué | `COMPLETADO` | User, Role, enums y ports |
-| 🔴 **Alta** | BE-02 · Preparar datos iniciales roles | Katherine | `PENDIENTE` | Diseño + migración V2__seed_roles.sql |
+| 🔴 **Alta** | BE-02 · Preparar datos iniciales roles | Katherine | `COMPLETADO` | V2__seed_roles.sql aplicado |
 | 🔴 **Alta** | BE-03 · Casos de uso Auth (Registro y Login) | Josué | `COMPLETADO` | Flujos Registro/Login + DTOs + AuthController |
-| 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `PENDIENTE` | Módulo Notification completo (dominio, JPA, casos de uso, REST, tests) |
+| 🔴 **Alta** | BE-10 · Implementar módulo de Notificaciones | Mia | `COMPLETADO` | Notification (dominio, JPA, casos de uso, REST, 15 tests) |
 | 🔴 **Alta** | BE-11 · Implementar módulo base de Tienda | Josué | `COMPLETADO` | Store completo (dominio, JPA, casos de uso, REST, 29 tests) |
 | 🔴 **Alta** | FE-01 · Auth & Onboarding Comerciante | Josué | `COMPLETADO` | Login, Register 3-pasos, ForgotPassword, Shared 404/403, 31 tests |
-| 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `COMPLETADO` | MerchantLayout, Sidebar, Header, Mi Tienda, Subcomponentes, Integración API, 42 tests |
+| 🔴 **Alta** | FE-02 · Dashboard y Gestión de Tienda | Josué | `COMPLETADO` | MerchantLayout, Sidebar, Header, Mi Tienda, Subcomponentes, 42 tests |
 | 🔴 **Alta** | FE-03 · Estandarizar Manejo de API y Errores | Josué | `COMPLETADO` | ApiError, ErrorHandlerService, ToastService, ToastContainer, ErrorInterceptor, 62 tests |
-| 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `PENDIENTE` | Revisión cruzada antes de JPA |
+| 🔴 **Alta** | FE-04 · Mi Perfil Merchant | Josué | `COMPLETADO` | ProfileService, UserProfile, GET/PUT /users/me, Mi Perfil, 67 tests |
+| 🟠 **Media** | BE-04 · Code Review Identity | Equipo | `COMPLETADO` | Revisión cruzada aprobada |
 | 🟠 **Media** | BE-05 · Persistencia JPA Identity | Josué | `COMPLETADO` | Entities + repositories + adapter |
 | 🟢 **Baja** | BE-06 · Integrar JWT con UUID | Josué | `COMPLETADO` | Security/JWT funcionando |
 
@@ -109,16 +108,16 @@ flowchart LR
 **Objetivo:** La BD tiene la estructura roles, pero necesitamos garantizar que existan los roles iniciales: CUSTOMER, MERCHANT, ADMIN.
 
 **Checklist:**
-- [ ] Revisar tabla roles en modelo-er.md
-- [ ] Confirmar IDs SMALLINT
-- [ ] Definir IDs estables para CUSTOMER/MERCHANT/ADMIN
-- [ ] Crear V2__seed_roles.sql
-- [ ] No modificar V1
-- [ ] Ejecutar Flyway
-- [ ] Verificar flyway_schema_history
-- [ ] Consultar roles insertados
-- [ ] Documentar resultado
-- [ ] Abrir Pull Request
+- [x] Revisar tabla roles en modelo-er.md
+- [x] Confirmar IDs SMALLINT
+- [x] Definir IDs estables para CUSTOMER/MERCHANT/ADMIN
+- [x] Crear V2__seed_roles.sql
+- [x] No modificar V1
+- [x] Ejecutar Flyway
+- [x] Verificar flyway_schema_history
+- [x] Consultar roles insertados
+- [x] Documentar resultado
+- [x] Abrir Pull Request
 
 **Decisión de IDs estables:**
 ```sql
@@ -243,11 +242,11 @@ MerchantAuthResponse (201 CREATED)
 **Objetivo:** Revisar el código del dominio y puertos antes de proceder a la persistencia JPA.
 
 **Checklist:**
-- [ ] Revisar entidades de dominio
-- [ ] Verificar independencia de Spring/JPA
-- [ ] Validar tests unitarios
-- [ ] Confirmar puertos correctos
-- [ ] Aprobar para JPA
+- [x] Revisar entidades de dominio
+- [x] Verificar independencia de Spring/JPA
+- [x] Validar tests unitarios
+- [x] Confirmar puertos correctos
+- [x] Aprobar para JPA
 
 ---
 
@@ -312,10 +311,10 @@ Implementar la gestión básica de notificaciones persistentes de JaldiShop, per
 - [x] Tests dominio
 - [x] Tests application
 - [x] Tests mapper
-- [ ] Tests repository/adapters
+- [x] Tests repository/adapters
 - [x] Tests endpoint
 - [x] Documentar endpoints
-- [ ] Abrir Pull Request
+- [x] Abrir Pull Request
 
 **Decisiones cerradas que aplican (modelo-er.md Sección 31):**
 - Tabla: `notifications` (ya creada en `V1__initial_schema.sql`)
@@ -493,14 +492,37 @@ Implementar la gestión de configuración de capacidad por tienda, permitiendo a
 
 ---
 
+### 📋 FE-04 | Mi Perfil Merchant
+
+**Responsable:** Josué  
+**Entregable:** `ProfileService`, `UserProfile`, `UpdateUserRequest`, `GET /users/me`, `PUT /users/me`, Pantalla `/profile`, Subcomponentes y 67 tests
+
+**Objetivo:** Permitir al comerciante visualizar sus datos de cuenta y credenciales, modificar su información personal (nombre, apellidos, teléfono/WhatsApp) mediante un formulario reactivo con Signals, y ver reflejada su identidad en el Header y Sidebar de la aplicación.
+
+**Checklist:**
+- [x] Endpoints Backend `GET /api/v1/users/me` y `PUT /api/v1/users/me` (`UserController`, `GetMyProfileService`, `UpdateProfileService`)
+- [x] DTOs de Backend `UserProfileResponse` y `UpdateUserRequest` con Bean Validation
+- [x] Modelo Frontend `UserProfile` y `UpdateUserProfileRequest` (`src/app/core/models/user-profile.models.ts`)
+- [x] Servicio Frontend `ProfileService` con Signals reactivos (`currentProfile`, `isLoading`, `fullName`, `userInitials`)
+- [x] Pantalla principal `Profile` (`/profile`) con layout responsivo de 2 columnas
+- [x] Tarjeta de Información Personal `ProfileInfoCard` con formulario reactivo (`NonNullableFormBuilder`) y validaciones
+- [x] Tarjeta de Seguridad y Resumen de Cuenta `ProfileSecurityCard` con iniciales, estado en línea, badges y cierre de sesión
+- [x] Integración de usuario real en `Header` (avatar con iniciales y enlace a `/profile`)
+- [x] Integración de usuario real en `Sidebar` (pie lateral con iniciales, nombre y rol)
+- [x] Manejo de estados de carga (`isLoading`), fallbacks dinámicos y directiva `@empty`
+- [x] Integración con `ToastService` global (`¡Tu información personal se ha guardado correctamente!`)
+- [x] Tests unitarios en Vitest (67 tests pasando al 100% en 27 suites)
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 10 / 12 (83%) |
+| Entregables completados | 12 / 12 (100%) |
 | Entregables en desarrollo activo | 0 / 12 (0%) |
-| Entregables pendientes | 2 / 12 (17%) |
-| **Estado General** | `EN PROGRESO AVANZADO` |
+| Entregables pendientes | 0 / 12 (0%) |
+| **Estado General** | `COMPLETADO CON ÉXITO` |
 
 ---
 

@@ -1,0 +1,69 @@
+<div class="flex flex-col w-full pb-12 font-sans">
+  <!-- ENCABEZADO DE SECCIÓN -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-6 border-b border-outline-variant/30">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-primary">Ajustes Generales</span>
+        <span class="text-on-surface-variant text-xs">/</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          Cuenta activa y verificada
+        </span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">Perfil y Cuenta</h1>
+      <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
+        Administra tus datos personales, credenciales de acceso seguro y las preferencias de contacto de tu negocio.
+      </p>
+    </div>
+
+    <!-- Botones de Acción Superiores -->
+    <div class="flex items-center gap-2.5 shrink-0">
+      <button
+        type="button"
+        (click)="onDiscard()"
+        [disabled]="profileService.isLoading()"
+        class="px-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+      >
+        Descartar
+      </button>
+
+      <button
+        type="button"
+        (click)="onSaveProfile()"
+        [disabled]="profileForm.invalid || profileService.isLoading()"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-white hover:bg-primary text-xs font-bold shadow-xs transition-all duration-150 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (profileService.isLoading()) {
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <span>Guardando...</span>
+        } @else {
+          <span class="material-symbols-outlined text-[18px]">check</span>
+          <span>Guardar cambios</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- CUADRÍCULA PRINCIPAL (4 COLS IZQUIERDA / 8 COLS DERECHA) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pt-6">
+    <!-- COLUMNA IZQUIERDA: Resumen de Identidad & Sesión (4 cols) -->
+    <div class="lg:col-span-4 flex flex-col gap-4">
+      <app-profile-security-card
+        [profile]="profileService.currentProfile()"
+        [storeName]="storeService.storeName()"
+        [userInitials]="profileService.userInitials()"
+      />
+    </div>
+
+    <!-- COLUMNA DERECHA: Datos Personales, Notificaciones y Seguridad (8 cols) -->
+    <div class="lg:col-span-8 flex flex-col gap-6">
+      <app-profile-info-card
+        [form]="profileForm"
+        [email]="profileService.currentProfile()?.email ?? ''"
+        [isLoading]="profileService.isLoading()"
+        (save)="onSaveProfile()"
+        (discard)="onDiscard()"
+      />
+    </div>
+  </div>
+</div>

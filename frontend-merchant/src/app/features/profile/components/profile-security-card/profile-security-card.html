@@ -1,0 +1,115 @@
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 flex flex-col items-center text-center relative overflow-hidden font-sans">
+  <!-- Avatar con Botón de Cámara -->
+  <div class="relative group my-2">
+    <div class="w-20 h-20 rounded-full bg-primary-fixed text-primary flex items-center justify-center text-2xl font-bold shadow-inner">
+      <span class="select-none font-bold">{{ userInitials() || 'U' }}</span>
+    </div>
+    <button
+      type="button"
+      title="Cambiar fotografía"
+      class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary-container text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors cursor-pointer"
+    >
+      <span class="material-symbols-outlined text-[14px]">photo_camera</span>
+    </button>
+  </div>
+
+  <!-- Nombre y Rol -->
+  <h2 class="text-lg font-bold text-on-surface mt-2 tracking-tight">
+    @if (profile()?.firstName || profile()?.lastName) {
+      {{ profile()?.firstName }} {{ profile()?.lastName }}
+    } @else {
+      <span class="text-on-surface-variant/80 italic font-medium">Comerciante JaldiShop</span>
+    }
+  </h2>
+  <span class="text-xs text-on-surface-variant mt-0.5">
+    Comerciante · {{ storeName() || 'Mi Tienda' }}
+  </span>
+
+  <!-- Badges de Verificación y Roles -->
+  <div class="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-fixed/40 text-primary text-[11px] font-bold">
+      <span class="material-symbols-outlined text-[14px]">check_circle</span>
+      Correo verificado
+    </span>
+
+    @if (profile()?.phone) {
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-bold">
+        <span class="material-symbols-outlined text-[14px]">chat</span>
+        WhatsApp activo
+      </span>
+    } @else {
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high/60 text-on-surface-variant/70 text-[11px] font-medium">
+        <span class="material-symbols-outlined text-[14px]">phone_disabled</span>
+        Sin WhatsApp
+      </span>
+    }
+  </div>
+
+  <!-- Roles del Usuario con @for y @empty -->
+  <div class="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+    @for (role of profile()?.roles; track role) {
+      <span class="px-2 py-0.5 rounded-md bg-primary-container/10 text-primary-container text-[10px] font-bold uppercase tracking-wider">
+        {{ role }}
+      </span>
+    } @empty {
+      <span class="px-2 py-0.5 rounded-md bg-primary-container/10 text-primary-container text-[10px] font-bold uppercase tracking-wider">
+        MERCHANT
+      </span>
+    }
+  </div>
+
+  <!-- Línea Divisoria -->
+  <div class="w-full h-[1px] bg-surface-variant my-4"></div>
+
+  <!-- Datos de Contacto y Sesión -->
+  <div class="w-full flex flex-col gap-2.5 text-left text-xs">
+    <div class="flex items-center justify-between py-1">
+      <span class="text-on-surface-variant font-medium">Correo</span>
+      <span class="font-bold text-on-surface truncate max-w-[180px]">
+        {{ profile()?.email || 'comercio@ejemplo.pe' }}
+      </span>
+    </div>
+
+    <div class="flex items-center justify-between py-1">
+      <span class="text-on-surface-variant font-medium">WhatsApp</span>
+      <span class="font-bold text-on-surface">
+        @if (profile()?.phone) {
+          +51 {{ profile()?.phone }}
+        } @else {
+          <span class="text-on-surface-variant/60 italic font-normal">Sin registrar (+51 900 000 000)</span>
+        }
+      </span>
+    </div>
+
+    <div class="flex items-center justify-between py-1">
+      <span class="text-on-surface-variant font-medium">Sesión actual</span>
+      <span class="inline-flex items-center gap-1 text-primary font-bold">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        En línea
+      </span>
+    </div>
+
+    <div class="flex items-center justify-between py-1">
+      <span class="text-on-surface-variant font-medium">Miembro desde</span>
+      <span class="font-bold text-on-surface">
+        @if (profile()?.createdAt) {
+          {{ profile()?.createdAt | date:'dd/MM/yyyy' }}
+        } @else {
+          <span class="text-on-surface-variant/60 font-normal">Reciente</span>
+        }
+      </span>
+    </div>
+  </div>
+
+  <!-- Botón de Cerrar Sesión -->
+  <div class="w-full pt-4 mt-2 border-t border-surface-container-high">
+    <button
+      type="button"
+      (click)="onLogout()"
+      class="w-full py-2.5 px-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+    >
+      <span class="material-symbols-outlined text-[18px] text-error">logout</span>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+</div>
