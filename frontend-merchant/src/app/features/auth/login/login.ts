@@ -1,10 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth-service';
-import { StoreService } from '../../store/services/store.service';
 import { Router } from '@angular/router';
 import { BrandPanel } from './components/brand-panel/brand-panel';
 import { FormPanel } from './components/form-panel/form-panel';
 import { LoginRequest } from '../../../core/models/auth.models';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +14,7 @@ import { LoginRequest } from '../../../core/models/auth.models';
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);
-  private readonly storeService = inject(StoreService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   readonly isLoading = signal<boolean>(false);
@@ -26,20 +26,9 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: () => {
-        this.storeService.getMyStore().subscribe({
-          next: (store) => {
-            this.isLoading.set(false);
-            if (store) {
-              this.router.navigate(['/mi-tienda']);
-            } else {
-              this.router.navigate(['/onboarding']);
-            }
-          },
-          error: () => {
-            this.isLoading.set(false);
-            this.router.navigate(['/onboarding']);
-          }
-        });
+        this.isLoading.set(false);
+        this.toastService.success('¡Bienvenido a tu panel de JaldiShop!', 'Sesión iniciada');
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -50,8 +39,7 @@ export class LoginComponent {
         } else {
           this.errorMessage.set(err.error?.message || 'Error de conexión con el servidor.');
         }
-      }
+      },
     });
   }
-
 }

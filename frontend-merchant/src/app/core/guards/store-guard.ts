@@ -16,7 +16,7 @@ export const hasStoreGuard: CanActivateFn = () => {
       if (store) {
         return true;
       }
-      return router.createUrlTree(['/onboarding']);
+      return router.createUrlTree(['/store']);
     })
   );
 };
@@ -26,7 +26,7 @@ export const noStoreGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (storeService.hasStore()) {
-    return router.createUrlTree(['mi-tienda']);
+    return router.createUrlTree(['/store']);
   }
 
   return storeService.getMyStore().pipe(
@@ -34,7 +34,7 @@ export const noStoreGuard: CanActivateFn = () => {
       if (!store) {
         return true;
       }
-      return router.createUrlTree(['/mi-tienda'])
+      return router.createUrlTree(['/store'])
     })
   )
 }

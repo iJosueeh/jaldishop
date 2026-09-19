@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { StoreService } from '../../../store/services/store.service';
+import { ProfileService } from '../../../../core/services/profile.service';
 
 @Component({
   imports: [],
@@ -9,8 +10,13 @@ import { StoreService } from '../../../store/services/store.service';
 })
 export class DashboardHeader {
   private readonly storeService = inject(StoreService);
+  private readonly profileService = inject(ProfileService);
 
-  readonly storeName = computed(() => this.storeService.storeName());
+  readonly firstName = computed(() => {
+    const profile = this.profileService.currentProfile();
+    return profile?.firstName || 'Comerciante';
+  })
+
   readonly storeStatus = computed(() => this.storeService.storeStatus());
   readonly isOpen = computed(() => this.storeStatus() === 'ACTIVE');
 

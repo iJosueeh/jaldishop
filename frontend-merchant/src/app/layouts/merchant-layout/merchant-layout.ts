@@ -3,6 +3,7 @@ import { Siderbar } from './components/siderbar/siderbar';
 import { Header } from './components/header/header';
 import { RouterOutlet } from '@angular/router';
 import { StoreService } from '../../features/store/services/store.service';
+import { ProfileService } from '../../core/services/profile.service';
 
 @Component({
   imports: [Siderbar, Header, RouterOutlet],
@@ -12,6 +13,7 @@ import { StoreService } from '../../features/store/services/store.service';
 })
 export class MerchantLayout implements OnInit {
   private readonly storeService = inject(StoreService);
+  private readonly profileService = inject(ProfileService);
 
   readonly isMobileMenuOpen = signal<boolean>(false);
 
@@ -21,6 +23,13 @@ export class MerchantLayout implements OnInit {
         error: (err) => console.error("Error al cargar la tienda del comerciante: ", err),
       });
     }
+
+    if (!this.profileService.currentProfile()) {
+      this.profileService.getMyProfile().subscribe({
+        error: (err) => console.error("Error al cargar el perfil del usuario: ", err)
+      })
+    }
+
   }
 
   toggleMobileMenu(): void {

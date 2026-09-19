@@ -13,6 +13,7 @@ import {
 import { AuthService } from '../../../core/services/auth-service';
 import { Router } from '@angular/router';
 import { AuthResult, RegisterMerchantRequest } from '../../../core/models/auth.models';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   imports: [
@@ -29,6 +30,7 @@ import { AuthResult, RegisterMerchantRequest } from '../../../core/models/auth.m
 })
 export class Register {
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   readonly currentStep = signal<1 | 2 | 3>(1);
@@ -46,13 +48,13 @@ export class Register {
   }
 
   onStep2Back(): void {
-    this.errorMessage.set(null)
+    this.errorMessage.set(null);
     this.currentStep.set(1);
   }
 
   onStep2Submit(data: RegisterStep2Data): void {
     this.step2Data.set(data);
-    this.errorMessage.set(null)
+    this.errorMessage.set(null);
     this.currentStep.set(3);
   }
 
@@ -70,7 +72,7 @@ export class Register {
         deliveryEnabled: true,
       });
     }
-    this.errorMessage.set(null)
+    this.errorMessage.set(null);
     this.currentStep.set(3);
   }
 
@@ -121,7 +123,7 @@ export class Register {
       storeContactPhone: step2.contactPhone?.trim(),
       address: step2.address?.trim() || undefined,
       pickupEnabled: step2.pickupEnabled,
-      deliveryEnabled: step2.deliveryEnabled
+      deliveryEnabled: step2.deliveryEnabled,
     };
   }
 
@@ -139,6 +141,10 @@ export class Register {
 
   private handleRegistrationSuccess(result: AuthResult): void {
     this.isLoading.set(false);
+    this.toastService.success(
+      'Tu cuenta y tienda han sido creadas con éxito. Inicia sesión para continuar.',
+      '¡Registro exitoso!',
+    );
     this.router.navigate(['/login']);
   }
 
@@ -149,5 +155,4 @@ export class Register {
       'Ocurrió un error al registrar tu cuenta y negocio. Inténtalo nuevamente.';
     this.errorMessage.set(message);
   }
-
 }
