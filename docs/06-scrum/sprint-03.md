@@ -42,7 +42,7 @@ flowchart LR
 |:---:|---|:---:|:---:|---|
 | 🔴 **Alta** | **BE-14** · Implementar configuración base de Capacidad | Mia | `EN PROGRESO` | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones de franjas y tests |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests |
-| 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `EN PROGRESO` | Workflow `.github/workflows/ci.yml` con verificación Backend (Maven) y Frontend (Node/Vitest) |
+| 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Workflow `.github/workflows/ci.yml` con verificación Backend (Maven) y Frontend (Node/Vitest) |
 
 ---
 
@@ -122,24 +122,24 @@ flowchart LR
 **Objetivo:** Automatizar la compilación y ejecución de pruebas de todo el proyecto en Pull Requests para detectar regresiones de forma temprana antes de integrar cambios a `develop` o `main`.
 
 **Checklist:**
-- [ ] Crear archivo `.github/workflows/ci.yml`
-- [ ] **Backend Job:**
-  - [ ] Configurar runner `ubuntu-latest`
-  - [ ] Configurar JDK 21 (Eclipse Temurin)
-  - [ ] Configurar caché de dependencias Maven
-  - [ ] Ejecutar compilación y verificación (`./mvnw clean test`)
-- [ ] **Frontend Merchant Job:**
-  - [ ] Configurar Node.js (v20 / v22)
-  - [ ] Configurar caché de dependencias npm
-  - [ ] Ejecutar instalación limpia (`npm ci`)
-  - [ ] Ejecutar suite de pruebas (`npm test -- --watch=false`)
-  - [ ] Ejecutar compilación de producción (`npm run build`)
-- [ ] **Integración & Verificación:**
-  - [ ] Configurar triggers para Pull Requests hacia `develop` y `main`
-  - [ ] Configurar triggers para pushes en `develop` y `main`
-  - [ ] Probar ejecución exitosa del pipeline
-  - [ ] Probar detección de fallo ante errores de compilación o tests
-  - [ ] Documentar flujo de CI en la guía del repositorio
+- [x] Crear archivo `.github/workflows/ci.yml`
+- [x] **Backend Job:**
+  - [x] Configurar runner `ubuntu-latest`
+  - [x] Configurar JDK 21 (Eclipse Temurin)
+  - [x] Configurar caché de dependencias Maven
+  - [x] Ejecutar compilación y verificación (`./mvnw clean test`)
+- [x] **Frontend Merchant Job:**
+  - [x] Configurar Node.js (v20 / v22)
+  - [x] Configurar caché de dependencias npm
+  - [x] Ejecutar instalación limpia (`npm ci`)
+  - [x] Ejecutar suite de pruebas (`npm test -- --watch=false`)
+  - [x] Ejecutar compilación de producción (`npm run build`)
+- [x] **Integración & Verificación:**
+  - [x] Configurar triggers para Pull Requests hacia `develop` y `main`
+  - [x] Configurar triggers para pushes en `develop` y `main`
+  - [x] Probar ejecución exitosa del pipeline
+  - [x] Probar detección de fallo ante errores de compilación o tests
+  - [x] Documentar flujo de CI en la guía del repositorio
 
 ---
 
@@ -147,8 +147,8 @@ flowchart LR
 
 | Métrica | Estado Actual |
 |---|:---:|
-| Entregables completados | 0 / 3 (0%) |
-| Entregables en desarrollo activo | 3 / 3 (100%) |
+| Entregables completados | 1 / 3 (33%) |
+| Entregables en desarrollo activo | 2 / 3 (67%) |
 | Entregables pendientes | 0 / 3 (0%) |
 | **Estado General** | `EN PROGRESO` |
 
