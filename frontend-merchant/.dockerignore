@@ -1,0 +1,14 @@
+node_modules
+.angular
+dist
+.git
+.github
+.idea
+.vscode
+*.log
+npm-debug.log*
+.editorconfig
+.prettierrc
+.DS_Store
+Thumbs.db
+coverage
