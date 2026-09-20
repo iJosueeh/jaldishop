@@ -18,6 +18,7 @@ import { CapacitySlotsList } from './components/capacity-slots-list/capacity-slo
 import { CapacityDaySelector } from './components/capacity-day-selector/capacity-day-selector';
 import { CapacityKpis } from './components/capacity-kpis/capacity-kpis';
 import { CapacityHeader } from './components/capacity-header/capacity-header';
+import { TimeRangePicker } from '../../shared/components/time-range-picker/time-range-picker';
 
 @Component({
   imports: [
@@ -27,8 +28,15 @@ import { CapacityHeader } from './components/capacity-header/capacity-header';
     CapacityKpis,
     CapacityDaySelector,
     CapacitySlotsList,
+    TimeRangePicker,
   ],
-  providers: [provideIcons({ matCloseOutline, matErrorOutline, matCheckOutline })],
+  providers: [
+    provideIcons({
+      matCloseOutline,
+      matErrorOutline,
+      matCheckOutline,
+    }),
+  ],
   selector: 'app-capacity',
   styleUrl: './capacity.css',
   templateUrl: './capacity.html',

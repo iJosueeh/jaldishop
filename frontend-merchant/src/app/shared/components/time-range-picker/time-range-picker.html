@@ -1,0 +1,83 @@
+<div [formGroup]="form()" class="flex flex-col gap-3 font-sans">
+  <!-- Presets / Atajos rápidos opcionales -->
+  @if (showPresets() && presets().length > 0) {
+    <div class="flex flex-col gap-1.5">
+      <span
+        class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1"
+      >
+        <ng-icon name="matBoltOutline" class="text-primary-container text-[14px]" />
+        <span>Turnos frecuentes (1 clic):</span>
+      </span>
+      <div class="grid grid-cols-3 gap-1.5">
+        @for (preset of presets(); track preset.label) {
+          <button
+            type="button"
+            (click)="applyPreset(preset)"
+            class="px-2 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface text-[11px] font-bold border border-outline-variant/30 transition-all cursor-pointer text-center active:scale-95"
+          >
+            {{ preset.label }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Campos de Hora con click en todo el contenedor y showPicker() -->
+  <div class="grid grid-cols-2 gap-3">
+    <!-- Hora de Inicio -->
+    <div class="flex flex-col gap-1.5">
+      <label [for]="startControlName()" class="text-xs font-bold text-on-surface">
+        {{ labelStart() }}
+      </label>
+      <div
+        (click)="startTimeInput.showPicker()"
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 hover:border-primary-container focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all cursor-pointer"
+      >
+        <ng-icon name="matScheduleOutline" class="text-[18px] text-primary-container shrink-0" />
+        <input
+          #startTimeInput
+          [id]="startControlName()"
+          type="time"
+          [formControlName]="startControlName()"
+          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer"
+        />
+      </div>
+    </div>
+
+    <!-- Hora de Fin -->
+    <div class="flex flex-col gap-1.5">
+      <label [for]="endControlName()" class="text-xs font-bold text-on-surface">
+        {{ labelEnd() }}
+      </label>
+      <div
+        (click)="endTimeInput.showPicker()"
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 hover:border-primary-container focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all cursor-pointer"
+      >
+        <ng-icon name="matScheduleOutline" class="text-[18px] text-primary-container shrink-0" />
+        <input
+          #endTimeInput
+          [id]="endControlName()"
+          type="time"
+          [formControlName]="endControlName()"
+          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador Reactivo de Duración de la Franja -->
+  @if (showDuration() && durationText()) {
+    <div
+      class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all"
+      [class.bg-surface-container]="!durationText()?.includes('inválido')"
+      [class.text-primary-container]="!durationText()?.includes('inválido')"
+      [class.bg-error-container]="durationText()?.includes('inválido')"
+      [class.text-on-error-container]="durationText()?.includes('inválido')"
+    >
+      <ng-icon name="matTimerOutline" class="text-[16px] shrink-0" />
+      <span
+        >Duración: <strong>{{ durationText() }}</strong></span
+      >
+    </div>
+  }
+</div>

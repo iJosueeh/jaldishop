@@ -29,18 +29,20 @@
   <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
     <button
       type="button"
-      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer"
+      (click)="copyStoreLink()"
+      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+      title="Copiar enlace de mi catálogo"
     >
-      <ng-icon name="matCalendarMonthOutline" class="text-[18px] text-on-surface-variant" />
-      <span>Agenda</span>
+      <ng-icon name="matShareOutline" class="text-[18px] text-primary-container" />
+      <span>Compartir Catálogo</span>
     </button>
 
-    <button
-      type="button"
+    <a
+      routerLink="/store"
       class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container text-white hover:bg-primary transition-colors text-xs font-bold shadow-2xs cursor-pointer active:scale-98"
     >
-      <ng-icon name="matAddCircleOutline" class="text-[18px]" />
-      <span>Nuevo Pedido</span>
-    </button>
+      <ng-icon name="matStorefrontOutline" class="text-[18px]" />
+      <span>Mi Tienda</span>
+    </a>
   </div>
 </header>
