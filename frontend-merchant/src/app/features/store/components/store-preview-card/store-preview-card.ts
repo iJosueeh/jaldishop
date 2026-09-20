@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -17,6 +17,7 @@ import {
 } from '@ng-icons/material-symbols/outline';
 import { switchMap } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StoreResponse } from '../../../../core/models/store.models';
 
 @Component({
@@ -41,6 +42,8 @@ import { StoreResponse } from '../../../../core/models/store.models';
   templateUrl: './store-preview-card.html',
 })
 export class StorePreviewCard {
+  private readonly toastService = inject(ToastService);
+
   readonly form = input<FormGroup>(new FormGroup({}));
   readonly store = input<StoreResponse | null>(null);
 
@@ -51,6 +54,12 @@ export class StorePreviewCard {
   );
 
   readonly isCopied = signal<boolean>(false);
+
+  handlePauseStore(): void {
+    this.toastService.info(
+      'Para pausar temporalmente o configurar horarios, gestiona tus franjas en el módulo de Capacidad.',
+    );
+  }
 
   private getVal<T>(key: string, fallback: T): T {
     const liveVal = this.formValues()?.[key];

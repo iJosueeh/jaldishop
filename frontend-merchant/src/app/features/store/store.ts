@@ -5,6 +5,7 @@ import { StoreLocationCard } from './components/store-location-card/store-locati
 import { StorePreviewCard } from './components/store-preview-card/store-preview-card';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { StoreService } from '../../core/services/store.service';
+import { ToastService } from '../../core/services/toast.service';
 import { StoreResponse, UpdateStoreRequest } from '../../core/models/store.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -36,10 +37,20 @@ import {
 })
 export class Store {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly toastService = inject(ToastService);
   readonly storeService = inject(StoreService);
 
   readonly saveSuccess = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+
+  openPublicCatalog(): void {
+    const slug = this.storeService.currentStore()?.slug;
+    if (slug) {
+      window.open(`https://jaldishop.pe/tienda/${slug}`, '_blank');
+    } else {
+      this.toastService.info('Configura y guarda el nombre de tu tienda para generar tu enlace público.');
+    }
+  }
 
   readonly storeForm = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(160)]],
