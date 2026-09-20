@@ -15,9 +15,12 @@ public class WebCorsConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:4200"
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "https://negocios-jaldishop.pages.dev",
+                "https://*.pages.dev",
+                "https://*.jaldishop.pe",
+                "https://jaldishop.pe"
         ));
 
         configuration.setAllowedMethods(List.of(
