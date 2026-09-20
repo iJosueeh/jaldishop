@@ -26,8 +26,10 @@
 
 ```mermaid
 flowchart TD
-    subgraph CI["DevOps & Calidad"]
+    subgraph DEVOPS["DevOps, Infraestructura & Branding"]
         CI01["CI-01 · Pipeline CI/CD<br/>(Josué)<br/>✅ COMPLETADO"]
+        DEPLOY01["DEPLOY-01 · Despliegue Producción<br/>(Render + Cloudflare + NeonDB)<br/>(Josué)<br/>✅ COMPLETADO"]
+        FE08["FE-08 · Branding & Favicon Set<br/>(Josué)<br/>✅ COMPLETADO"]
     end
 
     subgraph CATALOGO["Cadena de Catálogo & Carrito"]
@@ -48,11 +50,14 @@ flowchart TD
 
     CI01 -. Protege PRs .-> BE12
     CI01 -. Protege PRs .-> BE14
+    DEPLOY01 -. Expone API .-> FE08
 ```
 
 | Prioridad | Tarjeta | Responsable | Estado | Dependencia | Entregable |
 |:---:|---|:---:|:---:|:---:|---|
 | 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Ninguna | Workflow GitHub Actions con validación paralela Maven y Vitest |
+| 🔴 **Alta** | **DEPLOY-01** · Despliegue en la Nube y Ambientes | Josué | `COMPLETADO` | CI-01 | Backend en Render API, Frontend en Cloudflare Pages y NeonDB |
+| 🔴 **Alta** | **FE-08** · Identidad Visual, Favicon y Branding | Josué | `COMPLETADO` | Ninguna | Set de favicon SVG/PNG, manifest e integración en todas las vistas de auth/dashboard |
 | 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `EN PROGRESO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloquea BE-16)* |
@@ -90,6 +95,51 @@ flowchart TD
   - [x] Configurar triggers para pushes en `develop` y `main`
   - [x] Probar ejecución exitosa del pipeline
   - [x] Documentar reglas de branch protection en GitHub
+
+---
+
+### 📋 DEPLOY-01 | Despliegue en la Nube y Ambientes Multi-Entorno
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Infraestructura en la nube con Backend Spring Boot en Render Web Service (`https://jaldishop-api.onrender.com/api/v1`), Base de datos PostgreSQL en NeonDB y Frontend Merchant en Cloudflare Pages (`https://negocios-jaldishop.pages.dev/`), junto con Dockerfiles y perfiles multi-entorno (`development` vs `production`).
+
+**Objetivo:** Disponer de entornos en la nube totalmente funcionales e independientes para desarrollo (`localhost`) y producción, asegurando la accesibilidad pública de la plataforma.
+
+**Checklist:**
+- [x] Configuración de Dockerfile multi-stage y Docker Compose para backend
+- [x] Aprovisionamiento de base de datos Neon Serverless PostgreSQL (`postgresql+sslmode`)
+- [x] Despliegue de servicio web en Render (`https://jaldishop-api.onrender.com`)
+- [x] Configuración de variables de entorno seguras (`SPRING_DATASOURCE_URL`, `JWT_SECRET`, etc.) en Render
+- [x] Despliegue de Frontend Merchant en Cloudflare Pages (`https://negocios-jaldishop.pages.dev`)
+- [x] Configuración de perfiles de Angular (`src/environments/environment.ts` vs `environment.development.ts`)
+- [x] Verificación de conectividad CORS entre Cloudflare Pages y Render API
+
+---
+
+### 📋 FE-08 | Identidad Visual, Favicon y Branding Oficial
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Reemplazo integral de iconos genéricos, SVGs de prueba e imágenes externas temporales por el set oficial de logotipos y favicon JaldiShop en todas las vistas públicas y autenticadas.
+
+**Objetivo:** Consolidar la identidad visual del producto con recursos locales optimizados (SVG vectorial, PNG 96x96, Apple Touch Icon, Web App Manifest) en toda la interfaz de usuario.
+
+**Checklist:**
+- [x] Incorporación del set de favicon en `public/` (`favicon.ico`, `favicon.svg`, `favicon-96x96.png`, `apple-touch-icon.png`, `site.webmanifest`, Web App Manifests 192/512)
+- [x] Configuración de etiquetas `<head>` en `src/index.html` con iconos y manifest
+- [x] Actualización del sidebar principal (`merchant-layout`) con logo JaldiShop SVG
+- [x] Actualización de pantallas de autenticación:
+  - [x] Login (`form-panel` y `brand-panel`) con insignia "Panel Comerciante" y logo oficial
+  - [x] Registro Paso 1 (`register-brand-panel`)
+  - [x] Registro Paso 2 (`register-step2-brand`)
+  - [x] Registro Paso 3 (`register-step3-brand`)
+  - [x] Recuperación de contraseña (`forgot-password`)
+- [x] Actualización de componentes compartidos:
+  - [x] Header legal (`legal-header`)
+  - [x] Pantalla 404 No Encontrado (`not-found`)
+  - [x] Pantalla 403 No Autorizado (`unauthorized`)
+- [x] Verificación de suite de tests en frontend: 107 tests pasando al 100%
 
 ---
 
@@ -285,9 +335,9 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **2 / 7 (29%)** | `CI-01`, `BE-14` |
-| Entregables en desarrollo activo | **2 / 7 (29%)** | `BE-12`, `BE-15` (Desbloqueada) |
-| Entregables pendientes / bloqueados | **3 / 7 (42%)** | `BE-13`, `BE-17`, `BE-16` |
+| Entregables completados | **4 / 9 (44%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-14` |
+| Entregables en desarrollo activo | **2 / 9 (22%)** | `BE-12`, `BE-15` (Desbloqueada) |
+| Entregables pendientes / bloqueados | **3 / 9 (33%)** | `BE-13`, `BE-17`, `BE-16` |
 | **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
 
 ---
@@ -302,6 +352,7 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 | Aislamiento de Carrito | 1 Carrito activo por `(user_id, store_id)` | No mezclar tiendas en un mismo pedido | modelo-er.md |
 | Carrito sin reserva | Solo informativo | No descuenta stock ni bloquea capacidad | alcance-mvp.md |
 | Prioridad de Capacidad | `Excepción > Configuración Base` | La excepción sustituye por completo la capacidad base | modelo-capacidad-v1.md |
+| Multi-Entorno Frontend | `environment.ts` (Render) vs `development.ts` (Localhost) | Conexión a la nube en producción y mock local en dev | arquitectura-sistema.md |
 | CI Runner | GitHub Actions `ubuntu-latest` | Build & Test automatizado con PostgreSQL 16 y Node 22 | arquitectura-sistema.md |
 
 ---
@@ -316,6 +367,8 @@ graph TD
     classDef locked fill:#f8d7da,stroke:#dc3545,stroke-width:1px,stroke-dasharray: 5 5;
 
     CI01["CI-01 · Pipeline CI/CD<br/>(Josué)"]:::done
+    DEPLOY01["DEPLOY-01 · Despliegue Nube<br/>(Josué)"]:::done
+    FE08["FE-08 · Branding & Favicon<br/>(Josué)"]:::done
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::progress
     BE12["BE-12 · Módulo Catálogo<br/>(Katherine)"]:::progress
@@ -325,6 +378,7 @@ graph TD
 
     CI01 -. Valida PRs .-> BE12
     CI01 -. Valida PRs .-> BE14
+    DEPLOY01 -. Conecta con .-> FE08
     BE14 -->|Desbloqueó| BE15
     BE15 -->|Desbloquea| BE16
     BE12 -->|Desbloquea| BE13
