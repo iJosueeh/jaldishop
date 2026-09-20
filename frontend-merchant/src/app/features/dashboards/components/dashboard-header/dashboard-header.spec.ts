@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { DashboardHeader } from './dashboard-header';
 
 describe('DashboardHeader', () => {
@@ -11,6 +12,7 @@ describe('DashboardHeader', () => {
       imports: [DashboardHeader],
       providers: [
         provideHttpClient(),
+        provideRouter([]),
       ],
     }).compileComponents();
 

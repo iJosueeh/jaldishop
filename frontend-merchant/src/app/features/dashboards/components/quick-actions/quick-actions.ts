@@ -5,7 +5,7 @@ import {
   matBoltOutline,
   matPauseCircleOutline,
   matInventory2Outline,
-  matAddCircleOutline,
+  matStorefrontOutline,
   matTuneOutline,
 } from '@ng-icons/material-symbols/outline';
 
@@ -16,7 +16,7 @@ import {
       matBoltOutline,
       matPauseCircleOutline,
       matInventory2Outline,
-      matAddCircleOutline,
+      matStorefrontOutline,
       matTuneOutline,
     }),
   ],
