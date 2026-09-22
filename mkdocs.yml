@@ -68,8 +68,18 @@ nav:
       - Reglas de Negocio: 03-requisitos/reglas-negocio.md
       - Historias de Usuario: 03-requisitos/historia.md
       - Modelo de Dominio: 03-requisitos/modelo-dominio.md
-  - 04 Diseño & Proceso:
-      - AS-IS vs TO-BE: 04-design/proceso/as-is-to-be.md
+  - 04 Diseño & Persistencia:
+      - AS-IS vs TO-BE: 04-diseno/as-is-to-be.md
+      - Modelo Entidad-Relación: 04-diseno/modelo-er.md
+      - Diagrama ER: 04-diseno/diagrama-er.md
+      - Contrato API de Errores: 04-diseno/contrato-api-errores.md
+      - API Configuración de Capacidad: 04-diseno/api-capacity-configurations.md
+      - API Excepciones de Capacidad: 04-diseno/api-capacity-exceptions.md
+      - API Notificaciones: 04-diseno/api-notificaciones.md
+  - 05 Arquitectura:
+      - Arquitectura del Sistema: 05-arquitectura/arquitectura-sistema.md
+      - Decisiones Frontend (Signals & Iconos): 05-arquitectura/decisiones-frontend-signals-iconos.md
   - 06 Scrum & Sprints:
       - Sprint 01 (Completado): 06-scrum/sprint-01.md
-      - Sprint 02 (En Progreso): 06-scrum/sprint-02.md
+      - Sprint 02 (Completado): 06-scrum/sprint-02.md
+      - Sprint 03 (En Progreso): 06-scrum/sprint-03.md
