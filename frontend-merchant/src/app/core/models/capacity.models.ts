@@ -1,4 +1,5 @@
 export type CapacityStatus = 'ACTIVE' | 'INACTIVE';
+export type CapacityTab = 'SCHEDULE' | 'EXCEPTIONS';
 
 export interface CapacityConfiguration {
   id: string;
@@ -41,3 +42,35 @@ export const DAYS_OF_WEEK: DayScheduleOption[] = [
   { dayOfWeek: 6, label: 'Sábado', shortLabel: 'Sáb' },
   { dayOfWeek: 7, label: 'Domingo', shortLabel: 'Dom' },
 ];
+
+export type CapacityExceptionStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface CapacityException {
+  id: string;
+  storeId: string;
+  serviceDate: string;
+  startTime: string | null;
+  endTime: string | null;
+  exceptionCapacity: number;
+  reason?: string | null;
+  status: CapacityExceptionStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCapacityExceptionRequest {
+  serviceDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  exceptionCapacity: number;
+  reason?: string | null;
+}
+
+export interface UpdateCapacityExceptionRequest {
+  serviceDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  exceptionCapacity: number;
+  reason?: string | null;
+}
+

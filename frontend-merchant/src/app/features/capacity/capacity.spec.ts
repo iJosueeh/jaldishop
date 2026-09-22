@@ -48,14 +48,35 @@ describe('Capacity', () => {
     },
   ];
 
+  const mockExceptions = [
+    {
+      id: 'exc-1',
+      storeId: 'store-1',
+      serviceDate: '2026-12-25',
+      startTime: '09:00:00',
+      endTime: '14:00:00',
+      exceptionCapacity: 0,
+      reason: 'Cerrado por Navidad',
+      status: 'ACTIVE' as const,
+      createdAt: '2026-09-22T10:00:00Z',
+      updatedAt: '2026-09-22T10:00:00Z',
+    },
+  ];
+
   beforeEach(async () => {
     capacityServiceMock = {
       configurations: signal<CapacityConfiguration[]>(mockConfigs),
       isLoading: signal<boolean>(false),
+      exceptions: signal<any[]>(mockExceptions),
+      isLoadingExceptions: signal<boolean>(false),
       getConfigurations: vi.fn().mockReturnValue(of(mockConfigs)),
       createConfiguration: vi.fn().mockReturnValue(of(mockConfigs[0])),
       activateConfiguration: vi.fn().mockReturnValue(of(mockConfigs[0])),
       deactivateConfiguration: vi.fn().mockReturnValue(of(mockConfigs[1])),
+      getExceptions: vi.fn().mockReturnValue(of(mockExceptions)),
+      createException: vi.fn().mockReturnValue(of(mockExceptions[0])),
+      activateException: vi.fn().mockReturnValue(of(mockExceptions[0])),
+      deactivateException: vi.fn().mockReturnValue(of(mockExceptions[0])),
     };
 
     toastServiceMock = {
@@ -122,38 +143,82 @@ describe('Capacity', () => {
     expect(toastServiceMock.success).toHaveBeenCalledWith('Franja horaria activada.');
   });
 
-  it('should validate time range when submitting new configuration', () => {
+  it('should save valid configuration slot and show success toast', () => {
     component.openCreateModal();
-    component.form.patchValue({
-      startTime: '16:00',
-      endTime: '12:00',
-      maxCapacity: 10,
-    });
 
-    component.onSubmitForm();
-
-    expect(component.errorMessage()).toBe('La hora de inicio debe ser menor que la hora de fin.');
-    expect(capacityServiceMock.createConfiguration).not.toHaveBeenCalled();
-  });
-
-  it('should submit valid configuration and show success toast', () => {
-    component.selectDay(1);
-    component.openCreateModal();
-    component.form.patchValue({
-      startTime: '09:00',
-      endTime: '13:00',
-      maxCapacity: 12,
-    });
-
-    component.onSubmitForm();
-
-    expect(capacityServiceMock.createConfiguration).toHaveBeenCalledWith({
+    const payload = {
       dayOfWeek: 1,
       startTime: '09:00:00',
       endTime: '13:00:00',
       maxCapacity: 12,
-    });
+    };
+
+    component.onSaveSlot(payload);
+
+    expect(capacityServiceMock.createConfiguration).toHaveBeenCalledWith(payload);
     expect(component.isModalOpen()).toBe(false);
     expect(toastServiceMock.success).toHaveBeenCalledWith('¡Franja de capacidad creada con éxito!');
+  });
+
+  describe('Excepciones de Capacidad en Capacity Component', () => {
+    const mockException = {
+      id: 'exc-1',
+      storeId: 'store-1',
+      serviceDate: '2026-12-25',
+      startTime: '09:00:00',
+      endTime: '14:00:00',
+      exceptionCapacity: 0,
+      reason: 'Cerrado por Navidad',
+      status: 'ACTIVE' as const,
+      createdAt: '2026-09-22T10:00:00Z',
+      updatedAt: '2026-09-22T10:00:00Z',
+    };
+
+    it('debe cambiar de pestaña entre SCHEDULE y EXCEPTIONS', () => {
+      expect(component.activeTab()).toBe('SCHEDULE');
+      component.setActiveTab('EXCEPTIONS');
+      expect(component.activeTab()).toBe('EXCEPTIONS');
+      expect(capacityServiceMock.getExceptions).toHaveBeenCalled();
+    });
+
+    it('debe abrir y cerrar el modal de excepciones', () => {
+      component.openCreateExceptionModal();
+      expect(component.isExceptionModalOpen()).toBe(true);
+
+      component.closeExceptionModal();
+      expect(component.isExceptionModalOpen()).toBe(false);
+    });
+
+    it('debe guardar nueva excepción con éxito', () => {
+      capacityServiceMock.createException = vi.fn().mockReturnValue(of(mockException));
+      component.openCreateExceptionModal();
+
+      component.onSaveException({
+        serviceDate: '2026-12-25',
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        exceptionCapacity: 0,
+        reason: 'Navidad',
+      });
+
+      expect(capacityServiceMock.createException).toHaveBeenCalled();
+      expect(component.isExceptionModalOpen()).toBe(false);
+      expect(toastServiceMock.success).toHaveBeenCalledWith(
+        '¡Fecha especial / excepción creada con éxito!',
+      );
+    });
+
+    it('debe activar y desactivar excepción', () => {
+      capacityServiceMock.deactivateException = vi.fn().mockReturnValue(of(mockException));
+      capacityServiceMock.activateException = vi.fn().mockReturnValue(of(mockException));
+
+      // Toggle active to inactive
+      component.onToggleExceptionStatus(mockException);
+      expect(capacityServiceMock.deactivateException).toHaveBeenCalledWith('exc-1');
+
+      // Toggle inactive to active
+      component.onToggleExceptionStatus({ ...mockException, status: 'INACTIVE' });
+      expect(capacityServiceMock.activateException).toHaveBeenCalledWith('exc-1');
+    });
   });
 });

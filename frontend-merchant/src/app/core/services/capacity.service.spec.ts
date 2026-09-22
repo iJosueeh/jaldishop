@@ -175,5 +175,125 @@ describe('CapacityService', () => {
 
     service.clearCache();
     expect(service.configurations()).toEqual([]);
+    expect(service.exceptions()).toEqual([]);
+  });
+
+  describe('CapacityExceptions', () => {
+    const exceptionsUrl = `${environment.apiUrl}/capacity-exceptions`;
+
+    const mockExceptions = [
+      {
+        id: 'exc-1',
+        storeId: 'store-1',
+        serviceDate: '2026-12-25',
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        exceptionCapacity: 0,
+        reason: 'Cerrado por Navidad',
+        status: 'ACTIVE' as const,
+        createdAt: '2026-09-22T10:00:00Z',
+        updatedAt: '2026-09-22T10:00:00Z',
+      },
+    ];
+
+    it('debe obtener excepciones por HTTP y guardar en memoria', () => {
+      service.getExceptions().subscribe((res) => {
+        expect(res).toEqual(mockExceptions);
+        expect(service.exceptions()).toEqual(mockExceptions);
+        expect(service.isLoadingExceptions()).toBe(false);
+      });
+
+      const req = httpTesting.expectOne(exceptionsUrl);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockExceptions);
+    });
+
+    it('debe agregar nueva excepción en memoria tras createException()', () => {
+      const newRequest = {
+        serviceDate: '2026-12-31',
+        startTime: '10:00:00',
+        endTime: '16:00:00',
+        exceptionCapacity: 25,
+        reason: 'Cena de Año Nuevo',
+      };
+      const createdException = {
+        id: 'exc-2',
+        storeId: 'store-1',
+        ...newRequest,
+        status: 'ACTIVE' as const,
+        createdAt: '2026-09-22T10:00:00Z',
+        updatedAt: '2026-09-22T10:00:00Z',
+      };
+
+      service.createException(newRequest).subscribe((res) => {
+        expect(res).toEqual(createdException);
+        expect(service.exceptions()).toContainEqual(createdException);
+      });
+
+      const req = httpTesting.expectOne(exceptionsUrl);
+      expect(req.request.method).toBe('POST');
+      req.flush(createdException);
+    });
+
+    it('debe actualizar excepción en memoria tras updateException()', () => {
+      service.createException({
+        serviceDate: '2026-12-25',
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        exceptionCapacity: 0,
+      }).subscribe();
+      httpTesting.expectOne(exceptionsUrl).flush(mockExceptions[0]);
+
+      const updated = {
+        ...mockExceptions[0],
+        exceptionCapacity: 5,
+        reason: 'Horario especial reducido',
+      };
+
+      service.updateException('exc-1', {
+        serviceDate: '2026-12-25',
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        exceptionCapacity: 5,
+        reason: 'Horario especial reducido',
+      }).subscribe((res) => {
+        expect(res.exceptionCapacity).toBe(5);
+        expect(service.exceptions()[0].exceptionCapacity).toBe(5);
+      });
+
+      const req = httpTesting.expectOne(`${exceptionsUrl}/exc-1`);
+      expect(req.request.method).toBe('PUT');
+      req.flush(updated);
+    });
+
+    it('debe activar y desactivar excepción actualizando el estado en memoria', () => {
+      service.createException({
+        serviceDate: '2026-12-25',
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        exceptionCapacity: 0,
+      }).subscribe();
+      httpTesting.expectOne(exceptionsUrl).flush(mockExceptions[0]);
+
+      // Deactivate
+      const deactivated = { ...mockExceptions[0], status: 'INACTIVE' as const };
+      service.deactivateException('exc-1').subscribe((res) => {
+        expect(res.status).toBe('INACTIVE');
+        expect(service.exceptions()[0].status).toBe('INACTIVE');
+      });
+      const reqDeact = httpTesting.expectOne(`${exceptionsUrl}/exc-1/deactivate`);
+      expect(reqDeact.request.method).toBe('PATCH');
+      reqDeact.flush(deactivated);
+
+      // Activate
+      const activated = { ...mockExceptions[0], status: 'ACTIVE' as const };
+      service.activateException('exc-1').subscribe((res) => {
+        expect(res.status).toBe('ACTIVE');
+        expect(service.exceptions()[0].status).toBe('ACTIVE');
+      });
+      const reqAct = httpTesting.expectOne(`${exceptionsUrl}/exc-1/activate`);
+      expect(reqAct.request.method).toBe('PATCH');
+      reqAct.flush(activated);
+    });
   });
 });

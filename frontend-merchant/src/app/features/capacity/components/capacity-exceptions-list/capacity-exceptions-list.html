@@ -1,0 +1,156 @@
+<div class="flex flex-col gap-4 font-sans">
+  <!-- Cabecera de la Sección de Excepciones -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-xs">
+    <div class="flex items-start sm:items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary shrink-0">
+        <ng-icon name="matEventBusyOutline" class="text-[22px]" />
+      </div>
+      <div class="flex flex-col">
+        <h2 class="text-base font-bold text-on-surface">Excepciones y Fechas Especiales</h2>
+        <p class="text-xs text-on-surface-variant">
+          Sobrescribe el horario base en feriados, eventos o campañas de alta demanda.
+        </p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="createException.emit()"
+      class="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary-container hover:bg-primary active:scale-98 text-white text-xs font-bold shadow-2xs transition-all cursor-pointer shrink-0"
+    >
+      <ng-icon name="matAddOutline" class="text-[18px]" />
+      <span>Nueva Excepción</span>
+    </button>
+  </div>
+
+  <!-- Estado de Carga (Skeleton) -->
+  @if (isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 animate-pulse flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="w-28 h-5 bg-surface-container-high rounded-md"></div>
+            <div class="w-16 h-5 bg-surface-container-high rounded-full"></div>
+          </div>
+          <div class="w-48 h-4 bg-surface-container-high rounded-md"></div>
+          <div class="w-36 h-3 bg-surface-container-high rounded-md"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Listado de Excepciones Configurada -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      @for (exc of exceptions(); track exc.id) {
+        <article
+          class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-xs flex flex-col justify-between gap-4 hover:border-primary-container/30 transition-all"
+        >
+          <div class="flex flex-col gap-2.5">
+            <!-- Fila Superior: Fecha y Badge de Estado -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+                  <ng-icon name="matCalendarTodayOutline" class="text-[16px]" />
+                </span>
+                <span class="text-sm font-bold text-on-surface">
+                  {{ formatDate(exc.serviceDate) }}
+                </span>
+              </div>
+
+              <!-- Badge de Estado (Activo / Inactivo) -->
+              <span
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                [class.bg-emerald-500/15]="exc.status === 'ACTIVE'"
+                [class.text-emerald-700]="exc.status === 'ACTIVE'"
+                [class.bg-surface-container-high]="exc.status === 'INACTIVE'"
+                [class.text-on-surface-variant]="exc.status === 'INACTIVE'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-emerald-600]="exc.status === 'ACTIVE'"
+                  [class.bg-on-surface-variant]="exc.status === 'INACTIVE'"
+                ></span>
+                {{ exc.status === 'ACTIVE' ? 'Activa' : 'Pausada' }}
+              </span>
+            </div>
+
+            <!-- Motivo o Descripción -->
+            <div>
+              <h3 class="text-xs font-bold text-on-surface">
+                {{ exc.reason || 'Excepción sin motivo especificado' }}
+              </h3>
+            </div>
+
+            <!-- Horario y Cupos Asignados -->
+            <div class="flex items-center gap-2.5 flex-wrap text-xs pt-1">
+              <!-- Franja Horaria -->
+              <div class="flex items-center gap-1 text-on-surface-variant">
+                <ng-icon name="matScheduleOutline" class="text-[15px]" />
+                <span>{{ formatTimeRange(exc.startTime, exc.endTime) }}</span>
+              </div>
+
+              <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+
+              <!-- Cupo Excepcional -->
+              <div class="flex items-center gap-1">
+                @if (exc.exceptionCapacity === 0) {
+                  <span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 font-bold text-[11px] flex items-center gap-1">
+                    <ng-icon name="matBlockOutline" class="text-[13px]" />
+                    Cerrado (0 cupos)
+                  </span>
+                } @else {
+                  <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container font-bold text-[11px]">
+                    Capacidad: {{ exc.exceptionCapacity }} {{ exc.exceptionCapacity === 1 ? 'cupo' : 'cupos' }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Pie de Acciones de la Tarjeta -->
+          <div class="flex items-center justify-between pt-3 border-t border-surface-container-highest">
+            <span class="text-[11px] text-on-surface-variant font-medium">
+              Sobrescribe el horario base
+            </span>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="toggleStatus.emit(exc)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
+                [class.bg-surface-container-high]="exc.status === 'ACTIVE'"
+                [class.text-on-surface-variant]="exc.status === 'ACTIVE'"
+                [class.hover:bg-surface-container-highest]="exc.status === 'ACTIVE'"
+                [class.bg-emerald-600]="exc.status === 'INACTIVE'"
+                [class.text-white]="exc.status === 'INACTIVE'"
+                [class.hover:bg-emerald-700]="exc.status === 'INACTIVE'"
+              >
+                {{ exc.status === 'ACTIVE' ? 'Pausar' : 'Activar' }}
+              </button>
+            </div>
+          </div>
+        </article>
+      } @empty {
+        <!-- Estado Vacío (@empty) -->
+        <div class="col-span-full p-8 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center space-y-3 shadow-xs">
+          <div class="w-12 h-12 rounded-2xl bg-surface-container-high text-secondary mx-auto flex items-center justify-center">
+            <ng-icon name="matEventBusyOutline" class="text-2xl" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-on-surface">No hay excepciones configuradas</h3>
+            <p class="text-xs text-on-surface-variant mt-1 max-w-md mx-auto leading-relaxed">
+              Configura fechas especiales (feriados con 0 cupos o festividades con mayor capacidad) para reemplazar tu horario semanal recurrente.
+            </p>
+          </div>
+          <button
+            type="button"
+            (click)="createException.emit()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-98"
+          >
+            <ng-icon name="matAddOutline" class="text-[16px]" />
+            <span>Crear primera excepción</span>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
