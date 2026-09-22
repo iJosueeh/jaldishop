@@ -5,9 +5,7 @@ import com.jaldishop.backend.capacity.domain.CapacityException;
 import com.jaldishop.backend.capacity.domain.CapacityExceptionStatus;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.GetMyStoreService;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -40,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CapacityExceptionControllerTest {
 
     @Mock
-    private GetMyStoreService getMyStoreService;
+    private StoreContextService storeContextService;
     @Mock
     private CreateCapacityExceptionService createService;
     @Mock
@@ -54,7 +53,6 @@ class CapacityExceptionControllerTest {
     private UUID testMerchantId;
     private UUID testStoreId;
     private JwtPrincipal currentPrincipal;
-    private Store store;
 
     @BeforeEach
     void setUp() {
@@ -62,14 +60,8 @@ class CapacityExceptionControllerTest {
         testStoreId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("MERCHANT"));
 
-        store = Store.reconstitute(
-                testStoreId, testMerchantId, "Mi Tienda", "mi-tienda",
-                null, null, null, null, null, null,
-                true, false, null, null, false, null,
-                StoreStatus.ACTIVE, Instant.now(), Instant.now());
-
         CapacityExceptionController controller = new CapacityExceptionController(
-                getMyStoreService, createService, listService, updateService, toggleService);
+                storeContextService, createService, listService, updateService, toggleService);
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -97,7 +89,7 @@ class CapacityExceptionControllerTest {
         CapacityException exception = CapacityException.create(
                 testStoreId, LocalDate.of(2026, 12, 25), null, null, 0, "Navidad");
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(createService.execute(any(CreateCapacityExceptionCommand.class))).thenReturn(exception);
 
         String json = """
@@ -121,7 +113,7 @@ class CapacityExceptionControllerTest {
                 CapacityException.create(testStoreId, LocalDate.of(2026, 12, 25), null, null, 0, "Navidad"),
                 CapacityException.create(testStoreId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null));
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(listService.execute(testStoreId)).thenReturn(exceptions);
 
         mockMvc.perform(get("/api/v1/capacity-exceptions"))
@@ -139,7 +131,7 @@ class CapacityExceptionControllerTest {
                 LocalTime.of(8, 0), LocalTime.of(20, 0), 15, "Verano",
                 CapacityExceptionStatus.ACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(updateService.execute(any(UpdateCapacityExceptionCommand.class))).thenReturn(exception);
 
         String json = """
@@ -163,7 +155,7 @@ class CapacityExceptionControllerTest {
                 null, null, 0, null,
                 CapacityExceptionStatus.ACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(toggleService.activate(exceptionId, testStoreId)).thenReturn(exception);
 
         mockMvc.perform(patch("/api/v1/capacity-exceptions/" + exceptionId + "/activate"))
@@ -180,7 +172,7 @@ class CapacityExceptionControllerTest {
                 null, null, 0, null,
                 CapacityExceptionStatus.INACTIVE, Instant.now(), Instant.now());
 
-        when(getMyStoreService.execute(testMerchantId)).thenReturn(store);
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
         when(toggleService.deactivate(exceptionId, testStoreId)).thenReturn(exception);
 
         mockMvc.perform(patch("/api/v1/capacity-exceptions/" + exceptionId + "/deactivate"))
@@ -191,7 +183,8 @@ class CapacityExceptionControllerTest {
     @Test
     @DisplayName("POST sin rol MERCHANT - 403 Forbidden")
     void createForbiddenWhenNotMerchant() throws Exception {
-        currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("CUSTOMER"));
+        when(storeContextService.requireStoreId(any()))
+                .thenThrow(new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden realizar esta operación."));
 
         String json = """
                 {"serviceDate": "2026-12-25", "exceptionCapacity": 0}

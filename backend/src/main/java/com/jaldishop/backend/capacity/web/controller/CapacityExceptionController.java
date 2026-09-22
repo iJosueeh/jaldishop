@@ -6,12 +6,10 @@ import com.jaldishop.backend.capacity.web.dto.CapacityExceptionResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityExceptionRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityExceptionRequest;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.GetMyStoreService;
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,18 +21,18 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/capacity-exceptions")
 public class CapacityExceptionController {
 
-    private final GetMyStoreService getMyStoreService;
+    private final StoreContextService storeContextService;
     private final CreateCapacityExceptionService createService;
     private final GetStoreCapacityExceptionsService listService;
     private final UpdateCapacityExceptionService updateService;
     private final ToggleCapacityExceptionStatusService toggleService;
 
-    public CapacityExceptionController(GetMyStoreService getMyStoreService,
+    public CapacityExceptionController(StoreContextService storeContextService,
                                        CreateCapacityExceptionService createService,
                                        GetStoreCapacityExceptionsService listService,
                                        UpdateCapacityExceptionService updateService,
                                        ToggleCapacityExceptionStatusService toggleService) {
-        this.getMyStoreService = getMyStoreService;
+        this.storeContextService = storeContextService;
         this.createService = createService;
         this.listService = listService;
         this.updateService = updateService;
@@ -45,8 +43,7 @@ public class CapacityExceptionController {
     public ResponseEntity<CapacityExceptionResponse> create(
             @AuthenticationPrincipal JwtPrincipal principal,
             @Valid @RequestBody CreateCapacityExceptionRequest request) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CreateCapacityExceptionCommand command = new CreateCapacityExceptionCommand(
                 storeId, request.serviceDate(), request.startTime(), request.endTime(),
@@ -60,8 +57,7 @@ public class CapacityExceptionController {
     @GetMapping
     public ResponseEntity<List<CapacityExceptionResponse>> list(
             @AuthenticationPrincipal JwtPrincipal principal) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         List<CapacityException> exceptions = listService.execute(storeId);
         List<CapacityExceptionResponse> response = exceptions.stream()
@@ -75,8 +71,7 @@ public class CapacityExceptionController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCapacityExceptionRequest request) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         UpdateCapacityExceptionCommand command = new UpdateCapacityExceptionCommand(
                 id, storeId, request.serviceDate(), request.startTime(), request.endTime(),
@@ -90,8 +85,7 @@ public class CapacityExceptionController {
     public ResponseEntity<CapacityExceptionResponse> activate(
             @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID id) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CapacityException exception = toggleService.activate(id, storeId);
         return ResponseEntity.ok(CapacityExceptionResponse.fromDomain(exception));
@@ -101,21 +95,9 @@ public class CapacityExceptionController {
     public ResponseEntity<CapacityExceptionResponse> deactivate(
             @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID id) {
-        requireMerchantRole(principal);
-        UUID storeId = resolveStoreId(principal);
+        UUID storeId = storeContextService.requireStoreId(principal);
 
         CapacityException exception = toggleService.deactivate(id, storeId);
         return ResponseEntity.ok(CapacityExceptionResponse.fromDomain(exception));
-    }
-
-    private UUID resolveStoreId(JwtPrincipal principal) {
-        Store store = getMyStoreService.execute(principal.userId());
-        return store.getId();
-    }
-
-    private void requireMerchantRole(JwtPrincipal principal) {
-        if (!principal.roles().contains("MERCHANT")) {
-            throw new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden gestionar excepciones de capacidad.");
-        }
     }
 }
