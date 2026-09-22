@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DashboardMetrics } from '../../../../core/models/dashboard.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -7,6 +7,7 @@ import {
   matTimerOutline,
   matCheckCircleOutline,
 } from '@ng-icons/material-symbols/outline';
+import { CapacityService } from '../../../../core/services/capacity.service';
 
 @Component({
   imports: [NgIcon],
@@ -22,7 +23,12 @@ import {
   styleUrl: './dashboard-kpis.css',
   templateUrl: './dashboard-kpis.html',
 })
-export class DashboardKpis {
+export class DashboardKpis implements OnInit {
+  private readonly capacityService = inject(CapacityService);
+
+  readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
+  readonly capacityOccupied = signal<number>(0);
+
   readonly metrics = signal<DashboardMetrics>({
     capacityOccupied: 0,
     capacityTotal: 0,
@@ -36,25 +42,41 @@ export class DashboardKpis {
     targetRhythmMin: 0,
   });
 
+  readonly shiftSchedule = computed(() => {
+    const todayConfigs = this.capacityService.todayConfigurations();
+    if (todayConfigs.length === 0) {
+      return 'Sin franjas configuradas hoy';
+    }
+    const times = todayConfigs
+      .map((c) => `${c.startTime.substring(0, 5)} - ${c.endTime.substring(0, 5)}`)
+      .join(', ');
+    return `Horario hoy: ${times}`;
+  });
+
   readonly capacityPercentage = computed(() => {
-    const total = this.metrics().capacityTotal;
+    const total = this.capacityTotal();
     if (total <= 0) return 0;
-    return Math.round((this.metrics().capacityOccupied / total) * 100);
+    return Math.round((this.capacityOccupied() / total) * 100);
   });
 
   readonly availableCapacity = computed(() => {
-    return Math.max(0, this.metrics().capacityTotal - this.metrics().capacityOccupied);
+    return Math.max(0, this.capacityTotal() - this.capacityOccupied());
   });
 
   readonly capacityBlocks = computed(() => {
-    const occupied = this.metrics().capacityOccupied;
-    const total = this.metrics().capacityTotal || 10;
-    const ratio = Math.min(1, Math.max(0, occupied / total));
-    const filledBlocks = Math.round(ratio * 10);
+    const occupied = this.capacityOccupied();
+    const total = this.capacityTotal();
+    const percentage = total > 0 ? (occupied / total) * 10 : 0;
 
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,
-      isFilled: i < filledBlocks,
+      isFilled: i < Math.round(percentage),
     }));
   });
+
+  ngOnInit(): void {
+    if (this.capacityService.configurations().length === 0) {
+      this.capacityService.getConfigurations().subscribe();
+    }
+  }
 }

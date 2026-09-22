@@ -1,0 +1,130 @@
+<section class="max-w-5xl mx-auto space-y-6 font-sans antialiased">
+  <!-- Cabecera de Módulo y Navegación Rápida -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+    <div>
+      <div class="flex items-center gap-2">
+        <a
+          routerLink="/dashboard"
+          class="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant hover:text-primary-container transition-colors"
+        >
+          <ng-icon name="matArrowBackOutline" class="text-[16px]" />
+          <span>Volver al Dashboard</span>
+        </a>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-1">
+        {{ config().title }}
+      </h1>
+      <p class="text-sm text-on-surface-variant mt-0.5">
+        {{ config().subtitle }}
+      </p>
+    </div>
+
+    <!-- Badge de Estado del Sprint -->
+    <div
+      class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 self-start sm:self-auto shadow-2xs {{ config().sprintBadgeClass }}"
+    >
+      <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
+      <span>{{ config().sprint }}</span>
+    </div>
+  </div>
+
+  <!-- Tarjeta Central de Roadmap y Características -->
+  <div
+    class="bg-surface-container-lowest/95 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-outline-variant/30 shadow-lg relative overflow-hidden"
+  >
+    <!-- Fondo decorativo suave -->
+    <div
+      class="absolute -top-24 -right-24 w-72 h-72 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none"
+    ></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+      <!-- Columna Izquierda: Icono y Descripción -->
+      <div class="lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
+        <div
+          class="w-20 h-20 rounded-2xl border flex items-center justify-center shadow-xs {{ config().iconBgClass }} {{ config().iconTextClass }}"
+        >
+          <ng-icon [name]="config().iconName" class="text-4xl" />
+        </div>
+
+        <div>
+          <span class="text-xs font-bold tracking-wider uppercase text-primary-container">
+            Estado de Desarrollo
+          </span>
+          <h2 class="text-xl font-bold text-on-surface mt-1">
+            En construcción
+          </h2>
+          <p class="text-sm text-on-surface-variant mt-2 leading-relaxed">
+            {{ config().description }}
+          </p>
+        </div>
+
+        <div class="pt-2 w-full">
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface-variant">
+              <ng-icon name="matScheduleOutline" class="text-[20px]" />
+            </div>
+            <div class="flex flex-col text-left">
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Disponibilidad</span>
+              <span class="text-xs font-bold text-on-surface">{{ config().eta }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Próximas Capacidades -->
+      <div class="lg:col-span-7 bg-surface-container-low/60 rounded-xl p-5 sm:p-6 border border-outline-variant/20 space-y-4">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          ¿Qué podrás hacer en este módulo?
+        </h3>
+
+        <div class="space-y-3">
+          @for (feature of config().features; track feature.title) {
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container-lowest border border-outline-variant/15 shadow-2xs">
+              <div class="w-6 h-6 rounded-md bg-primary-fixed/40 flex items-center justify-center shrink-0 text-primary-container mt-0.5">
+                <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs font-bold text-on-surface">{{ feature.title }}</span>
+                <span class="text-xs text-on-surface-variant leading-relaxed">{{ feature.desc }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Accesos Rápidos a Módulos Habilitados -->
+    <div class="mt-8 pt-6 border-t border-surface-container-highest flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-xs text-on-surface-variant text-center sm:text-left">
+        <span class="font-bold text-on-surface">Módulos activos ahora:</span>
+        <span>Gestiona tu tienda o ajusta tus cupos disponibles hoy.</span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
+        <a
+          routerLink="/dashboard"
+          class="px-4 py-2 rounded-xl bg-primary-container hover:bg-primary active:scale-98 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+        >
+          <ng-icon name="matHomeOutline" class="text-[16px]" />
+          <span>Dashboard</span>
+        </a>
+
+        <a
+          routerLink="/store"
+          class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high active:scale-98 text-on-surface text-xs font-bold border border-outline-variant/30 transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ng-icon name="matStorefrontOutline" class="text-[16px]" />
+          <span>Mi Tienda</span>
+        </a>
+
+        <a
+          routerLink="/capacity"
+          class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high active:scale-98 text-on-surface text-xs font-bold border border-outline-variant/30 transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ng-icon name="matViewWeekOutline" class="text-[16px]" />
+          <span>Capacidad</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

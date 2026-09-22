@@ -5,6 +5,14 @@ export type DeliveryMode = 'PICKUP' | 'DELIVERY';
 
 export type OrderChannel = 'WHATSAPP' | 'INSTAGRAM' | 'COUNTER' | 'WEB_STORE';
 
+export interface OrderItemDetail {
+  name: string;
+  variant?: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 export interface DashboardPriorityOrder {
   id: string;
   orderNumber: string;
@@ -20,6 +28,12 @@ export interface DashboardPriorityOrder {
   deliveryTimeLabel: string;
   isUrgent: boolean;
   status: OrderStatus;
+  customerPhone?: string;
+  deliveryAddress?: string;
+  deliveryReference?: string;
+  notes?: string;
+  totalAmount?: number;
+  items?: OrderItemDetail[];
 }
 
 export interface UpcomingDeliveryItem {

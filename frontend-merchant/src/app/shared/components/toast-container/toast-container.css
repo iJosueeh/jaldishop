@@ -1,7 +1,7 @@
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateX(100%) scale(0.95);
+    transform: translateX(110%) scale(0.95);
   }
   to {
     opacity: 1;
@@ -9,6 +9,24 @@
   }
 }
 
-.animate-toast-slide {
-  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(110%) scale(0.92);
+  }
 }
+
+.animate-toast-slide-in {
+  animation: toastSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-toast-slide-out {
+  animation: toastSlideOut 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
