@@ -42,10 +42,10 @@ flowchart TD
 
     subgraph CAPACIDAD["Cadena de Capacidad Operativa"]
         BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
-        BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>🟢 EN PROGRESO (Desbloqueada)"]
-        BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>🔒 BLOQUEADA POR BE-15"]
+        BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
+        BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>🟢 EN PROGRESO (Desbloqueada)"]
         BE14 -->|Desbloqueó| BE15
-        BE15 -->|Desbloquea| BE16
+        BE15 -->|Desbloqueó| BE16
     end
 
     CI01 -. Protege PRs .-> BE12
@@ -60,10 +60,10 @@ flowchart TD
 | 🔴 **Alta** | **FE-08** · Identidad Visual, Favicon y Branding | Josué | `COMPLETADO` | Ninguna | Set de favicon SVG/PNG, manifest e integración en todas las vistas de auth/dashboard |
 | 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
-| 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `EN PROGRESO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloquea BE-16)* |
+| 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `BLOQUEADA` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST |
 | 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `BLOQUEADA` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento |
-| 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `BLOQUEADA` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
+| 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `EN PROGRESO` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
 
 ---
 
@@ -202,43 +202,44 @@ Permitir al comerciante configurar la capacidad operativa base de su tienda por 
 ### 📋 BE-15 | Implementar Excepciones de Capacidad
 
 **Responsable:** Mia  
-**Estado:** `EN PROGRESO` 🟢 *(Desbloqueada tras merge de BE-14)*  
-**Entregable:** Dominio `CapacityException`, persistencia JPA, casos de uso, validación de reglas de sobreescritura y endpoints REST.  
-**Desbloquea:** **BE-16** (Cálculo de Capacidad Efectiva).
+**Estado:** `COMPLETADO` ✅ *(Integrado en PR #19)*  
+**Entregable:** Dominio `CapacityException`, persistencia JPA, casos de uso de gestión, validación de reglas de sobreescritura, endpoints REST (`/api/v1/capacity-exceptions/**`) y suite de tests completa.  
+**Desbloqueó:** **BE-16** (Cálculo de Capacidad Efectiva).
 
 **Descripción:**  
 Permitir que un comerciante establezca una capacidad diferente para una fecha o franja específica sin modificar su configuración base (ej. feriados, eventos especiales, días de mantenimiento).
 
 **Checklist:**
-- [ ] Implementar `CapacityException`
-- [ ] Implementar reglas e invariantes de dominio
-- [ ] Implementar Repository Port (`CapacityExceptionRepository`)
-- [ ] Implementar JPA Entity (`CapacityExceptionEntity`)
-- [ ] Implementar `CapacityExceptionJpaRepository`
-- [ ] Implementar mapper de persistencia
-- [ ] Implementar Repository Adapter
-- [ ] Caso de uso Crear excepción
-- [ ] Caso de uso Consultar excepciones por Store y rango de fechas
-- [ ] Caso de uso Actualizar excepción
-- [ ] Caso de uso Desactivar/eliminar según modelo
-- [ ] Validar Store (`store_id` del merchant)
-- [ ] Validar fecha (`exception_date >= today`)
-- [ ] Validar rango horario (`start_time < end_time` si aplica a franja parcial)
-- [ ] Validar capacidad (`capacity >= 0`)
-- [ ] **Aplicar regla central:** la excepción *reemplaza* la capacidad base para esa fecha/franja, **no se suma a ella**
-- [ ] Implementar DTOs con Bean Validation
-- [ ] Implementar endpoints REST (`/api/v1/capacity-exceptions/**`)
-- [ ] Tests de dominio
-- [ ] Tests de aplicación
-- [ ] Tests de persistencia
-- [ ] Tests web
+- [x] Implementar `CapacityException`
+- [x] Implementar reglas e invariantes de dominio
+- [x] Implementar Repository Port (`CapacityExceptionRepository`)
+- [x] Implementar JPA Entity (`CapacityExceptionEntity`)
+- [x] Implementar `CapacityExceptionJpaRepository`
+- [x] Implementar mapper de persistencia
+- [x] Implementar Repository Adapter
+- [x] Caso de uso Crear excepción
+- [x] Caso de uso Consultar excepciones por Store
+- [x] Caso de uso Actualizar excepción
+- [x] Caso de uso Activar / Desactivar excepción
+- [x] Validar Store (`store_id` del merchant)
+- [x] Validar fecha (`exception_date >= today`)
+- [x] Validar rango horario (`start_time < end_time` si aplica a franja parcial)
+- [x] Validar capacidad (`capacity >= 0`)
+- [x] **Aplicar regla central:** la excepción *reemplaza* la capacidad base para esa fecha/franja, **no se suma a ella**
+- [x] Implementar DTOs con Bean Validation
+- [x] Implementar endpoints REST (`/api/v1/capacity-exceptions/**`)
+- [x] Tests de dominio
+- [x] Tests de aplicación
+- [x] Tests de persistencia
+- [x] Tests web
+- [x] Documentar especificación de API (`docs/04-diseno/api-capacity-exceptions.md`)
 
 ---
 
 ### 📋 BE-16 | Cálculo y consulta de Capacidad Efectiva
 
 **Responsable:** Mia  
-**Estado:** `BLOQUEADA POR BE-15` 🔒  
+**Estado:** `EN PROGRESO / READY` 🟢 *(Desbloqueada tras merge de BE-15)*  
 **Entregable:** Servicio de dominio/aplicación para resolución de capacidad efectiva y endpoint de consulta para clientes y comerciantes.
 
 **Descripción:**  
@@ -335,9 +336,9 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **4 / 9 (44%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-14` |
-| Entregables en desarrollo activo | **2 / 9 (22%)** | `BE-12`, `BE-15` (Desbloqueada) |
-| Entregables pendientes / bloqueados | **3 / 9 (33%)** | `BE-13`, `BE-17`, `BE-16` |
+| Entregables completados | **5 / 9 (56%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-14`, `BE-15` |
+| Entregables en desarrollo activo | **2 / 9 (22%)** | `BE-12`, `BE-16` (Desbloqueada) |
+| Entregables pendientes / bloqueados | **2 / 9 (22%)** | `BE-13`, `BE-17` |
 | **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
 
 ---
@@ -370,9 +371,9 @@ graph TD
     DEPLOY01["DEPLOY-01 · Despliegue Nube<br/>(Josué)"]:::done
     FE08["FE-08 · Branding & Favicon<br/>(Josué)"]:::done
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
-    BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::progress
+    BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
+    BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::progress
     BE12["BE-12 · Módulo Catálogo<br/>(Katherine)"]:::progress
-    BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::locked
     BE13["BE-13 · Módulo Inventario<br/>(Katherine)"]:::locked
     BE17["BE-17 · Módulo Carrito<br/>(Josué)"]:::locked
 
@@ -380,7 +381,7 @@ graph TD
     CI01 -. Valida PRs .-> BE14
     DEPLOY01 -. Conecta con .-> FE08
     BE14 -->|Desbloqueó| BE15
-    BE15 -->|Desbloquea| BE16
+    BE15 -->|Desbloqueó| BE16
     BE12 -->|Desbloquea| BE13
     BE12 -->|Desbloquea| BE17
 ```
