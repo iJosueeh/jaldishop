@@ -5,7 +5,9 @@
 >
   @for (toast of toasts(); track toast.id) {
     <div
-      class="pointer-events-auto p-4 rounded-2xl shadow-xl border backdrop-blur-md flex items-start gap-3 transition-all animate-toast-slide bg-surface-container-lowest/98"
+      class="pointer-events-auto p-4 rounded-2xl shadow-xl border backdrop-blur-md flex items-start gap-3 transition-all bg-surface-container-lowest/98"
+      [class.animate-toast-slide-in]="!toast.dismissing"
+      [class.animate-toast-slide-out]="toast.dismissing"
       [class.border-primary-container/30]="toast.type === 'success'"
       [class.border-error-container/40]="toast.type === 'error'"
       [class.border-secondary-container/40]="toast.type === 'warning'"

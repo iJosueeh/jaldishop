@@ -32,12 +32,17 @@ describe('ToastContainer', () => {
   });
 
   it('debe permitir descartar un toast al presionar cerrar', () => {
+    vi.useFakeTimers();
     const id = toastService.error('Error de prueba');
     fixture.detectChanges();
 
     component.dismiss(id);
     fixture.detectChanges();
 
+    expect(toastService.toasts().find((t) => t.id === id)?.dismissing).toBe(true);
+
+    vi.advanceTimersByTime(250);
     expect(toastService.toasts().length).toBe(0);
+    vi.useRealTimers();
   });
 });

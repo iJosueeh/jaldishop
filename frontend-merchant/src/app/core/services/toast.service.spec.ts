@@ -43,15 +43,20 @@ describe('ToastService', () => {
     expect(toasts[1].type).toBe('info');
   });
 
-  it('debe descartar un toast por su ID', () => {
+  it('debe descartar un toast por su ID tras la animación', () => {
+    vi.useFakeTimers();
     const id1 = service.success('Mensaje 1');
     const id2 = service.error('Mensaje 2');
 
     expect(service.toasts().length).toBe(2);
 
     service.dismiss(id1);
+    expect(service.toasts().find((t) => t.id === id1)?.dismissing).toBe(true);
+
+    vi.advanceTimersByTime(250);
     expect(service.toasts().length).toBe(1);
     expect(service.toasts()[0].id).toBe(id2);
+    vi.useRealTimers();
   });
 
   it('debe limpiar todos los toasts al invocar clear()', () => {

@@ -23,7 +23,20 @@ export class TokenService {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-      return JSON.parse(atob(parts[1]));
+
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) {
+        base64 += '=';
+      }
+
+      const decoded = atob(base64);
+      const bytes = new Uint8Array(decoded.length);
+      for (let i = 0; i < decoded.length; i++) {
+        bytes[i] = decoded.charCodeAt(i);
+      }
+
+      const text = new TextDecoder('utf-8').decode(bytes);
+      return JSON.parse(text);
     } catch (error) {
       return null;
     }
@@ -43,7 +56,21 @@ export class TokenService {
 
   getRoles(): string[] {
     const payload = this.getPayload();
-    return payload?.roles || [];
+    if (!payload) return [];
+
+    const rawRoles = payload.roles || payload.authorities || [];
+    if (Array.isArray(rawRoles)) {
+      return rawRoles.map((r: any) => {
+        const name = typeof r === 'string' ? r : r?.authority || r?.name || '';
+        return name.replace(/^ROLE_/, '').trim().toUpperCase();
+      });
+    }
+
+    if (typeof rawRoles === 'string') {
+      return [rawRoles.replace(/^ROLE_/, '').trim().toUpperCase()];
+    }
+
+    return [];
   }
 
   getUserId(): string | null {
