@@ -3,8 +3,11 @@ import { computed, inject, Service, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import {
   CapacityConfiguration,
+  CapacityException,
   CreateCapacityConfigRequest,
+  CreateCapacityExceptionRequest,
   UpdateCapacityConfigRequest,
+  UpdateCapacityExceptionRequest,
 } from '../models/capacity.models';
 import { Observable, of, tap } from 'rxjs';
 
@@ -12,11 +15,14 @@ import { Observable, of, tap } from 'rxjs';
 export class CapacityService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/capacity-configurations`;
+  private readonly exceptionsUrl = `${environment.apiUrl}/capacity-exceptions`;
+  private readonly isLoaded = signal<boolean>(false);
+  private readonly areExceptionsLoaded = signal<boolean>(false);
 
+  readonly exceptions = signal<CapacityException[]>([]);
+  readonly isLoadingExceptions = signal<boolean>(false);
   readonly configurations = signal<CapacityConfiguration[]>([]);
   readonly isLoading = signal<boolean>(false);
-
-  private readonly isLoaded = signal<boolean>(false);
 
   readonly todayConfigurations = computed(() => {
     const isDay = new Date().getDay();
@@ -32,7 +38,7 @@ export class CapacityService {
 
   getConfigurations(forceRefresh = false): Observable<CapacityConfiguration[]> {
     if (this.isLoaded() && !forceRefresh) {
-        return of(this.configurations());
+      return of(this.configurations());
     }
 
     this.isLoading.set(true);
@@ -83,8 +89,63 @@ export class CapacityService {
     );
   }
 
+  getExceptions(forceRefresh = false): Observable<CapacityException[]> {
+    if (this.areExceptionsLoaded() && !forceRefresh) {
+      return of(this.exceptions());
+    }
+
+    this.isLoadingExceptions.set(true);
+    return this.http.get<CapacityException[]>(this.exceptionsUrl).pipe(
+      tap({
+        next: (list) => {
+          this.exceptions.set(list);
+          this.areExceptionsLoaded.set(true);
+          this.isLoadingExceptions.set(false);
+        },
+        error: () => this.isLoadingExceptions.set(false),
+      }),
+    );
+  }
+
+  createException(request: CreateCapacityExceptionRequest): Observable<CapacityException> {
+    return this.http.post<CapacityException>(this.exceptionsUrl, request).pipe(
+      tap((created) => {
+        this.exceptions.update((list) => [...list, created]);
+      }),
+    );
+  }
+
+  updateException(
+    id: string,
+    request: UpdateCapacityExceptionRequest,
+  ): Observable<CapacityException> {
+    return this.http.put<CapacityException>(`${this.exceptionsUrl}/${id}`, request).pipe(
+      tap((updated) => {
+        this.exceptions.update((list) => list.map((item) => (item.id === id ? updated : item)));
+      }),
+    );
+  }
+
+  activateException(id: string): Observable<CapacityException> {
+    return this.http.patch<CapacityException>(`${this.exceptionsUrl}/${id}/activate`, {}).pipe(
+      tap((updated) => {
+        this.exceptions.update((list) => list.map((item) => (item.id === id ? updated : item)));
+      }),
+    );
+  }
+
+  deactivateException(id: string): Observable<CapacityException> {
+    return this.http.patch<CapacityException>(`${this.exceptionsUrl}/${id}/deactivate`, {}).pipe(
+      tap((updated) => {
+        this.exceptions.update((list) => list.map((item) => (item.id === id ? updated : item)));
+      }),
+    );
+  }
+
   clearCache(): void {
     this.configurations.set([]);
     this.isLoaded.set(false);
+    this.exceptions.set([]);
+    this.areExceptionsLoaded.set(false);
   }
 }
