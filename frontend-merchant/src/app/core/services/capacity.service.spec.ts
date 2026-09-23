@@ -295,5 +295,59 @@ describe('CapacityService', () => {
       expect(reqAct.request.method).toBe('PATCH');
       reqAct.flush(activated);
     });
+
+    it('debe priorizar excepción activa del día sobre la capacidad base', () => {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      // Configuración base
+      const isDay = today.getDay();
+      const todayDayOfWeek = isDay === 0 ? 7 : isDay;
+      const baseConfig: CapacityConfiguration = {
+        id: 'cfg-today',
+        storeId: 'store-1',
+        dayOfWeek: todayDayOfWeek,
+        startTime: '09:00:00',
+        endTime: '14:00:00',
+        maxCapacity: 10,
+        status: 'ACTIVE',
+        createdAt: '2026-09-19T10:00:00Z',
+        updatedAt: '2026-09-19T10:00:00Z',
+      };
+
+      service.configurations.set([baseConfig]);
+      expect(service.todayTotalCapacity()).toBe(10);
+      expect(service.todayEffectiveCapacity()).toBe(10);
+      expect(service.isTodayClosed()).toBe(false);
+
+      // Excepción activa hoy con 0 cupos (Cerrado)
+      const closedException = {
+        id: 'exc-today',
+        storeId: 'store-1',
+        serviceDate: todayStr,
+        startTime: null,
+        endTime: null,
+        exceptionCapacity: 0,
+        reason: 'Cerrado por Mantenimiento',
+        status: 'ACTIVE' as const,
+        createdAt: '2026-09-22T10:00:00Z',
+        updatedAt: '2026-09-22T10:00:00Z',
+      };
+
+      service.exceptions.set([closedException]);
+      expect(service.todayException()).toEqual(closedException);
+      expect(service.todayEffectiveCapacity()).toBe(0);
+      expect(service.isTodayClosed()).toBe(true);
+
+      // Excepción activa hoy con capacidad aumentada (ej. 30 cupos)
+      const specialException = {
+        ...closedException,
+        exceptionCapacity: 30,
+        reason: 'Evento Especial',
+      };
+      service.exceptions.set([specialException]);
+      expect(service.todayEffectiveCapacity()).toBe(30);
+      expect(service.isTodayClosed()).toBe(false);
+    });
   });
 });

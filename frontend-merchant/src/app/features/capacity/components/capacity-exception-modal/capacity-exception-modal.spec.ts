@@ -25,8 +25,9 @@ describe('CapacityExceptionModal', () => {
     expect(component.form.get('exceptionCapacity')?.value).toBe(0);
   });
 
-  it('debe emitir saveException al enviar formulario válido', () => {
+  it('debe emitir saveException al enviar formulario válido en modo creación', () => {
     fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('exceptionToEdit', null);
     fixture.detectChanges();
 
     component.form.patchValue({
@@ -44,10 +45,46 @@ describe('CapacityExceptionModal', () => {
     component.onSubmit();
 
     expect(emitted).toBeTruthy();
-    expect(emitted.serviceDate).toBe('2026-12-25');
-    expect(emitted.exceptionCapacity).toBe(0);
-    expect(emitted.startTime).toBeNull();
-    expect(emitted.endTime).toBeNull();
+    expect(emitted.id).toBeUndefined();
+    expect(emitted.request.serviceDate).toBe('2026-12-25');
+    expect(emitted.request.exceptionCapacity).toBe(0);
+    expect(emitted.request.startTime).toBeNull();
+    expect(emitted.request.endTime).toBeNull();
+  });
+
+  it('debe precargar datos y emitir id en modo edición', () => {
+    const mockException: any = {
+      id: 'exc-999',
+      serviceDate: '2026-12-31',
+      startTime: '10:00:00',
+      endTime: '18:00:00',
+      exceptionCapacity: 25,
+      reason: 'Fin de año',
+      status: 'ACTIVE',
+    };
+
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('exceptionToEdit', mockException);
+    fixture.detectChanges();
+
+    expect(component.form.get('serviceDate')?.value).toBe('2026-12-31');
+    expect(component.form.get('isAllDay')?.value).toBe(false);
+    expect(component.form.get('startTime')?.value).toBe('10:00');
+    expect(component.form.get('endTime')?.value).toBe('18:00');
+    expect(component.form.get('exceptionCapacity')?.value).toBe(25);
+    expect(component.form.get('reason')?.value).toBe('Fin de año');
+
+    let emitted: any = null;
+    component.saveException.subscribe((val) => {
+      emitted = val;
+    });
+
+    component.onSubmit();
+
+    expect(emitted).toBeTruthy();
+    expect(emitted.id).toBe('exc-999');
+    expect(emitted.request.serviceDate).toBe('2026-12-31');
+    expect(emitted.request.exceptionCapacity).toBe(25);
   });
 
   it('debe validar horario si isAllDay es falso', () => {

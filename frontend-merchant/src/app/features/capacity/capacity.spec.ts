@@ -71,10 +71,12 @@ describe('Capacity', () => {
       isLoadingExceptions: signal<boolean>(false),
       getConfigurations: vi.fn().mockReturnValue(of(mockConfigs)),
       createConfiguration: vi.fn().mockReturnValue(of(mockConfigs[0])),
+      updateConfiguration: vi.fn().mockReturnValue(of(mockConfigs[0])),
       activateConfiguration: vi.fn().mockReturnValue(of(mockConfigs[0])),
       deactivateConfiguration: vi.fn().mockReturnValue(of(mockConfigs[1])),
       getExceptions: vi.fn().mockReturnValue(of(mockExceptions)),
       createException: vi.fn().mockReturnValue(of(mockExceptions[0])),
+      updateException: vi.fn().mockReturnValue(of(mockExceptions[0])),
       activateException: vi.fn().mockReturnValue(of(mockExceptions[0])),
       deactivateException: vi.fn().mockReturnValue(of(mockExceptions[0])),
     };
@@ -123,12 +125,21 @@ describe('Capacity', () => {
     expect(component.getActiveSlotsCount(3)).toBe(0);
   });
 
-  it('should open and close the modal', () => {
+  it('should open and close the modal in create and edit mode', () => {
     component.openCreateModal();
     expect(component.isModalOpen()).toBe(true);
+    expect(component.selectedSlotToEdit()).toBeNull();
 
     component.closeModal();
     expect(component.isModalOpen()).toBe(false);
+
+    component.openEditModal(mockConfigs[0]);
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.selectedSlotToEdit()).toEqual(mockConfigs[0]);
+
+    component.closeModal();
+    expect(component.isModalOpen()).toBe(false);
+    expect(component.selectedSlotToEdit()).toBeNull();
   });
 
   it('should deactivate an active configuration', () => {
@@ -143,7 +154,7 @@ describe('Capacity', () => {
     expect(toastServiceMock.success).toHaveBeenCalledWith('Franja horaria activada.');
   });
 
-  it('should save valid configuration slot and show success toast', () => {
+  it('should create new configuration slot and show success toast', () => {
     component.openCreateModal();
 
     const payload = {
@@ -153,11 +164,28 @@ describe('Capacity', () => {
       maxCapacity: 12,
     };
 
-    component.onSaveSlot(payload);
+    component.onSaveSlot({ request: payload });
 
     expect(capacityServiceMock.createConfiguration).toHaveBeenCalledWith(payload);
     expect(component.isModalOpen()).toBe(false);
     expect(toastServiceMock.success).toHaveBeenCalledWith('¡Franja de capacidad creada con éxito!');
+  });
+
+  it('should update existing configuration slot and show success toast', () => {
+    component.openEditModal(mockConfigs[0]);
+
+    const payload = {
+      dayOfWeek: 1,
+      startTime: '09:00:00',
+      endTime: '14:00:00',
+      maxCapacity: 18,
+    };
+
+    component.onSaveSlot({ id: 'cfg-1', request: payload });
+
+    expect(capacityServiceMock.updateConfiguration).toHaveBeenCalledWith('cfg-1', payload);
+    expect(component.isModalOpen()).toBe(false);
+    expect(toastServiceMock.success).toHaveBeenCalledWith('¡Franja de capacidad actualizada con éxito!');
   });
 
   describe('Excepciones de Capacidad en Capacity Component', () => {
@@ -181,30 +209,62 @@ describe('Capacity', () => {
       expect(capacityServiceMock.getExceptions).toHaveBeenCalled();
     });
 
-    it('debe abrir y cerrar el modal de excepciones', () => {
+    it('debe abrir y cerrar el modal de excepciones en create y edit', () => {
       component.openCreateExceptionModal();
       expect(component.isExceptionModalOpen()).toBe(true);
+      expect(component.selectedExceptionToEdit()).toBeNull();
 
       component.closeExceptionModal();
       expect(component.isExceptionModalOpen()).toBe(false);
+
+      component.openEditExceptionModal(mockException);
+      expect(component.isExceptionModalOpen()).toBe(true);
+      expect(component.selectedExceptionToEdit()).toEqual(mockException);
+
+      component.closeExceptionModal();
+      expect(component.isExceptionModalOpen()).toBe(false);
+      expect(component.selectedExceptionToEdit()).toBeNull();
     });
 
     it('debe guardar nueva excepción con éxito', () => {
       capacityServiceMock.createException = vi.fn().mockReturnValue(of(mockException));
       component.openCreateExceptionModal();
 
-      component.onSaveException({
+      const payload = {
         serviceDate: '2026-12-25',
         startTime: '09:00:00',
         endTime: '14:00:00',
         exceptionCapacity: 0,
         reason: 'Navidad',
-      });
+      };
 
-      expect(capacityServiceMock.createException).toHaveBeenCalled();
+      component.onSaveException({ request: payload });
+
+      expect(capacityServiceMock.createException).toHaveBeenCalledWith(payload);
       expect(component.isExceptionModalOpen()).toBe(false);
       expect(toastServiceMock.success).toHaveBeenCalledWith(
         '¡Fecha especial / excepción creada con éxito!',
+      );
+    });
+
+    it('debe actualizar excepción existente con éxito', () => {
+      capacityServiceMock.updateException = vi.fn().mockReturnValue(of(mockException));
+      component.openEditExceptionModal(mockException);
+
+      const payload = {
+        serviceDate: '2026-12-25',
+        startTime: '10:00:00',
+        endTime: '15:00:00',
+        exceptionCapacity: 5,
+        reason: 'Navidad Medio Tiempo',
+      };
+
+      component.onSaveException({ id: 'exc-1', request: payload });
+
+      expect(capacityServiceMock.updateException).toHaveBeenCalledWith('exc-1', payload);
+      expect(component.isExceptionModalOpen()).toBe(false);
+      expect(toastServiceMock.success).toHaveBeenCalledWith(
+        '¡Fecha especial / excepción actualizada con éxito!',
       );
     });
 

@@ -45,9 +45,11 @@ export class Capacity implements OnInit {
   // Estados de modales
   readonly isModalOpen = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
+  readonly selectedSlotToEdit = signal<CapacityConfiguration | null>(null);
 
   readonly isExceptionModalOpen = signal<boolean>(false);
   readonly isSubmittingException = signal<boolean>(false);
+  readonly selectedExceptionToEdit = signal<CapacityException | null>(null);
 
   // Señales de Configuración Semanal
   readonly isLoading = computed(() => this.capacityService.isLoading());
@@ -115,26 +117,41 @@ export class Capacity implements OnInit {
 
   // Métodos de Modal Semanal
   openCreateModal(): void {
+    this.selectedSlotToEdit.set(null);
+    this.isModalOpen.set(true);
+  }
+
+  openEditModal(slot: CapacityConfiguration): void {
+    this.selectedSlotToEdit.set(slot);
     this.isModalOpen.set(true);
   }
 
   closeModal(): void {
     this.isModalOpen.set(false);
+    this.selectedSlotToEdit.set(null);
   }
 
-  onSaveSlot(request: CreateCapacityConfigRequest): void {
+  onSaveSlot(event: { request: CreateCapacityConfigRequest; id?: string }): void {
     this.isSubmitting.set(true);
-    this.capacityService.createConfiguration(request).subscribe({
+    const action$ = event.id
+      ? this.capacityService.updateConfiguration(event.id, event.request)
+      : this.capacityService.createConfiguration(event.request);
+
+    const successMsg = event.id
+      ? '¡Franja de capacidad actualizada con éxito!'
+      : '¡Franja de capacidad creada con éxito!';
+
+    action$.subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeModal();
-        this.toastService.success('¡Franja de capacidad creada con éxito!');
+        this.toastService.success(successMsg);
       },
       error: (err) => {
         this.isSubmitting.set(false);
         this.toastService.error(
           err?.error?.message ||
-            'Error al crear la configuración. Verifica que no se solape con otra franja.',
+            'Error al guardar la configuración. Verifica que no se solape con otra franja.',
         );
       },
     });
@@ -159,24 +176,41 @@ export class Capacity implements OnInit {
 
   // Métodos de Excepciones
   openCreateExceptionModal(): void {
+    this.selectedExceptionToEdit.set(null);
+    this.isExceptionModalOpen.set(true);
+  }
+
+  openEditExceptionModal(exc: CapacityException): void {
+    this.selectedExceptionToEdit.set(exc);
     this.isExceptionModalOpen.set(true);
   }
 
   closeExceptionModal(): void {
     this.isExceptionModalOpen.set(false);
+    this.selectedExceptionToEdit.set(null);
   }
 
-  onSaveException(request: CreateCapacityExceptionRequest): void {
+  onSaveException(event: { request: CreateCapacityExceptionRequest; id?: string }): void {
     this.isSubmittingException.set(true);
-    this.capacityService.createException(request).subscribe({
+    const action$ = event.id
+      ? this.capacityService.updateException(event.id, event.request)
+      : this.capacityService.createException(event.request);
+
+    const successMsg = event.id
+      ? '¡Fecha especial / excepción actualizada con éxito!'
+      : '¡Fecha especial / excepción creada con éxito!';
+
+    action$.subscribe({
       next: () => {
         this.isSubmittingException.set(false);
         this.closeExceptionModal();
-        this.toastService.success('¡Fecha especial / excepción creada con éxito!');
+        this.toastService.success(successMsg);
       },
       error: (err) => {
         this.isSubmittingException.set(false);
-        this.toastService.error(err?.error?.message || 'Error al crear la excepción de capacidad.');
+        this.toastService.error(
+          err?.error?.message || 'Error al guardar la excepción de capacidad.',
+        );
       },
     });
   }

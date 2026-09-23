@@ -21,8 +21,8 @@ export class AuthService {
   readonly token = signal<string | null>(this.tokenService.getToken());
   readonly currentUser = signal<AuthResult | null>(null);
 
-  readonly isAuthenticated = computed(() => !!this.token());
-  readonly userRoles = computed(() => this.tokenService.getRoles());
+  readonly isAuthenticated = computed(() => !!this.token() && this.tokenService.hasValidToken());
+  readonly userRoles = computed(() => (this.isAuthenticated() ? this.tokenService.getRoles() : []));
   readonly isMerchant = computed(() => this.userRoles().includes('MERCHANT'));
   readonly isAdmin = computed(() => this.userRoles().includes('ADMIN'));
 

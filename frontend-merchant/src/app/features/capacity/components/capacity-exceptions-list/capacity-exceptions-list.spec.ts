@@ -46,7 +46,22 @@ describe('CapacityExceptionsList', () => {
     expect(component.formatTimeRange(null, null)).toBe('Todo el día');
   });
 
-  it('debe emitir toggleStatus al hacer clic en el botón de acción', () => {
+  it('debe emitir editException al hacer clic en el botón Editar', () => {
+    fixture.componentRef.setInput('exceptions', mockExceptions);
+    fixture.detectChanges();
+
+    let emitted: CapacityException | null = null;
+    component.editException.subscribe((val) => {
+      emitted = val;
+    });
+
+    const editButton = fixture.nativeElement.querySelector('article button');
+    editButton.click();
+
+    expect(emitted).toEqual(mockExceptions[0]);
+  });
+
+  it('debe emitir toggleStatus al hacer clic en el botón Pausar/Activar', () => {
     fixture.componentRef.setInput('exceptions', mockExceptions);
     fixture.detectChanges();
 
@@ -55,8 +70,8 @@ describe('CapacityExceptionsList', () => {
       emitted = val;
     });
 
-    const button = fixture.nativeElement.querySelector('article button');
-    button.click();
+    const buttons = fixture.nativeElement.querySelectorAll('article button');
+    buttons[1].click();
 
     expect(emitted).toEqual(mockExceptions[0]);
   });

@@ -33,6 +33,7 @@
       [dayLabel]="selectedDayInfo().label"
       [isLoading]="isLoading()"
       (toggleStatus)="onToggleStatus($event)"
+      (editSlot)="openEditModal($event)"
       (createSlot)="openCreateModal()"
     />
   }
@@ -43,24 +44,27 @@
       [exceptions]="allExceptions()"
       [isLoading]="isLoadingExceptions()"
       (toggleStatus)="onToggleExceptionStatus($event)"
+      (editException)="openEditExceptionModal($event)"
       (createException)="openCreateExceptionModal()"
     />
   }
 
-  <!-- 3. Modal de Creación de Franja Semanal (Componente Standalone) -->
+  <!-- 3. Modal de Creación / Edición de Franja Semanal (Componente Standalone) -->
   <app-capacity-slot-modal
     [isOpen]="isModalOpen()"
     [isSubmitting]="isSubmitting()"
     [dayLabel]="selectedDayInfo().label"
     [dayOfWeek]="selectedDay()"
+    [slotToEdit]="selectedSlotToEdit()"
     (closeModal)="closeModal()"
     (saveSlot)="onSaveSlot($event)"
   />
 
-  <!-- 4. Modal de Creación de Excepción (Componente Standalone) -->
+  <!-- 4. Modal de Creación / Edición de Excepción (Componente Standalone) -->
   <app-capacity-exception-modal
     [isOpen]="isExceptionModalOpen()"
     [isSubmitting]="isSubmittingException()"
+    [exceptionToEdit]="selectedExceptionToEdit()"
     (closeModal)="closeExceptionModal()"
     (saveException)="onSaveException($event)"
   />

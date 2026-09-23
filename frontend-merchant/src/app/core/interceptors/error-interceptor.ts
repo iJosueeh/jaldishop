@@ -22,7 +22,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login'], { queryParams: { expired: 'true' } });
       } else if (normalizedError.status === 403) {
         toastService.error(
-          'No tienes permisos suficientes para realizar esta accion.',
+          'No tienes permisos suficientes para realizar esta acción.',
           'Acceso denegado',
         );
       } else if (normalizedError.status === 0) {

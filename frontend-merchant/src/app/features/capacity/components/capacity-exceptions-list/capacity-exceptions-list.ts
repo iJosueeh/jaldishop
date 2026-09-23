@@ -7,6 +7,7 @@ import {
   matAddOutline,
   matEventBusyOutline,
   matBlockOutline,
+  matEditOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -18,6 +19,7 @@ import {
       matAddOutline,
       matEventBusyOutline,
       matBlockOutline,
+      matEditOutline,
     }),
   ],
   selector: 'app-capacity-exceptions-list',
@@ -25,10 +27,11 @@ import {
   templateUrl: './capacity-exceptions-list.html',
 })
 export class CapacityExceptionsList {
-  readonly exceptions = input<CapacityException[]>();
+  readonly exceptions = input<CapacityException[]>([]);
   readonly isLoading = input<boolean>(false);
 
   readonly toggleStatus = output<CapacityException>();
+  readonly editException = output<CapacityException>();
   readonly createException = output<void>();
 
   formatDate(dateStr: string): string {

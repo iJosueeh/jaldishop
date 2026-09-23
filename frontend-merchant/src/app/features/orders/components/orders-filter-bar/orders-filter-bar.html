@@ -1,0 +1,126 @@
+<section class="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3 p-1.5 rounded-2xl bg-surface-container-low/40 border border-outline-variant/30 font-sans">
+  <!-- Pestañas de Estado -->
+  <div class="flex items-center gap-1.5 overflow-x-auto pb-1 2xl:pb-0 shrink-0 scrollbar-none">
+    <!-- Tab 1: Todos -->
+    <button
+      type="button"
+      (click)="tabChange.emit('ALL')"
+      [class.bg-primary-container]="activeTab() === 'ALL'"
+      [class.text-white]="activeTab() === 'ALL'"
+      [class.bg-surface-container-lowest]="activeTab() !== 'ALL'"
+      [class.text-on-surface-variant]="activeTab() !== 'ALL'"
+      class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
+    >
+      <span>Todos</span>
+      <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold" [class.bg-white/20]="activeTab() === 'ALL'" [class.bg-surface-container-high]="activeTab() !== 'ALL'">
+        {{ totalCount() }}
+      </span>
+    </button>
+
+    <!-- Tab 2: Nuevos / Confirmados -->
+    <button
+      type="button"
+      (click)="tabChange.emit('CONFIRMED')"
+      [class.bg-primary-container]="activeTab() === 'CONFIRMED'"
+      [class.text-white]="activeTab() === 'CONFIRMED'"
+      [class.bg-surface-container-lowest]="activeTab() !== 'CONFIRMED'"
+      [class.text-on-surface-variant]="activeTab() !== 'CONFIRMED'"
+      class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
+    >
+      <span>Nuevos</span>
+      <span
+        class="px-1.5 py-0.2 rounded-full text-[11px] font-bold"
+        [class.bg-secondary-container]="activeTab() !== 'CONFIRMED'"
+        [class.text-secondary-foreground]="activeTab() !== 'CONFIRMED'"
+        [class.bg-white/20]="activeTab() === 'CONFIRMED'"
+      >
+        {{ confirmedCount() }}
+      </span>
+    </button>
+
+    <!-- Tab 3: En cocina -->
+    <button
+      type="button"
+      (click)="tabChange.emit('IN_PREPARATION')"
+      [class.bg-primary-container]="activeTab() === 'IN_PREPARATION'"
+      [class.text-white]="activeTab() === 'IN_PREPARATION'"
+      [class.bg-surface-container-lowest]="activeTab() !== 'IN_PREPARATION'"
+      [class.text-on-surface-variant]="activeTab() !== 'IN_PREPARATION'"
+      class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
+    >
+      <span>En cocina</span>
+      <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold" [class.bg-white/20]="activeTab() === 'IN_PREPARATION'" [class.bg-surface-container-high]="activeTab() !== 'IN_PREPARATION'">
+        {{ inPrepCount() }}
+      </span>
+    </button>
+
+    <!-- Tab 4: Listos -->
+    <button
+      type="button"
+      (click)="tabChange.emit('READY')"
+      [class.bg-primary-container]="activeTab() === 'READY'"
+      [class.text-white]="activeTab() === 'READY'"
+      [class.bg-surface-container-lowest]="activeTab() !== 'READY'"
+      [class.text-on-surface-variant]="activeTab() !== 'READY'"
+      class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
+    >
+      <span>Listos</span>
+      <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold" [class.bg-white/20]="activeTab() === 'READY'" [class.bg-surface-container-high]="activeTab() !== 'READY'">
+        {{ readyCount() }}
+      </span>
+    </button>
+
+    <!-- Tab 5: Entregados / Completados -->
+    <button
+      type="button"
+      (click)="tabChange.emit('COMPLETED')"
+      [class.bg-primary-container]="activeTab() === 'COMPLETED'"
+      [class.text-white]="activeTab() === 'COMPLETED'"
+      [class.bg-surface-container-lowest]="activeTab() !== 'COMPLETED'"
+      [class.text-on-surface-variant]="activeTab() !== 'COMPLETED'"
+      class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
+    >
+      <span>Entregados</span>
+      <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold" [class.bg-white/20]="activeTab() === 'COMPLETED'" [class.bg-surface-container-high]="activeTab() !== 'COMPLETED'">
+        {{ completedCount() }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Controles de Búsqueda y Filtro de Turno / Canal -->
+  <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+    <!-- Chip Turno Actual -->
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold shrink-0">
+      <ng-icon name="matScheduleOutline" class="text-[16px] text-primary-container" />
+      <span>Turno Activo</span>
+    </div>
+
+    <!-- Buscador en tiempo real -->
+    <div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-xl shadow-2xs border border-outline-variant/30 flex-1 sm:w-64 min-w-[200px]">
+      <ng-icon name="matSearchOutline" class="text-[18px] text-on-surface-variant shrink-0" />
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        placeholder="Filtrar pedidos o cliente..."
+        class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant focus:outline-none text-xs font-medium"
+      />
+    </div>
+
+    <!-- Selector de Canal -->
+    <div class="relative shrink-0">
+      <select
+        [value]="selectedChannel()"
+        (change)="onChannelSelect($event)"
+        class="appearance-none px-3 py-1.5 pr-8 rounded-xl bg-surface-container-lowest text-on-surface text-xs font-bold shadow-2xs border border-outline-variant/30 focus:outline-none cursor-pointer"
+      >
+        <option value="ALL">Canal: Todos</option>
+        <option value="WHATSAPP">WhatsApp</option>
+        <option value="COUNTER">Mostrador</option>
+        <option value="INSTAGRAM">Instagram</option>
+        <option value="WEB_STORE">Tienda Web</option>
+      </select>
+      <ng-icon name="matArrowDropDownOutline" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none" />
+    </div>
+  </div>
+</section>

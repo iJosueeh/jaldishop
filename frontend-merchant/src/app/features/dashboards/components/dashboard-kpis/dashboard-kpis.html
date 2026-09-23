@@ -2,9 +2,24 @@
   <!-- KPI 1: Capacidad de Hoy -->
   <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4">
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
-        Capacidad de Hoy
-      </span>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+          Capacidad de Hoy
+        </span>
+        @if (todayException()) {
+          @if (isClosedToday()) {
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-500/20">
+              <ng-icon name="matBlockOutline" class="text-[12px]" />
+              Cerrado
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[10px] font-bold uppercase tracking-wider border border-secondary-container/30">
+              <ng-icon name="matStarOutline" class="text-[12px]" />
+              Especial
+            </span>
+          }
+        }
+      </div>
       <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
         <ng-icon name="matViewWeekOutline" class="text-[18px]" />
       </span>
@@ -18,8 +33,14 @@
             / {{ capacityTotal() > 0 ? capacityTotal() : 0 }} Cupos
           </span>
         </span>
-        <span class="text-[11px] sm:text-xs font-bold text-primary-container bg-surface-container px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
-          {{ capacityPercentage() }}% ocupado
+        <span
+          class="text-[11px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
+          [class.bg-rose-500/15]="isClosedToday()"
+          [class.text-rose-700]="isClosedToday()"
+          [class.bg-surface-container]="!isClosedToday()"
+          [class.text-primary-container]="!isClosedToday()"
+        >
+          {{ isClosedToday() ? 'Cerrado' : capacityPercentage() + '% ocupado' }}
         </span>
       </div>
 
@@ -28,7 +49,8 @@
         @for (block of capacityBlocks(); track block.index) {
           <span
             class="h-3 sm:h-3.5 flex-1 rounded-xs transition-colors"
-            [class.bg-primary-container]="block.isFilled"
+            [class.bg-primary-container]="block.isFilled && !isClosedToday()"
+            [class.bg-rose-500]="block.isFilled && isClosedToday()"
             [class.bg-surface-container-highest]="!block.isFilled"
           ></span>
         }
@@ -36,12 +58,20 @@
     </div>
 
     <div class="flex flex-col gap-1 pt-2 border-t border-surface-container-highest text-xs">
-      <span class="text-on-surface-variant font-medium">{{ shiftSchedule() }}</span>
-      <span class="font-bold text-primary-container">
-        @if (capacityTotal() > 0) {
+      <span class="text-on-surface-variant font-medium truncate" [title]="shiftSchedule()">
+        {{ shiftSchedule() }}
+      </span>
+      <span
+        class="font-bold"
+        [class.text-rose-700]="isClosedToday()"
+        [class.text-primary-container]="!isClosedToday()"
+      >
+        @if (isClosedToday()) {
+          Sin recepción de pedidos hoy
+        } @else if (capacityTotal() > 0) {
           Quedan {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
         } @else {
-          Sin límite configurado
+          Sin franjas configuradas
         }
       </span>
     </div>

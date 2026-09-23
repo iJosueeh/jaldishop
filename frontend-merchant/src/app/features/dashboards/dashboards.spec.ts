@@ -16,7 +16,12 @@ describe('Dashboards', () => {
       configurations: signal([]),
       todayConfigurations: signal([]),
       todayTotalCapacity: signal(0),
+      exceptions: signal([]),
+      todayException: signal(null),
+      todayEffectiveCapacity: signal(0),
+      isTodayClosed: signal(false),
       getConfigurations: () => of([]),
+      getExceptions: () => of([]),
     };
 
     await TestBed.configureTestingModule({

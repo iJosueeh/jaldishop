@@ -36,6 +36,32 @@ export class CapacityService {
     return this.todayConfigurations().reduce((acc, c) => acc + c.maxCapacity, 0);
   });
 
+  readonly todayException = computed<CapacityException | null>(() => {
+    const todayStr = this.getTodayDateString();
+    const allToday = this.exceptions().filter((e) => e.serviceDate === todayStr && e.status === 'ACTIVE');
+    if (allToday.length === 0) return null;
+
+    // Priorizar excepción de todo el día si existe
+    const allDayExc = allToday.find((e) => !e.startTime && !e.endTime);
+    return allDayExc || allToday[0];
+  });
+
+  readonly isTodayClosed = computed<boolean>(() => {
+    const exc = this.todayException();
+    if (exc) {
+      return exc.exceptionCapacity === 0;
+    }
+    return this.todayConfigurations().length === 0 || this.todayTotalCapacity() === 0;
+  });
+
+  readonly todayEffectiveCapacity = computed<number>(() => {
+    const todayExc = this.todayException();
+    if (todayExc) {
+      return todayExc.exceptionCapacity;
+    }
+    return this.todayTotalCapacity();
+  });
+
   getConfigurations(forceRefresh = false): Observable<CapacityConfiguration[]> {
     if (this.isLoaded() && !forceRefresh) {
       return of(this.configurations());
@@ -147,5 +173,13 @@ export class CapacityService {
     this.isLoaded.set(false);
     this.exceptions.set([]);
     this.areExceptionsLoaded.set(false);
+  }
+
+  private getTodayDateString(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

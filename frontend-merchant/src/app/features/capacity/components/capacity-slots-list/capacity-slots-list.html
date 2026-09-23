@@ -85,6 +85,15 @@
           <div class="flex items-center gap-2 pt-1 border-t border-outline-variant/20">
             <button
               type="button"
+              (click)="editSlot.emit(slot)"
+              class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest transition-colors cursor-pointer"
+            >
+              <ng-icon name="matEditOutline" class="text-[16px]" />
+              <span>Editar</span>
+            </button>
+
+            <button
+              type="button"
               (click)="toggleStatus.emit(slot)"
               [class.text-amber-700]="slot.status === 'ACTIVE'"
               [class.bg-amber-500/10]="slot.status === 'ACTIVE'"
@@ -98,7 +107,7 @@
                 [name]="slot.status === 'ACTIVE' ? 'matPauseCircleOutline' : 'matPlayCircleOutline'"
                 class="text-[16px]"
               />
-              <span>{{ slot.status === 'ACTIVE' ? 'Pausar franja' : 'Reactivar franja' }}</span>
+              <span>{{ slot.status === 'ACTIVE' ? 'Pausar' : 'Reactivar' }}</span>
             </button>
           </div>
         </div>

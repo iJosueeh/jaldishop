@@ -1,4 +1,4 @@
-import { Component, inject, input, signal, output } from '@angular/core';
+import { Component, effect, inject, input, signal, output } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -7,7 +7,11 @@ import {
   matErrorOutline,
   matCheckOutline,
 } from '@ng-icons/material-symbols/outline';
-import { CreateCapacityExceptionRequest } from '../../../../core/models/capacity.models';
+import {
+  CapacityException,
+  CreateCapacityExceptionRequest,
+  UpdateCapacityExceptionRequest,
+} from '../../../../core/models/capacity.models';
 import { TimeRangePicker } from '../../../../shared/components/time-range-picker/time-range-picker';
 
 @Component({
@@ -29,10 +33,14 @@ export class CapacityExceptionModal {
 
   readonly isOpen = input<boolean>(false);
   readonly isSubmitting = input<boolean>(false);
+  readonly exceptionToEdit = input<CapacityException | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
   readonly closeModal = output<void>();
-  readonly saveException = output<CreateCapacityExceptionRequest>();
+  readonly saveException = output<{
+    request: CreateCapacityExceptionRequest | UpdateCapacityExceptionRequest;
+    id?: string;
+  }>();
 
   readonly minDate: string = this.getTodayDateString();
 
@@ -44,6 +52,33 @@ export class CapacityExceptionModal {
     exceptionCapacity: [0, [Validators.required, Validators.min(0)]],
     reason: [''],
   });
+
+  constructor() {
+    effect(() => {
+      const exc = this.exceptionToEdit();
+      if (exc) {
+        const isAllDay = !exc.startTime && !exc.endTime;
+        this.form.patchValue({
+          serviceDate: exc.serviceDate,
+          isAllDay,
+          startTime: exc.startTime ? exc.startTime.substring(0, 5) : '09:00',
+          endTime: exc.endTime ? exc.endTime.substring(0, 5) : '14:00',
+          exceptionCapacity: exc.exceptionCapacity,
+          reason: exc.reason || '',
+        });
+      } else {
+        this.form.reset({
+          serviceDate: this.minDate,
+          isAllDay: true,
+          startTime: '09:00',
+          endTime: '14:00',
+          exceptionCapacity: 0,
+          reason: '',
+        });
+      }
+      this.errorMessage.set(null);
+    });
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -69,7 +104,10 @@ export class CapacityExceptionModal {
       reason: reason ? reason.trim() : null,
     };
 
-    this.saveException.emit(payload);
+    this.saveException.emit({
+      request: payload,
+      id: this.exceptionToEdit()?.id,
+    });
   }
 
   resetForm(): void {
