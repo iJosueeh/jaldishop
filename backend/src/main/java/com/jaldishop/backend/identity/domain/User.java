@@ -10,7 +10,7 @@ public class User {
     private String lastName;
     private final String email;
     private final String password;
-    private final UserStatus status;
+    private UserStatus status;
     private String phone;
     private final Set<Role> roles;
     private final Instant createdAt;
@@ -116,6 +116,25 @@ public class User {
 
     public boolean canAuthenticate() {
         return status == UserStatus.ACTIVE;
+    }
+
+    public void suspend(UUID currentAdminId) {
+        if (currentAdminId != null && this.id.equals(currentAdminId)) {
+            throw new IllegalArgumentException("No puedes suspender tu propia cuenta de administrador.");
+        }
+        if (this.status == UserStatus.SUSPENDED) {
+            throw new IllegalStateException("El usuario ya se encuentra suspendido.");
+        }
+        this.status = UserStatus.SUSPENDED;
+        this.updatedAt = Instant.now();
+    }
+
+    public void activate() {
+        if (this.status == UserStatus.ACTIVE) {
+            throw new IllegalStateException("El usuario ya se encuentra activo.");
+        }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = Instant.now();
     }
 
     public String getFullName() {

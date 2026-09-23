@@ -1,12 +1,15 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.adapter;
 
+import com.jaldishop.backend.identity.domain.RoleName;
 import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.domain.UserRepository;
+import com.jaldishop.backend.identity.domain.UserStatus;
 import com.jaldishop.backend.identity.infrastructure.persistence.entity.UserEntity;
 import com.jaldishop.backend.identity.infrastructure.persistence.mapper.UserPersistenceMapper;
 import com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,5 +47,13 @@ public class UserRepositoryAdapter implements UserRepository {
     @Override
     public boolean existsByEmail(String email) {
         return userJpaRepository.existsByEmail(email);
+    }
+
+    @Override
+    public List<User> findAll(String query, RoleName role, UserStatus status) {
+        String cleanQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+        return userJpaRepository.searchUsers(cleanQuery, role, status).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

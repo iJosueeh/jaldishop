@@ -22,6 +22,16 @@
       "type": "string"
     },
     {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "storeId",
       "value": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
       "type": "string"
@@ -671,6 +681,221 @@
               "path": ["api", "v1", "health"]
             },
             "description": "Verifica que el servicio Spring Boot se encuentre en línea y respondiendo."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Administración (ADMIN - BE-ADMIN-01)",
+      "item": [
+        {
+          "name": "01. Login Admin (Generar Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('adminToken', jsonData.token);",
+                  "    console.log('adminToken guardado con éxito');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin.demo@jaldishop.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Autentica al usuario Administrador de la plataforma y guarda automáticamente el JWT en la variable adminToken."
+          }
+        },
+        {
+          "name": "02. Listar Usuarios (Filtros Opcionales)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?query=&role=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "",
+                  "description": "Búsqueda por nombre, apellido o email (ej. demo)"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "Filtro por rol: CUSTOMER, MERCHANT, ADMIN"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filtro por estado: ACTIVE, INACTIVE, SUSPENDED"
+                }
+              ]
+            },
+            "description": "Lista los usuarios de la plataforma con roles y tiendas asociadas para comerciantes."
+          }
+        },
+        {
+          "name": "03. Consultar Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{targetUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{targetUserId}}"]
+            },
+            "description": "Obtiene el detalle completo de un usuario sin exponer contraseñas."
+          }
+        },
+        {
+          "name": "04. Suspender Usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{targetUserId}}/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{targetUserId}}", "suspend"]
+            },
+            "description": "Suspende la cuenta de un usuario impidiendo su inicio de sesión."
+          }
+        },
+        {
+          "name": "05. Reactivar Usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{targetUserId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{targetUserId}}", "activate"]
+            },
+            "description": "Reactiva la cuenta de un usuario suspendido o inactivo."
+          }
+        },
+        {
+          "name": "06. Listar Tiendas Globales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/stores?query=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "stores"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "",
+                  "description": "Búsqueda por nombre o slug de tienda"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filtro por estado: ACTIVE, INACTIVE, SUSPENDED, CLOSED"
+                }
+              ]
+            },
+            "description": "Listado global de todas las tiendas de la plataforma con datos del comerciante propietario."
+          }
+        },
+        {
+          "name": "07. Consultar Tienda por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/stores/{{storeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "stores", "{{storeId}}"]
+            },
+            "description": "Obtiene la configuración y estado detallado de una tienda."
+          }
+        },
+        {
+          "name": "08. Suspender Tienda",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/stores/{{storeId}}/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "stores", "{{storeId}}", "suspend"]
+            },
+            "description": "Suspende la operación de una tienda."
+          }
+        },
+        {
+          "name": "09. Reactivar Tienda",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/stores/{{storeId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "stores", "{{storeId}}", "activate"]
+            },
+            "description": "Reactiva una tienda suspendida para permitir recepción de pedidos."
           }
         }
       ]

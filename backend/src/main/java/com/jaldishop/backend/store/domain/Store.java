@@ -208,7 +208,18 @@ public class Store {
     }
 
     public void activate() {
+        if (this.status == StoreStatus.ACTIVE) {
+            throw new IllegalStateException("La tienda ya se encuentra activa.");
+        }
         this.status = StoreStatus.ACTIVE;
+        this.updatedAt = Instant.now();
+    }
+
+    public void suspend() {
+        if (this.status == StoreStatus.SUSPENDED) {
+            throw new IllegalStateException("La tienda ya se encuentra suspendida.");
+        }
+        this.status = StoreStatus.SUSPENDED;
         this.updatedAt = Instant.now();
     }
 
