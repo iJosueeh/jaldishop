@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -21,6 +22,8 @@ import {
   matShoppingBagOutline,
   matLocalShippingOutline,
   matSearchOutline,
+  matBoltOutline,
+  matTimerOutline,
 } from '@ng-icons/material-symbols/outline';
 import { MerchantOrder, OrderChannel, PaymentMethod } from '../../../core/models/order.models';
 
@@ -55,6 +58,8 @@ export interface CatalogProductItem {
       matShoppingBagOutline,
       matLocalShippingOutline,
       matSearchOutline,
+      matBoltOutline,
+      matTimerOutline,
     }),
   ],
   templateUrl: './create-order-modal.html',
@@ -127,6 +132,40 @@ export class CreateOrderModal {
     });
   }
 
+  readonly scheduledTimeValue = toSignal(
+    this.orderForm.get('scheduledTime')!.valueChanges,
+    { initialValue: this.orderForm.get('scheduledTime')?.value }
+  );
+
+  readonly scheduledTimeRelativeText = computed(() => {
+    const timeStr = this.scheduledTimeValue();
+    if (!timeStr || typeof timeStr !== 'string' || !timeStr.includes(':')) {
+      return '';
+    }
+
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return '';
+
+    const now = new Date();
+    const scheduledDate = new Date();
+    scheduledDate.setHours(hours, minutes, 0, 0);
+
+    const diffMinutes = Math.round((scheduledDate.getTime() - now.getTime()) / (60 * 1000));
+
+    if (diffMinutes < -10) {
+      return 'Hora anterior a la actual';
+    }
+    if (diffMinutes >= -10 && diffMinutes < 5) {
+      return 'Inmediato (ahora)';
+    }
+    if (diffMinutes >= 5 && diffMinutes < 60) {
+      return `En ~${diffMinutes} min`;
+    }
+    const h = Math.floor(diffMinutes / 60);
+    const m = diffMinutes % 60;
+    return m === 0 ? `En ~${h} h` : `En ~${h}h ${m}m`;
+  });
+
   getDefaultScheduledTime(): string {
     const d = new Date(Date.now() + 30 * 60 * 1000);
     const hours = d.getHours().toString().padStart(2, '0');
@@ -139,6 +178,24 @@ export class CreateOrderModal {
     const hours = d.getHours().toString().padStart(2, '0');
     const minutes = d.getMinutes().toString().padStart(2, '0');
     this.orderForm.patchValue({ scheduledTime: `${hours}:${minutes}` });
+    this.orderForm.get('scheduledTime')?.markAsDirty();
+  }
+
+  adjustScheduledTime(deltaMinutes: number): void {
+    const current = this.orderForm.get('scheduledTime')?.value || this.getDefaultScheduledTime();
+    let [h, m] = current.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) {
+      const d = new Date();
+      h = d.getHours();
+      m = d.getMinutes();
+    }
+    const totalMinutes = h * 60 + m + deltaMinutes;
+    // Normalizar a rango 24 horas (0 - 1439 minutos)
+    const normalizedMinutes = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const newH = Math.floor(normalizedMinutes / 60).toString().padStart(2, '0');
+    const newM = (normalizedMinutes % 60).toString().padStart(2, '0');
+    this.orderForm.patchValue({ scheduledTime: `${newH}:${newM}` });
+    this.orderForm.get('scheduledTime')?.markAsDirty();
   }
 
   onSearchFocus(): void {
@@ -220,6 +277,11 @@ export class CreateOrderModal {
         control.setValue(curr - 1);
       }
     }
+  }
+
+  calculateTotalUnits(): number {
+    const rawItems = this.itemsFormArray.value as Array<{ quantity: number }>;
+    return rawItems.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
   }
 
   calculateItemsSubtotal(): number {

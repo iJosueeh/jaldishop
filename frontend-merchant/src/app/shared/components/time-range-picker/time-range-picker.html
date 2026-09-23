@@ -39,7 +39,7 @@
           [id]="startControlName()"
           type="time"
           [formControlName]="startControlName()"
-          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer"
+          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
         />
       </div>
     </div>
@@ -59,7 +59,7 @@
           [id]="endControlName()"
           type="time"
           [formControlName]="endControlName()"
-          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer"
+          class="w-full bg-transparent text-xs font-bold text-on-surface focus:outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
         />
       </div>
     </div>

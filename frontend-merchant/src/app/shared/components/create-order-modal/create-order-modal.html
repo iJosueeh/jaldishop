@@ -208,42 +208,104 @@
             }
           </div>
 
-          <!-- 3. Horario Programado & Atajos Rápidos -->
+          <!-- 3. Horario Programado de Despacho Operativo -->
           <div>
             <div class="flex items-center justify-between mb-2">
               <label class="text-xs font-bold text-on-surface">Horario Estimado de Despacho</label>
-              <div class="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  (click)="setQuickTime(20)"
-                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
+              @if (scheduledTimeRelativeText()) {
+                <span
+                  class="text-[11px] font-bold px-2 py-0.5 rounded-full transition-colors"
+                  [class.bg-primary-container/10]="!scheduledTimeRelativeText().includes('anterior')"
+                  [class.text-primary-container]="!scheduledTimeRelativeText().includes('anterior')"
+                  [class.bg-error-container]="scheduledTimeRelativeText().includes('anterior')"
+                  [class.text-on-error-container]="scheduledTimeRelativeText().includes('anterior')"
                 >
-                  +20m
-                </button>
-                <button
-                  type="button"
-                  (click)="setQuickTime(35)"
-                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
-                >
-                  +35m
-                </button>
-                <button
-                  type="button"
-                  (click)="setQuickTime(50)"
-                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
-                >
-                  +50m
-                </button>
-              </div>
+                  {{ scheduledTimeRelativeText() }}
+                </span>
+              }
             </div>
-            
-            <div class="relative">
-              <ng-icon name="matScheduleOutline" class="absolute left-3.5 top-3 text-on-surface-variant text-[20px]" />
-              <input
-                type="time"
-                formControlName="scheduledTime"
-                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface font-bold outline-none transition-all shadow-2xs"
-              />
+
+            <!-- Selector Central Ergonómico con Steppers (-15m / +15m) y Click Completo -->
+            <div class="flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                (click)="adjustScheduledTime(-15)"
+                title="Restar 15 minutos"
+                class="px-3 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high active:scale-95 text-on-surface border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs"
+              >
+                <ng-icon name="matRemoveOutline" class="text-[15px]" />
+                <span>15m</span>
+              </button>
+
+              <div
+                (click)="scheduledTimeInput.showPicker()"
+                class="flex-1 flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 hover:border-primary focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all cursor-pointer shadow-2xs"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <ng-icon name="matTimerOutline" class="text-primary-container text-[18px] shrink-0" />
+                  <input
+                    #scheduledTimeInput
+                    type="time"
+                    formControlName="scheduledTime"
+                    class="bg-transparent text-xs sm:text-sm font-black text-on-surface outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </div>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider hidden sm:inline-block">
+                  Clic para cambiar
+                </span>
+              </div>
+
+              <button
+                type="button"
+                (click)="adjustScheduledTime(15)"
+                title="Sumar 15 minutos"
+                class="px-3 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high active:scale-95 text-on-surface border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs"
+              >
+                <ng-icon name="matAddOutline" class="text-[15px]" />
+                <span>15m</span>
+              </button>
+            </div>
+
+            <!-- Atajos Rápidos de Preparación Operativa -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider mr-1">
+                Atajos:
+              </span>
+              <button
+                type="button"
+                (click)="setQuickTime(15)"
+                class="px-2 py-1 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-white text-[11px] font-bold text-on-surface transition-all cursor-pointer active:scale-95"
+              >
+                +15 min
+              </button>
+              <button
+                type="button"
+                (click)="setQuickTime(30)"
+                class="px-2 py-1 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-white text-[11px] font-bold text-on-surface transition-all cursor-pointer active:scale-95"
+              >
+                +30 min
+              </button>
+              <button
+                type="button"
+                (click)="setQuickTime(45)"
+                class="px-2 py-1 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-white text-[11px] font-bold text-on-surface transition-all cursor-pointer active:scale-95"
+              >
+                +45 min
+              </button>
+              <button
+                type="button"
+                (click)="setQuickTime(60)"
+                class="px-2 py-1 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-white text-[11px] font-bold text-on-surface transition-all cursor-pointer active:scale-95"
+              >
+                +1 hora
+              </button>
+              <button
+                type="button"
+                (click)="setQuickTime(120)"
+                class="px-2 py-1 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-white text-[11px] font-bold text-on-surface transition-all cursor-pointer active:scale-95"
+              >
+                +2 horas
+              </button>
             </div>
           </div>
 
@@ -311,7 +373,7 @@
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Productos en Comanda</span>
                 <span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-extrabold text-[11px]">
-                  {{ itemsFormArray.length }}
+                  {{ itemsFormArray.length }} {{ itemsFormArray.length === 1 ? 'ítem' : 'ítems' }} · {{ calculateTotalUnits() }} unid.
                 </span>
               </div>
               <span class="text-[11px] text-on-surface-variant">Ticket en vivo</span>
@@ -369,38 +431,29 @@
               }
             </div>
 
-            <!-- Lista con Scroll de Ítems de la Comanda -->
-            <div formArrayName="items" class="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1 max-h-[220px] sm:max-h-[270px]">
+            <!-- Lista Optimizada con Scroll para Múltiples Ítems de la Comanda -->
+            <div formArrayName="items" class="flex-1 overflow-y-auto overflow-x-hidden space-y-2 pr-1 min-h-[150px] max-h-[250px] sm:max-h-[300px]">
               @for (item of itemsFormArray.controls; track $index; let idx = $index) {
-                <div [formGroupName]="idx" class="p-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-2 overflow-hidden">
-                  <!-- Nombre del Producto y Precio Oficial Unitario -->
-                  <div class="flex items-center justify-between gap-2 min-w-0">
-                    <div class="flex-1 min-w-0">
-                      <span class="text-xs font-bold text-on-surface truncate block">{{ item.get('name')?.value }}</span>
-                      <span class="text-[11px] text-on-surface-variant font-medium">
-                        Precio registrado: S/ {{ Number(item.get('unitPrice')?.value || 0) | number: '1.2-2' }} c/u
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      (click)="removeItem(idx)"
-                      [disabled]="itemsFormArray.length <= 1"
-                      [class.opacity-25]="itemsFormArray.length <= 1"
-                      class="p-1 rounded-lg text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
-                      aria-label="Eliminar producto"
-                    >
-                      <ng-icon name="matDeleteOutline" class="text-[18px]" />
-                    </button>
+                <div [formGroupName]="idx" class="p-2.5 sm:p-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 hover:border-outline-variant/60 shadow-2xs transition-all flex items-center justify-between gap-2.5 overflow-hidden">
+                  <!-- Nombre del Producto y Precio Unitario -->
+                  <div class="flex-1 min-w-0">
+                    <span class="text-xs font-bold text-on-surface truncate block" [title]="item.get('name')?.value">
+                      {{ item.get('name')?.value }}
+                    </span>
+                    <span class="text-[10px] text-on-surface-variant font-medium">
+                      S/ {{ Number(item.get('unitPrice')?.value || 0) | number: '1.2-2' }} c/u
+                    </span>
                   </div>
 
-                  <!-- Stepper de Cantidad y Subtotal Calculado de Línea -->
-                  <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-outline-variant/10 min-w-0">
+                  <!-- Stepper de Cantidad, Subtotal y Eliminar en un solo renglón -->
+                  <div class="flex items-center gap-2 shrink-0">
                     <!-- Stepper -->
-                    <div class="flex items-center gap-1 bg-surface-container-low/60 rounded-xl p-0.5 border border-outline-variant/20 shrink-0">
+                    <div class="flex items-center gap-0.5 bg-surface-container-low/80 rounded-xl p-0.5 border border-outline-variant/20">
                       <button
                         type="button"
                         (click)="decrementQuantity(idx)"
-                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs"
+                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs active:scale-95"
+                        aria-label="Restar 1 unidad"
                       >
                         -
                       </button>
@@ -408,19 +461,29 @@
                       <button
                         type="button"
                         (click)="incrementQuantity(idx)"
-                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs"
+                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs active:scale-95"
+                        aria-label="Sumar 1 unidad"
                       >
                         +
                       </button>
                     </div>
 
                     <!-- Subtotal de Línea -->
-                    <div class="flex items-center gap-1.5 shrink-0">
-                      <span class="text-[11px] text-on-surface-variant font-semibold">Subtotal:</span>
-                      <span class="text-xs font-black text-primary text-right whitespace-nowrap">
-                        S/ {{ (Number(item.get('quantity')?.value || 0) * Number(item.get('unitPrice')?.value || 0)) | number: '1.2-2' }}
-                      </span>
-                    </div>
+                    <span class="text-xs font-black text-primary text-right min-w-[62px] whitespace-nowrap">
+                      S/ {{ (Number(item.get('quantity')?.value || 0) * Number(item.get('unitPrice')?.value || 0)) | number: '1.2-2' }}
+                    </span>
+
+                    <!-- Eliminar -->
+                    <button
+                      type="button"
+                      (click)="removeItem(idx)"
+                      [disabled]="itemsFormArray.length <= 1"
+                      [class.opacity-20]="itemsFormArray.length <= 1"
+                      class="p-1 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer"
+                      aria-label="Eliminar producto"
+                    >
+                      <ng-icon name="matDeleteOutline" class="text-[17px]" />
+                    </button>
                   </div>
                 </div>
               }
