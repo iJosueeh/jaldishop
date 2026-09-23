@@ -6,7 +6,10 @@
 
 ---
 
-> **Nota:** Este diagrama es una representación visual del modelo físico documentado en `modelo-er.md`. Las definiciones físicas completas (tipos, constraints, índices, defaults) permanecen en dicho documento. Este diagrama muestra únicamente PK, FK y atributos relevantes para comprender las relaciones.
+> **Nota:** Este diagrama es una representación visual del modelo físico documentado en `modelo-er.md`. Las definiciones físicas completas (tipos, constraints, índices, defaults) permanecen en dicho documento.
+> 
+> 🔗 **Versión interactiva en vivo:** [Ver en dbdiagram.io](https://dbdiagram.io/d/6ab3fe0e0f25a52d01e9b47b)
+> 📄 **Exportación estática:** `docs/04-diseno/diagrama-er.png` / `docs/04-diseno/diagrama-er.pdf`
 
 ```mermaid
 erDiagram

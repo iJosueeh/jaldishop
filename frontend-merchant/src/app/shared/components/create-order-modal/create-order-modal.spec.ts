@@ -22,15 +22,16 @@ describe('CreateOrderModal', () => {
     expect(component).toBeTruthy();
   });
 
-  it('debe calcular subtotal y total general con costo de delivery', () => {
+  it('debe calcular subtotal, unidades totales y total general con costo de delivery', () => {
     component.itemsFormArray.push(component.createItemFormGroup('Brownies', 1, 15));
     const items = component.itemsFormArray;
     items.at(0).patchValue({ quantity: 2, unitPrice: 20 });
-    items.at(1).patchValue({ quantity: 1, unitPrice: 15 });
+    items.at(1).patchValue({ quantity: 3, unitPrice: 15 });
     component.orderForm.patchValue({ deliveryMode: 'DELIVERY', deliveryFee: 7.0 });
 
-    expect(component.calculateItemsSubtotal()).toBe(55);
-    expect(component.calculateGrandTotal()).toBe(62);
+    expect(component.calculateTotalUnits()).toBe(5);
+    expect(component.calculateItemsSubtotal()).toBe(85);
+    expect(component.calculateGrandTotal()).toBe(92);
   });
 
   it('debe manejar incremento y decremento de cantidades mediante steppers', () => {
@@ -60,6 +61,24 @@ describe('CreateOrderModal', () => {
   it('debe actualizar horario programado con atajos rápidos', () => {
     component.setQuickTime(30);
     expect(component.orderForm.get('scheduledTime')?.value).toBeTruthy();
+  });
+
+  it('debe ajustar horario programado con steppers (+15m y -15m)', () => {
+    component.orderForm.patchValue({ scheduledTime: '14:00' });
+    
+    component.adjustScheduledTime(15);
+    expect(component.orderForm.get('scheduledTime')?.value).toBe('14:15');
+
+    component.adjustScheduledTime(-15);
+    expect(component.orderForm.get('scheduledTime')?.value).toBe('14:00');
+
+    component.adjustScheduledTime(-30);
+    expect(component.orderForm.get('scheduledTime')?.value).toBe('13:30');
+  });
+
+  it('debe calcular scheduledTimeRelativeText reactivamente', () => {
+    component.orderForm.patchValue({ scheduledTime: '23:59' });
+    expect(component.scheduledTimeRelativeText()).toBeTruthy();
   });
 
   it('debe cambiar canales y métodos de pago', () => {

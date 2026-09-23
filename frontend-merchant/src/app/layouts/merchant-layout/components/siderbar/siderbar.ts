@@ -68,6 +68,51 @@ export class Siderbar implements OnInit {
     }));
   });
 
+  readonly storeOperationalStatus = computed<{
+    label: string;
+    dotClass: string;
+    footerLabel: string;
+    footerClass: string;
+  }>(() => {
+    const store = this.storeService.currentStore();
+    if (!store || store.status !== 'ACTIVE') {
+      return {
+        label: 'Pausada',
+        dotClass: 'bg-rose-500',
+        footerLabel: 'Tienda en pausa',
+        footerClass: 'text-rose-600 bg-rose-500/10 border-rose-500/20',
+      };
+    }
+
+    if (this.capacityService.isTodayClosed() || this.capacityService.todayEffectiveCapacity() === 0) {
+      return {
+        label: 'Cerrado hoy',
+        dotClass: 'bg-slate-400',
+        footerLabel: 'Solo pedidos programados',
+        footerClass: 'text-on-surface-variant bg-surface-container-lowest border-outline-variant/20',
+      };
+    }
+
+    const occupied = this.capacityOccupied();
+    const capacity = this.capacityService.todayEffectiveCapacity();
+
+    if (capacity > 0 && occupied >= capacity) {
+      return {
+        label: 'Lleno por hoy',
+        dotClass: 'bg-amber-500',
+        footerLabel: 'Cupos agotados hoy',
+        footerClass: 'text-amber-600 bg-amber-500/10 border-amber-500/20',
+      };
+    }
+
+    return {
+      label: 'Abierto',
+      dotClass: 'bg-emerald-500 animate-pulse',
+      footerLabel: 'Recibiendo pedidos',
+      footerClass: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20',
+    };
+  });
+
   ngOnInit(): void {
     if (this.capacityService.configurations().length === 0) {
       this.capacityService.getConfigurations().subscribe();
