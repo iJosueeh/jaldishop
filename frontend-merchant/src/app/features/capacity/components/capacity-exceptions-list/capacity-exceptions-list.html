@@ -115,6 +115,15 @@
             <div class="flex items-center gap-2">
               <button
                 type="button"
+                (click)="editException.emit(exc)"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest transition-all cursor-pointer active:scale-98 flex items-center gap-1"
+              >
+                <ng-icon name="matEditOutline" class="text-[14px]" />
+                <span>Editar</span>
+              </button>
+
+              <button
+                type="button"
                 (click)="toggleStatus.emit(exc)"
                 class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
                 [class.bg-surface-container-high]="exc.status === 'ACTIVE'"

@@ -25,9 +25,10 @@ describe('CapacitySlotModal', () => {
     expect(component.form.get('maxCapacity')?.value).toBe(10);
   });
 
-  it('debe emitir saveSlot al enviar formulario válido', () => {
+  it('debe emitir saveSlot al enviar formulario válido en modo creación', () => {
     fixture.componentRef.setInput('isOpen', true);
     fixture.componentRef.setInput('dayOfWeek', 2);
+    fixture.componentRef.setInput('slotToEdit', null);
     fixture.detectChanges();
 
     component.form.patchValue({
@@ -44,10 +45,42 @@ describe('CapacitySlotModal', () => {
     component.onSubmit();
 
     expect(emitted).toBeTruthy();
-    expect(emitted.dayOfWeek).toBe(2);
-    expect(emitted.startTime).toBe('10:00:00');
-    expect(emitted.endTime).toBe('15:00:00');
-    expect(emitted.maxCapacity).toBe(15);
+    expect(emitted.id).toBeUndefined();
+    expect(emitted.request.dayOfWeek).toBe(2);
+    expect(emitted.request.startTime).toBe('10:00:00');
+    expect(emitted.request.endTime).toBe('15:00:00');
+    expect(emitted.request.maxCapacity).toBe(15);
+  });
+
+  it('debe precargar datos y emitir id en modo edición', () => {
+    const mockSlot: any = {
+      id: 'cfg-123',
+      dayOfWeek: 2,
+      startTime: '11:00:00',
+      endTime: '16:00:00',
+      maxCapacity: 20,
+      status: 'ACTIVE',
+    };
+
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('dayOfWeek', 2);
+    fixture.componentRef.setInput('slotToEdit', mockSlot);
+    fixture.detectChanges();
+
+    expect(component.form.get('startTime')?.value).toBe('11:00');
+    expect(component.form.get('endTime')?.value).toBe('16:00');
+    expect(component.form.get('maxCapacity')?.value).toBe(20);
+
+    let emitted: any = null;
+    component.saveSlot.subscribe((val) => {
+      emitted = val;
+    });
+
+    component.onSubmit();
+
+    expect(emitted).toBeTruthy();
+    expect(emitted.id).toBe('cfg-123');
+    expect(emitted.request.maxCapacity).toBe(20);
   });
 
   it('debe validar horario inicio < fin', () => {

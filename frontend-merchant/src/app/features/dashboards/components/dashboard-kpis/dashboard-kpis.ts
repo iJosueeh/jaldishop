@@ -6,6 +6,9 @@ import {
   matReceiptLongOutline,
   matTimerOutline,
   matCheckCircleOutline,
+  matEventBusyOutline,
+  matBlockOutline,
+  matStarOutline,
 } from '@ng-icons/material-symbols/outline';
 import { CapacityService } from '../../../../core/services/capacity.service';
 
@@ -17,6 +20,9 @@ import { CapacityService } from '../../../../core/services/capacity.service';
       matReceiptLongOutline,
       matTimerOutline,
       matCheckCircleOutline,
+      matEventBusyOutline,
+      matBlockOutline,
+      matStarOutline,
     }),
   ],
   selector: 'app-dashboard-kpis',
@@ -26,7 +32,9 @@ import { CapacityService } from '../../../../core/services/capacity.service';
 export class DashboardKpis implements OnInit {
   private readonly capacityService = inject(CapacityService);
 
-  readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
+  readonly todayException = computed(() => this.capacityService.todayException());
+  readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacity());
+  readonly isClosedToday = computed(() => this.capacityService.isTodayClosed());
   readonly capacityOccupied = signal<number>(0);
 
   readonly metrics = signal<DashboardMetrics>({
@@ -43,6 +51,14 @@ export class DashboardKpis implements OnInit {
   });
 
   readonly shiftSchedule = computed(() => {
+    const exc = this.todayException();
+    if (exc) {
+      if (exc.exceptionCapacity === 0) {
+        return exc.reason ? `Cerrado: ${exc.reason}` : 'Cerrado por excepción hoy';
+      }
+      return exc.reason ? `Fecha especial: ${exc.reason}` : 'Capacidad especial configurada hoy';
+    }
+
     const todayConfigs = this.capacityService.todayConfigurations();
     if (todayConfigs.length === 0) {
       return 'Sin franjas configuradas hoy';
@@ -77,6 +93,9 @@ export class DashboardKpis implements OnInit {
   ngOnInit(): void {
     if (this.capacityService.configurations().length === 0) {
       this.capacityService.getConfigurations().subscribe();
+    }
+    if (this.capacityService.exceptions().length === 0) {
+      this.capacityService.getExceptions().subscribe();
     }
   }
 }

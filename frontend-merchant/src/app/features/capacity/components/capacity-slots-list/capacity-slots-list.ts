@@ -7,6 +7,7 @@ import {
   matPlayCircleOutline,
   matCalendarTodayOutline,
   matAddOutline,
+  matEditOutline,
 } from '@ng-icons/material-symbols/outline';
 import { CapacityConfiguration } from '../../../../core/models/capacity.models';
 
@@ -20,6 +21,7 @@ import { CapacityConfiguration } from '../../../../core/models/capacity.models';
       matPlayCircleOutline,
       matCalendarTodayOutline,
       matAddOutline,
+      matEditOutline,
     }),
   ],
   selector: 'app-capacity-slots-list',
@@ -32,5 +34,6 @@ export class CapacitySlotsList {
   readonly isLoading = input.required<boolean>();
 
   readonly toggleStatus = output<CapacityConfiguration>();
+  readonly editSlot = output<CapacityConfiguration>();
   readonly createSlot = output<void>();
 }

@@ -57,8 +57,7 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () => import('./features/coming-soon/coming-soon').then((m) => m.ComingSoon),
-        data: { moduleKey: 'orders' },
+        loadComponent: () => import('./features/orders/orders').then((m) => m.Orders),
       },
       {
         path: 'products',

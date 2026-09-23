@@ -1,0 +1,513 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200 font-sans"
+  >
+    <div
+      class="relative w-full max-w-4xl lg:max-w-5xl bg-surface-container-lowest rounded-3xl shadow-2xl border border-outline-variant/30 flex flex-col max-h-[92vh] overflow-hidden my-auto"
+    >
+      <!-- Cabecera Principal del Modal -->
+      <header
+        class="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-outline-variant/20 bg-surface-container-low/50 shrink-0"
+      >
+        <div class="flex items-center gap-3 sm:gap-3.5">
+          <div
+            class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary-container text-white flex items-center justify-center shadow-xs shrink-0"
+          >
+            <ng-icon name="matReceiptLongOutline" class="text-[22px] sm:text-[24px]" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h3 class="text-sm sm:text-base font-bold text-on-surface">Nueva Comanda Operativa</h3>
+              <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20">
+                Turno en Vivo
+              </span>
+            </div>
+            <p class="text-xs text-on-surface-variant mt-0.5">Búsqueda rápida de productos y registro de comanda</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="onClose()"
+          class="w-9 h-9 rounded-full hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors cursor-pointer"
+          aria-label="Cerrar modal"
+        >
+          <ng-icon name="matCloseOutline" class="text-[22px]" />
+        </button>
+      </header>
+
+      <!-- Segmented Tab Control para Móviles (< lg) -->
+      <div class="lg:hidden flex items-center p-2 bg-surface-container-low/70 border-b border-outline-variant/20 gap-2 shrink-0">
+        <button
+          type="button"
+          (click)="setMobileTab('DATA')"
+          [class.bg-surface-container-lowest]="activeMobileTab() === 'DATA'"
+          [class.text-primary]="activeMobileTab() === 'DATA'"
+          [class.shadow-2xs]="activeMobileTab() === 'DATA'"
+          [class.text-on-surface-variant]="activeMobileTab() !== 'DATA'"
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <ng-icon name="matLocationOnOutline" class="text-[18px]" />
+          <span>1. Despacho & Cliente</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setMobileTab('ITEMS')"
+          [class.bg-surface-container-lowest]="activeMobileTab() === 'ITEMS'"
+          [class.text-primary]="activeMobileTab() === 'ITEMS'"
+          [class.shadow-2xs]="activeMobileTab() === 'ITEMS'"
+          [class.text-on-surface-variant]="activeMobileTab() !== 'ITEMS'"
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <ng-icon name="matReceiptLongOutline" class="text-[18px]" />
+          <span>2. Comanda ({{ itemsFormArray.length }}) · S/ {{ calculateGrandTotal() | number: '1.2-2' }}</span>
+        </button>
+      </div>
+
+      <!-- Contenedor Split Responsivo -->
+      <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-hidden min-h-0">
+        
+        <!-- COLUMNA IZQUIERDA (7/12 en Desktop): Despacho, Cliente & Horario -->
+        <div
+          [class.hidden]="activeMobileTab() !== 'DATA'"
+          class="lg:!block lg:col-span-7 p-5 sm:p-7 overflow-y-auto space-y-5 sm:space-y-6 border-b lg:border-b-0 lg:border-r border-outline-variant/20"
+        >
+          <!-- 1. Canal de Venta Rápido -->
+          <div>
+            <label class="block text-xs font-bold text-on-surface mb-2">Canal de Recepción</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <button
+                type="button"
+                (click)="setChannel('WHATSAPP')"
+                [class.bg-emerald-600]="orderForm.get('channel')?.value === 'WHATSAPP'"
+                [class.text-white]="orderForm.get('channel')?.value === 'WHATSAPP'"
+                [class.border-emerald-600]="orderForm.get('channel')?.value === 'WHATSAPP'"
+                [class.bg-surface-container-low]="orderForm.get('channel')?.value !== 'WHATSAPP'"
+                [class.text-on-surface]="orderForm.get('channel')?.value !== 'WHATSAPP'"
+                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              >
+                <ng-icon name="matChatOutline" class="text-[18px] shrink-0" />
+                <span>WhatsApp</span>
+              </button>
+              
+              <button
+                type="button"
+                (click)="setChannel('COUNTER')"
+                [class.bg-primary-container]="orderForm.get('channel')?.value === 'COUNTER'"
+                [class.text-white]="orderForm.get('channel')?.value === 'COUNTER'"
+                [class.border-primary-container]="orderForm.get('channel')?.value === 'COUNTER'"
+                [class.bg-surface-container-low]="orderForm.get('channel')?.value !== 'COUNTER'"
+                [class.text-on-surface]="orderForm.get('channel')?.value !== 'COUNTER'"
+                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              >
+                <ng-icon name="matStorefrontOutline" class="text-[18px] shrink-0" />
+                <span>Mostrador</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setChannel('INSTAGRAM')"
+                [class.bg-pink-600]="orderForm.get('channel')?.value === 'INSTAGRAM'"
+                [class.text-white]="orderForm.get('channel')?.value === 'INSTAGRAM'"
+                [class.border-pink-600]="orderForm.get('channel')?.value === 'INSTAGRAM'"
+                [class.bg-surface-container-low]="orderForm.get('channel')?.value !== 'INSTAGRAM'"
+                [class.text-on-surface]="orderForm.get('channel')?.value !== 'INSTAGRAM'"
+                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              >
+                <ng-icon name="matChatOutline" class="text-[18px] shrink-0" />
+                <span>Instagram</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setChannel('WEB_STORE')"
+                [class.bg-indigo-600]="orderForm.get('channel')?.value === 'WEB_STORE'"
+                [class.text-white]="orderForm.get('channel')?.value === 'WEB_STORE'"
+                [class.border-indigo-600]="orderForm.get('channel')?.value === 'WEB_STORE'"
+                [class.bg-surface-container-low]="orderForm.get('channel')?.value !== 'WEB_STORE'"
+                [class.text-on-surface]="orderForm.get('channel')?.value !== 'WEB_STORE'"
+                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl border border-outline-variant/30 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              >
+                <ng-icon name="matShoppingBagOutline" class="text-[18px] shrink-0" />
+                <span>Tienda Web</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Modalidad de Entrega (Delivery / Recojo) -->
+          <div>
+            <label class="block text-xs font-bold text-on-surface mb-2">Modalidad de Despacho</label>
+            <div class="flex items-center gap-2.5 mb-3.5">
+              <button
+                type="button"
+                (click)="onDeliveryModeChange('DELIVERY')"
+                [class.bg-primary-container]="orderForm.get('deliveryMode')?.value === 'DELIVERY'"
+                [class.text-white]="orderForm.get('deliveryMode')?.value === 'DELIVERY'"
+                [class.bg-surface-container-low]="orderForm.get('deliveryMode')?.value !== 'DELIVERY'"
+                [class.text-on-surface]="orderForm.get('deliveryMode')?.value !== 'DELIVERY'"
+                class="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer border border-outline-variant/30 shadow-2xs"
+              >
+                <ng-icon name="matTwoWheelerOutline" class="text-[20px] shrink-0" />
+                <span>Envío por Delivery</span>
+              </button>
+              
+              <button
+                type="button"
+                (click)="onDeliveryModeChange('PICKUP')"
+                [class.bg-primary-container]="orderForm.get('deliveryMode')?.value === 'PICKUP'"
+                [class.text-white]="orderForm.get('deliveryMode')?.value === 'PICKUP'"
+                [class.bg-surface-container-low]="orderForm.get('deliveryMode')?.value !== 'PICKUP'"
+                [class.text-on-surface]="orderForm.get('deliveryMode')?.value !== 'PICKUP'"
+                class="flex-1 flex items-center justify-center gap-2.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer border border-outline-variant/30 shadow-2xs"
+              >
+                <ng-icon name="matStorefrontOutline" class="text-[20px] shrink-0" />
+                <span>Recojo en Local</span>
+              </button>
+            </div>
+
+            @if (orderForm.get('deliveryMode')?.value === 'DELIVERY') {
+              <div class="space-y-3.5 p-4 rounded-2xl bg-surface-container-low/40 border border-outline-variant/30 animate-in fade-in">
+                <div>
+                  <label class="block text-xs font-bold text-on-surface mb-1.5">Dirección de Entrega *</label>
+                  <div class="relative">
+                    <ng-icon name="matLocationOnOutline" class="absolute left-3.5 top-3 text-on-surface-variant text-[20px]" />
+                    <input
+                      type="text"
+                      formControlName="deliveryAddress"
+                      placeholder="Ej. Av. José Pardo 450, Miraflores"
+                      class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface outline-none transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1.5">Referencia / Dpto</label>
+                    <input
+                      type="text"
+                      formControlName="deliveryReference"
+                      placeholder="Ej. Dpto 802, Vivanda"
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface outline-none transition-all shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1.5">Costo de Envío</label>
+                    <div class="relative">
+                      <span class="absolute left-3.5 top-2.5 text-xs text-on-surface-variant font-bold">S/</span>
+                      <input
+                        type="number"
+                        formControlName="deliveryFee"
+                        min="0"
+                        step="0.5"
+                        class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface font-bold outline-none transition-all shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 3. Horario Programado & Atajos Rápidos -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold text-on-surface">Horario Estimado de Despacho</label>
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  (click)="setQuickTime(20)"
+                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
+                >
+                  +20m
+                </button>
+                <button
+                  type="button"
+                  (click)="setQuickTime(35)"
+                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
+                >
+                  +35m
+                </button>
+                <button
+                  type="button"
+                  (click)="setQuickTime(50)"
+                  class="px-2.5 py-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-bold text-on-surface transition-colors cursor-pointer"
+                >
+                  +50m
+                </button>
+              </div>
+            </div>
+            
+            <div class="relative">
+              <ng-icon name="matScheduleOutline" class="absolute left-3.5 top-3 text-on-surface-variant text-[20px]" />
+              <input
+                type="time"
+                formControlName="scheduledTime"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface font-bold outline-none transition-all shadow-2xs"
+              />
+            </div>
+          </div>
+
+          <!-- 4. Datos del Cliente -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-bold text-on-surface mb-1.5">Nombre del Cliente *</label>
+              <div class="relative">
+                <ng-icon name="matPersonOutline" class="absolute left-3.5 top-3 text-on-surface-variant text-[20px]" />
+                <input
+                  type="text"
+                  formControlName="customerName"
+                  placeholder="Ej. Valeria Ramos"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface outline-none transition-all shadow-2xs"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-on-surface mb-1.5">Teléfono / WhatsApp *</label>
+              <div class="relative">
+                <ng-icon name="matCallOutline" class="absolute left-3.5 top-3 text-on-surface-variant text-[20px]" />
+                <input
+                  type="tel"
+                  formControlName="customerPhone"
+                  placeholder="Ej. 984552109"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface font-mono outline-none transition-all shadow-2xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Observaciones Especiales -->
+          <div>
+            <label class="block text-xs font-bold text-on-surface mb-1.5">Notas especiales de preparación (Opcional)</label>
+            <input
+              type="text"
+              formControlName="notes"
+              placeholder="Ej. Sin cubiertos descartables · Enviar con dedicatoria"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface outline-none transition-all shadow-2xs"
+            />
+          </div>
+
+          <!-- Botón de avance hacia la Comanda en Móvil -->
+          <div class="lg:hidden pt-3">
+            <button
+              type="button"
+              (click)="setMobileTab('ITEMS')"
+              class="w-full py-3 px-4 rounded-2xl bg-primary text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
+            >
+              <span>Continuar a Comanda de Productos</span>
+              <ng-icon name="matReceiptLongOutline" class="text-[18px]" />
+            </button>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (5/12 en Desktop): Ticket de Cocina con Combobox de Búsqueda -->
+        <div
+          [class.hidden]="activeMobileTab() !== 'ITEMS'"
+          class="lg:!flex lg:col-span-5 p-5 sm:p-7 bg-surface-container-low/40 flex-col justify-between overflow-hidden rounded-b-3xl lg:rounded-bl-none lg:rounded-r-3xl"
+        >
+          <div class="flex flex-col flex-1 min-h-0">
+            <!-- Header del Ticket -->
+            <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Productos en Comanda</span>
+                <span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-extrabold text-[11px]">
+                  {{ itemsFormArray.length }}
+                </span>
+              </div>
+              <span class="text-[11px] text-on-surface-variant">Ticket en vivo</span>
+            </div>
+
+            <!-- Buscador y Selector Inteligente de Productos (Combobox Filtrado) -->
+            <div class="relative mb-3">
+              <div class="relative flex items-center">
+                <ng-icon name="matSearchOutline" class="absolute left-3 text-on-surface-variant text-[18px]" />
+                <input
+                  type="text"
+                  [value]="productSearchQuery()"
+                  (input)="onSearchInput($event)"
+                  (focus)="onSearchFocus()"
+                  (blur)="onSearchBlur()"
+                  placeholder="Escribe para buscar plato o producto..."
+                  autocomplete="off"
+                  class="w-full pl-9 pr-22 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 focus:border-primary text-xs font-bold text-on-surface outline-none shadow-2xs transition-all"
+                />
+                <button
+                  type="button"
+                  (click)="addCustomItem()"
+                  class="absolute right-1 px-2.5 py-1 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-container transition-colors cursor-pointer"
+                >
+                  + Agregar
+                </button>
+              </div>
+
+              <!-- Dropdown de sugerencias filtradas (máximo 4 sugerencias) -->
+              @if (isSearchDropdownOpen() && filteredCatalogProducts().length > 0) {
+                <div
+                  class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-1.5 space-y-1 animate-in fade-in duration-100"
+                >
+                  <div class="px-2 py-0.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                    Sugerencias del catálogo ({{ filteredCatalogProducts().length }}):
+                  </div>
+                  @for (prod of filteredCatalogProducts(); track prod.id) {
+                    <button
+                      type="button"
+                      (mousedown)="selectProductFromSearch(prod)"
+                      class="w-full px-2.5 py-1.5 rounded-xl text-left hover:bg-surface-container-high transition-colors flex items-center justify-between gap-2 cursor-pointer group"
+                    >
+                      <div class="truncate">
+                        <span class="text-xs font-bold text-on-surface group-hover:text-primary">{{ prod.name }}</span>
+                        <span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant font-medium">
+                          {{ prod.category }}
+                        </span>
+                      </div>
+                      <span class="text-xs font-extrabold text-primary shrink-0">
+                        S/ {{ prod.price | number: '1.2-2' }}
+                      </span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Lista con Scroll de Ítems de la Comanda -->
+            <div formArrayName="items" class="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1 max-h-[220px] sm:max-h-[270px]">
+              @for (item of itemsFormArray.controls; track $index; let idx = $index) {
+                <div [formGroupName]="idx" class="p-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-2 overflow-hidden">
+                  <!-- Nombre del Producto y Precio Oficial Unitario -->
+                  <div class="flex items-center justify-between gap-2 min-w-0">
+                    <div class="flex-1 min-w-0">
+                      <span class="text-xs font-bold text-on-surface truncate block">{{ item.get('name')?.value }}</span>
+                      <span class="text-[11px] text-on-surface-variant font-medium">
+                        Precio registrado: S/ {{ Number(item.get('unitPrice')?.value || 0) | number: '1.2-2' }} c/u
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="removeItem(idx)"
+                      [disabled]="itemsFormArray.length <= 1"
+                      [class.opacity-25]="itemsFormArray.length <= 1"
+                      class="p-1 rounded-lg text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
+                      aria-label="Eliminar producto"
+                    >
+                      <ng-icon name="matDeleteOutline" class="text-[18px]" />
+                    </button>
+                  </div>
+
+                  <!-- Stepper de Cantidad y Subtotal Calculado de Línea -->
+                  <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-outline-variant/10 min-w-0">
+                    <!-- Stepper -->
+                    <div class="flex items-center gap-1 bg-surface-container-low/60 rounded-xl p-0.5 border border-outline-variant/20 shrink-0">
+                      <button
+                        type="button"
+                        (click)="decrementQuantity(idx)"
+                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs"
+                      >
+                        -
+                      </button>
+                      <span class="w-6 text-center font-bold text-xs text-on-surface">{{ item.get('quantity')?.value }}</span>
+                      <button
+                        type="button"
+                        (click)="incrementQuantity(idx)"
+                        class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer text-xs font-bold shadow-2xs"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <!-- Subtotal de Línea -->
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <span class="text-[11px] text-on-surface-variant font-semibold">Subtotal:</span>
+                      <span class="text-xs font-black text-primary text-right whitespace-nowrap">
+                        S/ {{ (Number(item.get('quantity')?.value || 0) * Number(item.get('unitPrice')?.value || 0)) | number: '1.2-2' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Método de Pago Rápido -->
+            <div class="mt-3.5 pt-3.5 border-t border-outline-variant/20">
+              <label class="block text-[11px] font-bold text-on-surface uppercase tracking-wider mb-2">Método de Pago</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  (click)="setPaymentMethod('YAPE')"
+                  [class.bg-purple-700]="orderForm.get('paymentMethod')?.value === 'YAPE'"
+                  [class.text-white]="orderForm.get('paymentMethod')?.value === 'YAPE'"
+                  [class.border-purple-700]="orderForm.get('paymentMethod')?.value === 'YAPE'"
+                  [class.bg-surface-container-lowest]="orderForm.get('paymentMethod')?.value !== 'YAPE'"
+                  [class.text-on-surface]="orderForm.get('paymentMethod')?.value !== 'YAPE'"
+                  class="py-2 px-2.5 rounded-xl border border-outline-variant/30 text-xs font-extrabold transition-all cursor-pointer shadow-2xs text-center"
+                >
+                  Yape
+                </button>
+                <button
+                  type="button"
+                  (click)="setPaymentMethod('PLIN')"
+                  [class.bg-cyan-600]="orderForm.get('paymentMethod')?.value === 'PLIN'"
+                  [class.text-white]="orderForm.get('paymentMethod')?.value === 'PLIN'"
+                  [class.border-cyan-600]="orderForm.get('paymentMethod')?.value === 'PLIN'"
+                  [class.bg-surface-container-lowest]="orderForm.get('paymentMethod')?.value !== 'PLIN'"
+                  [class.text-on-surface]="orderForm.get('paymentMethod')?.value !== 'PLIN'"
+                  class="py-2 px-2.5 rounded-xl border border-outline-variant/30 text-xs font-extrabold transition-all cursor-pointer shadow-2xs text-center"
+                >
+                  Plin
+                </button>
+                <button
+                  type="button"
+                  (click)="setPaymentMethod('EFECTIVO')"
+                  [class.bg-primary-container]="orderForm.get('paymentMethod')?.value === 'EFECTIVO'"
+                  [class.text-white]="orderForm.get('paymentMethod')?.value === 'EFECTIVO'"
+                  [class.border-primary-container]="orderForm.get('paymentMethod')?.value === 'EFECTIVO'"
+                  [class.bg-surface-container-lowest]="orderForm.get('paymentMethod')?.value !== 'EFECTIVO'"
+                  [class.text-on-surface]="orderForm.get('paymentMethod')?.value !== 'EFECTIVO'"
+                  class="py-2 px-2.5 rounded-xl border border-outline-variant/30 text-xs font-extrabold transition-all cursor-pointer shadow-2xs text-center"
+                >
+                  Efectivo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liquidación Fija y Botón de Creación -->
+          <div class="mt-4 pt-3.5 border-t border-dashed border-outline-variant/40 space-y-3">
+            <div class="space-y-1.5 text-xs text-on-surface-variant">
+              <div class="flex justify-between">
+                <span>Subtotal productos:</span>
+                <span class="font-bold text-on-surface">S/ {{ calculateItemsSubtotal() | number: '1.2-2' }}</span>
+              </div>
+              @if (orderForm.get('deliveryMode')?.value === 'DELIVERY') {
+                <div class="flex justify-between">
+                  <span>Envío delivery:</span>
+                  <span class="font-bold text-on-surface">S/ {{ Number(orderForm.get('deliveryFee')?.value || 0) | number: '1.2-2' }}</span>
+                </div>
+              }
+              <div class="flex justify-between items-baseline pt-1.5 text-on-surface border-t border-outline-variant/20">
+                <span class="text-xs font-bold uppercase tracking-wider">Total a Cobrar:</span>
+                <span class="text-xl sm:text-2xl font-black text-primary">S/ {{ calculateGrandTotal() | number: '1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 pb-1">
+              <button
+                type="button"
+                (click)="setMobileTab('DATA')"
+                class="lg:hidden px-4 py-3 rounded-2xl bg-surface-container-high text-on-surface font-bold text-xs cursor-pointer active:scale-98 transition-all"
+              >
+                Volver
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-3.5 px-5 rounded-2xl bg-primary-container text-white font-bold text-xs sm:text-sm hover:bg-primary transition-all shadow-md active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <ng-icon name="matCheckOutline" class="text-[20px]" />
+                <span>Confirmar Comanda · S/ {{ calculateGrandTotal() | number: '1.2-2' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}

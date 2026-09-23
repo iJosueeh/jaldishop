@@ -1,0 +1,58 @@
+<footer
+  class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-on-surface-variant text-xs font-medium"
+>
+  <span>
+    Mostrando
+    <strong class="text-on-surface font-bold">
+      @if (totalItems() > 0) {
+        {{ startItem() }} - {{ endItem() }} de {{ totalItems() }}
+      } @else {
+        0 de 0
+      }
+    </strong>
+    {{ itemLabel() }}
+  </span>
+  <div class="flex items-center gap-1">
+    <button
+      type="button"
+      (click)="onPrevious()"
+      [disabled]="!hasPrevious()"
+      [class.opacity-50]="!hasPrevious()"
+      [class.cursor-not-allowed]="!hasPrevious()"
+      [class.cursor-pointer]="hasPrevious()"
+      class="px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-bold transition-colors flex items-center gap-0.5 border border-outline-variant/30"
+    >
+      <ng-icon name="matChevronLeftOutline" class="text-[16px]" />
+      <span>Anterior</span>
+    </button>
+    @for (page of pages(); track page) {
+      <button
+        type="button"
+        (click)="onPageSelect(page)"
+        [class.bg-primary-container]="page === currentPage()"
+        [class.text-white]="page === currentPage()"
+        [class.shadow-2xs]="page === currentPage()"
+        [class.bg-surface-container-lowest]="page !== currentPage()"
+        [class.text-on-surface]="page !== currentPage()"
+        [class.hover:bg-surface-container-high]="page !== currentPage()"
+        [class.border]="page !== currentPage()"
+        [class.border-outline-variant/30]="page !== currentPage()"
+        class="w-8 h-8 rounded-xl font-bold flex items-center justify-center transition-colors cursor-pointer"
+      >
+        {{ page }}
+      </button>
+    }
+    <button
+      type="button"
+      (click)="onNext()"
+      [disabled]="!hasNext()"
+      [class.opacity-50]="!hasNext()"
+      [class.cursor-not-allowed]="!hasNext()"
+      [class.cursor-pointer]="hasNext()"
+      class="px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-bold transition-colors flex items-center gap-0.5 border border-outline-variant/30"
+    >
+      <span>Siguiente</span>
+      <ng-icon name="matChevronRightOutline" class="text-[16px]" />
+    </button>
+  </div>
+</footer>

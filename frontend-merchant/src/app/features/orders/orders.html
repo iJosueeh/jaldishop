@@ -1,0 +1,66 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-10">
+  <!-- 1. Encabezado de Página -->
+  <app-orders-header
+    (newOrder)="onNewOrder()"
+    (adjustPace)="onAdjustPace()"
+    (printOrders)="onPrintOrders()"
+  />
+
+  <!-- 2. Alerta / Banner Consolidado Unificado -->
+  <app-orders-alert-banner
+    [urgentOrder]="urgentOrder()"
+    [readyCount]="orderService.readyCount()"
+    (viewUrgent)="onTabChange('IN_PREPARATION')"
+  />
+
+  <!-- 3. Indicadores de Ritmo y Métricas Rápidas -->
+  <app-orders-kpis
+    [capacityTotal]="capacityService.todayEffectiveCapacity()"
+    [capacityOccupied]="orderService.totalOrdersCount()"
+    [remainingDeliveries]="orderService.remainingDeliveriesCount()"
+    [inPrepCount]="orderService.inPrepCount()"
+    [readyCount]="orderService.readyCount()"
+    [averagePaceMin]="18"
+  />
+
+  <!-- 4. Filtros Unificados y Búsqueda Compacta -->
+  <app-orders-filter-bar
+    [activeTab]="activeTab()"
+    [totalCount]="orderService.totalOrdersCount()"
+    [confirmedCount]="orderService.confirmedCount()"
+    [inPrepCount]="orderService.inPrepCount()"
+    [readyCount]="orderService.readyCount()"
+    [completedCount]="orderService.completedCount()"
+    [searchQuery]="orderService.searchQuery()"
+    [selectedChannel]="orderService.channelFilter()"
+    (tabChange)="onTabChange($event)"
+    (searchChange)="onSearchChange($event)"
+    (channelChange)="onChannelChange($event)"
+  />
+
+  <!-- 5. Área de Pedidos / Comandas Modulares -->
+  <app-orders-grid
+    [orders]="paginatedOrders()"
+    (statusAdvance)="onStatusAdvance($event)"
+    (whatsAppClick)="onWhatsAppClick($event)"
+    (openDetails)="onOpenDetails($event)"
+    (resetFilter)="onTabChange('ALL')"
+  />
+
+  <!-- 6. Paginación / Resumen de Turno -->
+  <app-pagination
+    [currentPage]="currentPage()"
+    [totalItems]="orders().length"
+    [pageSize]="pageSize()"
+    itemLabel="pedidos del turno"
+    (pageChange)="onPageChange($event)"
+  />
+
+  <!-- 7. Drawer Lateral de Detalle Completo del Pedido -->
+  <app-order-details-drawer
+    [isOpen]="orderService.isDrawerOpen()"
+    [order]="drawerOrder()"
+    (closeDrawer)="onCloseDrawer()"
+    (statusChange)="onDrawerStatusChange($event)"
+  />
+</div>

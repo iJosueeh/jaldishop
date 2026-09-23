@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { errorInterceptor } from './error-interceptor';
 import { ToastService } from '../services/toast.service';
 import { TokenService } from '../services/token-service';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 describe('errorInterceptor', () => {
   let httpClient: HttpClient;
@@ -18,6 +18,7 @@ describe('errorInterceptor', () => {
       providers: [
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
+        provideRouter([{ path: 'login', component: class {} }]),
       ],
     });
 

@@ -13,7 +13,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 id="modal-slot-title" class="text-base sm:text-lg font-bold text-on-surface">
-            Nueva Franja Horaria
+            {{ slotToEdit() ? 'Editar Franja Horaria' : 'Nueva Franja Horaria' }}
           </h3>
           <p class="text-xs text-on-surface-variant">
             Día: <strong class="text-on-surface">{{ dayLabel() }}</strong>
@@ -82,7 +82,7 @@
               <span>Guardando...</span>
             } @else {
               <ng-icon name="matCheckOutline" class="text-[18px]" />
-              <span>Guardar Franja</span>
+              <span>{{ slotToEdit() ? 'Guardar Cambios' : 'Guardar Franja' }}</span>
             }
           </button>
         </div>

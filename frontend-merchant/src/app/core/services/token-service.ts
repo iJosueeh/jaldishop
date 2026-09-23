@@ -44,7 +44,7 @@ export class TokenService {
 
   isTokenExpired(): boolean {
     const payload = this.getPayload();
-    if (!payload || !payload.exp) return true;
+    if (!payload || !payload.exp) return false;
 
     return Date.now() >= payload.exp * 1000;
   }
@@ -58,7 +58,7 @@ export class TokenService {
     const payload = this.getPayload();
     if (!payload) return [];
 
-    const rawRoles = payload.roles || payload.authorities || [];
+    const rawRoles = payload.roles || payload.authorities || payload.role || [];
     if (Array.isArray(rawRoles)) {
       return rawRoles.map((r: any) => {
         const name = typeof r === 'string' ? r : r?.authority || r?.name || '';

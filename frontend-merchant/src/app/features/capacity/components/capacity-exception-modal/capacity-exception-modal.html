@@ -13,7 +13,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 id="modal-exception-title" class="text-base sm:text-lg font-bold text-on-surface">
-            Nueva Fecha Especial / Excepción
+            {{ exceptionToEdit() ? 'Editar Fecha Especial / Excepción' : 'Nueva Fecha Especial / Excepción' }}
           </h3>
           <p class="text-xs text-on-surface-variant">
             Sobrescribe la capacidad habitual para una fecha puntual.
@@ -135,7 +135,7 @@
               <span>Guardando...</span>
             } @else {
               <ng-icon name="matCheckOutline" class="text-[18px]" />
-              <span>Guardar Excepción</span>
+              <span>{{ exceptionToEdit() ? 'Guardar Cambios' : 'Guardar Excepción' }}</span>
             }
           </button>
         </div>

@@ -1,0 +1,48 @@
+<header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1 font-sans">
+  <div class="flex flex-col gap-1">
+    <div class="flex items-center gap-2.5 flex-wrap">
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
+        Pedidos
+      </h1>
+      <span
+        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0 border border-emerald-500/20"
+      >
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Turno Activo
+      </span>
+    </div>
+    <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
+      Supervisión ágil de preparación, despachos del día y pedidos por canal sin sobrecargar la cocina.
+    </p>
+  </div>
+
+  <!-- Acciones de Cabecera -->
+  <div class="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
+    <button
+      type="button"
+      (click)="printOrders.emit()"
+      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+    >
+      <ng-icon name="matPrintOutline" class="text-[18px] text-on-surface-variant" />
+      <span>Imprimir comandas</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="adjustPace.emit()"
+      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+    >
+      <ng-icon name="matTuneOutline" class="text-[18px] text-on-surface-variant" />
+      <span>Ajustar ritmo</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="newOrder.emit()"
+      class="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container text-white hover:bg-primary transition-colors text-xs font-bold shadow-2xs cursor-pointer active:scale-98"
+    >
+      <ng-icon name="matAddOutline" class="text-[18px]" />
+      <span>Registrar Pedido</span>
+    </button>
+  </div>
+</header>

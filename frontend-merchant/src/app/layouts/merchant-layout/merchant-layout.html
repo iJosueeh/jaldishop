@@ -20,4 +20,11 @@
       <router-outlet />
     </main>
   </div>
+
+  <!-- Modal Global de Nuevo Pedido accesible desde Header y cualquier vista -->
+  <app-create-order-modal
+    [isOpen]="orderService.isCreateModalOpen()"
+    (closeModal)="orderService.closeCreateModal()"
+    (orderCreated)="onOrderCreated($event)"
+  />
 </div>
