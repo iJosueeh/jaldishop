@@ -48,8 +48,15 @@ flowchart TD
         BE15 -->|Desbloqueó| BE16
     end
 
+    subgraph ADMIN["Administración de Plataforma"]
+        BEADMIN01["BE-ADMIN-01 · API Admin Usuarios & Tiendas<br/>(Josué)<br/>✅ COMPLETADO"]
+        FEADMIN01["FE-ADMIN-01 · Panel Admin Frontend<br/>(Josué)<br/>🟢 EN PROGRESO"]
+        BEADMIN01 -->|Desbloqueó| FEADMIN01
+    end
+
     CI01 -. Protege PRs .-> BE12
     CI01 -. Protege PRs .-> BE14
+    CI01 -. Protege PRs .-> BEADMIN01
     DEPLOY01 -. Expone API .-> FE08
 ```
 
@@ -58,6 +65,8 @@ flowchart TD
 | 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Ninguna | Workflow GitHub Actions con validación paralela Maven y Vitest |
 | 🔴 **Alta** | **DEPLOY-01** · Despliegue en la Nube y Ambientes | Josué | `COMPLETADO` | CI-01 | Backend en Render API, Frontend en Cloudflare Pages y NeonDB |
 | 🔴 **Alta** | **FE-08** · Identidad Visual, Favicon y Branding | Josué | `COMPLETADO` | Ninguna | Set de favicon SVG/PNG, manifest e integración en todas las vistas de auth/dashboard |
+| 🔴 **Alta** | **BE-ADMIN-01** · Administración base de Usuarios y Tiendas | Josué | `COMPLETADO` | Ninguna | Endpoints `/api/v1/admin/**` (Listar, Detalle, Filtros, Suspender, Reactivar, Reglas de RBAC y 206 tests) *(Desbloqueó FE-ADMIN-01)* |
+| 🔴 **Alta** | **FE-ADMIN-01** · Panel de Administración en Frontend | Josué | `EN PROGRESO` | BE-ADMIN-01 | Módulo `/admin/*` en `frontend-merchant` con Guards, vistas de usuarios, comerciantes y tiendas |
 | 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
@@ -332,14 +341,68 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 
 ---
 
+### 📋 BE-ADMIN-01 | Implementar administración base de Usuarios y Tiendas
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Endpoints REST de administración (`/api/v1/admin/users/**`, `/api/v1/admin/stores/**`), control de acceso por rol `ADMIN`, métodos de suspensión/activación, filtros combinados y 206 tests unitarios.  
+**Desbloqueó:** **FE-ADMIN-01** (Panel de Administración Frontend).
+
+**Descripción:**  
+Implementar las consultas y acciones administrativas básicas de JaldiShop para que los usuarios con rol `ADMIN` puedan supervisar usuarios, comerciantes y tiendas de la plataforma, además de gestionar sus estados (`ACTIVE`, `SUSPENDED`).
+
+**Checklist:**
+- [x] Implementar listado global de usuarios (`GET /api/v1/admin/users`)
+- [x] Implementar consulta de usuario por ID (`GET /api/v1/admin/users/{id}`)
+- [x] Permitir búsqueda/filtros básicos (`query`, `role`, `status`)
+- [x] Mostrar roles y estado del usuario
+- [x] Relacionar comerciante con su tienda (`store` resumen cuando corresponda)
+- [x] Implementar suspensión de usuario (`PATCH /api/v1/admin/users/{id}/suspend`)
+- [x] Implementar reactivación de usuario (`PATCH /api/v1/admin/users/{id}/activate`)
+- [x] Implementar regla de seguridad: El admin no puede auto-suspenderse (`NO_SELF_SUSPENSION` / `409 Conflict`)
+- [x] Implementar listado global de tiendas (`GET /api/v1/admin/stores`)
+- [x] Implementar consulta de tienda por ID (`GET /api/v1/admin/stores/{id}`)
+- [x] Permitir búsqueda/filtros básicos en tiendas (`query`, `status`)
+- [x] Relacionar tienda con datos de su comerciante propietario (`owner`)
+- [x] Implementar suspensión de tienda (`PATCH /api/v1/admin/stores/{id}/suspend`)
+- [x] Implementar reactivación de tienda (`PATCH /api/v1/admin/stores/{id}/activate`)
+- [x] Proteger rutas con `@PreAuthorize("hasRole('ADMIN')")` y `SecurityConfig`
+- [x] Seeds actualizados con contraseñas BCrypt válidas (`V2__seed_roles.sql`)
+- [x] Documentación y colección Postman completada (`docs/04-diseno/api-admin.md`)
+
+---
+
+### 📋 FE-ADMIN-01 | Panel de Administración en Frontend
+
+**Responsable:** Josué  
+**Estado:** `EN PROGRESO / READY` 🟢 *(Desbloqueada tras merge de BE-ADMIN-01)*  
+**Entregable:** Módulo `/admin/*` en `frontend-merchant` con layout dedicado, navegación, protección por `adminGuard`, tablas de datos reactivas, filtros y modales de confirmación.
+
+**Descripción:**  
+Construir el panel administrativo web en Angular para que los usuarios con rol `ADMIN` puedan gestionar y supervisar usuarios, comerciantes y tiendas desde una interfaz intuitiva y protegida.
+
+**Checklist:**
+- [ ] Implementar `adminGuard` para restringir rutas `/admin/*` únicamente a usuarios con rol `ADMIN`
+- [ ] Implementar `AdminService` con consumo de endpoints `/api/v1/admin/**`
+- [ ] Implementar `AdminLayoutComponent` (Header y Sidebar diferenciados para admin)
+- [ ] Implementar vista de Dashboard Admin (`/admin/dashboard`)
+- [ ] Implementar vista de Usuarios (`/admin/users`) con filtros por texto, rol y estado
+- [ ] Implementar vista de Comerciantes (`/admin/merchants`) filtrado automático por rol `MERCHANT`
+- [ ] Implementar vista de Tiendas (`/admin/stores`) con filtros y detalle de propietario
+- [ ] Implementar modales de confirmación para suspensión y reactivación
+- [ ] Redirección inteligente al iniciar sesión según rol (`ADMIN` -> `/admin/dashboard`, `MERCHANT` -> `/dashboard`)
+- [ ] Pruebas unitarias de Guards, Servicios y Componentes
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **5 / 9 (56%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-14`, `BE-15` |
-| Entregables en desarrollo activo | **2 / 9 (22%)** | `BE-12`, `BE-16` (Desbloqueada) |
-| Entregables pendientes / bloqueados | **2 / 9 (22%)** | `BE-13`, `BE-17` |
-| **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
+| Entregables completados | **6 / 11 (55%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15` |
+| Entregables en desarrollo activo | **3 / 11 (27%)** | `FE-ADMIN-01`, `BE-12`, `BE-16` |
+| Entregables pendientes / bloqueados | **2 / 11 (18%)** | `BE-13`, `BE-17` |
+| **Estado General** | `EN PROGRESO` | Cadena central y administración en ejecución |
 
 ---
 
@@ -353,6 +416,7 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 | Aislamiento de Carrito | 1 Carrito activo por `(user_id, store_id)` | No mezclar tiendas en un mismo pedido | modelo-er.md |
 | Carrito sin reserva | Solo informativo | No descuenta stock ni bloquea capacidad | alcance-mvp.md |
 | Prioridad de Capacidad | `Excepción > Configuración Base` | La excepción sustituye por completo la capacidad base | modelo-capacidad-v1.md |
+| Control de Acceso RBAC | `ADMIN` vs `MERCHANT` vs `CUSTOMER` | Solo `ADMIN` accede a `/api/v1/admin/**` y `/admin/*` | api-admin.md |
 | Multi-Entorno Frontend | `environment.ts` (Render) vs `development.ts` (Localhost) | Conexión a la nube en producción y mock local en dev | arquitectura-sistema.md |
 | CI Runner | GitHub Actions `ubuntu-latest` | Build & Test automatizado con PostgreSQL 16 y Node 22 | arquitectura-sistema.md |
 
@@ -370,6 +434,8 @@ graph TD
     CI01["CI-01 · Pipeline CI/CD<br/>(Josué)"]:::done
     DEPLOY01["DEPLOY-01 · Despliegue Nube<br/>(Josué)"]:::done
     FE08["FE-08 · Branding & Favicon<br/>(Josué)"]:::done
+    BEADMIN01["BE-ADMIN-01 · API Admin<br/>(Josué)"]:::done
+    FEADMIN01["FE-ADMIN-01 · Panel Admin<br/>(Josué)"]:::progress
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
     BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::progress
@@ -379,7 +445,9 @@ graph TD
 
     CI01 -. Valida PRs .-> BE12
     CI01 -. Valida PRs .-> BE14
+    CI01 -. Valida PRs .-> BEADMIN01
     DEPLOY01 -. Conecta con .-> FE08
+    BEADMIN01 -->|Desbloqueó| FEADMIN01
     BE14 -->|Desbloqueó| BE15
     BE15 -->|Desbloqueó| BE16
     BE12 -->|Desbloquea| BE13
