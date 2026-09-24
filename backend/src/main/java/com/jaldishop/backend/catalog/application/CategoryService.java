@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.CategoryStatus;
 import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,7 @@ public class CategoryService {
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCase(command.storeId(), trimmedName)) {
-            throw new ConflictException("A category with this name already exists in the store");
+            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "A category with this name already exists in the store");
         }
 
         Category category = Category.create(
@@ -47,7 +48,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category getCategoryByIdAndStore(UUID categoryId, UUID storeId) {
         return categoryRepository.findByIdAndStoreId(categoryId, storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
     }
 
     @Transactional
@@ -60,7 +61,7 @@ public class CategoryService {
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCaseAndIdNot(command.storeId(), trimmedName, command.categoryId())) {
-            throw new ConflictException("A category with this name already exists in the store");
+            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "A category with this name already exists in the store");
         }
 
         category.update(trimmedName, command.description());

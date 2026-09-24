@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.catalog.domain.ProductStatus;
 import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class ProductService {
         }
 
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
 
         String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
                 ? SlugUtils.toSlug(command.slug())
@@ -64,7 +65,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductByIdAndStore(UUID productId, UUID storeId) {
         return productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
     }
 
     @Transactional
@@ -76,7 +77,7 @@ public class ProductService {
         }
 
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
 
         String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
                 ? SlugUtils.toSlug(command.slug())

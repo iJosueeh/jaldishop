@@ -22,7 +22,8 @@ public record UpdateProductVariantRequest(
         @DecimalMin(value = "0.01", message = "Price amount must be greater than zero")
         BigDecimal priceAmount,
 
-        @Pattern(regexp = "[A-Za-z]{3}", message = "Price currency must be a 3-letter ISO code")
+        @NotBlank(message = "Price currency is required")
+        @Pattern(regexp = "^[A-Z]{3}$", message = "Price currency must be a 3-letter uppercase ISO code")
         String priceCurrency,
 
         boolean tracksInventory,

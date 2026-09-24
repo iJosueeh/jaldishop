@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,7 @@ class ProductServiceTest {
 
         when(categoryRepository.findByIdAndStoreId(categoryId, storeId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(ResourceNotFoundException.class, () ->
                 productService.createProduct(command)
         );
         verify(productRepository, never()).save(any());
