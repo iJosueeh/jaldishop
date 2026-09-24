@@ -7,9 +7,13 @@ import com.jaldishop.backend.catalog.domain.VariantAttribute;
 import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
+import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -19,20 +23,25 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/products/{productId}/variants")
+@PreAuthorize("hasRole('MERCHANT')")
 public class MerchantProductVariantController {
 
     private final ProductVariantService variantService;
+    private final StoreContextService storeContextService;
 
-    public MerchantProductVariantController(ProductVariantService variantService) {
+    public MerchantProductVariantController(ProductVariantService variantService, StoreContextService storeContextService) {
         this.variantService = variantService;
+        this.storeContextService = storeContextService;
     }
 
     @PostMapping
     public ResponseEntity<ProductVariantResponse> createVariant(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId,
             @Valid @RequestBody CreateProductVariantRequest request
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         List<VariantAttribute> attributes = request.attributes() != null
                 ? request.attributes().stream()
                 .map(attr -> new VariantAttribute(attr.name(), attr.value()))
@@ -56,9 +65,11 @@ public class MerchantProductVariantController {
 
     @GetMapping
     public ResponseEntity<List<ProductVariantResponse>> getVariants(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         var list = variantService.getVariantsByProduct(productId, storeId).stream()
                 .map(ProductVariantResponse::fromDomain)
                 .collect(Collectors.toList());
@@ -67,21 +78,25 @@ public class MerchantProductVariantController {
 
     @GetMapping("/{variantId}")
     public ResponseEntity<ProductVariantResponse> getVariant(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId,
             @PathVariable UUID variantId
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         var variant = variantService.getVariantById(variantId, productId, storeId);
         return ResponseEntity.ok(ProductVariantResponse.fromDomain(variant));
     }
 
     @PutMapping("/{variantId}")
     public ResponseEntity<ProductVariantResponse> updateVariant(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId,
             @PathVariable UUID variantId,
             @Valid @RequestBody UpdateProductVariantRequest request
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         List<VariantAttribute> attributes = request.attributes() != null
                 ? request.attributes().stream()
                 .map(attr -> new VariantAttribute(attr.name(), attr.value()))

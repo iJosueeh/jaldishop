@@ -6,9 +6,13 @@ import com.jaldishop.backend.catalog.application.UpdateProductCommand;
 import com.jaldishop.backend.catalog.web.dto.CreateProductRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductRequest;
+import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,19 +21,24 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/products")
+@PreAuthorize("hasRole('MERCHANT')")
 public class MerchantProductController {
 
     private final ProductService productService;
+    private final StoreContextService storeContextService;
 
-    public MerchantProductController(ProductService productService) {
+    public MerchantProductController(ProductService productService, StoreContextService storeContextService) {
         this.productService = productService;
+        this.storeContextService = storeContextService;
     }
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @Valid @RequestBody CreateProductRequest request
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         var command = new CreateProductCommand(
                 storeId,
                 request.categoryId(),
@@ -44,9 +53,11 @@ public class MerchantProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getProducts(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @RequestParam(required = false) UUID categoryId
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         List<ProductResponse> products;
         if (categoryId != null) {
             products = productService.getProductsByStoreAndCategory(storeId, categoryId).stream()
@@ -62,19 +73,23 @@ public class MerchantProductController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductResponse> getProduct(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         var product = productService.getProductByIdAndStore(productId, storeId);
         return ResponseEntity.ok(ProductResponse.fromDomain(product));
     }
 
     @PutMapping("/{productId}")
     public ResponseEntity<ProductResponse> updateProduct(
+            @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @PathVariable UUID productId,
             @Valid @RequestBody UpdateProductRequest request
     ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
         var command = new UpdateProductCommand(
                 productId,
                 storeId,

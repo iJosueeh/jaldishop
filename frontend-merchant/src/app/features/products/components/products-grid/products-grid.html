@@ -1,0 +1,85 @@
+@if (isLoading()) {
+  <!-- Skeleton Loading Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 w-full">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <div
+        class="flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden animate-pulse"
+      >
+        <div class="w-full h-48 sm:h-52 bg-surface-container-high"></div>
+        <div class="p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="h-5 bg-surface-container-high rounded w-2/3"></div>
+            <div class="h-5 bg-surface-container-high rounded w-16"></div>
+          </div>
+          <div class="h-3.5 bg-surface-container-high rounded w-full"></div>
+          <div class="h-8 bg-surface-container-high rounded-lg w-full"></div>
+          <div class="flex items-center justify-between pt-2 border-t border-outline-variant/15">
+            <div class="h-4 bg-surface-container-high rounded w-24"></div>
+            <div class="flex gap-1">
+              <div class="w-7 h-7 bg-surface-container-high rounded-lg"></div>
+              <div class="w-7 h-7 bg-surface-container-high rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (isEmptyCatalog()) {
+  <!-- Empty State: Catálogo sin productos -->
+  <div
+    class="w-full flex flex-col items-center justify-center py-16 px-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 text-center shadow-xs"
+  >
+    <div
+      class="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center text-primary mb-4"
+    >
+      <ng-icon name="matInventory2Outline" class="text-3xl"></ng-icon>
+    </div>
+    <h3 class="font-bold text-lg text-on-surface">Tu catálogo está vacío</h3>
+    <p class="text-sm text-on-surface-variant mt-1.5 max-w-md">
+      Aún no has registrado ningún producto en tu tienda. Comienza creando tus recetas o artículos
+      para habilitar ventas por WhatsApp y catálogo web.
+    </p>
+    <button
+      type="button"
+      (click)="createNewProduct.emit()"
+      class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary/90 shadow-xs transition-colors cursor-pointer"
+    >
+      <ng-icon name="matAddOutline" class="text-lg"></ng-icon>
+      <span>Crear Primer Producto</span>
+    </button>
+  </div>
+} @else if (isFilterEmpty() || products().length === 0) {
+  <!-- Empty State: Filtros o Búsqueda sin coincidencias -->
+  <div
+    class="w-full flex flex-col items-center justify-center py-14 px-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 text-center shadow-xs"
+  >
+    <div
+      class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-on-surface-variant mb-3.5"
+    >
+      <ng-icon name="matFilterAltOffOutline" class="text-2xl text-on-surface-variant"></ng-icon>
+    </div>
+    <h3 class="font-bold text-base text-on-surface">No se encontraron productos</h3>
+    <p class="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-sm">
+      No hay ningún producto que coincida con los criterios de búsqueda o categoría seleccionada.
+    </p>
+    <button
+      type="button"
+      (click)="clearFilters.emit()"
+      class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container-high text-on-surface font-semibold text-xs hover:bg-surface-variant transition-colors cursor-pointer"
+    >
+      <span>Limpiar filtros</span>
+    </button>
+  </div>
+} @else {
+  <!-- Grid de Productos -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 w-full">
+    @for (prod of products(); track prod.id) {
+      <app-product-card
+        [product]="prod"
+        (editProduct)="editProduct.emit($event)"
+        (adjustQuota)="adjustQuota.emit($event)"
+        (toggleStatus)="toggleStatus.emit($event)"
+      />
+    }
+  </div>
+}

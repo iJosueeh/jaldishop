@@ -6,12 +6,14 @@
     (printOrders)="onPrintOrders()"
   />
 
-  <!-- 2. Alerta / Banner Consolidado Unificado -->
-  <app-orders-alert-banner
-    [urgentOrder]="urgentOrder()"
-    [readyCount]="orderService.readyCount()"
-    (viewUrgent)="onTabChange('IN_PREPARATION')"
-  />
+  <!-- 2. Alerta / Banner Consolidado Unificado (solo si hay órdenes activas) -->
+  @if (orderService.totalOrdersCount() > 0) {
+    <app-orders-alert-banner
+      [urgentOrder]="urgentOrder()"
+      [readyCount]="orderService.readyCount()"
+      (viewUrgent)="onTabChange('IN_PREPARATION')"
+    />
+  }
 
   <!-- 3. Indicadores de Ritmo y Métricas Rápidas -->
   <app-orders-kpis
@@ -38,23 +40,29 @@
     (channelChange)="onChannelChange($event)"
   />
 
-  <!-- 5. Área de Pedidos / Comandas Modulares -->
+  <!-- 5. Área de Pedidos / Comandas Modulares con Skeletons y Estados Vacíos -->
   <app-orders-grid
     [orders]="paginatedOrders()"
+    [isLoading]="orderService.isLoading()"
+    [isEmptyOrders]="orderService.isEmptyOrders()"
+    [isFilterEmpty]="orderService.isFilterEmpty()"
     (statusAdvance)="onStatusAdvance($event)"
     (whatsAppClick)="onWhatsAppClick($event)"
     (openDetails)="onOpenDetails($event)"
     (resetFilter)="onTabChange('ALL')"
+    (createNewOrder)="onNewOrder()"
   />
 
   <!-- 6. Paginación / Resumen de Turno -->
-  <app-pagination
-    [currentPage]="currentPage()"
-    [totalItems]="orders().length"
-    [pageSize]="pageSize()"
-    itemLabel="pedidos del turno"
-    (pageChange)="onPageChange($event)"
-  />
+  @if (!orderService.isLoading() && orders().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="orders().length"
+      [pageSize]="pageSize()"
+      itemLabel="pedidos del turno"
+      (pageChange)="onPageChange($event)"
+    />
+  }
 
   <!-- 7. Drawer Lateral de Detalle Completo del Pedido -->
   <app-order-details-drawer

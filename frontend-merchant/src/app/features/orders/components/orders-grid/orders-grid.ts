@@ -1,7 +1,11 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { matReceiptLongOutline } from '@ng-icons/material-symbols/outline';
+import {
+  matAddOutline,
+  matFilterAltOffOutline,
+  matReceiptLongOutline,
+} from '@ng-icons/material-symbols/outline';
 import { MerchantOrder } from '../../../../core/models/order.models';
 import { OrdersCard } from '../orders-card/orders-card';
 
@@ -11,6 +15,8 @@ import { OrdersCard } from '../orders-card/orders-card';
   imports: [CommonModule, NgIcon, OrdersCard],
   viewProviders: [
     provideIcons({
+      matAddOutline,
+      matFilterAltOffOutline,
       matReceiptLongOutline,
     }),
   ],
@@ -19,9 +25,13 @@ import { OrdersCard } from '../orders-card/orders-card';
 })
 export class OrdersGrid {
   orders = input<MerchantOrder[]>([]);
+  isLoading = input<boolean>(false);
+  isEmptyOrders = input<boolean>(false);
+  isFilterEmpty = input<boolean>(false);
 
   statusAdvance = output<MerchantOrder>();
   whatsAppClick = output<MerchantOrder>();
   openDetails = output<MerchantOrder>();
   resetFilter = output<void>();
+  createNewOrder = output<void>();
 }

@@ -50,7 +50,7 @@ public class ProductVariantEntity {
     private Instant updatedAt;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "variant_id", referencedColumnName = "id")
+    @JoinColumn(name = "variant_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<VariantAttributeEntity> attributes = new ArrayList<>();
 
     public ProductVariantEntity() {
