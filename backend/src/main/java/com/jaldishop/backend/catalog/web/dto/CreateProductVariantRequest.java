@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -21,11 +22,12 @@ public record CreateProductVariantRequest(
         @DecimalMin(value = "0.01", message = "Price amount must be greater than zero")
         BigDecimal priceAmount,
 
-        @Size(min = 3, max = 3, message = "Price currency must be a 3-letter ISO code")
+        @Pattern(regexp = "[A-Za-z]{3}", message = "Price currency must be a 3-letter ISO code")
         String priceCurrency,
 
         boolean tracksInventory,
 
         @Valid
         List<VariantAttributeDto> attributes
+
 ) {}

@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.catalog.domain.ProductVariant;
 import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.domain.VariantStatus;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,7 @@ public class ProductVariantService {
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySku(trimmedSku)) {
-                throw new IllegalArgumentException("SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU '" + trimmedSku + "' is already in use");
             }
         }
 
@@ -94,7 +95,7 @@ public class ProductVariantService {
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySkuAndIdNot(trimmedSku, command.variantId())) {
-                throw new IllegalArgumentException("SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU '" + trimmedSku + "' is already in use");
             }
         }
 

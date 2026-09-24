@@ -3,6 +3,7 @@ package com.jaldishop.backend.catalog.application;
 import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.CategoryStatus;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class CategoryService {
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCase(command.storeId(), trimmedName)) {
-            throw new IllegalArgumentException("A category with this name already exists in the store");
+            throw new ConflictException("A category with this name already exists in the store");
         }
 
         Category category = Category.create(
@@ -59,7 +60,7 @@ public class CategoryService {
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCaseAndIdNot(command.storeId(), trimmedName, command.categoryId())) {
-            throw new IllegalArgumentException("A category with this name already exists in the store");
+            throw new ConflictException("A category with this name already exists in the store");
         }
 
         category.update(trimmedName, command.description());

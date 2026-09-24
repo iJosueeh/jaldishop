@@ -2,6 +2,7 @@ package com.jaldishop.backend.catalog.application;
 
 import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.catalog.domain.CategoryRepository;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class CategoryServiceTest {
 
         when(categoryRepository.existsByStoreIdAndNameIgnoreCase(storeId, "Postres")).thenReturn(true);
 
-        var exception = assertThrows(IllegalArgumentException.class, () ->
+        var exception = assertThrows(ConflictException.class, () ->
                 categoryService.createCategory(command)
         );
 

@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.domain.ProductRepository;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,21 @@ class ProductServiceTest {
         when(categoryRepository.findByIdAndStoreId(categoryId, storeId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () ->
+                productService.createProduct(command)
+        );
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should fail when product slug already exists in the store")
+    void shouldThrowWhenProductSlugAlreadyExists() {
+        var command = new CreateProductCommand(storeId, categoryId, "Cheesecake de Fresa", "cheesecake-de-fresa", "Desc", null);
+        Category mockCategory = Category.create(storeId, "Tortas", "Desc");
+
+        when(categoryRepository.findByIdAndStoreId(categoryId, storeId)).thenReturn(Optional.of(mockCategory));
+        when(productRepository.existsByStoreIdAndSlug(storeId, "cheesecake-de-fresa")).thenReturn(true);
+
+        assertThrows(ConflictException.class, () ->
                 productService.createProduct(command)
         );
         verify(productRepository, never()).save(any());

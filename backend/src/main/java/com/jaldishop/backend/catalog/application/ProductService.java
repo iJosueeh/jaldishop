@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.catalog.domain.ProductStatus;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,15 @@ public class ProductService {
             throw new IllegalArgumentException("Product name cannot be empty");
         }
 
-        // Validar pertenencia de Category a la Store
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
 
-        // Resolver slug: si no viene explícito, se genera del nombre
         String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
                 ? SlugUtils.toSlug(command.slug())
                 : SlugUtils.toSlug(command.name());
 
         if (productRepository.existsByStoreIdAndSlug(command.storeId(), resolvedSlug)) {
-            throw new IllegalArgumentException("A product with slug '" + resolvedSlug + "' already exists in this store");
+            throw new ConflictException("A product with slug '" + resolvedSlug + "' already exists in this store");
         }
 
         Product product = Product.create(
@@ -76,7 +75,6 @@ public class ProductService {
             throw new IllegalArgumentException("Product name cannot be empty");
         }
 
-        // Validar nueva categoría
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
 
@@ -85,7 +83,7 @@ public class ProductService {
                 : SlugUtils.toSlug(command.name());
 
         if (productRepository.existsByStoreIdAndSlugAndIdNot(command.storeId(), resolvedSlug, command.productId())) {
-            throw new IllegalArgumentException("A product with slug '" + resolvedSlug + "' already exists in this store");
+            throw new ConflictException("A product with slug '" + resolvedSlug + "' already exists in this store");
         }
 
         product.update(
