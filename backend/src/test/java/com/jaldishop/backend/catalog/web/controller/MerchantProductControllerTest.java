@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.application.CreateProductCommand;
 import com.jaldishop.backend.catalog.application.ProductService;
 import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,11 +31,14 @@ class MerchantProductControllerTest {
     @Mock
     private ProductService productService;
 
+    @Mock
+    private StoreContextService storeContextService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        MerchantProductController controller = new MerchantProductController(productService);
+        MerchantProductController controller = new MerchantProductController(productService, storeContextService);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -47,6 +52,7 @@ class MerchantProductControllerTest {
         UUID categoryId = UUID.randomUUID();
         Product product = Product.create(storeId, categoryId, "Torta Tres Leches", "tres-leches", "Deliciosa torta", null);
 
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
         when(productService.createProduct(any(CreateProductCommand.class))).thenReturn(product);
 
         String requestJson = String.format("""
@@ -73,6 +79,7 @@ class MerchantProductControllerTest {
         UUID categoryId = UUID.randomUUID();
         Product product = Product.create(storeId, categoryId, "Alfajor", "alfajor", "Clásico", null);
 
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
         when(productService.getProductByIdAndStore(product.getId(), storeId)).thenReturn(product);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}", storeId, product.getId()))

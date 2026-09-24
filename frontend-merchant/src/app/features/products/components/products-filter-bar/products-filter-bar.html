@@ -1,0 +1,119 @@
+<div
+  class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-surface-container-lowest p-2 sm:p-2.5 rounded-xl border border-outline-variant/30 shadow-xs"
+>
+  <!-- Pestañas Pills de Categorías -->
+  <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+    <button
+      type="button"
+      (click)="categoryChange.emit(null)"
+      [class]="
+        selectedCategoryId() === null
+          ? 'px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-xs whitespace-nowrap shadow-xs cursor-pointer'
+          : 'px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-semibold text-xs whitespace-nowrap transition-colors cursor-pointer'
+      "
+    >
+      Todos
+      <span
+        [class]="
+          selectedCategoryId() === null
+            ? 'ml-1 opacity-80 text-[11px] font-normal'
+            : 'ml-1 text-outline text-[11px] font-normal'
+        "
+      >
+        {{ totalCount() }}
+      </span>
+    </button>
+
+    @for (cat of categories(); track cat.id) {
+      <button
+        type="button"
+        (click)="categoryChange.emit(cat.id)"
+        [class]="
+          selectedCategoryId() === cat.id
+            ? 'px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-xs whitespace-nowrap shadow-xs cursor-pointer'
+            : 'px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-semibold text-xs whitespace-nowrap transition-colors cursor-pointer'
+        "
+      >
+        {{ cat.name }}
+        <span
+          [class]="
+            selectedCategoryId() === cat.id
+              ? 'ml-1 opacity-80 text-[11px] font-normal'
+              : 'ml-1 text-outline text-[11px] font-normal'
+          "
+        >
+          {{ cat.productCount ?? 0 }}
+        </span>
+      </button>
+    }
+  </div>
+
+  <!-- Herramientas de búsqueda, filtro de estado y vista grid/list -->
+  <div class="flex items-center gap-2 w-full lg:w-auto justify-between sm:justify-end flex-wrap">
+    <!-- Input de Búsqueda -->
+    <div
+      class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-lg w-full sm:w-60 border border-outline-variant/20 focus-within:border-primary/50 transition-colors"
+    >
+      <ng-icon name="matSearchOutline" class="text-on-surface-variant text-base"></ng-icon>
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant text-xs focus:outline-none"
+        placeholder="Buscar dulce o insumo..."
+      />
+    </div>
+
+    <!-- Filtro de Estado / Canal -->
+    <div
+      class="relative hidden sm:flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/20 text-xs text-on-surface font-medium"
+    >
+      <ng-icon name="matStorefrontOutline" class="text-on-surface-variant text-base"></ng-icon>
+      <select
+        [value]="selectedStatus()"
+        (change)="statusChange.emit($any($event.target).value)"
+        class="bg-transparent text-on-surface focus:outline-none cursor-pointer pr-4 appearance-none"
+      >
+        <option value="all">Estado: Todos</option>
+        <option value="ACTIVE">Activos</option>
+        <option value="INACTIVE">Pausados</option>
+      </select>
+      <ng-icon
+        name="matArrowDropDownOutline"
+        class="text-on-surface-variant text-base pointer-events-none -ml-4"
+      ></ng-icon>
+    </div>
+
+    <!-- Toggle Vista Cuadrícula / Lista -->
+    <div
+      class="flex items-center bg-surface-container-low p-0.5 rounded-lg border border-outline-variant/20"
+    >
+      <button
+        type="button"
+        (click)="viewModeChange.emit('grid')"
+        [class]="
+          viewMode() === 'grid'
+            ? 'w-7 h-7 rounded-md bg-surface-container-lowest text-primary shadow-xs flex items-center justify-center cursor-pointer'
+            : 'w-7 h-7 rounded-md text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer'
+        "
+        title="Vista cuadrícula"
+        aria-label="Vista cuadrícula"
+      >
+        <ng-icon name="matGridViewOutline" class="text-base"></ng-icon>
+      </button>
+      <button
+        type="button"
+        (click)="viewModeChange.emit('list')"
+        [class]="
+          viewMode() === 'list'
+            ? 'w-7 h-7 rounded-md bg-surface-container-lowest text-primary shadow-xs flex items-center justify-center cursor-pointer'
+            : 'w-7 h-7 rounded-md text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer'
+        "
+        title="Vista lista"
+        aria-label="Vista lista"
+      >
+        <ng-icon name="matViewAgendaOutline" class="text-base"></ng-icon>
+      </button>
+    </div>
+  </div>
+</div>

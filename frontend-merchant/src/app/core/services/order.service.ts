@@ -1,154 +1,24 @@
-import { computed, inject, Service, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { MerchantOrder, OrderFilterTab, OrderStatus } from '../models/order.models';
 import { ToastService } from './toast.service';
+import { Observable, of } from 'rxjs';
 
-@Service()
+@Injectable({
+  providedIn: 'root',
+})
 export class OrderService {
   private readonly toastService = inject(ToastService);
 
-  readonly orders = signal<MerchantOrder[]>([
-    {
-      id: 'ord-1039',
-      orderNumber: '#PED-1039',
-      customerName: 'Valeria Ramos',
-      customerPhone: '984552109',
-      channel: 'WHATSAPP',
-      channelLabel: 'WhatsApp',
-      deliveryMode: 'DELIVERY',
-      deliveryAddress: 'Av. José Pardo 450, Dpto 802, Miraflores',
-      deliveryReference: 'Frente a Vivanda',
-      deliveryTimeLabel: 'Entrega en 15 min (16:15)',
-      isUrgent: true,
-      urgentLabel: 'Entrega en 15 min (16:15)',
-      status: 'IN_PREPARATION',
-      paymentMethod: 'YAPE',
-      paymentLabel: 'Yape',
-      totalAmount: 58.0,
-      notes: 'Por favor no tocar timbre, bebé durmiendo.',
-      createdAt: new Date().toISOString(),
-      items: [
-        {
-          name: 'Caja Brownies Melcochosos x6',
-          variant: 'Caja Regalo',
-          quantity: 1,
-          unitPrice: 36.0,
-          totalPrice: 36.0,
-        },
-        {
-          name: 'Galletas de Avena con Chispas x4',
-          quantity: 1,
-          unitPrice: 22.0,
-          totalPrice: 22.0,
-        },
-      ],
-    },
-    {
-      id: 'ord-1040',
-      orderNumber: '#PED-1040',
-      customerName: 'Mariana Torres',
-      customerPhone: '984123456',
-      channel: 'COUNTER',
-      channelLabel: 'Mostrador / Tienda',
-      deliveryMode: 'PICKUP',
-      deliveryAddress: 'Recojo en taller · San Isidro',
-      deliveryReference: 'Caja con visor preparada',
-      deliveryTimeLabel: 'Retiro: 16:30 (En 30 min)',
-      isUrgent: false,
-      urgentLabel: 'Retiro: 16:30 (En 30 min)',
-      status: 'READY',
-      paymentMethod: 'PLIN',
-      paymentLabel: 'Plin',
-      totalAmount: 84.0,
-      notes: 'Incluir tarjeta de dedicatoria.',
-      createdAt: new Date().toISOString(),
-      items: [
-        {
-          name: 'Torta de Chocolate Mediana (12 porc.)',
-          variant: '12 Porciones',
-          quantity: 1,
-          unitPrice: 78.0,
-          totalPrice: 78.0,
-        },
-        {
-          name: 'Velita dorada con chispas especiales',
-          quantity: 1,
-          unitPrice: 6.0,
-          totalPrice: 6.0,
-        },
-      ],
-    },
-    {
-      id: 'ord-1041',
-      orderNumber: '#PED-1041',
-      customerName: 'Carlos Benavides',
-      customerPhone: '992345678',
-      channel: 'INSTAGRAM',
-      channelLabel: 'Instagram Direct',
-      deliveryMode: 'DELIVERY',
-      deliveryAddress: 'Calle Los Robles 112, Surco',
-      deliveryReference: 'Surco (Cerca a El Polo)',
-      deliveryTimeLabel: 'Para las 17:00 (En 50 min)',
-      isUrgent: false,
-      urgentLabel: 'Para las 17:00 (En 50 min)',
-      status: 'IN_PREPARATION',
-      paymentMethod: 'BCP',
-      paymentLabel: 'BCP',
-      totalAmount: 65.0,
-      createdAt: new Date().toISOString(),
-      items: [
-        {
-          name: 'Pie de Limón Artesanal Mediano',
-          quantity: 1,
-          unitPrice: 45.0,
-          totalPrice: 45.0,
-        },
-        {
-          name: 'Porción Cheesecake Frutos Rojos',
-          quantity: 1,
-          unitPrice: 20.0,
-          totalPrice: 20.0,
-        },
-      ],
-    },
-    {
-      id: 'ord-1042',
-      orderNumber: '#PED-1042',
-      customerName: 'Lucía Morales',
-      customerPhone: '991802443',
-      channel: 'WHATSAPP',
-      channelLabel: 'WhatsApp',
-      deliveryMode: 'PICKUP',
-      deliveryAddress: 'Recojo en taller · San Isidro',
-      deliveryTimeLabel: 'Recojo estimado: 18:00',
-      isUrgent: false,
-      urgentLabel: 'Recibido hace 6 min',
-      status: 'CONFIRMED',
-      paymentMethod: 'YAPE',
-      paymentLabel: 'Yape · Voucher adjunto',
-      totalAmount: 48.0,
-      createdAt: new Date().toISOString(),
-      items: [
-        {
-          name: 'Alfajores Clásicos de Maicena x6',
-          quantity: 2,
-          unitPrice: 13.0,
-          totalPrice: 26.0,
-        },
-        {
-          name: 'Queque de Zanahoria con Nuez',
-          quantity: 1,
-          unitPrice: 22.0,
-          totalPrice: 22.0,
-        },
-      ],
-    },
-  ]);
+  readonly orders = signal<MerchantOrder[]>([]);
+  readonly isLoading = signal<boolean>(false);
+  private readonly isLoaded = signal<boolean>(false);
 
   readonly activeTab = signal<OrderFilterTab>('ALL');
   readonly searchQuery = signal<string>('');
   readonly channelFilter = signal<string>('ALL');
   readonly selectedOrder = signal<MerchantOrder | null>(null);
   readonly isDrawerOpen = signal<boolean>(false);
+  readonly isCreateModalOpen = signal<boolean>(false);
 
   // KPIs
   readonly totalOrdersCount = computed(() => this.orders().length);
@@ -204,6 +74,26 @@ export class OrderService {
     });
   });
 
+  readonly isEmptyOrders = computed(() => {
+    return !this.isLoading() && this.isLoaded() && this.orders().length === 0;
+  });
+
+  readonly isFilterEmpty = computed(() => {
+    return !this.isLoading() && this.isLoaded() && this.orders().length > 0 && this.filteredOrders().length === 0;
+  });
+
+  loadOrders(forceRefresh = false): Observable<MerchantOrder[]> {
+    if (this.isLoaded() && !forceRefresh) {
+      return of(this.orders());
+    }
+
+    this.isLoading.set(true);
+    // Simula inicialización Cache First de pedidos
+    this.isLoaded.set(true);
+    this.isLoading.set(false);
+    return of(this.orders());
+  }
+
   setActiveTab(tab: OrderFilterTab): void {
     this.activeTab.set(tab);
   }
@@ -216,7 +106,11 @@ export class OrderService {
     this.channelFilter.set(channel);
   }
 
-  readonly isCreateModalOpen = signal<boolean>(false);
+  clearFilters(): void {
+    this.activeTab.set('ALL');
+    this.searchQuery.set('');
+    this.channelFilter.set('ALL');
+  }
 
   openCreateModal(): void {
     this.isCreateModalOpen.set(true);
@@ -228,6 +122,7 @@ export class OrderService {
 
   addOrder(order: MerchantOrder): void {
     this.orders.update((list) => [order, ...list]);
+    this.isLoaded.set(true);
     this.toastService.success(`Pedido ${order.orderNumber} registrado exitosamente.`);
   }
 

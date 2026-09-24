@@ -25,7 +25,7 @@ public interface StoreCustomerJpaRepository extends JpaRepository<StoreCustomerE
                    sc.created_at AS customerSince,
                    COUNT(o.id) AS ordersCount,
                    COALESCE(SUM(CASE WHEN o.status != 'CANCELLED' THEN o.total_amount ELSE 0 END), 0) AS totalSpent,
-                   MAX(o.created_at) AS lastOrderAt
+                   MAX(o.confirmed_at) AS lastOrderAt
             FROM store_customers sc
             JOIN users u ON u.id = sc.user_id
             LEFT JOIN orders o ON o.user_id = sc.user_id AND o.store_id = sc.store_id

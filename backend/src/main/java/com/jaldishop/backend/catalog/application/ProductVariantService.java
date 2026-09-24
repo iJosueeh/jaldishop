@@ -5,6 +5,8 @@ import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.catalog.domain.ProductVariant;
 import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.domain.VariantStatus;
+import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,7 @@ public class ProductVariantService {
     public ProductVariant createVariant(CreateProductVariantCommand command) {
         // Validar pertenencia del producto a la tienda
         productRepository.findByIdAndStoreId(command.productId(), command.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
 
         if (command.presentationName() == null || command.presentationName().trim().isEmpty()) {
             throw new IllegalArgumentException("Presentation name cannot be empty");
@@ -41,7 +43,7 @@ public class ProductVariantService {
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySku(trimmedSku)) {
-                throw new IllegalArgumentException("SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU_ALREADY_EXISTS", "SKU '" + trimmedSku + "' is already in use");
             }
         }
 
@@ -62,7 +64,7 @@ public class ProductVariantService {
     public List<ProductVariant> getVariantsByProduct(UUID productId, UUID storeId) {
         // Validar que el producto pertenezca a la tienda
         productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
 
         return variantRepository.findByProductId(productId);
     }
@@ -70,10 +72,10 @@ public class ProductVariantService {
     @Transactional(readOnly = true)
     public ProductVariant getVariantById(UUID variantId, UUID productId, UUID storeId) {
         productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
 
         ProductVariant variant = variantRepository.findById(variantId)
-                .orElseThrow(() -> new IllegalArgumentException("Variant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Variant not found"));
 
         if (!variant.getProductId().equals(productId)) {
             throw new IllegalArgumentException("Variant does not belong to the given product");
@@ -94,7 +96,7 @@ public class ProductVariantService {
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySkuAndIdNot(trimmedSku, command.variantId())) {
-                throw new IllegalArgumentException("SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU_ALREADY_EXISTS", "SKU '" + trimmedSku + "' is already in use");
             }
         }
 

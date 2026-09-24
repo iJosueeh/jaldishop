@@ -4,6 +4,8 @@ import com.jaldishop.backend.catalog.domain.CategoryRepository;
 import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.domain.ProductRepository;
 import com.jaldishop.backend.catalog.domain.ProductStatus;
+import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public class ProductService {
 
         // Validar pertenencia de Category a la Store
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
 
         // Resolver slug: si no viene explícito, se genera del nombre
         String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
@@ -37,7 +39,7 @@ public class ProductService {
                 : SlugUtils.toSlug(command.name());
 
         if (productRepository.existsByStoreIdAndSlug(command.storeId(), resolvedSlug)) {
-            throw new IllegalArgumentException("A product with slug '" + resolvedSlug + "' already exists in this store");
+            throw new ConflictException("PRODUCT_SLUG_ALREADY_EXISTS", "A product with slug '" + resolvedSlug + "' already exists in this store");
         }
 
         Product product = Product.create(
@@ -65,7 +67,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductByIdAndStore(UUID productId, UUID storeId) {
         return productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
     }
 
     @Transactional
@@ -78,14 +80,14 @@ public class ProductService {
 
         // Validar nueva categoría
         categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
 
         String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
                 ? SlugUtils.toSlug(command.slug())
                 : SlugUtils.toSlug(command.name());
 
         if (productRepository.existsByStoreIdAndSlugAndIdNot(command.storeId(), resolvedSlug, command.productId())) {
-            throw new IllegalArgumentException("A product with slug '" + resolvedSlug + "' already exists in this store");
+            throw new ConflictException("PRODUCT_SLUG_ALREADY_EXISTS", "A product with slug '" + resolvedSlug + "' already exists in this store");
         }
 
         product.update(

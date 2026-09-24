@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.application.CategoryService;
 import com.jaldishop.backend.catalog.application.CreateCategoryCommand;
 import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,11 +32,14 @@ class MerchantCategoryControllerTest {
     @Mock
     private CategoryService categoryService;
 
+    @Mock
+    private StoreContextService storeContextService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        MerchantCategoryController controller = new MerchantCategoryController(categoryService);
+        MerchantCategoryController controller = new MerchantCategoryController(categoryService, storeContextService);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -47,6 +52,7 @@ class MerchantCategoryControllerTest {
         UUID storeId = UUID.randomUUID();
         Category category = Category.create(storeId, "Postres", "Postres artesanales");
 
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
         when(categoryService.createCategory(any(CreateCategoryCommand.class))).thenReturn(category);
 
         String requestJson = """
@@ -70,6 +76,7 @@ class MerchantCategoryControllerTest {
         UUID storeId = UUID.randomUUID();
         Category category = Category.create(storeId, "Bebidas", null);
 
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
         when(categoryService.getCategoriesByStore(storeId)).thenReturn(List.of(category));
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/categories", storeId))
