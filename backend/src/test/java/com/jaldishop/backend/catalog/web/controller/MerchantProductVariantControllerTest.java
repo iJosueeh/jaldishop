@@ -3,6 +3,7 @@ package com.jaldishop.backend.catalog.web.controller;
 import com.jaldishop.backend.catalog.application.CreateProductVariantCommand;
 import com.jaldishop.backend.catalog.application.ProductVariantService;
 import com.jaldishop.backend.catalog.domain.ProductVariant;
+import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +39,11 @@ class MerchantProductVariantControllerTest {
     @Mock
     private StoreContextService storeContextService;
 
+    @Mock
+    private JwtPrincipal mockPrincipal;
+
     private MockMvc mockMvc;
+    private UsernamePasswordAuthenticationToken auth;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +52,8 @@ class MerchantProductVariantControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
+
+        auth = new UsernamePasswordAuthenticationToken(mockPrincipal, null, Collections.emptyList());
     }
 
     @Test
@@ -63,7 +71,8 @@ class MerchantProductVariantControllerTest {
                 Collections.emptyList()
         );
 
-        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        lenient().doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        lenient().when(storeContextService.requireStoreId(any())).thenReturn(storeId);
         when(variantService.createVariant(any(CreateProductVariantCommand.class))).thenReturn(variant);
 
         String requestJson = """
@@ -78,6 +87,7 @@ class MerchantProductVariantControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId)
+                        .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
@@ -92,6 +102,9 @@ class MerchantProductVariantControllerTest {
         UUID storeId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
 
+        lenient().doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        lenient().when(storeContextService.requireStoreId(any())).thenReturn(storeId);
+
         String requestJson = """
                 {
                     "presentationName": "Porción Individual",
@@ -104,6 +117,7 @@ class MerchantProductVariantControllerTest {
                 """;
 
         mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId)
+                        .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isBadRequest())
@@ -125,10 +139,12 @@ class MerchantProductVariantControllerTest {
                 Collections.emptyList()
         );
 
-        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        lenient().doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        lenient().when(storeContextService.requireStoreId(any())).thenReturn(storeId);
         when(variantService.getVariantsByProduct(productId, storeId)).thenReturn(List.of(variant));
 
-        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId))
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId)
+                        .principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].presentationName").value("Porción Grande"));
     }
