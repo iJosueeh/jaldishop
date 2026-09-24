@@ -57,4 +57,11 @@ public class StoreRepositoryAdapter implements StoreRepository {
         return storeJpaRepository.existsByMerchantUserId(merchantUserId);
     }
 
+    @Override
+    public java.util.List<Store> findAllStores(String query, com.jaldishop.backend.store.domain.StoreStatus status) {
+        String cleanQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+        return storeJpaRepository.searchStores(cleanQuery, status).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
 }

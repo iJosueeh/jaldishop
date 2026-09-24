@@ -1,0 +1,172 @@
+<div
+  class="group flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden"
+  [class.opacity-85]="isPaused()"
+>
+  <!-- Imagen fotográfica con badges flotantes -->
+  <div class="relative w-full h-52 overflow-hidden bg-surface-container-low">
+    @if (product().imageUrl) {
+      <img
+        [src]="product().imageUrl"
+        [alt]="product().name"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+      />
+    } @else {
+      <div
+        class="w-full h-full flex flex-col items-center justify-center bg-surface-container text-on-surface-variant/60"
+      >
+        <ng-icon name="matInventory2Outline" class="text-4xl text-primary/40 mb-1"></ng-icon>
+        <span class="text-xs font-medium">{{ product().name }}</span>
+      </div>
+    }
+
+    <!-- Badges superiores -->
+    <div class="absolute top-2.5 left-2.5 flex items-center gap-1">
+      @if (isPaused()) {
+        <span
+          class="px-2 py-0.5 rounded-md bg-red-600/90 backdrop-blur-md text-white font-bold text-[10px] uppercase shadow-xs tracking-wider"
+        >
+          Pausado
+        </span>
+      } @else if (product().badgeText) {
+        <span
+          class="px-2 py-0.5 rounded-md bg-surface-container-lowest/90 backdrop-blur-md text-primary font-bold text-[10px] uppercase shadow-xs tracking-wider"
+        >
+          {{ product().badgeText }}
+        </span>
+      }
+    </div>
+
+    <div class="absolute top-2.5 right-2.5">
+      <span
+        class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface-container-lowest/90 backdrop-blur-md text-on-surface text-[10px] font-semibold shadow-xs"
+      >
+        <span
+          class="w-1.5 h-1.5 rounded-full"
+          [class.bg-emerald-600]="!isPaused()"
+          [class.bg-red-600]="isPaused()"
+        ></span>
+        {{ product().channelText || 'WhatsApp & Web' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="p-4 flex flex-col gap-3.5 flex-1 justify-between">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-baseline justify-between gap-2">
+        <h2
+          class="font-bold text-base text-on-surface group-hover:text-primary transition-colors truncate"
+          [title]="product().name"
+        >
+          {{ product().name }}
+        </h2>
+        <span class="text-lg font-bold text-on-surface shrink-0">
+          {{ displayPrice() }}
+        </span>
+      </div>
+      <p class="text-xs text-on-surface-variant line-clamp-1">
+        {{ product().description || 'Sin descripción disponible' }}
+      </p>
+    </div>
+
+    <!-- Indicador de Stock / Capacidad / Problema -->
+    @if (product().hasStockIssue) {
+      <div
+        class="flex items-center justify-between py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs"
+      >
+        <div class="flex items-center gap-1.5 text-red-700 dark:text-red-400 font-medium">
+          <ng-icon name="matWarningOutline" class="text-sm"></ng-icon>
+          <span>{{ product().stockIssueMessage || 'Sin stock de insumos' }}</span>
+        </div>
+        <button
+          type="button"
+          (click)="editProduct.emit(product())"
+          class="text-[10px] font-bold text-red-700 dark:text-red-300 underline uppercase cursor-pointer"
+        >
+          Reponer
+        </button>
+      </div>
+    } @else {
+      <div
+        class="flex items-center justify-between py-2 px-3 rounded-lg bg-surface-container-low text-xs"
+      >
+        <div class="flex items-center gap-1.5 text-on-surface font-medium">
+          <ng-icon name="matInventory2Outline" class="text-primary text-sm"></ng-icon>
+          <span>
+            @if (product().preparedCount != null) {
+              {{ product().preparedCount }} preparados
+            } @else if (product().quotaToday) {
+              Cupo hoy: {{ product().quotaToday?.current }} de {{ product().quotaToday?.total }}
+            } @else {
+              Disponible para venta
+            }
+          </span>
+        </div>
+        <!-- Micro barras de capacidad -->
+        <div class="flex items-center gap-[3px]">
+          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
+          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
+          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
+          <span class="w-1.5 h-3 rounded-[2px] bg-surface-variant"></span>
+        </div>
+      </div>
+    }
+
+    <!-- Fila de acciones -->
+    <div class="flex items-center justify-between pt-2 border-t border-outline-variant/15">
+      <div class="flex items-center gap-1 text-xs">
+        <span class="text-[10px] uppercase font-bold tracking-wider text-on-surface-variant">
+          Despacho:
+        </span>
+        <span class="font-semibold" [class.text-primary]="!isPaused()" [class.text-red-600]="isPaused()">
+          {{ isPaused() ? 'Pausado' : product().leadTimeText || 'Inmediato' }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          (click)="editProduct.emit(product())"
+          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+          title="Editar receta y costo"
+          aria-label="Editar"
+        >
+          <ng-icon name="matEditOutline" class="text-sm"></ng-icon>
+        </button>
+        <button
+          type="button"
+          (click)="adjustQuota.emit(product())"
+          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+          title="Ajustar cupo diario"
+          aria-label="Ajustar cupo"
+        >
+          <ng-icon name="matTuneOutline" class="text-sm"></ng-icon>
+        </button>
+        <button
+          type="button"
+          (click)="toggleStatus.emit(product())"
+          class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center transition-colors cursor-pointer"
+          [class.text-red-600]="isPaused()"
+          [class.text-on-surface-variant]="!isPaused()"
+          [class.hover:text-primary]="!isPaused()"
+          [title]="isPaused() ? 'Reactivar producto' : 'Pausar producto'"
+          aria-label="Alternar visibilidad"
+        >
+          <ng-icon
+            [name]="isPaused() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'"
+            class="text-sm"
+          ></ng-icon>
+        </button>
+        <button
+          type="button"
+          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+          title="Más opciones"
+          aria-label="Más opciones"
+        >
+          <ng-icon name="matMoreVertOutline" class="text-sm"></ng-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

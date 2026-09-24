@@ -1,34 +1,88 @@
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-  @for (order of orders(); track order.id) {
-    <app-orders-card
-      [order]="order"
-      (statusAdvance)="statusAdvance.emit($event)"
-      (whatsAppClick)="whatsAppClick.emit($event)"
-      (openDetails)="openDetails.emit($event)"
-    />
-  } @empty {
-    <!-- Estado Vacío -->
-    <div
-      class="col-span-full p-8 sm:p-12 rounded-2xl bg-surface-container-lowest border border-dashed border-outline-variant/50 text-center flex flex-col items-center justify-center gap-3"
-    >
+@if (isLoading()) {
+  <!-- Skeleton Loading Grid -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    @for (i of [1, 2, 3, 4]; track i) {
       <div
-        class="w-12 h-12 rounded-2xl bg-primary-container/10 text-primary-container flex items-center justify-center"
+        class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 space-y-4 animate-pulse shadow-2xs"
       >
-        <ng-icon name="matReceiptLongOutline" class="text-[28px]" />
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-surface-container-high"></div>
+            <div class="space-y-1.5">
+              <div class="h-4 bg-surface-container-high rounded w-28"></div>
+              <div class="h-3 bg-surface-container-high rounded w-20"></div>
+            </div>
+          </div>
+          <div class="h-6 bg-surface-container-high rounded-full w-24"></div>
+        </div>
+        <div class="h-12 bg-surface-container-high rounded-xl w-full"></div>
+        <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+          <div class="h-5 bg-surface-container-high rounded w-20"></div>
+          <div class="h-8 bg-surface-container-high rounded-xl w-32"></div>
+        </div>
       </div>
-      <div>
-        <h4 class="text-base font-bold text-on-surface">No se encontraron pedidos</h4>
-        <p class="text-xs text-on-surface-variant max-w-sm mt-1">
-          No hay pedidos que coincidan con los filtros seleccionados o la búsqueda actual.
-        </p>
-      </div>
-      <button
-        type="button"
-        (click)="resetFilter.emit()"
-        class="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container text-white hover:bg-primary transition-colors text-xs font-bold shadow-2xs cursor-pointer active:scale-98"
-      >
-        <span>Ver todos los pedidos</span>
-      </button>
+    }
+  </section>
+} @else if (isEmptyOrders()) {
+  <!-- Estado Vacío: Sin pedidos en el turno -->
+  <div
+    class="w-full p-12 sm:p-16 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center flex flex-col items-center justify-center gap-3 shadow-2xs"
+  >
+    <div
+      class="w-14 h-14 rounded-2xl bg-surface-container-low text-primary-container flex items-center justify-center mb-1"
+    >
+      <ng-icon name="matReceiptLongOutline" class="text-3xl text-primary" />
     </div>
-  }
-</section>
+    <div>
+      <h4 class="text-base sm:text-lg font-bold text-on-surface">No hay pedidos en este turno</h4>
+      <p class="text-xs sm:text-sm text-on-surface-variant max-w-md mt-1">
+        Aún no has registrado comandas para hoy. Puedes ingresar un nuevo pedido manualmente o
+        recibirlos automáticamente desde tu catálogo web y WhatsApp.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="createNewOrder.emit()"
+      class="mt-3 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary/90 transition-colors text-xs sm:text-sm font-semibold shadow-xs cursor-pointer active:scale-98"
+    >
+      <ng-icon name="matAddOutline" class="text-base" />
+      <span>Registrar Primer Pedido</span>
+    </button>
+  </div>
+} @else if (isFilterEmpty() || orders().length === 0) {
+  <!-- Estado Vacío: Filtros o Búsqueda sin coincidencias -->
+  <div
+    class="w-full p-10 sm:p-14 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center flex flex-col items-center justify-center gap-3 shadow-2xs"
+  >
+    <div
+      class="w-12 h-12 rounded-2xl bg-surface-container-low text-on-surface-variant flex items-center justify-center mb-1"
+    >
+      <ng-icon name="matFilterAltOffOutline" class="text-2xl" />
+    </div>
+    <div>
+      <h4 class="text-base font-bold text-on-surface">No se encontraron pedidos</h4>
+      <p class="text-xs text-on-surface-variant max-w-sm mt-1">
+        No hay pedidos que coincidan con los filtros seleccionados o la búsqueda actual.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="resetFilter.emit()"
+      class="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors text-xs font-semibold shadow-2xs cursor-pointer active:scale-98"
+    >
+      <span>Ver todos los pedidos</span>
+    </button>
+  </div>
+} @else {
+  <!-- Grid de Comandas -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    @for (order of orders(); track order.id) {
+      <app-orders-card
+        [order]="order"
+        (statusAdvance)="statusAdvance.emit($event)"
+        (whatsAppClick)="whatsAppClick.emit($event)"
+        (openDetails)="openDetails.emit($event)"
+      />
+    }
+  </section>
+}

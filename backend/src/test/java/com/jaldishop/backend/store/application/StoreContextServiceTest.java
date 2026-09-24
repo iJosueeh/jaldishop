@@ -96,4 +96,25 @@ class StoreContextServiceTest {
         assertNotNull(result);
         assertEquals(mockStore, result);
     }
+
+    @Test
+    @DisplayName("validateStoreOwnership no debe lanzar excepción cuando el storeId coincide")
+    void validateStoreOwnershipSuccess() {
+        JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
+        when(getMyStoreService.execute(userId)).thenReturn(mockStore);
+
+        assertDoesNotThrow(() -> storeContextService.validateStoreOwnership(storeId, principal));
+    }
+
+    @Test
+    @DisplayName("validateStoreOwnership debe lanzar AccessDeniedException cuando el storeId no coincide")
+    void validateStoreOwnershipThrowsWhenMismatch() {
+        JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
+        when(getMyStoreService.execute(userId)).thenReturn(mockStore);
+
+        UUID differentStoreId = UUID.randomUUID();
+        assertThrows(AccessDeniedException.class, () ->
+                storeContextService.validateStoreOwnership(differentStoreId, principal)
+        );
+    }
 }

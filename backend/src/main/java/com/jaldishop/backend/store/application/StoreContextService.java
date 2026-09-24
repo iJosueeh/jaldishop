@@ -33,4 +33,11 @@ public class StoreContextService {
         }
     }
 
+    public void validateStoreOwnership(UUID storeId, JwtPrincipal principal) {
+        UUID authenticatedStoreId = requireStoreId(principal);
+        if (!authenticatedStoreId.equals(storeId)) {
+            throw new AccessDeniedException("No tiene permisos para operar sobre una tienda ajena.");
+        }
+    }
+
 }

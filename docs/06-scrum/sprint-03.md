@@ -33,11 +33,11 @@ flowchart TD
     end
 
     subgraph CATALOGO["Cadena de Catálogo & Carrito"]
-        BE12["BE-12 · Catálogo (Categorías, Productos, Variantes)<br/>(Katherine)<br/>🟢 EN PROGRESO"]
-        BE13["BE-13 · Inventario<br/>(Katherine)<br/>🔒 BLOQUEADA POR BE-12"]
-        BE17["BE-17 · Carrito de Compras<br/>(Josué)<br/>🔒 BLOQUEADA POR BE-12"]
-        BE12 -->|Desbloquea| BE13
-        BE12 -->|Desbloquea| BE17
+        BE12["BE-12 · Catálogo (Categorías, Productos, Variantes)<br/>(Katherine)<br/>✅ COMPLETADO (PR #25)"]
+        BE13["BE-13 · Inventario<br/>(Katherine)<br/>🟢 EN PROGRESO (Desbloqueada)"]
+        BE17["BE-17 · Carrito de Compras<br/>(Josué)<br/>🟢 EN PROGRESO (Desbloqueada)"]
+        BE12 -->|Desbloqueó| BE13
+        BE12 -->|Desbloqueó| BE17
     end
 
     subgraph CAPACIDAD["Cadena de Capacidad Operativa"]
@@ -48,8 +48,21 @@ flowchart TD
         BE15 -->|Desbloqueó| BE16
     end
 
+    subgraph TENANT_CUSTOMERS["Cartera de Clientes & Multi-Tenant"]
+        BETENANT01["BE-TENANT-01/02 · Store Customers API & Flyway V3<br/>(Josué)<br/>✅ COMPLETADO"]
+        FEMERCH01["FE-MERCH-01 · Cartera de Clientes Merchant<br/>(Josué)<br/>✅ COMPLETADO"]
+        BETENANT01 -->|Desbloqueó| FEMERCH01
+    end
+
+    subgraph ADMIN["Administración de Plataforma"]
+        BEADMIN01["BE-ADMIN-01 · API Admin Usuarios & Tiendas<br/>(Josué)<br/>✅ COMPLETADO"]
+        FEADMIN01["FE-ADMIN-01 · Panel Admin Frontend<br/>(Josué)<br/>🟢 EN PROGRESO"]
+        BEADMIN01 -->|Desbloqueó| FEADMIN01
+    end
+
     CI01 -. Protege PRs .-> BE12
     CI01 -. Protege PRs .-> BE14
+    CI01 -. Protege PRs .-> BEADMIN01
     DEPLOY01 -. Expone API .-> FE08
 ```
 
@@ -58,11 +71,15 @@ flowchart TD
 | 🔴 **Alta** | **CI-01** · Pipeline de validación automática | Josué | `COMPLETADO` | Ninguna | Workflow GitHub Actions con validación paralela Maven y Vitest |
 | 🔴 **Alta** | **DEPLOY-01** · Despliegue en la Nube y Ambientes | Josué | `COMPLETADO` | CI-01 | Backend en Render API, Frontend en Cloudflare Pages y NeonDB |
 | 🔴 **Alta** | **FE-08** · Identidad Visual, Favicon y Branding | Josué | `COMPLETADO` | Ninguna | Set de favicon SVG/PNG, manifest e integración en todas las vistas de auth/dashboard |
+| 🔴 **Alta** | **BE-ADMIN-01** · Administración base de Usuarios y Tiendas | Josué | `COMPLETADO` | Ninguna | Endpoints `/api/v1/admin/**` (Listar, Detalle, Filtros, Suspender, Reactivar, Reglas de RBAC y tests) *(Desbloqueó FE-ADMIN-01)* |
 | 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
-| 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine | `EN PROGRESO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST y tests *(Desbloquea BE-13 y BE-17)* |
+| 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine / Josué | `COMPLETADO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST, Ownership RBAC, 409 Conflicts y tests *(Desbloqueó BE-13 y BE-17)* |
+| 🔴 **Alta** | **BE-TENANT-01/02** · Aislamiento y Cartera de Clientes de Tienda | Josué | `COMPLETADO` | Ninguna | Migración V3, `StoreCustomer`, proyección SQL agregada y endpoint `/api/v1/merchant/customers` |
+| 🔴 **Alta** | **FE-MERCH-01** · Vista de Gestión de Clientes Merchant | Josué | `COMPLETADO` | BE-TENANT-02 | Vista `/customers`, Cache First, Signals, KPIs, exportación CSV, WhatsApp y Design System v2.1 |
+| 🔴 **Alta** | **FE-ADMIN-01** · Panel de Administración en Frontend | Josué | `EN PROGRESO` | BE-ADMIN-01 | Módulo `/admin/*` en `frontend-merchant` con Guards, vistas de usuarios, comerciantes y tiendas |
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
-| 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `BLOQUEADA` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST |
-| 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `BLOQUEADA` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento |
+| 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `EN PROGRESO` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST *(Desbloqueada)* |
+| 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `EN PROGRESO` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento *(Desbloqueada)* |
 | 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `EN PROGRESO` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
 
 ---
@@ -145,37 +162,39 @@ flowchart TD
 
 ### 📋 BE-12 | Implementar módulo de Catálogo
 
-**Responsable:** Katherine  
-**Estado:** `READY / EN PROGRESO` 🟢  
-**Entregable:** Dominio `Category`, `Product`, `ProductVariant`, persistencia JPA, casos de uso de gestión, REST controller y tests.  
-**Desbloquea:** **BE-13** (Inventario) y **BE-17** (Carrito).
+**Responsable:** Katherine / Josué  
+**Estado:** `COMPLETADO` ✅ *(Integrado en PR #25 + Refactoring de Seguridad & Semántica)*  
+**Entregable:** Dominio `Category`, `Product`, `ProductVariant`, persistencia JPA, casos de uso de gestión, REST controllers con RBAC StoreContextService, mapeo de conflictos 409 y 239 tests pasando.  
+**Desbloqueó:** **BE-13** (Inventario) y **BE-17** (Carrito).
 
 **Descripción:**  
-Implementar el módulo de catálogo de JaldiShop para permitir que cada comerciante gestione las categorías, productos y variantes pertenecientes a su tienda. Este módulo servirá como base para Inventario, Carrito y las interfaces de catálogo.
+Implementar el módulo de catálogo de JaldiShop para permitir que cada comerciante gestione las categorías, productos y variantes pertenecientes a su tienda. Este módulo sirve como base para Inventario, Carrito y las interfaces de catálogo.
 
 **Checklist:**
-- [ ] Implementar `Category`
-- [ ] Implementar `Product`
-- [ ] Implementar `ProductVariant`
-- [ ] Implementar puertos de repositorio (`CategoryRepository`, `ProductRepository`, `ProductVariantRepository`)
-- [ ] Implementar entidades JPA (`CategoryEntity`, `ProductEntity`, `ProductVariantEntity`)
-- [ ] Implementar `JpaRepository`
-- [ ] Implementar mappers de persistencia
-- [ ] Implementar adapters de persistencia
-- [ ] Casos de uso de categorías (Crear, Listar por Tienda, Actualizar, Cambiar Estado)
-- [ ] Casos de uso de productos (Crear con Variantes, Listar por Tienda/Categoría, Actualizar, Cambiar Estado)
-- [ ] Casos de uso de variantes (Agregar Variante, Actualizar Precio/SKU, Desactivar)
-- [ ] Validar pertenencia a Store (`store_id` del merchant)
-- [ ] Implementar reglas de slug único de producto por tienda
-- [ ] Implementar reglas de generación y unicidad de SKU por tienda
-- [ ] Respetar estados definidos en el modelo (`ACTIVE`, `INACTIVE`, `ARCHIVED`)
-- [ ] Implementar DTOs con Bean Validation
-- [ ] Implementar endpoints REST Merchant (`/api/v1/categories/**`, `/api/v1/products/**`)
-- [ ] Tests de dominio
-- [ ] Tests de aplicación
-- [ ] Tests de persistencia
-- [ ] Tests web
-- [ ] Documentar endpoints y contratos REST
+- [x] Implementar `Category`
+- [x] Implementar `Product`
+- [x] Implementar `ProductVariant`
+- [x] Implementar puertos de repositorio (`CategoryRepository`, `ProductRepository`, `ProductVariantRepository`)
+- [x] Implementar entidades JPA (`CategoryEntity`, `ProductEntity`, `ProductVariantEntity`)
+- [x] Resolver conflicto de doble mapeo de `variant_id` en JPA
+- [x] Implementar `JpaRepository`
+- [x] Implementar mappers de persistencia
+- [x] Implementar adapters de persistencia
+- [x] Casos de uso de categorías (Crear, Listar por Tienda, Actualizar, Cambiar Estado)
+- [x] Casos de uso de productos (Crear con Variantes, Listar por Tienda/Categoría, Actualizar, Cambiar Estado)
+- [x] Casos de uso de variantes (Agregar Variante, Actualizar Precio/SKU, Desactivar)
+- [x] Validar pertenencia y ownership de Store con `StoreContextService` en todos los endpoints
+- [x] Implementar reglas de slug único de producto por tienda (`ConflictException` 409)
+- [x] Implementar reglas de generación y unicidad de SKU por tienda (`ConflictException` 409)
+- [x] Implementar validación ISO de monedas de 3 letras (`@Pattern(regexp = "^[A-Z]{3}$")`)
+- [x] Respetar estados definidos en el modelo (`ACTIVE`, `INACTIVE`)
+- [x] Implementar DTOs con Bean Validation
+- [x] Implementar endpoints REST Merchant (`/api/v1/merchants/stores/{storeId}/categories/**`, `/api/v1/merchants/stores/{storeId}/products/**`)
+- [x] Tests de dominio
+- [x] Tests de aplicación
+- [x] Tests de persistencia
+- [x] Tests web con MockMvc y manejo global de excepciones
+- [x] Documentar endpoints y contratos REST
 
 ---
 
@@ -332,14 +351,91 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 
 ---
 
+### 📋 BE-ADMIN-01 | Implementar administración base de Usuarios y Tiendas
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Endpoints REST de administración (`/api/v1/admin/users/**`, `/api/v1/admin/stores/**`), control de acceso por rol `ADMIN`, métodos de suspensión/activación, filtros combinados y 206 tests unitarios.  
+**Desbloqueó:** **FE-ADMIN-01** (Panel de Administración Frontend).
+
+**Descripción:**  
+Implementar las consultas y acciones administrativas básicas de JaldiShop para que los usuarios con rol `ADMIN` puedan supervisar usuarios, comerciantes y tiendas de la plataforma, además de gestionar sus estados (`ACTIVE`, `SUSPENDED`).
+
+**Checklist:**
+- [x] Implementar listado global de usuarios (`GET /api/v1/admin/users`)
+- [x] Implementar consulta de usuario por ID (`GET /api/v1/admin/users/{id}`)
+- [x] Permitir búsqueda/filtros básicos (`query`, `role`, `status`)
+- [x] Mostrar roles y estado del usuario
+- [x] Relacionar comerciante con su tienda (`store` resumen cuando corresponda)
+- [x] Implementar suspensión de usuario (`PATCH /api/v1/admin/users/{id}/suspend`)
+- [x] Implementar reactivación de usuario (`PATCH /api/v1/admin/users/{id}/activate`)
+- [x] Implementar regla de seguridad: El admin no puede auto-suspenderse (`NO_SELF_SUSPENSION` / `409 Conflict`)
+- [x] Implementar listado global de tiendas (`GET /api/v1/admin/stores`)
+- [x] Implementar consulta de tienda por ID (`GET /api/v1/admin/stores/{id}`)
+- [x] Permitir búsqueda/filtros básicos en tiendas (`query`, `status`)
+- [x] Relacionar tienda con datos de su comerciante propietario (`owner`)
+- [x] Implementar suspensión de tienda (`PATCH /api/v1/admin/stores/{id}/suspend`)
+- [x] Implementar reactivación de tienda (`PATCH /api/v1/admin/stores/{id}/activate`)
+- [x] Proteger rutas con `@PreAuthorize("hasRole('ADMIN')")` y `SecurityConfig`
+- [x] Seeds actualizados con contraseñas BCrypt válidas (`V2__seed_roles.sql`)
+- [x] Documentación y colección Postman completada (`docs/04-diseno/api-admin.md`)
+
+---
+
+### 📋 FE-MERCH-02 | Catálogo de Productos y Disponibilidad en Frontend Merchant
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Módulo `/products` en `frontend-merchant` con arquitectura modular en Angular Standalone, Signals reactivas, estrategia Cache First, selector de modo Grid (3 columnas) vs Lista, barra de filtros con categorías dinámicas, buscador en tiempo real, badges de estado y canales, reutilización de `<app-pagination>` y 249 tests unitarios pasando.
+
+**Descripción:**  
+Permitir a los comerciantes gestionar su catálogo de productos de forma visual y ágil, visualizando recetas, disponibilidad, cupos por turno, insumos faltantes y estados de activación/pausa de manera reactiva y optimizada.
+
+**Checklist:**
+- [x] Modelos TypeScript de catálogo (`ProductCategory`, `Product`, `ProductVariant`, `ProductViewMode`)
+- [x] Servicio `ProductService` con estrategia Cache First, Signals computadas y filtros reactivos
+- [x] Componente `ProductsHeader` con métrica de productos activos y acciones de disponibilidad
+- [x] Componente `ProductsAlertBanner` para avisos de insumos agotados y cupos limitados
+- [x] Componente `ProductsFilterBar` con pills de categoría dinámicas y conmutador Grid/Lista
+- [x] Componente `ProductsGrid` y `ProductCard` con badges flotantes, precios y micro-barras de capacidad
+- [x] Componente `ProductsList` para vista alternativa en tabla
+- [x] Integración de paginación reutilizando `<app-pagination>`
+- [x] Integración de rutas (`/products`) en `app.routes.ts`
+- [x] Pruebas unitarias de componentes y servicio pasando al 100%
+
+---
+
+### 📋 FE-ADMIN-01 | Panel de Administración en Frontend
+
+**Responsable:** Josué  
+**Estado:** `EN PROGRESO / READY` 🟢 *(Desbloqueada tras merge de BE-ADMIN-01)*  
+**Entregable:** Módulo `/admin/*` en `frontend-merchant` con layout dedicado, navegación, protección por `adminGuard`, tablas de datos reactivas, filtros y modales de confirmación.
+
+**Descripción:**  
+Construir el panel administrativo web en Angular para que los usuarios con rol `ADMIN` puedan gestionar y supervisar usuarios, comerciantes y tiendas desde una interfaz intuitiva y protegida.
+
+**Checklist:**
+- [ ] Implementar `adminGuard` para restringir rutas `/admin/*` únicamente a usuarios con rol `ADMIN`
+- [ ] Implementar `AdminService` con consumo de endpoints `/api/v1/admin/**`
+- [ ] Implementar `AdminLayoutComponent` (Header y Sidebar diferenciados para admin)
+- [ ] Implementar vista de Dashboard Admin (`/admin/dashboard`)
+- [ ] Implementar vista de Usuarios (`/admin/users`) con filtros por texto, rol y estado
+- [ ] Implementar vista de Comerciantes (`/admin/merchants`) filtrado automático por rol `MERCHANT`
+- [ ] Implementar vista de Tiendas (`/admin/stores`) con filtros y detalle de propietario
+- [ ] Implementar modales de confirmación para suspensión y reactivación
+- [ ] Redirección inteligente al iniciar sesión según rol (`ADMIN` -> `/admin/dashboard`, `MERCHANT` -> `/dashboard`)
+- [ ] Pruebas unitarias de Guards, Servicios y Componentes
+
+---
+
 ## 4. Estado de Avance del Sprint
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **5 / 9 (56%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-14`, `BE-15` |
-| Entregables en desarrollo activo | **2 / 9 (22%)** | `BE-12`, `BE-16` (Desbloqueada) |
-| Entregables pendientes / bloqueados | **2 / 9 (22%)** | `BE-13`, `BE-17` |
-| **Estado General** | `EN PROGRESO` | Cadena central en ejecución |
+| Entregables completados | **10 / 14 (71%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
+| Entregables en desarrollo activo | **4 / 14 (29%)** | `FE-ADMIN-01`, `BE-16`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
+| Entregables pendientes / bloqueados | **0 / 14 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
+| **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad y cartera de clientes 100% operativos |
 
 ---
 
@@ -348,11 +444,13 @@ Implementar el carrito de compra del cliente para una tienda específica, permit
 | Decisión | Valor | Regla de Negocio | Documento |
 |---|---|---|---|
 | UUID para llaves primarias | `UUID` v4 generado en aplicación/JPA | Identificadores globales únicos en todas las entidades | modelo-er.md |
-| Unicidad de SKU | `UNIQUE(store_id, sku)` | No se pueden repetir SKUs dentro de la misma tienda | modelo-er.md |
-| Unicidad de Slug de Producto | `UNIQUE(store_id, slug)` | URLs amigables únicas por tienda | modelo-er.md |
+| Unicidad de SKU | `UNIQUE(store_id, sku)` | No se pueden repetir SKUs dentro de la misma tienda (409 Conflict) | modelo-er.md |
+| Unicidad de Slug de Producto | `UNIQUE(store_id, slug)` | URLs amigables únicas por tienda (409 Conflict) | modelo-er.md |
 | Aislamiento de Carrito | 1 Carrito activo por `(user_id, store_id)` | No mezclar tiendas en un mismo pedido | modelo-er.md |
 | Carrito sin reserva | Solo informativo | No descuenta stock ni bloquea capacidad | alcance-mvp.md |
 | Prioridad de Capacidad | `Excepción > Configuración Base` | La excepción sustituye por completo la capacidad base | modelo-capacidad-v1.md |
+| Control de Acceso RBAC | `ADMIN` vs `MERCHANT` vs `CUSTOMER` | Solo `ADMIN` accede a `/api/v1/admin/**` y `/admin/*` | api-admin.md |
+| Aislamiento Multitenant | `store_customers (store_id, user_id)` | Registro y lectura aislada de cartera de clientes de cada tienda | api-admin.md |
 | Multi-Entorno Frontend | `environment.ts` (Render) vs `development.ts` (Localhost) | Conexión a la nube en producción y mock local en dev | arquitectura-sistema.md |
 | CI Runner | GitHub Actions `ubuntu-latest` | Build & Test automatizado con PostgreSQL 16 y Node 22 | arquitectura-sistema.md |
 
@@ -370,20 +468,29 @@ graph TD
     CI01["CI-01 · Pipeline CI/CD<br/>(Josué)"]:::done
     DEPLOY01["DEPLOY-01 · Despliegue Nube<br/>(Josué)"]:::done
     FE08["FE-08 · Branding & Favicon<br/>(Josué)"]:::done
+    BEADMIN01["BE-ADMIN-01 · API Admin<br/>(Josué)"]:::done
+    FEADMIN01["FE-ADMIN-01 · Panel Admin<br/>(Josué)"]:::progress
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
     BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::progress
-    BE12["BE-12 · Módulo Catálogo<br/>(Katherine)"]:::progress
-    BE13["BE-13 · Módulo Inventario<br/>(Katherine)"]:::locked
-    BE17["BE-17 · Módulo Carrito<br/>(Josué)"]:::locked
+    BE12["BE-12 · Módulo Catálogo<br/>(Katherine / Josué)"]:::done
+    BETENANT01["BE-TENANT-01/02 · Store Customers<br/>(Josué)"]:::done
+    FEMERCH01["FE-MERCH-01 · Cartera Clientes<br/>(Josué)"]:::done
+    FEMERCH02["FE-MERCH-02 · Catálogo Productos<br/>(Josué)"]:::done
+    BE13["BE-13 · Módulo Inventario<br/>(Katherine)"]:::progress
+    BE17["BE-17 · Módulo Carrito<br/>(Josué)"]:::progress
 
     CI01 -. Valida PRs .-> BE12
     CI01 -. Valida PRs .-> BE14
+    CI01 -. Valida PRs .-> BEADMIN01
     DEPLOY01 -. Conecta con .-> FE08
+    BEADMIN01 -->|Desbloqueó| FEADMIN01
     BE14 -->|Desbloqueó| BE15
     BE15 -->|Desbloqueó| BE16
-    BE12 -->|Desbloquea| BE13
-    BE12 -->|Desbloquea| BE17
+    BE12 -->|Desbloqueó| BE13
+    BE12 -->|Desbloqueó| BE17
+    BE12 -->|Desbloqueó| FEMERCH02
+    BETENANT01 -->|Desbloqueó| FEMERCH01
 ```
 
 ---

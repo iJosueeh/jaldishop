@@ -1,0 +1,67 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-10">
+  <!-- 1. Cabecera despejada y accionable -->
+  <app-products-header
+    [activeCount]="productService.totalActiveCount()"
+    (createNewProduct)="onCreateProduct()"
+    (adjustAvailability)="onAdjustQuota(productService.products()[0])"
+  />
+
+  <!-- 2. Banner consolidado de alerta de insumos/cupos (solo si hay atención requerida) -->
+  @if (productService.attentionRequiredProducts().length > 0) {
+    <app-products-alert-banner
+      [attentionCount]="productService.attentionRequiredProducts().length"
+      (viewDetails)="onStatusChange('INACTIVE')"
+    />
+  }
+
+  <!-- 3. Barra de filtros, categorías, búsqueda y selector de modo de vista -->
+  <app-products-filter-bar
+    [categories]="productService.categoriesWithCounts()"
+    [selectedCategoryId]="productService.selectedCategoryId()"
+    [totalCount]="productService.totalCount()"
+    [searchQuery]="productService.searchQuery()"
+    [viewMode]="productService.viewMode()"
+    [selectedStatus]="productService.statusFilter()"
+    (categoryChange)="onCategoryChange($event)"
+    (searchChange)="onSearchChange($event)"
+    (statusChange)="onStatusChange($event)"
+    (viewModeChange)="onViewModeChange($event)"
+  />
+
+  <!-- 4. Contenido en Cuadrícula o Lista con Skeletons y Estados Vacíos -->
+  @if (productService.viewMode() === 'grid') {
+    <app-products-grid
+      [products]="productService.pagedProducts()"
+      [isLoading]="productService.isLoading()"
+      [isEmptyCatalog]="productService.isEmptyCatalog()"
+      [isFilterEmpty]="productService.isFilterEmpty()"
+      (editProduct)="onEditProduct($event)"
+      (adjustQuota)="onAdjustQuota($event)"
+      (toggleStatus)="onToggleStatus($event)"
+      (createNewProduct)="onCreateProduct()"
+      (clearFilters)="onClearFilters()"
+    />
+  } @else {
+    <app-products-list
+      [products]="productService.pagedProducts()"
+      [isLoading]="productService.isLoading()"
+      [isEmptyCatalog]="productService.isEmptyCatalog()"
+      [isFilterEmpty]="productService.isFilterEmpty()"
+      (editProduct)="onEditProduct($event)"
+      (toggleStatus)="onToggleStatus($event)"
+      (createNewProduct)="onCreateProduct()"
+      (clearFilters)="onClearFilters()"
+    />
+  }
+
+  <!-- 5. Paginación compartida reutilizable -->
+  @if (!productService.isLoading() && productService.filteredProducts().length > 0) {
+    <app-pagination
+      [currentPage]="productService.currentPage()"
+      [totalItems]="productService.filteredProducts().length"
+      [pageSize]="productService.pageSize()"
+      itemLabel="productos en catálogo"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

@@ -1,0 +1,42 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-10">
+  <!-- 1. Encabezado de Gestión de Clientes -->
+  <app-customers-header
+    [totalCustomers]="totalCount()"
+    (exportCsv)="onExportCsv()"
+  />
+
+  <!-- 2. KPIs de Fidelización y Cartera -->
+  <app-customers-kpis
+    [kpis]="kpis()"
+  />
+
+  <!-- 3. Barra de Filtros Segmentados y Búsqueda -->
+  <app-customers-filter-bar
+    [activeTab]="activeTab()"
+    [searchQuery]="searchQuery()"
+    [totalCount]="totalCount()"
+    [vipCount]="vipCount()"
+    [frequentCount]="frequentCount()"
+    [newCount]="newCount()"
+    (tabChange)="onTabChange($event)"
+    (searchChange)="onSearchChange($event)"
+  />
+
+  <!-- 4. Tabla de Clientes con Identidad y Acciones -->
+  <app-customers-table
+    [customers]="paginatedCustomers()"
+    [isLoading]="isLoading()"
+    (openWhatsApp)="onOpenWhatsApp($event)"
+  />
+
+  <!-- 5. Paginación -->
+  @if (filteredCustomers().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="filteredCustomers().length"
+      [pageSize]="pageSize()"
+      itemLabel="clientes registrados"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

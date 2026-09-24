@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { OrderService } from '../../core/services/order.service';
 import { CapacityService } from '../../core/services/capacity.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -21,12 +21,11 @@ import { OrderDetailsDrawer } from '../dashboards/components/order-details-drawe
     Pagination,
     OrderDetailsDrawer,
   ],
-  providers: [OrderService],
   selector: 'app-orders',
   styleUrl: './orders.css',
   templateUrl: './orders.html',
 })
-export class Orders {
+export class Orders implements OnInit {
   readonly orderService = inject(OrderService);
   readonly capacityService = inject(CapacityService);
   private readonly toastService = inject(ToastService);
@@ -77,6 +76,10 @@ export class Orders {
     };
   });
 
+  ngOnInit(): void {
+    this.orderService.loadOrders().subscribe();
+  }
+
   onTabChange(tab: OrderFilterTab): void {
     this.orderService.setActiveTab(tab);
     this.currentPage.set(1);
@@ -97,20 +100,16 @@ export class Orders {
   }
 
   onStatusAdvance(order: MerchantOrder): void {
-    let nextStatus: OrderStatus = 'IN_PREPARATION';
-    if (order.status === 'CONFIRMED') {
-      nextStatus = 'IN_PREPARATION';
-    } else if (order.status === 'IN_PREPARATION') {
-      nextStatus = 'READY';
-    } else if (order.status === 'READY') {
-      nextStatus = 'COMPLETED';
+    const nextStatusMap: Partial<Record<OrderStatus, OrderStatus>> = {
+      CONFIRMED: 'IN_PREPARATION',
+      IN_PREPARATION: 'READY',
+      READY: 'COMPLETED',
+    };
+
+    const next = nextStatusMap[order.status];
+    if (next) {
+      this.orderService.updateOrderStatus(order.id, next);
     }
-
-    this.orderService.updateOrderStatus(order.id, nextStatus);
-  }
-
-  onDrawerStatusChange(event: { order: any; newStatus: OrderStatus }): void {
-    this.orderService.updateOrderStatus(event.order.id, event.newStatus);
   }
 
   onWhatsAppClick(order: MerchantOrder): void {
@@ -125,23 +124,19 @@ export class Orders {
     this.orderService.closeDrawer();
   }
 
-  onPrintOrders(): void {
-    window.print();
-  }
-
-  onAdjustPace(): void {
-    this.toastService.info('Ritmo actual optimizado para cocina: 18 min / pedido.');
+  onDrawerStatusChange(event: { order: any; newStatus: OrderStatus }): void {
+    this.orderService.updateOrderStatus(event.order.id, event.newStatus);
   }
 
   onNewOrder(): void {
     this.orderService.openCreateModal();
   }
 
-  onCloseCreateModal(): void {
-    this.orderService.closeCreateModal();
+  onAdjustPace(): void {
+    this.toastService.info('Ajuste de ritmo de cocina disponible en Próximas Mejoras.');
   }
 
-  onOrderCreated(order: MerchantOrder): void {
-    this.orderService.addOrder(order);
+  onPrintOrders(): void {
+    window.print();
   }
 }

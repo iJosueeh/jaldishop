@@ -78,7 +78,7 @@ export interface NormalizedApiError {
 | **`401`** | `UNAUTHORIZED` / `INVALID_CREDENTIALS` | Token expirado, inválido o credenciales erróneas | `errorInterceptor` ejecuta `tokenService.removeToken()`, emite toast de advertencia y redirige a `/login?expired=true`. |
 | **`403`** | `FORBIDDEN` | Usuario sin rol `MERCHANT` o sin permisos | `errorInterceptor` emite toast de acceso denegado. |
 | **`404`** | `NOT_FOUND` / `RESOURCE_NOT_FOUND` | Tienda, pedido o producto inexistente | Devuelve `null` o normaliza el error para renderizar `@empty` o estado vacío. |
-| **`409`** | `CONFLICT` / `*_ALREADY_EXISTS` | Conflicto (email duplicado, slug en uso) | Muestra mensaje contextual de conflicto. |
+| **`409`** | `CONFLICT` / `CATEGORY_ALREADY_EXISTS` / `PRODUCT_SLUG_ALREADY_EXISTS` / `SKU_ALREADY_EXISTS` / `RESOURCE_CONFLICT` | Conflicto de unicidad (email, categoría, slug, SKU) | Muestra mensaje contextual de colisión de datos. |
 | **`422`** | `RN-ORD-xx` / `RN-CAP-xx` / `RN-STR-xx` | Violación de Regla de Negocio (`BusinessRuleException`) | Presenta el mensaje exacto de la regla de negocio violada. |
 | **`500`** | `INTERNAL_SERVER_ERROR` | Error no controlado en backend | `errorInterceptor` emite toast de error interno sin exponer trazas técnicas al usuario. |
 | **`0`** | `NETWORK_ERROR` | Servidor caído o sin conexión a internet | `errorInterceptor` emite toast informativo: *"No hay conexión con el servidor. Revisa tu red."* |
@@ -109,7 +109,7 @@ Servicio inyectable encargado de transformar cualquier `HttpErrorResponse` en un
  ✓ src/app/core/interceptors/error-interceptor.spec.ts (3 tests)
  ✓ src/app/shared/components/toast-container/toast-container.spec.ts (3 tests)
 
-Total Frontend: 62 tests passing (100%)
-Total Backend:  89 tests passing (100%)
-Total Global:  151 tests passing (100%)
+Total Frontend: 224 tests passing (100%)
+Total Backend:  239 tests passing (100%)
+Total Global:   463 tests passing (100%)
 ```

@@ -1,5 +1,6 @@
 package com.jaldishop.backend.store.domain;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,4 +11,5 @@ public interface StoreRepository {
     Optional<Store> findBySlug(String slug);
     boolean existsBySlug(String slug);
     boolean existsByMerchantUserId(UUID merchantUserId);
+    List<Store> findAllStores(String query, StoreStatus status);
 }
