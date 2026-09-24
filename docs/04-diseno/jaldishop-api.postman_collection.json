@@ -899,6 +899,54 @@
           }
         }
       ]
+    },
+    {
+      "name": "08. Cartera de Clientes Merchant (BE-TENANT-02)",
+      "item": [
+        {
+          "name": "01. Listar Clientes de mi Tienda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{merchantToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/merchant/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "merchant", "customers"]
+            },
+            "description": "Lista todos los clientes que han confirmado compras en la tienda del comerciante autenticado, incluyendo total gastado, cantidad de pedidos y fecha de último pedido."
+          }
+        },
+        {
+          "name": "02. Buscar Clientes por Filtro",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{merchantToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/merchant/customers?query=Valeria",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "merchant", "customers"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Valeria",
+                  "description": "Búsqueda por nombre, apellido, email o teléfono"
+                }
+              ]
+            },
+            "description": "Busca clientes dentro de la cartera de la tienda por coincidencia parcial."
+          }
+        }
+      ]
     }
   ]
 }
