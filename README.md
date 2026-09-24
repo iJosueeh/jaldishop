@@ -6,7 +6,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/iJosueeh/jaldishop?style=flat-square&color=green)](https://github.com/iJosueeh/jaldishop)
 [![CI](https://github.com/iJosueeh/jaldishop/actions/workflows/ci.yml/badge.svg)](https://github.com/iJosueeh/jaldishop/actions/workflows/ci.yml)
 [![Sprint](https://img.shields.io/badge/Sprint-03%20En%20Progreso-yellow?style=flat-square)](./docs/06-scrum/sprint-03.md)
-[![Tests](https://img.shields.io/badge/Tests-274%20Passing%20(153%20BE%20+%20121%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
+[![Tests](https://img.shields.io/badge/Tests-409%20Passing%20(206%20BE%20+%20203%20FE)-success?style=flat-square&logo=vitest)](./frontend-merchant)
 [![Frontend Merchant](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?style=flat-square&logo=cloudflare)](https://negocios-jaldishop.pages.dev/)
 [![Backend API](https://img.shields.io/badge/Deploy-Render%20Web%20Service-46E3B7?style=flat-square&logo=render)](https://jaldishop-api.onrender.com/api/v1)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./docs)
@@ -34,7 +34,7 @@ flowchart LR
         C1["Catálogo y Carrito Digital"]
         C2["Motor de Validación de Capacidad"]
         C3["Checkout con Reserva Temporal"]
-        C4["Panel de Control MYPE"]
+        C4["Panel de Control MYPE & Admin"]
     end
 
     subgraph BENEFICIOS["Impacto Operativo"]
@@ -52,7 +52,7 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 3 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | **CI-01** · Pipeline CI/CD (✅ Hecho), **BE-17** · Carrito (🔒 Bloqueada), **Despliegue** (Render & Cloudflare Pages) y **FE Branding** | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | **CI-01** · Pipeline CI/CD (✅ Hecho), **BE-ADMIN-01** · API Administración (✅ Hecho), **FE-ADMIN-01** · Panel Admin (🟢 En Progreso), **BE-17** · Carrito (🔒 Bloqueada), **Despliegue** (Render & Cloudflare Pages) | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
 | **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-12** · Módulo de Catálogo (🟢 En Progreso) & **BE-13** · Módulo de Inventario (🔒 Bloqueada por BE-12) | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
 | **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-14** · Capacidad Base (✅ Hecho), **BE-15** · Excepciones (✅ Hecho) & **BE-16** · Capacidad Efectiva (🟢 En Progreso) | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
@@ -65,9 +65,9 @@ flowchart LR
 | **Backend** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot_4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) | API RESTful, Arquitectura Hexagonal/DDD, Bean Validation y Transaccionalidad |
 | **Seguridad** | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) | Autenticación sin estado, RBAC (CUSTOMER, MERCHANT, ADMIN) y control de acceso |
 | **Persistencia** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white) | Base de datos NeonDB en la nube, versionamiento DDL forward-only y JPA |
-| **Frontend** | ![Angular](https://img.shields.io/badge/Angular_20-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Panel de Comerciante (Angular Standalone/Signals) y Portal Cliente (Next.js) |
+| **Frontend** | ![Angular](https://img.shields.io/badge/Angular_20-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) | Panel de Comerciante & Admin (Angular Standalone/Signals) y Portal Cliente (Next.js) |
 | **Despliegue & DevOps** | ![Cloudflare](https://img.shields.io/badge/Cloudflare_Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white) ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) | Despliegue en la nube (Frontend en Cloudflare Pages, Backend en Render) |
-| **Calidad / QA & CI** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) | 274 pruebas automatizadas pasando al 100% (153 BE + 121 FE) y pipeline continuo |
+| **Calidad / QA & CI** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-FCC72B?style=for-the-badge&logo=vitest&logoColor=black) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) | 409 pruebas automatizadas pasando al 100% (206 BE + 203 FE) y pipeline continuo |
 | **Documentación** | ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white) | Diagramas interactivos y especificaciones de arquitectura viva |
 
 ---
@@ -96,6 +96,7 @@ jaldishop/
 │   ├── 📁 04-diseno/                   # Modelado de persistencia y API
 │   │   ├── 📄 modelo-er.md             # Modelo Entidad-Relación v1.6 (Listo para DDL)
 │   │   ├── 📄 diagrama-er.md           # Diagrama ER visual
+│   │   ├── 📄 api-admin.md             # Especificación de API del Módulo de Administración (BE-ADMIN-01)
 │   │   ├── 📄 contrato-api-errores.md  # Contrato estandarizado de respuestas y errores HTTP
 │   │   └── 📄 as-is-to-be.md           # Diagramas comparativos AS-IS vs TO-BE
 │   ├── 📁 05-arquitectura/             # Decisiones arquitectónicas
@@ -103,7 +104,7 @@ jaldishop/
 │   ├── 📁 06-scrum/                    # Gestión ágil de sprints
 │   │   ├── 📄 sprint-01.md             # Sprint 1: Modelo de Capacidad (Completado)
 │   │   ├── 📄 sprint-02.md             # Sprint 2: Backend Base y Frontend Merchant Core (Completado)
-│   │   └── 📄 sprint-03.md             # Sprint 3: Catálogo, Capacidad y CI/CD (En Progreso)
+│   │   └── 📄 sprint-03.md             # Sprint 3: Catálogo, Capacidad, Admin y CI/CD (En Progreso)
 │   └── 📄 TEMPLATE.md                  # Plantilla estándar para nuevos documentos
 ├── 📁 backend/                         # Servidor Spring Boot (Identity + Store + Notification + Catalog + Capacity)
 ├── 📁 frontend-merchant/               # Panel de Comerciante (Angular 20 Standalone con Signals)
