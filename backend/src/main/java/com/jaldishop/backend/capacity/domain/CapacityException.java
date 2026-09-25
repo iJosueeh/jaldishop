@@ -104,6 +104,19 @@ public class CapacityException {
         return this.startTime != null && this.endTime != null;
     }
 
+    public boolean appliesTo(LocalTime reqStartTime, LocalTime reqEndTime) {
+        if (status != CapacityExceptionStatus.ACTIVE) {
+            return false;
+        }
+        if (!hasTimeSlot()) {
+            return true;
+        }
+        if (reqStartTime == null || reqEndTime == null) {
+            return false;
+        }
+        return !reqStartTime.isBefore(startTime) && !reqEndTime.isAfter(endTime);
+    }
+
     public UUID getId() { return id; }
     public UUID getStoreId() { return storeId; }
     public LocalDate getServiceDate() { return serviceDate; }

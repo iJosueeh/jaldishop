@@ -43,7 +43,7 @@ flowchart TD
     subgraph CAPACIDAD["Cadena de Capacidad Operativa"]
         BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
         BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
-        BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>🟢 EN PROGRESO (Desbloqueada)"]
+        BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>✅ COMPLETADO"]
         BE14 -->|Desbloqueó| BE15
         BE15 -->|Desbloqueó| BE16
     end
@@ -80,7 +80,7 @@ flowchart TD
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `EN PROGRESO` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST *(Desbloqueada)* |
 | 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `EN PROGRESO` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento *(Desbloqueada)* |
-| 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `EN PROGRESO` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
+| 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `COMPLETADO` | BE-15 | Motor de resolución base vs excepción, endpoint REST y consulta de capacidad efectiva |
 
 ---
 
@@ -258,29 +258,29 @@ Permitir que un comerciante establezca una capacidad diferente para una fecha o 
 ### 📋 BE-16 | Cálculo y consulta de Capacidad Efectiva
 
 **Responsable:** Mia  
-**Estado:** `EN PROGRESO / READY` 🟢 *(Desbloqueada tras merge de BE-15)*  
-**Entregable:** Servicio de dominio/aplicación para resolución de capacidad efectiva y endpoint de consulta para clientes y comerciantes.
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Servicio de aplicación para resolución de capacidad efectiva (excepción vs base) y endpoint REST de consulta para comerciantes.
 
 **Descripción:**  
 Implementar el servicio que determine qué capacidad corresponde realmente a una tienda para una fecha y franja determinadas, resolviendo la jerarquía entre configuración base y excepciones aplicables.
 
 **Checklist:**
-- [ ] Recibir Store + fecha + franja horaria
-- [ ] Determinar configuración base aplicable según `day_of_week`
-- [ ] Buscar excepción aplicable para la fecha exacta y franja
-- [ ] **Priorizar excepción cuando exista** frente a la base
-- [ ] Calcular `effectiveCapacity` final
-- [ ] Manejar capacidad 0 (tienda cerrada o bloqueada ese día/franja)
-- [ ] Manejar fecha sin configuración base ni excepción (cerrado por defecto)
-- [ ] Manejar franja no disponible / fuera de horario
-- [ ] Exponer consulta desde Application Service
-- [ ] Crear endpoint REST de consulta de capacidad efectiva
-- [ ] Tests sin excepción (aplica base)
-- [ ] Tests con excepción (sobreescribe base)
-- [ ] Tests con capacidad 0
-- [ ] Tests sin configuración
-- [ ] Tests de límites de franja
-- [ ] *(Nota: Todavía NO debe implementar el hold/reserva temporal de 10 minutos; eso corresponde a Checkout/Holds).*
+- [x] Recibir Store + fecha + franja horaria
+- [x] Determinar configuración base aplicable según `day_of_week`
+- [x] Buscar excepción aplicable para la fecha exacta y franja
+- [x] **Priorizar excepción cuando exista** frente a la base
+- [x] Calcular `effectiveCapacity` final
+- [x] Manejar capacidad 0 (tienda cerrada o bloqueada ese día/franja)
+- [x] Manejar fecha sin configuración base ni excepción (cerrado por defecto)
+- [x] Manejar franja no disponible / fuera de horario
+- [x] Exponer consulta desde Application Service
+- [x] Crear endpoint REST de consulta de capacidad efectiva (`GET /api/v1/capacity/effective`)
+- [x] Tests sin excepción (aplica base)
+- [x] Tests con excepción (sobreescribe base)
+- [x] Tests con capacidad 0
+- [x] Tests sin configuración
+- [x] Tests de límites de franja
+- [x] *(Nota: Todavía NO debe implementar el hold/reserva temporal de 10 minutos; eso corresponde a Checkout/Holds).*
 
 ---
 
@@ -432,8 +432,8 @@ Construir el panel administrativo web en Angular para que los usuarios con rol `
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **10 / 14 (71%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
-| Entregables en desarrollo activo | **4 / 14 (29%)** | `FE-ADMIN-01`, `BE-16`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
+| Entregables completados | **11 / 14 (79%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-16`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
+| Entregables en desarrollo activo | **3 / 14 (21%)** | `FE-ADMIN-01`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
 | Entregables pendientes / bloqueados | **0 / 14 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
 | **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad y cartera de clientes 100% operativos |
 
@@ -472,7 +472,7 @@ graph TD
     FEADMIN01["FE-ADMIN-01 · Panel Admin<br/>(Josué)"]:::progress
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
-    BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::progress
+    BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::done
     BE12["BE-12 · Módulo Catálogo<br/>(Katherine / Josué)"]:::done
     BETENANT01["BE-TENANT-01/02 · Store Customers<br/>(Josué)"]:::done
     FEMERCH01["FE-MERCH-01 · Cartera Clientes<br/>(Josué)"]:::done
