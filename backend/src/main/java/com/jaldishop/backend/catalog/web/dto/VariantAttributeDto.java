@@ -3,9 +3,9 @@ package com.jaldishop.backend.catalog.web.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public record VariantAttributeDto(
-        @NotBlank(message = "Attribute name is required")
+        @NotBlank(message = "El nombre del atributo es obligatorio")
         String name,
 
-        @NotBlank(message = "Attribute value is required")
+        @NotBlank(message = "El valor del atributo es obligatorio")
         String value
 ) {}

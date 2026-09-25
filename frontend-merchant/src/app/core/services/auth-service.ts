@@ -8,6 +8,9 @@ import { environment } from '../../../environments/environment';
 import { CapacityService } from './capacity.service';
 import { StoreService } from './store.service';
 import { ProfileService } from './profile.service';
+import { ProductService } from './product.service';
+import { CustomerService } from './customer.service';
+import { OrderService } from './order.service';
 
 @Service()
 export class AuthService {
@@ -17,6 +20,9 @@ export class AuthService {
   private readonly capacityService = inject(CapacityService);
   private readonly storeService = inject(StoreService);
   private readonly profileService = inject(ProfileService);
+  private readonly productService = inject(ProductService);
+  private readonly customerService = inject(CustomerService);
+  private readonly orderService = inject(OrderService);
 
   readonly token = signal<string | null>(this.tokenService.getToken());
   readonly currentUser = signal<AuthResult | null>(null);
@@ -63,6 +69,9 @@ export class AuthService {
     this.capacityService.clearCache();
     this.storeService.clearStore();
     this.profileService.clearProfile();
+    this.productService.clearCache();
+    this.customerService.clearCache();
+    this.orderService.clearOrders();
 
     this.router.navigate(['/login']);
   }

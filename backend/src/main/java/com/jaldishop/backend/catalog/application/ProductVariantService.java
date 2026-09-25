@@ -29,21 +29,21 @@ public class ProductVariantService {
     public ProductVariant createVariant(CreateProductVariantCommand command) {
         // Validar pertenencia del producto a la tienda
         productRepository.findByIdAndStoreId(command.productId(), command.storeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
 
         if (command.presentationName() == null || command.presentationName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Presentation name cannot be empty");
+            throw new IllegalArgumentException("El nombre de la presentación no puede estar vacío");
         }
 
         if (command.priceAmount() == null || command.priceAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price amount must be greater than zero");
+            throw new IllegalArgumentException("El precio debe ser mayor a cero");
         }
 
         // Regla de unicidad de SKU
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySku(trimmedSku)) {
-                throw new ConflictException("SKU_ALREADY_EXISTS", "SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU_ALREADY_EXISTS", "El SKU '" + trimmedSku + "' ya está en uso");
             }
         }
 
@@ -64,7 +64,7 @@ public class ProductVariantService {
     public List<ProductVariant> getVariantsByProduct(UUID productId, UUID storeId) {
         // Validar que el producto pertenezca a la tienda
         productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
 
         return variantRepository.findByProductId(productId);
     }
@@ -72,13 +72,13 @@ public class ProductVariantService {
     @Transactional(readOnly = true)
     public ProductVariant getVariantById(UUID variantId, UUID productId, UUID storeId) {
         productRepository.findByIdAndStoreId(productId, storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
 
         ProductVariant variant = variantRepository.findById(variantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Variant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Variante no encontrada"));
 
         if (!variant.getProductId().equals(productId)) {
-            throw new IllegalArgumentException("Variant does not belong to the given product");
+            throw new IllegalArgumentException("La variante no pertenece al producto especificado");
         }
 
         return variant;
@@ -89,14 +89,14 @@ public class ProductVariantService {
         ProductVariant variant = getVariantById(command.variantId(), command.productId(), command.storeId());
 
         if (command.presentationName() == null || command.presentationName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Presentation name cannot be empty");
+            throw new IllegalArgumentException("El nombre de la presentación no puede estar vacío");
         }
 
         // Regla de unicidad de SKU
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
             if (variantRepository.existsBySkuAndIdNot(trimmedSku, command.variantId())) {
-                throw new ConflictException("SKU_ALREADY_EXISTS", "SKU '" + trimmedSku + "' is already in use");
+                throw new ConflictException("SKU_ALREADY_EXISTS", "El SKU '" + trimmedSku + "' ya está en uso");
             }
         }
 

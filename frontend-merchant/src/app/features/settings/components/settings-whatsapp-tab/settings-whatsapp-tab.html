@@ -1,0 +1,138 @@
+<div class="flex flex-col gap-6">
+  <!-- Info banner -->
+  <div class="flex items-start gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+    <ng-icon name="matChatOutline" class="text-2xl text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+    <div class="flex flex-col gap-1">
+      <span class="text-sm font-bold text-on-surface">Mensajes Directos para WhatsApp</span>
+      <p class="text-xs text-on-surface-variant leading-relaxed">
+        Personaliza los mensajes que se enviarán a tus clientes cuando actualices el estado de su pedido. Al hacer clic en &quot;Notificar por WhatsApp&quot;, se abrirá el chat con este texto ya listo para enviar.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Lista y Editor de Plantillas (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-5">
+      <!-- Selector de estados / plantillas -->
+      <div class="flex flex-wrap gap-2 p-1.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
+        @for (tpl of templates(); track tpl.id) {
+          <button
+            type="button"
+            (click)="selectTemplate(tpl.id)"
+            class="flex-1 min-w-[140px] px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            [class.bg-surface-container-lowest]="selectedTemplateId() === tpl.id"
+            [class.text-primary-container]="selectedTemplateId() === tpl.id"
+            [class.shadow-2xs]="selectedTemplateId() === tpl.id"
+            [class.text-on-surface-variant]="selectedTemplateId() !== tpl.id"
+            [class.hover:text-on-surface]="selectedTemplateId() !== tpl.id"
+          >
+            <span>{{ tpl.title }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Editor de la plantilla seleccionada -->
+      @if (currentTemplate(); as tpl) {
+        <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-4 shadow-2xs">
+          <div>
+            <h3 class="text-base font-bold text-on-surface">{{ tpl.title }}</h3>
+            <p class="text-xs text-on-surface-variant mt-0.5">{{ tpl.description }}</p>
+          </div>
+
+          <!-- Textarea con mensaje -->
+          <div class="flex flex-col gap-1.5">
+            <label for="template-message" class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+              Contenido del Mensaje
+            </label>
+            <textarea
+              id="template-message"
+              rows="4"
+              [ngModel]="editedMessage()"
+              (ngModelChange)="editedMessage.set($event)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/40 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-y"
+              placeholder="Escribe el mensaje que recibirá el cliente..."
+            ></textarea>
+          </div>
+
+          <!-- Tags dinámicos insertables -->
+          <div class="flex flex-col gap-2 pt-1">
+            <span class="text-xs font-semibold text-on-surface-variant">Variables dinámicas (haz clic para insertar):</span>
+            <div class="flex flex-wrap gap-1.5">
+              @for (tag of tpl.availableTags; track tag) {
+                <button
+                  type="button"
+                  (click)="insertTag(tag)"
+                  class="px-2.5 py-1 rounded-md bg-surface-container-high hover:bg-primary/10 hover:text-primary hover:border-primary/30 border border-outline-variant/30 text-xs font-mono font-medium text-on-surface-variant transition-colors cursor-pointer flex items-center gap-1"
+                  title="Insertar {{ tag }}"
+                >
+                  <ng-icon name="matAddOutline" class="text-xs" />
+                  <span>{{ tag }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex items-center justify-between pt-3 border-t border-outline-variant/20">
+            <button
+              type="button"
+              (click)="onResetDefaults()"
+              class="px-3 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <ng-icon name="matRestartAltOutline" class="text-base" />
+              <span>Restaurar predeterminados</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="onSaveCurrentTemplate()"
+              class="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <ng-icon name="matSaveOutline" class="text-base" />
+              <span>Guardar Plantilla</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Vista Previa de WhatsApp (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-3">
+      <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+        Vista Previa en WhatsApp
+      </span>
+
+      <!-- Simulador de Chat WhatsApp -->
+      <div class="rounded-2xl border border-outline-variant/30 overflow-hidden shadow-sm bg-[#efeae2] dark:bg-slate-900 flex flex-col">
+        <!-- Header del chat -->
+        <div class="px-4 py-3 bg-[#075e54] text-white flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-200 text-emerald-900 font-bold text-xs flex items-center justify-center shrink-0">
+            C
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs font-bold truncate">Carlos (Cliente)</span>
+            <span class="text-[10px] text-emerald-100 opacity-80">En línea</span>
+          </div>
+        </div>
+
+        <!-- Cuerpo del chat con fondo patrón sutil -->
+        <div class="p-4 min-h-[200px] flex flex-col justify-end gap-2 bg-[#efeae2]/90 dark:bg-slate-900/90">
+          <!-- Mensaje enviado de la tienda (verde WhatsApp) -->
+          <div class="self-end max-w-[90%] p-3 rounded-2xl rounded-tr-xs bg-[#d9fdd3] dark:bg-emerald-950/80 text-emerald-950 dark:text-emerald-50 text-xs shadow-2xs border border-emerald-500/20 leading-relaxed whitespace-pre-line">
+            {{ previewText() }}
+            <div class="flex items-center justify-end gap-1 mt-1.5 text-[9px] text-emerald-800 dark:text-emerald-300 opacity-75">
+              <span>12:45 p. m.</span>
+              <ng-icon name="matCheckCircleOutline" class="text-xs text-emerald-600" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer del chat simulado -->
+        <div class="px-3 py-2 bg-surface-container-lowest/80 border-t border-outline-variant/20 flex items-center gap-2 text-[11px] text-on-surface-variant">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>El cliente recibirá el enlace con el mensaje listo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

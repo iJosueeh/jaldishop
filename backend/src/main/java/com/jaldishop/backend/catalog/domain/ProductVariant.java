@@ -25,7 +25,7 @@ public class ProductVariant {
                           VariantStatus status, List<VariantAttribute> attributes,
                           Instant createdAt, Instant updatedAt) {
         if (priceAmount == null || priceAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price amount must be greater than zero");
+            throw new IllegalArgumentException("El precio debe ser mayor a cero");
         }
         this.id = id;
         this.productId = productId;
@@ -62,7 +62,7 @@ public class ProductVariant {
     public void update(String presentationName, String sku, BigDecimal priceAmount,
                        String priceCurrency, boolean tracksInventory, List<VariantAttribute> attributes) {
         if (priceAmount == null || priceAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price amount must be greater than zero");
+            throw new IllegalArgumentException("El precio debe ser mayor a cero");
         }
         this.presentationName = presentationName;
         this.sku = (sku != null && !sku.isBlank()) ? sku.trim() : null;

@@ -11,19 +11,19 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateProductVariantRequest(
-        @NotBlank(message = "Presentation name is required")
-        @Size(max = 120, message = "Presentation name must not exceed 120 characters")
+        @NotBlank(message = "El nombre de presentación es obligatorio")
+        @Size(max = 120, message = "El nombre de presentación no debe exceder 120 caracteres")
         String presentationName,
 
-        @Size(max = 100, message = "SKU must not exceed 100 characters")
+        @Size(max = 100, message = "El SKU no debe exceder 100 caracteres")
         String sku,
 
-        @NotNull(message = "Price amount is required")
-        @DecimalMin(value = "0.01", message = "Price amount must be greater than zero")
+        @NotNull(message = "El monto del precio es obligatorio")
+        @DecimalMin(value = "0.01", message = "El monto del precio debe ser mayor a cero")
         BigDecimal priceAmount,
 
-        @NotBlank(message = "Price currency is required")
-        @Pattern(regexp = "^[A-Z]{3}$", message = "Price currency must be a 3-letter uppercase ISO code")
+        @NotBlank(message = "La moneda del precio es obligatoria")
+        @Pattern(regexp = "^[A-Z]{3}$", message = "La moneda debe ser un código ISO de 3 letras en mayúsculas")
         String priceCurrency,
 
         boolean tracksInventory,
