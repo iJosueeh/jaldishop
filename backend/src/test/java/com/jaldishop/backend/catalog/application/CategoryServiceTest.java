@@ -60,7 +60,8 @@ class CategoryServiceTest {
                 categoryService.createCategory(command)
         );
 
-        assertTrue(exception.getMessage().contains("already exists"));
+        assertEquals("CATEGORY_ALREADY_EXISTS", exception.getCode());
+        assertTrue(exception.getMessage().contains("Ya existe una categoría"));
         verify(categoryRepository, never()).save(any());
     }
 }

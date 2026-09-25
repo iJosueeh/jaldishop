@@ -1,6 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { MerchantOrder, OrderFilterTab, OrderStatus } from '../models/order.models';
 import { ToastService } from './toast.service';
+import { SettingsService } from './settings.service';
+import { StoreService } from './store.service';
+import { WhatsAppTemplateId } from '../models/settings.models';
 import { Observable, of } from 'rxjs';
 
 @Injectable({
@@ -8,6 +11,8 @@ import { Observable, of } from 'rxjs';
 })
 export class OrderService {
   private readonly toastService = inject(ToastService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly storeService = inject(StoreService);
 
   readonly orders = signal<MerchantOrder[]>([]);
   readonly isLoading = signal<boolean>(false);
@@ -88,7 +93,7 @@ export class OrderService {
     }
 
     this.isLoading.set(true);
-    // Simula inicialización Cache First de pedidos
+    // Inicialización Cache First de pedidos
     this.isLoaded.set(true);
     this.isLoading.set(false);
     return of(this.orders());
@@ -123,6 +128,7 @@ export class OrderService {
   addOrder(order: MerchantOrder): void {
     this.orders.update((list) => [order, ...list]);
     this.isLoaded.set(true);
+    this.settingsService.playNotificationSound();
     this.toastService.success(`Pedido ${order.orderNumber} registrado exitosamente.`);
   }
 
@@ -163,16 +169,45 @@ export class OrderService {
       return;
     }
     const cleanPhone = order.customerPhone.replace(/\D/g, '');
-    const message = encodeURIComponent(
-      `¡Hola ${order.customerName}! Te escribimos de JaldiShop. Tu pedido ${order.orderNumber} (${order.items.map((i) => i.name).join(', ')}) está ${
-        order.status === 'READY'
-          ? 'LISTO para entrega / despacho'
-          : order.status === 'IN_PREPARATION'
-            ? 'en preparación en cocina'
-            : 'confirmado'
-      }. ¡Gracias por tu compra!`,
-    );
-    window.open(`https://wa.me/51${cleanPhone}?text=${message}`, '_blank');
+    const clientFirstName = order.customerName.split(' ')[0];
+    const storeName = this.storeService.storeName() || 'JaldiShop';
+    const totalFormatted = `S/ ${order.totalAmount.toFixed(2)}`;
+    const modality = order.deliveryMode === 'DELIVERY' ? 'Delivery a domicilio' : 'Recojo en tienda';
+
+    // Determinar plantilla adecuada según estado
+    let templateId: WhatsAppTemplateId = 'in_preparation';
+    if (order.status === 'READY' || order.status === 'OUT_FOR_DELIVERY') {
+      templateId = 'ready';
+    } else if (order.status === 'COMPLETED') {
+      templateId = 'completed';
+    }
+
+    const templates = this.settingsService.settings().whatsappTemplates;
+    const template = templates.find((t) => t.id === templateId);
+
+    let rawMessage = template
+      ? template.message
+      : `¡Hola {cliente}! Tu pedido {numero_pedido} está en estado {modalidad}. Total: {total}. ¡Gracias por tu compra en {tienda}!`;
+
+    const formattedMessage = rawMessage
+      .replace(/{cliente}/g, clientFirstName)
+      .replace(/{numero_pedido}/g, order.orderNumber)
+      .replace(/{tienda}/g, storeName)
+      .replace(/{total}/g, totalFormatted)
+      .replace(/{modalidad}/g, modality);
+
+    const encoded = encodeURIComponent(formattedMessage);
+    window.open(`https://wa.me/51${cleanPhone}?text=${encoded}`, '_blank');
     this.toastService.success(`WhatsApp abierto para ${order.customerName}.`);
   }
+
+  clearOrders(): void {
+    this.orders.set([]);
+    this.isLoaded.set(false);
+    this.selectedOrder.set(null);
+    this.isDrawerOpen.set(false);
+    this.isCreateModalOpen.set(false);
+    this.clearFilters();
+  }
 }
+

@@ -1,0 +1,136 @@
+<div class="flex flex-col gap-6 max-w-4xl">
+  <!-- Banner Informativo -->
+  <div class="flex items-start gap-3 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+    <ng-icon name="matGavelOutline" class="text-2xl text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+    <div class="flex flex-col gap-1">
+      <span class="text-sm font-bold text-on-surface">Políticas de la Tienda y Reglas de Checkout</span>
+      <p class="text-xs leading-relaxed text-on-surface-variant">
+        Define las reglas de atención al cliente y los datos obligatorios u opcionales que se le solicitarán al comprador en la pantalla de compra.
+      </p>
+    </div>
+  </div>
+
+  <!-- 1. Política de Cancelación -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-4 shadow-2xs">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0 border border-rose-500/20">
+        <ng-icon name="matDescriptionOutline" class="text-2xl" />
+      </div>
+      <div class="flex flex-col">
+        <h3 class="text-base font-bold text-on-surface">Política de Cancelación de Pedidos</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+          Indica claramente hasta qué punto o con cuánto tiempo de anticipación el cliente puede solicitar cancelar su compra.
+        </p>
+      </div>
+    </div>
+
+    <textarea
+      rows="3"
+      [ngModel]="cancellationPolicy()"
+      (ngModelChange)="cancellationPolicy.set($event)"
+      class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-y"
+      placeholder="Escribe los términos de cancelación..."
+    ></textarea>
+  </div>
+
+  <!-- 2. Política de Reembolsos y Devoluciones -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-4 shadow-2xs">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/20">
+        <ng-icon name="matDescriptionOutline" class="text-2xl" />
+      </div>
+      <div class="flex flex-col">
+        <h3 class="text-base font-bold text-on-surface">Política de Reembolsos y Devoluciones</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+          Términos aplicables en caso de reclamos, incidencias en el producto o fallas en el reparto.
+        </p>
+      </div>
+    </div>
+
+    <textarea
+      rows="3"
+      [ngModel]="refundPolicy()"
+      (ngModelChange)="refundPolicy.set($event)"
+      class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-y"
+      placeholder="Escribe los términos de reembolso..."
+    ></textarea>
+  </div>
+
+  <!-- 3. Campos requeridos en el Checkout -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-5 shadow-2xs">
+    <div>
+      <h3 class="text-base font-bold text-on-surface">Campos Adicionales en el Checkout</h3>
+      <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+        Configura qué información complementaria debe ingresar el comprador al pagar.
+      </p>
+    </div>
+
+    <!-- Toggle DNI / RUC -->
+    <div class="flex items-start justify-between gap-4 pt-2 border-t border-outline-variant/20">
+      <div class="flex items-start gap-3">
+        <ng-icon name="matBadgeOutline" class="text-xl text-primary mt-0.5" />
+        <div class="flex flex-col">
+          <span class="text-sm font-bold text-on-surface">Exigir DNI / RUC del Comprador</span>
+          <span class="text-xs text-on-surface-variant">
+            Obliga al cliente a ingresar su documento de identidad (útil para emisión de comprobantes o boletas).
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="requireDni.set(!requireDni())"
+        class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+        [class.bg-primary]="requireDni()"
+        [class.bg-surface-container-highest]="!requireDni()"
+        aria-label="Exigir DNI"
+      >
+        <span
+          class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+          [class.translate-x-5.5]="requireDni()"
+          [class.translate-x-0]="!requireDni()"
+        ></span>
+      </button>
+    </div>
+
+    <!-- Toggle Notas / Dedicatorias -->
+    <div class="flex items-start justify-between gap-4 pt-4 border-t border-outline-variant/20">
+      <div class="flex items-start gap-3">
+        <ng-icon name="matEditNoteOutline" class="text-xl text-primary mt-0.5" />
+        <div class="flex flex-col">
+          <span class="text-sm font-bold text-on-surface">Permitir Notas Especiales o Dedicatorias</span>
+          <span class="text-xs text-on-surface-variant">
+            Agrega una caja de texto opcional en el checkout para indicaciones especiales (ej. dedicatorias de tortas, sin cebolla, timbre).
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="allowNotes.set(!allowNotes())"
+        class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+        [class.bg-primary]="allowNotes()"
+        [class.bg-surface-container-highest]="!allowNotes()"
+        aria-label="Permitir notas"
+      >
+        <span
+          class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+          [class.translate-x-5.5]="allowNotes()"
+          [class.translate-x-0]="!allowNotes()"
+        ></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Botón Guardar -->
+  <div class="flex justify-end pt-2">
+    <button
+      type="button"
+      (click)="onSave()"
+      class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2"
+    >
+      <ng-icon name="matSaveOutline" class="text-base" />
+      <span>Guardar Políticas y Checkout</span>
+    </button>
+  </div>
+</div>

@@ -23,12 +23,12 @@ public class CategoryService {
     @Transactional
     public Category createCategory(CreateCategoryCommand command) {
         if (command.name() == null || command.name().trim().isEmpty()) {
-            throw new IllegalArgumentException("Category name cannot be empty");
+            throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");
         }
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCase(command.storeId(), trimmedName)) {
-            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "A category with this name already exists in the store");
+            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "Ya existe una categoría con este nombre en la tienda");
         }
 
         Category category = Category.create(
@@ -48,7 +48,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category getCategoryByIdAndStore(UUID categoryId, UUID storeId) {
         return categoryRepository.findByIdAndStoreId(categoryId, storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to store"));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada o no pertenece a la tienda"));
     }
 
     @Transactional
@@ -56,12 +56,12 @@ public class CategoryService {
         Category category = getCategoryByIdAndStore(command.categoryId(), command.storeId());
 
         if (command.name() == null || command.name().trim().isEmpty()) {
-            throw new IllegalArgumentException("Category name cannot be empty");
+            throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");
         }
 
         String trimmedName = command.name().trim();
         if (categoryRepository.existsByStoreIdAndNameIgnoreCaseAndIdNot(command.storeId(), trimmedName, command.categoryId())) {
-            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "A category with this name already exists in the store");
+            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "Ya existe una categoría con este nombre en la tienda");
         }
 
         category.update(trimmedName, command.description());
