@@ -164,4 +164,71 @@ class CapacityExceptionTest {
         assertEquals(createdAt, exception.getCreatedAt());
         assertEquals(updatedAt, exception.getUpdatedAt());
     }
+
+    @Test
+    @DisplayName("appliesTo - excepción full day aplica para cualquier franja")
+    void appliesToFullDayMatchesAnySlot() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 12, 25), null, null, 0, "Navidad");
+
+        assertTrue(exception.appliesTo(LocalTime.of(8, 0), LocalTime.of(9, 0)));
+        assertTrue(exception.appliesTo(LocalTime.of(20, 0), LocalTime.of(22, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada contenida en la franja de la excepción")
+    void appliesToSlotContainsRequest() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null);
+
+        assertTrue(exception.appliesTo(LocalTime.of(11, 0), LocalTime.of(12, 0)));
+        assertTrue(exception.appliesTo(LocalTime.of(10, 0), LocalTime.of(14, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada antes del inicio de la excepción")
+    void appliesToSlotRequestBeforeStart() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null);
+
+        assertFalse(exception.appliesTo(LocalTime.of(9, 0), LocalTime.of(10, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada después del fin de la excepción")
+    void appliesToSlotRequestAfterEnd() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null);
+
+        assertFalse(exception.appliesTo(LocalTime.of(14, 0), LocalTime.of(15, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada que cruza los límites de la excepción")
+    void appliesToSlotRequestCrosses() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null);
+
+        assertFalse(exception.appliesTo(LocalTime.of(9, 0), LocalTime.of(11, 0)));
+        assertFalse(exception.appliesTo(LocalTime.of(13, 0), LocalTime.of(15, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - excepción con franja no cubre una consulta de día completo")
+    void appliesToSlotDoesNotMatchFullDayRequest() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), LocalTime.of(10, 0), LocalTime.of(14, 0), 5, null);
+
+        assertFalse(exception.appliesTo(null, null));
+    }
+
+    @Test
+    @DisplayName("appliesTo - excepción INACTIVE no aplica")
+    void appliesToInactiveException() {
+        CapacityException exception = CapacityException.create(
+                storeId, LocalDate.of(2026, 7, 15), null, null, 5, null);
+        exception.deactivate();
+
+        assertFalse(exception.appliesTo(LocalTime.of(8, 0), LocalTime.of(9, 0)));
+    }
 }
