@@ -1,0 +1,126 @@
+<div class="flex flex-col gap-6 max-w-4xl">
+  <!-- Card 1: Alertas Sonoras de Pedidos -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-5 shadow-2xs">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/20">
+          <ng-icon name="matVolumeUpOutline" class="text-2xl" />
+        </div>
+        <div class="flex flex-col">
+          <h3 class="text-base font-bold text-on-surface">Sonido de Notificación de Nuevo Pedido</h3>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Reproduce una campana en el navegador cada vez que entra un nuevo pedido en tiempo real.
+          </p>
+        </div>
+      </div>
+
+      <!-- Toggle Switch -->
+      <button
+        type="button"
+        (click)="toggleOrderSound()"
+        class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+        [class.bg-primary]="notifications().orderSoundAlert"
+        [class.bg-surface-container-highest]="!notifications().orderSoundAlert"
+        aria-label="Alternar alerta sonora"
+      >
+        <span
+          class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+          [class.translate-x-5.5]="notifications().orderSoundAlert"
+          [class.translate-x-0]="!notifications().orderSoundAlert"
+        ></span>
+      </button>
+    </div>
+
+    <!-- Controles de volumen y prueba si está activo -->
+    @if (notifications().orderSoundAlert) {
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-outline-variant/20 bg-surface-container-low/60 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 p-4 sm:p-5 rounded-b-2xl">
+        <div class="flex items-center gap-3 flex-1 max-w-sm">
+          <ng-icon name="matVolumeMuteOutline" class="text-lg text-on-surface-variant shrink-0" />
+          <input
+            type="range"
+            min="10"
+            max="100"
+            step="5"
+            [ngModel]="notifications().soundVolume"
+            (ngModelChange)="updateVolume($event)"
+            class="w-full accent-primary cursor-pointer"
+            aria-label="Volumen del sonido"
+          />
+          <ng-icon name="matVolumeUpOutline" class="text-lg text-on-surface-variant shrink-0" />
+          <span class="text-xs font-mono font-bold text-on-surface min-w-[32px]">
+            {{ notifications().soundVolume }}%
+          </span>
+        </div>
+
+        <button
+          type="button"
+          (click)="playTestSound()"
+          class="px-3.5 py-2 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <ng-icon name="matPlayArrowOutline" class="text-base text-primary" />
+          <span>Probar Sonido</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Card 2: Alerta Visual de Inventario Bajo -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex items-start justify-between gap-4 shadow-2xs">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0 border border-rose-500/20">
+        <ng-icon name="matInventory2Outline" class="text-2xl" />
+      </div>
+      <div class="flex flex-col">
+        <h3 class="text-base font-bold text-on-surface">Avisos de Stock Crítico</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+          Muestra insignias y avisos destacados en el catálogo y pedidos cuando los insumos o productos estén por agotarse.
+        </p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="toggleLowStock()"
+      class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+      [class.bg-primary]="notifications().lowStockVisualAlert"
+      [class.bg-surface-container-highest]="!notifications().lowStockVisualAlert"
+      aria-label="Alternar alertas de stock"
+    >
+      <span
+        class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+        [class.translate-x-5.5]="notifications().lowStockVisualAlert"
+        [class.translate-x-0]="!notifications().lowStockVisualAlert"
+      ></span>
+    </button>
+  </div>
+
+  <!-- Card 3: Resumen Diario por Correo -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex items-start justify-between gap-4 shadow-2xs">
+    <div class="flex items-start gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 border border-blue-500/20">
+        <ng-icon name="matMailOutline" class="text-2xl" />
+      </div>
+      <div class="flex flex-col">
+        <h3 class="text-base font-bold text-on-surface">Resumen de Ventas al Cierre de Jornada</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+          Recibe un email con el consolidado de pedidos completados y cupos ocupados al final del día.
+        </p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="toggleDailyEmail()"
+      class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+      [class.bg-primary]="notifications().dailyEmailSummary"
+      [class.bg-surface-container-highest]="!notifications().dailyEmailSummary"
+      aria-label="Alternar resumen diario"
+    >
+      <span
+        class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+        [class.translate-x-5.5]="notifications().dailyEmailSummary"
+        [class.translate-x-0]="!notifications().dailyEmailSummary"
+      ></span>
+    </button>
+  </div>
+</div>

@@ -69,8 +69,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
-        loadComponent: () => import('./features/coming-soon/coming-soon').then((m) => m.ComingSoon),
-        data: { moduleKey: 'settings' },
+        loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
       },
     ],
   },

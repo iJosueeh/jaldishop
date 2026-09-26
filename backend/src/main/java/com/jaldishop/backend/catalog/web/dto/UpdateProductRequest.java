@@ -6,14 +6,14 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record UpdateProductRequest(
-        @NotNull(message = "Category ID is required")
+        @NotNull(message = "El ID de la categoría es obligatorio")
         UUID categoryId,
 
-        @NotBlank(message = "Product name is required")
-        @Size(max = 160, message = "Product name must not exceed 160 characters")
+        @NotBlank(message = "El nombre del producto es obligatorio")
+        @Size(max = 160, message = "El nombre del producto no debe exceder 160 caracteres")
         String name,
 
-        @Size(max = 180, message = "Product slug must not exceed 180 characters")
+        @Size(max = 180, message = "El slug del producto no debe exceder 180 caracteres")
         String slug,
 
         String description,

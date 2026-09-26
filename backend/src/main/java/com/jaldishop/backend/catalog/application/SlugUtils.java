@@ -13,7 +13,7 @@ public final class SlugUtils {
 
     public static String toSlug(String input) {
         if (input == null || input.isBlank()) {
-            throw new IllegalArgumentException("Input string for slug cannot be empty");
+            throw new IllegalArgumentException("El texto para generar el slug no puede estar vacío");
         }
         String nowhitespace = WHITESPACE.matcher(input.trim()).replaceAll("-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
