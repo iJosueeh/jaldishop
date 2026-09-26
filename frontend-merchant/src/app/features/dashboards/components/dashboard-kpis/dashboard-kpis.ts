@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { DashboardMetrics } from '../../../../core/models/dashboard.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -11,6 +11,7 @@ import {
   matStarOutline,
 } from '@ng-icons/material-symbols/outline';
 import { CapacityService } from '../../../../core/services/capacity.service';
+import { OrderService } from '../../../../core/services/order.service';
 
 @Component({
   imports: [NgIcon],
@@ -31,23 +32,14 @@ import { CapacityService } from '../../../../core/services/capacity.service';
 })
 export class DashboardKpis implements OnInit {
   private readonly capacityService = inject(CapacityService);
+  private readonly orderService = inject(OrderService);
 
   readonly todayException = computed(() => this.capacityService.todayException());
   readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacity());
   readonly isClosedToday = computed(() => this.capacityService.isTodayClosed());
-  readonly capacityOccupied = signal<number>(0);
 
-  readonly metrics = signal<DashboardMetrics>({
-    capacityOccupied: 0,
-    capacityTotal: 0,
-    shiftSchedule: 'Sin pedidos hoy',
-    totalOrdersToday: 0,
-    confirmedOrders: 0,
-    inPrepOrders: 0,
-    readyOrders: 0,
-    completedOrders: 0,
-    operatingRhythmMin: 0,
-    targetRhythmMin: 0,
+  readonly capacityOccupied = computed(() => {
+    return this.orderService.orders().filter((o) => o.status !== 'CANCELLED').length;
   });
 
   readonly shiftSchedule = computed(() => {
@@ -68,6 +60,19 @@ export class DashboardKpis implements OnInit {
       .join(', ');
     return `Horario hoy: ${times}`;
   });
+
+  readonly metrics = computed<DashboardMetrics>(() => ({
+    capacityOccupied: this.capacityOccupied(),
+    capacityTotal: this.capacityTotal(),
+    shiftSchedule: this.shiftSchedule(),
+    totalOrdersToday: this.orderService.totalOrdersCount(),
+    confirmedOrders: this.orderService.confirmedCount(),
+    inPrepOrders: this.orderService.inPrepCount(),
+    readyOrders: this.orderService.readyCount(),
+    completedOrders: this.orderService.completedCount(),
+    operatingRhythmMin: 0,
+    targetRhythmMin: 25,
+  }));
 
   readonly capacityPercentage = computed(() => {
     const total = this.capacityTotal();
@@ -96,6 +101,9 @@ export class DashboardKpis implements OnInit {
     }
     if (this.capacityService.exceptions().length === 0) {
       this.capacityService.getExceptions().subscribe();
+    }
+    if (this.orderService.orders().length === 0) {
+      this.orderService.loadOrders().subscribe();
     }
   }
 }

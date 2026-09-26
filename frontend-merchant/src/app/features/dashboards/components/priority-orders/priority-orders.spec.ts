@@ -1,16 +1,55 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PriorityOrders } from './priority-orders';
+import { OrderService } from '../../../../core/services/order.service';
+import { MerchantOrder } from '../../../../core/models/order.models';
 
 describe('PriorityOrders', () => {
   let component: PriorityOrders;
   let fixture: ComponentFixture<PriorityOrders>;
+  let orderService: OrderService;
+
+  const mockOrder: MerchantOrder = {
+    id: 'ord-test-1',
+    orderNumber: '#ORD-0001',
+    customerName: 'María García',
+    customerPhone: '987654321',
+    channel: 'WHATSAPP',
+    channelLabel: 'WhatsApp',
+    deliveryMode: 'DELIVERY',
+    deliveryAddress: 'Av. Larco 123',
+    deliveryTimeLabel: '10:00 - 11:30',
+    isUrgent: true,
+    status: 'IN_PREPARATION',
+    paymentMethod: 'YAPE',
+    totalAmount: 45.0,
+    items: [
+      {
+        name: 'Torta de Chocolate',
+        variant: 'Porción personal',
+        quantity: 1,
+        unitPrice: 45.0,
+        totalPrice: 45.0,
+      },
+    ],
+    createdAt: '2026-09-25T10:00:00Z',
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PriorityOrders],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        OrderService,
+      ],
     }).compileComponents();
+
+    orderService = TestBed.inject(OrderService);
+    orderService.orders.set([mockOrder]);
 
     fixture = TestBed.createComponent(PriorityOrders);
     component = fixture.componentInstance;
@@ -19,6 +58,11 @@ describe('PriorityOrders', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('debe listar pedidos prioritarios activos', () => {
+    expect(component.orders().length).toBe(1);
+    expect(component.orders()[0].id).toBe('ord-test-1');
   });
 
   it('debe abrir y cerrar el drawer correctamente', () => {
@@ -44,4 +88,3 @@ describe('PriorityOrders', () => {
     expect(component.selectedOrder()?.status).toBe('READY');
   });
 });
-

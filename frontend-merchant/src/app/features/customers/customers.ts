@@ -76,38 +76,6 @@ export class Customers implements OnInit {
     this.currentPage.set(page);
   }
 
-  onExportCsv(): void {
-    const list = this.filteredCustomers();
-    if (list.length === 0) {
-      this.toastService.info('No hay clientes para exportar.');
-      return;
-    }
-
-    const headers = ['ID', 'Nombre', 'Apellido', 'Email', 'Telefono', 'Pedidos', 'Total Gastado (PEN)', 'Ultimo Pedido'];
-    const rows = list.map((c) => [
-      c.userId,
-      `"${c.firstName.replace(/"/g, '""')}"`,
-      `"${c.lastName.replace(/"/g, '""')}"`,
-      `"${c.email.replace(/"/g, '""')}"`,
-      `"${c.phone || ''}"`,
-      c.ordersCount,
-      c.totalSpentAmount.toFixed(2),
-      `"${c.lastOrderAt || ''}"`,
-    ]);
-
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = `clientes-jaldishop-${dateStr}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    this.toastService.success('Lista de clientes exportada en CSV correctamente.');
-  }
-
   onOpenWhatsApp(customer: StoreCustomer): void {
     this.toastService.info(`Iniciando chat con ${customer.firstName}...`);
   }

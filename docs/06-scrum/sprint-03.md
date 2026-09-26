@@ -75,11 +75,11 @@ flowchart TD
 | 🔴 **Alta** | **BE-14** · Configuración base de Capacidad | Mia | `COMPLETADO` | Ninguna | Dominio CapacityConfiguration, JPA, CRUD REST, validaciones *(Desbloqueó BE-15)* |
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine / Josué | `COMPLETADO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST, Ownership RBAC, 409 Conflicts y tests *(Desbloqueó BE-13 y BE-17)* |
 | 🔴 **Alta** | **BE-TENANT-01/02** · Aislamiento y Cartera de Clientes de Tienda | Josué | `COMPLETADO` | Ninguna | Migración V3, `StoreCustomer`, proyección SQL agregada y endpoint `/api/v1/merchant/customers` |
-| 🔴 **Alta** | **FE-MERCH-01** · Vista de Gestión de Clientes Merchant | Josué | `COMPLETADO` | BE-TENANT-02 | Vista `/customers`, Cache First, Signals, KPIs, exportación CSV, WhatsApp y Design System v2.1 |
+| 🔴 **Alta** | **FE-MERCH-01** · Vista de Gestión de Clientes Merchant | Josué | `COMPLETADO` | BE-TENANT-02 | Vista `/customers`, Cache First, Signals, KPIs, WhatsApp y Design System v2.1 |
 | 🔴 **Alta** | **FE-ADMIN-01** · Panel de Administración en Frontend | Josué | `EN PROGRESO` | BE-ADMIN-01 | Módulo `/admin/*` en `frontend-merchant` con Guards, vistas de usuarios, comerciantes y tiendas |
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `EN PROGRESO` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST *(Desbloqueada)* |
-| 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `EN PROGRESO` | BE-12 | Carrito por User + Store, gestión de ítems y reglas de aislamiento *(Desbloqueada)* |
+| 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `COMPLETADO` | BE-12 | Carrito por User + Store, gestión de ítems, CartViewAssembler y reglas de aislamiento *(Desbloqueada)* |
 | 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `EN PROGRESO` | BE-15 | Motor de resolución base vs excepción y cálculo de slots disponibles |
 
 ---
@@ -319,35 +319,37 @@ Implementar la gestión de inventario asociada a las variantes de productos (`Pr
 ### 📋 BE-17 | Implementar módulo de Carrito
 
 **Responsable:** Josué  
-**Estado:** `BLOQUEADA POR BE-12` 🔒  
-**Entregable:** Dominio `Cart`, `CartItem`, persistencia JPA, casos de uso de gestión de carrito cliente y endpoints REST Customer.
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Dominio `Cart`, `CartItem`, persistencia JPA, casos de uso de gestión de carrito cliente, `CartViewAssembler` y endpoints REST Customer.
 
 **Descripción:**  
 Implementar el carrito de compra del cliente para una tienda específica, permitiendo agregar, modificar y administrar variantes de productos antes de proceder a la selección de horario y Checkout.
 
 **Checklist:**
-- [ ] Implementar dominio `Cart`
-- [ ] Implementar dominio `CartItem`
-- [ ] Implementar Repository Port (`CartRepository`)
-- [ ] Implementar persistencia JPA (`CartEntity`, `CartItemEntity`, `CartJpaRepository`)
-- [ ] Implementar mapper y adapter de persistencia
-- [ ] Caso de uso Obtener carrito activo del usuario para la tienda
-- [ ] Caso de uso Agregar variante al carrito
-- [ ] Caso de uso Modificar cantidad de ítem
-- [ ] Caso de uso Eliminar ítem del carrito
-- [ ] Caso de uso Vaciar carrito
-- [ ] Validar `quantity > 0`
-- [ ] Validar existencia y estado activo de `ProductVariant`
-- [ ] Validar pertenencia de productos a la misma `Store`
-- [ ] Impedir mezclar productos de distintas tiendas en un mismo carrito
-- [ ] Mantener un único carrito activo por tupla `(User, Store)`
-- [ ] **Regla de negocio:** El carrito **NO reserva inventario ni capacidad**
-- [ ] Crear DTOs de entrada y salida
-- [ ] Implementar endpoints REST Customer (`/api/v1/cart/**`)
-- [ ] Tests de dominio
-- [ ] Tests de aplicación
-- [ ] Tests de persistencia
-- [ ] Tests web
+- [x] Implementar dominio `Cart`
+- [x] Implementar dominio `CartItem`
+- [x] Implementar Repository Port (`CartRepository`)
+- [x] Implementar persistencia JPA (`CartEntity`, `CartItemEntity`, `CartJpaRepository`)
+- [x] Implementar mapper y adapter de persistencia
+- [x] Caso de uso Obtener carrito activo del usuario para la tienda
+- [x] Caso de uso Agregar variante al carrito
+- [x] Caso de uso Modificar cantidad de ítem
+- [x] Caso de uso Eliminar ítem del carrito
+- [x] Caso de uso Vaciar carrito
+- [x] Validar `quantity > 0`
+- [x] Validar existencia y estado activo de `ProductVariant`
+- [x] Validar pertenencia de productos a la misma `Store`
+- [x] Impedir mezclar productos de distintas tiendas en un mismo carrito
+- [x] Mantener un único carrito activo por tupla `(User, Store)`
+- [x] **Regla de negocio:** El carrito **NO reserva inventario ni capacidad**
+- [x] Separación SRP con `CartViewAssembler` para proyecciones de lectura
+- [x] Crear DTOs de entrada y salida
+- [x] Implementar endpoints REST Customer (`/api/v1/cart/**`)
+- [x] Tests de dominio
+- [x] Tests de aplicación
+- [x] Tests de persistencia
+- [x] Tests web
+
 
 ---
 
