@@ -55,20 +55,33 @@
       <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
         Tiempo Promedio
       </span>
-      <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
-        Ritmo fluido
-      </span>
+      @if (hasAveragePace()) {
+        <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
+          Ritmo fluido
+        </span>
+      } @else {
+        <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider border border-outline-variant/30">
+          Sin registros
+        </span>
+      }
     </div>
 
     <div class="flex items-baseline gap-1.5">
-      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
-        {{ averagePaceMin() }} min
-      </span>
-      <span class="text-xs text-on-surface-variant font-medium">/ preparación</span>
+      @if (hasAveragePace()) {
+        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+          {{ averagePaceMin() }} min
+        </span>
+        <span class="text-xs text-on-surface-variant font-medium">/ preparación</span>
+      } @else {
+        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface-variant tracking-tight">
+          --
+        </span>
+        <span class="text-xs text-on-surface-variant font-medium">min / preparación</span>
+      }
     </div>
 
     <p class="text-xs text-on-surface-variant font-medium">
-      Producción sincronizada sin demoras
+      {{ hasAveragePace() ? 'Producción sincronizada sin demoras' : 'Se calculará al completar pedidos' }}
     </p>
   </div>
 </section>
