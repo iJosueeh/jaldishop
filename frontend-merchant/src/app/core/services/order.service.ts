@@ -48,6 +48,11 @@ export class OrderService {
     return this.orders().find((o) => o.isUrgent && o.status !== 'COMPLETED') || null;
   });
 
+  readonly averagePrepTimeMin = computed<number | null>(() => {
+    // Retorna null de forma reactiva si aún no existen métricas calculadas
+    return null;
+  });
+
   // Lista Filtrada Reactiva
   readonly filteredOrders = computed(() => {
     const tab = this.activeTab();

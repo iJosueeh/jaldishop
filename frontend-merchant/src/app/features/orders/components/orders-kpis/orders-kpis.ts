@@ -20,12 +20,17 @@ import {
   templateUrl: './orders-kpis.html',
 })
 export class OrdersKpis {
-  readonly capacityTotal = input<number>(10);
-  readonly capacityOccupied = input<number>(8);
-  readonly remainingDeliveries = input<number>(4);
-  readonly inPrepCount = input<number>(2);
-  readonly readyCount = input<number>(2);
-  readonly averagePaceMin = input<number>(18);
+  readonly capacityTotal = input<number>(0);
+  readonly capacityOccupied = input<number>(0);
+  readonly remainingDeliveries = input<number>(0);
+  readonly inPrepCount = input<number>(0);
+  readonly readyCount = input<number>(0);
+  readonly averagePaceMin = input<number | null>(null);
+
+  readonly hasAveragePace = computed(() => {
+    const pace = this.averagePaceMin();
+    return pace !== null && pace !== undefined && pace > 0;
+  });
 
   readonly availableCapacity = computed(() => {
     return Math.max(0, this.capacityTotal() - this.capacityOccupied());

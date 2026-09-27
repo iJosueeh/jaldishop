@@ -130,4 +130,8 @@ describe('OrderService', () => {
     expect(service.orders()[0].id).toBe('new-ord-999');
     expect(toastMock.success).toHaveBeenCalledWith('Pedido #PED-9999 registrado exitosamente.');
   });
+
+  it('debe exponer averagePrepTimeMin como signal reactiva nullable', () => {
+    expect(service.averagePrepTimeMin()).toBeNull();
+  });
 });
