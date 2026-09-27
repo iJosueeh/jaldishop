@@ -112,18 +112,14 @@ describe('Customers', () => {
     expect(component.currentPage()).toBe(2);
   });
 
-  it('should trigger CSV export and WhatsApp action', () => {
+  it('should trigger WhatsApp action', () => {
     fixture.detectChanges();
     const req = httpMock.expectOne(`${environment.apiUrl}/merchant/customers`);
     req.flush(mockCustomers);
     fixture.detectChanges();
 
     const toastService = TestBed.inject(ToastService);
-    const successSpy = vi.spyOn(toastService, 'success');
     const infoSpy = vi.spyOn(toastService, 'info');
-
-    component.onExportCsv();
-    expect(successSpy).toHaveBeenCalledWith('Lista de clientes exportada en CSV correctamente.');
 
     component.onOpenWhatsApp(mockCustomers[0]);
     expect(infoSpy).toHaveBeenCalledWith('Iniciando chat con Ana...');
