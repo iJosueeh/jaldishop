@@ -32,4 +32,10 @@ describe('AdminQuickUsers', () => {
     expect(component).toBeTruthy();
     expect(component.users().length).toBe(1);
   });
+
+  it('debe emitir selectUser cuando se selecciona un usuario', () => {
+    const spy = vi.spyOn(component.selectUser, 'emit');
+    component.selectUser.emit(component.users()[0]);
+    expect(spy).toHaveBeenCalledWith(component.users()[0]);
+  });
 });

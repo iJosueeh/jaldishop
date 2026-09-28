@@ -19,13 +19,18 @@
 
   <div class="flex flex-col gap-2.5 flex-1">
     @for (store of stores(); track store.id) {
-      <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container transition-colors">
+      <div
+        (click)="selectStore.emit(store)"
+        class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-surface-container/60 border border-transparent hover:border-outline-variant/30 transition-all cursor-pointer group"
+      >
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary font-black text-xs flex items-center justify-center shrink-0">
+          <div class="w-8 h-8 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-on-primary text-primary font-black text-xs flex items-center justify-center shrink-0 transition-colors">
             {{ store.name.substring(0, 2).toUpperCase() }}
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-on-surface truncate">{{ store.name }}</span>
+            <span class="text-xs font-bold text-on-surface group-hover:text-primary transition-colors truncate">
+              {{ store.name }}
+            </span>
             <span class="text-[11px] text-on-surface-variant truncate">&#64;{{ store.slug }}</span>
           </div>
         </div>
@@ -42,6 +47,14 @@
           >
             {{ store.status === 'ACTIVE' ? 'Activa' : 'Pausada' }}
           </span>
+          <button
+            type="button"
+            (click)="$event.stopPropagation(); selectStore.emit(store)"
+            class="p-1 rounded-lg text-on-surface-variant/70 hover:text-primary hover:bg-surface-container transition-colors"
+            title="Ver ficha 360°"
+          >
+            <ng-icon name="matVisibilityOutline" class="text-[15px]" />
+          </button>
         </div>
       </div>
     } @empty {

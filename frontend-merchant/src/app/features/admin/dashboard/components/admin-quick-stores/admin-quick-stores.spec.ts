@@ -30,4 +30,10 @@ describe('AdminQuickStores', () => {
     expect(component).toBeTruthy();
     expect(component.stores().length).toBe(1);
   });
+
+  it('debe emitir selectStore cuando se selecciona una tienda', () => {
+    const spy = vi.spyOn(component.selectStore, 'emit');
+    component.selectStore.emit(component.stores()[0]);
+    expect(spy).toHaveBeenCalledWith(component.stores()[0]);
+  });
 });

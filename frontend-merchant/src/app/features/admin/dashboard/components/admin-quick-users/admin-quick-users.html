@@ -19,13 +19,18 @@
 
   <div class="flex flex-col gap-2.5 flex-1">
     @for (user of users(); track user.id) {
-      <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container transition-colors">
+      <div
+        (click)="selectUser.emit(user)"
+        class="flex items-center justify-between p-2.5 rounded-2xl hover:bg-surface-container/60 border border-transparent hover:border-outline-variant/30 transition-all cursor-pointer group"
+      >
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface font-extrabold text-xs flex items-center justify-center shrink-0">
+          <div class="w-8 h-8 rounded-xl bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary text-on-surface font-black text-xs flex items-center justify-center shrink-0 transition-colors">
             {{ user.fullName.substring(0, 2).toUpperCase() }}
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-on-surface truncate">{{ user.fullName }}</span>
+            <span class="text-xs font-bold text-on-surface group-hover:text-primary transition-colors truncate">
+              {{ user.fullName }}
+            </span>
             <span class="text-[11px] text-on-surface-variant truncate">{{ user.email }}</span>
           </div>
         </div>
@@ -48,6 +53,14 @@
             [class.bg-rose-500]="user.status === 'SUSPENDED'"
             [title]="user.status"
           ></span>
+          <button
+            type="button"
+            (click)="$event.stopPropagation(); selectUser.emit(user)"
+            class="p-1 rounded-lg text-on-surface-variant/70 hover:text-primary hover:bg-surface-container transition-colors"
+            title="Ver ficha 360°"
+          >
+            <ng-icon name="matVisibilityOutline" class="text-[15px]" />
+          </button>
         </div>
       </div>
     } @empty {

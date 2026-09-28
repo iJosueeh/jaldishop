@@ -25,9 +25,38 @@
   <!-- KPIs Globales de la Plataforma -->
   <app-admin-dashboard-kpis [metrics]="adminService.metrics()" />
 
+  <!-- Monitor de Salud & Operatividad del Sistema -->
+  <app-admin-platform-health
+    [metrics]="adminService.metrics()"
+    [isLoading]="adminService.isLoadingStores() || adminService.isLoadingUsers()"
+    (filterSuspended)="onFilterSuspendedStores()"
+  />
+
   <!-- Paneles Secundarios: Usuarios Recientes y Tiendas -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-    <app-admin-quick-users [users]="recentUsers()" />
-    <app-admin-quick-stores [stores]="recentStores()" />
+    <app-admin-quick-users
+      [users]="recentUsers()"
+      (selectUser)="onSelectUser($event)"
+    />
+    <app-admin-quick-stores
+      [stores]="recentStores()"
+      (selectStore)="onSelectStore($event)"
+    />
   </div>
+
+  <!-- Ficha 360 Lateral para Usuario (Drawer) -->
+  <app-admin-user-drawer
+    [isOpen]="isUserDrawerOpen()"
+    [user]="drawerUser()"
+    (closeDrawer)="onCloseUserDrawer()"
+    (statusChange)="onUserDrawerStatusChange($event)"
+  />
+
+  <!-- Ficha 360 Lateral para Tienda (Drawer) -->
+  <app-admin-store-drawer
+    [isOpen]="isStoreDrawerOpen()"
+    [store]="drawerStore()"
+    (closeDrawer)="onCloseStoreDrawer()"
+    (statusChange)="onStoreDrawerStatusChange($event)"
+  />
 </div>
