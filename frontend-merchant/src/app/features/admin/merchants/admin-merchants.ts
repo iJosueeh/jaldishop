@@ -4,12 +4,14 @@ import { AdminUserSummary } from '../../../core/models/admin.models';
 import { AdminMerchantsHeader } from './components/admin-merchants-header/admin-merchants-header';
 import { AdminMerchantsGrid } from './components/admin-merchants-grid/admin-merchants-grid';
 import { UserStatusModal } from '../users/components/user-status-modal/user-status-modal';
+import { AdminUserDrawer } from '../users/components/admin-user-drawer/admin-user-drawer';
 
 @Component({
   imports: [
     AdminMerchantsHeader,
     AdminMerchantsGrid,
     UserStatusModal,
+    AdminUserDrawer,
   ],
   selector: 'app-admin-merchants',
   styleUrl: './admin-merchants.css',
@@ -20,6 +22,9 @@ export class AdminMerchants implements OnInit {
 
   readonly selectedMerchant = signal<AdminUserSummary | null>(null);
   readonly isModalOpen = signal<boolean>(false);
+
+  readonly drawerMerchant = signal<AdminUserSummary | null>(null);
+  readonly isDrawerOpen = signal<boolean>(false);
 
   ngOnInit(): void {
     if (this.adminService.users().length === 0) {
@@ -39,6 +44,21 @@ export class AdminMerchants implements OnInit {
   onCloseModal(): void {
     this.isModalOpen.set(false);
     this.selectedMerchant.set(null);
+  }
+
+  onSelectMerchant(merchant: AdminUserSummary): void {
+    this.drawerMerchant.set(merchant);
+    this.isDrawerOpen.set(true);
+  }
+
+  onCloseDrawer(): void {
+    this.isDrawerOpen.set(false);
+    this.drawerMerchant.set(null);
+  }
+
+  onDrawerStatusChange(merchant: AdminUserSummary): void {
+    this.onCloseDrawer();
+    this.onOpenStatusModal(merchant);
   }
 
   onConfirmStatusChange(merchant: AdminUserSummary): void {

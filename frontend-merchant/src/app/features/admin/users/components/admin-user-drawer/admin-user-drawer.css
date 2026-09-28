@@ -1,0 +1,70 @@
+/* Animaciones aceleradas por GPU para el Drawer lateral */
+:host {
+  display: contents;
+}
+
+@keyframes drawerBackdropEnter {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes drawerBackdropExit {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+@keyframes drawerSlideEnter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideExit {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.drawer-backdrop-enter {
+  animation: drawerBackdropEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, backdrop-filter;
+}
+
+.drawer-backdrop-exit {
+  animation: drawerBackdropExit 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, backdrop-filter;
+}
+
+.drawer-panel-enter {
+  animation: drawerSlideEnter 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.drawer-panel-exit {
+  animation: drawerSlideExit 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+  transform: translateZ(0);
+}

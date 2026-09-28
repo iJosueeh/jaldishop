@@ -1,8 +1,8 @@
 <header
   class="fixed top-0 right-0 left-0 lg:left-60 h-16 sm:h-18 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-200"
 >
-  <!-- Lado Izquierdo: Botón Menú Móvil + Distintivo Admin -->
-  <div class="flex items-center gap-3 sm:gap-4">
+  <!-- Lado Izquierdo: Botón Menú Móvil + Distintivo Admin + Buscador Global -->
+  <div class="flex items-center gap-3 sm:gap-4 flex-1 max-w-xl">
     <button
       type="button"
       (click)="toggleSidebar.emit()"
@@ -12,21 +12,39 @@
       <ng-icon name="matMenuOutline" class="text-[22px]" />
     </button>
 
-    <!-- Badge Modo Administrador de Plataforma -->
-    <div class="flex items-center gap-2">
-      <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold tracking-wide uppercase shadow-2xs">
+    <!-- Badges de Estado del Sistema & Consola con espacio holgado -->
+    <div class="hidden md:flex items-center gap-2.5 mr-2 lg:mr-4 shrink-0">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold tracking-wide uppercase shadow-2xs">
         <ng-icon name="matShieldOutline" class="text-[14px]" />
-        <span>Consola de Administración</span>
+        <span>Consola</span>
       </span>
-      <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        API Online
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>API Online</span>
       </span>
     </div>
+
+    <!-- Barra de búsqueda rápida / Disparador Command Palette -->
+    <button
+      type="button"
+      (click)="openCommandPalette.emit()"
+      class="flex items-center justify-between gap-2.5 px-3.5 py-2 w-full max-w-xs sm:max-w-sm rounded-xl bg-surface-container/60 hover:bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface text-xs font-medium transition-colors shadow-2xs group cursor-pointer"
+      aria-label="Buscar en la plataforma"
+    >
+      <div class="flex items-center gap-2 min-w-0">
+        <ng-icon name="matSearchOutline" class="text-[16px] text-on-surface-variant group-hover:text-primary transition-colors" />
+        <span class="truncate">Buscar usuarios o tiendas...</span>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <kbd class="px-1.5 py-0.5 rounded bg-surface-container-lowest border border-outline-variant/40 text-[10px] font-bold text-on-surface-variant/80 shadow-2xs">
+          Ctrl K
+        </kbd>
+      </div>
+    </button>
   </div>
 
   <!-- Lado Derecho: Accesos Rápidos, Perfil y Cerrar Sesión -->
-  <div class="flex items-center gap-2 sm:gap-4">
+  <div class="flex items-center gap-2 sm:gap-4 shrink-0">
     <!-- Switch a Panel de Tienda si el usuario también es Merchant -->
     @if (authService.isMerchant()) {
       <a

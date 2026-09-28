@@ -17,6 +17,7 @@
   <!-- Tabla de Datos de Tiendas -->
   <app-admin-stores-table
     [stores]="adminService.filteredStores()"
+    (selectStore)="onSelectStore($event)"
     (toggleStatus)="onOpenStatusModal($event)"
   />
 
@@ -26,5 +27,13 @@
     [store]="selectedStore()"
     (confirm)="onConfirmStatusChange($event)"
     (cancel)="onCloseModal()"
+  />
+
+  <!-- Ficha 360° con Drawer Lateral -->
+  <app-admin-store-drawer
+    [isOpen]="isDrawerOpen()"
+    [store]="drawerStore()"
+    (closeDrawer)="onCloseDrawer()"
+    (statusChange)="onDrawerStatusChange($event)"
   />
 </div>

@@ -19,7 +19,16 @@
   <!-- Tabla de Datos -->
   <app-admin-users-table
     [users]="adminService.filteredUsers()"
+    (selectUser)="onOpenUserDrawer($event)"
     (toggleStatus)="onOpenStatusModal($event)"
+  />
+
+  <!-- Ficha 360° Drawer Lateral de Usuario -->
+  <app-admin-user-drawer
+    [isOpen]="isDrawerOpen()"
+    [user]="selectedUser()"
+    (closeDrawer)="onCloseUserDrawer()"
+    (statusChange)="onOpenStatusModal($event)"
   />
 
   <!-- Modal de Suspensión / Reactivación -->

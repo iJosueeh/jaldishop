@@ -8,6 +8,8 @@ import {
   matShieldOutline,
   matStorefrontOutline,
   matLogoutOutline,
+  matSearchOutline,
+  matBoltOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -18,6 +20,8 @@ import {
       matShieldOutline,
       matStorefrontOutline,
       matLogoutOutline,
+      matSearchOutline,
+      matBoltOutline,
     }),
   ],
   selector: 'app-admin-header',
@@ -29,6 +33,7 @@ export class AdminHeader {
   private readonly profileService = inject(ProfileService);
 
   readonly toggleSidebar = output<void>();
+  readonly openCommandPalette = output<void>();
 
   readonly adminName = computed(
     () => this.profileService.fullName() || this.authService.currentUser()?.fullName || 'Administrador',

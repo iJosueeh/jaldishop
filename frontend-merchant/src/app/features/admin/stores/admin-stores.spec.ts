@@ -68,14 +68,21 @@ describe('AdminStores', () => {
     expect(component.selectedStore()).toBeNull();
   });
 
-  it('debe suspender la tienda al confirmar cuando está activa', () => {
-    component.onConfirmStatusChange(mockStores[0]);
-    expect(adminServiceMock.suspendStore).toHaveBeenCalledWith('str-1');
+  it('debe abrir y cerrar la ficha 360 (drawer) de tienda', () => {
+    component.onSelectStore(mockStores[0]);
+    expect(component.isDrawerOpen()).toBe(true);
+    expect(component.drawerStore()).toEqual(mockStores[0]);
+
+    component.onCloseDrawer();
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.drawerStore()).toBeNull();
   });
 
-  it('debe reactivar la tienda al confirmar cuando está suspendida', () => {
-    const suspendedStore: AdminStoreSummary = { ...mockStores[0], status: 'SUSPENDED' };
-    component.onConfirmStatusChange(suspendedStore);
-    expect(adminServiceMock.activateStore).toHaveBeenCalledWith('str-1');
+  it('debe abrir el modal de estado desde la ficha 360', () => {
+    component.onSelectStore(mockStores[0]);
+    component.onDrawerStatusChange(mockStores[0]);
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.selectedStore()).toEqual(mockStores[0]);
   });
 });

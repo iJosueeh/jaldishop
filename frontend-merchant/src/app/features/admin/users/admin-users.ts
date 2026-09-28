@@ -4,6 +4,7 @@ import { AdminUserSummary } from '../../../core/models/admin.models';
 import { AdminUsersHeader } from './components/admin-users-header/admin-users-header';
 import { AdminUsersFilterBar } from './components/admin-users-filter-bar/admin-users-filter-bar';
 import { AdminUsersTable } from './components/admin-users-table/admin-users-table';
+import { AdminUserDrawer } from './components/admin-user-drawer/admin-user-drawer';
 import { UserStatusModal } from './components/user-status-modal/user-status-modal';
 
 @Component({
@@ -11,6 +12,7 @@ import { UserStatusModal } from './components/user-status-modal/user-status-moda
     AdminUsersHeader,
     AdminUsersFilterBar,
     AdminUsersTable,
+    AdminUserDrawer,
     UserStatusModal,
   ],
   selector: 'app-admin-users',
@@ -22,6 +24,7 @@ export class AdminUsers implements OnInit {
 
   readonly selectedUser = signal<AdminUserSummary | null>(null);
   readonly isModalOpen = signal<boolean>(false);
+  readonly isDrawerOpen = signal<boolean>(false);
 
   ngOnInit(): void {
     if (this.adminService.users().length === 0) {
@@ -52,6 +55,16 @@ export class AdminUsers implements OnInit {
 
   onCloseModal(): void {
     this.isModalOpen.set(false);
+    this.selectedUser.set(null);
+  }
+
+  onOpenUserDrawer(user: AdminUserSummary): void {
+    this.selectedUser.set(user);
+    this.isDrawerOpen.set(true);
+  }
+
+  onCloseUserDrawer(): void {
+    this.isDrawerOpen.set(false);
     this.selectedUser.set(null);
   }
 

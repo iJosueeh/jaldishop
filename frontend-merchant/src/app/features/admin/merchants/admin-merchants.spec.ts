@@ -58,4 +58,22 @@ describe('AdminMerchants', () => {
     expect(component.isModalOpen()).toBe(false);
     expect(component.selectedMerchant()).toBeNull();
   });
+
+  it('debe abrir y cerrar la ficha 360 (drawer) de comerciante', () => {
+    component.onSelectMerchant(mockMerchants[0]);
+    expect(component.isDrawerOpen()).toBe(true);
+    expect(component.drawerMerchant()).toEqual(mockMerchants[0]);
+
+    component.onCloseDrawer();
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.drawerMerchant()).toBeNull();
+  });
+
+  it('debe abrir el modal de estado desde la ficha 360', () => {
+    component.onSelectMerchant(mockMerchants[0]);
+    component.onDrawerStatusChange(mockMerchants[0]);
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.isModalOpen()).toBe(true);
+    expect(component.selectedMerchant()).toEqual(mockMerchants[0]);
+  });
 });

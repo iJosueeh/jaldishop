@@ -59,4 +59,14 @@ describe('AdminLayout', () => {
     component.closeMobileMenu();
     expect(component.isMobileMenuOpen()).toBe(false);
   });
+
+  it('debe abrir y cerrar la command palette', () => {
+    expect(component.isCommandPaletteOpen()).toBe(false);
+
+    component.openCommandPalette();
+    expect(component.isCommandPaletteOpen()).toBe(true);
+
+    component.closeCommandPalette();
+    expect(component.isCommandPaletteOpen()).toBe(false);
+  });
 });

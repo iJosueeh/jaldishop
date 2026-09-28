@@ -5,6 +5,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matGroupOutline,
   matStorefrontOutline,
+  matVisibilityOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -13,6 +14,7 @@ import {
     provideIcons({
       matGroupOutline,
       matStorefrontOutline,
+      matVisibilityOutline,
     }),
   ],
   selector: 'app-admin-users-table',
@@ -21,5 +23,6 @@ import {
 })
 export class AdminUsersTable {
   readonly users = input.required<AdminUserSummary[]>();
+  readonly selectUser = output<AdminUserSummary>();
   readonly toggleStatus = output<AdminUserSummary>();
 }

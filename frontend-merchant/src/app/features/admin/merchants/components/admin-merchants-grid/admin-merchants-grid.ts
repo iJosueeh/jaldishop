@@ -5,6 +5,7 @@ import {
   matStorefrontOutline,
   matPersonOutline,
   matChatOutline,
+  matVisibilityOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -14,6 +15,7 @@ import {
       matStorefrontOutline,
       matPersonOutline,
       matChatOutline,
+      matVisibilityOutline,
     }),
   ],
   selector: 'app-admin-merchants-grid',
@@ -22,5 +24,6 @@ import {
 })
 export class AdminMerchantsGrid {
   readonly merchants = input.required<AdminUserSummary[]>();
+  readonly selectMerchant = output<AdminUserSummary>();
   readonly toggleStatus = output<AdminUserSummary>();
 }

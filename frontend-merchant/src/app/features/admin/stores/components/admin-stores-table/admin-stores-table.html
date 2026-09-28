@@ -16,15 +16,18 @@
       <!-- Cuerpo de Tabla -->
       <tbody class="divide-y divide-outline-variant/20 font-medium">
         @for (store of stores(); track store.id) {
-          <tr class="hover:bg-surface-container/40 transition-colors">
+          <tr
+            (click)="selectStore.emit(store)"
+            class="hover:bg-surface-container/40 transition-colors cursor-pointer group"
+          >
             <!-- Columna Tienda -->
             <td class="py-3.5 px-4 sm:px-6">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 text-primary font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-on-primary text-primary font-black text-xs flex items-center justify-center shrink-0 shadow-2xs transition-colors">
                   {{ store.name.substring(0, 2).toUpperCase() }}
                 </div>
                 <div class="flex flex-col min-w-0">
-                  <span class="font-bold text-on-surface text-xs sm:text-sm truncate">
+                  <span class="font-bold text-on-surface text-xs sm:text-sm truncate group-hover:text-primary transition-colors">
                     {{ store.name }}
                   </span>
                   <span class="text-[11px] text-primary font-bold truncate">
@@ -95,26 +98,37 @@
             </td>
 
             <!-- Columna Acciones -->
-            <td class="py-3.5 px-4 sm:px-6 text-right">
-              @if (store.status === 'ACTIVE') {
+            <td class="py-3.5 px-4 sm:px-6 text-right" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  (click)="toggleStatus.emit(store)"
-                  class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shadow-2xs"
-                  title="Suspender esta tienda"
+                  (click)="selectStore.emit(store)"
+                  class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                  title="Ver ficha 360°"
                 >
-                  Pausar
+                  <ng-icon name="matVisibilityOutline" class="text-[17px]" />
                 </button>
-              } @else {
-                <button
-                  type="button"
-                  (click)="toggleStatus.emit(store)"
-                  class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors shadow-2xs"
-                  title="Reactivar esta tienda"
-                >
-                  Reactivar
-                </button>
-              }
+
+                @if (store.status === 'ACTIVE') {
+                  <button
+                    type="button"
+                    (click)="toggleStatus.emit(store)"
+                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shadow-2xs"
+                    title="Suspender esta tienda"
+                  >
+                    Pausar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="toggleStatus.emit(store)"
+                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors shadow-2xs"
+                    title="Reactivar esta tienda"
+                  >
+                    Reactivar
+                  </button>
+                }
+              </div>
             </td>
           </tr>
         } @empty {

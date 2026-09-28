@@ -9,6 +9,7 @@
   <!-- Grid de Comerciantes -->
   <app-admin-merchants-grid
     [merchants]="adminService.merchants()"
+    (selectMerchant)="onSelectMerchant($event)"
     (toggleStatus)="onOpenStatusModal($event)"
   />
 
@@ -18,5 +19,13 @@
     [user]="selectedMerchant()"
     (confirm)="onConfirmStatusChange($event)"
     (cancel)="onCloseModal()"
+  />
+
+  <!-- Ficha 360° con Drawer Lateral -->
+  <app-admin-user-drawer
+    [isOpen]="isDrawerOpen()"
+    [user]="drawerMerchant()"
+    (closeDrawer)="onCloseDrawer()"
+    (statusChange)="onDrawerStatusChange($event)"
   />
 </div>
