@@ -77,8 +77,8 @@ GET /api/v1/capacity/effective?date=2026-09-22&startTime=12:30&endTime=13:30
 Se evalúa en este orden estricto, **priorizando la excepción** por sobre la configuración base:
 
 1. **Excepciones** (`CapacityException` activas para `storeId + serviceDate`):
-   - Aplica la primera que cubra la franja solicitada (`startTime >= cfgStart && endTime <= cfgEnd`).
-   - Una excepción **sin franja (full day)** tiene prioridad sobre cualquier excepción con franja de la misma fecha.
+   - Aplica la que cubra la franja solicitada (`startTime >= cfgStart && endTime <= cfgEnd`).
+   - Dentro de las excepciones, la excepción **con franja horaria** tiene prioridad sobre la de día completo (full day).
 2. **Configuración base** (`CapacityConfiguration` activas para `storeId + day_of_week`):
    - `day_of_week` se deriva de la fecha: `getDayOfWeek().getValue() % 7` (`0` = Domingo, `1` = Lunes … `6` = Sábado).
    - Dentro de la base, la configuración **con franja horaria** tiene prioridad sobre la de día completo.

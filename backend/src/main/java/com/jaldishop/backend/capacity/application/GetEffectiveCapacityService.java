@@ -75,7 +75,7 @@ public class GetEffectiveCapacityService {
             }
         }
 
-        return fullDay != null ? fullDay : slot;
+        return slot != null ? slot : fullDay;
     }
 
     private CapacityConfiguration findApplicableConfiguration(UUID storeId, LocalDate serviceDate,

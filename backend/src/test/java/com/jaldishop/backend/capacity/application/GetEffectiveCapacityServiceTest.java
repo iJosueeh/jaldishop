@@ -110,13 +110,13 @@ class GetEffectiveCapacityServiceTest {
     }
 
     @Test
-    @DisplayName("Excepción full day tiene prioridad sobre excepción de franja")
-    void fullDayExceptionBeatsSlotException() {
+    @DisplayName("Excepción de franja tiene prioridad sobre excepción full day")
+    void slotExceptionBeatsFullDayException() {
         stubExceptions(fullDayException(8), slotException(LocalTime.of(12, 0), LocalTime.of(14, 0), 3));
 
         EffectiveCapacityResult result = service.execute(query(LocalTime.of(12, 30), LocalTime.of(13, 30)));
 
-        assertEquals(8, result.capacity());
+        assertEquals(3, result.capacity());
         assertEquals(EffectiveCapacitySource.EXCEPTION, result.source());
     }
 

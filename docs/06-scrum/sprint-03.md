@@ -35,7 +35,7 @@ flowchart TD
     subgraph CATALOGO["Cadena de Catálogo & Carrito"]
         BE12["BE-12 · Catálogo (Categorías, Productos, Variantes)<br/>(Katherine)<br/>✅ COMPLETADO (PR #25)"]
         BE13["BE-13 · Inventario<br/>(Katherine)<br/>🟢 EN PROGRESO (Desbloqueada)"]
-        BE17["BE-17 · Carrito de Compras<br/>(Josué)<br/>🟢 EN PROGRESO (Desbloqueada)"]
+        BE17["BE-17 · Carrito de Compras<br/>(Josué)<br/>✅ COMPLETADO"]
         BE12 -->|Desbloqueó| BE13
         BE12 -->|Desbloqueó| BE17
     end
