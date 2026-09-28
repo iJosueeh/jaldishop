@@ -102,6 +102,22 @@ public class CapacityConfiguration {
         return startTime != null && endTime != null;
     }
 
+    public boolean appliesTo(int dayOfWeek, LocalTime reqStartTime, LocalTime reqEndTime) {
+        if (status != CapacityConfigurationStatus.ACTIVE) {
+            return false;
+        }
+        if (this.dayOfWeek != dayOfWeek) {
+            return false;
+        }
+        if (!hasTimeSlot()) {
+            return true;
+        }
+        if (reqStartTime == null || reqEndTime == null) {
+            return false;
+        }
+        return !reqStartTime.isBefore(startTime) && !reqEndTime.isAfter(endTime);
+    }
+
     public UUID getId() {
         return id;
     }

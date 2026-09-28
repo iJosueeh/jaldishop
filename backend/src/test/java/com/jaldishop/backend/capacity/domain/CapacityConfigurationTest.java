@@ -165,4 +165,94 @@ class CapacityConfigurationTest {
             assertEquals(day, config.getDayOfWeek());
         }
     }
+
+    @Test
+    @DisplayName("appliesTo - configuración full day aplica para cualquier franja del día")
+    void appliesToFullDayMatchesAnySlot() {
+        CapacityConfiguration config = CapacityConfiguration.create(storeId, 1, null, null, 10);
+
+        assertTrue(config.appliesTo(1, LocalTime.of(8, 0), LocalTime.of(9, 0)));
+        assertTrue(config.appliesTo(1, LocalTime.of(20, 0), LocalTime.of(22, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - rechaza día de la semana distinto")
+    void appliesToRejectsDifferentDay() {
+        CapacityConfiguration config = CapacityConfiguration.create(storeId, 1, null, null, 10);
+
+        assertFalse(config.appliesTo(2, LocalTime.of(8, 0), LocalTime.of(9, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada contenida en la franja configurada")
+    void appliesToSlotContainsRequest() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertTrue(config.appliesTo(1, LocalTime.of(10, 0), LocalTime.of(12, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - límite inferior: franja que inicia exactamente en startTime")
+    void appliesToSlotBoundaryStartEqual() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertTrue(config.appliesTo(1, LocalTime.of(9, 0), LocalTime.of(12, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - límite superior: franja que termina exactamente en endTime")
+    void appliesToSlotBoundaryEndEqual() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertTrue(config.appliesTo(1, LocalTime.of(12, 0), LocalTime.of(17, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada antes del inicio de la configurada")
+    void appliesToSlotRequestBeforeStart() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertFalse(config.appliesTo(1, LocalTime.of(8, 30), LocalTime.of(9, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada después del fin de la configurada")
+    void appliesToSlotRequestAfterEnd() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertFalse(config.appliesTo(1, LocalTime.of(17, 0), LocalTime.of(18, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja solicitada que cruza los límites de la configurada")
+    void appliesToSlotRequestCrosses() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertFalse(config.appliesTo(1, LocalTime.of(8, 0), LocalTime.of(10, 0)));
+        assertFalse(config.appliesTo(1, LocalTime.of(16, 0), LocalTime.of(18, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - configuración INACTIVE no aplica")
+    void appliesToInactiveConfiguration() {
+        CapacityConfiguration config = CapacityConfiguration.create(storeId, 1, null, null, 10);
+        config.deactivate();
+
+        assertFalse(config.appliesTo(1, LocalTime.of(8, 0), LocalTime.of(9, 0)));
+    }
+
+    @Test
+    @DisplayName("appliesTo - franja configurada no cubre una consulta de día completo")
+    void appliesToSlotDoesNotMatchFullDayRequest() {
+        CapacityConfiguration config = CapacityConfiguration.create(
+                storeId, 1, LocalTime.of(9, 0), LocalTime.of(17, 0), 20);
+
+        assertFalse(config.appliesTo(1, null, null));
+    }
 }
