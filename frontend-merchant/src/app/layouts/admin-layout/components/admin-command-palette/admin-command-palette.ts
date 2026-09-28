@@ -24,6 +24,7 @@ import {
   matArrowForwardOutline,
   matCloseOutline,
   matBoltOutline,
+  matSettingsOutline,
 } from '@ng-icons/material-symbols/outline';
 
 export interface CommandItem {
@@ -54,6 +55,7 @@ export interface CommandGroup {
       matArrowForwardOutline,
       matCloseOutline,
       matBoltOutline,
+      matSettingsOutline,
     }),
   ],
   selector: 'app-admin-command-palette',
@@ -155,6 +157,16 @@ export class AdminCommandPalette {
               'Actualizado',
             );
             this.dismiss();
+          },
+        },
+        {
+          id: 'act-settings',
+          title: 'Gobernanza & Parámetros Globales',
+          subtitle: 'Configurar políticas de admisión, 2FA y mantenimiento',
+          category: 'ACTION',
+          icon: 'matSettingsOutline',
+          action: () => {
+            this.navigateAndClose('/admin/settings');
           },
         },
         {

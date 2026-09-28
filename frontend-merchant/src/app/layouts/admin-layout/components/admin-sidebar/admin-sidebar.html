@@ -108,19 +108,15 @@
         Configuración
       </span>
 
-      <!-- 5. Mantenimiento / Parámetros -->
+      <!-- 5. Gobernanza / Parámetros -->
       <a
-        routerLink="/coming-soon"
+        routerLink="/admin/settings"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
         (click)="closeSidebar.emit()"
-        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
       >
-        <div class="flex items-center gap-3">
-          <ng-icon name="matSettingsOutline" class="text-[18px]" />
-          <span>Mantenimiento</span>
-        </div>
-        <span class="px-1.5 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[9px] font-bold uppercase tracking-wider">
-          Pronto
-        </span>
+        <ng-icon name="matSettingsOutline" class="text-[18px]" />
+        <span>Gobernanza & Parámetros</span>
       </a>
     </nav>
   </div>

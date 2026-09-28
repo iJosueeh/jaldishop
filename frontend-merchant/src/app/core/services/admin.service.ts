@@ -4,6 +4,7 @@ import { Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AdminDashboardMetrics,
+  AdminPlatformSettings,
   AdminStoreSummary,
   AdminUserRole,
   AdminUserStatus,
@@ -24,6 +25,21 @@ export class AdminService {
   readonly isLoadingStores = signal<boolean>(false);
   private readonly isUsersLoaded = signal<boolean>(false);
   private readonly isStoresLoaded = signal<boolean>(false);
+
+  // Parámetros Globales de la Plataforma
+  readonly settings = signal<AdminPlatformSettings>({
+    allowMerchantRegistration: true,
+    requireStoreApproval: false,
+    maintenanceMode: false,
+    maintenanceNotice: 'La plataforma se encuentra en mantenimiento programado. Volveremos pronto.',
+    sessionTimeoutHours: 24,
+    enforce2FAForAdmins: true,
+    notifyOnNewStoreRegistration: true,
+    notifyOnStoreSuspension: true,
+    adminAlertEmail: 'admin@jaldishop.com',
+    platformVersion: '1.2.0',
+    environment: 'production',
+  });
 
   // Filtros de Usuarios
   readonly userSearchQuery = signal<string>('');
@@ -274,6 +290,14 @@ export class AdminService {
 
   setMerchantStatusFilter(status: string): void {
     this.merchantStatusFilter.set(status);
+  }
+
+  updateSettings(partial: Partial<AdminPlatformSettings>): void {
+    this.settings.update((current) => ({ ...current, ...partial }));
+  }
+
+  saveSettings(): void {
+    this.toastService.success('Parámetros de la plataforma guardados exitosamente.', 'Configuración Actualizada');
   }
 
   clearCache(): void {

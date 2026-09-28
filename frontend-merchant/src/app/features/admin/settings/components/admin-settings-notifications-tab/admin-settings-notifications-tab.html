@@ -1,0 +1,89 @@
+<div class="space-y-6 font-sans">
+  <section class="p-5 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+        <ng-icon name="matNotificationsOutline" class="text-[20px]" />
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
+          Alertas de Administración & Notificaciones
+        </h3>
+        <p class="text-xs text-on-surface-variant font-medium">
+          Configuración de avisos por correo para eventos operativos de la plataforma
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Correo de Alertas Admin -->
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 space-y-2">
+        <label class="block text-xs font-bold text-on-surface">
+          Correo Electrónico para Alertas del Sistema:
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+            <ng-icon name="matMailOutline" class="text-[16px]" />
+          </span>
+          <input
+            type="email"
+            [value]="settings().adminAlertEmail"
+            (input)="onEmailChange($event)"
+            class="w-full pl-9 pr-3 py-2 text-xs font-bold rounded-xl bg-surface border border-outline-variant/30 focus:border-primary focus:outline-hidden text-on-surface"
+          />
+        </div>
+      </div>
+
+      <div class="divide-y divide-outline-variant/20 pt-2">
+        <!-- Notificación 1: Nueva Tienda -->
+        <div class="py-4 flex items-center justify-between gap-4">
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs sm:text-sm font-bold text-on-surface">
+              Notificar al Registrarse una Nueva Tienda
+            </span>
+            <span class="text-xs text-on-surface-variant font-medium">
+              Envía un correo inmediato cada vez que un comerciante concluye el onboarding de su tienda.
+            </span>
+          </div>
+          <button
+            type="button"
+            (click)="toggleNotifyNewStore()"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+            [class.bg-primary]="settings().notifyOnNewStoreRegistration"
+            [class.bg-surface-container-highest]="!settings().notifyOnNewStoreRegistration"
+          >
+            <span
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+              [class.translate-x-5]="settings().notifyOnNewStoreRegistration"
+              [class.translate-x-0]="!settings().notifyOnNewStoreRegistration"
+            ></span>
+          </button>
+        </div>
+
+        <!-- Notificación 2: Suspensión de Tienda -->
+        <div class="py-4 flex items-center justify-between gap-4">
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs sm:text-sm font-bold text-on-surface">
+              Notificar al Suspender o Reactivar Comercios
+            </span>
+            <span class="text-xs text-on-surface-variant font-medium">
+              Envía un registro al correo de gobernanza cuando un comercio cambia de estado.
+            </span>
+          </div>
+          <button
+            type="button"
+            (click)="toggleNotifySuspension()"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+            [class.bg-primary]="settings().notifyOnStoreSuspension"
+            [class.bg-surface-container-highest]="!settings().notifyOnStoreSuspension"
+          >
+            <span
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+              [class.translate-x-5]="settings().notifyOnStoreSuspension"
+              [class.translate-x-0]="!settings().notifyOnStoreSuspension"
+            ></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

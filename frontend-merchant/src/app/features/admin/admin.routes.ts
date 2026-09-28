@@ -20,6 +20,11 @@ export const ADMIN_ROUTES: Routes = [
       import('./merchants/admin-merchants').then((m) => m.AdminMerchants),
   },
   {
+    path: 'settings',
+    loadComponent: () =>
+      import('./settings/admin-settings').then((m) => m.AdminSettings),
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',

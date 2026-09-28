@@ -50,3 +50,18 @@ export interface AdminDashboardMetrics {
   activeStores: number;
   suspendedStores: number;
 }
+
+export interface AdminPlatformSettings {
+  allowMerchantRegistration: boolean;
+  requireStoreApproval: boolean;
+  maintenanceMode: boolean;
+  maintenanceNotice: string;
+  sessionTimeoutHours: number;
+  enforce2FAForAdmins: boolean;
+  notifyOnNewStoreRegistration: boolean;
+  notifyOnStoreSuspension: boolean;
+  adminAlertEmail: string;
+  platformVersion: string;
+  environment: string;
+}
+
