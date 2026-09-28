@@ -8,52 +8,19 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-
 @Service
-public class CategoryService {
+@Transactional
+public class UpdateCategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public UpdateCategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
-    @Transactional
-    public Category createCategory(CreateCategoryCommand command) {
-        if (command.name() == null || command.name().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");
-        }
-
-        String trimmedName = command.name().trim();
-        if (categoryRepository.existsByStoreIdAndNameIgnoreCase(command.storeId(), trimmedName)) {
-            throw new ConflictException("CATEGORY_ALREADY_EXISTS", "Ya existe una categoría con este nombre en la tienda");
-        }
-
-        Category category = Category.create(
-                command.storeId(),
-                trimmedName,
-                command.description()
-        );
-
-        return categoryRepository.save(category);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Category> getCategoriesByStore(UUID storeId) {
-        return categoryRepository.findByStoreId(storeId);
-    }
-
-    @Transactional(readOnly = true)
-    public Category getCategoryByIdAndStore(UUID categoryId, UUID storeId) {
-        return categoryRepository.findByIdAndStoreId(categoryId, storeId)
+    public Category execute(UpdateCategoryCommand command) {
+        Category category = categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada o no pertenece a la tienda"));
-    }
-
-    @Transactional
-    public Category updateCategory(UpdateCategoryCommand command) {
-        Category category = getCategoryByIdAndStore(command.categoryId(), command.storeId());
 
         if (command.name() == null || command.name().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");

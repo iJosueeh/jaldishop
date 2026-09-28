@@ -1,8 +1,12 @@
 package com.jaldishop.backend.catalog.web.controller;
 
 import com.jaldishop.backend.catalog.application.CreateProductCommand;
-import com.jaldishop.backend.catalog.application.ProductService;
+import com.jaldishop.backend.catalog.application.CreateProductService;
+import com.jaldishop.backend.catalog.application.GetProductsService;
+import com.jaldishop.backend.catalog.application.UpdateProductService;
 import com.jaldishop.backend.catalog.domain.Product;
+import com.jaldishop.backend.catalog.web.dto.ProductResponse;
+import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -29,16 +34,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MerchantProductControllerTest {
 
     @Mock
-    private ProductService productService;
+    private CreateProductService createProductService;
+
+    @Mock
+    private UpdateProductService updateProductService;
+
+    @Mock
+    private GetProductsService getProductsService;
 
     @Mock
     private StoreContextService storeContextService;
+
+    @Mock
+    private ProductResponseMapper responseMapper;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        MerchantProductController controller = new MerchantProductController(productService, storeContextService);
+        MerchantProductController controller = new MerchantProductController(
+                createProductService,
+                updateProductService,
+                getProductsService,
+                storeContextService,
+                responseMapper
+        );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -51,9 +71,22 @@ class MerchantProductControllerTest {
         UUID storeId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         Product product = Product.create(storeId, categoryId, "Torta Tres Leches", "tres-leches", "Deliciosa torta", null);
+        ProductResponse response = new ProductResponse(
+                product.getId(),
+                storeId,
+                categoryId,
+                "Torta Tres Leches",
+                "tres-leches",
+                "Deliciosa torta",
+                null,
+                "ACTIVE",
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(productService.createProduct(any(CreateProductCommand.class))).thenReturn(product);
+        when(createProductService.execute(any(CreateProductCommand.class))).thenReturn(product);
+        when(responseMapper.toResponse(product)).thenReturn(response);
 
         String requestJson = String.format("""
                 {
@@ -78,9 +111,22 @@ class MerchantProductControllerTest {
         UUID storeId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         Product product = Product.create(storeId, categoryId, "Alfajor", "alfajor", "Clásico", null);
+        ProductResponse response = new ProductResponse(
+                product.getId(),
+                storeId,
+                categoryId,
+                "Alfajor",
+                "alfajor",
+                "Clásico",
+                null,
+                "ACTIVE",
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(productService.getProductByIdAndStore(product.getId(), storeId)).thenReturn(product);
+        when(getProductsService.execute(product.getId(), storeId)).thenReturn(product);
+        when(responseMapper.toResponse(product)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}", storeId, product.getId()))
                 .andExpect(status().isOk())

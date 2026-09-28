@@ -1,11 +1,15 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.CategoryService;
 import com.jaldishop.backend.catalog.application.CreateCategoryCommand;
+import com.jaldishop.backend.catalog.application.CreateCategoryService;
+import com.jaldishop.backend.catalog.application.GetCategoriesService;
 import com.jaldishop.backend.catalog.application.UpdateCategoryCommand;
+import com.jaldishop.backend.catalog.application.UpdateCategoryService;
+import com.jaldishop.backend.catalog.domain.Category;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.dto.CreateCategoryRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateCategoryRequest;
+import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
@@ -17,19 +21,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/categories")
 @PreAuthorize("hasRole('MERCHANT')")
 public class MerchantCategoryController {
 
-    private final CategoryService categoryService;
+    private final CreateCategoryService createCategoryService;
+    private final UpdateCategoryService updateCategoryService;
+    private final GetCategoriesService getCategoriesService;
     private final StoreContextService storeContextService;
+    private final CategoryResponseMapper responseMapper;
 
-    public MerchantCategoryController(CategoryService categoryService, StoreContextService storeContextService) {
-        this.categoryService = categoryService;
+    public MerchantCategoryController(
+            CreateCategoryService createCategoryService,
+            UpdateCategoryService updateCategoryService,
+            GetCategoriesService getCategoriesService,
+            StoreContextService storeContextService,
+            CategoryResponseMapper responseMapper
+    ) {
+        this.createCategoryService = createCategoryService;
+        this.updateCategoryService = updateCategoryService;
+        this.getCategoriesService = getCategoriesService;
         this.storeContextService = storeContextService;
+        this.responseMapper = responseMapper;
     }
 
     @PostMapping
@@ -44,8 +59,8 @@ public class MerchantCategoryController {
                 request.name(),
                 request.description()
         );
-        var created = categoryService.createCategory(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CategoryResponse.fromDomain(created));
+        Category created = createCategoryService.execute(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMapper.toResponse(created));
     }
 
     @GetMapping
@@ -54,10 +69,11 @@ public class MerchantCategoryController {
             @PathVariable UUID storeId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        var list = categoryService.getCategoriesByStore(storeId).stream()
-                .map(CategoryResponse::fromDomain)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(list);
+        List<Category> list = getCategoriesService.execute(storeId);
+        List<CategoryResponse> response = list.stream()
+                .map(responseMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{categoryId}")
@@ -67,8 +83,8 @@ public class MerchantCategoryController {
             @PathVariable UUID categoryId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        var category = categoryService.getCategoryByIdAndStore(categoryId, storeId);
-        return ResponseEntity.ok(CategoryResponse.fromDomain(category));
+        Category category = getCategoriesService.execute(categoryId, storeId);
+        return ResponseEntity.ok(responseMapper.toResponse(category));
     }
 
     @PutMapping("/{categoryId}")
@@ -86,7 +102,7 @@ public class MerchantCategoryController {
                 request.description(),
                 request.status()
         );
-        var updated = categoryService.updateCategory(command);
-        return ResponseEntity.ok(CategoryResponse.fromDomain(updated));
+        Category updated = updateCategoryService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
     }
 }

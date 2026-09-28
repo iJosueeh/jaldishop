@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProductServiceTest {
+class CreateProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
@@ -31,7 +31,7 @@ class ProductServiceTest {
     private CategoryRepository categoryRepository;
 
     @InjectMocks
-    private ProductService productService;
+    private CreateProductService createProductService;
 
     private UUID storeId;
     private UUID categoryId;
@@ -52,7 +52,7 @@ class ProductServiceTest {
         when(productRepository.existsByStoreIdAndSlug(storeId, "cheesecake-de-fresa")).thenReturn(false);
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Product result = productService.createProduct(command);
+        Product result = createProductService.execute(command);
 
         assertNotNull(result);
         assertEquals("cheesecake-de-fresa", result.getSlug());
@@ -67,7 +67,7 @@ class ProductServiceTest {
         when(categoryRepository.findByIdAndStoreId(categoryId, storeId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
-                productService.createProduct(command)
+                createProductService.execute(command)
         );
         verify(productRepository, never()).save(any());
     }
@@ -82,7 +82,7 @@ class ProductServiceTest {
         when(productRepository.existsByStoreIdAndSlug(storeId, "cheesecake-de-fresa")).thenReturn(true);
 
         assertThrows(ConflictException.class, () ->
-                productService.createProduct(command)
+                createProductService.execute(command)
         );
         verify(productRepository, never()).save(any());
     }

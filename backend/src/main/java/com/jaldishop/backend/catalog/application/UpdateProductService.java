@@ -9,70 +9,21 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-
 @Service
-public class ProductService {
+@Transactional
+public class UpdateProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public UpdateProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
 
-    @Transactional
-    public Product createProduct(CreateProductCommand command) {
-        if (command.name() == null || command.name().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre del producto no puede estar vacío");
-        }
-
-        // Validar pertenencia de Category a la Store
-        categoryRepository.findByIdAndStoreId(command.categoryId(), command.storeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada o no pertenece a la tienda"));
-
-        // Resolver slug: si no viene explícito, se genera del nombre
-        String resolvedSlug = (command.slug() != null && !command.slug().isBlank())
-                ? SlugUtils.toSlug(command.slug())
-                : SlugUtils.toSlug(command.name());
-
-        if (productRepository.existsByStoreIdAndSlug(command.storeId(), resolvedSlug)) {
-            throw new ConflictException("PRODUCT_SLUG_ALREADY_EXISTS", "Ya existe un producto con el slug '" + resolvedSlug + "' en esta tienda");
-        }
-
-        Product product = Product.create(
-                command.storeId(),
-                command.categoryId(),
-                command.name().trim(),
-                resolvedSlug,
-                command.description(),
-                command.imageUrl()
-        );
-
-        return productRepository.save(product);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsByStore(UUID storeId) {
-        return productRepository.findByStoreId(storeId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsByStoreAndCategory(UUID storeId, UUID categoryId) {
-        return productRepository.findByStoreIdAndCategoryId(storeId, categoryId);
-    }
-
-    @Transactional(readOnly = true)
-    public Product getProductByIdAndStore(UUID productId, UUID storeId) {
-        return productRepository.findByIdAndStoreId(productId, storeId)
+    public Product execute(UpdateProductCommand command) {
+        Product product = productRepository.findByIdAndStoreId(command.productId(), command.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
-    }
-
-    @Transactional
-    public Product updateProduct(UpdateProductCommand command) {
-        Product product = getProductByIdAndStore(command.productId(), command.storeId());
 
         if (command.name() == null || command.name().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre del producto no puede estar vacío");
