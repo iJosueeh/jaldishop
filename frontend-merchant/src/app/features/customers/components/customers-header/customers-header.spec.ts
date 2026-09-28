@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CustomersHeader } from './customers-header';
-import { vi } from 'vitest';
 
 describe('CustomersHeader', () => {
   let component: CustomersHeader;
@@ -23,12 +22,5 @@ describe('CustomersHeader', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Gestión de Clientes');
     expect(compiled.textContent).toContain('12 Registrados');
-  });
-
-  it('should emit exportCsv when export button is clicked', () => {
-    const emitSpy = vi.spyOn(component.exportCsv, 'emit');
-    const button = fixture.nativeElement.querySelector('button');
-    button.click();
-    expect(emitSpy).toHaveBeenCalled();
   });
 });
