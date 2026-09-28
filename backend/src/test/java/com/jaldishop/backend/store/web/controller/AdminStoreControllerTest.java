@@ -2,11 +2,15 @@ package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.store.application.ChangeStoreStatusCommand;
 import com.jaldishop.backend.store.application.ChangeStoreStatusService;
+import com.jaldishop.backend.store.application.GetAdminStoresQuery;
 import com.jaldishop.backend.store.application.GetAdminStoresService;
+import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import com.jaldishop.backend.store.web.dto.AdminStoreDetailResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreSummaryResponse;
+import com.jaldishop.backend.store.web.mapper.AdminStoreResponseMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,10 +50,14 @@ class AdminStoreControllerTest {
     @Mock
     private ChangeStoreStatusService changeStoreStatusService;
 
+    @Mock
+    private AdminStoreResponseMapper responseMapper;
+
     private MockMvc mockMvc;
     private UUID storeId;
     private UUID merchantId;
     private JwtPrincipal adminPrincipal;
+    private Store testStore;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +65,29 @@ class AdminStoreControllerTest {
         merchantId = UUID.randomUUID();
         adminPrincipal = new JwtPrincipal(UUID.randomUUID(), Set.of("ADMIN"));
 
-        AdminStoreController controller = new AdminStoreController(getAdminStoresService, changeStoreStatusService);
+        testStore = Store.create(
+                merchantId,
+                "Tienda Demo",
+                "tienda-demo",
+                "Descripcion",
+                "987654321",
+                "Direccion 123",
+                "Ref",
+                null,
+                null,
+                true,
+                true,
+                BigDecimal.valueOf(5),
+                "PEN",
+                false,
+                null
+        );
+
+        AdminStoreController controller = new AdminStoreController(
+                getAdminStoresService,
+                changeStoreStatusService,
+                responseMapper
+        );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -95,7 +125,8 @@ class AdminStoreControllerTest {
                 null
         );
 
-        when(getAdminStoresService.listStores(any(), any())).thenReturn(List.of(summary));
+        when(getAdminStoresService.execute(any(GetAdminStoresQuery.class))).thenReturn(List.of(testStore));
+        when(responseMapper.toSummary(testStore)).thenReturn(summary);
 
         mockMvc.perform(get("/api/v1/admin/stores")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -130,7 +161,8 @@ class AdminStoreControllerTest {
                 null
         );
 
-        when(getAdminStoresService.getStoreById(storeId)).thenReturn(detail);
+        when(getAdminStoresService.execute(storeId)).thenReturn(testStore);
+        when(responseMapper.toDetail(testStore)).thenReturn(detail);
 
         mockMvc.perform(get("/api/v1/admin/stores/{id}", storeId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -165,7 +197,8 @@ class AdminStoreControllerTest {
                 null
         );
 
-        when(changeStoreStatusService.suspend(eq(storeId))).thenReturn(suspended);
+        when(changeStoreStatusService.execute(any(ChangeStoreStatusCommand.class))).thenReturn(testStore);
+        when(responseMapper.toDetail(testStore)).thenReturn(suspended);
 
         mockMvc.perform(patch("/api/v1/admin/stores/{id}/suspend", storeId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -199,7 +232,8 @@ class AdminStoreControllerTest {
                 null
         );
 
-        when(changeStoreStatusService.activate(eq(storeId))).thenReturn(activated);
+        when(changeStoreStatusService.execute(any(ChangeStoreStatusCommand.class))).thenReturn(testStore);
+        when(responseMapper.toDetail(testStore)).thenReturn(activated);
 
         mockMvc.perform(patch("/api/v1/admin/stores/{id}/activate", storeId)
                         .contentType(MediaType.APPLICATION_JSON))

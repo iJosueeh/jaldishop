@@ -1,12 +1,18 @@
 package com.jaldishop.backend.identity.web.controller;
 
+import com.jaldishop.backend.identity.application.ChangeUserStatusCommand;
 import com.jaldishop.backend.identity.application.ChangeUserStatusService;
+import com.jaldishop.backend.identity.application.GetAdminUsersQuery;
 import com.jaldishop.backend.identity.application.GetAdminUsersService;
 import com.jaldishop.backend.identity.application.UpdateUserRolesService;
+import com.jaldishop.backend.identity.domain.Role;
+import com.jaldishop.backend.identity.domain.RoleName;
+import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.domain.UserStatus;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
+import com.jaldishop.backend.identity.web.mapper.AdminUserResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,10 +55,14 @@ class AdminUserControllerTest {
     @Mock
     private UpdateUserRolesService updateUserRolesService;
 
+    @Mock
+    private AdminUserResponseMapper responseMapper;
+
     private MockMvc mockMvc;
     private UUID adminId;
     private UUID targetUserId;
     private JwtPrincipal adminPrincipal;
+    private User testUser;
 
     @BeforeEach
     void setUp() {
@@ -60,10 +70,24 @@ class AdminUserControllerTest {
         targetUserId = UUID.randomUUID();
         adminPrincipal = new JwtPrincipal(adminId, Set.of("ADMIN"));
 
+        testUser = User.reconstitute(
+                targetUserId,
+                "user@jaldishop.com",
+                "hashed",
+                "Carlos",
+                "Lopez",
+                "987654321",
+                UserStatus.ACTIVE,
+                Set.of(new Role((short) 1, RoleName.CUSTOMER)),
+                Instant.now(),
+                Instant.now()
+        );
+
         AdminUserController controller = new AdminUserController(
                 getAdminUsersService,
                 changeUserStatusService,
-                updateUserRolesService
+                updateUserRolesService,
+                responseMapper
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -103,7 +127,8 @@ class AdminUserControllerTest {
                 null
         );
 
-        when(getAdminUsersService.listUsers(any(), any(), any())).thenReturn(List.of(summary));
+        when(getAdminUsersService.execute(any(GetAdminUsersQuery.class))).thenReturn(List.of(testUser));
+        when(responseMapper.toSummary(testUser)).thenReturn(summary);
 
         mockMvc.perform(get("/api/v1/admin/users")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -129,7 +154,8 @@ class AdminUserControllerTest {
                 null
         );
 
-        when(getAdminUsersService.getUserById(targetUserId)).thenReturn(detail);
+        when(getAdminUsersService.execute(targetUserId)).thenReturn(testUser);
+        when(responseMapper.toDetail(testUser)).thenReturn(detail);
 
         mockMvc.perform(get("/api/v1/admin/users/{id}", targetUserId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -154,7 +180,8 @@ class AdminUserControllerTest {
                 null
         );
 
-        when(changeUserStatusService.suspend(eq(targetUserId), eq(adminId))).thenReturn(suspended);
+        when(changeUserStatusService.execute(any(ChangeUserStatusCommand.class))).thenReturn(testUser);
+        when(responseMapper.toDetail(testUser)).thenReturn(suspended);
 
         mockMvc.perform(patch("/api/v1/admin/users/{id}/suspend", targetUserId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -179,7 +206,8 @@ class AdminUserControllerTest {
                 null
         );
 
-        when(changeUserStatusService.activate(eq(targetUserId))).thenReturn(activated);
+        when(changeUserStatusService.execute(any(ChangeUserStatusCommand.class))).thenReturn(testUser);
+        when(responseMapper.toDetail(testUser)).thenReturn(activated);
 
         mockMvc.perform(patch("/api/v1/admin/users/{id}/activate", targetUserId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -204,7 +232,8 @@ class AdminUserControllerTest {
                 null
         );
 
-        when(updateUserRolesService.updateRoles(eq(targetUserId), any(), eq(adminId))).thenReturn(updated);
+        when(updateUserRolesService.execute(eq(targetUserId), any(), eq(adminId))).thenReturn(testUser);
+        when(responseMapper.toDetail(testUser)).thenReturn(updated);
 
         String requestBody = """
                 {
@@ -219,4 +248,3 @@ class AdminUserControllerTest {
                 .andExpect(jsonPath("$.roles").isArray());
     }
 }
-

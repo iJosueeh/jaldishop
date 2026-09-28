@@ -1,9 +1,7 @@
 package com.jaldishop.backend.identity.application;
 
 import com.jaldishop.backend.identity.domain.*;
-import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
-import com.jaldishop.backend.store.domain.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,9 +29,6 @@ class UpdateUserRolesServiceTest {
 
     @Mock
     private RoleRepository roleRepository;
-
-    @Mock
-    private StoreRepository storeRepository;
 
     @InjectMocks
     private UpdateUserRolesService updateUserRolesService;
@@ -75,14 +70,15 @@ class UpdateUserRolesServiceTest {
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        AdminUserDetailResponse response = updateUserRolesService.updateRoles(
+        User response = updateUserRolesService.execute(
                 userId,
                 Set.of(RoleName.MERCHANT),
                 adminId
         );
 
         assertThat(response).isNotNull();
-        assertThat(response.roles()).containsExactly("MERCHANT");
+        assertThat(response.hasRole(RoleName.MERCHANT)).isTrue();
+        assertThat(response.hasRole(RoleName.CUSTOMER)).isFalse();
         verify(userRepository).save(customerUser);
     }
 
@@ -104,7 +100,7 @@ class UpdateUserRolesServiceTest {
 
         when(userRepository.findById(adminId)).thenReturn(Optional.of(adminUser));
 
-        assertThatThrownBy(() -> updateUserRolesService.updateRoles(
+        assertThatThrownBy(() -> updateUserRolesService.execute(
                 adminId,
                 Set.of(RoleName.CUSTOMER),
                 adminId
@@ -116,7 +112,7 @@ class UpdateUserRolesServiceTest {
     @Test
     @DisplayName("Debe lanzar excepción si el conjunto de roles es nulo o vacío")
     void shouldThrowWhenRolesEmpty() {
-        assertThatThrownBy(() -> updateUserRolesService.updateRoles(userId, Set.of(), adminId))
+        assertThatThrownBy(() -> updateUserRolesService.execute(userId, Set.of(), adminId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("al menos un rol");
     }
@@ -126,7 +122,7 @@ class UpdateUserRolesServiceTest {
     void shouldThrowWhenUserNotFound() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> updateUserRolesService.updateRoles(userId, Set.of(RoleName.ADMIN), adminId))
+        assertThatThrownBy(() -> updateUserRolesService.execute(userId, Set.of(RoleName.ADMIN), adminId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }

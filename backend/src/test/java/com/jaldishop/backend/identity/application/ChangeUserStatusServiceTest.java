@@ -5,9 +5,7 @@ import com.jaldishop.backend.identity.domain.RoleName;
 import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.domain.UserRepository;
 import com.jaldishop.backend.identity.domain.UserStatus;
-import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
-import com.jaldishop.backend.store.domain.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,9 +30,6 @@ class ChangeUserStatusServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private StoreRepository storeRepository;
 
     @InjectMocks
     private ChangeUserStatusService changeUserStatusService;
@@ -68,10 +63,10 @@ class ChangeUserStatusServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        AdminUserDetailResponse response = changeUserStatusService.suspend(userId, adminId);
+        User response = changeUserStatusService.execute(new ChangeUserStatusCommand(userId, UserStatus.SUSPENDED, adminId));
 
         assertThat(response).isNotNull();
-        assertThat(response.status()).isEqualTo(UserStatus.SUSPENDED);
+        assertThat(response.getStatus()).isEqualTo(UserStatus.SUSPENDED);
         verify(userRepository).save(activeUser);
     }
 
@@ -93,7 +88,7 @@ class ChangeUserStatusServiceTest {
 
         when(userRepository.findById(adminId)).thenReturn(Optional.of(adminUser));
 
-        assertThatThrownBy(() -> changeUserStatusService.suspend(adminId, adminId))
+        assertThatThrownBy(() -> changeUserStatusService.execute(new ChangeUserStatusCommand(adminId, UserStatus.SUSPENDED, adminId)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("No puedes suspender tu propia cuenta");
     }
@@ -116,7 +111,7 @@ class ChangeUserStatusServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(suspendedUser));
 
-        assertThatThrownBy(() -> changeUserStatusService.suspend(userId, adminId))
+        assertThatThrownBy(() -> changeUserStatusService.execute(new ChangeUserStatusCommand(userId, UserStatus.SUSPENDED, adminId)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ya se encuentra suspendido");
     }
@@ -140,10 +135,10 @@ class ChangeUserStatusServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(suspendedUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        AdminUserDetailResponse response = changeUserStatusService.activate(userId);
+        User response = changeUserStatusService.execute(new ChangeUserStatusCommand(userId, UserStatus.ACTIVE, null));
 
         assertThat(response).isNotNull();
-        assertThat(response.status()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(response.getStatus()).isEqualTo(UserStatus.ACTIVE);
         verify(userRepository).save(suspendedUser);
     }
 
@@ -152,7 +147,7 @@ class ChangeUserStatusServiceTest {
     void shouldThrowWhenUserNotFound() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> changeUserStatusService.suspend(userId, adminId))
+        assertThatThrownBy(() -> changeUserStatusService.execute(new ChangeUserStatusCommand(userId, UserStatus.SUSPENDED, adminId)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
