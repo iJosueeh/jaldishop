@@ -14,10 +14,10 @@
 
 ## 1. Objetivo del Sprint
 
-> 📌 **Nota:** Implementar el núcleo transaccional y operativo de JaldiShop. Se desarrollan en paralelo la cadena de catálogo (Categorías, Productos, Variantes, Inventario y Carrito) y la cadena de capacidad operativa (Configuración base, Excepciones y Capacidad efectiva), asegurando la calidad mediante el pipeline automatizado de CI/CD.
+> 📌 **Nota:** Implementar el núcleo transaccional y operativo de JaldiShop. Se desarrollan en paralelo la cadena de catálogo (Categorías, Productos, Variantes, Inventario y Carrito) y la cadena de capacidad operativa (Configuración base, Excepciones, Capacidad efectiva y Reservas Temporales — Hold), asegurando la calidad mediante el pipeline automatizado de CI/CD.
 
-* **Fase:** *Catálogo, Capacidad Operativa, Inventario, Carrito y Pipeline CI/CD*.
-* **Propósito:** Construir los dominios centrales de `Catalog`, `Inventory`, `Cart`, `CapacityConfiguration` y `CapacityException` respetando las dependencias de negocio para desbloquear flujos transaccionales.
+* **Fase:** *Catálogo, Capacidad Operativa, Reservas (Hold), Inventario, Carrito y Pipeline CI/CD*.
+* **Propósito:** Construir los dominios centrales de `Catalog`, `Inventory`, `Cart`, `CapacityConfiguration`, `CapacityException` y `CapacityReservation` respetando las dependencias de negocio para desbloquear flujos transaccionales (Checkout).
 * **Meta Central:** Disponer de los contratos REST y servicios de aplicación de Catálogo y Capacidad listos para su integración en Checkout y Frontend.
 
 ---
@@ -44,8 +44,10 @@ flowchart TD
         BE14["BE-14 · Configuración Base de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
         BE15["BE-15 · Excepciones de Capacidad<br/>(Mia)<br/>✅ COMPLETADO"]
         BE16["BE-16 · Capacidad Efectiva<br/>(Mia)<br/>✅ COMPLETADO"]
+        BE18["BE-18 · Reservas Temporales de Capacidad (Hold)<br/>(Mia)<br/>✅ COMPLETADO"]
         BE14 -->|Desbloqueó| BE15
         BE15 -->|Desbloqueó| BE16
+        BE16 -->|Desbloqueó| BE18
     end
 
     subgraph TENANT_CUSTOMERS["Cartera de Clientes & Multi-Tenant"]
@@ -81,6 +83,7 @@ flowchart TD
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `EN PROGRESO` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST *(Desbloqueada)* |
 | 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `COMPLETADO` | BE-12 | Carrito por User + Store, gestión de ítems, CartViewAssembler y reglas de aislamiento *(Desbloqueada)* |
 | 🔵 **Baja** | **BE-16** · Cálculo y consulta de Capacidad Efectiva | Mia | `COMPLETADO` | BE-15 | Motor de resolución base vs excepción, endpoint REST y consulta de capacidad efectiva |
+| 🟡 **Media** | **BE-18** · Reservas Temporales de Capacidad (Hold) | Mia | `COMPLETADO` | BE-16 | ReservaCapacidad (Hold 10 min), consulta de disponibilidad, locks pesimistas y endpoints CUSTOMER *(Desbloquea Checkout en Sprint 4)* |
 
 ---
 
@@ -284,6 +287,38 @@ Implementar el servicio que determine qué capacidad corresponde realmente a una
 
 ---
 
+### 📋 BE-18 | Reservas Temporales de Capacidad (Hold)
+
+**Responsable:** Mia  
+**Estado:** `COMPLETADO` ✅  
+**Entregable:** Dominio `CapacityReservation`, persistencia JPA, Service Layer de disponibilidad/creación/consulta/liberación, bloqueo pesimista sobre el registro estable de capacidad y endpoints REST CUSTOMER.  
+**Desbloqueó:** **Checkout con Reserva (Sprint 4)**.
+
+**Descripción:**  
+Implementar el Hold transaccional de 10 minutos que bloquea un cupo de capacidad cuando el cliente inicia el Checkout, garantizando que la capacidad disponible = efectiva − reservada − comprometida, incluso bajo concurrencia sobre el último cupo.
+
+**Checklist:**
+- [x] Implementar `CapacityReservation` (ACTIVE / PAYMENT_PROTECTED / COMMITTED / EXPIRED / RELEASED)
+- [x] Implementar `CapacityReservationRepository` (port de dominio)
+- [x] Implementar persistencia JPA (`CapacityReservationEntity`, `CapacityReservationJpaRepository`, mapper, adapter)
+- [x] Refactor `GetEffectiveCapacityService` → `resolve()` (reutilizable por disponibilidad y reservas)
+- [x] Agregar `findByIdForUpdate()` con `PESSIMISTIC_WRITE` sobre configuración base y excepción (registro estable)
+- [x] Crear reserva (Hold) respetando RN-CAP-07, RN-CAP-06 y el *Hard Cap* (RN-CAP-08)
+- [x] Recontar disponibilidad tras adquirir el lock (protección del último cupo contra *race condition*)
+- [x] Expiración *lazy* de 10 minutos aplicada en consulta y liberación
+- [x] Consultar disponibilidad (`GET /api/v1/capacity/availability`)
+- [x] Crear reserva (`POST /api/v1/capacity/reservations` → 201)
+- [x] Consultar reserva propia (`GET /api/v1/capacity/reservations/{id}`)
+- [x] Liberar reserva (`DELETE /api/v1/capacity/reservations/{id}`, idempotente)
+- [x] RBAC CUSTOMER y aislamiento por `userId` (404 sin fuga de información)
+- [x] Conflictos 409 (`CAPACITY_UNAVAILABLE`, `CAPACITY_EXHAUSTED`, `ALREADY_RESERVED`, `RESERVATION_COMMITTED`)
+- [x] Tests de dominio, aplicación, persistencia y web (MockMvc)
+- [x] Documentar especificación de API (`docs/04-diseno/api-capacity-reservations.md`)
+- [x] Verificar suite completa (`mvn clean test`: 357 tests, 0 fallos)
+- [x] *(Nota: `PAYMENT_PROTECTED`, `COMMITTED` y la transición `COMPROMETIDA → LIBERADA` NO se exponen aquí; corresponden a Pagos/Órdenes en Sprint 4.)*
+
+---
+
 ### 📋 BE-13 | Implementar módulo de Inventario
 
 **Responsable:** Katherine  
@@ -434,10 +469,10 @@ Construir el panel administrativo web en Angular para que los usuarios con rol `
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
-| Entregables completados | **11 / 14 (79%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-16`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
-| Entregables en desarrollo activo | **3 / 14 (21%)** | `FE-ADMIN-01`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
-| Entregables pendientes / bloqueados | **0 / 14 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
-| **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad y cartera de clientes 100% operativos |
+| Entregables completados | **12 / 15 (80%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-16`, `BE-18`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
+| Entregables en desarrollo activo | **3 / 15 (20%)** | `FE-ADMIN-01`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
+| Entregables pendientes / bloqueados | **0 / 15 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
+| **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad, reservas (Hold) y cartera de clientes 100% operativos |
 
 ---
 
@@ -475,6 +510,7 @@ graph TD
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
     BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::done
+    BE18["BE-18 · Reservas Temporales de Capacidad<br/>(Mia)"]:::done
     BE12["BE-12 · Módulo Catálogo<br/>(Katherine / Josué)"]:::done
     BETENANT01["BE-TENANT-01/02 · Store Customers<br/>(Josué)"]:::done
     FEMERCH01["FE-MERCH-01 · Cartera Clientes<br/>(Josué)"]:::done
@@ -489,6 +525,7 @@ graph TD
     BEADMIN01 -->|Desbloqueó| FEADMIN01
     BE14 -->|Desbloqueó| BE15
     BE15 -->|Desbloqueó| BE16
+    BE16 -->|Desbloqueó| BE18
     BE12 -->|Desbloqueó| BE13
     BE12 -->|Desbloqueó| BE17
     BE12 -->|Desbloqueó| FEMERCH02

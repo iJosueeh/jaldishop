@@ -1,19 +1,26 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.repository;
 
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityConfigurationEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CapacityConfigurationJpaRepository extends JpaRepository<CapacityConfigurationEntity, UUID> {
     List<CapacityConfigurationEntity> findByStoreIdOrderByDayOfWeekAscStartTimeAsc(UUID
                                                                                            storeId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM CapacityConfigurationEntity c WHERE c.id = :id")
+    Optional<CapacityConfigurationEntity> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""
             SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END

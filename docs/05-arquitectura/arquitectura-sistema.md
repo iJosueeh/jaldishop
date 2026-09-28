@@ -701,7 +701,7 @@ BEGIN
   → liberar lock
 ```
 
-> ⚠️ **Pendiente:** El ER deberá determinar cuál será exactamente el registro estable que se bloqueará para representar una tienda + periodo/franja.
+> ✅ **Resuelto:** El registro estable que se bloquea (`PESSIMISTIC_WRITE`) es **la fila de la configuración base o excepción que ganó la resolución de capacidad efectiva** para `storeId + fecha + franja` (`GetEffectiveCapacityService.resolve()`). Se adquiere el lock mediante `findByIdForUpdate()` sobre la entidad de configuración/excepción correspondiente; tras adquirirlo se **re-cuenta** la disponibilidad para proteger el último cupo del *race condition*. Implementado en las Reservas Temporales de Capacidad (`CapacityReservation`).
 
 > 📌 **Nota:** No establecer SERIALIZABLE global.
 
