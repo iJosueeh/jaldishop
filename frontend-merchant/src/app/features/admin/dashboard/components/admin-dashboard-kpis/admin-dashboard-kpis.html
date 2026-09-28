@@ -1,0 +1,97 @@
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 font-sans">
+  <!-- KPI 1: Total Usuarios -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Usuarios Totales
+      </span>
+      <span class="p-1.5 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+        <ng-icon name="matGroupOutline" class="text-[18px]" />
+      </span>
+    </div>
+
+    <div class="flex items-baseline gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        {{ metrics().totalUsers }}
+      </span>
+      <span class="text-xs text-on-surface-variant font-medium">registrados</span>
+    </div>
+
+    <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+      <span class="font-bold text-emerald-700 dark:text-emerald-400">{{ metrics().activeUsers }} activos</span>
+      <span>·</span>
+      <span>{{ metrics().suspendedUsers }} suspendidos</span>
+    </div>
+  </div>
+
+  <!-- KPI 2: Comerciantes Activos -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Comerciantes
+      </span>
+      <span class="p-1.5 rounded-lg bg-secondary-container/20 text-secondary flex items-center justify-center">
+        <ng-icon name="matPersonOutline" class="text-[18px]" />
+      </span>
+    </div>
+
+    <div class="flex items-baseline gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        {{ metrics().totalMerchants }}
+      </span>
+      <span class="text-xs text-on-surface-variant font-medium">cuentas</span>
+    </div>
+
+    <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+      <span>{{ metrics().totalCustomers }} clientes finales</span>
+    </div>
+  </div>
+
+  <!-- KPI 3: Tiendas en la Plataforma -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Tiendas Creadas
+      </span>
+      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+        <ng-icon name="matStorefrontOutline" class="text-[18px]" />
+      </span>
+    </div>
+
+    <div class="flex items-baseline gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        {{ metrics().totalStores }}
+      </span>
+      <span class="text-xs text-on-surface-variant font-medium">tiendas</span>
+    </div>
+
+    <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+      <span class="font-bold text-emerald-700 dark:text-emerald-400">{{ metrics().activeStores }} activas</span>
+      <span>·</span>
+      <span>{{ metrics().suspendedStores }} en pausa</span>
+    </div>
+  </div>
+
+  <!-- KPI 4: Estado de la Plataforma -->
+  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Salud del Sistema
+      </span>
+      <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
+        <ng-icon name="matShieldOutline" class="text-[18px]" />
+      </span>
+    </div>
+
+    <div class="flex items-baseline gap-2">
+      <span class="text-xl sm:text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 tracking-tight">
+        100% Operativo
+      </span>
+    </div>
+
+    <div class="flex items-center gap-1 text-xs text-on-surface-variant">
+      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <span>PostgreSQL & Render API listos</span>
+    </div>
+  </div>
+</section>

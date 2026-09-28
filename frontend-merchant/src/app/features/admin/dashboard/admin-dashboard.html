@@ -1,0 +1,33 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado del Dashboard Admin -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">
+        Panel de Control Global
+      </h1>
+      <p class="text-xs sm:text-sm text-on-surface-variant font-medium mt-0.5">
+        Supervisión en tiempo real de comercios, usuarios y operatividad de JaldiShop
+      </p>
+    </div>
+
+    <!-- Botón de Actualizar Datos -->
+    <button
+      type="button"
+      (click)="refreshData()"
+      class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors shadow-2xs self-start sm:self-auto"
+      title="Sincronizar métricas con la API"
+    >
+      <ng-icon name="matRefreshOutline" class="text-[16px]" [class.animate-spin]="adminService.isLoadingUsers() || adminService.isLoadingStores()" />
+      <span>Actualizar Datos</span>
+    </button>
+  </div>
+
+  <!-- KPIs Globales de la Plataforma -->
+  <app-admin-dashboard-kpis [metrics]="adminService.metrics()" />
+
+  <!-- Paneles Secundarios: Usuarios Recientes y Tiendas -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+    <app-admin-quick-users [users]="recentUsers()" />
+    <app-admin-quick-stores [stores]="recentStores()" />
+  </div>
+</div>

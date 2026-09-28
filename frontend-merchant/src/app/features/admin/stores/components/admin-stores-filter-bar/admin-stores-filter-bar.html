@@ -1,0 +1,38 @@
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs font-sans">
+  <!-- Buscador en tiempo real -->
+  <div class="relative flex-1 min-w-0">
+    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+      <ng-icon name="matSearchOutline" class="text-[18px]" />
+    </span>
+    <input
+      type="text"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      placeholder="Buscar por nombre de tienda, slug o propietario..."
+      class="w-full pl-9 pr-8 py-2 text-xs font-medium rounded-xl bg-surface border border-outline-variant/30 focus:border-primary focus:outline-hidden text-on-surface placeholder:text-on-surface-variant transition-colors"
+    />
+    @if (searchQuery()) {
+      <button
+        type="button"
+        (click)="clearSearch()"
+        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-on-surface-variant hover:text-on-surface"
+        aria-label="Limpiar búsqueda"
+      >
+        <ng-icon name="matCloseOutline" class="text-[16px]" />
+      </button>
+    }
+  </div>
+
+  <!-- Filtro de Estado -->
+  <div class="flex items-center gap-2">
+    <select
+      [value]="selectedStatus()"
+      (change)="onStatusChange($event)"
+      class="py-2 px-3 rounded-xl bg-surface border border-outline-variant/30 text-xs font-bold text-on-surface focus:outline-hidden cursor-pointer"
+    >
+      <option value="ALL">Todas las tiendas</option>
+      <option value="ACTIVE">Activas</option>
+      <option value="SUSPENDED">Suspendidas</option>
+    </select>
+  </div>
+</div>

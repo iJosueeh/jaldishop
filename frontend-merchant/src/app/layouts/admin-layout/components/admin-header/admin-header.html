@@ -1,0 +1,68 @@
+<header
+  class="fixed top-0 right-0 left-0 lg:left-60 h-16 sm:h-18 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-200"
+>
+  <!-- Lado Izquierdo: Botón Menú Móvil + Distintivo Admin -->
+  <div class="flex items-center gap-3 sm:gap-4">
+    <button
+      type="button"
+      (click)="toggleSidebar.emit()"
+      class="lg:hidden p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      aria-label="Abrir menú de navegación"
+    >
+      <ng-icon name="matMenuOutline" class="text-[22px]" />
+    </button>
+
+    <!-- Badge Modo Administrador de Plataforma -->
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold tracking-wide uppercase shadow-2xs">
+        <ng-icon name="matShieldOutline" class="text-[14px]" />
+        <span>Consola de Administración</span>
+      </span>
+      <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        API Online
+      </span>
+    </div>
+  </div>
+
+  <!-- Lado Derecho: Accesos Rápidos, Perfil y Cerrar Sesión -->
+  <div class="flex items-center gap-2 sm:gap-4">
+    <!-- Switch a Panel de Tienda si el usuario también es Merchant -->
+    @if (authService.isMerchant()) {
+      <a
+        routerLink="/dashboard"
+        class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors"
+        title="Cambiar a la vista de tu tienda"
+      >
+        <ng-icon name="matStorefrontOutline" class="text-[16px]" />
+        <span>Vista Comerciante</span>
+      </a>
+    }
+
+    <!-- Avatar y Perfil Admin -->
+    <div class="flex items-center gap-2.5 pl-2 border-l border-outline-variant/30">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary text-on-primary font-extrabold text-xs sm:text-sm flex items-center justify-center shadow-xs">
+        {{ adminInitials() }}
+      </div>
+      <div class="hidden sm:flex flex-col">
+        <span class="text-xs font-bold text-on-surface leading-tight">
+          {{ adminName() }}
+        </span>
+        <span class="text-[10px] font-semibold text-primary uppercase tracking-wider">
+          Super Admin
+        </span>
+      </div>
+
+      <!-- Botón de Logout -->
+      <button
+        type="button"
+        (click)="logout()"
+        class="p-2 rounded-xl text-on-surface-variant hover:text-rose-600 hover:bg-rose-500/10 transition-colors ml-1"
+        title="Cerrar Sesión"
+        aria-label="Cerrar Sesión"
+      >
+        <ng-icon name="matLogoutOutline" class="text-[18px]" />
+      </button>
+    </div>
+  </div>
+</header>

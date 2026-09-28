@@ -1,0 +1,30 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado -->
+  <app-admin-stores-header
+    [totalCount]="adminService.metrics().totalStores"
+    [isLoading]="adminService.isLoadingStores()"
+    (refresh)="onRefresh()"
+  />
+
+  <!-- Barra de Filtros y Búsqueda -->
+  <app-admin-stores-filter-bar
+    [searchQuery]="adminService.storeSearchQuery()"
+    [selectedStatus]="adminService.storeStatusFilter()"
+    (searchChange)="onSearchChange($event)"
+    (statusChange)="onStatusChange($event)"
+  />
+
+  <!-- Tabla de Datos de Tiendas -->
+  <app-admin-stores-table
+    [stores]="adminService.filteredStores()"
+    (toggleStatus)="onOpenStatusModal($event)"
+  />
+
+  <!-- Modal de Suspensión / Reactivación de Tienda -->
+  <app-store-status-modal
+    [isOpen]="isModalOpen()"
+    [store]="selectedStore()"
+    (confirm)="onConfirmStatusChange($event)"
+    (cancel)="onCloseModal()"
+  />
+</div>

@@ -1,0 +1,140 @@
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-2xs overflow-hidden font-sans">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs text-on-surface border-collapse">
+      <!-- Encabezados de Tabla -->
+      <thead class="bg-surface-container/60 border-b border-outline-variant/30 text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="py-3.5 px-4 sm:px-6">Usuario</th>
+          <th class="py-3.5 px-4">Roles</th>
+          <th class="py-3.5 px-4 hidden md:table-cell">Tienda Vinculada</th>
+          <th class="py-3.5 px-4">Estado</th>
+          <th class="py-3.5 px-4 hidden lg:table-cell">Fecha Registro</th>
+          <th class="py-3.5 px-4 sm:px-6 text-right">Acciones</th>
+        </tr>
+      </thead>
+
+      <!-- Cuerpo de Tabla -->
+      <tbody class="divide-y divide-outline-variant/20 font-medium">
+        @for (user of users(); track user.id) {
+          <tr class="hover:bg-surface-container/40 transition-colors">
+            <!-- Columna Usuario: Avatar + Nombre + Email -->
+            <td class="py-3.5 px-4 sm:px-6">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-surface-container-high text-on-surface font-extrabold text-xs flex items-center justify-center shrink-0">
+                  {{ user.fullName.substring(0, 2).toUpperCase() }}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-bold text-on-surface text-xs sm:text-sm truncate">
+                    {{ user.fullName }}
+                  </span>
+                  <span class="text-[11px] text-on-surface-variant truncate">
+                    {{ user.email }}
+                  </span>
+                  @if (user.phone) {
+                    <span class="text-[10px] text-on-surface-variant/80 truncate md:hidden">
+                      📞 {{ user.phone }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </td>
+
+            <!-- Columna Roles -->
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-1 flex-wrap">
+                @for (role of user.roles; track role) {
+                  <span
+                    class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border"
+                    [class.bg-primary/10]="role === 'ADMIN'"
+                    [class.text-primary]="role === 'ADMIN'"
+                    [class.border-primary/20]="role === 'ADMIN'"
+                    [class.bg-secondary-container/20]="role === 'MERCHANT'"
+                    [class.text-secondary]="role === 'MERCHANT'"
+                    [class.border-secondary-container/30]="role === 'MERCHANT'"
+                    [class.bg-surface-container-high]="role === 'CUSTOMER'"
+                    [class.text-on-surface-variant]="role === 'CUSTOMER'"
+                    [class.border-outline-variant/30]="role === 'CUSTOMER'"
+                  >
+                    {{ role }}
+                  </span>
+                }
+              </div>
+            </td>
+
+            <!-- Columna Tienda Vinculada -->
+            <td class="py-3.5 px-4 hidden md:table-cell">
+              @if (user.storeName) {
+                <div class="flex items-center gap-1.5 text-xs text-on-surface font-bold">
+                  <ng-icon name="matStorefrontOutline" class="text-primary text-[15px]" />
+                  <span class="truncate max-w-[150px]">{{ user.storeName }}</span>
+                </div>
+              } @else {
+                <span class="text-on-surface-variant/60 text-[11px]">Sin tienda</span>
+              }
+            </td>
+
+            <!-- Columna Estado -->
+            <td class="py-3.5 px-4">
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
+                [class.bg-emerald-500/10]="user.status === 'ACTIVE'"
+                [class.text-emerald-700]="user.status === 'ACTIVE'"
+                [class.dark:text-emerald-400]="user.status === 'ACTIVE'"
+                [class.border-emerald-500/20]="user.status === 'ACTIVE'"
+                [class.bg-rose-500/10]="user.status === 'SUSPENDED'"
+                [class.text-rose-700]="user.status === 'SUSPENDED'"
+                [class.dark:text-rose-400]="user.status === 'SUSPENDED'"
+                [class.border-rose-500/20]="user.status === 'SUSPENDED'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-emerald-500]="user.status === 'ACTIVE'"
+                  [class.bg-rose-500]="user.status === 'SUSPENDED'"
+                ></span>
+                {{ user.status === 'ACTIVE' ? 'Activo' : 'Suspendido' }}
+              </span>
+            </td>
+
+            <!-- Columna Fecha Registro -->
+            <td class="py-3.5 px-4 hidden lg:table-cell text-on-surface-variant text-[11px]">
+              {{ user.createdAt ? (user.createdAt | slice:0:10) : '--' }}
+            </td>
+
+            <!-- Columna Acciones -->
+            <td class="py-3.5 px-4 sm:px-6 text-right">
+              @if (user.status === 'ACTIVE') {
+                <button
+                  type="button"
+                  (click)="toggleStatus.emit(user)"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shadow-2xs"
+                  title="Suspender acceso de este usuario"
+                >
+                  Suspender
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  (click)="toggleStatus.emit(user)"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors shadow-2xs"
+                  title="Reactivar acceso de este usuario"
+                >
+                  Reactivar
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="py-12 px-4 text-center">
+              <div class="flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+                <ng-icon name="matGroupOutline" class="text-4xl text-on-surface-variant/40" />
+                <p class="text-sm font-bold text-on-surface">No se encontraron usuarios</p>
+                <p class="text-xs text-on-surface-variant">Prueba ajustando los filtros de rol, estado o el término de búsqueda.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

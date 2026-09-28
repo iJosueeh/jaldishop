@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { merchantGuard } from './core/guards/merchant-guard';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,13 @@ export const routes: Routes = [
   {
     path: '404',
     loadComponent: () => import('./shared/components/not-found/not-found').then((m) => m.NotFound),
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
+    canActivate: [adminGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   {
     path: '',

@@ -1,0 +1,53 @@
+<div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-4 font-sans h-full">
+  <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+    <div class="flex items-center gap-2">
+      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+        <ng-icon name="matStorefrontOutline" class="text-[18px]" />
+      </span>
+      <div>
+        <h3 class="font-extrabold text-sm text-on-surface">Tiendas de la Plataforma</h3>
+        <p class="text-[11px] text-on-surface-variant font-medium">Comercios creados</p>
+      </div>
+    </div>
+    <a
+      routerLink="/admin/stores"
+      class="text-xs font-bold text-primary hover:underline"
+    >
+      Ver todas &rarr;
+    </a>
+  </div>
+
+  <div class="flex flex-col gap-2.5 flex-1">
+    @for (store of stores(); track store.id) {
+      <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container transition-colors">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary font-black text-xs flex items-center justify-center shrink-0">
+            {{ store.name.substring(0, 2).toUpperCase() }}
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs font-bold text-on-surface truncate">{{ store.name }}</span>
+            <span class="text-[11px] text-on-surface-variant truncate">&#64;{{ store.slug }}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span
+            class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border"
+            [class.bg-emerald-500/10]="store.status === 'ACTIVE'"
+            [class.text-emerald-700]="store.status === 'ACTIVE'"
+            [class.border-emerald-500/20]="store.status === 'ACTIVE'"
+            [class.bg-rose-500/10]="store.status === 'SUSPENDED'"
+            [class.text-rose-700]="store.status === 'SUSPENDED'"
+            [class.border-rose-500/20]="store.status === 'SUSPENDED'"
+          >
+            {{ store.status === 'ACTIVE' ? 'Activa' : 'Pausada' }}
+          </span>
+        </div>
+      </div>
+    } @empty {
+      <div class="py-6 text-center text-xs text-on-surface-variant">
+        No hay tiendas registradas aún.
+      </div>
+    }
+  </div>
+</div>

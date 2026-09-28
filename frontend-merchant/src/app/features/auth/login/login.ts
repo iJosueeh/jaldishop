@@ -28,7 +28,11 @@ export class LoginComponent {
       next: () => {
         this.isLoading.set(false);
         this.toastService.success('¡Bienvenido a tu panel de JaldiShop!', 'Sesión iniciada');
-        this.router.navigate(['/dashboard']);
+        if (this.authService.isAdmin() && !this.authService.isMerchant()) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

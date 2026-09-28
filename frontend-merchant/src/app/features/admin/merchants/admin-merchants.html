@@ -1,0 +1,22 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado -->
+  <app-admin-merchants-header
+    [totalCount]="adminService.metrics().totalMerchants"
+    [isLoading]="adminService.isLoadingUsers()"
+    (refresh)="onRefresh()"
+  />
+
+  <!-- Grid de Comerciantes -->
+  <app-admin-merchants-grid
+    [merchants]="adminService.merchants()"
+    (toggleStatus)="onOpenStatusModal($event)"
+  />
+
+  <!-- Modal de Suspensión / Reactivación -->
+  <app-user-status-modal
+    [isOpen]="isModalOpen()"
+    [user]="selectedMerchant()"
+    (confirm)="onConfirmStatusChange($event)"
+    (cancel)="onCloseModal()"
+  />
+</div>
