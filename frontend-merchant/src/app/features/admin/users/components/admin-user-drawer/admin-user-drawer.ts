@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminUserSummary } from '../../../../../core/models/admin.models';
+import { AdminUserSummary, AdminUserRole } from '../../../../../core/models/admin.models';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -22,6 +22,10 @@ import {
   matCheckCircleOutline,
   matCancelOutline,
   matChatOutline,
+  matLockOutline,
+  matNotesOutline,
+  matCheckOutline,
+  matBoltOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -39,6 +43,10 @@ import {
       matCheckCircleOutline,
       matCancelOutline,
       matChatOutline,
+      matLockOutline,
+      matNotesOutline,
+      matCheckOutline,
+      matBoltOutline,
     }),
   ],
   selector: 'app-admin-user-drawer',
@@ -52,9 +60,12 @@ export class AdminUserDrawer {
   readonly isOpen = input<boolean>(false);
   readonly closeDrawer = output<void>();
   readonly statusChange = output<AdminUserSummary>();
+  readonly roleToggle = output<{ user: AdminUserSummary; role: AdminUserRole }>();
 
   readonly isClosing = signal<boolean>(false);
   readonly isCopied = signal<boolean>(false);
+  readonly adminNote = signal<string>('');
+  readonly isNoteSaved = signal<boolean>(false);
 
   @HostListener('window:keydown.escape')
   handleEscape(): void {
@@ -86,4 +97,37 @@ export class AdminUserDrawer {
       this.statusChange.emit(currentUser);
     }
   }
+
+  onSendPasswordReset(): void {
+    const u = this.user();
+    if (u) {
+      this.toastService.success(
+        `Enlace de restablecimiento de contraseña enviado a ${u.email}`,
+        'Acción de Soporte'
+      );
+    }
+  }
+
+  onToggleRole(role: AdminUserRole): void {
+    const u = this.user();
+    if (u) {
+      this.roleToggle.emit({ user: u, role });
+      this.toastService.info(
+        `Solicitud de cambio de rol (${role}) registrada para ${u.fullName}.`,
+        'Gestión de Roles'
+      );
+    }
+  }
+
+  onNoteInput(event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.adminNote.set(value);
+  }
+
+  onSaveNote(): void {
+    this.isNoteSaved.set(true);
+    this.toastService.success('Nota interna de auditoría guardada.', 'Nota Admin');
+    setTimeout(() => this.isNoteSaved.set(false), 2500);
+  }
 }
+

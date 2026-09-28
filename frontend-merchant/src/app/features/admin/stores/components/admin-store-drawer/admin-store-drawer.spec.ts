@@ -28,11 +28,13 @@ describe('AdminStoreDrawer', () => {
       id: 'u1',
       email: 'maria@test.com',
       fullName: 'Maria Lopez',
+      phone: '987654321',
       status: 'ACTIVE',
     },
   };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdminStoreDrawer],
       providers: [{ provide: ToastService, useValue: mockToastService }],
@@ -65,4 +67,36 @@ describe('AdminStoreDrawer', () => {
     expect(spy).toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  it('debe abrir la tienda pública en una nueva pestaña', () => {
+    const windowSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    component.openPublicStore(mockStore.slug);
+    expect(windowSpy).toHaveBeenCalledWith('/store/panaderia-san-jose', '_blank');
+  });
+
+  it('debe emitir modalityChange y notificar al alternar modalidad', () => {
+    const spy = vi.spyOn(component.modalityChange, 'emit');
+    component.onToggleModality('pickup');
+    expect(spy).toHaveBeenCalledWith({ store: mockStore, type: 'pickup' });
+    expect(mockToastService.info).toHaveBeenCalledWith(
+      expect.stringContaining('Pickup'),
+      'Configuración de Tienda'
+    );
+  });
+
+  it('debe guardar nota interna de auditoría de tienda correctamente', () => {
+    vi.useFakeTimers();
+    component.adminNote.set('Tienda inspeccionada y aprobada');
+    component.onSaveNote();
+    expect(component.isNoteSaved()).toBe(true);
+    expect(mockToastService.success).toHaveBeenCalledWith(
+      'Nota de auditoría de tienda guardada.',
+      'Nota Admin'
+    );
+
+    vi.advanceTimersByTime(2600);
+    expect(component.isNoteSaved()).toBe(false);
+    vi.useRealTimers();
+  });
 });
+

@@ -62,7 +62,56 @@
       </div>
 
       <!-- 2. Cuerpo del Drawer (Scrollable) -->
-      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <!-- Tarjeta: Acciones Rápidas de Operación & Soporte -->
+        <section class="p-4 rounded-2xl bg-surface-container-high/40 border border-outline-variant/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+              <ng-icon name="matBoltOutline" class="text-[14px]" />
+              Acciones Rápidas de Soporte
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Botón Restablecer Clave -->
+            <button
+              type="button"
+              (click)="onSendPasswordReset()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface transition-all cursor-pointer text-left"
+            >
+              <ng-icon name="matLockOutline" class="text-[16px] text-primary shrink-0" />
+              <div class="flex flex-col min-w-0">
+                <span class="truncate">Resetear Clave</span>
+                <span class="text-[10px] text-on-surface-variant font-normal">Enviar email de recuperación</span>
+              </div>
+            </button>
+
+            <!-- Botón WhatsApp Soporte -->
+            @if (u.phone) {
+              <a
+                [href]="'https://wa.me/' + u.phone + '?text=Hola%20' + u.fullName + ',%20te%20contactamos%20desde%20el%20equipo%20de%20administraci%C3%B3n%20de%20JaldiShop.'"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-all cursor-pointer text-left"
+              >
+                <ng-icon name="matChatOutline" class="text-[16px] shrink-0" />
+                <div class="flex flex-col min-w-0">
+                  <span class="truncate">WhatsApp Soporte</span>
+                  <span class="text-[10px] opacity-80 font-normal">Iniciar chat oficial</span>
+                </div>
+              </a>
+            } @else {
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container/40 border border-outline-variant/10 text-xs font-medium text-on-surface-variant/60 cursor-not-allowed">
+                <ng-icon name="matChatOutline" class="text-[16px] shrink-0" />
+                <div class="flex flex-col min-w-0">
+                  <span class="truncate">WhatsApp No Disp.</span>
+                  <span class="text-[10px]">Sin teléfono registrado</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
         <!-- Tarjeta: Identificadores & Contacto -->
         <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
           <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
@@ -136,30 +185,71 @@
           </div>
         </section>
 
-        <!-- Tarjeta: Roles Asignados -->
+        <!-- Tarjeta: Roles Asignados & Gestión -->
         <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
-            Roles y Nivel de Acceso
-          </span>
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+              Roles y Nivel de Acceso
+            </span>
+            <span class="text-[10px] text-on-surface-variant font-medium">Click para alternar</span>
+          </div>
 
           <div class="flex items-center gap-2 flex-wrap">
-            @for (role of u.roles; track role) {
-              <div
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border"
-                [class.bg-primary/10]="role === 'ADMIN'"
-                [class.text-primary]="role === 'ADMIN'"
-                [class.border-primary/20]="role === 'ADMIN'"
-                [class.bg-secondary-container/20]="role === 'MERCHANT'"
-                [class.text-secondary]="role === 'MERCHANT'"
-                [class.border-secondary-container/30]="role === 'MERCHANT'"
-                [class.bg-surface-container-high]="role === 'CUSTOMER'"
-                [class.text-on-surface-variant]="role === 'CUSTOMER'"
-                [class.border-outline-variant/30]="role === 'CUSTOMER'"
-              >
-                <ng-icon name="matShieldOutline" class="text-[15px]" />
-                <span>{{ role === 'ADMIN' ? 'Administrador Plataforma' : role === 'MERCHANT' ? 'Comerciante / Dueño' : 'Cliente Final' }}</span>
-              </div>
-            }
+            <!-- ADMIN -->
+            <button
+              type="button"
+              (click)="onToggleRole('ADMIN')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-primary]="u.roles.includes('ADMIN')"
+              [class.text-on-primary]="u.roles.includes('ADMIN')"
+              [class.border-primary]="u.roles.includes('ADMIN')"
+              [class.bg-surface-container]="!u.roles.includes('ADMIN')"
+              [class.text-on-surface-variant]="!u.roles.includes('ADMIN')"
+              [class.border-outline-variant/30]="!u.roles.includes('ADMIN')"
+            >
+              <ng-icon name="matShieldOutline" class="text-[15px]" />
+              <span>Admin</span>
+              @if (u.roles.includes('ADMIN')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
+
+            <!-- MERCHANT -->
+            <button
+              type="button"
+              (click)="onToggleRole('MERCHANT')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-secondary]="u.roles.includes('MERCHANT')"
+              [class.text-on-secondary]="u.roles.includes('MERCHANT')"
+              [class.border-secondary]="u.roles.includes('MERCHANT')"
+              [class.bg-surface-container]="!u.roles.includes('MERCHANT')"
+              [class.text-on-surface-variant]="!u.roles.includes('MERCHANT')"
+              [class.border-outline-variant/30]="!u.roles.includes('MERCHANT')"
+            >
+              <ng-icon name="matStorefrontOutline" class="text-[15px]" />
+              <span>Comerciante</span>
+              @if (u.roles.includes('MERCHANT')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
+
+            <!-- CUSTOMER -->
+            <button
+              type="button"
+              (click)="onToggleRole('CUSTOMER')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-surface-container-highest]="u.roles.includes('CUSTOMER')"
+              [class.text-on-surface]="u.roles.includes('CUSTOMER')"
+              [class.border-outline-variant/60]="u.roles.includes('CUSTOMER')"
+              [class.bg-surface-container]="!u.roles.includes('CUSTOMER')"
+              [class.text-on-surface-variant]="!u.roles.includes('CUSTOMER')"
+              [class.border-outline-variant/30]="!u.roles.includes('CUSTOMER')"
+            >
+              <span>Cliente</span>
+              @if (u.roles.includes('CUSTOMER')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
           </div>
         </section>
 
@@ -190,6 +280,41 @@
             </div>
           </section>
         }
+
+        <!-- Tarjeta: Notas Internas de Auditoría -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              <ng-icon name="matNotesOutline" class="text-[15px]" />
+              Notas de Auditoría (Admin)
+            </span>
+            @if (isNoteSaved()) {
+              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <ng-icon name="matCheckOutline" class="text-[13px]" />
+                Guardado
+              </span>
+            }
+          </div>
+
+          <textarea
+            rows="2"
+            [value]="adminNote()"
+            (input)="onNoteInput($event)"
+            placeholder="Escribir anotaciones internas sobre este usuario (visibles solo para administradores)..."
+            class="w-full px-3 py-2 text-xs rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none transition-colors"
+          ></textarea>
+
+          <div class="flex justify-end">
+            <button
+              type="button"
+              (click)="onSaveNote()"
+              [disabled]="!adminNote().trim()"
+              class="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest disabled:opacity-40 text-on-surface text-xs font-bold transition-all cursor-pointer"
+            >
+              Guardar Nota
+            </button>
+          </div>
+        </section>
       </div>
 
       <!-- 3. Footer con Acciones de Gobierno -->

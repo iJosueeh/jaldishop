@@ -29,6 +29,7 @@ describe('AdminUserDrawer', () => {
   };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdminUserDrawer],
       providers: [{ provide: ToastService, useValue: mockToastService }],
@@ -61,4 +62,38 @@ describe('AdminUserDrawer', () => {
     expect(spy).toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  it('debe enviar restablecimiento de contraseña mostrando un toast de éxito', () => {
+    component.onSendPasswordReset();
+    expect(mockToastService.success).toHaveBeenCalledWith(
+      expect.stringContaining(mockUser.email),
+      'Acción de Soporte'
+    );
+  });
+
+  it('debe emitir roleToggle y notificar al alternar rol de usuario', () => {
+    const spy = vi.spyOn(component.roleToggle, 'emit');
+    component.onToggleRole('ADMIN');
+    expect(spy).toHaveBeenCalledWith({ user: mockUser, role: 'ADMIN' });
+    expect(mockToastService.info).toHaveBeenCalledWith(
+      expect.stringContaining('ADMIN'),
+      'Gestión de Roles'
+    );
+  });
+
+  it('debe guardar nota interna de auditoría correctamente', () => {
+    vi.useFakeTimers();
+    component.adminNote.set('Cliente verificado por DNI');
+    component.onSaveNote();
+    expect(component.isNoteSaved()).toBe(true);
+    expect(mockToastService.success).toHaveBeenCalledWith(
+      'Nota interna de auditoría guardada.',
+      'Nota Admin'
+    );
+
+    vi.advanceTimersByTime(2600);
+    expect(component.isNoteSaved()).toBe(false);
+    vi.useRealTimers();
+  });
 });
+
