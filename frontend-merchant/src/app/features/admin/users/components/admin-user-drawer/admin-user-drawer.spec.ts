@@ -71,14 +71,18 @@ describe('AdminUserDrawer', () => {
     );
   });
 
-  it('debe emitir roleToggle y notificar al alternar rol de usuario', () => {
-    const spy = vi.spyOn(component.roleToggle, 'emit');
+  it('debe emitir roleToggle y roleChangeRequest al alternar rol de usuario', () => {
+    const toggleSpy = vi.spyOn(component.roleToggle, 'emit');
+    const requestSpy = vi.spyOn(component.roleChangeRequest, 'emit');
+
     component.onToggleRole('ADMIN');
-    expect(spy).toHaveBeenCalledWith({ user: mockUser, role: 'ADMIN' });
-    expect(mockToastService.info).toHaveBeenCalledWith(
-      expect.stringContaining('ADMIN'),
-      'Gestión de Roles'
-    );
+
+    expect(toggleSpy).toHaveBeenCalledWith({ user: mockUser, role: 'ADMIN' });
+    expect(requestSpy).toHaveBeenCalledWith({
+      user: mockUser,
+      targetRole: 'ADMIN',
+      action: 'ADD',
+    });
   });
 
   it('debe guardar nota interna de auditoría correctamente', () => {

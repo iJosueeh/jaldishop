@@ -38,6 +38,7 @@ describe('AdminUsers', () => {
       setUserStatusFilter: vi.fn(),
       suspendUser: vi.fn().mockReturnValue(of({ ...mockUsers[0], status: 'SUSPENDED' })),
       activateUser: vi.fn().mockReturnValue(of({ ...mockUsers[0], status: 'ACTIVE' })),
+      updateUserRoles: vi.fn().mockReturnValue(of({ ...mockUsers[0], roles: ['MERCHANT', 'ADMIN'] })),
     };
 
     await TestBed.configureTestingModule({
@@ -75,6 +76,34 @@ describe('AdminUsers', () => {
     expect(adminServiceMock.activateUser).toHaveBeenCalledWith('usr-1');
   });
 
+  it('debe abrir y cerrar el modal de cambio de rol de seguridad', () => {
+    component.onOpenRoleModal({
+      user: mockUsers[0],
+      targetRole: 'ADMIN',
+      action: 'ADD',
+    });
+    expect(component.isRoleModalOpen()).toBe(true);
+    expect(component.roleModalUser()).toEqual(mockUsers[0]);
+    expect(component.targetRole()).toBe('ADMIN');
+    expect(component.roleAction()).toBe('ADD');
+
+    component.onCloseRoleModal();
+    expect(component.isRoleModalOpen()).toBe(false);
+    expect(component.roleModalUser()).toBeNull();
+  });
+
+  it('debe ejecutar updateUserRoles al confirmar en el modal de rol', () => {
+    component.onConfirmRoleChange({
+      user: mockUsers[0],
+      targetRole: 'ADMIN',
+      action: 'ADD',
+      newRoles: ['MERCHANT', 'ADMIN'],
+    });
+
+    expect(adminServiceMock.updateUserRoles).toHaveBeenCalledWith('usr-1', ['MERCHANT', 'ADMIN']);
+    expect(component.isRoleModalOpen()).toBe(false);
+  });
+
   it('debe abrir y cerrar la ficha 360 de usuario', () => {
     component.onOpenUserDrawer(mockUsers[0]);
     expect(component.isDrawerOpen()).toBe(true);
@@ -102,3 +131,4 @@ describe('AdminUsers', () => {
     expect(component.currentPage()).toBe(3);
   });
 });
+

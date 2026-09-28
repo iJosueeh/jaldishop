@@ -40,6 +40,7 @@
     [user]="selectedUser()"
     (closeDrawer)="onCloseUserDrawer()"
     (statusChange)="onOpenStatusModal($event)"
+    (roleChangeRequest)="onOpenRoleModal($event)"
   />
 
   <!-- Modal de Suspensión / Reactivación -->
@@ -49,4 +50,15 @@
     (confirm)="onConfirmStatusChange($event)"
     (cancel)="onCloseModal()"
   />
+
+  <!-- Modal de Seguridad para Cambio de Rol -->
+  <app-user-role-modal
+    [isOpen]="isRoleModalOpen()"
+    [user]="roleModalUser()"
+    [targetRole]="targetRole()"
+    [action]="roleAction()"
+    (confirm)="onConfirmRoleChange($event)"
+    (cancel)="onCloseRoleModal()"
+  />
 </div>
+

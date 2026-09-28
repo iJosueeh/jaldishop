@@ -2,6 +2,7 @@ package com.jaldishop.backend.identity.web.controller;
 
 import com.jaldishop.backend.identity.application.ChangeUserStatusService;
 import com.jaldishop.backend.identity.application.GetAdminUsersService;
+import com.jaldishop.backend.identity.application.UpdateUserRolesService;
 import com.jaldishop.backend.identity.domain.UserStatus;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
@@ -45,6 +46,9 @@ class AdminUserControllerTest {
     @Mock
     private ChangeUserStatusService changeUserStatusService;
 
+    @Mock
+    private UpdateUserRolesService updateUserRolesService;
+
     private MockMvc mockMvc;
     private UUID adminId;
     private UUID targetUserId;
@@ -56,7 +60,11 @@ class AdminUserControllerTest {
         targetUserId = UUID.randomUUID();
         adminPrincipal = new JwtPrincipal(adminId, Set.of("ADMIN"));
 
-        AdminUserController controller = new AdminUserController(getAdminUsersService, changeUserStatusService);
+        AdminUserController controller = new AdminUserController(
+                getAdminUsersService,
+                changeUserStatusService,
+                updateUserRolesService
+        );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -178,4 +186,37 @@ class AdminUserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
+
+    @Test
+    @DisplayName("PATCH /api/v1/admin/users/{id}/roles - Debe actualizar roles de usuario")
+    void shouldUpdateUserRoles() throws Exception {
+        AdminUserDetailResponse updated = new AdminUserDetailResponse(
+                targetUserId,
+                "user@jaldishop.com",
+                "Carlos",
+                "Lopez",
+                "Carlos Lopez",
+                "987654321",
+                UserStatus.ACTIVE,
+                Set.of("MERCHANT", "CUSTOMER"),
+                Instant.now(),
+                Instant.now(),
+                null
+        );
+
+        when(updateUserRolesService.updateRoles(eq(targetUserId), any(), eq(adminId))).thenReturn(updated);
+
+        String requestBody = """
+                {
+                    "roles": ["MERCHANT", "CUSTOMER"]
+                }
+                """;
+
+        mockMvc.perform(patch("/api/v1/admin/users/{id}/roles", targetUserId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles").isArray());
+    }
 }
+

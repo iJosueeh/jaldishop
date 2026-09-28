@@ -61,6 +61,11 @@ export class AdminUserDrawer {
   readonly closeDrawer = output<void>();
   readonly statusChange = output<AdminUserSummary>();
   readonly roleToggle = output<{ user: AdminUserSummary; role: AdminUserRole }>();
+  readonly roleChangeRequest = output<{
+    user: AdminUserSummary;
+    targetRole: AdminUserRole;
+    action: 'ADD' | 'REMOVE';
+  }>();
 
   readonly isClosing = signal<boolean>(false);
   readonly isCopied = signal<boolean>(false);
@@ -111,11 +116,10 @@ export class AdminUserDrawer {
   onToggleRole(role: AdminUserRole): void {
     const u = this.user();
     if (u) {
+      const isAssigned = u.roles.includes(role);
+      const action = isAssigned ? 'REMOVE' : 'ADD';
       this.roleToggle.emit({ user: u, role });
-      this.toastService.info(
-        `Solicitud de cambio de rol (${role}) registrada para ${u.fullName}.`,
-        'Gestión de Roles'
-      );
+      this.roleChangeRequest.emit({ user: u, targetRole: role, action });
     }
   }
 

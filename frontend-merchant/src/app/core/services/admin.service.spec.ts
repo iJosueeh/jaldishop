@@ -246,6 +246,27 @@ describe('AdminService', () => {
     expect(target?.status).toBe('ACTIVE');
   });
 
+  it('debe actualizar los roles de un usuario y actualizar la lista', () => {
+    service.users.set(mockUsers);
+    const updatedUser: AdminUserSummary = {
+      ...mockUsers[2],
+      roles: ['CUSTOMER', 'ADMIN'],
+    };
+
+    service.updateUserRoles('usr-3', ['CUSTOMER', 'ADMIN']).subscribe((res) => {
+      expect(res.roles).toEqual(['CUSTOMER', 'ADMIN']);
+      expect(toastMock.success).toHaveBeenCalled();
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/usr-3/roles`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ roles: ['CUSTOMER', 'ADMIN'] });
+    req.flush(updatedUser);
+
+    const target = service.users().find((u) => u.id === 'usr-3');
+    expect(target?.roles).toEqual(['CUSTOMER', 'ADMIN']);
+  });
+
   it('debe suspender una tienda y actualizar la lista', () => {
     service.stores.set(mockStores);
     const updatedStore = { ...mockStores[0], status: 'SUSPENDED' as const };

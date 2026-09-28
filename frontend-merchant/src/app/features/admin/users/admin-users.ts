@@ -1,11 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AdminService } from '../../../core/services/admin.service';
-import { AdminUserSummary } from '../../../core/models/admin.models';
+import { AdminUserRole, AdminUserSummary } from '../../../core/models/admin.models';
 import { AdminUsersHeader } from './components/admin-users-header/admin-users-header';
 import { AdminUsersFilterBar } from './components/admin-users-filter-bar/admin-users-filter-bar';
 import { AdminUsersTable } from './components/admin-users-table/admin-users-table';
 import { AdminUserDrawer } from './components/admin-user-drawer/admin-user-drawer';
 import { UserStatusModal } from './components/user-status-modal/user-status-modal';
+import { UserRoleModal } from './components/user-role-modal/user-role-modal';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 
 @Component({
@@ -15,6 +16,7 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
     AdminUsersTable,
     AdminUserDrawer,
     UserStatusModal,
+    UserRoleModal,
     Pagination,
   ],
   selector: 'app-admin-users',
@@ -27,6 +29,12 @@ export class AdminUsers implements OnInit {
   readonly selectedUser = signal<AdminUserSummary | null>(null);
   readonly isModalOpen = signal<boolean>(false);
   readonly isDrawerOpen = signal<boolean>(false);
+
+  // Modal de Seguridad de Cambio de Rol
+  readonly isRoleModalOpen = signal<boolean>(false);
+  readonly roleModalUser = signal<AdminUserSummary | null>(null);
+  readonly targetRole = signal<AdminUserRole | null>(null);
+  readonly roleAction = signal<'ADD' | 'REMOVE'>('ADD');
 
   readonly currentPage = signal<number>(1);
   readonly pageSize = signal<number>(10);
@@ -86,15 +94,59 @@ export class AdminUsers implements OnInit {
     this.selectedUser.set(null);
   }
 
+  onOpenRoleModal(event: {
+    user: AdminUserSummary;
+    targetRole: AdminUserRole;
+    action: 'ADD' | 'REMOVE';
+  }): void {
+    this.roleModalUser.set(event.user);
+    this.targetRole.set(event.targetRole);
+    this.roleAction.set(event.action);
+    this.isRoleModalOpen.set(true);
+  }
+
+  onCloseRoleModal(): void {
+    this.isRoleModalOpen.set(false);
+    this.roleModalUser.set(null);
+    this.targetRole.set(null);
+  }
+
+  onConfirmRoleChange(event: {
+    user: AdminUserSummary;
+    targetRole: AdminUserRole;
+    action: 'ADD' | 'REMOVE';
+    newRoles: AdminUserRole[];
+  }): void {
+    this.adminService.updateUserRoles(event.user.id, event.newRoles).subscribe({
+      next: (updatedUser) => {
+        this.onCloseRoleModal();
+        if (this.selectedUser()?.id === updatedUser.id) {
+          this.selectedUser.set(updatedUser);
+        }
+      },
+    });
+  }
+
   onConfirmStatusChange(user: AdminUserSummary): void {
     if (user.status === 'ACTIVE') {
       this.adminService.suspendUser(user.id).subscribe({
-        next: () => this.onCloseModal(),
+        next: (updatedUser) => {
+          this.onCloseModal();
+          if (this.selectedUser()?.id === updatedUser.id) {
+            this.selectedUser.set(updatedUser);
+          }
+        },
       });
     } else {
       this.adminService.activateUser(user.id).subscribe({
-        next: () => this.onCloseModal(),
+        next: (updatedUser) => {
+          this.onCloseModal();
+          if (this.selectedUser()?.id === updatedUser.id) {
+            this.selectedUser.set(updatedUser);
+          }
+        },
       });
     }
   }
 }
+

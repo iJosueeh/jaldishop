@@ -232,6 +232,31 @@ export class AdminService {
     );
   }
 
+  updateUserRoles(userId: string, roles: AdminUserRole[]): Observable<AdminUserSummary> {
+    return this.http
+      .patch<AdminUserSummary>(`${environment.apiUrl}/admin/users/${userId}/roles`, { roles })
+      .pipe(
+        tap({
+          next: (updatedUser) => {
+            this.users.update((list) => list.map((u) => (u.id === userId ? updatedUser : u)));
+            this.toastService.success(
+              `Roles de ${updatedUser.fullName} actualizados correctamente.`,
+              'Seguridad y Accesos'
+            );
+          },
+          error: (err) => {
+            if (err.status === 400 || err.status === 409) {
+              this.toastService.error(
+                err.error?.message || 'No puedes removerte tu propio rol de administrador.'
+              );
+            } else {
+              this.toastService.error('Error al actualizar los roles del usuario.');
+            }
+          },
+        }),
+      );
+  }
+
   suspendStore(storeId: string): Observable<AdminStoreSummary> {
     return this.http.patch<AdminStoreSummary>(`${environment.apiUrl}/admin/stores/${storeId}/suspend`, {}).pipe(
       tap({

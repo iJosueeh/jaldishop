@@ -1,0 +1,172 @@
+@if (isOpen() && user() && targetRole()) {
+  @let u = user()!;
+  @let role = targetRole()!;
+  @let isAdding = action() === 'ADD';
+  @let isAdminChange = role === 'ADMIN';
+
+  <div
+    class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-fade-in"
+    (click)="cancel.emit()"
+  >
+    <div
+      class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-2xl w-full max-w-lg p-5 sm:p-6 flex flex-col gap-4 relative"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Botón de Cerrar -->
+      <button
+        type="button"
+        (click)="cancel.emit()"
+        class="absolute top-4 right-4 p-1.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+        aria-label="Cerrar modal"
+      >
+        <ng-icon name="matCloseOutline" class="text-[20px]" />
+      </button>
+
+      <!-- Encabezado con Icono de Seguridad -->
+      <div class="flex items-center gap-3">
+        <div
+          class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+          [class.bg-rose-500/10]="isAdminChange"
+          [class.text-rose-600]="isAdminChange"
+          [class.bg-primary/10]="!isAdminChange"
+          [class.text-primary]="!isAdminChange"
+        >
+          @if (isAdminChange) {
+            <ng-icon name="matWarningOutline" class="text-[24px]" />
+          } @else {
+            <ng-icon name="matShieldOutline" class="text-[24px]" />
+          }
+        </div>
+
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-on-surface leading-tight">
+            {{ isAdding ? 'Asignar Rol de Acceso' : 'Revocar Rol de Acceso' }}
+          </h2>
+          <p class="text-xs text-on-surface-variant font-medium mt-0.5">
+            Modificación de permisos de seguridad de la cuenta
+          </p>
+        </div>
+      </div>
+
+      <!-- Datos del Usuario Destino -->
+      <div class="flex items-center gap-3 p-3 rounded-2xl bg-surface-container/40 border border-outline-variant/20">
+        <div class="w-10 h-10 rounded-xl bg-primary text-on-primary font-black text-sm flex items-center justify-center shrink-0">
+          {{ u.fullName.substring(0, 2).toUpperCase() }}
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-sm font-bold text-on-surface truncate">{{ u.fullName }}</span>
+          <span class="text-xs text-on-surface-variant truncate">{{ u.email }}</span>
+        </div>
+      </div>
+
+      <!-- Banner de Advertencia de Seguridad -->
+      <div
+        class="p-4 rounded-2xl border text-xs leading-relaxed space-y-1.5"
+        [class.bg-rose-500/10]="isAdminChange && isAdding"
+        [class.border-rose-500/30]="isAdminChange && isAdding"
+        [class.text-rose-900]="isAdminChange && isAdding"
+        [class.dark:text-rose-300]="isAdminChange && isAdding"
+        [class.bg-amber-500/10]="(isAdminChange && !isAdding) || (!isAdminChange && !isAdding)"
+        [class.border-amber-500/30]="(isAdminChange && !isAdding) || (!isAdminChange && !isAdding)"
+        [class.text-amber-900]="(isAdminChange && !isAdding) || (!isAdminChange && !isAdding)"
+        [class.dark:text-amber-300]="(isAdminChange && !isAdding) || (!isAdminChange && !isAdding)"
+        [class.bg-primary/5]="!isAdminChange && isAdding"
+        [class.border-primary/20]="!isAdminChange && isAdding"
+        [class.text-on-surface]="!isAdminChange && isAdding"
+      >
+        <div class="font-black flex items-center gap-1.5">
+          <ng-icon name="matWarningOutline" class="text-[16px]" />
+          <span>
+            {{
+              isAdminChange && isAdding
+                ? '⚠️ ACCIÓN DE ALTO PRIVILEGIO (ADMIN)'
+                : isAdminChange && !isAdding
+                ? '⚠️ REVOCACIÓN DE ADMINISTRADOR'
+                : isAdding
+                ? 'ℹ️ Asignación de Permisos'
+                : 'ℹ️ Revocación de Rol'
+            }}
+          </span>
+        </div>
+        <p>
+          @if (isAdminChange && isAdding) {
+            Otorgar el rol de <strong>Administrador</strong> conferirá acceso total e irrestricto para gestionar todos los comercios, suspender cuentas, consultar auditorías y modificar configuraciones sensibles de la plataforma JaldiShop.
+          } @else if (isAdminChange && !isAdding) {
+            Revocar el rol de <strong>Administrador</strong> quitará inmediatamente el acceso al panel de administración y sus facultades de gobernanza sobre la plataforma.
+          } @else if (role === 'MERCHANT' && isAdding) {
+            Asignar el rol de <strong>Comerciante</strong> permitirá a este usuario registrar y administrar su propia tienda, productos y pedidos en la plataforma.
+          } @else if (role === 'MERCHANT' && !isAdding) {
+            Revocar el rol de <strong>Comerciante</strong> deshabilitará el acceso de este usuario al panel de gestión de su tienda asociada.
+          } @else {
+            Se modificará el rol de <strong>Cliente</strong> para esta cuenta.
+          }
+        </p>
+      </div>
+
+      <!-- Comparación: Roles Actuales vs Resultado -->
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center justify-between text-on-surface-variant font-medium">
+          <span>Roles Actuales</span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            @for (r of u.roles; track r) {
+              <span class="px-2 py-0.5 rounded-lg bg-surface-container font-mono font-bold text-[11px] border border-outline-variant/30 text-on-surface">
+                {{ r }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between font-bold text-on-surface">
+          <span class="flex items-center gap-1">
+            <ng-icon name="matCheckOutline" class="text-primary text-[15px]" />
+            Nuevos Roles Resultantes
+          </span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            @for (r of calculatedNewRoles(); track r) {
+              <span
+                class="px-2 py-0.5 rounded-lg font-mono font-black text-[11px] border"
+                [class.bg-primary/10]="r === 'ADMIN'"
+                [class.text-primary]="r === 'ADMIN'"
+                [class.border-primary/30]="r === 'ADMIN'"
+                [class.bg-secondary/10]="r === 'MERCHANT'"
+                [class.text-secondary]="r === 'MERCHANT'"
+                [class.border-secondary/30]="r === 'MERCHANT'"
+                [class.bg-surface-container-high]="r === 'CUSTOMER'"
+                [class.text-on-surface]="r === 'CUSTOMER'"
+                [class.border-outline-variant/40]="r === 'CUSTOMER'"
+              >
+                {{ r }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/20">
+        <button
+          type="button"
+          (click)="cancel.emit()"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          (click)="onConfirm()"
+          class="px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          [class.bg-rose-600]="isAdminChange"
+          [class.hover:bg-rose-700]="isAdminChange"
+          [class.text-white]="isAdminChange"
+          [class.bg-primary]="!isAdminChange"
+          [class.hover:bg-primary-hover]="!isAdminChange"
+          [class.text-on-primary]="!isAdminChange"
+        >
+          <ng-icon name="matShieldOutline" class="text-[16px]" />
+          <span>{{ isAdding ? 'Confirmar Asignación' : 'Confirmar Revocación' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
