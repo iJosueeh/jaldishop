@@ -1,0 +1,90 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado de Parámetros Globales -->
+  <app-admin-settings-header (save)="onSaveSettings()" />
+
+  <!-- Selector de Pestañas (Pills) -->
+  <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs overflow-x-auto">
+    <button
+      type="button"
+      (click)="setTab('general')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="currentTab() === 'general'"
+      [class.text-on-primary]="currentTab() === 'general'"
+      [class.shadow-2xs]="currentTab() === 'general'"
+      [class.text-on-surface-variant]="currentTab() !== 'general'"
+      [class.hover:bg-surface-container]="currentTab() !== 'general'"
+    >
+      <ng-icon name="matTuneOutline" class="text-[16px]" />
+      <span>Políticas & Registro</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('security')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="currentTab() === 'security'"
+      [class.text-on-primary]="currentTab() === 'security'"
+      [class.shadow-2xs]="currentTab() === 'security'"
+      [class.text-on-surface-variant]="currentTab() !== 'security'"
+      [class.hover:bg-surface-container]="currentTab() !== 'security'"
+    >
+      <ng-icon name="matShieldOutline" class="text-[16px]" />
+      <span>Seguridad & Sesiones</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('notifications')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="currentTab() === 'notifications'"
+      [class.text-on-primary]="currentTab() === 'notifications'"
+      [class.shadow-2xs]="currentTab() === 'notifications'"
+      [class.text-on-surface-variant]="currentTab() !== 'notifications'"
+      [class.hover:bg-surface-container]="currentTab() !== 'notifications'"
+    >
+      <ng-icon name="matNotificationsOutline" class="text-[16px]" />
+      <span>Notificaciones</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('system')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="currentTab() === 'system'"
+      [class.text-on-primary]="currentTab() === 'system'"
+      [class.shadow-2xs]="currentTab() === 'system'"
+      [class.text-on-surface-variant]="currentTab() !== 'system'"
+      [class.hover:bg-surface-container]="currentTab() !== 'system'"
+    >
+      <ng-icon name="matInfoOutline" class="text-[16px]" />
+      <span>Sistema & Versión</span>
+    </button>
+  </div>
+
+  <!-- Contenido de la Pestaña Activa -->
+  <div class="mt-1">
+    @switch (currentTab()) {
+      @case ('general') {
+        <app-admin-settings-general-tab
+          [settings]="adminService.settings()"
+          (settingsChange)="onUpdateSettings($event)"
+        />
+      }
+      @case ('security') {
+        <app-admin-settings-security-tab
+          [settings]="adminService.settings()"
+          (settingsChange)="onUpdateSettings($event)"
+        />
+      }
+      @case ('notifications') {
+        <app-admin-settings-notifications-tab
+          [settings]="adminService.settings()"
+          (settingsChange)="onUpdateSettings($event)"
+        />
+      }
+      @case ('system') {
+        <app-admin-settings-system-tab [settings]="adminService.settings()" />
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-sans">
+  <div>
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">
+        Directorio de Usuarios
+      </h1>
+      <span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-extrabold text-xs">
+        {{ totalCount() }}
+      </span>
+    </div>
+    <p class="text-xs sm:text-sm text-on-surface-variant font-medium mt-0.5">
+      Administración central de cuentas, roles de acceso y estados de actividad
+    </p>
+  </div>
+
+  <button
+    type="button"
+    (click)="refresh.emit()"
+    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors shadow-2xs self-start sm:self-auto"
+    title="Refrescar usuarios"
+  >
+    <ng-icon name="matRefreshOutline" class="text-[16px]" [class.animate-spin]="isLoading()" />
+    <span>Actualizar</span>
+  </button>
+</div>

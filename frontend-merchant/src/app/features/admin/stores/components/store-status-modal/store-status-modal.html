@@ -1,0 +1,83 @@
+@if (isOpen() && store()) {
+  <div
+    class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-fade-in"
+  >
+    <div
+      class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-xl w-full max-w-md p-5 sm:p-6 flex flex-col gap-4 relative"
+    >
+      <!-- Botón de Cerrar -->
+      <button
+        type="button"
+        (click)="cancel.emit()"
+        class="absolute top-4 right-4 p-1.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        aria-label="Cerrar modal"
+      >
+        <ng-icon name="matCloseOutline" class="text-[20px]" />
+      </button>
+
+      <!-- Encabezado con Icono Condicional -->
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0"
+          [class.bg-rose-500/10]="store()!.status === 'ACTIVE'"
+          [class.text-rose-600]="store()!.status === 'ACTIVE'"
+          [class.bg-emerald-500/10]="store()!.status === 'SUSPENDED'"
+          [class.text-emerald-600]="store()!.status === 'SUSPENDED'"
+        >
+          @if (store()!.status === 'ACTIVE') {
+            <ng-icon name="matWarningOutline" />
+          } @else {
+            <ng-icon name="matCheckCircleOutline" />
+          }
+        </div>
+
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-on-surface leading-tight">
+            {{ store()!.status === 'ACTIVE' ? 'Suspender Tienda' : 'Reactivar Tienda' }}
+          </h2>
+          <p class="text-xs text-on-surface-variant font-medium mt-0.5">
+            {{ store()!.name }} (&#64;{{ store()!.slug }})
+          </p>
+        </div>
+      </div>
+
+      <!-- Cuerpo / Explicación -->
+      <div class="p-3.5 rounded-2xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface leading-relaxed">
+        @if (store()!.status === 'ACTIVE') {
+          <p>
+            Al suspender la tienda <strong>{{ store()!.name }}</strong>, su catálogo público quedará inaccesible para los clientes y el comerciante no podrá recibir nuevos pedidos hasta que sea reactivada.
+          </p>
+        } @else {
+          <p>
+            Al reactivar la tienda <strong>{{ store()!.name }}</strong>, su storefront volverá a estar disponible públicamente en JaldiShop.
+          </p>
+        }
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/20">
+        <button
+          type="button"
+          (click)="cancel.emit()"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          (click)="confirm.emit(store()!)"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs"
+          [class.bg-rose-600]="store()!.status === 'ACTIVE'"
+          [class.text-white]="store()!.status === 'ACTIVE'"
+          [class.hover:bg-rose-700]="store()!.status === 'ACTIVE'"
+          [class.bg-emerald-600]="store()!.status === 'SUSPENDED'"
+          [class.text-white]="store()!.status === 'SUSPENDED'"
+          [class.hover:bg-emerald-700]="store()!.status === 'SUSPENDED'"
+        >
+          {{ store()!.status === 'ACTIVE' ? 'Confirmar Suspensión' : 'Confirmar Reactivación' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

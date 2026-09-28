@@ -1,0 +1,19 @@
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-sans">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">
+      Gobernanza & Parámetros Globales
+    </h1>
+    <p class="text-xs sm:text-sm text-on-surface-variant font-medium mt-0.5">
+      Políticas de plataforma, seguridad, notificaciones y control de infraestructura
+    </p>
+  </div>
+
+  <button
+    type="button"
+    (click)="save.emit()"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs hover:bg-primary/90 transition-all cursor-pointer self-start sm:self-auto"
+  >
+    <ng-icon name="matCheckOutline" class="text-[16px]" />
+    <span>Guardar Cambios</span>
+  </button>
+</div>

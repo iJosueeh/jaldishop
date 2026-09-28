@@ -1,0 +1,67 @@
+<div class="space-y-6 font-sans">
+  <section class="p-5 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-secondary-container/20 text-secondary flex items-center justify-center font-bold text-lg shrink-0">
+        <ng-icon name="matShieldOutline" class="text-[20px]" />
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
+          Seguridad, Sesiones & Autenticación
+        </h3>
+        <p class="text-xs text-on-surface-variant font-medium">
+          Políticas de protección para cuentas de administración y comerciantes
+        </p>
+      </div>
+    </div>
+
+    <div class="divide-y divide-outline-variant/20">
+      <!-- 1. Expiración de Sesión -->
+      <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-bold text-on-surface">
+            Tiempo de Expiración de Token de Sesión (JWT)
+          </span>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Duración máxima antes de requerir volver a iniciar sesión.
+          </span>
+        </div>
+        <select
+          [value]="settings().sessionTimeoutHours"
+          (change)="onTimeoutChange($event)"
+          class="py-2 px-3 rounded-xl bg-surface border border-outline-variant/30 text-xs font-bold text-on-surface focus:outline-hidden cursor-pointer shrink-0"
+        >
+          <option [value]="8">8 horas</option>
+          <option [value]="12">12 horas</option>
+          <option [value]="24">24 horas (Recomendado)</option>
+          <option [value]="72">3 días</option>
+          <option [value]="168">7 días</option>
+        </select>
+      </div>
+
+      <!-- 2. Doble Factor de Autenticación Requerido -->
+      <div class="py-4 flex items-center justify-between gap-4">
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-bold text-on-surface">
+            Exigir Autenticación en Dos Pasos (2FA) para Administradores
+          </span>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Obliga a todo usuario con rol ADMIN a validar un código de seguridad al iniciar sesión.
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="toggleEnforce2FA()"
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+          [class.bg-primary]="settings().enforce2FAForAdmins"
+          [class.bg-surface-container-highest]="!settings().enforce2FAForAdmins"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+            [class.translate-x-5]="settings().enforce2FAForAdmins"
+            [class.translate-x-0]="!settings().enforce2FAForAdmins"
+          ></span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

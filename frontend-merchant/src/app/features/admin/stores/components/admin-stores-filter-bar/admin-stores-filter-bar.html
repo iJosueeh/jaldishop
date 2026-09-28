@@ -1,0 +1,78 @@
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs font-sans">
+  <!-- Buscador en tiempo real -->
+  <div class="relative flex-1 min-w-0">
+    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+      <ng-icon name="matSearchOutline" class="text-[18px]" />
+    </span>
+    <input
+      type="text"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      placeholder="Buscar por nombre de tienda, slug o propietario..."
+      class="w-full pl-9 pr-8 py-2 text-xs font-medium rounded-xl bg-surface border border-outline-variant/30 focus:border-primary focus:outline-hidden text-on-surface placeholder:text-on-surface-variant transition-colors"
+    />
+    @if (searchQuery()) {
+      <button
+        type="button"
+        (click)="clearSearch()"
+        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-on-surface-variant hover:text-on-surface"
+        aria-label="Limpiar búsqueda"
+      >
+        <ng-icon name="matCloseOutline" class="text-[16px]" />
+      </button>
+    }
+  </div>
+
+  <!-- Pills de Modalidad & Filtro de Estado -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+    <!-- Pills de Modalidad de Entrega -->
+    <div class="flex items-center gap-1 bg-surface-container/60 p-1 rounded-xl border border-outline-variant/20 shrink-0">
+      <button
+        type="button"
+        (click)="modalityChange.emit('ALL')"
+        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
+        [class.bg-surface-container-lowest]="selectedModality() === 'ALL'"
+        [class.text-on-surface]="selectedModality() === 'ALL'"
+        [class.shadow-2xs]="selectedModality() === 'ALL'"
+        [class.text-on-surface-variant]="selectedModality() !== 'ALL'"
+      >
+        Todas
+      </button>
+
+      <button
+        type="button"
+        (click)="modalityChange.emit('DELIVERY')"
+        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
+        [class.bg-surface-container-lowest]="selectedModality() === 'DELIVERY'"
+        [class.text-primary]="selectedModality() === 'DELIVERY'"
+        [class.shadow-2xs]="selectedModality() === 'DELIVERY'"
+        [class.text-on-surface-variant]="selectedModality() !== 'DELIVERY'"
+      >
+        Delivery
+      </button>
+
+      <button
+        type="button"
+        (click)="modalityChange.emit('PICKUP')"
+        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
+        [class.bg-surface-container-lowest]="selectedModality() === 'PICKUP'"
+        [class.text-secondary]="selectedModality() === 'PICKUP'"
+        [class.shadow-2xs]="selectedModality() === 'PICKUP'"
+        [class.text-on-surface-variant]="selectedModality() !== 'PICKUP'"
+      >
+        Pickup
+      </button>
+    </div>
+
+    <!-- Filtro de Estado -->
+    <select
+      [value]="selectedStatus()"
+      (change)="onStatusChange($event)"
+      class="py-1.5 px-3 rounded-xl bg-surface border border-outline-variant/30 text-xs font-bold text-on-surface focus:outline-hidden cursor-pointer shrink-0"
+    >
+      <option value="ALL">Todos los estados</option>
+      <option value="ACTIVE">Activas</option>
+      <option value="SUSPENDED">Pausadas</option>
+    </select>
+  </div>
+</div>

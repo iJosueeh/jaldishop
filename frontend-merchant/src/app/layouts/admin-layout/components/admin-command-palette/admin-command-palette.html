@@ -1,0 +1,166 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-50 flex items-start justify-center pt-8 sm:pt-16 md:pt-20 px-3 sm:px-6 pb-6 overflow-y-auto">
+    <!-- Backdrop con animación de entrada y salida -->
+    <div
+      (click)="dismiss()"
+      class="fixed inset-0 bg-black/60 backdrop-blur-md"
+      [class.palette-backdrop-enter]="!isClosing()"
+      [class.palette-backdrop-exit]="isClosing()"
+    ></div>
+
+    <!-- Modal de la Command Palette con animación de entrada y salida -->
+    <div
+      class="relative w-full max-w-2xl bg-surface-container-lowest border border-outline-variant/30 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 my-auto sm:my-0"
+      [class.palette-dialog-enter]="!isClosing()"
+      [class.palette-dialog-exit]="isClosing()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header / Barra de Entrada -->
+      <div class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-4.5 border-b border-outline-variant/20 bg-surface-container/20">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <ng-icon name="matSearchOutline" class="text-[22px] sm:text-[24px]" />
+        </div>
+
+        <input
+          #searchInput
+          type="text"
+          [value]="query()"
+          (input)="onQueryChange($any($event.target).value)"
+          placeholder="Buscar usuarios por email o tiendas por slug..."
+          class="flex-1 bg-transparent border-none outline-none text-on-surface text-sm sm:text-base placeholder:text-on-surface-variant/60 font-medium"
+          autofocus
+        />
+
+        <div class="flex items-center gap-2">
+          <kbd class="hidden sm:inline-flex items-center px-2 py-1 rounded-lg bg-surface-container border border-outline-variant/30 text-[10px] font-bold text-on-surface-variant uppercase shadow-2xs">
+            ESC
+          </kbd>
+          <button
+            type="button"
+            (click)="dismiss()"
+            class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+            aria-label="Cerrar buscador"
+          >
+            <ng-icon name="matCloseOutline" class="text-[20px]" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor de Resultados (Máximo 5 elementos) -->
+      <div class="p-3 sm:p-4 space-y-3">
+        @if (groupedItems().length > 0) {
+          @for (group of groupedItems(); track group.name) {
+            <div class="space-y-1">
+              <!-- Encabezado de Categoría -->
+              <div class="px-3 py-1 flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant/70">
+                  {{ group.name }}
+                </span>
+                <span class="text-[10px] font-bold text-on-surface-variant/50">
+                  {{ group.items.length }}
+                </span>
+              </div>
+
+              <!-- Lista de Items (Compacta y Holgada) -->
+              <div class="space-y-1">
+                @for (item of group.items; track item.id) {
+                  @let globalIdx = getItemGlobalIndex(item);
+                  <button
+                    type="button"
+                    (click)="executeCommand(item)"
+                    (mouseenter)="selectedIndex.set(globalIdx)"
+                    class="w-full flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-left transition-all cursor-pointer group"
+                    [class.bg-primary/10]="selectedIndex() === globalIdx"
+                    [class.ring-1]="selectedIndex() === globalIdx"
+                    [class.ring-primary/20]="selectedIndex() === globalIdx"
+                    [class.hover:bg-surface-container]="selectedIndex() !== globalIdx"
+                  >
+                    <!-- Icono y Textos -->
+                    <div class="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                      <div
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                        [class.bg-primary/20]="selectedIndex() === globalIdx"
+                        [class.text-primary]="selectedIndex() === globalIdx"
+                        [class.bg-surface-container]="selectedIndex() !== globalIdx"
+                        [class.text-on-surface-variant]="selectedIndex() !== globalIdx"
+                      >
+                        <ng-icon [name]="item.icon" class="text-[18px]" />
+                      </div>
+
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-xs sm:text-sm font-bold truncate text-on-surface leading-snug">
+                          {{ item.title }}
+                        </span>
+                        @if (item.subtitle) {
+                          <span class="text-[11px] font-medium text-on-surface-variant/80 truncate mt-0.5">
+                            {{ item.subtitle }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Badges y Flecha de Acción -->
+                    <div class="flex items-center gap-2 shrink-0 ml-2">
+                      @if (item.badge) {
+                        <span
+                          class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
+                          [class.bg-emerald-500/10]="item.badge === 'Activo' || item.badge === 'Activa'"
+                          [class.text-emerald-700]="item.badge === 'Activo' || item.badge === 'Activa'"
+                          [class.dark:text-emerald-400]="item.badge === 'Activo' || item.badge === 'Activa'"
+                          [class.bg-rose-500/10]="item.badge === 'Suspendido' || item.badge === 'Suspendida'"
+                          [class.text-rose-700]="item.badge === 'Suspendido' || item.badge === 'Suspendida'"
+                          [class.dark:text-rose-400]="item.badge === 'Suspendido' || item.badge === 'Suspendida'"
+                        >
+                          {{ item.badge }}
+                        </span>
+                      }
+                      <div
+                        class="w-6 h-6 rounded-lg flex items-center justify-center transition-colors"
+                        [class.bg-primary/20]="selectedIndex() === globalIdx"
+                        [class.text-primary]="selectedIndex() === globalIdx"
+                        [class.text-on-surface-variant/40]="selectedIndex() !== globalIdx"
+                      >
+                        <ng-icon name="matArrowForwardOutline" class="text-[14px]" />
+                      </div>
+                    </div>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <!-- Estado Vacío -->
+          <div class="py-10 sm:py-12 text-center flex flex-col items-center justify-center px-4">
+            <div class="w-10 h-10 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant/40 mb-2">
+              <ng-icon name="matSearchOutline" class="text-[24px]" />
+            </div>
+            <p class="text-xs sm:text-sm font-bold text-on-surface">
+              Sin coincidencias para "{{ query() }}"
+            </p>
+            <p class="text-[11px] text-on-surface-variant/70 mt-0.5 max-w-xs">
+              Escribe un correo, nombre o slug de comercio registrado.
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Footer con Atajos -->
+      <div class="px-4 sm:px-6 py-3 bg-surface-container/30 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant font-medium">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center gap-1.5 text-[11px]">
+            <kbd class="px-1.5 py-0.5 rounded-md bg-surface-container border border-outline-variant/30 text-[10px] font-bold">↑↓</kbd>
+            <span>Navegar</span>
+          </span>
+          <span class="flex items-center gap-1.5 text-[11px]">
+            <kbd class="px-1.5 py-0.5 rounded-md bg-surface-container border border-outline-variant/30 text-[10px] font-bold">↵</kbd>
+            <span>Seleccionar</span>
+          </span>
+        </div>
+
+        <span class="text-[10px] font-bold text-on-surface-variant/60">
+          Max 5 resultados
+        </span>
+      </div>
+    </div>
+  </div>
+}

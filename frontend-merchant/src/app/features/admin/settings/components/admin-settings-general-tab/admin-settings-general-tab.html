@@ -1,0 +1,127 @@
+<div class="space-y-6 font-sans">
+  <!-- 1. Sección: Admisión de Comercios -->
+  <section class="p-5 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+        <ng-icon name="matStorefrontOutline" class="text-[20px]" />
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
+          Políticas de Registro & Nuevos Comercios
+        </h3>
+        <p class="text-xs text-on-surface-variant font-medium">
+          Controla la admisión y alta de nuevas tiendas en JaldiShop
+        </p>
+      </div>
+    </div>
+
+    <div class="divide-y divide-outline-variant/20">
+      <!-- Opción 1: Registro Público de Comerciantes -->
+      <div class="py-4 flex items-center justify-between gap-4">
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-bold text-on-surface">
+            Habilitar Registro Público de Comerciantes
+          </span>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Permite que nuevos emprendedores creen cuentas desde el portal público de registro.
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="toggleMerchantRegistration()"
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+          [class.bg-primary]="settings().allowMerchantRegistration"
+          [class.bg-surface-container-highest]="!settings().allowMerchantRegistration"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+            [class.translate-x-5]="settings().allowMerchantRegistration"
+            [class.translate-x-0]="!settings().allowMerchantRegistration"
+          ></span>
+        </button>
+      </div>
+
+      <!-- Opción 2: Aprobación Previa de Tiendas -->
+      <div class="py-4 flex items-center justify-between gap-4">
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-bold text-on-surface">
+            Aprobación Manual de Nuevas Tiendas
+          </span>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Las tiendas recién creadas iniciarán en estado pausado hasta que un administrador las verifique.
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="toggleStoreApproval()"
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+          [class.bg-primary]="settings().requireStoreApproval"
+          [class.bg-surface-container-highest]="!settings().requireStoreApproval"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+            [class.translate-x-5]="settings().requireStoreApproval"
+            [class.translate-x-0]="!settings().requireStoreApproval"
+          ></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Sección: Modo Mantenimiento de la Plataforma -->
+  <section class="p-5 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg shrink-0">
+        <ng-icon name="matWarningOutline" class="text-[20px]" />
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
+          Modo Mantenimiento Programado
+        </h3>
+        <p class="text-xs text-on-surface-variant font-medium">
+          Suspende temporalmente operaciones públicas para actualizaciones críticas
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-bold text-on-surface">
+            Activar Estado de Mantenimiento
+          </span>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Muestra una pantalla informativa de mantenimiento a comerciantes y clientes.
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="toggleMaintenanceMode()"
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden"
+          [class.bg-amber-600]="settings().maintenanceMode"
+          [class.bg-surface-container-highest]="!settings().maintenanceMode"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+            [class.translate-x-5]="settings().maintenanceMode"
+            [class.translate-x-0]="!settings().maintenanceMode"
+          ></span>
+        </button>
+      </div>
+
+      @if (settings().maintenanceMode) {
+        <div class="pt-2 space-y-2">
+          <label class="block text-xs font-bold text-on-surface">
+            Mensaje Público de Notificación:
+          </label>
+          <textarea
+            rows="3"
+            [value]="settings().maintenanceNotice"
+            (input)="onNoticeChange($event)"
+            class="w-full p-3 text-xs font-medium rounded-2xl bg-surface border border-outline-variant/30 focus:border-primary focus:outline-hidden text-on-surface placeholder:text-on-surface-variant"
+          ></textarea>
+        </div>
+      }
+    </div>
+  </section>
+</div>

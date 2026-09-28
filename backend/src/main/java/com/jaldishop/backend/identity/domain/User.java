@@ -107,6 +107,15 @@ public class User {
         this.updatedAt = Instant.now();
     }
 
+    public void updateRoles(Set<Role> newRoles) {
+        if (newRoles == null || newRoles.isEmpty()) {
+            throw new IllegalArgumentException("El usuario debe contener al menos un rol.");
+        }
+        this.roles.clear();
+        this.roles.addAll(newRoles);
+        this.updatedAt = Instant.now();
+    }
+
     public boolean hasRole(RoleName roleName) {
         if (roleName == null) {
             return false;
