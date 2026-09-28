@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AdminService } from '../../../core/services/admin.service';
 import { AdminStoreSummary } from '../../../core/models/admin.models';
 import { AdminStoresHeader } from './components/admin-stores-header/admin-stores-header';
@@ -6,6 +6,7 @@ import { AdminStoresFilterBar } from './components/admin-stores-filter-bar/admin
 import { AdminStoresTable } from './components/admin-stores-table/admin-stores-table';
 import { StoreStatusModal } from './components/store-status-modal/store-status-modal';
 import { AdminStoreDrawer } from './components/admin-store-drawer/admin-store-drawer';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 
 @Component({
   imports: [
@@ -14,6 +15,7 @@ import { AdminStoreDrawer } from './components/admin-store-drawer/admin-store-dr
     AdminStoresTable,
     StoreStatusModal,
     AdminStoreDrawer,
+    Pagination,
   ],
   selector: 'app-admin-stores',
   styleUrl: './admin-stores.css',
@@ -28,6 +30,15 @@ export class AdminStores implements OnInit {
   readonly drawerStore = signal<AdminStoreSummary | null>(null);
   readonly isDrawerOpen = signal<boolean>(false);
 
+  readonly currentPage = signal<number>(1);
+  readonly pageSize = signal<number>(10);
+
+  readonly paginatedStores = computed(() => {
+    const list = this.adminService.filteredStores();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return list.slice(start, start + this.pageSize());
+  });
+
   ngOnInit(): void {
     if (this.adminService.stores().length === 0) {
       this.adminService.loadStores().subscribe();
@@ -38,12 +49,23 @@ export class AdminStores implements OnInit {
     this.adminService.loadStores(true).subscribe();
   }
 
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
+
   onSearchChange(query: string): void {
+    this.currentPage.set(1);
     this.adminService.setStoreSearchQuery(query);
   }
 
   onStatusChange(status: string): void {
+    this.currentPage.set(1);
     this.adminService.setStoreStatusFilter(status);
+  }
+
+  onModalityChange(modality: string): void {
+    this.currentPage.set(1);
+    this.adminService.setStoreModalityFilter(modality);
   }
 
   onOpenStatusModal(store: AdminStoreSummary): void {

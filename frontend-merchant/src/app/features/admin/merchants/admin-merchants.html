@@ -6,12 +6,31 @@
     (refresh)="onRefresh()"
   />
 
+  <!-- Barra de Filtros y Búsqueda de Comerciantes -->
+  <app-admin-merchants-filter-bar
+    [searchQuery]="adminService.merchantSearchQuery()"
+    [selectedStatus]="adminService.merchantStatusFilter()"
+    (searchChange)="onSearchChange($event)"
+    (statusChange)="onStatusChange($event)"
+  />
+
   <!-- Grid de Comerciantes -->
   <app-admin-merchants-grid
-    [merchants]="adminService.merchants()"
+    [merchants]="paginatedMerchants()"
     (selectMerchant)="onSelectMerchant($event)"
     (toggleStatus)="onOpenStatusModal($event)"
   />
+
+  <!-- Paginación Reactiva -->
+  @if (adminService.filteredMerchants().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="adminService.filteredMerchants().length"
+      [pageSize]="pageSize()"
+      itemLabel="comerciantes"
+      (pageChange)="onPageChange($event)"
+    />
+  }
 
   <!-- Modal de Suspensión / Reactivación -->
   <app-user-status-modal

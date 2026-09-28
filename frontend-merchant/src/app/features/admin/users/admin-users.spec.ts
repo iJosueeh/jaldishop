@@ -74,4 +74,31 @@ describe('AdminUsers', () => {
     component.onConfirmStatusChange(suspendedUser);
     expect(adminServiceMock.activateUser).toHaveBeenCalledWith('usr-1');
   });
+
+  it('debe abrir y cerrar la ficha 360 de usuario', () => {
+    component.onOpenUserDrawer(mockUsers[0]);
+    expect(component.isDrawerOpen()).toBe(true);
+    expect(component.selectedUser()).toEqual(mockUsers[0]);
+
+    component.onCloseUserDrawer();
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.selectedUser()).toBeNull();
+  });
+
+  it('debe actualizar la paginación de usuarios', () => {
+    component.onSearchChange('Valeria');
+    expect(adminServiceMock.setUserSearchQuery).toHaveBeenCalledWith('Valeria');
+    expect(component.currentPage()).toBe(1);
+
+    component.onRoleChange('MERCHANT');
+    expect(adminServiceMock.setUserRoleFilter).toHaveBeenCalledWith('MERCHANT');
+    expect(component.currentPage()).toBe(1);
+
+    component.onStatusChange('ACTIVE');
+    expect(adminServiceMock.setUserStatusFilter).toHaveBeenCalledWith('ACTIVE');
+    expect(component.currentPage()).toBe(1);
+
+    component.onPageChange(3);
+    expect(component.currentPage()).toBe(3);
+  });
 });

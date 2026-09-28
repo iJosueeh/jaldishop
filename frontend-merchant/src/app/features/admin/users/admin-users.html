@@ -18,10 +18,21 @@
 
   <!-- Tabla de Datos -->
   <app-admin-users-table
-    [users]="adminService.filteredUsers()"
+    [users]="paginatedUsers()"
     (selectUser)="onOpenUserDrawer($event)"
     (toggleStatus)="onOpenStatusModal($event)"
   />
+
+  <!-- Paginación Reactiva -->
+  @if (adminService.filteredUsers().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="adminService.filteredUsers().length"
+      [pageSize]="pageSize()"
+      itemLabel="usuarios"
+      (pageChange)="onPageChange($event)"
+    />
+  }
 
   <!-- Ficha 360° Drawer Lateral de Usuario -->
   <app-admin-user-drawer

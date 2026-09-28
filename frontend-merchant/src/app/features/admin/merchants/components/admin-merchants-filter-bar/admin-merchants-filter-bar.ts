@@ -5,18 +5,16 @@ import { matSearchOutline, matCloseOutline } from '@ng-icons/material-symbols/ou
 @Component({
   imports: [NgIcon],
   providers: [provideIcons({ matSearchOutline, matCloseOutline })],
-  selector: 'app-admin-stores-filter-bar',
-  styleUrl: './admin-stores-filter-bar.css',
-  templateUrl: './admin-stores-filter-bar.html',
+  selector: 'app-admin-merchants-filter-bar',
+  styleUrl: './admin-merchants-filter-bar.css',
+  templateUrl: './admin-merchants-filter-bar.html',
 })
-export class AdminStoresFilterBar {
+export class AdminMerchantsFilterBar {
   readonly searchQuery = input<string>('');
   readonly selectedStatus = input<string>('ALL');
-  readonly selectedModality = input<string>('ALL');
 
   readonly searchChange = output<string>();
   readonly statusChange = output<string>();
-  readonly modalityChange = output<string>();
 
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;

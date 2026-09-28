@@ -37,9 +37,11 @@ describe('AdminStores', () => {
       isLoadingStores: vi.fn().mockReturnValue(false),
       storeSearchQuery: vi.fn().mockReturnValue(''),
       storeStatusFilter: vi.fn().mockReturnValue('ALL'),
+      storeModalityFilter: vi.fn().mockReturnValue('ALL'),
       loadStores: vi.fn().mockReturnValue(of(mockStores)),
       setStoreSearchQuery: vi.fn(),
       setStoreStatusFilter: vi.fn(),
+      setStoreModalityFilter: vi.fn(),
       suspendStore: vi.fn().mockReturnValue(of({ ...mockStores[0], status: 'SUSPENDED' })),
       activateStore: vi.fn().mockReturnValue(of({ ...mockStores[0], status: 'ACTIVE' })),
     };
@@ -84,5 +86,14 @@ describe('AdminStores', () => {
     expect(component.isDrawerOpen()).toBe(false);
     expect(component.isModalOpen()).toBe(true);
     expect(component.selectedStore()).toEqual(mockStores[0]);
+  });
+
+  it('debe actualizar el filtro de modalidad y paginación', () => {
+    component.onModalityChange('DELIVERY');
+    expect(adminServiceMock.setStoreModalityFilter).toHaveBeenCalledWith('DELIVERY');
+    expect(component.currentPage()).toBe(1);
+
+    component.onPageChange(2);
+    expect(component.currentPage()).toBe(2);
   });
 });

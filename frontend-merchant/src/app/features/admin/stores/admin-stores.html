@@ -10,16 +10,29 @@
   <app-admin-stores-filter-bar
     [searchQuery]="adminService.storeSearchQuery()"
     [selectedStatus]="adminService.storeStatusFilter()"
+    [selectedModality]="adminService.storeModalityFilter()"
     (searchChange)="onSearchChange($event)"
     (statusChange)="onStatusChange($event)"
+    (modalityChange)="onModalityChange($event)"
   />
 
   <!-- Tabla de Datos de Tiendas -->
   <app-admin-stores-table
-    [stores]="adminService.filteredStores()"
+    [stores]="paginatedStores()"
     (selectStore)="onSelectStore($event)"
     (toggleStatus)="onOpenStatusModal($event)"
   />
+
+  <!-- Paginación Reactiva -->
+  @if (adminService.filteredStores().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="adminService.filteredStores().length"
+      [pageSize]="pageSize()"
+      itemLabel="tiendas"
+      (pageChange)="onPageChange($event)"
+    />
+  }
 
   <!-- Modal de Suspensión / Reactivación de Tienda -->
   <app-store-status-modal

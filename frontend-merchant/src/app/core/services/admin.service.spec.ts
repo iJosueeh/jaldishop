@@ -174,7 +174,7 @@ describe('AdminService', () => {
     expect(service.filteredUsers()[0].status).toBe('SUSPENDED');
   });
 
-  it('debe filtrar tiendas por estado y búsqueda de texto', () => {
+  it('debe filtrar tiendas por estado, modalidad y búsqueda de texto', () => {
     service.stores.set(mockStores);
 
     service.setStoreSearchQuery('Capri');
@@ -185,6 +185,31 @@ describe('AdminService', () => {
     service.setStoreStatusFilter('SUSPENDED');
     expect(service.filteredStores().length).toBe(1);
     expect(service.filteredStores()[0].status).toBe('SUSPENDED');
+
+    service.setStoreStatusFilter('ALL');
+    service.setStoreModalityFilter('DELIVERY');
+    expect(service.filteredStores().length).toBe(1);
+    expect(service.filteredStores()[0].deliveryEnabled).toBe(true);
+  });
+
+  it('debe filtrar comerciantes por búsqueda y estado', () => {
+    service.users.set(mockUsers);
+
+    expect(service.merchants().length).toBe(1);
+    expect(service.merchants()[0].fullName).toBe('Valeria Ramos');
+
+    service.setMerchantSearchQuery('Valeria');
+    expect(service.filteredMerchants().length).toBe(1);
+
+    service.setMerchantSearchQuery('Inexistente');
+    expect(service.filteredMerchants().length).toBe(0);
+
+    service.setMerchantSearchQuery('');
+    service.setMerchantStatusFilter('SUSPENDED');
+    expect(service.filteredMerchants().length).toBe(0);
+
+    service.setMerchantStatusFilter('ACTIVE');
+    expect(service.filteredMerchants().length).toBe(1);
   });
 
   it('debe suspender un usuario y actualizar la lista', () => {

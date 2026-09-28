@@ -33,6 +33,11 @@ export class AdminService {
   // Filtros de Tiendas
   readonly storeSearchQuery = signal<string>('');
   readonly storeStatusFilter = signal<string>('ALL');
+  readonly storeModalityFilter = signal<string>('ALL');
+
+  // Filtros de Comerciantes
+  readonly merchantSearchQuery = signal<string>('');
+  readonly merchantStatusFilter = signal<string>('ALL');
 
   // Métricas Computadas del Dashboard Global
   readonly metrics = computed<AdminDashboardMetrics>(() => {
@@ -81,22 +86,51 @@ export class AdminService {
     });
   });
 
-  // Comerciantes Especializados
+  // Comerciantes Especializados y Filtrados
   readonly merchants = computed(() => {
     return this.users().filter((u) => u.roles.includes('MERCHANT'));
+  });
+
+  readonly filteredMerchants = computed(() => {
+    const query = this.merchantSearchQuery().toLowerCase().trim();
+    const status = this.merchantStatusFilter();
+
+    return this.merchants().filter((merchant) => {
+      if (status !== 'ALL' && merchant.status !== status) {
+        return false;
+      }
+      if (query) {
+        const matchName = merchant.fullName.toLowerCase().includes(query);
+        const matchEmail = merchant.email.toLowerCase().includes(query);
+        const matchPhone = merchant.phone?.includes(query);
+        const matchStore = merchant.storeName?.toLowerCase().includes(query);
+        if (!matchName && !matchEmail && !matchPhone && !matchStore) {
+          return false;
+        }
+      }
+      return true;
+    });
   });
 
   // Tiendas Filtradas Reactivas
   readonly filteredStores = computed(() => {
     const query = this.storeSearchQuery().toLowerCase().trim();
     const status = this.storeStatusFilter();
+    const modality = this.storeModalityFilter();
 
     return this.stores().filter((store) => {
       // 1. Filtro por Estado
       if (status !== 'ALL' && store.status !== status) {
         return false;
       }
-      // 2. Filtro por Búsqueda
+      // 2. Filtro por Modalidad
+      if (modality === 'DELIVERY' && !store.deliveryEnabled) {
+        return false;
+      }
+      if (modality === 'PICKUP' && !store.pickupEnabled) {
+        return false;
+      }
+      // 3. Filtro por Búsqueda
       if (query) {
         const matchName = store.name.toLowerCase().includes(query);
         const matchSlug = store.slug.toLowerCase().includes(query);
@@ -230,6 +264,18 @@ export class AdminService {
     this.storeStatusFilter.set(status);
   }
 
+  setStoreModalityFilter(modality: string): void {
+    this.storeModalityFilter.set(modality);
+  }
+
+  setMerchantSearchQuery(query: string): void {
+    this.merchantSearchQuery.set(query);
+  }
+
+  setMerchantStatusFilter(status: string): void {
+    this.merchantStatusFilter.set(status);
+  }
+
   clearCache(): void {
     this.users.set([]);
     this.stores.set([]);
@@ -240,5 +286,8 @@ export class AdminService {
     this.userStatusFilter.set('ALL');
     this.storeSearchQuery.set('');
     this.storeStatusFilter.set('ALL');
+    this.storeModalityFilter.set('ALL');
+    this.merchantSearchQuery.set('');
+    this.merchantStatusFilter.set('ALL');
   }
 }
