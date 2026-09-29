@@ -1,10 +1,20 @@
 package com.jaldishop.backend.cart.web.controller;
 
 import com.jaldishop.backend.cart.application.AddItemToCartCommand;
+import com.jaldishop.backend.cart.application.AddItemToCartService;
 import com.jaldishop.backend.cart.application.CartItemView;
-import com.jaldishop.backend.cart.application.CartService;
 import com.jaldishop.backend.cart.application.CartView;
+import com.jaldishop.backend.cart.application.ClearCartCommand;
+import com.jaldishop.backend.cart.application.ClearCartService;
+import com.jaldishop.backend.cart.application.GetCartQuery;
+import com.jaldishop.backend.cart.application.GetCartService;
+import com.jaldishop.backend.cart.application.RemoveCartItemCommand;
+import com.jaldishop.backend.cart.application.RemoveCartItemService;
 import com.jaldishop.backend.cart.application.UpdateCartItemQuantityCommand;
+import com.jaldishop.backend.cart.application.UpdateCartItemQuantityService;
+import com.jaldishop.backend.cart.web.dto.CartItemResponse;
+import com.jaldishop.backend.cart.web.dto.CartResponse;
+import com.jaldishop.backend.cart.web.mapper.CartResponseMapper;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,7 +49,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CartControllerTest {
 
     @Mock
-    private CartService cartService;
+    private GetCartService getCartService;
+
+    @Mock
+    private AddItemToCartService addItemToCartService;
+
+    @Mock
+    private UpdateCartItemQuantityService updateCartItemQuantityService;
+
+    @Mock
+    private RemoveCartItemService removeCartItemService;
+
+    @Mock
+    private ClearCartService clearCartService;
+
+    @Mock
+    private CartResponseMapper responseMapper;
 
     private MockMvc mockMvc;
     private UUID testUserId;
@@ -53,7 +77,14 @@ class CartControllerTest {
         testStoreId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testUserId, Set.of("CUSTOMER"));
 
-        CartController controller = new CartController(cartService);
+        CartController controller = new CartController(
+                getCartService,
+                addItemToCartService,
+                updateCartItemQuantityService,
+                removeCartItemService,
+                clearCartService,
+                responseMapper
+        );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -88,8 +119,19 @@ class CartControllerTest {
                 "PEN",
                 Instant.now()
         );
+        CartResponse response = new CartResponse(
+                cartId,
+                testUserId,
+                testStoreId,
+                List.of(),
+                0,
+                BigDecimal.ZERO,
+                "PEN",
+                Instant.now()
+        );
 
-        when(cartService.getCart(testUserId, testStoreId)).thenReturn(cartView);
+        when(getCartService.execute(any(GetCartQuery.class))).thenReturn(cartView);
+        when(responseMapper.toResponse(cartView)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/cart")
                         .param("storeId", testStoreId.toString())
@@ -135,7 +177,34 @@ class CartControllerTest {
                 Instant.now()
         );
 
-        when(cartService.addItemToCart(eq(testUserId), any(AddItemToCartCommand.class))).thenReturn(cartView);
+        CartItemResponse itemResponse = new CartItemResponse(
+                variantId,
+                productId,
+                "Alfajores Artesanales",
+                "Caja x6",
+                "ALF-06",
+                "https://example.com/alfajor.png",
+                2,
+                new BigDecimal("15.00"),
+                "PEN",
+                new BigDecimal("30.00"),
+                true,
+                true
+        );
+
+        CartResponse response = new CartResponse(
+                cartId,
+                testUserId,
+                testStoreId,
+                List.of(itemResponse),
+                2,
+                new BigDecimal("30.00"),
+                "PEN",
+                Instant.now()
+        );
+
+        when(addItemToCartService.execute(any(AddItemToCartCommand.class))).thenReturn(cartView);
+        when(responseMapper.toResponse(cartView)).thenReturn(response);
 
         String json = """
                 {
@@ -172,7 +241,19 @@ class CartControllerTest {
                 Instant.now()
         );
 
-        when(cartService.updateCartItemQuantity(eq(testUserId), any(UpdateCartItemQuantityCommand.class))).thenReturn(cartView);
+        CartResponse response = new CartResponse(
+                cartId,
+                testUserId,
+                testStoreId,
+                List.of(),
+                3,
+                new BigDecimal("45.00"),
+                "PEN",
+                Instant.now()
+        );
+
+        when(updateCartItemQuantityService.execute(any(UpdateCartItemQuantityCommand.class))).thenReturn(cartView);
+        when(responseMapper.toResponse(cartView)).thenReturn(response);
 
         String json = """
                 {
@@ -206,7 +287,19 @@ class CartControllerTest {
                 Instant.now()
         );
 
-        when(cartService.removeCartItem(testUserId, testStoreId, variantId)).thenReturn(cartView);
+        CartResponse response = new CartResponse(
+                cartId,
+                testUserId,
+                testStoreId,
+                List.of(),
+                0,
+                BigDecimal.ZERO,
+                "PEN",
+                Instant.now()
+        );
+
+        when(removeCartItemService.execute(any(RemoveCartItemCommand.class))).thenReturn(cartView);
+        when(responseMapper.toResponse(cartView)).thenReturn(response);
 
         mockMvc.perform(delete("/api/v1/cart/items/{variantId}", variantId)
                         .param("storeId", testStoreId.toString())
@@ -231,7 +324,19 @@ class CartControllerTest {
                 Instant.now()
         );
 
-        when(cartService.clearCart(testUserId, testStoreId)).thenReturn(cartView);
+        CartResponse response = new CartResponse(
+                cartId,
+                testUserId,
+                testStoreId,
+                List.of(),
+                0,
+                BigDecimal.ZERO,
+                "PEN",
+                Instant.now()
+        );
+
+        when(clearCartService.execute(any(ClearCartCommand.class))).thenReturn(cartView);
+        when(responseMapper.toResponse(cartView)).thenReturn(response);
 
         mockMvc.perform(delete("/api/v1/cart")
                         .param("storeId", testStoreId.toString())
