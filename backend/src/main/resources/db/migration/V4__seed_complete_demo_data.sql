@@ -257,14 +257,14 @@ ON CONFLICT (variant_id, name) DO NOTHING;
 -- --------------------------------------------------------------------
 -- 10. INVENTARIOS (inventories)
 -- --------------------------------------------------------------------
-INSERT INTO inventories (variant_id, stock_quantity, min_alert_threshold, updated_at) VALUES
+INSERT INTO inventories (variant_id, quantity, low_stock_threshold, updated_at) VALUES
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf302', 15, 5, NOW()), -- Porción Torta Choc (Stock normal)
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf303', 2, 5, NOW()),  -- Cheesecake (Stock bajo -> Alerta)
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf304', 8, 4, NOW()),  -- Pie de Limón
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf305', 25, 6, NOW()), -- Alfajores x6
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf306', 10, 4, NOW()), -- Alfajores x12
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf310', 18, 5, NOW())  -- Croissants
-ON CONFLICT (variant_id) DO UPDATE SET stock_quantity = EXCLUDED.stock_quantity;
+ON CONFLICT (variant_id) DO UPDATE SET quantity = EXCLUDED.quantity, low_stock_threshold = EXCLUDED.low_stock_threshold, updated_at = EXCLUDED.updated_at;
 
 -- --------------------------------------------------------------------
 -- 11. DESCUENTOS & CUPONES (discounts)
@@ -295,9 +295,9 @@ ON CONFLICT (id) DO NOTHING;
 -- --------------------------------------------------------------------
 -- 13. EXCEPCIONES DE CAPACIDAD (capacity_exceptions)
 -- --------------------------------------------------------------------
-INSERT INTO capacity_exceptions (id, store_id, service_date, start_time, end_time, exception_capacity, reason, created_at, updated_at) VALUES
-    ('80acf0ba-5a79-4888-b00d-b5aef8fcf551', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5', CURRENT_DATE + INTERVAL '10 days', NULL, NULL, 0, 'Cierre extraordinario por inventario general y mantenimiento.', NOW(), NOW()),
-    ('80acf0ba-5a79-4888-b00d-b5aef8fcf552', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5', CURRENT_DATE + INTERVAL '15 days', '09:00:00', '21:00:00', 35, 'Campaña especial de fin de semana con alta demanda.', NOW(), NOW())
+INSERT INTO capacity_exceptions (id, store_id, service_date, start_time, end_time, exception_capacity, reason, status, created_at, updated_at) VALUES
+    ('80acf0ba-5a79-4888-b00d-b5aef8fcf551', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5', CURRENT_DATE + INTERVAL '10 days', NULL, NULL, 0, 'Cierre extraordinario por inventario general y mantenimiento.', 'ACTIVE', NOW(), NOW()),
+    ('80acf0ba-5a79-4888-b00d-b5aef8fcf552', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5', CURRENT_DATE + INTERVAL '15 days', '09:00:00', '21:00:00', 35, 'Campaña especial de fin de semana con alta demanda.', 'ACTIVE', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- --------------------------------------------------------------------
@@ -602,10 +602,10 @@ INSERT INTO carts (id, user_id, store_id, created_at, updated_at) VALUES
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf901', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2', '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5', NOW() - INTERVAL '15 minutes', NOW())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO cart_items (cart_id, variant_id, quantity, unit_price_amount, unit_price_currency, added_at, updated_at) VALUES
+INSERT INTO cart_items (cart_id, variant_id, quantity, reference_price_amount, reference_price_currency, created_at, updated_at) VALUES
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf901', '80acf0ba-5a79-4888-b00d-b5aef8fcf303', 1, 14.00, 'PEN', NOW() - INTERVAL '15 minutes', NOW()),
     ('80acf0ba-5a79-4888-b00d-b5aef8fcf901', '80acf0ba-5a79-4888-b00d-b5aef8fcf305', 1, 20.00, 'PEN', NOW() - INTERVAL '10 minutes', NOW())
-ON CONFLICT (cart_id, variant_id) DO UPDATE SET quantity = EXCLUDED.quantity;
+ON CONFLICT (cart_id, variant_id) DO UPDATE SET quantity = EXCLUDED.quantity, reference_price_amount = EXCLUDED.reference_price_amount, updated_at = EXCLUDED.updated_at;
 
 -- --------------------------------------------------------------------
 -- 20. FAVORITOS (favorites)
