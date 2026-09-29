@@ -9,7 +9,6 @@ import com.jaldishop.backend.catalog.domain.ProductVariant;
 import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.domain.VariantStatus;
 import com.jaldishop.backend.shared.exception.ConflictException;
-import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreRepository;
 import com.jaldishop.backend.store.domain.StoreStatus;
@@ -32,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CartServiceTest {
+class AddItemToCartServiceTest {
 
     @Mock
     private CartRepository cartRepository;
@@ -50,11 +49,10 @@ class CartServiceTest {
     private CartViewAssembler cartViewAssembler;
 
     @InjectMocks
-    private CartService cartService;
+    private AddItemToCartService addItemToCartService;
 
     private UUID userId;
     private UUID storeId;
-    private UUID productId;
     private UUID variantId;
     private Store mockStore;
     private Product mockProduct;
@@ -65,7 +63,6 @@ class CartServiceTest {
     void setUp() {
         userId = UUID.randomUUID();
         storeId = UUID.randomUUID();
-        productId = UUID.randomUUID();
         variantId = UUID.randomUUID();
 
         mockStore = Store.reconstitute(
@@ -117,23 +114,9 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("Should return empty CartView when cart does not exist")
-    void shouldReturnEmptyCartViewWhenCartDoesNotExist() {
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.empty());
-        when(cartViewAssembler.empty(userId, storeId)).thenReturn(mockCartView);
-
-        CartView result = cartService.getCart(userId, storeId);
-
-        assertNotNull(result);
-        assertEquals(mockCartView, result);
-        verify(cartViewAssembler).empty(userId, storeId);
-    }
-
-    @Test
     @DisplayName("Should add item to cart successfully")
     void shouldAddItemToCartSuccessfully() {
-        var command = new AddItemToCartCommand(storeId, variantId, 2);
+        var command = new AddItemToCartCommand(userId, storeId, variantId, 2);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
         when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(mockVariant));
@@ -142,7 +125,7 @@ class CartServiceTest {
         when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
         when(cartViewAssembler.assemble(any(Cart.class))).thenReturn(mockCartView);
 
-        CartView result = cartService.addItemToCart(userId, command);
+        CartView result = addItemToCartService.execute(command);
 
         assertNotNull(result);
         assertEquals(mockCartView, result);
@@ -154,13 +137,13 @@ class CartServiceTest {
     @DisplayName("Should reject adding item if variant is INACTIVE")
     void shouldRejectAddingInactiveVariant() {
         mockVariant.deactivate();
-        var command = new AddItemToCartCommand(storeId, variantId, 1);
+        var command = new AddItemToCartCommand(userId, storeId, variantId, 1);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
         when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(mockVariant));
 
         ConflictException ex = assertThrows(ConflictException.class, () ->
-                cartService.addItemToCart(userId, command)
+                addItemToCartService.execute(command)
         );
 
         assertEquals("VARIANT_INACTIVE", ex.getCode());
@@ -174,14 +157,14 @@ class CartServiceTest {
         UUID otherStoreId = UUID.randomUUID();
         Product otherStoreProduct = Product.create(otherStoreId, UUID.randomUUID(), "Otro Producto", "otro-prod", "Desc", null);
 
-        var command = new AddItemToCartCommand(storeId, variantId, 1);
+        var command = new AddItemToCartCommand(userId, storeId, variantId, 1);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
         when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(mockVariant));
         when(productRepository.findById(mockVariant.getProductId())).thenReturn(Optional.of(otherStoreProduct));
 
         ConflictException ex = assertThrows(ConflictException.class, () ->
-                cartService.addItemToCart(userId, command)
+                addItemToCartService.execute(command)
         );
 
         assertEquals("VARIANT_STORE_MISMATCH", ex.getCode());
@@ -190,61 +173,10 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("Should update cart item quantity")
-    void shouldUpdateCartItemQuantity() {
-        Cart cart = Cart.create(userId, storeId);
-        cart.addItem(variantId, 2, new BigDecimal("12.00"), "PEN");
+    @DisplayName("Should reject adding item if quantity is <= 0")
+    void shouldRejectZeroQuantity() {
+        var command = new AddItemToCartCommand(userId, storeId, variantId, 0);
 
-        var command = new UpdateCartItemQuantityCommand(storeId, variantId, 5);
-
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartViewAssembler.assemble(any(Cart.class))).thenReturn(mockCartView);
-
-        CartView result = cartService.updateCartItemQuantity(userId, command);
-
-        assertNotNull(result);
-        assertEquals(mockCartView, result);
-        verify(cartRepository).save(any(Cart.class));
-        verify(cartViewAssembler).assemble(any(Cart.class));
-    }
-
-    @Test
-    @DisplayName("Should remove cart item")
-    void shouldRemoveCartItem() {
-        Cart cart = Cart.create(userId, storeId);
-        cart.addItem(variantId, 2, new BigDecimal("12.00"), "PEN");
-
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartViewAssembler.assemble(any(Cart.class))).thenReturn(mockCartView);
-
-        CartView result = cartService.removeCartItem(userId, storeId, variantId);
-
-        assertNotNull(result);
-        assertEquals(mockCartView, result);
-        verify(cartRepository).save(any(Cart.class));
-        verify(cartViewAssembler).assemble(any(Cart.class));
-    }
-
-    @Test
-    @DisplayName("Should clear cart")
-    void shouldClearCart() {
-        Cart cart = Cart.create(userId, storeId);
-        cart.addItem(variantId, 2, new BigDecimal("12.00"), "PEN");
-
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartViewAssembler.assemble(any(Cart.class))).thenReturn(mockCartView);
-
-        CartView result = cartService.clearCart(userId, storeId);
-
-        assertNotNull(result);
-        assertEquals(mockCartView, result);
-        verify(cartRepository).save(any(Cart.class));
-        verify(cartViewAssembler).assemble(any(Cart.class));
+        assertThrows(IllegalArgumentException.class, () -> addItemToCartService.execute(command));
     }
 }

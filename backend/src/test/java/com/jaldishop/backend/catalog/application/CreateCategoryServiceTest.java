@@ -18,13 +18,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CategoryServiceTest {
+class CreateCategoryServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
 
     @InjectMocks
-    private CategoryService categoryService;
+    private CreateCategoryService createCategoryService;
 
     private UUID storeId;
 
@@ -41,7 +41,7 @@ class CategoryServiceTest {
         when(categoryRepository.existsByStoreIdAndNameIgnoreCase(storeId, "Postres")).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Category result = categoryService.createCategory(command);
+        Category result = createCategoryService.execute(command);
 
         assertNotNull(result);
         assertEquals("Postres", result.getName());
@@ -57,7 +57,7 @@ class CategoryServiceTest {
         when(categoryRepository.existsByStoreIdAndNameIgnoreCase(storeId, "Postres")).thenReturn(true);
 
         var exception = assertThrows(ConflictException.class, () ->
-                categoryService.createCategory(command)
+                createCategoryService.execute(command)
         );
 
         assertEquals("CATEGORY_ALREADY_EXISTS", exception.getCode());

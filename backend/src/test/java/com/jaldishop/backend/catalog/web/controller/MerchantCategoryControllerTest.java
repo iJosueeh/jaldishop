@@ -1,8 +1,12 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.CategoryService;
 import com.jaldishop.backend.catalog.application.CreateCategoryCommand;
+import com.jaldishop.backend.catalog.application.CreateCategoryService;
+import com.jaldishop.backend.catalog.application.GetCategoriesService;
+import com.jaldishop.backend.catalog.application.UpdateCategoryService;
 import com.jaldishop.backend.catalog.domain.Category;
+import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
+import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,16 +35,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MerchantCategoryControllerTest {
 
     @Mock
-    private CategoryService categoryService;
+    private CreateCategoryService createCategoryService;
+
+    @Mock
+    private UpdateCategoryService updateCategoryService;
+
+    @Mock
+    private GetCategoriesService getCategoriesService;
 
     @Mock
     private StoreContextService storeContextService;
+
+    @Mock
+    private CategoryResponseMapper responseMapper;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        MerchantCategoryController controller = new MerchantCategoryController(categoryService, storeContextService);
+        MerchantCategoryController controller = new MerchantCategoryController(
+                createCategoryService,
+                updateCategoryService,
+                getCategoriesService,
+                storeContextService,
+                responseMapper
+        );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -51,9 +71,19 @@ class MerchantCategoryControllerTest {
     void shouldCreateCategory() throws Exception {
         UUID storeId = UUID.randomUUID();
         Category category = Category.create(storeId, "Postres", "Postres artesanales");
+        CategoryResponse response = new CategoryResponse(
+                category.getId(),
+                storeId,
+                "Postres",
+                "Postres artesanales",
+                "ACTIVE",
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(categoryService.createCategory(any(CreateCategoryCommand.class))).thenReturn(category);
+        when(createCategoryService.execute(any(CreateCategoryCommand.class))).thenReturn(category);
+        when(responseMapper.toResponse(category)).thenReturn(response);
 
         String requestJson = """
                 {
@@ -75,9 +105,19 @@ class MerchantCategoryControllerTest {
     void shouldGetCategories() throws Exception {
         UUID storeId = UUID.randomUUID();
         Category category = Category.create(storeId, "Bebidas", null);
+        CategoryResponse response = new CategoryResponse(
+                category.getId(),
+                storeId,
+                "Bebidas",
+                null,
+                "ACTIVE",
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(categoryService.getCategoriesByStore(storeId)).thenReturn(List.of(category));
+        when(getCategoriesService.execute(storeId)).thenReturn(List.of(category));
+        when(responseMapper.toResponse(category)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/categories", storeId))
                 .andExpect(status().isOk())
