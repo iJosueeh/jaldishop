@@ -1,0 +1,50 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado -->
+  <app-admin-merchants-header
+    [totalCount]="adminService.metrics().totalMerchants"
+    [isLoading]="adminService.isLoadingUsers()"
+    (refresh)="onRefresh()"
+  />
+
+  <!-- Barra de Filtros y Búsqueda de Comerciantes -->
+  <app-admin-merchants-filter-bar
+    [searchQuery]="adminService.merchantSearchQuery()"
+    [selectedStatus]="adminService.merchantStatusFilter()"
+    (searchChange)="onSearchChange($event)"
+    (statusChange)="onStatusChange($event)"
+  />
+
+  <!-- Grid de Comerciantes -->
+  <app-admin-merchants-grid
+    [merchants]="paginatedMerchants()"
+    (selectMerchant)="onSelectMerchant($event)"
+    (toggleStatus)="onOpenStatusModal($event)"
+  />
+
+  <!-- Paginación Reactiva -->
+  @if (adminService.filteredMerchants().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="adminService.filteredMerchants().length"
+      [pageSize]="pageSize()"
+      itemLabel="comerciantes"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+
+  <!-- Modal de Suspensión / Reactivación -->
+  <app-user-status-modal
+    [isOpen]="isModalOpen()"
+    [user]="selectedMerchant()"
+    (confirm)="onConfirmStatusChange($event)"
+    (cancel)="onCloseModal()"
+  />
+
+  <!-- Ficha 360° con Drawer Lateral -->
+  <app-admin-user-drawer
+    [isOpen]="isDrawerOpen()"
+    [user]="drawerMerchant()"
+    (closeDrawer)="onCloseDrawer()"
+    (statusChange)="onDrawerStatusChange($event)"
+  />
+</div>

@@ -1,0 +1,352 @@
+@if (isOpen() && user()) {
+  @let u = user()!;
+  <div class="fixed inset-0 z-50 overflow-hidden flex justify-end">
+    <!-- Backdrop oscuro -->
+    <div
+      (click)="dismiss()"
+      class="fixed inset-0 bg-black/50 backdrop-blur-xs"
+      [class.drawer-backdrop-enter]="!isClosing()"
+      [class.drawer-backdrop-exit]="isClosing()"
+    ></div>
+
+    <!-- Panel Drawer Lateral (Slide-Over) -->
+    <div
+      class="relative w-full max-w-md sm:max-w-lg lg:max-w-xl bg-surface-container-lowest border-l border-outline-variant/30 shadow-2xl h-full flex flex-col z-10 overflow-hidden font-sans"
+      [class.drawer-panel-enter]="!isClosing()"
+      [class.drawer-panel-exit]="isClosing()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- 1. Header del Drawer -->
+      <div class="p-5 sm:p-6 border-b border-outline-variant/20 bg-surface-container/20 flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-on-primary font-black text-lg sm:text-xl flex items-center justify-center shadow-xs shrink-0">
+            {{ u.fullName.substring(0, 2).toUpperCase() }}
+          </div>
+          <div class="flex flex-col min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-black text-on-surface truncate leading-tight">
+                {{ u.fullName }}
+              </h2>
+              <!-- Badge de Estado -->
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
+                [class.bg-emerald-500/10]="u.status === 'ACTIVE'"
+                [class.text-emerald-700]="u.status === 'ACTIVE'"
+                [class.dark:text-emerald-400]="u.status === 'ACTIVE'"
+                [class.bg-rose-500/10]="u.status === 'SUSPENDED'"
+                [class.text-rose-700]="u.status === 'SUSPENDED'"
+                [class.dark:text-rose-400]="u.status === 'SUSPENDED'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-emerald-500]="u.status === 'ACTIVE'"
+                  [class.bg-rose-500]="u.status === 'SUSPENDED'"
+                ></span>
+                {{ u.status === 'ACTIVE' ? 'Activo' : 'Suspendido' }}
+              </span>
+            </div>
+            <span class="text-xs text-on-surface-variant font-medium truncate mt-0.5">
+              {{ u.email }}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 cursor-pointer"
+          aria-label="Cerrar ficha"
+        >
+          <ng-icon name="matCloseOutline" class="text-[22px]" />
+        </button>
+      </div>
+
+      <!-- 2. Cuerpo del Drawer (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <!-- Tarjeta: Acciones Rápidas de Operación & Soporte -->
+        <section class="p-4 rounded-2xl bg-surface-container-high/40 border border-outline-variant/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+              <ng-icon name="matBoltOutline" class="text-[14px]" />
+              Acciones Rápidas de Soporte
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Botón Restablecer Clave -->
+            <button
+              type="button"
+              (click)="onSendPasswordReset()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface transition-all cursor-pointer text-left"
+            >
+              <ng-icon name="matLockOutline" class="text-[16px] text-primary shrink-0" />
+              <div class="flex flex-col min-w-0">
+                <span class="truncate">Resetear Clave</span>
+                <span class="text-[10px] text-on-surface-variant font-normal">Enviar email de recuperación</span>
+              </div>
+            </button>
+
+            <!-- Botón WhatsApp Soporte -->
+            @if (u.phone) {
+              <a
+                [href]="'https://wa.me/' + u.phone + '?text=Hola%20' + u.fullName + ',%20te%20contactamos%20desde%20el%20equipo%20de%20administraci%C3%B3n%20de%20JaldiShop.'"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-all cursor-pointer text-left"
+              >
+                <ng-icon name="matChatOutline" class="text-[16px] shrink-0" />
+                <div class="flex flex-col min-w-0">
+                  <span class="truncate">WhatsApp Soporte</span>
+                  <span class="text-[10px] opacity-80 font-normal">Iniciar chat oficial</span>
+                </div>
+              </a>
+            } @else {
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container/40 border border-outline-variant/10 text-xs font-medium text-on-surface-variant/60 cursor-not-allowed">
+                <ng-icon name="matChatOutline" class="text-[16px] shrink-0" />
+                <div class="flex flex-col min-w-0">
+                  <span class="truncate">WhatsApp No Disp.</span>
+                  <span class="text-[10px]">Sin teléfono registrado</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Tarjeta: Identificadores & Contacto -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+            Datos de Identidad & Contacto
+          </span>
+
+          <!-- ID UUID -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matKeyOutline" class="text-[16px]" />
+              ID de Usuario
+            </span>
+            <button
+              type="button"
+              (click)="copyId(u.id)"
+              class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-[11px] font-mono font-bold text-on-surface transition-colors cursor-pointer"
+              title="Copiar ID"
+            >
+              <span>{{ u.id.substring(0, 12) }}...</span>
+              <ng-icon name="matContentCopyOutline" class="text-[13px] text-on-surface-variant" />
+            </button>
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matMailOutline" class="text-[16px]" />
+              Correo
+            </span>
+            <a
+              [href]="'mailto:' + u.email"
+              class="font-bold text-primary hover:underline"
+            >
+              {{ u.email }}
+            </a>
+          </div>
+
+          <!-- Teléfono / WhatsApp -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matCallOutline" class="text-[16px]" />
+              Teléfono
+            </span>
+            @if (u.phone) {
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-on-surface font-mono">{{ u.phone }}</span>
+                <a
+                  [href]="'https://wa.me/' + u.phone"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="p-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                  title="Contactar por WhatsApp"
+                >
+                  <ng-icon name="matChatOutline" class="text-[14px]" />
+                </a>
+              </div>
+            } @else {
+              <span class="text-on-surface-variant/60 font-medium">No registrado</span>
+            }
+          </div>
+
+          <!-- Fecha de Registro -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matCalendarMonthOutline" class="text-[16px]" />
+              Fecha de Registro
+            </span>
+            <span class="font-bold text-on-surface">
+              {{ u.createdAt ? (u.createdAt | date: 'dd/MM/yyyy, HH:mm') : '--' }}
+            </span>
+          </div>
+        </section>
+
+        <!-- Tarjeta: Roles Asignados & Gestión -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+              Roles y Nivel de Acceso
+            </span>
+            <span class="text-[10px] text-on-surface-variant font-medium">Click para alternar</span>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- ADMIN -->
+            <button
+              type="button"
+              (click)="onToggleRole('ADMIN')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-primary]="u.roles.includes('ADMIN')"
+              [class.text-on-primary]="u.roles.includes('ADMIN')"
+              [class.border-primary]="u.roles.includes('ADMIN')"
+              [class.bg-surface-container]="!u.roles.includes('ADMIN')"
+              [class.text-on-surface-variant]="!u.roles.includes('ADMIN')"
+              [class.border-outline-variant/30]="!u.roles.includes('ADMIN')"
+            >
+              <ng-icon name="matShieldOutline" class="text-[15px]" />
+              <span>Admin</span>
+              @if (u.roles.includes('ADMIN')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
+
+            <!-- MERCHANT -->
+            <button
+              type="button"
+              (click)="onToggleRole('MERCHANT')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-secondary]="u.roles.includes('MERCHANT')"
+              [class.text-on-secondary]="u.roles.includes('MERCHANT')"
+              [class.border-secondary]="u.roles.includes('MERCHANT')"
+              [class.bg-surface-container]="!u.roles.includes('MERCHANT')"
+              [class.text-on-surface-variant]="!u.roles.includes('MERCHANT')"
+              [class.border-outline-variant/30]="!u.roles.includes('MERCHANT')"
+            >
+              <ng-icon name="matStorefrontOutline" class="text-[15px]" />
+              <span>Comerciante</span>
+              @if (u.roles.includes('MERCHANT')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
+
+            <!-- CUSTOMER -->
+            <button
+              type="button"
+              (click)="onToggleRole('CUSTOMER')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all cursor-pointer"
+              [class.bg-surface-container-highest]="u.roles.includes('CUSTOMER')"
+              [class.text-on-surface]="u.roles.includes('CUSTOMER')"
+              [class.border-outline-variant/60]="u.roles.includes('CUSTOMER')"
+              [class.bg-surface-container]="!u.roles.includes('CUSTOMER')"
+              [class.text-on-surface-variant]="!u.roles.includes('CUSTOMER')"
+              [class.border-outline-variant/30]="!u.roles.includes('CUSTOMER')"
+            >
+              <span>Cliente</span>
+              @if (u.roles.includes('CUSTOMER')) {
+                <ng-icon name="matCheckOutline" class="text-[14px]" />
+              }
+            </button>
+          </div>
+        </section>
+
+        <!-- Tarjeta: Tienda Vinculada (Si es Comerciante) -->
+        @if (u.storeName) {
+          <section class="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                Tienda Vinculada
+              </span>
+              <span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-extrabold uppercase">
+                Activa
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-black text-sm shrink-0">
+                <ng-icon name="matStorefrontOutline" class="text-[20px]" />
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-extrabold text-on-surface truncate">
+                  {{ u.storeName }}
+                </span>
+                <span class="text-xs text-on-surface-variant font-medium">
+                  Comercio Asociado
+                </span>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- Tarjeta: Notas Internas de Auditoría -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              <ng-icon name="matNotesOutline" class="text-[15px]" />
+              Notas de Auditoría (Admin)
+            </span>
+            @if (isNoteSaved()) {
+              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <ng-icon name="matCheckOutline" class="text-[13px]" />
+                Guardado
+              </span>
+            }
+          </div>
+
+          <textarea
+            rows="2"
+            [value]="adminNote()"
+            (input)="onNoteInput($event)"
+            placeholder="Escribir anotaciones internas sobre este usuario (visibles solo para administradores)..."
+            class="w-full px-3 py-2 text-xs rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none transition-colors"
+          ></textarea>
+
+          <div class="flex justify-end">
+            <button
+              type="button"
+              (click)="onSaveNote()"
+              [disabled]="!adminNote().trim()"
+              class="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest disabled:opacity-40 text-on-surface text-xs font-bold transition-all cursor-pointer"
+            >
+              Guardar Nota
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- 3. Footer con Acciones de Gobierno -->
+      <div class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container/30 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors cursor-pointer"
+        >
+          Cerrar
+        </button>
+
+        @if (u.status === 'ACTIVE') {
+          <button
+            type="button"
+            (click)="onToggleStatus()"
+            class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon name="matCancelOutline" class="text-[16px]" />
+            <span>Suspender Cuenta</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="onToggleStatus()"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+            <span>Reactivar Cuenta</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

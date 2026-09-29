@@ -1,12 +1,16 @@
 package com.jaldishop.backend.catalog.web.controller;
 
 import com.jaldishop.backend.catalog.application.CreateProductVariantCommand;
-import com.jaldishop.backend.catalog.application.ProductVariantService;
+import com.jaldishop.backend.catalog.application.CreateProductVariantService;
+import com.jaldishop.backend.catalog.application.GetProductVariantsService;
 import com.jaldishop.backend.catalog.application.UpdateProductVariantCommand;
+import com.jaldishop.backend.catalog.application.UpdateProductVariantService;
+import com.jaldishop.backend.catalog.domain.ProductVariant;
 import com.jaldishop.backend.catalog.domain.VariantAttribute;
 import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
+import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
@@ -19,19 +23,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/products/{productId}/variants")
 @PreAuthorize("hasRole('MERCHANT')")
 public class MerchantProductVariantController {
 
-    private final ProductVariantService variantService;
+    private final CreateProductVariantService createVariantService;
+    private final UpdateProductVariantService updateVariantService;
+    private final GetProductVariantsService getVariantsService;
     private final StoreContextService storeContextService;
+    private final ProductVariantResponseMapper responseMapper;
 
-    public MerchantProductVariantController(ProductVariantService variantService, StoreContextService storeContextService) {
-        this.variantService = variantService;
+    public MerchantProductVariantController(
+            CreateProductVariantService createVariantService,
+            UpdateProductVariantService updateVariantService,
+            GetProductVariantsService getVariantsService,
+            StoreContextService storeContextService,
+            ProductVariantResponseMapper responseMapper
+    ) {
+        this.createVariantService = createVariantService;
+        this.updateVariantService = updateVariantService;
+        this.getVariantsService = getVariantsService;
         this.storeContextService = storeContextService;
+        this.responseMapper = responseMapper;
     }
 
     @PostMapping
@@ -45,7 +60,7 @@ public class MerchantProductVariantController {
         List<VariantAttribute> attributes = request.attributes() != null
                 ? request.attributes().stream()
                 .map(attr -> new VariantAttribute(attr.name(), attr.value()))
-                .collect(Collectors.toList())
+                .toList()
                 : Collections.emptyList();
 
         var command = new CreateProductVariantCommand(
@@ -59,8 +74,8 @@ public class MerchantProductVariantController {
                 attributes
         );
 
-        var created = variantService.createVariant(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ProductVariantResponse.fromDomain(created));
+        ProductVariant created = createVariantService.execute(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMapper.toResponse(created));
     }
 
     @GetMapping
@@ -70,10 +85,11 @@ public class MerchantProductVariantController {
             @PathVariable UUID productId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        var list = variantService.getVariantsByProduct(productId, storeId).stream()
-                .map(ProductVariantResponse::fromDomain)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(list);
+        List<ProductVariant> list = getVariantsService.execute(productId, storeId);
+        List<ProductVariantResponse> response = list.stream()
+                .map(responseMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{variantId}")
@@ -84,8 +100,8 @@ public class MerchantProductVariantController {
             @PathVariable UUID variantId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        var variant = variantService.getVariantById(variantId, productId, storeId);
-        return ResponseEntity.ok(ProductVariantResponse.fromDomain(variant));
+        ProductVariant variant = getVariantsService.execute(variantId, productId, storeId);
+        return ResponseEntity.ok(responseMapper.toResponse(variant));
     }
 
     @PutMapping("/{variantId}")
@@ -100,7 +116,7 @@ public class MerchantProductVariantController {
         List<VariantAttribute> attributes = request.attributes() != null
                 ? request.attributes().stream()
                 .map(attr -> new VariantAttribute(attr.name(), attr.value()))
-                .collect(Collectors.toList())
+                .toList()
                 : Collections.emptyList();
 
         var command = new UpdateProductVariantCommand(
@@ -116,7 +132,7 @@ public class MerchantProductVariantController {
                 attributes
         );
 
-        var updated = variantService.updateVariant(command);
-        return ResponseEntity.ok(ProductVariantResponse.fromDomain(updated));
+        ProductVariant updated = updateVariantService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
     }
 }

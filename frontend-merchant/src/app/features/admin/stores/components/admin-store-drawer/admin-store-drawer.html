@@ -1,0 +1,324 @@
+@if (isOpen() && store()) {
+  @let s = store()!;
+  <div class="fixed inset-0 z-50 overflow-hidden flex justify-end">
+    <!-- Backdrop oscuro -->
+    <div
+      (click)="dismiss()"
+      class="fixed inset-0 bg-black/50 backdrop-blur-xs"
+      [class.drawer-backdrop-enter]="!isClosing()"
+      [class.drawer-backdrop-exit]="isClosing()"
+    ></div>
+
+    <!-- Panel Drawer Lateral (Slide-Over) -->
+    <div
+      class="relative w-full max-w-md sm:max-w-lg lg:max-w-xl bg-surface-container-lowest border-l border-outline-variant/30 shadow-2xl h-full flex flex-col z-10 overflow-hidden font-sans"
+      [class.drawer-panel-enter]="!isClosing()"
+      [class.drawer-panel-exit]="isClosing()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- 1. Header del Drawer -->
+      <div class="p-5 sm:p-6 border-b border-outline-variant/20 bg-surface-container/20 flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-secondary text-on-secondary font-black text-lg sm:text-xl flex items-center justify-center shadow-xs shrink-0">
+            <ng-icon name="matStorefrontOutline" class="text-[26px]" />
+          </div>
+          <div class="flex flex-col min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-black text-on-surface truncate leading-tight">
+                {{ s.name }}
+              </h2>
+              <!-- Badge de Estado -->
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
+                [class.bg-emerald-500/10]="s.status === 'ACTIVE'"
+                [class.text-emerald-700]="s.status === 'ACTIVE'"
+                [class.dark:text-emerald-400]="s.status === 'ACTIVE'"
+                [class.bg-rose-500/10]="s.status === 'SUSPENDED'"
+                [class.text-rose-700]="s.status === 'SUSPENDED'"
+                [class.dark:text-rose-400]="s.status === 'SUSPENDED'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-emerald-500]="s.status === 'ACTIVE'"
+                  [class.bg-rose-500]="s.status === 'SUSPENDED'"
+                ></span>
+                {{ s.status === 'ACTIVE' ? 'Activa' : 'Suspendida' }}
+              </span>
+            </div>
+            <span class="text-xs text-primary font-mono font-bold truncate mt-0.5">
+              /{{ s.slug }}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 cursor-pointer"
+          aria-label="Cerrar ficha"
+        >
+          <ng-icon name="matCloseOutline" class="text-[22px]" />
+        </button>
+      </div>
+
+      <!-- 2. Cuerpo del Drawer (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <!-- Tarjeta: Acciones Rápidas de la Tienda -->
+        <section class="p-4 rounded-2xl bg-surface-container-high/40 border border-outline-variant/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+              <ng-icon name="matBoltOutline" class="text-[14px]" />
+              Acciones de Operación & Catálogo
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Botón Ver Tienda Pública -->
+            <button
+              type="button"
+              (click)="openPublicStore(s.slug)"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface transition-all cursor-pointer text-left"
+            >
+              <ng-icon name="matOpenInNewOutline" class="text-[16px] text-primary shrink-0" />
+              <div class="flex flex-col min-w-0">
+                <span class="truncate">Ver Catálogo Público</span>
+                <span class="text-[10px] text-on-surface-variant font-normal">Abrir /store/{{ s.slug }}</span>
+              </div>
+            </button>
+
+            <!-- Botón Copiar URL Tienda -->
+            <button
+              type="button"
+              (click)="copyStoreLink(s.slug)"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-bold text-on-surface transition-all cursor-pointer text-left"
+            >
+              <ng-icon name="matContentCopyOutline" class="text-[16px] text-primary shrink-0" />
+              <div class="flex flex-col min-w-0">
+                <span class="truncate">Copiar Enlace Tienda</span>
+                <span class="text-[10px] text-on-surface-variant font-normal">URL completa para compartir</span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- Tarjeta: Datos de la Tienda -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+            Identificación de la Tienda
+          </span>
+
+          <!-- ID UUID -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matKeyOutline" class="text-[16px]" />
+              ID de Tienda
+            </span>
+            <button
+              type="button"
+              (click)="copyId(s.id)"
+              class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-[11px] font-mono font-bold text-on-surface transition-colors cursor-pointer"
+              title="Copiar ID"
+            >
+              <span>{{ s.id.substring(0, 12) }}...</span>
+              <ng-icon name="matContentCopyOutline" class="text-[13px] text-on-surface-variant" />
+            </button>
+          </div>
+
+          <!-- Teléfono de Contacto -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matCallOutline" class="text-[16px]" />
+              Teléfono Tienda
+            </span>
+            <span class="font-bold text-on-surface font-mono">
+              {{ s.contactPhone || 'No registrado' }}
+            </span>
+          </div>
+
+          <!-- Fecha de Creación -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
+              <ng-icon name="matCalendarMonthOutline" class="text-[16px]" />
+              Registrada el
+            </span>
+            <span class="font-bold text-on-surface">
+              {{ s.createdAt ? (s.createdAt | date: 'dd/MM/yyyy, HH:mm') : '--' }}
+            </span>
+          </div>
+        </section>
+
+        <!-- Tarjeta: Control de Modalidades de Entrega -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              <ng-icon name="matLocalShippingOutline" class="text-[15px]" />
+              Canales y Modalidades
+            </span>
+            <span class="text-[10px] text-on-surface-variant font-medium">Gestión rápida</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Pickup Toggle -->
+            <button
+              type="button"
+              (click)="onToggleModality('pickup')"
+              class="p-3 rounded-xl border flex flex-col items-start gap-1.5 transition-all cursor-pointer text-left"
+              [class.bg-secondary/10]="s.pickupEnabled"
+              [class.border-secondary/30]="s.pickupEnabled"
+              [class.bg-surface-container]="!s.pickupEnabled"
+              [class.border-outline-variant/30]="!s.pickupEnabled"
+            >
+              <div class="flex items-center justify-between w-full">
+                <span class="text-xs font-black text-on-surface">Pickup</span>
+                @if (s.pickupEnabled) {
+                  <span class="w-2 h-2 rounded-full bg-secondary"></span>
+                } @else {
+                  <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                }
+              </div>
+              <span class="text-[10px] text-on-surface-variant">
+                {{ s.pickupEnabled ? 'Habilitado en local' : 'Desactivado' }}
+              </span>
+            </button>
+
+            <!-- Delivery Toggle -->
+            <button
+              type="button"
+              (click)="onToggleModality('delivery')"
+              class="p-3 rounded-xl border flex flex-col items-start gap-1.5 transition-all cursor-pointer text-left"
+              [class.bg-primary/10]="s.deliveryEnabled"
+              [class.border-primary/30]="s.deliveryEnabled"
+              [class.bg-surface-container]="!s.deliveryEnabled"
+              [class.border-outline-variant/30]="!s.deliveryEnabled"
+            >
+              <div class="flex items-center justify-between w-full">
+                <span class="text-xs font-black text-on-surface">Delivery</span>
+                @if (s.deliveryEnabled) {
+                  <span class="w-2 h-2 rounded-full bg-primary"></span>
+                } @else {
+                  <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                }
+              </div>
+              <span class="text-[10px] text-on-surface-variant">
+                {{ s.deliveryEnabled ? 'Envíos habilitados' : 'Desactivado' }}
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Tarjeta: Propietario / Comerciante a Cargo -->
+        @if (s.merchant) {
+          <section class="p-4 rounded-2xl bg-secondary-container/10 border border-secondary-container/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-secondary">
+                Comerciante Responsable
+              </span>
+              <span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[10px] font-extrabold uppercase">
+                Dueño
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-black text-sm shrink-0">
+                {{ s.merchant.fullName.substring(0, 2).toUpperCase() }}
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-extrabold text-on-surface truncate">
+                  {{ s.merchant.fullName }}
+                </span>
+                <span class="text-xs text-on-surface-variant font-medium truncate">
+                  {{ s.merchant.email }}
+                </span>
+                @if (s.merchant.phone) {
+                  <span class="text-[11px] text-on-surface-variant font-mono mt-0.5">
+                    📞 {{ s.merchant.phone }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            @if (s.merchant.phone) {
+              <div class="pt-1">
+                <a
+                  [href]="'https://wa.me/' + s.merchant.phone + '?text=Hola%20' + s.merchant.fullName + ',%20te%20contactamos%20desde%20el%20equipo%20de%20administraci%C3%B3n%20de%20JaldiShop%20respecto%20a%20tu%20tienda%20' + s.name + '.'"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <ng-icon name="matChatOutline" class="text-[15px]" />
+                  <span>Contactar Comerciante por WhatsApp</span>
+                </a>
+              </div>
+            }
+          </section>
+        }
+
+        <!-- Tarjeta: Notas Internas de Auditoría de la Tienda -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              <ng-icon name="matNotesOutline" class="text-[15px]" />
+              Notas de Fiscalización (Admin)
+            </span>
+            @if (isNoteSaved()) {
+              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <ng-icon name="matCheckOutline" class="text-[13px]" />
+                Guardado
+              </span>
+            }
+          </div>
+
+          <textarea
+            rows="2"
+            [value]="adminNote()"
+            (input)="onNoteInput($event)"
+            placeholder="Anotaciones de auditoría sobre esta tienda (ej. acuerdos especiales, verificación de catálogo, reportes)..."
+            class="w-full px-3 py-2 text-xs rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none transition-colors"
+          ></textarea>
+
+          <div class="flex justify-end">
+            <button
+              type="button"
+              (click)="onSaveNote()"
+              [disabled]="!adminNote().trim()"
+              class="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest disabled:opacity-40 text-on-surface text-xs font-bold transition-all cursor-pointer"
+            >
+              Guardar Nota
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- 3. Footer con Acciones de Gobierno -->
+      <div class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container/30 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors cursor-pointer"
+        >
+          Cerrar
+        </button>
+
+        @if (s.status === 'ACTIVE') {
+          <button
+            type="button"
+            (click)="onToggleStatus()"
+            class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon name="matCancelOutline" class="text-[16px]" />
+            <span>Suspender Tienda</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="onToggleStatus()"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+            <span>Reactivar Tienda</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

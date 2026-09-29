@@ -1,0 +1,148 @@
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-2xs overflow-hidden font-sans">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs text-on-surface border-collapse">
+      <!-- Encabezados de Tabla -->
+      <thead class="bg-surface-container/60 border-b border-outline-variant/30 text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="py-3.5 px-4 sm:px-6">Tienda / Slug</th>
+          <th class="py-3.5 px-4">Propietario</th>
+          <th class="py-3.5 px-4 hidden md:table-cell">Modalidades</th>
+          <th class="py-3.5 px-4">Estado</th>
+          <th class="py-3.5 px-4 hidden lg:table-cell">Fecha Creación</th>
+          <th class="py-3.5 px-4 sm:px-6 text-right">Acciones</th>
+        </tr>
+      </thead>
+
+      <!-- Cuerpo de Tabla -->
+      <tbody class="divide-y divide-outline-variant/20 font-medium">
+        @for (store of stores(); track store.id) {
+          <tr
+            (click)="selectStore.emit(store)"
+            class="hover:bg-surface-container/40 transition-colors cursor-pointer group"
+          >
+            <!-- Columna Tienda -->
+            <td class="py-3.5 px-4 sm:px-6">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-on-primary text-primary font-black text-xs flex items-center justify-center shrink-0 shadow-2xs transition-colors">
+                  {{ store.name.substring(0, 2).toUpperCase() }}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="font-bold text-on-surface text-xs sm:text-sm truncate group-hover:text-primary transition-colors">
+                    {{ store.name }}
+                  </span>
+                  <span class="text-[11px] text-primary font-bold truncate">
+                    &#64;{{ store.slug }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Columna Propietario -->
+            <td class="py-3.5 px-4">
+              <div class="flex flex-col min-w-0">
+                <span class="font-bold text-on-surface text-xs truncate">
+                  {{ store.merchant.fullName }}
+                </span>
+                <span class="text-[11px] text-on-surface-variant truncate">
+                  {{ store.merchant.email }}
+                </span>
+                @if (store.contactPhone) {
+                  <span class="text-[10px] text-on-surface-variant/80 truncate">
+                    📞 {{ store.contactPhone }}
+                  </span>
+                }
+              </div>
+            </td>
+
+            <!-- Columna Modalidades -->
+            <td class="py-3.5 px-4 hidden md:table-cell">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                @if (store.pickupEnabled) {
+                  <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface text-[10px] font-bold">
+                    Pickup
+                  </span>
+                }
+                @if (store.deliveryEnabled) {
+                  <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary text-[10px] font-bold">
+                    Delivery
+                  </span>
+                }
+              </div>
+            </td>
+
+            <!-- Columna Estado -->
+            <td class="py-3.5 px-4">
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
+                [class.bg-emerald-500/10]="store.status === 'ACTIVE'"
+                [class.text-emerald-700]="store.status === 'ACTIVE'"
+                [class.dark:text-emerald-400]="store.status === 'ACTIVE'"
+                [class.border-emerald-500/20]="store.status === 'ACTIVE'"
+                [class.bg-rose-500/10]="store.status === 'SUSPENDED'"
+                [class.text-rose-700]="store.status === 'SUSPENDED'"
+                [class.dark:text-rose-400]="store.status === 'SUSPENDED'"
+                [class.border-rose-500/20]="store.status === 'SUSPENDED'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-emerald-500]="store.status === 'ACTIVE'"
+                  [class.bg-rose-500]="store.status === 'SUSPENDED'"
+                ></span>
+                {{ store.status === 'ACTIVE' ? 'Activa' : 'Pausada' }}
+              </span>
+            </td>
+
+            <!-- Columna Fecha Creación -->
+            <td class="py-3.5 px-4 hidden lg:table-cell text-on-surface-variant text-[11px]">
+              {{ store.createdAt ? (store.createdAt | slice:0:10) : '--' }}
+            </td>
+
+            <!-- Columna Acciones -->
+            <td class="py-3.5 px-4 sm:px-6 text-right" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  (click)="selectStore.emit(store)"
+                  class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                  title="Ver ficha 360°"
+                >
+                  <ng-icon name="matVisibilityOutline" class="text-[17px]" />
+                </button>
+
+                @if (store.status === 'ACTIVE') {
+                  <button
+                    type="button"
+                    (click)="toggleStatus.emit(store)"
+                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shadow-2xs"
+                    title="Suspender esta tienda"
+                  >
+                    Pausar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="toggleStatus.emit(store)"
+                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors shadow-2xs"
+                    title="Reactivar esta tienda"
+                  >
+                    Reactivar
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="py-12 px-4 text-center">
+              <div class="flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+                <ng-icon name="matStorefrontOutline" class="text-4xl text-on-surface-variant/40" />
+                <p class="text-sm font-bold text-on-surface">No se encontraron tiendas</p>
+                <p class="text-xs text-on-surface-variant">Prueba cambiando los filtros o el término de búsqueda.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

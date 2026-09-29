@@ -58,7 +58,7 @@ flowchart TD
 
     subgraph ADMIN["Administración de Plataforma"]
         BEADMIN01["BE-ADMIN-01 · API Admin Usuarios & Tiendas<br/>(Josué)<br/>✅ COMPLETADO"]
-        FEADMIN01["FE-ADMIN-01 · Panel Admin Frontend<br/>(Josué)<br/>🟢 EN PROGRESO"]
+        FEADMIN01["FE-ADMIN-01 · Panel Admin Frontend<br/>(Josué)<br/>✅ COMPLETADO"]
         BEADMIN01 -->|Desbloqueó| FEADMIN01
     end
 
@@ -78,7 +78,7 @@ flowchart TD
 | 🔴 **Alta** | **BE-12** · Implementar módulo de Catálogo | Katherine / Josué | `COMPLETADO` | Ninguna | Categorías, Productos, Variantes, SKUs, Slugs, JPA, REST, Ownership RBAC, 409 Conflicts y tests *(Desbloqueó BE-13 y BE-17)* |
 | 🔴 **Alta** | **BE-TENANT-01/02** · Aislamiento y Cartera de Clientes de Tienda | Josué | `COMPLETADO` | Ninguna | Migración V3, `StoreCustomer`, proyección SQL agregada y endpoint `/api/v1/merchant/customers` |
 | 🔴 **Alta** | **FE-MERCH-01** · Vista de Gestión de Clientes Merchant | Josué | `COMPLETADO` | BE-TENANT-02 | Vista `/customers`, Cache First, Signals, KPIs, WhatsApp y Design System v2.1 |
-| 🔴 **Alta** | **FE-ADMIN-01** · Panel de Administración en Frontend | Josué | `EN PROGRESO` | BE-ADMIN-01 | Módulo `/admin/*` en `frontend-merchant` con Guards, vistas de usuarios, comerciantes y tiendas |
+| 🔴 **Alta** | **FE-ADMIN-01** · Panel de Administración en Frontend | Josué | `COMPLETADO` | BE-ADMIN-01 | Módulo `/admin/*` en `frontend-merchant` con Guards, vistas de usuarios, comerciantes y tiendas |
 | 🟡 **Media** | **BE-15** · Implementar Excepciones de Capacidad | Mia | `COMPLETADO` | BE-14 | Dominio CapacityException, JPA, reglas de reemplazo y REST *(Desbloqueó BE-16)* |
 | 🟡 **Media** | **BE-13** · Implementar módulo de Inventario | Katherine | `EN PROGRESO` | BE-12 | Control de existencias, umbral bajo, tracking por variante y REST *(Desbloqueada)* |
 | 🟡 **Media** | **BE-17** · Implementar módulo de Carrito | Josué | `COMPLETADO` | BE-12 | Carrito por User + Store, gestión de ítems, CartViewAssembler y reglas de aislamiento *(Desbloqueada)* |
@@ -445,23 +445,23 @@ Permitir a los comerciantes gestionar su catálogo de productos de forma visual 
 ### 📋 FE-ADMIN-01 | Panel de Administración en Frontend
 
 **Responsable:** Josué  
-**Estado:** `EN PROGRESO / READY` 🟢 *(Desbloqueada tras merge de BE-ADMIN-01)*  
-**Entregable:** Módulo `/admin/*` en `frontend-merchant` con layout dedicado, navegación, protección por `adminGuard`, tablas de datos reactivas, filtros y modales de confirmación.
+**Estado:** `COMPLETADO` ✅ *(Integrado tras BE-ADMIN-01)*  
+**Entregable:** Módulo `/admin/*` en `frontend-merchant` con layout dedicado, navegación, protección por `adminGuard`, tablas de datos reactivas, filtros, modales de confirmación y 335 tests unitarios pasando.
 
 **Descripción:**  
 Construir el panel administrativo web en Angular para que los usuarios con rol `ADMIN` puedan gestionar y supervisar usuarios, comerciantes y tiendas desde una interfaz intuitiva y protegida.
 
 **Checklist:**
-- [ ] Implementar `adminGuard` para restringir rutas `/admin/*` únicamente a usuarios con rol `ADMIN`
-- [ ] Implementar `AdminService` con consumo de endpoints `/api/v1/admin/**`
-- [ ] Implementar `AdminLayoutComponent` (Header y Sidebar diferenciados para admin)
-- [ ] Implementar vista de Dashboard Admin (`/admin/dashboard`)
-- [ ] Implementar vista de Usuarios (`/admin/users`) con filtros por texto, rol y estado
-- [ ] Implementar vista de Comerciantes (`/admin/merchants`) filtrado automático por rol `MERCHANT`
-- [ ] Implementar vista de Tiendas (`/admin/stores`) con filtros y detalle de propietario
-- [ ] Implementar modales de confirmación para suspensión y reactivación
-- [ ] Redirección inteligente al iniciar sesión según rol (`ADMIN` -> `/admin/dashboard`, `MERCHANT` -> `/dashboard`)
-- [ ] Pruebas unitarias de Guards, Servicios y Componentes
+- [x] Implementar `adminGuard` para restringir rutas `/admin/*` únicamente a usuarios con rol `ADMIN`
+- [x] Implementar `AdminService` con consumo de endpoints `/api/v1/admin/**`
+- [x] Implementar `AdminLayoutComponent` (Header y Sidebar diferenciados para admin)
+- [x] Implementar vista de Dashboard Admin (`/admin/dashboard`)
+- [x] Implementar vista de Usuarios (`/admin/users`) con filtros por texto, rol y estado
+- [x] Implementar vista de Comerciantes (`/admin/merchants`) filtrado automático por rol `MERCHANT`
+- [x] Implementar vista de Tiendas (`/admin/stores`) con filtros y detalle de propietario
+- [x] Implementar modales de confirmación para suspensión y reactivación
+- [x] Redirección inteligente al iniciar sesión según rol (`ADMIN` -> `/admin/dashboard`, `MERCHANT` -> `/dashboard`)
+- [x] Pruebas unitarias de Guards, Servicios y Componentes
 
 ---
 
@@ -469,10 +469,17 @@ Construir el panel administrativo web en Angular para que los usuarios con rol `
 
 | Métrica | Estado Actual | Detalle |
 |---|:---:|---|
+<<<<<<< HEAD
 | Entregables completados | **12 / 15 (80%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-16`, `BE-18`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02` |
 | Entregables en desarrollo activo | **3 / 15 (20%)** | `FE-ADMIN-01`, `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
 | Entregables pendientes / bloqueados | **0 / 15 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
 | **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad, reservas (Hold) y cartera de clientes 100% operativos |
+=======
+| Entregables completados | **12 / 14 (86%)** | `CI-01`, `DEPLOY-01`, `FE-08`, `BE-ADMIN-01`, `BE-14`, `BE-15`, `BE-16`, `BE-12`, `BE-TENANT-01/02`, `FE-MERCH-01`, `FE-MERCH-02`, `FE-ADMIN-01` |
+| Entregables en desarrollo activo | **2 / 14 (14%)** | `BE-13` *(Desbloqueada)*, `BE-17` *(Desbloqueada)* |
+| Entregables pendientes / bloqueados | **0 / 14 (0%)** | *Todas las tarjetas del backlog se encuentran desbloqueadas* |
+| **Estado General** | `EN PROGRESO` | Catálogo visual, disponibilidad, cartera de clientes y panel de administración 100% operativos |
+>>>>>>> origin/main
 
 ---
 
@@ -506,7 +513,7 @@ graph TD
     DEPLOY01["DEPLOY-01 · Despliegue Nube<br/>(Josué)"]:::done
     FE08["FE-08 · Branding & Favicon<br/>(Josué)"]:::done
     BEADMIN01["BE-ADMIN-01 · API Admin<br/>(Josué)"]:::done
-    FEADMIN01["FE-ADMIN-01 · Panel Admin<br/>(Josué)"]:::progress
+    FEADMIN01["FE-ADMIN-01 · Panel Admin<br/>(Josué)"]:::done
     BE14["BE-14 · Config Base Capacidad<br/>(Mia)"]:::done
     BE15["BE-15 · Excepciones Capacidad<br/>(Mia)"]:::done
     BE16["BE-16 · Capacidad Efectiva<br/>(Mia)"]:::done

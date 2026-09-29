@@ -1,0 +1,147 @@
+<aside
+  class="fixed top-0 bottom-0 left-0 w-60 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between transition-transform duration-200 ease-in-out font-sans"
+  [class.translate-x-0]="isOpen()"
+  [class.-translate-x-full]="!isOpen()"
+  [class.lg:translate-x-0]="true"
+>
+  <!-- Sección Superior: Brand & Navegación -->
+  <div class="flex flex-col flex-1 overflow-y-auto">
+    <!-- Header del Sidebar con Logo JaldiShop y badge Admin -->
+    <div class="p-4 sm:p-5 flex items-center justify-between border-b border-outline-variant/20">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-on-primary font-black text-base shadow-xs">
+          J
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-sm tracking-tight text-on-surface leading-tight">
+            JaldiShop
+          </span>
+          <span class="text-[10px] font-bold text-primary tracking-wider uppercase">
+            Plataforma Admin
+          </span>
+        </div>
+      </div>
+
+      <!-- Botón de Cierre en Móvil -->
+      <button
+        type="button"
+        (click)="closeSidebar.emit()"
+        class="lg:hidden p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        aria-label="Cerrar barra lateral"
+      >
+        <ng-icon name="matCloseOutline" class="text-[20px]" />
+      </button>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="p-3 flex flex-col gap-1 text-xs font-semibold">
+      <span class="px-3 pt-2 pb-1 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wider">
+        Supervisión Global
+      </span>
+
+      <!-- 1. Dashboard -->
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
+        (click)="closeSidebar.emit()"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      >
+        <ng-icon name="matDashboardOutline" class="text-[18px]" />
+        <span>Dashboard Global</span>
+      </a>
+
+      <!-- 2. Usuarios -->
+      <a
+        routerLink="/admin/users"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
+        (click)="closeSidebar.emit()"
+        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      >
+        <div class="flex items-center gap-3">
+          <ng-icon name="matGroupOutline" class="text-[18px]" />
+          <span>Usuarios</span>
+        </div>
+        @if (adminService.metrics().totalUsers > 0) {
+          <span class="px-1.5 py-0.5 rounded-md bg-surface-container-high text-[10px] font-bold text-on-surface-variant">
+            {{ adminService.metrics().totalUsers }}
+          </span>
+        }
+      </a>
+
+      <!-- 3. Tiendas -->
+      <a
+        routerLink="/admin/stores"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
+        (click)="closeSidebar.emit()"
+        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      >
+        <div class="flex items-center gap-3">
+          <ng-icon name="matStorefrontOutline" class="text-[18px]" />
+          <span>Tiendas</span>
+        </div>
+        @if (adminService.metrics().totalStores > 0) {
+          <span class="px-1.5 py-0.5 rounded-md bg-surface-container-high text-[10px] font-bold text-on-surface-variant">
+            {{ adminService.metrics().totalStores }}
+          </span>
+        }
+      </a>
+
+      <!-- 4. Comerciantes -->
+      <a
+        routerLink="/admin/merchants"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
+        (click)="closeSidebar.emit()"
+        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      >
+        <div class="flex items-center gap-3">
+          <ng-icon name="matPersonOutline" class="text-[18px]" />
+          <span>Comerciantes</span>
+        </div>
+        @if (adminService.metrics().totalMerchants > 0) {
+          <span class="px-1.5 py-0.5 rounded-md bg-surface-container-high text-[10px] font-bold text-on-surface-variant">
+            {{ adminService.metrics().totalMerchants }}
+          </span>
+        }
+      </a>
+
+      <span class="px-3 pt-4 pb-1 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-wider">
+        Configuración
+      </span>
+
+      <!-- 5. Gobernanza / Parámetros -->
+      <a
+        routerLink="/admin/settings"
+        routerLinkActive="bg-primary/10 text-primary font-bold border-l-3 border-primary"
+        (click)="closeSidebar.emit()"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+      >
+        <ng-icon name="matSettingsOutline" class="text-[18px]" />
+        <span>Gobernanza & Parámetros</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Sección Inferior: Resumen y Cerrar Sesión -->
+  <div class="p-3 border-t border-outline-variant/20 flex flex-col gap-2">
+    <div class="p-2.5 rounded-xl bg-surface-container/60 border border-outline-variant/30 flex items-center justify-between">
+      <div class="flex flex-col">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+          Entorno
+        </span>
+        <span class="text-xs font-extrabold text-on-surface">
+          Producción
+        </span>
+      </div>
+      <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-xs"></span>
+    </div>
+
+    <button
+      type="button"
+      (click)="logout()"
+      class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 transition-colors"
+    >
+      <ng-icon name="matLogoutOutline" class="text-[16px]" />
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>

@@ -1,12 +1,20 @@
 package com.jaldishop.backend.cart.web.controller;
 
 import com.jaldishop.backend.cart.application.AddItemToCartCommand;
-import com.jaldishop.backend.cart.application.CartService;
+import com.jaldishop.backend.cart.application.AddItemToCartService;
 import com.jaldishop.backend.cart.application.CartView;
+import com.jaldishop.backend.cart.application.ClearCartCommand;
+import com.jaldishop.backend.cart.application.ClearCartService;
+import com.jaldishop.backend.cart.application.GetCartQuery;
+import com.jaldishop.backend.cart.application.GetCartService;
+import com.jaldishop.backend.cart.application.RemoveCartItemCommand;
+import com.jaldishop.backend.cart.application.RemoveCartItemService;
 import com.jaldishop.backend.cart.application.UpdateCartItemQuantityCommand;
+import com.jaldishop.backend.cart.application.UpdateCartItemQuantityService;
 import com.jaldishop.backend.cart.web.dto.AddItemToCartRequest;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import com.jaldishop.backend.cart.web.dto.UpdateCartItemRequest;
+import com.jaldishop.backend.cart.web.mapper.CartResponseMapper;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,10 +28,27 @@ import java.util.UUID;
 @RequestMapping("/api/v1/cart")
 public class CartController {
 
-    private final CartService cartService;
+    private final GetCartService getCartService;
+    private final AddItemToCartService addItemToCartService;
+    private final UpdateCartItemQuantityService updateCartItemQuantityService;
+    private final RemoveCartItemService removeCartItemService;
+    private final ClearCartService clearCartService;
+    private final CartResponseMapper responseMapper;
 
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
+    public CartController(
+            GetCartService getCartService,
+            AddItemToCartService addItemToCartService,
+            UpdateCartItemQuantityService updateCartItemQuantityService,
+            RemoveCartItemService removeCartItemService,
+            ClearCartService clearCartService,
+            CartResponseMapper responseMapper
+    ) {
+        this.getCartService = getCartService;
+        this.addItemToCartService = addItemToCartService;
+        this.updateCartItemQuantityService = updateCartItemQuantityService;
+        this.removeCartItemService = removeCartItemService;
+        this.clearCartService = clearCartService;
+        this.responseMapper = responseMapper;
     }
 
     @GetMapping
@@ -31,8 +56,8 @@ public class CartController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @RequestParam UUID storeId
     ) {
-        CartView cartView = cartService.getCart(principal.userId(), storeId);
-        return ResponseEntity.ok(CartResponse.fromView(cartView));
+        CartView cartView = getCartService.execute(new GetCartQuery(principal.userId(), storeId));
+        return ResponseEntity.ok(responseMapper.toResponse(cartView));
     }
 
     @PostMapping("/items")
@@ -41,12 +66,13 @@ public class CartController {
             @Valid @RequestBody AddItemToCartRequest request
     ) {
         var command = new AddItemToCartCommand(
+                principal.userId(),
                 request.storeId(),
                 request.variantId(),
                 request.quantity()
         );
-        CartView cartView = cartService.addItemToCart(principal.userId(), command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CartResponse.fromView(cartView));
+        CartView cartView = addItemToCartService.execute(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMapper.toResponse(cartView));
     }
 
     @PutMapping("/items/{variantId}")
@@ -56,12 +82,13 @@ public class CartController {
             @Valid @RequestBody UpdateCartItemRequest request
     ) {
         var command = new UpdateCartItemQuantityCommand(
+                principal.userId(),
                 request.storeId(),
                 variantId,
                 request.quantity()
         );
-        CartView cartView = cartService.updateCartItemQuantity(principal.userId(), command);
-        return ResponseEntity.ok(CartResponse.fromView(cartView));
+        CartView cartView = updateCartItemQuantityService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(cartView));
     }
 
     @DeleteMapping("/items/{variantId}")
@@ -70,8 +97,13 @@ public class CartController {
             @PathVariable UUID variantId,
             @RequestParam UUID storeId
     ) {
-        CartView cartView = cartService.removeCartItem(principal.userId(), storeId, variantId);
-        return ResponseEntity.ok(CartResponse.fromView(cartView));
+        var command = new RemoveCartItemCommand(
+                principal.userId(),
+                storeId,
+                variantId
+        );
+        CartView cartView = removeCartItemService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(cartView));
     }
 
     @DeleteMapping
@@ -79,7 +111,11 @@ public class CartController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @RequestParam UUID storeId
     ) {
-        CartView cartView = cartService.clearCart(principal.userId(), storeId);
-        return ResponseEntity.ok(CartResponse.fromView(cartView));
+        var command = new ClearCartCommand(
+                principal.userId(),
+                storeId
+        );
+        CartView cartView = clearCartService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(cartView));
     }
 }

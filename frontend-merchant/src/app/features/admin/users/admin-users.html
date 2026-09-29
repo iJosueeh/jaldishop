@@ -1,0 +1,64 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado -->
+  <app-admin-users-header
+    [totalCount]="adminService.metrics().totalUsers"
+    [isLoading]="adminService.isLoadingUsers()"
+    (refresh)="onRefresh()"
+  />
+
+  <!-- Barra de Filtros y Búsqueda -->
+  <app-admin-users-filter-bar
+    [searchQuery]="adminService.userSearchQuery()"
+    [selectedRole]="adminService.userRoleFilter()"
+    [selectedStatus]="adminService.userStatusFilter()"
+    (searchChange)="onSearchChange($event)"
+    (roleChange)="onRoleChange($event)"
+    (statusChange)="onStatusChange($event)"
+  />
+
+  <!-- Tabla de Datos -->
+  <app-admin-users-table
+    [users]="paginatedUsers()"
+    (selectUser)="onOpenUserDrawer($event)"
+    (toggleStatus)="onOpenStatusModal($event)"
+  />
+
+  <!-- Paginación Reactiva -->
+  @if (adminService.filteredUsers().length > pageSize()) {
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalItems]="adminService.filteredUsers().length"
+      [pageSize]="pageSize()"
+      itemLabel="usuarios"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+
+  <!-- Ficha 360° Drawer Lateral de Usuario -->
+  <app-admin-user-drawer
+    [isOpen]="isDrawerOpen()"
+    [user]="selectedUser()"
+    (closeDrawer)="onCloseUserDrawer()"
+    (statusChange)="onOpenStatusModal($event)"
+    (roleChangeRequest)="onOpenRoleModal($event)"
+  />
+
+  <!-- Modal de Suspensión / Reactivación -->
+  <app-user-status-modal
+    [isOpen]="isModalOpen()"
+    [user]="selectedUser()"
+    (confirm)="onConfirmStatusChange($event)"
+    (cancel)="onCloseModal()"
+  />
+
+  <!-- Modal de Seguridad para Cambio de Rol -->
+  <app-user-role-modal
+    [isOpen]="isRoleModalOpen()"
+    [user]="roleModalUser()"
+    [targetRole]="targetRole()"
+    [action]="roleAction()"
+    (confirm)="onConfirmRoleChange($event)"
+    (cancel)="onCloseRoleModal()"
+  />
+</div>
+

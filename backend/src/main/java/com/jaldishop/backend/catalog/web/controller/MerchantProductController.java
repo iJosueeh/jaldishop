@@ -1,11 +1,16 @@
 package com.jaldishop.backend.catalog.web.controller;
 
 import com.jaldishop.backend.catalog.application.CreateProductCommand;
-import com.jaldishop.backend.catalog.application.ProductService;
+import com.jaldishop.backend.catalog.application.CreateProductService;
+import com.jaldishop.backend.catalog.application.GetProductsQuery;
+import com.jaldishop.backend.catalog.application.GetProductsService;
 import com.jaldishop.backend.catalog.application.UpdateProductCommand;
+import com.jaldishop.backend.catalog.application.UpdateProductService;
+import com.jaldishop.backend.catalog.domain.Product;
 import com.jaldishop.backend.catalog.web.dto.CreateProductRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductRequest;
+import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
@@ -17,19 +22,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/products")
 @PreAuthorize("hasRole('MERCHANT')")
 public class MerchantProductController {
 
-    private final ProductService productService;
+    private final CreateProductService createProductService;
+    private final UpdateProductService updateProductService;
+    private final GetProductsService getProductsService;
     private final StoreContextService storeContextService;
+    private final ProductResponseMapper responseMapper;
 
-    public MerchantProductController(ProductService productService, StoreContextService storeContextService) {
-        this.productService = productService;
+    public MerchantProductController(
+            CreateProductService createProductService,
+            UpdateProductService updateProductService,
+            GetProductsService getProductsService,
+            StoreContextService storeContextService,
+            ProductResponseMapper responseMapper
+    ) {
+        this.createProductService = createProductService;
+        this.updateProductService = updateProductService;
+        this.getProductsService = getProductsService;
         this.storeContextService = storeContextService;
+        this.responseMapper = responseMapper;
     }
 
     @PostMapping
@@ -47,8 +63,8 @@ public class MerchantProductController {
                 request.description(),
                 request.imageUrl()
         );
-        var created = productService.createProduct(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.fromDomain(created));
+        Product created = createProductService.execute(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMapper.toResponse(created));
     }
 
     @GetMapping
@@ -58,17 +74,11 @@ public class MerchantProductController {
             @RequestParam(required = false) UUID categoryId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        List<ProductResponse> products;
-        if (categoryId != null) {
-            products = productService.getProductsByStoreAndCategory(storeId, categoryId).stream()
-                    .map(ProductResponse::fromDomain)
-                    .collect(Collectors.toList());
-        } else {
-            products = productService.getProductsByStore(storeId).stream()
-                    .map(ProductResponse::fromDomain)
-                    .collect(Collectors.toList());
-        }
-        return ResponseEntity.ok(products);
+        List<Product> products = getProductsService.execute(new GetProductsQuery(storeId, categoryId));
+        List<ProductResponse> response = products.stream()
+                .map(responseMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{productId}")
@@ -78,8 +88,8 @@ public class MerchantProductController {
             @PathVariable UUID productId
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        var product = productService.getProductByIdAndStore(productId, storeId);
-        return ResponseEntity.ok(ProductResponse.fromDomain(product));
+        Product product = getProductsService.execute(productId, storeId);
+        return ResponseEntity.ok(responseMapper.toResponse(product));
     }
 
     @PutMapping("/{productId}")
@@ -100,7 +110,7 @@ public class MerchantProductController {
                 request.imageUrl(),
                 request.status()
         );
-        var updated = productService.updateProduct(command);
-        return ResponseEntity.ok(ProductResponse.fromDomain(updated));
+        Product updated = updateProductService.execute(command);
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
     }
 }

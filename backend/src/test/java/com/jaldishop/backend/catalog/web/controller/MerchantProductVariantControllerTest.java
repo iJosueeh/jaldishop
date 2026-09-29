@@ -1,8 +1,12 @@
 package com.jaldishop.backend.catalog.web.controller;
 
 import com.jaldishop.backend.catalog.application.CreateProductVariantCommand;
-import com.jaldishop.backend.catalog.application.ProductVariantService;
+import com.jaldishop.backend.catalog.application.CreateProductVariantService;
+import com.jaldishop.backend.catalog.application.GetProductVariantsService;
+import com.jaldishop.backend.catalog.application.UpdateProductVariantService;
 import com.jaldishop.backend.catalog.domain.ProductVariant;
+import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
+import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -32,16 +37,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MerchantProductVariantControllerTest {
 
     @Mock
-    private ProductVariantService variantService;
+    private CreateProductVariantService createVariantService;
+
+    @Mock
+    private UpdateProductVariantService updateVariantService;
+
+    @Mock
+    private GetProductVariantsService getVariantsService;
 
     @Mock
     private StoreContextService storeContextService;
+
+    @Mock
+    private ProductVariantResponseMapper responseMapper;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        MerchantProductVariantController controller = new MerchantProductVariantController(variantService, storeContextService);
+        MerchantProductVariantController controller = new MerchantProductVariantController(
+                createVariantService,
+                updateVariantService,
+                getVariantsService,
+                storeContextService,
+                responseMapper
+        );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -62,9 +82,23 @@ class MerchantProductVariantControllerTest {
                 true,
                 Collections.emptyList()
         );
+        ProductVariantResponse response = new ProductVariantResponse(
+                variant.getId(),
+                productId,
+                "Porción Individual",
+                "CHEESE-IND-01",
+                new BigDecimal("18.50"),
+                "PEN",
+                true,
+                "ACTIVE",
+                Collections.emptyList(),
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(variantService.createVariant(any(CreateProductVariantCommand.class))).thenReturn(variant);
+        when(createVariantService.execute(any(CreateProductVariantCommand.class))).thenReturn(variant);
+        when(responseMapper.toResponse(variant)).thenReturn(response);
 
         String requestJson = """
                 {
@@ -124,9 +158,23 @@ class MerchantProductVariantControllerTest {
                 false,
                 Collections.emptyList()
         );
+        ProductVariantResponse response = new ProductVariantResponse(
+                variant.getId(),
+                productId,
+                "Porción Grande",
+                "CHEESE-GRD-01",
+                new BigDecimal("45.00"),
+                "PEN",
+                false,
+                "ACTIVE",
+                Collections.emptyList(),
+                Instant.now(),
+                Instant.now()
+        );
 
         doNothing().when(storeContextService).validateStoreOwnership(any(), any());
-        when(variantService.getVariantsByProduct(productId, storeId)).thenReturn(List.of(variant));
+        when(getVariantsService.execute(productId, storeId)).thenReturn(List.of(variant));
+        when(responseMapper.toResponse(variant)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId))
                 .andExpect(status().isOk())

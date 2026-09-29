@@ -1,7 +1,5 @@
 package com.jaldishop.backend.cart.web.dto;
 
-import com.jaldishop.backend.cart.application.CartItemView;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -18,21 +16,4 @@ public record CartItemResponse(
         BigDecimal subtotalAmount,
         boolean tracksInventory,
         boolean available
-) {
-    public static CartItemResponse fromView(CartItemView view) {
-        return new CartItemResponse(
-                view.variantId(),
-                view.productId(),
-                view.productName(),
-                view.presentationName(),
-                view.sku(),
-                view.imageUrl(),
-                view.quantity(),
-                view.unitPriceAmount(),
-                view.unitPriceCurrency(),
-                view.subtotalAmount(),
-                view.tracksInventory(),
-                view.available()
-        );
-    }
-}
+) {}

@@ -1,0 +1,42 @@
+<div class="space-y-6 font-sans">
+  <section class="p-5 sm:p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+        <ng-icon name="matInfoOutline" class="text-[20px]" />
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
+          Información del Sistema & Despliegue
+        </h3>
+        <p class="text-xs text-on-surface-variant font-medium">
+          Detalles de versión de cliente web, API Gateway y configuración de runtime
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-1">
+        <span class="text-xs font-bold text-on-surface-variant">Versión de Plataforma:</span>
+        <span class="text-base font-black text-on-surface font-mono">v{{ settings().platformVersion }}</span>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-1">
+        <span class="text-xs font-bold text-on-surface-variant">Entorno de Ejecución:</span>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-sm font-black text-on-surface uppercase tracking-wider">{{ settings().environment }}</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-1">
+        <span class="text-xs font-bold text-on-surface-variant">Arquitectura Frontend:</span>
+        <span class="text-sm font-bold text-on-surface">Angular Standalone + Signals</span>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-1">
+        <span class="text-xs font-bold text-on-surface-variant">Seguridad de Acceso:</span>
+        <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">JWT Bearer + Role-Guards</span>
+      </div>
+    </div>
+  </section>
+</div>

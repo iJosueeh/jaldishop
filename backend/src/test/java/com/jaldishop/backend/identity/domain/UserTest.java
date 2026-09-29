@@ -393,4 +393,38 @@ class UserTest {
         );
     }
 
+    @Test
+    @DisplayName("updateRoles() debe reemplazar los roles existentes y actualizar updatedAt")
+    void updateRolesShouldReplaceRoles() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        user.updateRoles(Set.of(merchantRole));
+        assertEquals(1, user.getRoles().size());
+        assertTrue(user.hasRole(RoleName.MERCHANT));
+        assertFalse(user.hasRole(RoleName.CUSTOMER));
+    }
+
+    @Test
+    @DisplayName("updateRoles() debe lanzar excepción con conjunto nulo o vacío")
+    void updateRolesShouldThrowWhenNullOrEmpty() {
+        User user = User.create(
+                "maria@test.com",
+                "password123",
+                "Maria",
+                "Perez",
+                null,
+                Set.of(customerRole)
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> user.updateRoles(null));
+        assertThrows(IllegalArgumentException.class, () -> user.updateRoles(Set.of()));
+    }
+
 }
