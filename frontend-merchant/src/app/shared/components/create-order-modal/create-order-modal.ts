@@ -106,7 +106,7 @@ export class CreateOrderModal {
 
   readonly orderForm: FormGroup = this.fb.group({
     customerName: ['', [Validators.required, Validators.minLength(3)]],
-    customerPhone: ['', [Validators.required, Validators.pattern(/^[0-9+ ]{8,15}$/)]],
+    customerPhone: ['', [Validators.required, Validators.pattern(/^9\d{8}$/)]],
     channel: ['WHATSAPP' as OrderChannel, [Validators.required]],
     deliveryMode: ['DELIVERY', [Validators.required]],
     deliveryAddress: ['', [Validators.required]],

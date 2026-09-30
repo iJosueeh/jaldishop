@@ -86,7 +86,7 @@
           </span>
           @if (order().customerPhone) {
             <span class="text-[11px] text-on-surface-variant font-medium shrink-0">
-              +51 {{ order().customerPhone }}
+              {{ order().customerPhone?.startsWith('+51') ? order().customerPhone : ('+51 ' + order().customerPhone) }}
             </span>
           }
         </div>

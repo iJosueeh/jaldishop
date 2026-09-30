@@ -71,7 +71,6 @@ class AdminUserResponseMapperTest {
                 true,
                 BigDecimal.valueOf(8),
                 "PEN",
-                false,
                 null
         );
     }

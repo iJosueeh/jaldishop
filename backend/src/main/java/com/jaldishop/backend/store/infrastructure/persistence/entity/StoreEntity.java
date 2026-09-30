@@ -53,9 +53,6 @@ public class StoreEntity {
     @Column(name = "delivery_fee_currency", length = 3)
     private String deliveryFeeCurrency;
 
-    @Column(name = "tax_applies", nullable = false)
-    private boolean taxApplies;
-
     @Column(name = "tax_rate")
     private BigDecimal taxRate;
 
@@ -72,7 +69,7 @@ public class StoreEntity {
     protected StoreEntity() {
     }
 
-    public StoreEntity(UUID id, UUID merchantUserID, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, boolean taxApplies, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
+    public StoreEntity(UUID id, UUID merchantUserID, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.merchantUserId = merchantUserID;
         this.name = name;
@@ -87,7 +84,6 @@ public class StoreEntity {
         this.deliveryEnabled = deliveryEnabled;
         this.deliveryFeeAmount = deliveryFeeAmount;
         this.deliveryFeeCurrency = deliveryFeeCurrency;
-        this.taxApplies = taxApplies;
         this.taxRate = taxRate;
         this.status = status;
         this.createdAt = createdAt;
@@ -148,10 +144,6 @@ public class StoreEntity {
 
     public String getDeliveryFeeCurrency() {
         return deliveryFeeCurrency;
-    }
-
-    public boolean isTaxApplies() {
-        return taxApplies;
     }
 
     public BigDecimal getTaxRate() {

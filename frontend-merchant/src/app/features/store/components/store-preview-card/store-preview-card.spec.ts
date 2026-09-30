@@ -22,7 +22,7 @@ describe('StorePreviewCard', () => {
       deliveryEnabled: new FormControl(true),
       deliveryFeeAmount: new FormControl(7.5),
       deliveryFeeCurrency: new FormControl('PEN'),
-      taxApplies: new FormControl(true),
+      taxRate: new FormControl(18.0),
     });
 
     fixture = TestBed.createComponent(StorePreviewCard);
@@ -42,7 +42,7 @@ describe('StorePreviewCard', () => {
     expect(component.address()).toBe('Av. Larco 450');
     expect(component.addressReference()).toBe('Frente al parque');
     expect(component.deliveryFeeAmount()).toBe(7.5);
-    expect(component.taxApplies()).toBe(true);
+    expect(component.taxRate()).toBe(18.0);
   });
 
   it('should update preview values in real time when form changes', () => {
@@ -50,13 +50,13 @@ describe('StorePreviewCard', () => {
       name: 'Nueva Pastelería Gourmet',
       contactPhone: '912345678',
       deliveryFeeAmount: 10.0,
-      taxApplies: false,
+      taxRate: 10.0,
     });
     fixture.detectChanges();
 
     expect(component.name()).toBe('Nueva Pastelería Gourmet');
     expect(component.contactPhone()).toBe('912345678');
     expect(component.deliveryFeeAmount()).toBe(10.0);
-    expect(component.taxApplies()).toBe(false);
+    expect(component.taxRate()).toBe(10.0);
   });
 });

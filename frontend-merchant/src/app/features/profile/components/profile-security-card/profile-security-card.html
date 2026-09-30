@@ -74,7 +74,7 @@
       <span class="text-on-surface-variant font-medium">WhatsApp</span>
       <span class="font-bold text-on-surface">
         @if (profile()?.phone) {
-          +51 {{ profile()?.phone }}
+          {{ profile()?.phone?.startsWith('+51') ? profile()?.phone : ('+51 ' + profile()?.phone) }}
         } @else {
           <span class="text-on-surface-variant/60 italic font-normal">Sin registrar (+51 900 000 000)</span>
         }

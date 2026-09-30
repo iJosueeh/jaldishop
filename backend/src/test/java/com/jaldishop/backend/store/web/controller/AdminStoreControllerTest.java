@@ -79,7 +79,6 @@ class AdminStoreControllerTest {
                 true,
                 BigDecimal.valueOf(5),
                 "PEN",
-                false,
                 null
         );
 
@@ -153,7 +152,6 @@ class AdminStoreControllerTest {
                 true,
                 BigDecimal.valueOf(5),
                 "PEN",
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 Instant.now(),
@@ -189,7 +187,6 @@ class AdminStoreControllerTest {
                 true,
                 BigDecimal.valueOf(5),
                 "PEN",
-                false,
                 null,
                 StoreStatus.SUSPENDED,
                 Instant.now(),
@@ -224,7 +221,6 @@ class AdminStoreControllerTest {
                 true,
                 BigDecimal.valueOf(5),
                 "PEN",
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 Instant.now(),

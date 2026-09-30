@@ -50,7 +50,6 @@ public class StoreController {
                 request.deliveryEnabled(),
                 request.deliveryFeeAmount(),
                 request.deliveryFeeCurrency(),
-                request.taxApplies(),
                 request.taxRate()
         );
 
@@ -87,7 +86,6 @@ public class StoreController {
                 request.deliveryEnabled(),
                 request.deliveryFeeAmount(),
                 request.deliveryFeeCurrency(),
-                request.taxApplies(),
                 request.taxRate()
         );
 

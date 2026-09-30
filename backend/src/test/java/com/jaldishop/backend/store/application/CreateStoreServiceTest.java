@@ -52,7 +52,6 @@ class CreateStoreServiceTest {
                 true,
                 new BigDecimal("10.00"),
                 "GTQ",
-                false,
                 null
         );
 
@@ -78,7 +77,7 @@ class CreateStoreServiceTest {
                 "Segunda Tienda",
                 "segunda-tienda",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         when(storeRepository.existsByMerchantUserId(merchantUserId)).thenReturn(true);
@@ -100,7 +99,7 @@ class CreateStoreServiceTest {
                 "Tienda Duplicada",
                 "tienda-duplicada",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         when(storeRepository.existsByMerchantUserId(merchantUserId)).thenReturn(false);
@@ -123,7 +122,7 @@ class CreateStoreServiceTest {
                 "Super Tienda Express!",
                 null,
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         when(storeRepository.existsByMerchantUserId(merchantUserId)).thenReturn(false);

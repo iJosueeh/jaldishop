@@ -40,6 +40,7 @@ public class User {
         }
 
         Instant now = Instant.now();
+        String normalizedPhone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(phone);
 
         return new User(
                 UUID.randomUUID(),
@@ -48,7 +49,7 @@ public class User {
                 email.trim().toLowerCase(Locale.ROOT),
                 password,
                 UserStatus.ACTIVE,
-                phone,
+                normalizedPhone,
                 now,
                 now,
                 roles
@@ -87,7 +88,7 @@ public class User {
 
         this.firstName = firstName.trim();
         this.lastName = lastName.trim();
-        this.phone = phone != null ? phone.trim() : null;
+        this.phone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(phone);
         this.updatedAt = Instant.now();
     }
 

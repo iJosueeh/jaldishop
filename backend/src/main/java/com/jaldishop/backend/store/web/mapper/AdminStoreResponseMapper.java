@@ -56,7 +56,6 @@ public class AdminStoreResponseMapper {
                 store.isDeliveryEnabled(),
                 store.getDeliveryFeeAmount(),
                 store.getDeliveryFeeCurrency(),
-                store.isTaxApplies(),
                 store.getTaxRate(),
                 store.getStatus(),
                 store.getCreatedAt(),

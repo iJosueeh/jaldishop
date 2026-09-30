@@ -30,7 +30,6 @@ class StoreTest {
                 true,
                 new BigDecimal("15.00"),
                 "GTQ",
-                true,
                 new BigDecimal("12.00")
         );
 
@@ -48,7 +47,6 @@ class StoreTest {
         assertTrue(store.isDeliveryEnabled());
         assertEquals(new BigDecimal("15.00"), store.getDeliveryFeeAmount());
         assertEquals("GTQ", store.getDeliveryFeeCurrency());
-        assertTrue(store.isTaxApplies());
         assertEquals(new BigDecimal("12.00"), store.getTaxRate());
         assertEquals(StoreStatus.ACTIVE, store.getStatus());
         assertNotNull(store.getCreatedAt());
@@ -65,7 +63,7 @@ class StoreTest {
                         "Mi Tienda",
                         "mi-tienda",
                         null, null, null, null, null, null,
-                        true, false, null, null, false, null
+                        true, false, null, null, null
                 )
         );
         assertTrue(exception.getMessage().contains("ID del comerciante"));
@@ -81,7 +79,7 @@ class StoreTest {
                         null,
                         "mi-tienda",
                         null, null, null, null, null, null,
-                        true, false, null, null, false, null
+                        true, false, null, null, null
                 )
         );
         assertTrue(exception.getMessage().contains("nombre"));
@@ -97,7 +95,7 @@ class StoreTest {
                         "   ",
                         "mi-tienda",
                         null, null, null, null, null, null,
-                        true, false, null, null, false, null
+                        true, false, null, null, null
                 )
         );
         assertTrue(exception.getMessage().contains("nombre"));
@@ -113,7 +111,7 @@ class StoreTest {
                         "Mi Tienda",
                         null,
                         null, null, null, null, null, null,
-                        true, false, null, null, false, null
+                        true, false, null, null, null
                 )
         );
         assertTrue(exception.getMessage().contains("slug"));
@@ -129,7 +127,7 @@ class StoreTest {
                         "Mi Tienda",
                         "   ",
                         null, null, null, null, null, null,
-                        true, false, null, null, false, null
+                        true, false, null, null, null
                 )
         );
         assertTrue(exception.getMessage().contains("slug"));
@@ -149,7 +147,6 @@ class StoreTest {
                         true,
                         new BigDecimal("-0.01"),
                         "GTQ",
-                        false,
                         null
                 )
         );
@@ -168,7 +165,6 @@ class StoreTest {
                 false,
                 null,
                 null,
-                false,
                 null
         );
 
@@ -177,22 +173,22 @@ class StoreTest {
     }
 
     @Test
-    @DisplayName("Lanzar excepción cuando taxRate es menor o igual a cero")
-    void throwExceptionWhenTaxRateIsZeroOrNegative() {
-        IllegalArgumentException exceptionZero = assertThrows(
-                IllegalArgumentException.class,
-                () -> Store.create(
-                        merchantUserId,
-                        "Mi Tienda",
-                        "mi-tienda",
-                        null, null, null, null, null, null,
-                        true, false, null, null,
-                        true,
-                        BigDecimal.ZERO
-                )
+    @DisplayName("Permitir taxRate igual a cero")
+    void allowTaxRateZero() {
+        Store store = Store.create(
+                merchantUserId,
+                "Mi Tienda",
+                "mi-tienda",
+                null, null, null, null, null, null,
+                true, false, null, null,
+                BigDecimal.ZERO
         );
-        assertTrue(exceptionZero.getMessage().contains("tasa de impuestos"));
+        assertEquals(BigDecimal.ZERO, store.getTaxRate());
+    }
 
+    @Test
+    @DisplayName("Lanzar excepción cuando taxRate es negativo")
+    void throwExceptionWhenTaxRateIsNegative() {
         IllegalArgumentException exceptionNegative = assertThrows(
                 IllegalArgumentException.class,
                 () -> Store.create(
@@ -201,7 +197,6 @@ class StoreTest {
                         "mi-tienda",
                         null, null, null, null, null, null,
                         true, false, null, null,
-                        true,
                         new BigDecimal("-5.00")
                 )
         );
@@ -219,7 +214,6 @@ class StoreTest {
                         "mi-tienda",
                         null, null, null, null, null, null,
                         true, false, null, null,
-                        true,
                         new BigDecimal("100.01")
                 )
         );
@@ -235,7 +229,7 @@ class StoreTest {
                 "tienda-original",
                 "Desc original",
                 null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         Instant originalUpdatedAt = store.getUpdatedAt();
@@ -252,7 +246,6 @@ class StoreTest {
                 true,
                 new BigDecimal("20.00"),
                 "USD",
-                true,
                 new BigDecimal("15.00")
         );
 
@@ -267,7 +260,6 @@ class StoreTest {
         assertTrue(store.isDeliveryEnabled());
         assertEquals(new BigDecimal("20.00"), store.getDeliveryFeeAmount());
         assertEquals("USD", store.getDeliveryFeeCurrency());
-        assertTrue(store.isTaxApplies());
         assertEquals(new BigDecimal("15.00"), store.getTaxRate());
         assertTrue(store.getUpdatedAt().isAfter(originalUpdatedAt) || store.getUpdatedAt().equals(originalUpdatedAt));
     }
@@ -280,7 +272,7 @@ class StoreTest {
                 "Tienda",
                 "tienda",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         assertEquals(StoreStatus.ACTIVE, store.getStatus());
@@ -314,7 +306,6 @@ class StoreTest {
                 true,
                 new BigDecimal("10.00"),
                 "GTQ",
-                false,
                 null,
                 StoreStatus.SUSPENDED,
                 createdAt,

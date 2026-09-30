@@ -49,7 +49,6 @@ class StorePersistenceMapperTest {
                 true,
                 new BigDecimal("15.50"),
                 "GTQ",
-                true,
                 new BigDecimal("12.00"),
                 StoreStatus.ACTIVE,
                 testCreatedAt,
@@ -73,7 +72,6 @@ class StorePersistenceMapperTest {
         assertTrue(entity.isDeliveryEnabled());
         assertEquals(new BigDecimal("15.50"), entity.getDeliveryFeeAmount());
         assertEquals("GTQ", entity.getDeliveryFeeCurrency());
-        assertTrue(entity.isTaxApplies());
         assertEquals(new BigDecimal("12.00"), entity.getTaxRate());
         assertEquals(StoreStatus.ACTIVE, entity.getStatus());
         assertEquals(testCreatedAt, entity.getCreatedAt());
@@ -98,7 +96,6 @@ class StorePersistenceMapperTest {
                 true,
                 new BigDecimal("25.00"),
                 "USD",
-                true,
                 new BigDecimal("10.00"),
                 StoreStatus.INACTIVE,
                 testCreatedAt,
@@ -122,7 +119,6 @@ class StorePersistenceMapperTest {
         assertTrue(domain.isDeliveryEnabled());
         assertEquals(new BigDecimal("25.00"), domain.getDeliveryFeeAmount());
         assertEquals("USD", domain.getDeliveryFeeCurrency());
-        assertTrue(domain.isTaxApplies());
         assertEquals(new BigDecimal("10.00"), domain.getTaxRate());
         assertEquals(StoreStatus.INACTIVE, domain.getStatus());
         assertEquals(testCreatedAt, domain.getCreatedAt());
@@ -147,7 +143,6 @@ class StorePersistenceMapperTest {
                 false,
                 null,
                 null,
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 testCreatedAt,
