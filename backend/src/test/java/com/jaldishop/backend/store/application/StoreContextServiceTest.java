@@ -51,7 +51,6 @@ class StoreContextServiceTest {
                 false,
                 null,
                 null,
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 Instant.now(),

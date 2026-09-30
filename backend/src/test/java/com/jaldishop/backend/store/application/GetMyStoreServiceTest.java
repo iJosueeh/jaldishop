@@ -40,7 +40,7 @@ class GetMyStoreServiceTest {
                 "Mi Tienda",
                 "mi-tienda",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));

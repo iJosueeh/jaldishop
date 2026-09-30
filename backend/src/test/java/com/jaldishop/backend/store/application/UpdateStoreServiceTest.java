@@ -43,7 +43,7 @@ class UpdateStoreServiceTest {
                 "slug-original",
                 "Desc",
                 null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         UpdateStoreCommand command = new UpdateStoreCommand(
@@ -59,7 +59,6 @@ class UpdateStoreServiceTest {
                 true,
                 new BigDecimal("20.00"),
                 "GTQ",
-                true,
                 new BigDecimal("12.00")
         );
 
@@ -85,7 +84,7 @@ class UpdateStoreServiceTest {
                 merchantUserId,
                 "Nombre",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null
+                true, false, null, null, null
         );
 
         when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.empty());

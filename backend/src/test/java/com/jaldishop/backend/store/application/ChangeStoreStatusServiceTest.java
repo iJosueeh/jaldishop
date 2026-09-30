@@ -54,7 +54,6 @@ class ChangeStoreStatusServiceTest {
                 true,
                 BigDecimal.valueOf(5),
                 "PEN",
-                false,
                 null
         );
     }

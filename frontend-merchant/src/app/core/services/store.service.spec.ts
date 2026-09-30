@@ -21,7 +21,7 @@ describe('StoreService', () => {
     address: 'Av. Siempre Viva 123',
     pickupEnabled: true,
     deliveryEnabled: true,
-    taxApplies: false,
+    taxRate: 18.0,
     createdAt: '2026-09-19T10:00:00Z',
     updatedAt: '2026-09-19T10:00:00Z',
   };
@@ -100,7 +100,7 @@ describe('StoreService', () => {
 
   it('debe actualizar memoria tras updateStore()', () => {
     const updated = { ...mockStore, name: 'Panadería y Pastelería Central' };
-    service.updateStore({ name: 'Panadería y Pastelería Central', pickupEnabled: true, deliveryEnabled: true, taxApplies: false }).subscribe((res) => {
+    service.updateStore({ name: 'Panadería y Pastelería Central', pickupEnabled: true, deliveryEnabled: true }).subscribe((res) => {
       expect(res.name).toBe('Panadería y Pastelería Central');
       expect(service.storeName()).toBe('Panadería y Pastelería Central');
     });

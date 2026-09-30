@@ -21,7 +21,6 @@ public record AdminStoreDetailResponse(
         boolean deliveryEnabled,
         BigDecimal deliveryFeeAmount,
         String deliveryFeeCurrency,
-        boolean taxApplies,
         BigDecimal taxRate,
         StoreStatus status,
         Instant createdAt,

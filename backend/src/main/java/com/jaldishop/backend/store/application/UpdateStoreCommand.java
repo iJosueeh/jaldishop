@@ -18,6 +18,5 @@ public record UpdateStoreCommand(
         boolean deliveryEnabled,
         BigDecimal deliveryFeeAmount,
         String deliveryFeeCurrency,
-        boolean taxApplies,
         BigDecimal taxRate
 ) {}

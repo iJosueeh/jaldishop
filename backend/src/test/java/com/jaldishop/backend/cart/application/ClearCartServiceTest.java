@@ -64,7 +64,6 @@ class ClearCartServiceTest {
                 true,
                 BigDecimal.ZERO,
                 "PEN",
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 Instant.now(),

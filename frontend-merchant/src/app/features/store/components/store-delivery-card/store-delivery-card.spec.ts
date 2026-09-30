@@ -17,7 +17,6 @@ describe('StoreDeliveryCard', () => {
       pickupEnabled: new FormControl(true),
       deliveryEnabled: new FormControl(true),
       deliveryFeeAmount: new FormControl(5.0),
-      taxApplies: new FormControl(false),
     }));
     await fixture.whenStable();
   });

@@ -95,7 +95,6 @@ class StoreControllerTest {
                 true,
                 new BigDecimal("15.00"),
                 "GTQ",
-                false,
                 null,
                 StoreStatus.ACTIVE,
                 Instant.now(),
@@ -117,8 +116,7 @@ class StoreControllerTest {
                     "pickupEnabled": true,
                     "deliveryEnabled": true,
                     "deliveryFeeAmount": 15.00,
-                    "deliveryFeeCurrency": "GTQ",
-                    "taxApplies": false
+                    "deliveryFeeCurrency": "GTQ"
                 }
                 """;
 
@@ -140,8 +138,7 @@ class StoreControllerTest {
                 {
                     "name": "Tienda Intruso",
                     "pickupEnabled": true,
-                    "deliveryEnabled": false,
-                    "taxApplies": false
+                    "deliveryEnabled": false
                 }
                 """;
 
@@ -159,8 +156,7 @@ class StoreControllerTest {
                 {
                     "name": "   ",
                     "pickupEnabled": true,
-                    "deliveryEnabled": false,
-                    "taxApplies": false
+                    "deliveryEnabled": false
                 }
                 """;
 
@@ -181,7 +177,7 @@ class StoreControllerTest {
                 "Mi Tienda",
                 "mi-tienda",
                 null, null, null, null, null, null,
-                true, false, null, null, false, null,
+                true, false, null, null, null,
                 StoreStatus.ACTIVE,
                 Instant.now(),
                 Instant.now()
@@ -207,7 +203,7 @@ class StoreControllerTest {
                 "+51999999999",
                 "Nueva Direccion",
                 null, null, null,
-                true, true, new BigDecimal("20.00"), "GTQ", false, null,
+                true, true, new BigDecimal("20.00"), "GTQ", null,
                 StoreStatus.ACTIVE,
                 Instant.now(),
                 Instant.now()
@@ -224,8 +220,7 @@ class StoreControllerTest {
                     "pickupEnabled": true,
                     "deliveryEnabled": true,
                     "deliveryFeeAmount": 20.00,
-                    "deliveryFeeCurrency": "GTQ",
-                    "taxApplies": false
+                    "deliveryFeeCurrency": "GTQ"
                 }
                 """;
 

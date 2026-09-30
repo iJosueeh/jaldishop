@@ -125,12 +125,12 @@ export class StorePreviewCard {
     this.getVal('deliveryFeeCurrency', this.store()?.deliveryFeeCurrency || 'PEN'),
   );
 
-  readonly taxApplies = computed(() => {
-    const live = this.formValues()?.taxApplies;
-    if (live !== undefined && live !== null) return Boolean(live);
-    const formVal = this.form()?.get('taxApplies')?.value;
-    if (formVal !== undefined && formVal !== null) return Boolean(formVal);
-    return this.store()?.taxApplies ?? false;
+  readonly taxRate = computed(() => {
+    const live = this.formValues()?.taxRate;
+    if (live !== undefined && live !== null && live !== '') return Number(live);
+    const formVal = this.form()?.get('taxRate')?.value;
+    if (formVal !== undefined && formVal !== null && formVal !== '') return Number(formVal);
+    return this.store()?.taxRate ?? 18.0;
   });
 
   readonly slug = computed(() => this.store()?.slug || 'mi-tienda');

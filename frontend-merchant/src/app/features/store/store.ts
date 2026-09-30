@@ -62,7 +62,6 @@ export class Store {
     deliveryEnabled: [true],
     deliveryFeeAmount: [5.0],
     deliveryFeeCurrency: ['PEN'],
-    taxApplies: [false],
     taxRate: [18.0],
   });
 
@@ -99,7 +98,6 @@ export class Store {
       deliveryEnabled: store.deliveryEnabled,
       deliveryFeeAmount: store.deliveryFeeAmount ?? 0,
       deliveryFeeCurrency: store.deliveryFeeCurrency ?? 'PEN',
-      taxApplies: store.taxApplies,
       taxRate: store.taxRate ?? 18.0,
     });
   }
@@ -116,7 +114,6 @@ export class Store {
       deliveryEnabled: value.deliveryEnabled,
       deliveryFeeAmount: value.deliveryFeeAmount ?? undefined,
       deliveryFeeCurrency: value.deliveryFeeCurrency,
-      taxApplies: value.taxApplies,
       taxRate: value.taxRate ?? undefined,
     };
   }

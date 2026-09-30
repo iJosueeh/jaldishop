@@ -92,8 +92,7 @@ public class RegisterMerchantService {
                 command.deliveryEnabled(),
                 null,
                 null,
-                false,
-                null
+                new java.math.BigDecimal("18.00")
         );
 
         createStoreService.execute(storeCommand);

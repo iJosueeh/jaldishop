@@ -21,13 +21,12 @@ public class Store {
     private boolean deliveryEnabled;
     private BigDecimal deliveryFeeAmount;
     private String deliveryFeeCurrency;
-    private boolean taxApplies;
     private BigDecimal taxRate;
     private StoreStatus status;
     private final Instant createdAt;
     private Instant updatedAt;
 
-    private Store(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, boolean taxApplies, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
+    private Store(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.merchantUserId = merchantUserId;
         this.name = name.trim();
@@ -42,7 +41,6 @@ public class Store {
         this.deliveryEnabled = deliveryEnabled;
         this.deliveryFeeAmount = deliveryFeeAmount;
         this.deliveryFeeCurrency = deliveryFeeCurrency;
-        this.taxApplies = taxApplies;
         this.taxRate = taxRate;
         this.status = status;
         this.createdAt = createdAt;
@@ -63,7 +61,6 @@ public class Store {
             boolean deliveryEnabled,
             BigDecimal deliveryFeeAmount,
             String deliveryFeeCurrency,
-            boolean taxApplies,
             BigDecimal taxRate
     ) {
         if (merchantUserId == null) {
@@ -84,10 +81,9 @@ public class Store {
             }
         }
 
-        if (taxRate != null) {
-            if (taxRate.compareTo(BigDecimal.ZERO) <= 0 || taxRate.compareTo(new BigDecimal("100")) > 0) {
-                throw new IllegalArgumentException("La tasa de impuestos debe ser mayor a 0 y menor o igual a 100.");
-            }
+        BigDecimal effectiveTaxRate = taxRate != null ? taxRate : new BigDecimal("18.00");
+        if (effectiveTaxRate.compareTo(BigDecimal.ZERO) <= 0 || effectiveTaxRate.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("La tasa de impuestos debe ser mayor a 0 y menor o igual a 100.");
         }
 
         UUID id = UUID.randomUUID();
@@ -108,8 +104,7 @@ public class Store {
                 deliveryEnabled,
                 deliveryFeeAmount,
                 deliveryFeeCurrency,
-                taxApplies,
-                taxRate,
+                effectiveTaxRate,
                 StoreStatus.ACTIVE,
                 now,
                 now
@@ -131,7 +126,6 @@ public class Store {
             boolean deliveryEnabled,
             BigDecimal deliveryFeeAmount,
             String deliveryFeeCurrency,
-            boolean taxApplies,
             BigDecimal taxRate,
             StoreStatus status,
             Instant createdAt,
@@ -152,7 +146,6 @@ public class Store {
                 deliveryEnabled,
                 deliveryFeeAmount,
                 deliveryFeeCurrency,
-                taxApplies,
                 taxRate,
                 status,
                 createdAt,
@@ -172,7 +165,6 @@ public class Store {
             boolean deliveryEnabled,
             BigDecimal deliveryFeeAmount,
             String deliveryFeeCurrency,
-            boolean taxApplies,
             BigDecimal taxRate
     ) {
         if (name == null || name.isBlank()) {
@@ -202,8 +194,7 @@ public class Store {
         this.deliveryEnabled = deliveryEnabled;
         this.deliveryFeeAmount = deliveryFeeAmount;
         this.deliveryFeeCurrency = deliveryFeeCurrency;
-        this.taxApplies = taxApplies;
-        this.taxRate = taxRate;
+        this.taxRate = taxRate != null ? taxRate : this.taxRate;
         this.updatedAt = Instant.now();
     }
 
@@ -242,10 +233,6 @@ public class Store {
 
     public BigDecimal getTaxRate() {
         return taxRate;
-    }
-
-    public boolean isTaxApplies() {
-        return taxApplies;
     }
 
     public String getDeliveryFeeCurrency() {

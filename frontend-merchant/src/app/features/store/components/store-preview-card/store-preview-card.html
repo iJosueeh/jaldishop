@@ -79,10 +79,10 @@
             Delivery (S/ {{ deliveryFeeAmount() | number: '1.2-2' }})
           </span>
         }
-        @if (taxApplies()) {
+        @if (taxRate()) {
           <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container text-[10px] font-bold flex items-center gap-1">
             <ng-icon name="matReceiptOutline" class="text-[12px]" />
-            Precios con IGV
+            Precios con IGV ({{ taxRate() }}%)
           </span>
         }
       </div>

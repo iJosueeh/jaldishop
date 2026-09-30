@@ -13,7 +13,6 @@ export interface StoreResponse {
     deliveryEnabled: boolean;
     deliveryFeeAmount?: number;
     deliveryFeeCurrency?: string;
-    taxApplies: boolean;
     taxRate?: number;
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
     createdAt: string;
@@ -33,7 +32,6 @@ export interface CreateStoreRequest {
     deliveryEnabled: boolean;
     deliveryFeeAmount?: number;
     deliveryFeeCurrency?: string;
-    taxApplies: boolean;
     taxRate?: number;
 }
 

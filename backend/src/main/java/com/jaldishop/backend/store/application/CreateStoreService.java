@@ -42,7 +42,6 @@ public class CreateStoreService {
                 command.deliveryEnabled(),
                 command.deliveryFeeAmount(),
                 command.deliveryFeeCurrency(),
-                command.taxApplies(),
                 command.taxRate()
         );
 

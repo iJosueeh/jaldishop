@@ -52,7 +52,6 @@ class GetAdminStoresServiceTest {
                 true,
                 BigDecimal.valueOf(4),
                 "PEN",
-                false,
                 null
         );
     }
