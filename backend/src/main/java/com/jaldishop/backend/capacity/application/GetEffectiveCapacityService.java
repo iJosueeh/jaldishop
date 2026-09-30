@@ -27,24 +27,34 @@ public class GetEffectiveCapacityService {
     }
 
     public EffectiveCapacityResult execute(EffectiveCapacityQuery query) {
+        EffectiveCapacityResolution resolution = resolve(query);
+        return new EffectiveCapacityResult(resolution.capacity(), resolution.source());
+    }
+
+    public EffectiveCapacityResolution resolve(EffectiveCapacityQuery query) {
         validateQuery(query);
 
         CapacityException exception = findApplicableException(
                 query.storeId(), query.serviceDate(), query.startTime(), query.endTime());
         if (exception != null) {
-            return new EffectiveCapacityResult(exception.getExceptionCapacity(), EffectiveCapacitySource.EXCEPTION);
+            return new EffectiveCapacityResolution(
+                    exception.getExceptionCapacity(), EffectiveCapacitySource.EXCEPTION, null, exception.getId());
         }
 
         CapacityConfiguration configuration = findApplicableConfiguration(
                 query.storeId(), query.serviceDate(), query.startTime(), query.endTime());
         if (configuration != null) {
-            return new EffectiveCapacityResult(configuration.getMaxCapacity(), EffectiveCapacitySource.BASE);
+            return new EffectiveCapacityResolution(
+                    configuration.getMaxCapacity(), EffectiveCapacitySource.BASE, configuration.getId(), null);
         }
 
-        return new EffectiveCapacityResult(0, EffectiveCapacitySource.NONE);
+        return new EffectiveCapacityResolution(0, EffectiveCapacitySource.NONE, null, null);
     }
 
     private void validateQuery(EffectiveCapacityQuery query) {
+        if (query.storeId() == null) {
+            throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "El identificador de la tienda es obligatorio.");
+        }
         if (query.serviceDate() == null) {
             throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "La fecha es obligatoria para consultar la capacidad efectiva.");
         }

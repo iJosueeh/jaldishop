@@ -31,6 +31,11 @@ public class CapacityExceptionRepositoryAdapter implements CapacityExceptionRepo
     }
 
     @Override
+    public Optional<CapacityException> findByIdForUpdate(UUID id) {
+        return jpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
     public List<CapacityException> findByStoreId(UUID storeId) {
         return jpaRepository.findByStoreIdOrderByServiceDateDescStartTimeAsc(storeId).stream()
                 .map(mapper::toDomain)
