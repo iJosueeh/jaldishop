@@ -112,15 +112,21 @@ export class Register {
     const step1 = this.step1Data()!;
     const step2 = this.step2Data()!;
 
+    const rawPhone = step2.contactPhone?.trim();
+    const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
+    const normalizedPhone = cleanPhone
+      ? (cleanPhone.startsWith('51') ? `+${cleanPhone}` : `+51${cleanPhone}`)
+      : undefined;
+
     return {
       firstName: step1.firstName.trim(),
       lastName: step1.lastName.trim(),
       email: step1.email.trim().toLowerCase(),
       password: step1.password,
-      phone: step2.contactPhone?.trim(),
+      phone: normalizedPhone,
       storeName: step2.name.trim(),
       businessType: step2.businessType,
-      storeContactPhone: step2.contactPhone?.trim(),
+      storeContactPhone: normalizedPhone,
       address: step2.address?.trim() || undefined,
       pickupEnabled: step2.pickupEnabled,
       deliveryEnabled: step2.deliveryEnabled,

@@ -48,7 +48,7 @@
         @if (contactPhone()) {
           <div class="flex items-center gap-1.5">
             <ng-icon name="matChatOutline" class="text-[14px] text-primary-container shrink-0" />
-            <span class="truncate">WhatsApp: <strong class="text-on-surface">+51 {{ contactPhone() }}</strong></span>
+            <span class="truncate">WhatsApp: <strong class="text-on-surface">{{ displayContactPhone() }}</strong></span>
           </div>
         }
 

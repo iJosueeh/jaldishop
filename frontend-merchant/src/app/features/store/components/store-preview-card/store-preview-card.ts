@@ -89,6 +89,13 @@ export class StorePreviewCard {
     this.getVal('contactPhone', this.store()?.contactPhone || ''),
   );
 
+  readonly displayContactPhone = computed(() => {
+    const phone = this.contactPhone();
+    if (!phone) return '';
+    const clean = phone.replace(/^\+51\s*/, '').trim();
+    return `+51 ${clean}`;
+  });
+
   readonly address = computed(() =>
     this.getVal('address', this.store()?.address || ''),
   );

@@ -115,12 +115,13 @@ export class OrderDetailsDrawer {
     }
 
     const cleanPhone = currentOrder.customerPhone.replace(/\D/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('51') ? cleanPhone : `51${cleanPhone}`;
     const message = encodeURIComponent(
       `¡Hola ${currentOrder.customerName}! Te escribimos de JaldiShop sobre tu pedido ${
         currentOrder.orderNumber
       } (${currentOrder.itemSummary}).`,
     );
-    window.open(`https://wa.me/51${cleanPhone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${phoneWithCountry}?text=${message}`, '_blank');
   }
 
   copyOrderNumber(): void {

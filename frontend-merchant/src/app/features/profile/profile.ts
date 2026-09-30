@@ -41,7 +41,7 @@ export class Profile implements OnInit {
       this.profileForm.patchValue({
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
-        phone: profile.phone || '',
+        phone: profile.phone ? profile.phone.replace(/^\+51\s*/, '') : '',
       });
     }
   });
@@ -63,7 +63,7 @@ export class Profile implements OnInit {
       this.profileForm.reset({
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
-        phone: profile.phone || '',
+        phone: profile.phone ? profile.phone.replace(/^\+51\s*/, '') : '',
       })
     }
   }
@@ -75,10 +75,16 @@ export class Profile implements OnInit {
     }
 
     const val = this.profileForm.getRawValue();
+    const rawPhone = val.phone?.trim();
+    const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
+    const normalizedPhone = cleanPhone
+      ? (cleanPhone.startsWith('51') ? `+${cleanPhone}` : `+51${cleanPhone}`)
+      : null;
+
     const request: UpdateUserProfileRequest = {
       firstName: val.firstName.trim(),
       lastName: val.lastName.trim(),
-      phone: val.phone.trim() || null,
+      phone: normalizedPhone,
     };
 
     this.profileService.updateProfile(request).subscribe({

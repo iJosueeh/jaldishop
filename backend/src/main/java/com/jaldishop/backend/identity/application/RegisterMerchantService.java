@@ -91,7 +91,7 @@ public class RegisterMerchantService {
                 command.pickupEnabled(),
                 command.deliveryEnabled(),
                 null,
-                null,
+                "PEN",
                 new java.math.BigDecimal("18.00")
         );
 

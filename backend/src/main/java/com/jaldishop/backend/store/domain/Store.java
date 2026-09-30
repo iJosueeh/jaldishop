@@ -86,6 +86,11 @@ public class Store {
             throw new IllegalArgumentException("La tasa de impuestos debe ser mayor a 0 y menor o igual a 100.");
         }
 
+        String effectiveDeliveryFeeCurrency = (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank())
+                ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
+                : "PEN";
+        String normalizedContactPhone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(contactPhone);
+
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
 
@@ -95,7 +100,7 @@ public class Store {
                 name,
                 slug,
                 description,
-                contactPhone,
+                normalizedContactPhone,
                 address,
                 addressReference,
                 latitude,
@@ -103,7 +108,7 @@ public class Store {
                 pickupEnabled,
                 deliveryEnabled,
                 deliveryFeeAmount,
-                deliveryFeeCurrency,
+                effectiveDeliveryFeeCurrency,
                 effectiveTaxRate,
                 StoreStatus.ACTIVE,
                 now,
@@ -185,7 +190,7 @@ public class Store {
 
         this.name = name.trim();
         this.description = description;
-        this.contactPhone = contactPhone;
+        this.contactPhone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(contactPhone);
         this.address = address;
         this.addressReference = addressReference;
         this.latitude = latitude;
@@ -193,7 +198,9 @@ public class Store {
         this.pickupEnabled = pickupEnabled;
         this.deliveryEnabled = deliveryEnabled;
         this.deliveryFeeAmount = deliveryFeeAmount;
-        this.deliveryFeeCurrency = deliveryFeeCurrency;
+        this.deliveryFeeCurrency = (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank())
+                ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
+                : (this.deliveryFeeCurrency != null ? this.deliveryFeeCurrency : "PEN");
         this.taxRate = taxRate != null ? taxRate : this.taxRate;
         this.updatedAt = Instant.now();
     }

@@ -91,7 +91,7 @@ export class Store {
     this.storeForm.patchValue({
       name: store.name,
       description: store.description ?? '',
-      contactPhone: store.contactPhone ?? '',
+      contactPhone: store.contactPhone ? store.contactPhone.replace(/^\+51\s*/, '') : '',
       address: store.address ?? '',
       addressReference: store.addressReference ?? '',
       pickupEnabled: store.pickupEnabled,
@@ -104,16 +104,22 @@ export class Store {
 
   private buildUpdateRequest(): UpdateStoreRequest {
     const value = this.storeForm.getRawValue();
+    const rawPhone = value.contactPhone?.trim();
+    const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
+    const normalizedPhone = cleanPhone
+      ? (cleanPhone.startsWith('51') ? `+${cleanPhone}` : `+51${cleanPhone}`)
+      : undefined;
+
     return {
       name: value.name.trim(),
       description: value.description.trim() || undefined,
-      contactPhone: value.contactPhone.trim() || undefined,
+      contactPhone: normalizedPhone,
       address: value.address.trim() || undefined,
       addressReference: value.addressReference.trim() || undefined,
       pickupEnabled: value.pickupEnabled,
       deliveryEnabled: value.deliveryEnabled,
       deliveryFeeAmount: value.deliveryFeeAmount ?? undefined,
-      deliveryFeeCurrency: value.deliveryFeeCurrency,
+      deliveryFeeCurrency: value.deliveryFeeCurrency || 'PEN',
       taxRate: value.taxRate ?? undefined,
     };
   }
