@@ -173,21 +173,22 @@ class StoreTest {
     }
 
     @Test
-    @DisplayName("Lanzar excepción cuando taxRate es menor o igual a cero")
-    void throwExceptionWhenTaxRateIsZeroOrNegative() {
-        IllegalArgumentException exceptionZero = assertThrows(
-                IllegalArgumentException.class,
-                () -> Store.create(
-                        merchantUserId,
-                        "Mi Tienda",
-                        "mi-tienda",
-                        null, null, null, null, null, null,
-                        true, false, null, null,
-                        BigDecimal.ZERO
-                )
+    @DisplayName("Permitir taxRate igual a cero")
+    void allowTaxRateZero() {
+        Store store = Store.create(
+                merchantUserId,
+                "Mi Tienda",
+                "mi-tienda",
+                null, null, null, null, null, null,
+                true, false, null, null,
+                BigDecimal.ZERO
         );
-        assertTrue(exceptionZero.getMessage().contains("tasa de impuestos"));
+        assertEquals(BigDecimal.ZERO, store.getTaxRate());
+    }
 
+    @Test
+    @DisplayName("Lanzar excepción cuando taxRate es negativo")
+    void throwExceptionWhenTaxRateIsNegative() {
         IllegalArgumentException exceptionNegative = assertThrows(
                 IllegalArgumentException.class,
                 () -> Store.create(

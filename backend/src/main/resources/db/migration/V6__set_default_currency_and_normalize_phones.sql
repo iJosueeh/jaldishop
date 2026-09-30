@@ -21,3 +21,8 @@ WHERE phone ~ '^9[0-9]{8}$';
 UPDATE stores
 SET contact_phone = '+51' || TRIM(contact_phone)
 WHERE contact_phone ~ '^9[0-9]{8}$';
+
+-- 4. Ajustar CHECK constraint de tax_rate para permitir valores entre 0.00 y 100.00 inclusive
+ALTER TABLE stores DROP CONSTRAINT IF EXISTS ck_stores_tax_rate;
+ALTER TABLE stores ADD CONSTRAINT ck_stores_tax_rate CHECK (tax_rate IS NULL OR (tax_rate >= 0 AND tax_rate <= 100));
+

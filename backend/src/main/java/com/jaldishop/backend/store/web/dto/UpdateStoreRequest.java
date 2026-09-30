@@ -20,5 +20,5 @@ public record UpdateStoreRequest(
         boolean deliveryEnabled,
         @DecimalMin("0.00") BigDecimal deliveryFeeAmount,
         @Size(min = 3, max = 3) String deliveryFeeCurrency,
-        @DecimalMin("0.01") @DecimalMax("100.00") BigDecimal taxRate
+        @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal taxRate
 ) {}

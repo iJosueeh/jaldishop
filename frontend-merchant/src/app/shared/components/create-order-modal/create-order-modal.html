@@ -332,9 +332,21 @@
                   type="tel"
                   formControlName="customerPhone"
                   placeholder="Ej. 984552109"
+                  maxlength="9"
+                  inputmode="numeric"
                   class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/50 focus:border-primary text-xs text-on-surface font-mono outline-none transition-all shadow-2xs"
+                  [class.border-error]="orderForm.get('customerPhone')?.touched && orderForm.get('customerPhone')?.invalid"
                 />
               </div>
+              @if (orderForm.get('customerPhone')?.touched && orderForm.get('customerPhone')?.invalid) {
+                <span class="text-[11px] text-error mt-1 block">
+                  @if (orderForm.get('customerPhone')?.hasError('required')) {
+                    El teléfono es obligatorio.
+                  } @else {
+                    Debe ser un número celular de 9 dígitos (iniciando con 9).
+                  }
+                </span>
+              }
             </div>
           </div>
 

@@ -82,8 +82,8 @@ public class Store {
         }
 
         BigDecimal effectiveTaxRate = taxRate != null ? taxRate : new BigDecimal("18.00");
-        if (effectiveTaxRate.compareTo(BigDecimal.ZERO) <= 0 || effectiveTaxRate.compareTo(new BigDecimal("100")) > 0) {
-            throw new IllegalArgumentException("La tasa de impuestos debe ser mayor a 0 y menor o igual a 100.");
+        if (effectiveTaxRate.compareTo(BigDecimal.ZERO) < 0 || effectiveTaxRate.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("La tasa de impuestos debe ser mayor o igual a 0 y menor o igual a 100.");
         }
 
         String effectiveDeliveryFeeCurrency = (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank())
@@ -183,8 +183,8 @@ public class Store {
         }
 
         if (taxRate != null) {
-            if (taxRate.compareTo(BigDecimal.ZERO) <= 0 || taxRate.compareTo(new BigDecimal("100")) > 0) {
-                throw new IllegalArgumentException("La tasa de impuestos debe ser mayor a 0 y menor o igual a 100.");
+            if (taxRate.compareTo(BigDecimal.ZERO) < 0 || taxRate.compareTo(new BigDecimal("100")) > 0) {
+                throw new IllegalArgumentException("La tasa de impuestos debe ser mayor o igual a 0 y menor o igual a 100.");
             }
         }
 
