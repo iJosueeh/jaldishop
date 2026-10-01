@@ -40,7 +40,7 @@ class StorePersistenceMapperTest {
                 "Tienda Jaldi",
                 "tienda-jaldi",
                 "Gran variedad de productos",
-                "+50212345678",
+                "+51987654321",
                 "Calle Real, Zona 1",
                 "A la par de la farmacia",
                 new BigDecimal("14.634915"),
@@ -48,8 +48,13 @@ class StorePersistenceMapperTest {
                 true,
                 true,
                 new BigDecimal("15.50"),
-                "GTQ",
-                new BigDecimal("12.00"),
+                "PEN",
+                new BigDecimal("18.00"),
+                "https://example.com/logo.png",
+                "https://example.com/banner.png",
+                "https://instagram.com/tienda",
+                "https://facebook.com/tienda",
+                "+51987654321",
                 StoreStatus.ACTIVE,
                 testCreatedAt,
                 testUpdatedAt
@@ -63,7 +68,7 @@ class StorePersistenceMapperTest {
         assertEquals("Tienda Jaldi", entity.getName());
         assertEquals("tienda-jaldi", entity.getSlug());
         assertEquals("Gran variedad de productos", entity.getDescription());
-        assertEquals("+50212345678", entity.getContactPhone());
+        assertEquals("+51987654321", entity.getContactPhone());
         assertEquals("Calle Real, Zona 1", entity.getAddress());
         assertEquals("A la par de la farmacia", entity.getAddressReference());
         assertEquals(new BigDecimal("14.634915"), entity.getLatitude());
@@ -71,8 +76,13 @@ class StorePersistenceMapperTest {
         assertTrue(entity.isPickupEnabled());
         assertTrue(entity.isDeliveryEnabled());
         assertEquals(new BigDecimal("15.50"), entity.getDeliveryFeeAmount());
-        assertEquals("GTQ", entity.getDeliveryFeeCurrency());
-        assertEquals(new BigDecimal("12.00"), entity.getTaxRate());
+        assertEquals("PEN", entity.getDeliveryFeeCurrency());
+        assertEquals(new BigDecimal("18.00"), entity.getTaxRate());
+        assertEquals("https://example.com/logo.png", entity.getLogoUrl());
+        assertEquals("https://example.com/banner.png", entity.getBannerUrl());
+        assertEquals("https://instagram.com/tienda", entity.getInstagramUrl());
+        assertEquals("https://facebook.com/tienda", entity.getFacebookUrl());
+        assertEquals("+51987654321", entity.getWhatsappNumber());
         assertEquals(StoreStatus.ACTIVE, entity.getStatus());
         assertEquals(testCreatedAt, entity.getCreatedAt());
         assertEquals(testUpdatedAt, entity.getUpdatedAt());
@@ -87,7 +97,7 @@ class StorePersistenceMapperTest {
                 "Tienda Central",
                 "tienda-central",
                 "Venta de abarrotes",
-                "+50298765432",
+                "+51987654321",
                 "Avenida 5, Zona 10",
                 "Frente al centro comercial",
                 new BigDecimal("14.590000"),
@@ -95,8 +105,13 @@ class StorePersistenceMapperTest {
                 false,
                 true,
                 new BigDecimal("25.00"),
-                "USD",
-                new BigDecimal("10.00"),
+                "PEN",
+                new BigDecimal("18.00"),
+                "https://example.com/logo.png",
+                "https://example.com/banner.png",
+                "https://instagram.com/tienda",
+                "https://facebook.com/tienda",
+                "+51987654321",
                 StoreStatus.INACTIVE,
                 testCreatedAt,
                 testUpdatedAt
@@ -110,7 +125,7 @@ class StorePersistenceMapperTest {
         assertEquals("Tienda Central", domain.getName());
         assertEquals("tienda-central", domain.getSlug());
         assertEquals("Venta de abarrotes", domain.getDescription());
-        assertEquals("+50298765432", domain.getContactPhone());
+        assertEquals("+51987654321", domain.getContactPhone());
         assertEquals("Avenida 5, Zona 10", domain.getAddress());
         assertEquals("Frente al centro comercial", domain.getAddressReference());
         assertEquals(new BigDecimal("14.590000"), domain.getLatitude());
@@ -118,8 +133,13 @@ class StorePersistenceMapperTest {
         assertFalse(domain.isPickupEnabled());
         assertTrue(domain.isDeliveryEnabled());
         assertEquals(new BigDecimal("25.00"), domain.getDeliveryFeeAmount());
-        assertEquals("USD", domain.getDeliveryFeeCurrency());
-        assertEquals(new BigDecimal("10.00"), domain.getTaxRate());
+        assertEquals("PEN", domain.getDeliveryFeeCurrency());
+        assertEquals(new BigDecimal("18.00"), domain.getTaxRate());
+        assertEquals("https://example.com/logo.png", domain.getLogoUrl());
+        assertEquals("https://example.com/banner.png", domain.getBannerUrl());
+        assertEquals("https://instagram.com/tienda", domain.getInstagramUrl());
+        assertEquals("https://facebook.com/tienda", domain.getFacebookUrl());
+        assertEquals("+51987654321", domain.getWhatsappNumber());
         assertEquals(StoreStatus.INACTIVE, domain.getStatus());
         assertEquals(testCreatedAt, domain.getCreatedAt());
         assertEquals(testUpdatedAt, domain.getUpdatedAt());

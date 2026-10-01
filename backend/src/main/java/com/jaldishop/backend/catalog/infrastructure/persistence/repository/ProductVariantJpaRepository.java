@@ -12,4 +12,6 @@ public interface ProductVariantJpaRepository extends JpaRepository<ProductVarian
     List<ProductVariantEntity> findByProductId(UUID productId);
     boolean existsBySku(String sku);
     boolean existsBySkuAndIdNot(String sku, UUID id);
+    boolean existsByStoreIdAndSku(UUID storeId, String sku);
+    boolean existsByStoreIdAndSkuAndIdNot(UUID storeId, String sku, UUID id);
 }

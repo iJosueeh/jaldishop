@@ -4,12 +4,14 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.File;
+
 @SpringBootApplication
 public class BackendApplication {
 
     public static void main(String[] args) {
 
-        String envDir = new java.io.File("backend/.env").exists() ? "./backend" : "./";
+        String envDir = new File("backend/.env").exists() ? "./backend" : "./";
 
         Dotenv dotenv = Dotenv.configure()
                 .directory(envDir)

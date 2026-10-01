@@ -24,6 +24,9 @@ public class CartItemEntity {
     @JoinColumn(name = "cart_id", nullable = false)
     private CartEntity cart;
 
+    @Column(name = "store_id", nullable = false)
+    private UUID storeId;
+
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
@@ -45,8 +48,15 @@ public class CartItemEntity {
     public CartItemEntity(CartItemId id, CartEntity cart, int quantity,
                           BigDecimal referencePriceAmount, String referencePriceCurrency,
                           Instant createdAt, Instant updatedAt) {
+        this(id, cart, cart != null ? cart.getStoreId() : null, quantity, referencePriceAmount, referencePriceCurrency, createdAt, updatedAt);
+    }
+
+    public CartItemEntity(CartItemId id, CartEntity cart, UUID storeId, int quantity,
+                          BigDecimal referencePriceAmount, String referencePriceCurrency,
+                          Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.cart = cart;
+        this.storeId = storeId;
         this.quantity = quantity;
         this.referencePriceAmount = referencePriceAmount;
         this.referencePriceCurrency = referencePriceCurrency;
@@ -68,6 +78,14 @@ public class CartItemEntity {
 
     public void setCart(CartEntity cart) {
         this.cart = cart;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(UUID storeId) {
+        this.storeId = storeId;
     }
 
     public UUID getCartId() {

@@ -1,5 +1,7 @@
 package com.jaldishop.backend.store.domain;
 
+import com.jaldishop.backend.shared.util.PhoneUtils;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Locale;
@@ -22,11 +24,22 @@ public class Store {
     private BigDecimal deliveryFeeAmount;
     private String deliveryFeeCurrency;
     private BigDecimal taxRate;
+    private String logoUrl;
+    private String bannerUrl;
+    private String instagramUrl;
+    private String facebookUrl;
+    private String whatsappNumber;
     private StoreStatus status;
     private final Instant createdAt;
     private Instant updatedAt;
 
-    private Store(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
+    private Store(UUID id, UUID merchantUserId, String name, String slug, String description,
+                  String contactPhone, String address, String addressReference,
+                  BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled,
+                  boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency,
+                  BigDecimal taxRate, String logoUrl, String bannerUrl, String instagramUrl,
+                  String facebookUrl, String whatsappNumber, StoreStatus status,
+                  Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.merchantUserId = merchantUserId;
         this.name = name.trim();
@@ -42,6 +55,11 @@ public class Store {
         this.deliveryFeeAmount = deliveryFeeAmount;
         this.deliveryFeeCurrency = deliveryFeeCurrency;
         this.taxRate = taxRate;
+        this.logoUrl = logoUrl;
+        this.bannerUrl = bannerUrl;
+        this.instagramUrl = instagramUrl;
+        this.facebookUrl = facebookUrl;
+        this.whatsappNumber = whatsappNumber;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -63,6 +81,50 @@ public class Store {
             String deliveryFeeCurrency,
             BigDecimal taxRate
     ) {
+        return create(
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static Store create(
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber
+    ) {
         if (merchantUserId == null) {
             throw new IllegalArgumentException("El ID del comerciante no puede ser nulo.");
         }
@@ -73,6 +135,10 @@ public class Store {
 
         if (slug == null || slug.isBlank()) {
             throw new IllegalArgumentException("El slug no puede ser nulo ni vacio.");
+        }
+
+        if ((latitude == null) != (longitude == null)) {
+            throw new IllegalArgumentException("Latitud y longitud deben ser ambos nulos o ambos especificados.");
         }
 
         if (deliveryEnabled && deliveryFeeAmount != null) {
@@ -89,7 +155,8 @@ public class Store {
         String effectiveDeliveryFeeCurrency = (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank())
                 ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
                 : "PEN";
-        String normalizedContactPhone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(contactPhone);
+        String normalizedContactPhone = PhoneUtils.normalizePeruPhone(contactPhone);
+        String normalizedWhatsapp = PhoneUtils.normalizePeruPhone(whatsappNumber);
 
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
@@ -110,6 +177,11 @@ public class Store {
                 deliveryFeeAmount,
                 effectiveDeliveryFeeCurrency,
                 effectiveTaxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                normalizedWhatsapp,
                 StoreStatus.ACTIVE,
                 now,
                 now
@@ -136,6 +208,58 @@ public class Store {
             Instant createdAt,
             Instant updatedAt
     ) {
+        return reconstitute(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                null,
+                null,
+                null,
+                null,
+                null,
+                status,
+                createdAt,
+                updatedAt
+        );
+    }
+
+    public static Store reconstitute(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
         return new Store(
                 id,
                 merchantUserId,
@@ -152,6 +276,11 @@ public class Store {
                 deliveryFeeAmount,
                 deliveryFeeCurrency,
                 taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
                 status,
                 createdAt,
                 updatedAt
@@ -176,6 +305,10 @@ public class Store {
             throw new IllegalArgumentException("El nombre no puede ser nulo ni vacio.");
         }
 
+        if ((latitude == null) != (longitude == null)) {
+            throw new IllegalArgumentException("Latitud y longitud deben ser ambos nulos o ambos especificados.");
+        }
+
         if (deliveryEnabled && deliveryFeeAmount != null) {
             if (deliveryFeeAmount.compareTo(BigDecimal.ZERO) < 0) {
                 throw new IllegalArgumentException("La tarifa de entrega no puede ser negativa.");
@@ -190,7 +323,7 @@ public class Store {
 
         this.name = name.trim();
         this.description = description;
-        this.contactPhone = com.jaldishop.backend.shared.util.PhoneUtils.normalizePeruPhone(contactPhone);
+        this.contactPhone = PhoneUtils.normalizePeruPhone(contactPhone);
         this.address = address;
         this.addressReference = addressReference;
         this.latitude = latitude;
@@ -202,6 +335,21 @@ public class Store {
                 ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
                 : (this.deliveryFeeCurrency != null ? this.deliveryFeeCurrency : "PEN");
         this.taxRate = taxRate != null ? taxRate : this.taxRate;
+        this.updatedAt = Instant.now();
+    }
+
+    public void updateStorefront(
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber
+    ) {
+        this.logoUrl = logoUrl;
+        this.bannerUrl = bannerUrl;
+        this.instagramUrl = instagramUrl;
+        this.facebookUrl = facebookUrl;
+        this.whatsappNumber = PhoneUtils.normalizePeruPhone(whatsappNumber);
         this.updatedAt = Instant.now();
     }
 
@@ -296,5 +444,25 @@ public class Store {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
+    public String getFacebookUrl() {
+        return facebookUrl;
+    }
+
+    public String getWhatsappNumber() {
+        return whatsappNumber;
     }
 }

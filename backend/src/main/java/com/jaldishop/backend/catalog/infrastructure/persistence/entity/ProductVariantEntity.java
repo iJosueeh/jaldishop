@@ -22,6 +22,9 @@ public class ProductVariantEntity {
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    @Column(name = "store_id", nullable = false)
+    private UUID storeId;
+
     @Column(name = "product_id", nullable = false)
     private UUID productId;
 
@@ -59,7 +62,14 @@ public class ProductVariantEntity {
     public ProductVariantEntity(UUID id, UUID productId, String presentationName, String sku,
                                 BigDecimal priceAmount, String priceCurrency, boolean tracksInventory,
                                 String status, Instant createdAt, Instant updatedAt) {
+        this(id, null, productId, presentationName, sku, priceAmount, priceCurrency, tracksInventory, status, createdAt, updatedAt);
+    }
+
+    public ProductVariantEntity(UUID id, UUID storeId, UUID productId, String presentationName, String sku,
+                                BigDecimal priceAmount, String priceCurrency, boolean tracksInventory,
+                                String status, Instant createdAt, Instant updatedAt) {
         this.id = id;
+        this.storeId = storeId;
         this.productId = productId;
         this.presentationName = presentationName;
         this.sku = sku;
@@ -77,6 +87,14 @@ public class ProductVariantEntity {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(UUID storeId) {
+        this.storeId = storeId;
     }
 
     public UUID getProductId() {

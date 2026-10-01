@@ -41,35 +41,39 @@
 
 ---
 
-## 2. Inventario Final de Tablas v1.0
+## 2. Inventario Final de Tablas v1.7.0
 
 | # | Tabla | Propósito | PK | Tipo PK |
 |---|---|---|---|---|
 | 1 | users | Usuarios de la plataforma | id | UUID |
 | 2 | roles | Catálogo de roles | id | SMALLINT |
-| 3 | user_roles | Relación usuario-rol | (user_id, role_id) | Compuesta |
-| 4 | stores | Tiendas de los comerciantes | id | UUID |
-| 5 | categories | Categorías de productos | id | UUID |
-| 6 | products | Productos dentro de una tienda | id | UUID |
-| 7 | product_variants | Variantes/presentaciones de productos | id | UUID |
-| 8 | variant_attributes | Atributos de cada variante | (variant_id, name) | Compuesta |
-| 9 | inventories | Stock de variantes con control | variant_id | FK |
-| 10 | carts | Carritos de compra | id | UUID |
-| 11 | cart_items | Items dentro de un carrito | (cart_id, variant_id) | Compuesta |
-| 12 | discounts | Descuentos definidos por tienda | id | UUID |
-| 13 | capacity_configurations | Capacidad base recurrente | id | UUID |
-| 14 | capacity_exceptions | Excepciones de capacidad | id | UUID |
-| 15 | capacity_reservations | Reservas temporales de cupo | id | UUID |
-| 16 | payments | Procesos de pago | id | UUID |
-| 17 | payment_attempts | Intentos de pago | id | UUID |
-| 18 | orders | Pedidos confirmados | id | UUID |
-| 19 | order_items | Detalles de cada pedido | id | UUID |
-| 20 | order_status_history | Historial de estados | id | UUID |
-| 21 | favorites | Favoritos de usuarios | (user_id, product_id) | Compuesta |
-| 22 | reviews | Reseñas de productos | id | UUID |
-| 23 | notifications | Notificaciones a usuarios | id | UUID |
+| 3 | user_roles | Relación contextual usuario-rol-tienda | id | UUID (Surrogate) |
+| 4 | store_categories | Catálogo maestro de rubros comerciales | id | UUID |
+| 5 | store_category_assignments | Asignación N:M de rubros a tiendas | (store_id, store_category_id) | Compuesta |
+| 6 | stores | Tiendas de los comerciantes | id | UUID |
+| 7 | categories | Categorías de productos | id | UUID |
+| 8 | products | Productos dentro de una tienda | id | UUID |
+| 9 | product_images | Imágenes adicionales y principal por producto | id | UUID |
+| 10 | product_variants | Variantes/presentaciones de productos | id | UUID |
+| 11 | variant_attributes | Atributos de cada variante | (variant_id, name) | Compuesta |
+| 12 | inventories | Stock de variantes con control | variant_id | FK |
+| 13 | inventory_reservations | Holds temporales de stock para checkout | id | UUID |
+| 14 | carts | Carritos de compra | id | UUID |
+| 15 | cart_items | Items dentro de un carrito | (cart_id, variant_id) | Compuesta |
+| 16 | discounts | Descuentos definidos por tienda | id | UUID |
+| 17 | capacity_configurations | Capacidad base recurrente | id | UUID |
+| 18 | capacity_exceptions | Excepciones de capacidad | id | UUID |
+| 19 | capacity_reservations | Reservas temporales de cupo | id | UUID |
+| 20 | payments | Procesos de pago | id | UUID |
+| 21 | payment_attempts | Intentos de pago | id | UUID |
+| 22 | orders | Pedidos confirmados | id | UUID |
+| 23 | order_items | Detalles de cada pedido | id | UUID |
+| 24 | order_status_history | Historial de estados | id | UUID |
+| 25 | favorites | Favoritos de usuarios | (user_id, product_id) | Compuesta |
+| 26 | reviews | Reseñas de productos | id | UUID |
+| 27 | notifications | Notificaciones a usuarios | id | UUID |
 
-**Total: 23 tablas**
+**Total: 27 tablas**
 
 ---
 
@@ -80,10 +84,14 @@
 Se aplica UUID a las siguientes tablas:
 
 - users
+- user_roles
+- store_categories
 - stores
 - categories
 - products
+- product_images
 - product_variants
+- inventory_reservations
 - carts
 - discounts
 - capacity_configurations
@@ -98,6 +106,13 @@ Se aplica UUID a las siguientes tablas:
 - notifications
 
 ### Tablas con PK natural/compuesta
+
+- `roles`: SMALLINT autoincremental / catálogo estático.
+- `store_category_assignments`: (store_id, store_category_id)
+- `variant_attributes`: (variant_id, name)
+- `inventories`: variant_id (1:1 con product_variants)
+- `cart_items`: (cart_id, variant_id)
+- `favorites`: (user_id, product_id)
 
 | Tabla | PK | Justificación |
 |---|---|---|

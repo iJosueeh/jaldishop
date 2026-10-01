@@ -61,7 +61,7 @@ class CreateProductVariantServiceTest {
         );
 
         when(productRepository.findByIdAndStoreId(productId, storeId)).thenReturn(Optional.of(product));
-        when(variantRepository.existsBySku("TORTA-IND-01")).thenReturn(false);
+        when(variantRepository.existsByStoreIdAndSku(storeId, "TORTA-IND-01")).thenReturn(false);
         when(variantRepository.save(any(ProductVariant.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ProductVariant result = createVariantService.execute(command);
@@ -92,7 +92,7 @@ class CreateProductVariantServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw ConflictException when SKU already exists")
+    @DisplayName("Should throw ConflictException when SKU already exists in the same store")
     void shouldThrowWhenSkuExists() {
         var command = new CreateProductVariantCommand(
                 storeId,
@@ -106,7 +106,7 @@ class CreateProductVariantServiceTest {
         );
 
         when(productRepository.findByIdAndStoreId(productId, storeId)).thenReturn(Optional.of(product));
-        when(variantRepository.existsBySku("SKU-EXISTS")).thenReturn(true);
+        when(variantRepository.existsByStoreIdAndSku(storeId, "SKU-EXISTS")).thenReturn(true);
 
         assertThrows(ConflictException.class, () -> createVariantService.execute(command));
     }
