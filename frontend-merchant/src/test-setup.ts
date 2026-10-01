@@ -3,7 +3,7 @@
  * Polyfills navigator properties (userAgent, platform, appVersion) and ResizeObserver for Node.js 21/22+ on Linux/CI.
  */
 if (typeof globalThis !== 'undefined') {
-  const nav = globalThis.navigator || ({} as any);
+  const nav: Record<string, any> = (globalThis.navigator || {}) as Record<string, any>;
 
   const defineProp = (prop: string, val: string) => {
     try {
