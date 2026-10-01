@@ -1,20 +1,30 @@
 /**
  * Global test environment setup for Vitest / Angular CLI.
- * Polyfills navigator.userAgent and ResizeObserver for Node.js 21/22+ environments on Linux/CI.
+ * Polyfills navigator properties (userAgent, platform, appVersion) and ResizeObserver for Node.js 21/22+ on Linux/CI.
  */
 if (typeof globalThis !== 'undefined') {
-  if (!globalThis.navigator) {
-    (globalThis as any).navigator = { userAgent: 'Mozilla/5.0 (Node.js/Vitest)' };
-  } else if (!globalThis.navigator.userAgent) {
+  const nav = globalThis.navigator || ({} as any);
+
+  const defineProp = (prop: string, val: string) => {
     try {
-      Object.defineProperty(globalThis.navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (Node.js/Vitest)',
-        configurable: true,
-        writable: true,
-      });
+      if (!nav[prop]) {
+        Object.defineProperty(nav, prop, {
+          value: val,
+          configurable: true,
+          writable: true,
+        });
+      }
     } catch {
-      (globalThis.navigator as any).userAgent = 'Mozilla/5.0 (Node.js/Vitest)';
+      nav[prop] = val;
     }
+  };
+
+  defineProp('userAgent', 'Mozilla/5.0 (Node.js/Vitest)');
+  defineProp('platform', 'Linux x86_64');
+  defineProp('appVersion', '5.0 (Linux)');
+
+  if (!globalThis.navigator) {
+    (globalThis as any).navigator = nav;
   }
 
   if (typeof (globalThis as any).ResizeObserver === 'undefined') {
