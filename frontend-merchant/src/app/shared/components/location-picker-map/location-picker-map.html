@@ -1,0 +1,107 @@
+<div class="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-outline-variant/40 shadow-inner bg-surface-container font-sans flex flex-col">
+  <!-- Barra de Búsqueda de Direcciones Superior (Float z-index 500) -->
+  @if (interactive()) {
+    <div class="absolute top-3 inset-x-3 sm:inset-x-auto sm:left-3 sm:w-80 md:w-96 z-[500] flex flex-col gap-1">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/40 shadow-md focus-within:border-secondary focus-within:ring-2 focus-within:ring-secondary/20 transition-all">
+        <ng-icon name="matSearchOutline" class="text-[18px] text-on-surface-variant shrink-0" />
+        <input
+          type="text"
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+          (keydown.enter)="onSearchSubmit()"
+          (keydown.escape)="closeSearchResults()"
+          placeholder="Buscar calle, avenida o distrito..."
+          aria-label="Buscar dirección en el mapa"
+          class="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+        />
+
+        @if (isSearching()) {
+          <span class="w-3.5 h-3.5 border-2 border-secondary border-t-transparent rounded-full animate-spin shrink-0"></span>
+        } @else if (searchQuery()) {
+          <button
+            type="button"
+            (click)="clearSearch()"
+            class="p-0.5 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors cursor-pointer"
+            title="Limpiar búsqueda"
+            aria-label="Limpiar búsqueda"
+          >
+            <ng-icon name="matCloseOutline" class="text-[16px]" />
+          </button>
+        }
+
+        <button
+          type="button"
+          (click)="onSearchSubmit()"
+          [disabled]="searchQuery().trim().length < 3 || isSearching()"
+          class="px-2.5 py-1 rounded-lg bg-secondary text-white text-[11px] font-bold transition-all hover:bg-secondary/90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-95 shrink-0"
+        >
+          Buscar
+        </button>
+      </div>
+
+      <!-- Menú Desplegable con Resultados de Búsqueda -->
+      @if (showResults() && searchResults().length > 0) {
+        <div class="w-full max-h-56 overflow-y-auto rounded-xl bg-surface-container-lowest border border-outline-variant/40 shadow-xl flex flex-col divide-y divide-surface-container-highest animate-fade-in" role="listbox">
+          @for (result of searchResults(); track result.displayName) {
+            <button
+              type="button"
+              (click)="onSelectResult(result)"
+              role="option"
+              class="w-full text-left p-2.5 hover:bg-surface-container-low transition-colors flex items-start gap-2 cursor-pointer group"
+            >
+              <ng-icon name="matLocationOnOutline" class="text-[18px] text-secondary shrink-0 mt-0.5" />
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs font-semibold text-on-surface group-hover:text-secondary line-clamp-1">
+                  {{ result.road || result.suburb || 'Ubicación' }}
+                </span>
+                <span class="text-[11px] text-on-surface-variant line-clamp-1">
+                  {{ result.displayName }}
+                </span>
+              </div>
+            </button>
+          }
+        </div>
+      } @else if (showResults() && !isSearching() && searchResults().length === 0) {
+        <div class="w-full p-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 shadow-lg text-center text-xs text-on-surface-variant">
+          No se encontraron resultados para "{{ searchQuery() }}".
+        </div>
+      }
+    </div>
+
+    <!-- Botón flotante para recentrar cámara en el pin (Float z-index 450) -->
+    <button
+      type="button"
+      (click)="recenterOnMarker()"
+      class="absolute top-3 right-3 z-[450] px-2.5 py-1.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border border-outline-variant/40 shadow-md text-on-surface hover:text-secondary transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 text-xs font-semibold"
+      title="Centrar mapa en el pin"
+      aria-label="Centrar mapa en el pin"
+    >
+      <ng-icon name="matMyLocationOutline" class="text-[16px] text-secondary" />
+      <span class="hidden sm:inline text-[11px]">Centrar pin</span>
+    </button>
+  }
+
+  <!-- Contenedor nativo donde Leaflet renderiza el mapa -->
+  <div #mapContainer class="w-full h-full z-0 flex-1"></div>
+
+  <!-- Indicador / Badge flotante inferior para información del radio -->
+  <div class="absolute bottom-3 left-3 z-[400] flex flex-col gap-1.5 pointer-events-none">
+    <div class="px-2.5 py-1 rounded-lg bg-surface-container-lowest/90 backdrop-blur-md border border-outline-variant/40 shadow-xs text-[11px] font-semibold text-on-surface flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+      <span>
+        @if (interactive()) {
+          Arrastra el pin o toca para mover
+        } @else {
+          Ubicación del establecimiento
+        }
+      </span>
+    </div>
+
+    @if (radiusKm(); as r) {
+      <div class="px-2.5 py-1 rounded-lg bg-secondary-container/95 backdrop-blur-md border border-secondary/30 text-[11px] font-medium text-on-secondary-container flex items-center gap-1.5 shadow-xs">
+        <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+        <span>Radio de cobertura: {{ r }} km</span>
+      </div>
+    }
+  </div>
+</div>

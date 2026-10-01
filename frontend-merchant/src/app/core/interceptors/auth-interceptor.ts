@@ -5,7 +5,11 @@ import { TokenService } from '../services/token-service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
 
-  if (req.url.includes('api.cloudinary.com')) {
+  if (
+    req.url.includes('api.cloudinary.com') ||
+    req.url.includes('nominatim.openstreetmap.org') ||
+    req.url.includes('photon.komoot.io')
+  ) {
     return next(req);
   }
 

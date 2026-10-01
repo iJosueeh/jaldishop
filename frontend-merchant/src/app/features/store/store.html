@@ -79,7 +79,10 @@
       <app-store-delivery-card [form]="storeForm" />
 
       <!-- Tarjeta 3: Ubicación Física del Negocio -->
-      <app-store-location-card [form]="storeForm" />
+      <app-store-location-card
+        [form]="storeForm"
+        [deliveryRadiusKm]="storeForm.get('deliveryRadiusKm')?.value"
+      />
     </div>
 
     <!-- Columna Derecha (4/12): Vista Previa en Vivo & Estado Operativo -->
