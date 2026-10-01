@@ -69,7 +69,7 @@ class UpdateProductVariantServiceTest {
 
         when(productRepository.findByIdAndStoreId(productId, storeId)).thenReturn(Optional.of(product));
         when(variantRepository.findById(variantId)).thenReturn(Optional.of(variant));
-        when(variantRepository.existsBySkuAndIdNot("SKU-MED", variantId)).thenReturn(false);
+        when(variantRepository.existsByStoreIdAndSkuAndIdNot(storeId, "SKU-MED", variantId)).thenReturn(false);
         when(variantRepository.save(any(ProductVariant.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ProductVariant updated = updateVariantService.execute(command);
@@ -103,7 +103,7 @@ class UpdateProductVariantServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw ConflictException when duplicate SKU exists")
+    @DisplayName("Should throw ConflictException when duplicate SKU exists in the same store")
     void shouldThrowWhenSkuExists() {
         var command = new UpdateProductVariantCommand(
                 variantId,
@@ -120,7 +120,7 @@ class UpdateProductVariantServiceTest {
 
         when(productRepository.findByIdAndStoreId(productId, storeId)).thenReturn(Optional.of(product));
         when(variantRepository.findById(variantId)).thenReturn(Optional.of(variant));
-        when(variantRepository.existsBySkuAndIdNot("SKU-DUP", variantId)).thenReturn(true);
+        when(variantRepository.existsByStoreIdAndSkuAndIdNot(storeId, "SKU-DUP", variantId)).thenReturn(true);
 
         assertThrows(ConflictException.class, () -> updateVariantService.execute(command));
     }

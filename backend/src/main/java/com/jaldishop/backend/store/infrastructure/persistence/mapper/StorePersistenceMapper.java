@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 public class StorePersistenceMapper {
 
     public Store toDomain(StoreEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return Store.reconstitute(
                 entity.getId(),
                 entity.getMerchantUserId(),
@@ -24,6 +27,11 @@ public class StorePersistenceMapper {
                 entity.getDeliveryFeeAmount(),
                 entity.getDeliveryFeeCurrency(),
                 entity.getTaxRate(),
+                entity.getLogoUrl(),
+                entity.getBannerUrl(),
+                entity.getInstagramUrl(),
+                entity.getFacebookUrl(),
+                entity.getWhatsappNumber(),
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
@@ -31,6 +39,9 @@ public class StorePersistenceMapper {
     }
 
     public StoreEntity toEntity(Store domain) {
+        if (domain == null) {
+            return null;
+        }
         return new StoreEntity(
                 domain.getId(),
                 domain.getMerchantUserId(),
@@ -47,6 +58,11 @@ public class StorePersistenceMapper {
                 domain.getDeliveryFeeAmount(),
                 domain.getDeliveryFeeCurrency(),
                 domain.getTaxRate(),
+                domain.getLogoUrl(),
+                domain.getBannerUrl(),
+                domain.getInstagramUrl(),
+                domain.getFacebookUrl(),
+                domain.getWhatsappNumber(),
                 domain.getStatus(),
                 domain.getCreatedAt(),
                 domain.getUpdatedAt()

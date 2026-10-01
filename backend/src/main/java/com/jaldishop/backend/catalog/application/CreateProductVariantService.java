@@ -35,10 +35,10 @@ public class CreateProductVariantService {
             throw new IllegalArgumentException("El precio debe ser mayor a cero");
         }
 
-        // Regla de unicidad de SKU
+        // Regla de unicidad de SKU por tienda
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
-            if (variantRepository.existsBySku(trimmedSku)) {
+            if (variantRepository.existsByStoreIdAndSku(command.storeId(), trimmedSku)) {
                 throw new ConflictException("SKU_ALREADY_EXISTS", "El SKU '" + trimmedSku + "' ya está en uso");
             }
         }

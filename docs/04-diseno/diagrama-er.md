@@ -30,7 +30,7 @@ users {
 }
 
 %% ============================================
-%% ROLES Y USER_ROLES
+%% ROLES Y USER_ROLES CONTEXTUAL
 %% ============================================
 roles {
     smallint id PK
@@ -38,12 +38,32 @@ roles {
 }
 
 user_roles {
-    uuid user_id PK,FK
-    smallint role_id PK,FK
+    uuid id PK
+    uuid user_id FK
+    smallint role_id FK
+    uuid store_id FK
 }
 
 users ||--o{ user_roles : "CASCADE"
 roles ||--o{ user_roles : "RESTRICT"
+
+%% ============================================
+%% STORE CATEGORIES (RUBROS)
+%% ============================================
+store_categories {
+    uuid id PK
+    varchar name
+    varchar slug UK
+    text description
+    varchar status
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+store_category_assignments {
+    uuid store_id PK,FK
+    uuid store_category_id PK,FK
+}
 
 %% ============================================
 %% STORES
@@ -63,14 +83,21 @@ stores {
     boolean delivery_enabled
     numeric delivery_fee_amount
     char delivery_fee_currency
-    boolean tax_applies
     numeric tax_rate
+    text logo_url
+    text banner_url
+    varchar instagram_url
+    varchar facebook_url
+    varchar whatsapp_number
     varchar status
     timestamptz created_at
     timestamptz updated_at
 }
 
 users ||--o| stores : "UNIQUE + RESTRICT"
+stores ||--o{ user_roles : "CASCADE"
+stores ||--o{ store_category_assignments : "CASCADE"
+store_categories ||--o{ store_category_assignments : "CASCADE"
 
 %% ============================================
 %% CATEGORIES
@@ -104,13 +131,28 @@ products {
 }
 
 stores ||--o{ products : "RESTRICT"
-categories ||--o{ products : "RESTRICT"
+categories ||--o{ products : "RESTRICT (store_id, category_id)"
+
+%% ============================================
+%% PRODUCT_IMAGES
+%% ============================================
+product_images {
+    uuid id PK
+    uuid product_id FK
+    text image_url
+    integer position
+    boolean is_primary
+    timestamptz created_at
+}
+
+products ||--o{ product_images : "CASCADE"
 
 %% ============================================
 %% PRODUCT_VARIANTS
 %% ============================================
 product_variants {
     uuid id PK
+    uuid store_id FK
     uuid product_id FK
     varchar presentation_name
     varchar sku
@@ -122,7 +164,7 @@ product_variants {
     timestamptz updated_at
 }
 
-products ||--o{ product_variants : "CASCADE"
+products ||--o{ product_variants : "CASCADE (store_id, product_id)"
 
 %% ============================================
 %% VARIANT_ATTRIBUTES
@@ -167,6 +209,7 @@ stores ||--o{ carts : "CASCADE"
 cart_items {
     uuid cart_id PK,FK
     uuid variant_id PK,FK
+    uuid store_id FK
     integer quantity
     numeric reference_price_amount
     char reference_price_currency
@@ -174,8 +217,25 @@ cart_items {
     timestamptz updated_at
 }
 
-carts ||--o{ cart_items : "CASCADE"
-product_variants ||--o{ cart_items : "CASCADE"
+carts ||--o{ cart_items : "CASCADE (store_id, cart_id)"
+product_variants ||--o{ cart_items : "CASCADE (store_id, variant_id)"
+
+%% ============================================
+%% INVENTORY_RESERVATIONS
+%% ============================================
+inventory_reservations {
+    uuid id PK
+    uuid capacity_reservation_id FK
+    uuid variant_id FK
+    integer quantity
+    varchar status
+    timestamptz expires_at
+    timestamptz created_at
+    timestamptz updated_at
+}
+
+capacity_reservations ||--o{ inventory_reservations : "CASCADE"
+product_variants ||--o{ inventory_reservations : "RESTRICT"
 
 %% ============================================
 %% DISCOUNTS
@@ -331,14 +391,15 @@ orders {
 
 users ||--o{ orders : "RESTRICT"
 stores ||--o{ orders : "RESTRICT"
-payments ||--o| orders : "RESTRICT"
-capacity_reservations ||--o| orders : "RESTRICT"
+payments ||--o| orders : "RESTRICT (capacity_reservation_id, payment_id)"
+capacity_reservations ||--o| orders : "RESTRICT (store_id, user_id, capacity_reservation_id)"
 
 %% ============================================
 %% ORDER_ITEMS
 %% ============================================
 order_items {
     uuid id PK
+    uuid store_id FK
     uuid order_id FK
     uuid variant_id FK
     varchar product_name
@@ -349,8 +410,8 @@ order_items {
     numeric subtotal_amount
 }
 
-orders ||--o{ order_items : "CASCADE"
-product_variants ||--o{ order_items : "RESTRICT"
+orders ||--o{ order_items : "CASCADE (store_id, order_id)"
+product_variants ||--o{ order_items : "RESTRICT (store_id, variant_id)"
 
 %% ============================================
 %% ORDER_STATUS_HISTORY

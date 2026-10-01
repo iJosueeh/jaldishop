@@ -36,10 +36,10 @@ public class UpdateProductVariantService {
             throw new IllegalArgumentException("El nombre de la presentación no puede estar vacío");
         }
 
-        // Regla de unicidad de SKU
+        // Regla de unicidad de SKU por tienda
         if (command.sku() != null && !command.sku().isBlank()) {
             String trimmedSku = command.sku().trim();
-            if (variantRepository.existsBySkuAndIdNot(trimmedSku, command.variantId())) {
+            if (variantRepository.existsByStoreIdAndSkuAndIdNot(command.storeId(), trimmedSku, command.variantId())) {
                 throw new ConflictException("SKU_ALREADY_EXISTS", "El SKU '" + trimmedSku + "' ya está en uso");
             }
         }

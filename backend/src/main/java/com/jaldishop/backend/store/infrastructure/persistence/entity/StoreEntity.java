@@ -56,6 +56,21 @@ public class StoreEntity {
     @Column(name = "tax_rate")
     private BigDecimal taxRate;
 
+    @Column(name = "logo_url", columnDefinition = "TEXT")
+    private String logoUrl;
+
+    @Column(name = "banner_url", columnDefinition = "TEXT")
+    private String bannerUrl;
+
+    @Column(name = "instagram_url", length = 255)
+    private String instagramUrl;
+
+    @Column(name = "facebook_url", length = 255)
+    private String facebookUrl;
+
+    @Column(name = "whatsapp_number", length = 30)
+    private String whatsappNumber;
+
     @Column(name = "status", length = 30, nullable = false)
     @Enumerated(EnumType.STRING)
     private StoreStatus status;
@@ -70,8 +85,12 @@ public class StoreEntity {
     }
 
     public StoreEntity(UUID id, UUID merchantUserID, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
+        this(id, merchantUserID, name, slug, description, contactPhone, address, addressReference, latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount, deliveryFeeCurrency, taxRate, null, null, null, null, null, status, createdAt, updatedAt);
+    }
+
+    public StoreEntity(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, String logoUrl, String bannerUrl, String instagramUrl, String facebookUrl, String whatsappNumber, StoreStatus status, Instant createdAt, Instant updatedAt) {
         this.id = id;
-        this.merchantUserId = merchantUserID;
+        this.merchantUserId = merchantUserId;
         this.name = name;
         this.slug = slug;
         this.description = description;
@@ -85,6 +104,11 @@ public class StoreEntity {
         this.deliveryFeeAmount = deliveryFeeAmount;
         this.deliveryFeeCurrency = deliveryFeeCurrency;
         this.taxRate = taxRate;
+        this.logoUrl = logoUrl;
+        this.bannerUrl = bannerUrl;
+        this.instagramUrl = instagramUrl;
+        this.facebookUrl = facebookUrl;
+        this.whatsappNumber = whatsappNumber;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -148,6 +172,26 @@ public class StoreEntity {
 
     public BigDecimal getTaxRate() {
         return taxRate;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
+
+    public String getFacebookUrl() {
+        return facebookUrl;
+    }
+
+    public String getWhatsappNumber() {
+        return whatsappNumber;
     }
 
     public StoreStatus getStatus() {

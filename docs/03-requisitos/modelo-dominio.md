@@ -95,9 +95,10 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 | descripcion | Descripción de la tienda |
 | telefonoContacto | Teléfono de contacto comercial |
 | ubicacion | UbicacionTienda (Value Object) |
+| storefront | StorefrontConfig (logoUrl, bannerUrl, redes sociales, WhatsApp) |
 | estado | ACTIVA, INACTIVA, SUSPENDIDA, CERRADA |
 | configuracionEntrega | ConfiguracionEntrega (Value Object) |
-| configuracionTributaria | ConfiguracionTributaria (Value Object) |
+| configuracionTributaria | ConfiguracionTributaria (tasa IGV 18.00% incluida en precio) |
 | fechaCreacion | Fecha de creación |
 | fechaActualizacion | Última modificación |
 
@@ -108,7 +109,8 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 - El slug debe ser único dentro de la plataforma y se genera automáticamente a partir del nombre comercial.
 - SUSPENDIDA representa restricción administrativa/plataforma.
 - INACTIVA/CERRADA representan estados comerciales.
-- Categorías, productos, pedidos y reservas son relaciones, no contenido interno del aggregate.
+- Categorías, productos, pedidos, reservas y rubros son relaciones, no contenido interno del aggregate.
+- Si se especifican coordenadas en `UbicacionTienda`, ambas (latitud y longitud) deben ser provistas conjuntamente.
 
 **Value Object: UbicacionTienda**
 
@@ -119,7 +121,25 @@ El **inventario** y la **capacidad operativa** también representan restriccione
 | latitud | Coordenada opcional |
 | longitud | Coordenada opcional |
 
-> 💡 Las coordenadas son opcionales porque la integración con Maps es un plus y no requisito central.
+> 💡 Las coordenadas son opcionales pero deben ser completas (ambas presentes o ambas nulas).
+
+---
+
+### 3.2.1 Rubro Comercial (StoreCategory)
+
+**Clasificación:** Aggregate Root / Catálogo Maestro
+
+**Responsabilidad:** Representar la actividad o giro de negocio general (ej. Pastelería, Bodega, Farmacia) al cual se adscribe una tienda para su descubrimiento en la plataforma.
+
+| Atributo | Descripción |
+|---|---|
+| identificador | Identificador único del rubro |
+| nombre | Nombre del rubro comercial |
+| slug | Slug único del rubro |
+| descripcion | Descripción general |
+| estado | ACTIVO o INACTIVO |
+| fechaCreacion | Fecha de registro |
+| fechaActualizacion | Última modificación |
 
 ---
 

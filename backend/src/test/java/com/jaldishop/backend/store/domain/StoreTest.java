@@ -320,4 +320,62 @@ class StoreTest {
         assertEquals(createdAt, store.getCreatedAt());
         assertEquals(updatedAt, store.getUpdatedAt());
     }
+
+    @Test
+    @DisplayName("Lanzar excepción cuando solo una de las coordenadas es proporcionada")
+    void throwExceptionWhenOnlyOneCoordinateProvided() {
+        IllegalArgumentException exceptionLatOnly = assertThrows(
+                IllegalArgumentException.class,
+                () -> Store.create(
+                        merchantUserId,
+                        "Mi Tienda",
+                        "mi-tienda",
+                        null, null, null, null,
+                        new BigDecimal("-12.046374"),
+                        null,
+                        true, false, null, null, null
+                )
+        );
+        assertTrue(exceptionLatOnly.getMessage().contains("Latitud y longitud"));
+
+        IllegalArgumentException exceptionLngOnly = assertThrows(
+                IllegalArgumentException.class,
+                () -> Store.create(
+                        merchantUserId,
+                        "Mi Tienda",
+                        "mi-tienda",
+                        null, null, null, null,
+                        null,
+                        new BigDecimal("-77.042793"),
+                        true, false, null, null, null
+                )
+        );
+        assertTrue(exceptionLngOnly.getMessage().contains("Latitud y longitud"));
+    }
+
+    @Test
+    @DisplayName("Actualizar storefront y redes sociales")
+    void updateStorefrontDetails() {
+        Store store = Store.create(
+                merchantUserId,
+                "Tienda",
+                "tienda",
+                null, null, null, null, null, null,
+                true, false, null, null, null
+        );
+
+        store.updateStorefront(
+                "https://example.com/logo.png",
+                "https://example.com/banner.png",
+                "https://instagram.com/mitienda",
+                "https://facebook.com/mitienda",
+                "987654321"
+        );
+
+        assertEquals("https://example.com/logo.png", store.getLogoUrl());
+        assertEquals("https://example.com/banner.png", store.getBannerUrl());
+        assertEquals("https://instagram.com/mitienda", store.getInstagramUrl());
+        assertEquals("https://facebook.com/mitienda", store.getFacebookUrl());
+        assertEquals("+51987654321", store.getWhatsappNumber());
+    }
 }
