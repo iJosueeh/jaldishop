@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Forzar que el contenedor divIcon de Leaflet sea 100% transparente */
+:host ::ng-deep .jaldishop-map-pin,
+:host ::ng-deep .leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
