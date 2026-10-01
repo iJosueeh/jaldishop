@@ -1,4 +1,4 @@
-<section [formGroup]="form()" class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col gap-5 font-sans">
+<section [formGroup]="form()" class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col gap-6 font-sans">
   <!-- Encabezado de la Tarjeta -->
   <div class="flex items-center justify-between border-b border-surface-container-highest pb-3">
     <div class="flex items-center gap-2.5">
@@ -6,86 +6,319 @@
         <ng-icon name="matBadgeOutline" class="text-[20px]" />
       </div>
       <div class="flex flex-col">
-        <h2 class="text-sm sm:text-base font-bold text-on-surface">Identidad del Negocio</h2>
-        <p class="text-xs text-on-surface-variant">Información comercial básica visible para tus clientes.</p>
+        <h2 class="text-sm sm:text-base font-bold text-on-surface">Identidad y Marca del Negocio</h2>
+        <p class="text-xs text-on-surface-variant">Personaliza la presentación visual y datos de contacto visibles para tus clientes.</p>
       </div>
     </div>
   </div>
-
-  <!-- Campos de Identidad -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <!-- Nombre de la Tienda -->
-    <div class="flex flex-col gap-1.5 sm:col-span-2">
-      <label for="store-name" class="text-xs font-bold text-on-surface flex items-center justify-between">
-        <span>Nombre Comercial <span class="text-error">*</span></span>
-        <span class="text-[11px] font-normal text-on-surface-variant">Máx. 160 caracteres</span>
-      </label>
-      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
-        <ng-icon name="matStorefrontOutline" class="text-[18px] text-on-surface-variant" />
-        <input
-          id="store-name"
-          type="text"
-          formControlName="name"
-          placeholder="Ej. Panadería & Pastelería Don Pepe"
-          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
-        />
-      </div>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-bold text-on-surface uppercase tracking-wider text-on-surface-variant">
+        1. Portada y Logo de la Tienda
+      </span>
     </div>
 
-    <!-- Slug / Enlace Público Permanente (Read-only) -->
-    <div class="flex flex-col gap-1.5">
-      <label for="store-slug" class="text-xs font-bold text-on-surface flex items-center justify-between">
-        <span>Enlace Único (Slug)</span>
-        <span class="text-[10px] font-bold text-primary-container uppercase tracking-wider">Permanente</span>
-      </label>
-      <div class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-on-surface-variant cursor-not-allowed">
-        <span class="text-xs text-on-surface-variant/80 font-mono select-none">jaldishop.pe/</span>
-        <input
-          id="store-slug"
-          type="text"
-          readonly
-          [value]="slug()"
-          placeholder="mi-tienda"
-          class="w-full bg-transparent text-xs sm:text-sm text-on-surface font-mono font-semibold focus:outline-none cursor-not-allowed"
-        />
-        <ng-icon name="matLockOutline" class="text-[16px] text-on-surface-variant/70" />
-      </div>
-      <span class="text-[11px] text-on-surface-variant">Se asigna automáticamente al registrarte.</span>
-    </div>
+    <!-- Contenedor de Banner con Logo superpuesto estilo perfil de redes -->
+    <div class="relative w-full rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/30 flex flex-col">
+      <!-- Área de Banner (16:9 responsive) -->
+      <div class="relative w-full h-32 sm:h-44 bg-surface-container-high flex items-center justify-center overflow-hidden group">
+        @if (isUploadingBanner()) {
+          <div class="absolute inset-0 bg-black/60 z-20 flex flex-col items-center justify-center gap-2 text-white p-4">
+            <div class="w-7 h-7 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <span class="text-xs font-bold">Subiendo portada... {{ bannerProgress() }}%</span>
+            <div class="w-44 h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div class="h-full bg-primary transition-all duration-300 rounded-full" [style.width.%]="bannerProgress()"></div>
+            </div>
+          </div>
+        }
 
-    <!-- Teléfono de Contacto / WhatsApp -->
-    <div class="flex flex-col gap-1.5">
-      <label for="store-phone" class="text-xs font-bold text-on-surface flex items-center justify-between">
-        <span>Teléfono / WhatsApp</span>
-        <span class="text-[10px] text-primary-container font-bold">Pedidos y Notificaciones</span>
-      </label>
-      <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
-        <span class="text-xs font-bold text-on-surface-variant/80 font-mono select-none">+51</span>
-        <span class="w-px h-4 bg-outline-variant/40"></span>
-        <input
-          id="store-phone"
-          type="tel"
-          formControlName="contactPhone"
-          placeholder="987 654 321"
-          class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
-        />
-        <ng-icon name="matChatOutline" class="text-[18px] text-primary-container" />
+        @if (form().get('bannerUrl')?.value) {
+          <img [src]="form().get('bannerUrl')?.value" alt="Banner" class="w-full h-full object-cover" />
+          
+          <!-- Controles de Banner: Flotantes y visibles en móvil, overlay centrado en hover para desktop -->
+          <div class="absolute top-2 right-2 sm:inset-0 sm:top-0 sm:right-0 sm:bg-black/40 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-end sm:justify-center gap-1.5 sm:gap-2 z-10">
+            <label class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-black/65 sm:bg-surface-container-lowest text-white sm:text-on-surface text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md sm:shadow-sm backdrop-blur-xs hover:bg-black/80 sm:hover:bg-surface-container active:scale-95 transition-all">
+              <ng-icon name="matPhotoCameraOutline" class="text-[16px]" />
+              <span class="text-[11px] sm:text-xs">Cambiar</span>
+              <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event, 'bannerUrl')" />
+            </label>
+            <button
+              type="button"
+              (click)="requestDelete('bannerUrl')"
+              class="p-1.5 sm:p-1.5 rounded-xl bg-error text-white hover:bg-error/90 active:scale-95 transition-all shadow-md sm:shadow-sm"
+              title="Quitar banner"
+            >
+              <ng-icon name="matDeleteOutline" class="text-[18px]" />
+            </button>
+          </div>
+        } @else {
+          <!-- Dropzone / Selector de Banner Vacío -->
+          <div class="flex flex-col items-center gap-2 text-center p-4">
+            @if (bannerMode() === 'upload') {
+              <label class="px-4 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 hover:border-primary-container text-on-surface text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs transition-all hover:scale-102">
+                <ng-icon name="matUploadOutline" class="text-[18px] text-primary-container" />
+                <span>Subir Banner de Portada</span>
+                <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event, 'bannerUrl')" />
+              </label>
+              <span class="text-[11px] text-on-surface-variant">Recomendado: 1200 x 400 px (JPG, PNG, WebP)</span>
+              <button
+                type="button"
+                (click)="setBannerMode('url')"
+                class="text-[11px] text-primary-container hover:underline cursor-pointer font-medium"
+              >
+                o ingresar enlace / URL
+              </button>
+            } @else {
+              <div class="flex items-center gap-2 w-full max-w-md px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30">
+                <ng-icon name="matLinkOutline" class="text-[18px] text-on-surface-variant shrink-0" />
+                <input
+                  type="url"
+                  formControlName="bannerUrl"
+                  placeholder="https://ejemplo.com/banner.png"
+                  class="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  (click)="setBannerMode('upload')"
+                  class="text-[10px] text-primary-container font-bold hover:underline shrink-0"
+                >
+                  Subir archivo
+                </button>
+              </div>
+            }
+          </div>
+        }
       </div>
-      <span class="text-[11px] text-on-surface-variant">Los clientes recibirán confirmaciones a este número.</span>
-    </div>
 
-    <!-- Descripción / Biografía -->
-    <div class="flex flex-col gap-1.5 sm:col-span-2">
-      <label for="store-desc" class="text-xs font-bold text-on-surface">
-        Biografía / Descripción del Negocio
-      </label>
-      <textarea
-        id="store-desc"
-        rows="3"
-        formControlName="description"
-        placeholder="Cuéntale a tus clientes qué preparas, tus especialidades o tu horario de horneado..."
-        class="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none resize-none transition-all"
-      ></textarea>
+      <!-- Barra inferior del contenedor: Logo Superpuesto + Tips -->
+      <div class="p-4 pt-0 sm:p-5 sm:pt-0 flex items-end justify-between gap-4 -mt-10 sm:-mt-12 relative z-10">
+        <!-- Logo del Negocio (Avatar superpuesto) -->
+        <div class="flex items-end gap-3.5">
+          <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-surface-container-lowest border-4 border-surface-container-lowest shadow-md overflow-hidden flex items-center justify-center shrink-0 group">
+            @if (isUploadingLogo()) {
+              <div class="absolute inset-0 bg-black/60 z-20 flex flex-col items-center justify-center gap-1 text-white p-1">
+                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span class="text-[10px] font-bold">{{ logoProgress() }}%</span>
+              </div>
+            }
+
+            @if (form().get('logoUrl')?.value) {
+              <img [src]="form().get('logoUrl')?.value" alt="Logo" class="w-full h-full object-cover" />
+              
+              <!-- Overlay de Escritorio: Solo visible en hover sobre el avatar en pantallas sm en adelante -->
+              <div class="hidden sm:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center gap-1.5 z-10">
+                <label class="p-1.5 rounded-lg bg-surface-container-lowest text-on-surface cursor-pointer shadow-xs hover:bg-surface-container" title="Cambiar logo">
+                  <ng-icon name="matPhotoCameraOutline" class="text-[16px]" />
+                  <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event, 'logoUrl')" />
+                </label>
+                <button
+                  type="button"
+                  (click)="requestDelete('logoUrl')"
+                  class="p-1.5 rounded-lg bg-error text-white hover:bg-error/90 shadow-xs"
+                  title="Quitar logo"
+                >
+                  <ng-icon name="matDeleteOutline" class="text-[16px]" />
+                </button>
+              </div>
+            } @else {
+              <!-- Estado Vacío: Botón para subir primer logo -->
+              <label class="flex flex-col items-center justify-center text-center p-1 text-on-surface-variant cursor-pointer hover:text-primary transition-colors">
+                <ng-icon name="matPhotoCameraOutline" class="text-[24px] text-primary-container mb-0.5" />
+                <span class="text-[10px] font-bold text-on-surface">Subir Logo</span>
+                <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event, 'logoUrl')" />
+              </label>
+            }
+          </div>
+
+          <!-- Información y Acciones Claras de Texto (Acciones visibles en móvil, ocultas en escritorio) -->
+          <div class="flex flex-col justify-end gap-1 pb-0.5">
+            <div class="flex flex-col">
+              <span class="text-xs sm:text-sm font-bold text-on-surface leading-tight">Logo de la Tienda</span>
+              <span class="text-[11px] text-on-surface-variant font-medium mt-0.5">
+                Recomendado: Cuadrado 1:1 (mínimo 400x400 px)
+              </span>
+            </div>
+            
+            @if (form().get('logoUrl')?.value) {
+              <!-- En móvil: acciones de texto apiladas verticalmente -->
+              <div class="flex flex-col gap-1 mt-1 sm:hidden">
+                <label class="inline-flex items-center gap-1.5 text-xs font-bold text-primary-container hover:underline cursor-pointer w-fit">
+                  <ng-icon name="matPhotoCameraOutline" class="text-[14px]" />
+                  <span>Cambiar logo</span>
+                  <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event, 'logoUrl')" />
+                </label>
+
+                <button
+                  type="button"
+                  (click)="requestDelete('logoUrl')"
+                  class="inline-flex items-center gap-1.5 text-xs font-bold text-error hover:underline cursor-pointer w-fit"
+                >
+                  <ng-icon name="matDeleteOutline" class="text-[14px]" />
+                  <span>Quitar logo</span>
+                </button>
+              </div>
+            } @else if (logoMode() === 'upload') {
+              <button
+                type="button"
+                (click)="setLogoMode('url')"
+                class="text-[11px] text-primary-container text-left hover:underline cursor-pointer font-medium mt-0.5"
+              >
+                o ingresar enlace URL
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (logoMode() === 'url' && !form().get('logoUrl')?.value) {
+          <div class="flex items-center gap-2 max-w-xs px-3 py-1.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-xs">
+            <ng-icon name="matLinkOutline" class="text-[16px] text-on-surface-variant" />
+            <input
+              type="url"
+              formControlName="logoUrl"
+              placeholder="https://.../logo.png"
+              class="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+            />
+            <button
+              type="button"
+              (click)="setLogoMode('upload')"
+              class="text-[10px] text-primary-container font-bold hover:underline"
+            >
+              Archivo
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col gap-4 pt-2 border-t border-surface-container-highest">
+    <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+      2. Datos Comerciales del Negocio
+    </span>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Nombre de la Tienda -->
+      <div class="flex flex-col gap-1.5 sm:col-span-2">
+        <label for="store-name" class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>Nombre Comercial <span class="text-error">*</span></span>
+          <span class="text-[11px] font-normal text-on-surface-variant">Máx. 160 caracteres</span>
+        </label>
+        <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+          <ng-icon name="matStorefrontOutline" class="text-[18px] text-on-surface-variant" />
+          <input
+            id="store-name"
+            type="text"
+            formControlName="name"
+            placeholder="Ej. Panadería & Pastelería Don Pepe"
+            class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+          />
+        </div>
+      </div>
+
+      <!-- Slug / Enlace Público Permanente (Read-only) -->
+      <div class="flex flex-col gap-1.5 sm:col-span-2">
+        <label for="store-slug" class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>Enlace Único de tu Catálogo (Slug)</span>
+          <span class="text-[10px] font-bold text-primary-container uppercase tracking-wider">Identificador Permanente</span>
+        </label>
+        <div class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-on-surface-variant cursor-not-allowed">
+          <span class="text-xs text-on-surface-variant/80 font-mono select-none">jaldishop.pe/tienda/</span>
+          <input
+            id="store-slug"
+            type="text"
+            readonly
+            [value]="slug()"
+            placeholder="mi-tienda"
+            class="w-full bg-transparent text-xs sm:text-sm text-on-surface font-mono font-semibold focus:outline-none cursor-not-allowed"
+          />
+          <ng-icon name="matLockOutline" class="text-[16px] text-on-surface-variant/70" />
+        </div>
+      </div>
+
+      <!-- Descripción / Biografía -->
+      <div class="flex flex-col gap-1.5 sm:col-span-2">
+        <label for="store-desc" class="text-xs font-bold text-on-surface">
+          Biografía / Descripción del Negocio
+        </label>
+        <textarea
+          id="store-desc"
+          rows="3"
+          formControlName="description"
+          placeholder="Cuéntale a tus clientes qué preparas, tus especialidades o tu horario de horneado..."
+          class="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none resize-none transition-all"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col gap-4 pt-2 border-t border-surface-container-highest">
+    <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+      3. Canales de Contacto y Redes Sociales
+    </span>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Teléfono / WhatsApp de Pedidos -->
+      <div class="flex flex-col gap-1.5">
+        <label for="store-phone" class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>WhatsApp de Pedidos</span>
+          <span class="text-[10px] text-primary-container font-bold">Principal</span>
+        </label>
+        <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+          <span class="text-xs font-bold text-on-surface-variant/80 font-mono select-none">+51</span>
+          <span class="w-px h-4 bg-outline-variant/40"></span>
+          <input
+            id="store-phone"
+            type="tel"
+            formControlName="contactPhone"
+            placeholder="987 654 321"
+            class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+          />
+          <ng-icon name="matChatOutline" class="text-[18px] text-primary-container" />
+        </div>
+      </div>
+
+      <!-- Instagram -->
+      <div class="flex flex-col gap-1.5">
+        <label for="store-instagram" class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>Instagram</span>
+          <span class="text-[11px] font-normal text-on-surface-variant">&#64;usuario o URL</span>
+        </label>
+        <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+          <ng-icon name="matShareOutline" class="text-[18px] text-on-surface-variant" />
+          <input
+            id="store-instagram"
+            type="text"
+            formControlName="instagramUrl"
+            placeholder="https://instagram.com/mitienda"
+            class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+          />
+        </div>
+      </div>
+
+      <!-- Facebook -->
+      <div class="flex flex-col gap-1.5">
+        <label for="store-facebook" class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>Facebook</span>
+          <span class="text-[11px] font-normal text-on-surface-variant">Página o URL</span>
+        </label>
+        <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all">
+          <ng-icon name="matLinkOutline" class="text-[18px] text-on-surface-variant" />
+          <input
+            id="store-facebook"
+            type="text"
+            formControlName="facebookUrl"
+            placeholder="https://facebook.com/mitienda"
+            class="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none font-medium"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<app-confirm-modal
+  [isOpen]="showDeleteModal()"
+  [title]="deleteModalTitle"
+  [message]="deleteModalMessage"
+  confirmText="Quitar"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

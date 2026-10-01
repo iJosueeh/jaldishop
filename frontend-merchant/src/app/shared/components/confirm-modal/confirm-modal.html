@@ -1,0 +1,79 @@
+@if (isRendered()) {
+  <div
+    class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans"
+    [class.modal-backdrop-animate]="!isClosing()"
+    [class.modal-backdrop-exit]="isClosing()"
+    role="dialog"
+    aria-modal="true"
+    (click)="onBackdropClick($event)"
+  >
+    <div
+      class="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl shadow-2xl w-full max-w-md p-5 sm:p-6 flex flex-col gap-4 relative"
+      [class.modal-dialog-animate]="!isClosing()"
+      [class.modal-dialog-exit]="isClosing()"
+    >
+      <!-- Botón de Cerrar Superior (X) -->
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="absolute top-4 right-4 p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+        aria-label="Cerrar modal"
+      >
+        <ng-icon name="matCloseOutline" class="text-[20px]" />
+      </button>
+
+      <!-- Encabezado con Icono de Advertencia -->
+      <div class="flex items-center gap-3">
+        <div
+          class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+          [class.bg-rose-500/10]="isDanger()"
+          [class.text-rose-600]="isDanger()"
+          [class.bg-primary/10]="!isDanger()"
+          [class.text-primary]="!isDanger()"
+        >
+          @if (isDanger()) {
+            <ng-icon name="matDeleteOutline" class="text-[24px]" />
+          } @else {
+            <ng-icon name="matWarningOutline" class="text-[24px]" />
+          }
+        </div>
+
+        <div class="pr-8">
+          <h2 class="text-base sm:text-lg font-black text-on-surface leading-tight">
+            {{ title() }}
+          </h2>
+        </div>
+      </div>
+
+      <!-- Mensaje / Explicación -->
+      <div class="p-3.5 rounded-2xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface leading-relaxed">
+        <p>{{ message() }}</p>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/20">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+        >
+          {{ cancelText() }}
+        </button>
+
+        <button
+          type="button"
+          (click)="onConfirm()"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+          [class.bg-rose-600]="isDanger()"
+          [class.text-white]="isDanger()"
+          [class.hover:bg-rose-700]="isDanger()"
+          [class.bg-primary]="!isDanger()"
+          [class.text-on-primary]="!isDanger()"
+          [class.hover:bg-primary/90]="!isDanger()"
+        >
+          {{ confirmText() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

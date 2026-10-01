@@ -91,8 +91,8 @@
                   <div
                     class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container shrink-0 flex items-center justify-center"
                   >
-                    @if (prod.imageUrl) {
-                      <img [src]="prod.imageUrl" [alt]="prod.name" class="w-full h-full object-cover" />
+                    @if (getImageUrl(prod)) {
+                      <img [src]="getImageUrl(prod)" [alt]="prod.name" class="w-full h-full object-cover" />
                     } @else {
                       <ng-icon name="matInventory2Outline" class="text-lg text-primary"></ng-icon>
                     }

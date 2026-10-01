@@ -14,6 +14,8 @@ import {
   matChatOutline,
   matPinDropOutline,
   matReceiptOutline,
+  matShareOutline,
+  matLinkOutline,
 } from '@ng-icons/material-symbols/outline';
 import { switchMap } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
@@ -35,6 +37,8 @@ import { StoreResponse } from '../../../../core/models/store.models';
       matChatOutline,
       matPinDropOutline,
       matReceiptOutline,
+      matShareOutline,
+      matLinkOutline,
     }),
   ],
   selector: 'app-store-preview-card',
@@ -139,6 +143,22 @@ export class StorePreviewCard {
     if (formVal !== undefined && formVal !== null && formVal !== '') return Number(formVal);
     return this.store()?.taxRate ?? 18.0;
   });
+
+  readonly logoUrl = computed(() =>
+    this.getVal('logoUrl', this.store()?.logoUrl || ''),
+  );
+
+  readonly bannerUrl = computed(() =>
+    this.getVal('bannerUrl', this.store()?.bannerUrl || ''),
+  );
+
+  readonly instagramUrl = computed(() =>
+    this.getVal('instagramUrl', this.store()?.instagramUrl || ''),
+  );
+
+  readonly facebookUrl = computed(() =>
+    this.getVal('facebookUrl', this.store()?.facebookUrl || ''),
+  );
 
   readonly slug = computed(() => this.store()?.slug || 'mi-tienda');
 

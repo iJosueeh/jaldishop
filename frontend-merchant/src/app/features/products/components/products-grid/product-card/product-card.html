@@ -4,9 +4,9 @@
 >
   <!-- Imagen fotográfica con badges flotantes -->
   <div class="relative w-full h-52 overflow-hidden bg-surface-container-low">
-    @if (product().imageUrl) {
+    @if (mainImageUrl()) {
       <img
-        [src]="product().imageUrl"
+        [src]="mainImageUrl()"
         [alt]="product().name"
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"

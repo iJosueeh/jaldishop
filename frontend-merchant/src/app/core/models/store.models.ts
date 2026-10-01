@@ -14,9 +14,22 @@ export interface StoreResponse {
     deliveryFeeAmount?: number;
     deliveryFeeCurrency?: string;
     taxRate?: number;
+    logoUrl?: string;
+    bannerUrl?: string;
+    instagramUrl?: string;
+    facebookUrl?: string;
+    whatsappNumber?: string;
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
     createdAt: string;
     updatedAt: string; 
+}
+
+export interface StoreCategory {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface CreateStoreRequest {
@@ -33,6 +46,11 @@ export interface CreateStoreRequest {
     deliveryFeeAmount?: number;
     deliveryFeeCurrency?: string;
     taxRate?: number;
+    logoUrl?: string;
+    bannerUrl?: string;
+    instagramUrl?: string;
+    facebookUrl?: string;
+    whatsappNumber?: string;
 }
 
 export type UpdateStoreRequest = Omit<CreateStoreRequest, 'slug'>;

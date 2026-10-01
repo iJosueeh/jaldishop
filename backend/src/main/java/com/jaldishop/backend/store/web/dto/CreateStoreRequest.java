@@ -21,5 +21,47 @@ public record CreateStoreRequest(
         boolean deliveryEnabled,
         @DecimalMin("0.00") BigDecimal deliveryFeeAmount,
         @Size(min = 3, max = 3) String deliveryFeeCurrency,
-        @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal taxRate
-) {}
+        @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal taxRate,
+        String logoUrl,
+        String bannerUrl,
+        String instagramUrl,
+        String facebookUrl,
+        @ValidPhone String whatsappNumber
+) {
+    public CreateStoreRequest(
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate
+    ) {
+        this(
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+}

@@ -8,6 +8,15 @@ export interface ProductCategory {
   updatedAt?: string;
 }
 
+export interface ProductImage {
+  id?: string;
+  productId?: string;
+  imageUrl: string;
+  position: number;
+  isPrimary: boolean;
+  createdAt?: string;
+}
+
 export interface ProductVariantAttribute {
   name: string;
   value: string;
@@ -36,6 +45,7 @@ export interface Product {
   slug: string;
   description?: string;
   imageUrl?: string;
+  images?: ProductImage[];
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   createdAt?: string;
   updatedAt?: string;
@@ -60,6 +70,7 @@ export interface CreateProductRequest {
   slug: string;
   description?: string;
   imageUrl?: string;
+  images?: ProductImage[];
 }
 
 export interface UpdateProductRequest {
@@ -68,6 +79,7 @@ export interface UpdateProductRequest {
   slug?: string;
   description?: string;
   imageUrl?: string;
+  images?: ProductImage[];
   status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 }
 

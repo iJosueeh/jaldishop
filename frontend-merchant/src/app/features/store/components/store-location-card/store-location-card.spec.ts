@@ -16,6 +16,8 @@ describe('StoreLocationCard', () => {
     fixture.componentRef.setInput('form', new FormGroup({
       address: new FormControl(''),
       addressReference: new FormControl(''),
+      latitude: new FormControl<number | null>(null),
+      longitude: new FormControl<number | null>(null),
     }));
     await fixture.whenStable();
   });

@@ -58,4 +58,14 @@ export class ProductCard {
   });
 
   readonly isPaused = computed(() => this.product().status === 'INACTIVE');
+
+  readonly mainImageUrl = computed(() => {
+    const p = this.product();
+    if (p.imageUrl) return p.imageUrl;
+    if (p.images && p.images.length > 0) {
+      const primary = p.images.find((img) => img.isPrimary);
+      return primary ? primary.imageUrl : p.images[0].imageUrl;
+    }
+    return null;
+  });
 }

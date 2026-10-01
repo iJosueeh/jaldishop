@@ -23,10 +23,62 @@ public record StoreResponse(
         BigDecimal deliveryFeeAmount,
         String deliveryFeeCurrency,
         BigDecimal taxRate,
+        String logoUrl,
+        String bannerUrl,
+        String instagramUrl,
+        String facebookUrl,
+        String whatsappNumber,
         StoreStatus status,
         Instant createdAt,
         Instant updatedAt
 ) {
+    public StoreResponse(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                null,
+                null,
+                null,
+                null,
+                null,
+                status,
+                createdAt,
+                updatedAt
+        );
+    }
+
     public static StoreResponse fromDomain(Store store) {
         return new StoreResponse(
                 store.getId(),
@@ -44,6 +96,11 @@ public record StoreResponse(
                 store.getDeliveryFeeAmount(),
                 store.getDeliveryFeeCurrency(),
                 store.getTaxRate(),
+                store.getLogoUrl(),
+                store.getBannerUrl(),
+                store.getInstagramUrl(),
+                store.getFacebookUrl(),
+                store.getWhatsappNumber(),
                 store.getStatus(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
