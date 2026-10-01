@@ -31,6 +31,11 @@ public class CapacityConfigurationRepositoryAdapter implements CapacityConfigura
     }
 
     @Override
+    public Optional<CapacityConfiguration> findByIdForUpdate(UUID id) {
+        return jpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
     public List<CapacityConfiguration> findByStoreId(UUID storeId) {
         return jpaRepository.findByStoreIdOrderByDayOfWeekAscStartTimeAsc(storeId).stream()
                 .map(mapper::toDomain)

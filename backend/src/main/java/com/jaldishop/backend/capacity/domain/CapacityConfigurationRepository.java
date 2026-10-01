@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface CapacityConfigurationRepository {
     Optional<CapacityConfiguration> findById(UUID id);
+    Optional<CapacityConfiguration> findByIdForUpdate(UUID id);
     List<CapacityConfiguration> findByStoreId(UUID storeId);
     boolean existsOverlappingByStoreIdAndDayOfWeek(
             UUID storeId, int dayOfWeek, LocalTime startTime, LocalTime endTime, UUID excludeId);
