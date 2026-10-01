@@ -5,6 +5,10 @@ import { TokenService } from '../services/token-service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
 
+  if (req.url.includes('api.cloudinary.com')) {
+    return next(req);
+  }
+
   if (tokenService.hasValidToken()) {
     const token = tokenService.getToken();
     const cloned = req.clone({

@@ -5,6 +5,7 @@ import {
   matLocationOnOutline,
   matPinDropOutline,
   matNearMeOutline,
+  matWarningOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -14,6 +15,7 @@ import {
       matLocationOnOutline,
       matPinDropOutline,
       matNearMeOutline,
+      matWarningOutline,
     }),
   ],
   selector: 'app-store-location-card',

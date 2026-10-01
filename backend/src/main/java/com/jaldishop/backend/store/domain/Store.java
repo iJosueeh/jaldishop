@@ -301,6 +301,46 @@ public class Store {
             String deliveryFeeCurrency,
             BigDecimal taxRate
     ) {
+        update(
+                name,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                this.logoUrl,
+                this.bannerUrl,
+                this.instagramUrl,
+                this.facebookUrl,
+                this.whatsappNumber
+        );
+    }
+
+    public void update(
+            String name,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber
+    ) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("El nombre no puede ser nulo ni vacio.");
         }
@@ -335,6 +375,11 @@ public class Store {
                 ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
                 : (this.deliveryFeeCurrency != null ? this.deliveryFeeCurrency : "PEN");
         this.taxRate = taxRate != null ? taxRate : this.taxRate;
+        this.logoUrl = logoUrl;
+        this.bannerUrl = bannerUrl;
+        this.instagramUrl = instagramUrl;
+        this.facebookUrl = facebookUrl;
+        this.whatsappNumber = PhoneUtils.normalizePeruPhone(whatsappNumber);
         this.updatedAt = Instant.now();
     }
 

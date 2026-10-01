@@ -32,7 +32,12 @@ public class UpdateStoreService {
                 command.deliveryEnabled(),
                 command.deliveryFeeAmount(),
                 command.deliveryFeeCurrency(),
-                command.taxRate()
+                command.taxRate(),
+                command.logoUrl(),
+                command.bannerUrl(),
+                command.instagramUrl(),
+                command.facebookUrl(),
+                command.whatsappNumber()
         );
 
         return storeRepository.save(store);

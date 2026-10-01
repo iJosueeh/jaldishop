@@ -1,0 +1,64 @@
+:host {
+  display: contents;
+}
+
+.modal-backdrop-animate {
+  animation: backdropFadeIn 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.modal-backdrop-exit {
+  animation: backdropFadeOut 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none;
+}
+
+.modal-dialog-animate {
+  animation: modalScaleIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.modal-dialog-exit {
+  animation: modalScaleOut 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@keyframes backdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes modalScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalScaleOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.92) translateY(16px);
+  }
+}
+

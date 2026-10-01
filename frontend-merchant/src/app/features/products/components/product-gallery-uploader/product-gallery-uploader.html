@@ -1,0 +1,179 @@
+<div class="flex flex-col gap-3 font-sans">
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col">
+      <span class="text-xs font-bold text-on-surface">Galería de Imágenes del Producto</span>
+      <span class="text-[11px] text-on-surface-variant">
+        Hasta {{ maxImages() }} fotografías (JPG, PNG, WebP). La primera será la portada de catálogo.
+      </span>
+    </div>
+    <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant">
+      {{ internalImages().length }} / {{ maxImages() }}
+    </span>
+  </div>
+
+  <!-- Grid de Miniaturas de la Galería -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+    @for (item of internalImages(); track $index) {
+      <div
+        class="relative aspect-square rounded-xl bg-surface-container overflow-hidden border-2 transition-all flex flex-col items-center justify-center group"
+        [class.border-primary]="item.isPrimary"
+        [class.border-outline-variant]="!item.isPrimary"
+      >
+        <!-- Overlay de carga / progreso -->
+        @if (item.isUploading) {
+          <div class="absolute inset-0 bg-black/60 z-20 flex flex-col items-center justify-center gap-1.5 text-white p-2">
+            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <span class="text-[10px] font-bold">{{ item.uploadProgress ?? 10 }}%</span>
+            <div class="w-full h-1 bg-white/20 rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full transition-all duration-300" [style.width.%]="item.uploadProgress ?? 10"></div>
+            </div>
+          </div>
+        }
+
+        <!-- Imagen -->
+        <img
+          [src]="item.imageUrl || item.previewUrl"
+          alt="Foto de producto"
+          class="w-full h-full object-cover"
+        />
+
+        <!-- Insignia de Portada Principal -->
+        @if (item.isPrimary) {
+          <div class="absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-md bg-primary text-on-primary text-[9px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1">
+            <ng-icon name="matStarOutline" class="text-[11px]" />
+            <span>Portada</span>
+          </div>
+        }
+
+        <!-- Overlay de Acciones Rápidas: Visible en móvil, hover en desktop -->
+        @if (!item.isUploading) {
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 flex flex-col justify-between p-1.5 pointer-events-none sm:pointer-events-auto">
+            <!-- Botón Eliminar Arriba a la Derecha -->
+            <div class="flex justify-end pointer-events-auto">
+              <button
+                type="button"
+                (click)="requestDelete($index)"
+                class="p-1.5 rounded-lg bg-error text-white hover:bg-error/90 active:scale-90 shadow-md transition-all cursor-pointer"
+                title="Eliminar foto"
+              >
+                <ng-icon name="matDeleteOutline" class="text-[14px]" />
+              </button>
+            </div>
+
+            <!-- Controles Inferiores: Mover y Establecer Portada -->
+            <div class="flex items-center justify-between gap-1 pointer-events-auto">
+              <div class="flex items-center gap-0.5">
+                @if ($index > 0) {
+                  <button
+                    type="button"
+                    (click)="movePosition($index, 'left')"
+                    class="p-1 rounded-md bg-surface-container-lowest/90 text-on-surface hover:bg-surface-container active:scale-90 text-xs shadow-xs transition-all"
+                    title="Mover a la izquierda"
+                  >
+                    <ng-icon name="matArrowBackOutline" class="text-[12px]" />
+                  </button>
+                }
+                @if ($index < internalImages().length - 1) {
+                  <button
+                    type="button"
+                    (click)="movePosition($index, 'right')"
+                    class="p-1 rounded-md bg-surface-container-lowest/90 text-on-surface hover:bg-surface-container active:scale-90 text-xs shadow-xs transition-all"
+                    title="Mover a la derecha"
+                  >
+                    <ng-icon name="matArrowForwardOutline" class="text-[12px]" />
+                  </button>
+                }
+              </div>
+
+              @if (!item.isPrimary) {
+                <button
+                  type="button"
+                  (click)="setPrimary($index)"
+                  class="px-1.5 py-0.5 rounded-md bg-surface-container-lowest/90 text-on-surface text-[10px] font-bold hover:bg-primary hover:text-on-primary active:scale-90 shadow-xs transition-all cursor-pointer"
+                  title="Hacer foto principal"
+                >
+                  Portada
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Botón / Dropzone para Agregar Más Fotos -->
+    @if (internalImages().length < maxImages() && !disabled()) {
+      <div
+        class="relative aspect-square rounded-xl border-2 border-dashed border-outline-variant/60 hover:border-primary-container bg-surface-container-low/40 hover:bg-surface-container-low transition-all flex flex-col items-center justify-center p-3 text-center cursor-pointer group"
+      >
+        <label class="w-full h-full flex flex-col items-center justify-center gap-1 cursor-pointer">
+          <ng-icon
+            name="matAddPhotoAlternateOutline"
+            class="text-[26px] text-primary-container group-hover:scale-110 transition-transform"
+          />
+          <span class="text-[11px] font-bold text-on-surface">Subir Foto</span>
+          <span class="text-[9px] text-on-surface-variant">o arrastra aquí</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            class="hidden"
+            (change)="onFilesSelected($event)"
+          />
+        </label>
+      </div>
+    }
+  </div>
+
+  <!-- Opción de Enlace URL Alternativo -->
+  @if (!disabled()) {
+    <div class="flex items-center gap-2 pt-1">
+      @if (!showUrlInput()) {
+        <button
+          type="button"
+          (click)="showUrlInput.set(true)"
+          class="text-[11px] text-primary-container hover:underline font-medium flex items-center gap-1 cursor-pointer"
+        >
+          <ng-icon name="matLinkOutline" class="text-[14px]" />
+          <span>o agregar mediante enlace URL</span>
+        </button>
+      } @else {
+        <div class="flex items-center gap-2 w-full max-w-md p-1.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs">
+          <ng-icon name="matLinkOutline" class="text-[16px] text-on-surface-variant shrink-0" />
+          <input
+            type="url"
+            [value]="urlInputValue()"
+            (input)="urlInputValue.set($any($event.target).value)"
+            placeholder="https://ejemplo.com/producto.webp"
+            class="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+            (keydown.enter)="addFromUrl()"
+          />
+          <button
+            type="button"
+            (click)="addFromUrl()"
+            class="px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold text-[11px] hover:bg-primary/90 shrink-0"
+          >
+            Agregar
+          </button>
+          <button
+            type="button"
+            (click)="showUrlInput.set(false)"
+            class="text-[11px] text-on-surface-variant hover:text-on-surface shrink-0"
+          >
+            Cancelar
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-confirm-modal
+  [isOpen]="showDeleteModal()"
+  title="¿Eliminar foto del producto?"
+  message="Esta fotografía será removida de la galería del producto. Si guardas los cambios, la actualización será permanente."
+  confirmText="Eliminar"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
+

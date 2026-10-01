@@ -46,4 +46,13 @@ export class ProductsList {
     if (p.variants && p.variants.length > 0) return `S/ ${p.variants[0].priceAmount.toFixed(2)}`;
     return 'S/ 0.00';
   }
+
+  getImageUrl(p: Product): string | null {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.images && p.images.length > 0) {
+      const primary = p.images.find((img) => img.isPrimary);
+      return primary ? primary.imageUrl : p.images[0].imageUrl;
+    }
+    return null;
+  }
 }

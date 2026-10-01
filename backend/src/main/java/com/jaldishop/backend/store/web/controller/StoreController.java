@@ -50,7 +50,12 @@ public class StoreController {
                 request.deliveryEnabled(),
                 request.deliveryFeeAmount(),
                 request.deliveryFeeCurrency(),
-                request.taxRate()
+                request.taxRate(),
+                request.logoUrl(),
+                request.bannerUrl(),
+                request.instagramUrl(),
+                request.facebookUrl(),
+                request.whatsappNumber()
         );
 
         Store store = createStoreService.execute(command);
@@ -86,7 +91,12 @@ public class StoreController {
                 request.deliveryEnabled(),
                 request.deliveryFeeAmount(),
                 request.deliveryFeeCurrency(),
-                request.taxRate()
+                request.taxRate(),
+                request.logoUrl(),
+                request.bannerUrl(),
+                request.instagramUrl(),
+                request.facebookUrl(),
+                request.whatsappNumber()
         );
 
         Store store = updateStoreService.execute(command);

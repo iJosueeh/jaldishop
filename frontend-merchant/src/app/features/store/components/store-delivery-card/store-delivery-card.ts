@@ -6,6 +6,8 @@ import {
   matStoreOutline,
   matMopedOutline,
   matReceiptOutline,
+  matWarningOutline,
+  matErrorOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -16,6 +18,8 @@ import {
       matStoreOutline,
       matMopedOutline,
       matReceiptOutline,
+      matWarningOutline,
+      matErrorOutline,
     }),
   ],
   selector: 'app-store-delivery-card',

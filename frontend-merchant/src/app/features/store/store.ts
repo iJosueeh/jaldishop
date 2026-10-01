@@ -52,18 +52,43 @@ export class Store {
     }
   }
 
-  readonly storeForm = this.fb.group({
-    name: ['', [Validators.required, Validators.maxLength(160)]],
-    description: [''],
-    contactPhone: [''],
-    address: [''],
-    addressReference: [''],
-    pickupEnabled: [true],
-    deliveryEnabled: [true],
-    deliveryFeeAmount: [5.0],
-    deliveryFeeCurrency: ['PEN'],
-    taxRate: [18.0],
-  });
+  readonly storeForm = this.fb.group(
+    {
+      name: ['', [Validators.required, Validators.maxLength(160)]],
+      description: [''],
+      contactPhone: [''],
+      address: [''],
+      addressReference: [''],
+      latitude: [null as number | null, [Validators.min(-90), Validators.max(90)]],
+      longitude: [null as number | null, [Validators.min(-180), Validators.max(180)]],
+      pickupEnabled: [true],
+      deliveryEnabled: [true],
+      deliveryFeeAmount: [5.0, [Validators.min(0)]],
+      deliveryFeeCurrency: ['PEN'],
+      taxRate: [18.0, [Validators.min(0), Validators.max(100)]],
+      logoUrl: [''],
+      bannerUrl: [''],
+      instagramUrl: [''],
+      facebookUrl: [''],
+      whatsappNumber: [''],
+    },
+    {
+      validators: [
+        (control) => {
+          const pickup = control.get('pickupEnabled')?.value;
+          const delivery = control.get('deliveryEnabled')?.value;
+          return !pickup && !delivery ? { requireAtLeastOneFulfillment: true } : null;
+        },
+        (control) => {
+          const lat = control.get('latitude')?.value;
+          const lng = control.get('longitude')?.value;
+          const hasLat = lat !== null && lat !== undefined && lat !== '';
+          const hasLng = lng !== null && lng !== undefined && lng !== '';
+          return hasLat !== hasLng ? { coordinatesParityMismatch: true } : null;
+        },
+      ],
+    }
+  );
 
   private readonly _syncStoreFormEffect = effect(() => {
     const store = this.storeService.currentStore();
@@ -94,11 +119,18 @@ export class Store {
       contactPhone: store.contactPhone ? store.contactPhone.replace(/^\+51\s*/, '') : '',
       address: store.address ?? '',
       addressReference: store.addressReference ?? '',
+      latitude: store.latitude ?? null,
+      longitude: store.longitude ?? null,
       pickupEnabled: store.pickupEnabled,
       deliveryEnabled: store.deliveryEnabled,
       deliveryFeeAmount: store.deliveryFeeAmount ?? 0,
       deliveryFeeCurrency: store.deliveryFeeCurrency ?? 'PEN',
       taxRate: store.taxRate ?? 18.0,
+      logoUrl: store.logoUrl ?? '',
+      bannerUrl: store.bannerUrl ?? '',
+      instagramUrl: store.instagramUrl ?? '',
+      facebookUrl: store.facebookUrl ?? '',
+      whatsappNumber: store.whatsappNumber ? store.whatsappNumber.replace(/^\+51\s*/, '') : '',
     });
   }
 
@@ -110,17 +142,37 @@ export class Store {
       ? (cleanPhone.startsWith('51') ? `+${cleanPhone}` : `+51${cleanPhone}`)
       : undefined;
 
+    const rawWhatsapp = value.whatsappNumber?.trim();
+    const cleanWhatsapp = rawWhatsapp ? rawWhatsapp.replace(/\D/g, '') : '';
+    const normalizedWhatsapp = cleanWhatsapp
+      ? (cleanWhatsapp.startsWith('51') ? `+${cleanWhatsapp}` : `+51${cleanWhatsapp}`)
+      : undefined;
+
+    const latVal = value.latitude !== null && value.latitude !== undefined && value.latitude !== ('' as any)
+      ? Number(value.latitude)
+      : undefined;
+    const lngVal = value.longitude !== null && value.longitude !== undefined && value.longitude !== ('' as any)
+      ? Number(value.longitude)
+      : undefined;
+
     return {
       name: value.name.trim(),
       description: value.description.trim() || undefined,
       contactPhone: normalizedPhone,
       address: value.address.trim() || undefined,
       addressReference: value.addressReference.trim() || undefined,
+      latitude: latVal,
+      longitude: lngVal,
       pickupEnabled: value.pickupEnabled,
       deliveryEnabled: value.deliveryEnabled,
       deliveryFeeAmount: value.deliveryFeeAmount ?? undefined,
       deliveryFeeCurrency: value.deliveryFeeCurrency || 'PEN',
       taxRate: value.taxRate ?? undefined,
+      logoUrl: value.logoUrl.trim() || undefined,
+      bannerUrl: value.bannerUrl.trim() || undefined,
+      instagramUrl: value.instagramUrl.trim() || undefined,
+      facebookUrl: value.facebookUrl.trim() || undefined,
+      whatsappNumber: normalizedWhatsapp,
     };
   }
 
