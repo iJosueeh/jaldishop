@@ -58,7 +58,7 @@ public class InitiateCheckoutService {
         }
 
         List<CheckoutItemSnapshot> itemSnapshots = snapshotAssembler.assemble(cart, command.storeId());
-        String currency = itemSnapshots.isEmpty() ? "PEN" : itemSnapshots.get(0).currency();
+        String currency = itemSnapshots.isEmpty() ? "PEN" : itemSnapshots.getFirst().currency();
 
         CapacityReservation capacityReservation = createCapacityReservationService.execute(
                 new CreateCapacityReservationCommand(
