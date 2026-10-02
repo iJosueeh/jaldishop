@@ -37,7 +37,8 @@ public class UpdateStoreService {
                 command.bannerUrl(),
                 command.instagramUrl(),
                 command.facebookUrl(),
-                command.whatsappNumber()
+                command.whatsappNumber(),
+                command.categoryIds()
         );
 
         return storeRepository.save(store);

@@ -26,8 +26,52 @@ public record CreateStoreRequest(
         String bannerUrl,
         String instagramUrl,
         String facebookUrl,
-        @ValidPhone String whatsappNumber
+        @ValidPhone String whatsappNumber,
+        java.util.Set<java.util.UUID> categoryIds
 ) {
+    public CreateStoreRequest(
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber
+    ) {
+        this(
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                null
+        );
+    }
+
     public CreateStoreRequest(
             String name,
             String slug,
@@ -57,6 +101,7 @@ public record CreateStoreRequest(
                 deliveryFeeAmount,
                 deliveryFeeCurrency,
                 taxRate,
+                null,
                 null,
                 null,
                 null,

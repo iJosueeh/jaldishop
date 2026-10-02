@@ -247,6 +247,44 @@
           class="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none resize-none transition-all"
         ></textarea>
       </div>
+
+      <!-- Rubros Comerciales / Categorías de la Tienda -->
+      <div class="flex flex-col gap-2 sm:col-span-2 pt-1">
+        <label class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <ng-icon name="matCategoryOutline" class="text-[16px] text-primary-container" />
+            <span>Rubros Comerciales / Giros de Negocio</span>
+          </span>
+          <span class="text-[11px] font-normal text-on-surface-variant">Selecciona las categorías de tu tienda</span>
+        </label>
+        
+        @if (categories().length > 0) {
+          <div class="flex flex-wrap gap-2 pt-1">
+            @for (cat of categories(); track cat.id) {
+              <button
+                type="button"
+                (click)="toggleCategory(cat.id)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer select-none"
+                [class.bg-primary-container]="isSelected(cat.id)"
+                [class.text-white]="isSelected(cat.id)"
+                [class.border-primary-container]="isSelected(cat.id)"
+                [class.shadow-xs]="isSelected(cat.id)"
+                [class.bg-surface-container-low]="!isSelected(cat.id)"
+                [class.text-on-surface]="!isSelected(cat.id)"
+                [class.border-outline-variant/30]="!isSelected(cat.id)"
+                [class.hover:border-primary-container/60]="!isSelected(cat.id)"
+              >
+                @if (isSelected(cat.id)) {
+                  <ng-icon name="matCheckOutline" class="text-[14px]" />
+                }
+                <span>{{ cat.name }}</span>
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="text-xs text-on-surface-variant italic">Cargando rubros comerciales disponibles...</p>
+        }
+      </div>
     </div>
   </div>
   <div class="flex flex-col gap-4 pt-2 border-t border-surface-container-highest">

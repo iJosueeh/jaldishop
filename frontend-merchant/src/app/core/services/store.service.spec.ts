@@ -118,4 +118,26 @@ describe('StoreService', () => {
     expect(service.currentStore()).toBeNull();
     expect(service.hasStore()).toBe(false);
   });
+
+  it('debe obtener categorias de tiendas por HTTP y cachearlas en signal', () => {
+    const mockCategories = [
+      { id: 'cat-1', name: 'Restaurantes', slug: 'restaurantes', status: 'ACTIVE' as const },
+      { id: 'cat-2', name: 'Moda', slug: 'moda', status: 'ACTIVE' as const },
+    ];
+
+    service.getStoreCategories().subscribe((cats) => {
+      expect(cats).toEqual(mockCategories);
+      expect(service.categories()).toEqual(mockCategories);
+    });
+
+    const req = httpTesting.expectOne(`${environment.apiUrl}/store-categories`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockCategories);
+
+    // Llamada posterior debe retornar desde memoria sin nueva petición HTTP
+    service.getStoreCategories().subscribe((cats) => {
+      expect(cats).toEqual(mockCategories);
+    });
+    httpTesting.expectNone(`${environment.apiUrl}/store-categories`);
+  });
 });

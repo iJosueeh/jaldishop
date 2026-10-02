@@ -19,6 +19,7 @@ export interface StoreResponse {
     instagramUrl?: string;
     facebookUrl?: string;
     whatsappNumber?: string;
+    categoryIds?: string[];
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
     createdAt: string;
     updatedAt: string; 
@@ -51,6 +52,7 @@ export interface CreateStoreRequest {
     instagramUrl?: string;
     facebookUrl?: string;
     whatsappNumber?: string;
+    categoryIds?: string[];
 }
 
 export type UpdateStoreRequest = Omit<CreateStoreRequest, 'slug'>;

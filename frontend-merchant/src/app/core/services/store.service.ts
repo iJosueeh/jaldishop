@@ -1,6 +1,7 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import {
   CreateStoreRequest,
+  StoreCategory,
   StoreResponse,
   UpdateStoreRequest,
 } from '../models/store.models';
@@ -12,14 +13,29 @@ import { catchError, Observable, of, tap, throwError } from 'rxjs';
 export class StoreService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/stores`;
+  private readonly categoriesUrl = `${environment.apiUrl}/store-categories`;
 
   readonly currentStore = signal<StoreResponse | null>(null);
+  readonly categories = signal<StoreCategory[]>([]);
   readonly isLoading = signal<boolean>(false);
   private readonly isLoaded = signal<boolean>(false);
 
   readonly hasStore = computed(() => !!this.currentStore());
   readonly storeName = computed(() => this.currentStore()?.name ?? 'Mi tienda');
   readonly storeStatus = computed(() => this.currentStore()?.status ?? 'INACTIVE');
+
+  getStoreCategories(): Observable<StoreCategory[]> {
+    if (this.categories().length > 0) {
+      return of(this.categories());
+    }
+
+    return this.http.get<StoreCategory[]>(this.categoriesUrl).pipe(
+      tap((cats) => this.categories.set(cats)),
+      catchError((error) => {
+        return of([]);
+      })
+    );
+  }
 
   getMyStore(forceRefresh = false): Observable<StoreResponse | null> {
     if (this.isLoaded() && !forceRefresh) {
