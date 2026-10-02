@@ -1,8 +1,21 @@
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/core/providers/QueryProvider';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Toaster } from 'sonner';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
+});
 
 export const metadata: Metadata = {
   title: 'JaldiShop | Control Inteligente de Capacidad y Pedidos para MYPE',
@@ -41,8 +54,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className="antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+    <html lang="es" className={`${plusJakartaSans.variable} ${outfit.variable} scroll-smooth`}>
+      <body className="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
         <QueryProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
@@ -52,3 +65,4 @@ export default function RootLayout({
     </html>
   );
 }
+

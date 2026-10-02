@@ -8,24 +8,26 @@ import { MotionFade } from '@/shared/components/ui/MotionFade';
 import { env } from '@/core/config/env';
 
 export function HeroSection() {
+
   return (
-    <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center pt-28 pb-20 lg:pt-36 lg:pb-32 overflow-hidden">
-      {/* Video Background from local high-performance source */}
+    <section className="relative min-h-[88vh] lg:min-h-[92vh] flex items-end pb-12 sm:pb-18 lg:pb-22 pt-32 sm:pt-36 overflow-hidden">
+      {/* 1. Full-bleed local video loop */}
       <HeroVideoBackground />
 
-      <Container size="lg" className="relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-7">
+      {/* 2. Bottom-Left Cinematic HUD Container */}
+      <Container size="lg" className="relative z-10 w-full">
+        <div className="max-w-2xl text-left space-y-5 sm:space-y-6">
           {/* Pill Tag */}
           <MotionFade delay={0.1}>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-stone-950/60 backdrop-blur-md border border-white/20 text-stone-100 text-xs sm:text-sm font-medium shadow-xl">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-stone-200 text-xs sm:text-sm font-semibold shadow-2xl">
               <span className="w-2 h-2 rounded-full bg-[#ea580c] animate-pulse" />
               <span>Capacidad Inteligente para Gastronomía y Talleres MYPE</span>
             </div>
           </MotionFade>
 
-          {/* Concise High-Impact Headline */}
+          {/* Distinctive Display Headline */}
           <MotionFade delay={0.2}>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-md">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-black tracking-tight text-white leading-[1.08] drop-shadow-lg">
               Vende por WhatsApp e Instagram{' '}
               <span className="text-[#feae2c] underline decoration-[#ea580c] decoration-wavy decoration-2">
                 sin sobreventa
@@ -33,16 +35,16 @@ export function HeroSection() {
             </h1>
           </MotionFade>
 
-          {/* Short Subtitle */}
+          {/* Concise Subtitle */}
           <MotionFade delay={0.3}>
-            <p className="text-base sm:text-xl text-stone-100/90 max-w-2xl mx-auto leading-relaxed font-normal drop-shadow-sm">
+            <p className="text-stone-200/90 text-sm sm:text-base lg:text-lg font-medium leading-relaxed max-w-xl drop-shadow-md">
               Sincroniza tus pedidos con la capacidad real de tu cocina. Franjas horarias automáticas y reserva atómica de 10 minutos para atender siempre a tiempo.
             </p>
           </MotionFade>
 
-          {/* Clean Action Buttons */}
+          {/* Action Buttons */}
           <MotionFade delay={0.4}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
               <a
                 href={env.merchantUrl}
                 target="_blank"
@@ -52,7 +54,7 @@ export function HeroSection() {
                 <Button
                   variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto text-base font-extrabold shadow-xl shadow-black/40 cursor-pointer bg-[#005141] hover:bg-[#00382d] text-white border border-white/15 px-7 py-3.5 rounded-2xl transition-transform hover:scale-[1.02]"
+                  className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-2xl shadow-black/60 cursor-pointer bg-[#005141] hover:bg-[#00382d] text-white border border-white/15 px-6 py-3.5 rounded-2xl transition-all hover:scale-[1.02]"
                   leftIcon={<Store className="w-5 h-5" />}
                 >
                   Crear mi Tienda Gratis
@@ -63,7 +65,7 @@ export function HeroSection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto font-extrabold cursor-pointer bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-md px-7 py-3.5 rounded-2xl transition-transform hover:scale-[1.02]"
+                  className="w-full sm:w-auto text-sm sm:text-base font-extrabold cursor-pointer bg-black/40 hover:bg-black/60 text-white border-white/30 backdrop-blur-md px-6 py-3.5 rounded-2xl transition-all hover:scale-[1.02]"
                   rightIcon={<ArrowRight className="w-5 h-5 text-stone-200" />}
                 >
                   Explorar Tiendas
@@ -72,18 +74,18 @@ export function HeroSection() {
             </div>
           </MotionFade>
 
-          {/* 3 Value Guarantees with frosted dark glass style */}
+          {/* 3 Value Guarantees HUD Strip */}
           <MotionFade delay={0.5}>
-            <div className="pt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-6">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-stone-950/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-100 shadow-lg">
+            <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-200 shadow-xl">
                 <CheckCircle2 className="w-4 h-4 text-[#34d399] shrink-0" />
                 <span>Cero sobreventa</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-stone-950/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-100 shadow-lg">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-200 shadow-xl">
                 <ShieldCheck className="w-4 h-4 text-[#fb923c] shrink-0" />
                 <span>Hold 10m seguro</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-stone-950/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-100 shadow-lg">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-xs sm:text-sm font-semibold text-stone-200 shadow-xl">
                 <Sparkles className="w-4 h-4 text-[#feae2c] shrink-0" />
                 <span>Sin comisiones abusivas</span>
               </div>
@@ -94,5 +96,6 @@ export function HeroSection() {
     </section>
   );
 }
+
 
 
