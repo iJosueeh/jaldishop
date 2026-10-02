@@ -5,13 +5,8 @@ import com.jaldishop.backend.capacity.application.CreateCapacityReservationServi
 import com.jaldishop.backend.capacity.domain.CapacityReservation;
 import com.jaldishop.backend.cart.domain.Cart;
 import com.jaldishop.backend.cart.domain.CartRepository;
-import com.jaldishop.backend.catalog.domain.Product;
-import com.jaldishop.backend.catalog.domain.ProductRepository;
-import com.jaldishop.backend.catalog.domain.ProductStatus;
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
-import com.jaldishop.backend.catalog.domain.VariantStatus;
 import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
+import com.jaldishop.backend.checkout.domain.CheckoutItemSnapshot;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.store.domain.Store;
@@ -48,10 +43,7 @@ class InitiateCheckoutServiceTest {
     private StoreRepository storeRepository;
 
     @Mock
-    private ProductRepository productRepository;
-
-    @Mock
-    private ProductVariantRepository productVariantRepository;
+    private CheckoutItemSnapshotAssembler snapshotAssembler;
 
     @Mock
     private CreateCapacityReservationService createCapacityReservationService;
@@ -64,10 +56,9 @@ class InitiateCheckoutServiceTest {
     private UUID productId;
     private UUID variantId;
     private Store testStore;
-    private Product testProduct;
-    private ProductVariant testVariant;
     private Cart testCart;
     private CapacityReservation testReservation;
+    private CheckoutItemSnapshot testItemSnapshot;
 
     @BeforeEach
     void setUp() {
@@ -97,35 +88,22 @@ class InitiateCheckoutServiceTest {
                 null
         );
 
-        testProduct = new Product(
-                productId,
-                storeId,
-                UUID.randomUUID(),
-                "Pan Francés",
-                "pan-frances",
-                "Pan crocante artesanal",
-                "https://example.com/pan.png",
-                ProductStatus.ACTIVE,
-                null,
-                null
-        );
-
-        testVariant = new ProductVariant(
-                variantId,
-                productId,
-                "Bolsa x10 unidades",
-                "PAN-FR-10",
-                new BigDecimal("10.00"),
-                "PEN",
-                true,
-                VariantStatus.ACTIVE,
-                List.of(),
-                null,
-                null
-        );
-
         testCart = Cart.create(userId, storeId);
         testCart.addItem(variantId, 2, new BigDecimal("10.00"), "PEN");
+
+        testItemSnapshot = new CheckoutItemSnapshot(
+                variantId,
+                productId,
+                "Pan Francés",
+                "Bolsa x10 unidades",
+                "PAN-FR-10",
+                "https://example.com/pan.png",
+                2,
+                new BigDecimal("10.00"),
+                "PEN",
+                new BigDecimal("20.00"),
+                true
+        );
 
         testReservation = CapacityReservation.create(
                 storeId,
@@ -158,8 +136,7 @@ class InitiateCheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
         when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
-        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(testVariant));
-        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(snapshotAssembler.assemble(testCart, storeId)).thenReturn(List.of(testItemSnapshot));
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class))).thenReturn(testReservation);
 
         CheckoutResult result = initiateCheckoutService.execute(command);
@@ -206,8 +183,7 @@ class InitiateCheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
         when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
-        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(testVariant));
-        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(snapshotAssembler.assemble(testCart, storeId)).thenReturn(List.of(testItemSnapshot));
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class))).thenReturn(testReservation);
 
         CheckoutResult result = initiateCheckoutService.execute(command);
@@ -351,78 +327,6 @@ class InitiateCheckoutServiceTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar ConflictException si una variante está INACTIVA")
-    void shouldThrowConflictWhenVariantInactive() {
-        ProductVariant inactiveVariant = new ProductVariant(
-                variantId,
-                productId,
-                "Bolsa x10 unidades",
-                "PAN-FR-10",
-                new BigDecimal("10.00"),
-                "PEN",
-                true,
-                VariantStatus.INACTIVE,
-                List.of(),
-                null,
-                null
-        );
-
-        var command = new InitiateCheckoutCommand(
-                userId,
-                storeId,
-                CheckoutFulfillmentType.PICKUP,
-                LocalDate.now().plusDays(1),
-                LocalTime.of(10, 0),
-                LocalTime.of(12, 0),
-                null, null, null, null, null, null, null, null
-        );
-
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
-        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(inactiveVariant));
-
-        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("no se encuentra disponible");
-    }
-
-    @Test
-    @DisplayName("Debe lanzar ConflictException si el producto está INACTIVO")
-    void shouldThrowConflictWhenProductInactive() {
-        Product inactiveProduct = new Product(
-                productId,
-                storeId,
-                UUID.randomUUID(),
-                "Pan Francés",
-                "pan-frances",
-                "Pan",
-                null,
-                ProductStatus.INACTIVE,
-                null,
-                null
-        );
-
-        var command = new InitiateCheckoutCommand(
-                userId,
-                storeId,
-                CheckoutFulfillmentType.PICKUP,
-                LocalDate.now().plusDays(1),
-                LocalTime.of(10, 0),
-                LocalTime.of(12, 0),
-                null, null, null, null, null, null, null, null
-        );
-
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
-        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
-        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(testVariant));
-        when(productRepository.findById(productId)).thenReturn(Optional.of(inactiveProduct));
-
-        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("no se encuentra activo");
-    }
-
-    @Test
     @DisplayName("Debe propagar ConflictException cuando la capacidad operativa está agotada")
     void shouldPropagateConflictWhenCapacityExhausted() {
         var command = new InitiateCheckoutCommand(
@@ -437,8 +341,7 @@ class InitiateCheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
         when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
-        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(testVariant));
-        when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
+        when(snapshotAssembler.assemble(testCart, storeId)).thenReturn(List.of(testItemSnapshot));
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class)))
                 .thenThrow(new ConflictException("CAPACITY_EXHAUSTED", "No quedan cupos disponibles para la franja horaria seleccionada."));
 
