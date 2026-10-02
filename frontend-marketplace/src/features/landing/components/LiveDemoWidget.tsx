@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, ShieldAlert, Sparkles, Store, Bike, ShoppingBag, ArrowRight, Utensils, Cake, RefreshCw } from 'lucide-react';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
@@ -69,6 +69,14 @@ export function LiveDemoWidget() {
 
   const activePreset = PRESETS.find((p) => p.id === activePresetId) || PRESETS[0];
 
+  useEffect(() => {
+    if (!isReserved) return;
+    const interval = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isReserved]);
+
   const handleSelectPreset = (id: string) => {
     setActivePresetId(id);
     const preset = PRESETS.find((p) => p.id === id);
@@ -88,26 +96,26 @@ export function LiveDemoWidget() {
   const seconds = countdown % 60;
 
   return (
-    <div className="relative w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-7 shadow-2xl shadow-[#1c1917]/10 border-2 border-[#e7e0d6] text-[#1c1917]">
+    <div className="relative w-full max-w-lg mx-auto bg-[#141413]/95 backdrop-blur-xl rounded-3xl p-4 sm:p-7 shadow-2xl shadow-black/60 border border-white/10 text-white">
       {/* Decorative Warm Tag Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#e7e0d6]">
+      <div className="flex items-center justify-between pb-4 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#005141] animate-pulse" />
-          <span className="text-xs font-bold text-[#005141] uppercase tracking-wider">
-            Simulador Interactivo de Capacidad
+          <span className="w-2.5 h-2.5 rounded-full bg-[#34d399] animate-pulse" />
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+            Simulador de Capacidad
           </span>
         </div>
-        <Badge variant="amber" size="sm">
-          Hold 10 min
-        </Badge>
+        <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-0.5 rounded-full text-xs font-bold text-[#feae2c]">
+          <Clock className="w-3 h-3" /> 10 min hold
+        </span>
       </div>
 
       {/* Business Type Quick Switcher */}
       <div className="mt-4">
-        <label className="text-[11px] font-bold text-[#57534e] uppercase tracking-wider block mb-2">
+        <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block mb-2">
           Pruébalo en tu rubro:
         </label>
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#faf7f2] rounded-2xl border border-[#e7e0d6]">
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-white/5 rounded-2xl border border-white/10">
           {PRESETS.map((preset) => {
             const isSelected = activePresetId === preset.id;
             return (
@@ -116,8 +124,8 @@ export function LiveDemoWidget() {
                 onClick={() => handleSelectPreset(preset.id)}
                 className={`py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-white text-[#1c1917] shadow-sm border border-[#e7e0d6]'
-                    : 'text-[#57534e] hover:text-[#1c1917]'
+                    ? 'bg-white/15 text-white shadow-sm border border-white/20'
+                    : 'text-stone-400 hover:text-white'
                 }`}
               >
                 {preset.icon}
@@ -129,14 +137,14 @@ export function LiveDemoWidget() {
       </div>
 
       {/* Store Header Info */}
-      <div className="mt-4 p-3 bg-[#faf7f2] rounded-2xl border border-[#e7e0d6] flex items-center justify-between">
+      <div className="mt-4 p-3 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-[#005141] text-white flex items-center justify-center font-bold text-xs shadow-xs">
             {activePreset.name.substring(0, 2).toUpperCase()}
           </div>
           <div>
-            <h4 className="text-xs font-bold text-[#1c1917]">{activePreset.name}</h4>
-            <p className="text-[11px] text-[#57534e]">{activePreset.category}</p>
+            <h4 className="text-xs font-bold text-white">{activePreset.name}</h4>
+            <p className="text-[11px] text-stone-400">{activePreset.category}</p>
           </div>
         </div>
         <Badge variant="jade" size="sm">
@@ -145,13 +153,13 @@ export function LiveDemoWidget() {
       </div>
 
       {/* Fulfillment Switch */}
-      <div className="mt-4 p-1 bg-[#f7f3ec] rounded-2xl flex gap-1 border border-[#e7e0d6]">
+      <div className="mt-4 p-1 bg-white/5 rounded-2xl flex gap-1 border border-white/10">
         <button
           onClick={() => setFulfillmentType('DELIVERY')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             fulfillmentType === 'DELIVERY'
-              ? 'bg-[#005141] text-white shadow-xs'
-              : 'text-[#57534e] hover:text-[#1c1917]'
+              ? 'bg-[#005141] text-white shadow-md'
+              : 'text-stone-400 hover:text-white'
           }`}
         >
           <Bike className="w-3.5 h-3.5" />
@@ -161,8 +169,8 @@ export function LiveDemoWidget() {
           onClick={() => setFulfillmentType('PICKUP')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             fulfillmentType === 'PICKUP'
-              ? 'bg-[#005141] text-white shadow-xs'
-              : 'text-[#57534e] hover:text-[#1c1917]'
+              ? 'bg-[#005141] text-white shadow-md'
+              : 'text-stone-400 hover:text-white'
           }`}
         >
           <Store className="w-3.5 h-3.5" />
@@ -172,9 +180,9 @@ export function LiveDemoWidget() {
 
       {/* Slots selection */}
       <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between text-xs text-[#57534e] mb-1">
+        <div className="flex items-center justify-between text-xs text-stone-400 mb-1">
           <span className="font-semibold">Franjas horarias disponibles:</span>
-          <span className="text-[#005141] font-bold">Capacidad en vivo</span>
+          <span className="text-emerald-400 font-bold">Capacidad en vivo</span>
         </div>
 
         {activePreset.slots.map((slot) => {
@@ -186,25 +194,25 @@ export function LiveDemoWidget() {
               key={slot.time}
               disabled={!slot.available}
               onClick={() => setSelectedSlotTime(slot.time)}
-              className={`w-full p-2.5 rounded-2xl text-left border-2 flex items-center justify-between transition-all cursor-pointer ${
+              className={`w-full p-2.5 rounded-2xl text-left border flex items-center justify-between transition-all cursor-pointer ${
                 !slot.available
-                  ? 'bg-[#f7f3ec]/60 border-[#e7e0d6]/60 opacity-50 cursor-not-allowed'
+                  ? 'bg-white/[0.02] border-white/5 opacity-40 cursor-not-allowed text-stone-500'
                   : isSelected
-                  ? 'bg-[#f0fdfa] border-[#005141] text-[#1c1917] shadow-sm'
-                  : 'bg-white border-[#e7e0d6] text-[#57534e] hover:border-[#a8a29e]'
+                  ? 'bg-[#005141]/30 border-emerald-500/60 text-white shadow-sm'
+                  : 'bg-white/5 border-white/10 text-stone-300 hover:border-white/25 hover:bg-white/10'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-[#005141]' : 'text-[#a8a29e]'}`} />
+                <Clock className={`w-3.5 h-3.5 ${isSelected ? 'text-emerald-400' : 'text-stone-400'}`} />
                 <span className="text-xs font-bold">{slot.time}</span>
               </div>
               <div className="flex items-center gap-2">
                 {slot.available ? (
-                  <span className={`text-[11px] font-bold ${slotsLeft <= 3 ? 'text-[#ea580c]' : 'text-[#005141]'}`}>
+                  <span className={`text-[11px] font-bold ${slotsLeft <= 3 ? 'text-[#feae2c]' : 'text-emerald-400'}`}>
                     {slotsLeft} {slotsLeft === 1 ? 'cupo' : 'cupos'}
                   </span>
                 ) : (
-                  <span className="text-[11px] font-bold text-[#b91c1c] flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-rose-400 flex items-center gap-1">
                     <ShieldAlert className="w-3 h-3" /> Agotado
                   </span>
                 )}
@@ -215,32 +223,32 @@ export function LiveDemoWidget() {
       </div>
 
       {/* Interactive Hold Demonstration */}
-      <div className="mt-4 p-4 rounded-2xl bg-[#faf7f2] border-2 border-[#e7e0d6] space-y-3">
+      <div className="mt-4 p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#57534e] font-semibold flex items-center gap-1.5">
-            <ShoppingBag className="w-3.5 h-3.5 text-[#ea580c]" />
+          <span className="text-stone-300 font-semibold flex items-center gap-1.5">
+            <ShoppingBag className="w-3.5 h-3.5 text-[#feae2c]" />
             {activePreset.productSample}
           </span>
-          <span className="font-extrabold text-[#1c1917] font-mono">
+          <span className="font-extrabold text-white font-mono">
             S/ {activePreset.priceSample.toFixed(2)}
           </span>
         </div>
 
         {isReserved ? (
-          <div className="bg-[#f0fdfa] border-2 border-[#005141] rounded-2xl p-3 space-y-1.5 text-center animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-center gap-1.5 text-xs text-[#005141] font-bold">
-              <CheckCircle2 className="w-4 h-4 text-[#005141]" />
+          <div className="bg-[#005141]/30 border border-emerald-500/50 rounded-2xl p-3 space-y-1.5 text-center animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-300 font-bold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               ¡Cupo bloqueado temporalmente (Hold 10m)!
             </div>
-            <div className="text-[11px] text-[#57534e]">
+            <div className="text-[11px] text-stone-300">
               Tiempo para completar pago:{' '}
-              <span className="font-mono font-extrabold text-[#ea580c] bg-white px-2 py-0.5 rounded-lg border border-[#fed7aa]">
+              <span className="font-mono font-extrabold text-[#feae2c] bg-black/40 px-2 py-0.5 rounded-lg border border-white/10">
                 {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
               </span>
             </div>
             <button
               onClick={() => setIsReserved(false)}
-              className="text-[10px] text-[#57534e] hover:text-[#005141] underline flex items-center justify-center gap-1 mx-auto pt-1 cursor-pointer"
+              className="text-[10px] text-stone-400 hover:text-emerald-300 underline flex items-center justify-center gap-1 mx-auto pt-1 cursor-pointer"
             >
               <RefreshCw className="w-2.5 h-2.5" /> Liberar y reiniciar prueba
             </button>
@@ -250,7 +258,7 @@ export function LiveDemoWidget() {
             onClick={handleSimulateReservation}
             variant="terracotta"
             size="sm"
-            className="w-full text-xs font-bold py-3 rounded-2xl shadow-md cursor-pointer"
+            className="w-full text-xs font-bold py-3 rounded-2xl shadow-lg shadow-[#ea580c]/30 cursor-pointer border-0"
             rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
           >
             Simular Reserva de Cupo (Hold 10m)

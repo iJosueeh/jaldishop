@@ -14,6 +14,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/stores")
 public class StoreController {
@@ -22,17 +24,20 @@ public class StoreController {
     private final GetMyStoreService getMyStoreService;
     private final UpdateStoreService updateStoreService;
     private final GetStoreBySlugService getStoreBySlugService;
+    private final SearchPublicStoresService searchPublicStoresService;
 
     public StoreController(
             CreateStoreService createStoreService,
             GetMyStoreService getMyStoreService,
             UpdateStoreService updateStoreService,
-            GetStoreBySlugService getStoreBySlugService
+            GetStoreBySlugService getStoreBySlugService,
+            SearchPublicStoresService searchPublicStoresService
     ) {
         this.createStoreService = createStoreService;
         this.getMyStoreService = getMyStoreService;
         this.updateStoreService = updateStoreService;
         this.getStoreBySlugService = getStoreBySlugService;
+        this.searchPublicStoresService = searchPublicStoresService;
     }
 
     @PostMapping()
@@ -119,6 +124,29 @@ public class StoreController {
     ) {
         Store store = getStoreBySlugService.execute(slug);
         return ResponseEntity.ok(PublicStoreResponse.fromDomain(store));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PublicStoreResponse>> searchPublicStores(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false, defaultValue = "5") int limit
+    ) {
+        List<PublicStoreResponse> stores = searchPublicStoresService.execute(q).stream()
+                .limit(limit)
+                .map(PublicStoreResponse::fromDomain)
+                .toList();
+        return ResponseEntity.ok(stores);
+    }
+
+    @GetMapping("/featured")
+    public ResponseEntity<List<PublicStoreResponse>> getFeaturedStores(
+            @RequestParam(required = false, defaultValue = "6") int limit
+    ) {
+        List<PublicStoreResponse> stores = searchPublicStoresService.execute("").stream()
+                .limit(limit)
+                .map(PublicStoreResponse::fromDomain)
+                .toList();
+        return ResponseEntity.ok(stores);
     }
 
 }

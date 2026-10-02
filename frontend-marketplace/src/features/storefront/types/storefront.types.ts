@@ -3,6 +3,7 @@ export interface PublicStore {
   name: string;
   slug: string;
   description?: string;
+  tagline?: string;
   bannerUrl?: string;
   logoUrl?: string;
   phone?: string;
@@ -17,11 +18,19 @@ export interface PublicStore {
   reviewsCount?: number;
   preparationTimeMinutes?: number;
   openingHours?: string;
+  badge?: string;
+  badgeVariant?: 'jade' | 'terracotta' | 'amber';
+  iconEmoji?: string;
+  coverGradient?: string;
+  logoBg?: string;
+  keywords?: string[];
 }
 
 export interface StoreCategory {
   id: string;
   name: string;
   slug: string;
+  description?: string;
+  icon?: string;
   itemCount?: number;
 }

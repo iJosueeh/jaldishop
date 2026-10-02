@@ -126,7 +126,7 @@ export function HeroShowcase() {
           rotateY,
           transformStyle: 'preserve-3d',
         }}
-        className="relative bg-white rounded-[36px] p-6 sm:p-8 shadow-2xl shadow-[#1c1917]/15 border-2 border-[#e7e0d6] transition-shadow duration-300"
+        className="relative bg-white rounded-[36px] p-6 sm:p-8 shadow-2xl shadow-stone-900/10 border-0 transition-shadow duration-300"
       >
         {/* Dynamic Light Glare Highlight */}
         <motion.div
@@ -140,7 +140,7 @@ export function HeroShowcase() {
         {/* Device Top Bar with Brand Badge */}
         <div
           style={{ transform: 'translateZ(25px)' }}
-          className="flex items-center justify-between pb-4 border-b border-[#e7e0d6]"
+          className="flex items-center justify-between pb-4 border-b border-stone-100"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#005141] flex items-center justify-center p-1.5 shadow-sm">
@@ -165,10 +165,10 @@ export function HeroShowcase() {
         {/* Store Profile Ribbon */}
         <div
           style={{ transform: 'translateZ(35px)' }}
-          className="mt-5 p-4 rounded-2xl bg-[#faf7f2] border-2 border-[#e7e0d6] flex items-center justify-between shadow-xs"
+          className="mt-5 p-4 rounded-2xl bg-[#faf7f2] flex items-center justify-between shadow-xs border-0"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ea580c] to-[#feae2c] text-white flex items-center justify-center text-2xl shadow-sm border-2 border-white">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ea580c] to-[#feae2c] text-white flex items-center justify-center text-2xl shadow-sm">
               {currentOrder.iconEmoji}
             </div>
             <div>
@@ -196,14 +196,14 @@ export function HeroShowcase() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -14, scale: 0.96 }}
               transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
-              className="p-5 rounded-2xl bg-white border-2 border-[#e7e0d6] shadow-md space-y-3.5"
+              className="p-5 rounded-2xl bg-white shadow-lg shadow-stone-900/5 space-y-3.5 border-0"
             >
-              <div className="flex items-center justify-between text-xs pb-2 border-b border-[#e7e0d6]/70">
+              <div className="flex items-center justify-between text-xs pb-2 border-b border-stone-100">
                 <span className="font-bold text-[#1c1917] flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ea580c]" />
                   {currentOrder.customer}
                 </span>
-                <span className="font-mono font-extrabold text-sm text-[#005141] bg-[#f0fdfa] px-2.5 py-0.5 rounded-lg border border-[#ccfbf1]">
+                <span className="font-mono font-extrabold text-sm text-[#005141] bg-[#f0fdfa] px-2.5 py-0.5 rounded-lg border-0">
                   {currentOrder.price}
                 </span>
               </div>
@@ -218,7 +218,7 @@ export function HeroShowcase() {
                   <Clock className="w-3.5 h-3.5 text-[#005141]" />
                   <span>Franja: {currentOrder.slot}</span>
                 </div>
-                <span className="text-[11px] font-bold text-[#005141] bg-[#f0fdfa] px-2.5 py-0.5 rounded-full border border-[#99f6e4]">
+                <span className="text-[11px] font-bold text-[#005141] bg-[#f0fdfa] px-2.5 py-0.5 rounded-full border-0">
                   {currentOrder.status}
                 </span>
               </div>
@@ -229,7 +229,7 @@ export function HeroShowcase() {
         {/* Real-time Capacity Progress Bar */}
         <div
           style={{ transform: 'translateZ(30px)' }}
-          className="mt-4 p-3.5 rounded-2xl bg-[#faf7f2] border border-[#e7e0d6] space-y-2"
+          className="mt-4 p-3.5 rounded-2xl bg-[#faf7f2] space-y-2 border-0"
         >
           <div className="flex items-center justify-between text-xs font-bold text-[#57534e]">
             <span className="flex items-center gap-1.5 text-[#1c1917]">
@@ -237,7 +237,7 @@ export function HeroShowcase() {
             </span>
             <span className="font-mono text-[#005141] font-extrabold">9 / 10 cupos</span>
           </div>
-          <div className="w-full h-2.5 bg-[#e7e0d6] rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-stone-200 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: '65%' }}
               animate={{ width: '90%' }}
@@ -254,7 +254,7 @@ export function HeroShowcase() {
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                currentIndex === idx ? 'w-6 bg-[#005141]' : 'w-2 bg-[#e7e0d6] hover:bg-[#a8a29e]'
+                currentIndex === idx ? 'w-6 bg-[#005141]' : 'w-2 bg-stone-300 hover:bg-stone-400'
               }`}
               aria-label={`Ver orden ${idx + 1}`}
             />
@@ -267,9 +267,9 @@ export function HeroShowcase() {
         style={{ transform: 'translateZ(65px)' }}
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="hidden sm:flex absolute -top-5 -right-5 z-20 items-center gap-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border-2 border-[#feae2c] shadow-xl shadow-[#feae2c]/15"
+        className="hidden sm:flex absolute -top-5 -right-5 z-20 items-center gap-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl shadow-stone-900/10 border-0"
       >
-        <div className="w-10 h-10 rounded-xl bg-[#fffbeb] text-[#92400e] border border-[#fef3c7] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-[#fffbeb] text-[#92400e] flex items-center justify-center">
           <Zap className="w-5 h-5 text-[#feae2c] fill-[#feae2c]" />
         </div>
         <div className="text-left">
@@ -283,7 +283,7 @@ export function HeroShowcase() {
         style={{ transform: 'translateZ(65px)' }}
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="hidden sm:flex absolute -bottom-5 -left-5 z-20 items-center gap-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border-2 border-[#005141] shadow-xl shadow-[#005141]/20"
+        className="hidden sm:flex absolute -bottom-5 -left-5 z-20 items-center gap-3 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl shadow-stone-900/10 border-0"
       >
         <div className="w-10 h-10 rounded-xl bg-[#005141] text-white flex items-center justify-center shadow-xs">
           <MessageSquare className="w-5 h-5" />
@@ -299,7 +299,7 @@ export function HeroShowcase() {
         style={{ transform: 'translateZ(75px)' }}
         animate={{ y: [0, -6, 0] }}
         transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        className="hidden sm:flex absolute -bottom-8 -right-3 z-20 items-center gap-2 bg-[#faf7f2] px-3.5 py-2 rounded-2xl border-2 border-[#e7e0d6] shadow-lg shadow-[#1c1917]/10"
+        className="hidden sm:flex absolute -bottom-8 -right-3 z-20 items-center gap-2 bg-[#faf7f2] px-3.5 py-2 rounded-2xl shadow-lg shadow-stone-900/10 border-0"
       >
         <Flame className="w-4 h-4 text-[#ea580c]" />
         <span className="text-[11px] font-extrabold text-[#1c1917]">

@@ -54,7 +54,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${plusJakartaSans.variable} ${outfit.variable} scroll-smooth`}>
+    <html
+      lang="es"
+      className={`${plusJakartaSans.variable} ${outfit.variable} scroll-smooth`}
+      data-scroll-behavior="smooth"
+    >
       <body className="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
         <QueryProvider>
           <Navbar />

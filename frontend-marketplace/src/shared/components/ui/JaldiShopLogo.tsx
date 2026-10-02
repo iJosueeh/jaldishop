@@ -16,12 +16,12 @@ export function JaldiShopLogo({
   className,
 }: JaldiShopLogoProps) {
   const sizes = {
-    sm: { icon: 28, text: 'text-base', subtext: 'text-[9px]' },
-    md: { icon: 38, text: 'text-xl', subtext: 'text-[10px]' },
-    lg: { icon: 48, text: 'text-2xl', subtext: 'text-xs' },
+    sm: { icon: 28, text: 'text-base' },
+    md: { icon: 34, text: 'text-xl' },
+    lg: { icon: 44, text: 'text-2xl' },
   };
 
-  const { icon, text, subtext } = sizes[size];
+  const { icon, text } = sizes[size];
   const isLight = variant === 'light';
 
   return (
@@ -38,28 +38,18 @@ export function JaldiShopLogo({
       </div>
 
       {showText && (
-        <div className="flex flex-col">
-          <span
-            className={cn(
-              'font-extrabold tracking-tight leading-none',
-              isLight ? 'text-white' : 'text-[#1c1917]',
-              text
-            )}
-          >
-            Jaldi<span className="text-[#feae2c]">Shop</span>
-          </span>
-          <span
-            className={cn(
-              'font-bold tracking-wider uppercase mt-0.5',
-              isLight ? 'text-stone-300' : 'text-[#57534e]',
-              subtext
-            )}
-          >
-            Marketplace
-          </span>
-        </div>
+        <span
+          className={cn(
+            'font-display font-black tracking-tight leading-none',
+            isLight ? 'text-white' : 'text-[#1c1917]',
+            text
+          )}
+        >
+          Jaldi<span className="text-[#feae2c]">Shop</span>
+        </span>
       )}
     </div>
   );
 }
+
 

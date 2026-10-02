@@ -64,7 +64,7 @@ export function HeroVideoBackground({
         muted
         loop
         playsInline
-        preload="auto"
+        preload="none"
         onLoadedData={() => setIsVideoLoaded(true)}
         onPlaying={() => setIsVideoLoaded(true)}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 filter brightness-[0.7] contrast-[1.08] saturate-[1.1] ${
