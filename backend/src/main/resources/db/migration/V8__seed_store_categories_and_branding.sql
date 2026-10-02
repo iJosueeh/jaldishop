@@ -12,14 +12,14 @@
 -- 1. SEED GENERAL STORE CATEGORIES (Rubros Comerciales Generales)
 -- ------------------------------------------------------------------------------
 INSERT INTO store_categories (id, name, slug, description, status, created_at, updated_at) VALUES
-('11111111-1111-1111-1111-111111111001', 'Restaurantes y Cafeterías', 'restaurantes-cafeterias', 'Comida preparada, cafés, repostería y bebidas', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111002', 'Moda y Calzado', 'moda-calzado', 'Prendas de vestir, zapatos y accesorios de moda', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111003', 'Supermercado y Bodega', 'supermercado-bodega', 'Abarrotes, alimentos frescos y productos de primera necesidad', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111004', 'Tecnología y Electrónica', 'tecnologia-electronica', 'Dispositivos electrónicos, computadoras y gadgets', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111005', 'Salud y Belleza', 'salud-belleza', 'Cosméticos, cuidado personal y bienestar', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111006', 'Hogar y Decoración', 'hogar-decoracion', 'Muebles, artículos para el hogar y decoración', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111007', 'Mascotas', 'mascotas', 'Alimentos y accesorios para mascotas', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111008', 'Servicios y Otros', 'servicios-otros', 'Servicios profesionales y giros diversos', 'ACTIVE', NOW(), NOW())
+(gen_random_uuid(), 'Restaurantes y Cafeterías', 'restaurantes-cafeterias', 'Comida preparada, cafés, repostería y bebidas', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Moda y Calzado', 'moda-calzado', 'Prendas de vestir, zapatos y accesorios de moda', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Supermercado y Bodega', 'supermercado-bodega', 'Abarrotes, alimentos frescos y productos de primera necesidad', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Tecnología y Electrónica', 'tecnologia-electronica', 'Dispositivos electrónicos, computadoras y gadgets', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Salud y Belleza', 'salud-belleza', 'Cosméticos, cuidado personal y bienestar', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Hogar y Decoración', 'hogar-decoracion', 'Muebles, artículos para el hogar y decoración', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Mascotas', 'mascotas', 'Alimentos y accesorios para mascotas', 'ACTIVE', NOW(), NOW()),
+(gen_random_uuid(), 'Servicios y Otros', 'servicios-otros', 'Servicios profesionales y giros diversos', 'ACTIVE', NOW(), NOW())
 ON CONFLICT (slug) DO UPDATE SET
     name = EXCLUDED.name,
     description = EXCLUDED.description,
@@ -30,9 +30,11 @@ ON CONFLICT (slug) DO UPDATE SET
 -- 2. ASIGNACIÓN DE CATEGORÍAS A TIENDAS DEMO (store_category_assignments)
 -- ------------------------------------------------------------------------------
 INSERT INTO store_category_assignments (store_id, store_category_id)
-SELECT s.id, '11111111-1111-1111-1111-111111111001'::UUID
+SELECT s.id, sc.id
 FROM stores s
+CROSS JOIN store_categories sc
 WHERE s.slug IN ('dulce-deleite', 'cafe-grano')
+  AND sc.slug = 'restaurantes-cafeterias'
 ON CONFLICT (store_id, store_category_id) DO NOTHING;
 
 -- ------------------------------------------------------------------------------
