@@ -16,13 +16,13 @@ export function HeroSection() {
 
       <Container size="lg">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: SaaS Value Proposition */}
+          {/* Left Column: Clean, high-impact Value Proposition */}
           <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
             {/* Pill Tag with Live Animation */}
             <MotionFade delay={0.1}>
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border-2 border-[#e7e0d6] text-[#1c1917] text-xs font-bold shadow-md shadow-[#1c1917]/5">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border-2 border-[#e7e0d6] text-[#1c1917] text-xs font-extrabold shadow-md shadow-[#1c1917]/5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ea580c] animate-pulse" />
-                <span>La plataforma de pedidos con control de capacidad para MYPE</span>
+                <span>Control de Capacidad Inteligente para MYPE</span>
               </div>
             </MotionFade>
 
@@ -33,18 +33,18 @@ export function HeroSection() {
                 <span className="text-[#005141] underline decoration-[#feae2c] decoration-wavy decoration-2">
                   sin sobreventa
                 </span>{' '}
-                ni estrés operativo.
+                ni caos en tu cocina.
               </h1>
             </MotionFade>
 
             {/* Subtitle */}
             <MotionFade delay={0.3}>
-              <p className="text-base sm:text-lg text-[#57534e] max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                JaldiShop sincroniza tus pedidos con la **capacidad real de tu cocina, taller o pastelería**. Bloquea franjas horarias al agotarse, reserva cupos por 10 minutos y ofrece una tienda online que transmite confianza y profesionalismo.
+              <p className="text-base sm:text-lg text-[#57534e] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+                JaldiShop sincroniza tus pedidos con la **capacidad real de tu cocina, taller o pastelería**. Bloquea franjas horarias al agotarse los cupos y asegura pedidos organizados con 10 minutos de reserva.
               </p>
             </MotionFade>
 
-            {/* Action Buttons */}
+            {/* Action Buttons: Clean & Direct */}
             <MotionFade delay={0.4}>
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <a
@@ -56,21 +56,21 @@ export function HeroSection() {
                   <Button
                     variant="primary"
                     size="lg"
-                    className="w-full sm:w-auto text-base font-bold shadow-lg shadow-[#005141]/20 cursor-pointer"
+                    className="w-full sm:w-auto text-base font-extrabold shadow-xl shadow-[#005141]/25 cursor-pointer"
                     leftIcon={<Store className="w-5 h-5" />}
                   >
                     Crear mi Tienda Gratis
                   </Button>
                 </a>
 
-                <Link href="/tienda/panaderia-don-pepe" className="w-full sm:w-auto">
+                <Link href="#tiendas-destacadas" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full sm:w-auto font-bold cursor-pointer"
+                    className="w-full sm:w-auto font-extrabold cursor-pointer"
                     rightIcon={<ArrowRight className="w-5 h-5 text-[#57534e]" />}
                   >
-                    Ver Tienda Demo
+                    Explorar Tiendas
                   </Button>
                 </Link>
               </div>
@@ -79,15 +79,15 @@ export function HeroSection() {
             {/* Value Guarantees Pill Badges */}
             <MotionFade delay={0.5}>
               <div className="pt-6 border-t border-[#e7e0d6]/80 grid grid-cols-3 gap-2 text-left">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#57534e]">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1c1917]">
                   <CheckCircle2 className="w-4 h-4 text-[#005141] shrink-0" />
                   <span>Cero sobreventa</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-[#57534e]">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1c1917]">
                   <ShieldCheck className="w-4 h-4 text-[#ea580c] shrink-0" />
                   <span>Hold seguro 10m</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-[#57534e]">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1c1917]">
                   <Sparkles className="w-4 h-4 text-[#feae2c] shrink-0" />
                   <span>Listo en 5 min</span>
                 </div>
