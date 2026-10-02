@@ -50,6 +50,7 @@ export class StoreIdentityCard {
   readonly form = input<FormGroup>(new FormGroup({}));
   readonly slug = input<string>('');
   readonly categories = input<StoreCategory[]>([]);
+  readonly isLoadingCategories = input<boolean>(false);
 
   readonly logoMode = signal<'upload' | 'url'>('upload');
   readonly bannerMode = signal<'upload' | 'url'>('upload');

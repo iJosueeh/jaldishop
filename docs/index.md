@@ -2,7 +2,7 @@
 
 ### Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE
 
-[![Sprint](https://img.shields.io/badge/Sprint-03%20En%20Progreso-yellow?style=flat-square)](./06-scrum/sprint-03.md)
+[![Sprint](https://img.shields.io/badge/Sprint-04%20En%20Progreso-yellow?style=flat-square)](./06-scrum/sprint-04.md)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./index.md)
 [![Frontend Merchant](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?style=flat-square&logo=cloudflare)](https://negocios-jaldishop.pages.dev/)
 [![Backend API](https://img.shields.io/badge/Deploy-Render%20Web%20Service-46E3B7?style=flat-square&logo=render)](https://jaldishop-api.onrender.com/api/v1)
@@ -46,11 +46,11 @@ flowchart LR
 
 ## 👥 Equipo de Desarrollo
 
-| Miembro | Rol | Responsabilidad Sprint 3 | Perfil |
+| Miembro | Rol | Responsabilidad Sprint 4 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | CI-01 Pipeline CI/CD + BE-17 Carrito + Despliegue Render/Cloudflare + FE Branding | [@iJosueeh](https://github.com/iJosueeh) |
-| **Katherine Patricia Salas Quiroz** | Full Stack Dev | BE-12 Módulo de Catálogo + BE-13 Inventario | [@kath144](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | BE-14 Capacidad Base + BE-15 Excepciones + BE-16 Capacidad Efectiva | [@miagv](https://github.com/miagv) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | **BE-19** Orquestación de Checkout + **FE-STORE-01** Storefront Público | [@iJosueeh](https://github.com/iJosueeh) |
+| **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-PAYMENTS-01** Integración de Pagos + **FE-STORE-03** Catálogo Público | [@kath144](https://github.com/kath144) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-20** Confirmación Transaccional de Compra + **FE-STORE-02** Carrito Customer | [@miagv](https://github.com/miagv) |
 
 ---
 
@@ -58,12 +58,12 @@ flowchart LR
 
 | Capa | Tecnologías | Propósito |
 |:---|:---|:---|
-| **Backend** | Spring Boot 4.1.1, Java 21 | API RESTful, Arquitectura Hexagonal/DDD y Transaccionalidad |
+| **Backend** | Spring Boot 3.4.x, Java 21 | API RESTful, Arquitectura Hexagonal/DDD y Transaccionalidad |
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
 | **Frontend** | Angular 20 Standalone, Next.js, Tailwind CSS | Panel de Comerciante (Angular) y Portal Cliente (Next.js) |
-| **Persistencia** | PostgreSQL 18.6 (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
+| **Persistencia** | PostgreSQL 16+ (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
 | **Despliegue & DevOps** | Render, Cloudflare Pages, Docker, GitHub Actions | Despliegue continuo y validación automatizada en la nube |
-| **Calidad / QA** | JUnit 5, Mockito, Vitest | 260 pruebas automatizadas pasando al 100% (153 Backend + 107 Frontend) |
+| **Calidad / QA** | JUnit 5, Mockito, Vitest | 878 pruebas automatizadas pasando al 100% (428 Backend + 450 Frontend) |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---
@@ -74,9 +74,9 @@ flowchart LR
 flowchart TD
     S1["Sprint 1: Modelo de Capacidad y Casos de Estudio - Completado ✅"]
     S2["Sprint 2: Backend Base & Frontend Merchant Core - Completado ✅"]
-    S3["Sprint 3: Catálogo, Capacidad y CI/CD - En Progreso 🚀"]
-    S4["Sprint 4: Inventario, Carrito y Checkout con Reserva - Próximo"]
-    S5["Sprint 5: Pedidos, Pagos, Integración y Despliegue MVP - Pendiente"]
+    S3["Sprint 3: Catálogo, Capacidad y CI/CD - Completado ✅"]
+    S4["Sprint 4: Checkout, Pagos, Confirmación Transaccional y Storefront - En Progreso 🚀"]
+    S5["Sprint 5: Seguimiento, Notificaciones, Integración y Despliegue MVP - Próximo"]
 
     S1 --> S2 --> S3 --> S4 --> S5
 ```
