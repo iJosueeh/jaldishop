@@ -1,8 +1,8 @@
 package com.jaldishop.backend.checkout.web.controller;
 
 import com.jaldishop.backend.checkout.application.CheckoutResult;
-import com.jaldishop.backend.checkout.application.CheckoutService;
 import com.jaldishop.backend.checkout.application.InitiateCheckoutCommand;
+import com.jaldishop.backend.checkout.application.InitiateCheckoutService;
 import com.jaldishop.backend.checkout.web.dto.CheckoutResponse;
 import com.jaldishop.backend.checkout.web.dto.InitiateCheckoutRequest;
 import com.jaldishop.backend.checkout.web.mapper.CheckoutResponseMapper;
@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/checkout")
 public class CheckoutController {
 
-    private final CheckoutService checkoutService;
+    private final InitiateCheckoutService initiateCheckoutService;
     private final CheckoutResponseMapper responseMapper;
 
-    public CheckoutController(CheckoutService checkoutService, CheckoutResponseMapper responseMapper) {
-        this.checkoutService = checkoutService;
+    public CheckoutController(InitiateCheckoutService initiateCheckoutService, CheckoutResponseMapper responseMapper) {
+        this.initiateCheckoutService = initiateCheckoutService;
         this.responseMapper = responseMapper;
     }
 
@@ -50,7 +50,7 @@ public class CheckoutController {
                 request.discountCode()
         );
 
-        CheckoutResult result = checkoutService.initiateCheckout(command);
+        CheckoutResult result = initiateCheckoutService.execute(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMapper.toResponse(result));
     }
 }

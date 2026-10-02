@@ -1,8 +1,8 @@
 package com.jaldishop.backend.checkout.web.controller;
 
 import com.jaldishop.backend.checkout.application.CheckoutResult;
-import com.jaldishop.backend.checkout.application.CheckoutService;
 import com.jaldishop.backend.checkout.application.InitiateCheckoutCommand;
+import com.jaldishop.backend.checkout.application.InitiateCheckoutService;
 import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
 import com.jaldishop.backend.checkout.domain.CheckoutItemSnapshot;
 import com.jaldishop.backend.checkout.domain.CheckoutPricing;
@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CheckoutControllerTest {
 
     @Mock
-    private CheckoutService checkoutService;
+    private InitiateCheckoutService initiateCheckoutService;
 
     @Mock
     private CheckoutResponseMapper responseMapper;
@@ -64,7 +64,7 @@ class CheckoutControllerTest {
         testStoreId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testUserId, Set.of("CUSTOMER"));
 
-        CheckoutController controller = new CheckoutController(checkoutService, responseMapper);
+        CheckoutController controller = new CheckoutController(initiateCheckoutService, responseMapper);
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -180,7 +180,7 @@ class CheckoutControllerTest {
                 now
         );
 
-        when(checkoutService.initiateCheckout(any(InitiateCheckoutCommand.class))).thenReturn(result);
+        when(initiateCheckoutService.execute(any(InitiateCheckoutCommand.class))).thenReturn(result);
         when(responseMapper.toResponse(result)).thenReturn(response);
 
         String json = """
@@ -223,7 +223,7 @@ class CheckoutControllerTest {
     @Test
     @DisplayName("POST /api/v1/checkout - Retorna 409 Conflict si el carrito está vacío")
     void shouldReturn409WhenCartIsEmpty() throws Exception {
-        when(checkoutService.initiateCheckout(any(InitiateCheckoutCommand.class)))
+        when(initiateCheckoutService.execute(any(InitiateCheckoutCommand.class)))
                 .thenThrow(new ConflictException("CART_EMPTY", "El carrito de compras se encuentra vacío."));
 
         String json = """
@@ -244,7 +244,7 @@ class CheckoutControllerTest {
     @Test
     @DisplayName("POST /api/v1/checkout - Retorna 409 Conflict si la capacidad está agotada")
     void shouldReturn409WhenCapacityExhausted() throws Exception {
-        when(checkoutService.initiateCheckout(any(InitiateCheckoutCommand.class)))
+        when(initiateCheckoutService.execute(any(InitiateCheckoutCommand.class)))
                 .thenThrow(new ConflictException("CAPACITY_EXHAUSTED", "No quedan cupos disponibles."));
 
         String json = """

@@ -32,7 +32,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class CheckoutService {
+public class InitiateCheckoutService {
 
     private final CartRepository cartRepository;
     private final StoreRepository storeRepository;
@@ -40,7 +40,7 @@ public class CheckoutService {
     private final ProductVariantRepository productVariantRepository;
     private final CreateCapacityReservationService createCapacityReservationService;
 
-    public CheckoutService(
+    public InitiateCheckoutService(
             CartRepository cartRepository,
             StoreRepository storeRepository,
             ProductRepository productRepository,
@@ -54,7 +54,7 @@ public class CheckoutService {
         this.createCapacityReservationService = createCapacityReservationService;
     }
 
-    public CheckoutResult initiateCheckout(InitiateCheckoutCommand command) {
+    public CheckoutResult execute(InitiateCheckoutCommand command) {
         if (command == null) {
             throw new IllegalArgumentException("El comando de inicio de checkout no puede ser nulo.");
         }

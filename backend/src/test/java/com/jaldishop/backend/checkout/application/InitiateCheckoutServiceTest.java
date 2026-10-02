@@ -14,7 +14,6 @@ import com.jaldishop.backend.catalog.domain.VariantStatus;
 import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.ConflictException;
-import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreRepository;
 import com.jaldishop.backend.store.domain.StoreStatus;
@@ -40,7 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CheckoutServiceTest {
+class InitiateCheckoutServiceTest {
 
     @Mock
     private CartRepository cartRepository;
@@ -58,7 +57,7 @@ class CheckoutServiceTest {
     private CreateCapacityReservationService createCapacityReservationService;
 
     @InjectMocks
-    private CheckoutService checkoutService;
+    private InitiateCheckoutService initiateCheckoutService;
 
     private UUID userId;
     private UUID storeId;
@@ -163,7 +162,7 @@ class CheckoutServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class))).thenReturn(testReservation);
 
-        CheckoutResult result = checkoutService.initiateCheckout(command);
+        CheckoutResult result = initiateCheckoutService.execute(command);
 
         assertThat(result).isNotNull();
         assertThat(result.reservationId()).isEqualTo(testReservation.getId());
@@ -211,7 +210,7 @@ class CheckoutServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class))).thenReturn(testReservation);
 
-        CheckoutResult result = checkoutService.initiateCheckout(command);
+        CheckoutResult result = initiateCheckoutService.execute(command);
 
         assertThat(result).isNotNull();
         assertThat(result.fulfillmentType()).isEqualTo(CheckoutFulfillmentType.DELIVERY);
@@ -236,7 +235,7 @@ class CheckoutServiceTest {
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
         when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("vacío");
     }
@@ -266,7 +265,7 @@ class CheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(inactiveStore));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("disponible");
     }
@@ -296,7 +295,7 @@ class CheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(noDeliveryStore));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("envíos a domicilio");
     }
@@ -316,7 +315,7 @@ class CheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("dirección de entrega es obligatoria");
     }
@@ -346,7 +345,7 @@ class CheckoutServiceTest {
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(noPickupStore));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("retiro en tienda");
     }
@@ -382,7 +381,7 @@ class CheckoutServiceTest {
         when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(testCart));
         when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(inactiveVariant));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("no se encuentra disponible");
     }
@@ -418,7 +417,7 @@ class CheckoutServiceTest {
         when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(testVariant));
         when(productRepository.findById(productId)).thenReturn(Optional.of(inactiveProduct));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("no se encuentra activo");
     }
@@ -443,7 +442,7 @@ class CheckoutServiceTest {
         when(createCapacityReservationService.execute(any(CreateCapacityReservationCommand.class)))
                 .thenThrow(new ConflictException("CAPACITY_EXHAUSTED", "No quedan cupos disponibles para la franja horaria seleccionada."));
 
-        assertThatThrownBy(() -> checkoutService.initiateCheckout(command))
+        assertThatThrownBy(() -> initiateCheckoutService.execute(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("No quedan cupos disponibles");
     }
