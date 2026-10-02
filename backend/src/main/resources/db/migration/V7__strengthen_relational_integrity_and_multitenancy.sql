@@ -41,17 +41,6 @@ CREATE TABLE store_category_assignments (
 
 CREATE INDEX idx_store_cat_assign_category_id ON store_category_assignments (store_category_id);
 
-INSERT INTO store_categories (id, name, slug, description, status, created_at, updated_at) VALUES
-('11111111-1111-1111-1111-111111111001', 'Restaurantes y Cafeterías', 'restaurantes-cafeterias', 'Comida preparada, cafés, repostería y bebidas', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111002', 'Moda y Calzado', 'moda-calzado', 'Prendas de vestir, zapatos y accesorios de moda', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111003', 'Supermercado y Bodega', 'supermercado-bodega', 'Abarrotes, alimentos frescos y productos de primera necesidad', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111004', 'Tecnología y Electrónica', 'tecnologia-electronica', 'Dispositivos electrónicos, computadoras y gadgets', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111005', 'Salud y Belleza', 'salud-belleza', 'Cosméticos, cuidado personal y bienestar', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111006', 'Hogar y Decoración', 'hogar-decoracion', 'Muebles, artículos para el hogar y decoración', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111007', 'Mascotas', 'mascotas', 'Alimentos y accesorios para mascotas', 'ACTIVE', NOW(), NOW()),
-('11111111-1111-1111-1111-111111111008', 'Servicios y Otros', 'servicios-otros', 'Servicios profesionales y diversos', 'ACTIVE', NOW(), NOW())
-ON CONFLICT (slug) DO NOTHING;
-
 -- ------------------------------------------------------------------------------
 -- 2. STOREFRONT & COORDINATES INTEGRITY IN STORES
 -- ------------------------------------------------------------------------------
