@@ -46,6 +46,9 @@ class StoreControllerTest {
     @Mock
     private GetStoreBySlugService getStoreBySlugService;
 
+    @Mock
+    private SearchPublicStoresService searchPublicStoresService;
+
     private MockMvc mockMvc;
     private UUID testMerchantId;
     private JwtPrincipal currentPrincipal;
@@ -59,7 +62,8 @@ class StoreControllerTest {
                 createStoreService,
                 getMyStoreService,
                 updateStoreService,
-                getStoreBySlugService
+                getStoreBySlugService,
+                searchPublicStoresService
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {

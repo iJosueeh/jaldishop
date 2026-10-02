@@ -1,67 +1,11 @@
 import { apiClient, ApiException } from '@/core/api/apiClient';
-import { PublicStore } from '../types/storefront.types';
-
-const DEMO_STORES: Record<string, PublicStore> = {
-  'panaderia-don-pepe': {
-    id: 'demo-store-001',
-    name: 'Panadería & Pastelería Don Pepe',
-    slug: 'panaderia-don-pepe',
-    description:
-      'Tradición artesanal desde 1998. Especialistas en masa madre, croissants de mantequilla francesa, empanadas recién horneadas y postres caseros.',
-    phone: '+51987654321',
-    address: 'Av. Primavera 450, Santiago de Surco, Lima',
-    status: 'ACTIVE',
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    deliveryFee: 5.0,
-    minOrderAmount: 15.0,
-    category: 'Panadería y Pastelería',
-    rating: 4.9,
-    reviewsCount: 128,
-    preparationTimeMinutes: 25,
-    openingHours: 'Lun - Sáb: 07:00 AM - 08:00 PM',
-  },
-  'dulce-amor': {
-    id: 'demo-store-002',
-    name: 'Dulce Amor Repostería Creativa',
-    slug: 'dulce-amor',
-    description:
-      'Tortas artesanales personalizadas para cumpleaños y eventos especiales, cheesecakes clásicos, cupcakes gourmet y macarons variados.',
-    phone: '+51987112233',
-    address: 'Calle Los Cedros 123, Miraflores, Lima',
-    status: 'ACTIVE',
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    deliveryFee: 7.5,
-    minOrderAmount: 25.0,
-    category: 'Repostería Creativa',
-    rating: 4.95,
-    reviewsCount: 94,
-    preparationTimeMinutes: 60,
-    openingHours: 'Mar - Dom: 09:00 AM - 07:00 PM',
-  },
-  'tokyo-dark-kitchen': {
-    id: 'demo-store-003',
-    name: 'Tokyo Dark Kitchen',
-    slug: 'tokyo-dark-kitchen',
-    description:
-      'Auténtico ramen japonés, sushi rolls tempura, gyoza al vapor y bowls teriyaki preparados en franjas horarias estrictas de alta precisión.',
-    phone: '+51999887766',
-    address: 'Av. Dos de Mayo 880, San Isidro, Lima',
-    status: 'ACTIVE',
-    deliveryEnabled: true,
-    pickupEnabled: false,
-    deliveryFee: 6.0,
-    minOrderAmount: 30.0,
-    category: 'Comida Japonesa & Nikkei',
-    rating: 4.85,
-    reviewsCount: 210,
-    preparationTimeMinutes: 35,
-    openingHours: 'Mar - Dom: 12:00 PM - 10:00 PM',
-  },
-};
+import { PublicStore, StoreCategory } from '../types/storefront.types';
 
 export const storeService = {
+  /**
+   * Fetches public store information by slug from backend API.
+   * Returns null if store does not exist (triggering notFound).
+   */
   async getStoreBySlug(slug: string): Promise<PublicStore | null> {
     try {
       const store = await apiClient<PublicStore>(`/stores/slug/${slug}`, {
@@ -70,15 +14,55 @@ export const storeService = {
       return store;
     } catch (error: unknown) {
       if (error instanceof ApiException && error.status === 404) {
-        if (DEMO_STORES[slug]) {
-          return DEMO_STORES[slug];
-        }
         return null;
       }
-      if (DEMO_STORES[slug]) {
-        return DEMO_STORES[slug];
-      }
       return null;
+    }
+  },
+
+  /**
+   * Retrieves featured/active stores from backend API.
+   */
+  async getFeaturedStores(limit = 6): Promise<PublicStore[]> {
+    try {
+      const stores = await apiClient<PublicStore[]>('/stores/featured', {
+        params: { limit },
+        timeoutMs: 4000,
+      });
+      return Array.isArray(stores) ? stores : [];
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Searches active stores in real-time. If query is empty, returns initial active stores.
+   */
+  async searchStores(query: string = '', limit = 5): Promise<PublicStore[]> {
+    const cleanQuery = query.trim();
+
+    try {
+      const results = await apiClient<PublicStore[]>('/stores/search', {
+        params: { q: cleanQuery, limit },
+        timeoutMs: 3000,
+      });
+      return Array.isArray(results) ? results.slice(0, limit) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Fetches all active store categories from backend API.
+   */
+  async getCategories(): Promise<StoreCategory[]> {
+    try {
+      const categories = await apiClient<StoreCategory[]>('/store-categories', {
+        timeoutMs: 4000,
+      });
+      return Array.isArray(categories) ? categories : [];
+    } catch {
+      return [];
     }
   },
 };

@@ -3,55 +3,57 @@ import { Container } from '@/shared/components/ui/Container';
 import { MotionFade } from '@/shared/components/ui/MotionFade';
 import { Card } from '@/shared/components/ui/Card';
 import { Clock, MessageCircle, BarChart3, Smartphone, Check, Zap } from 'lucide-react';
-import { Badge } from '@/shared/components/ui/Badge';
 
 export function BentoFeatures() {
   return (
-    <section id="como-funciona" className="py-24 bg-gradient-to-b from-[#faf7f2] via-[#f7f3ec] to-[#faf7f2] relative">
+    <section id="caracteristicas" className="py-16 sm:py-24 bg-[#0a0a09] text-white relative overflow-hidden">
+      {/* Decorative Warm Ambient Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#005141]/15 blur-[160px] pointer-events-none" />
+
       <Container size="lg">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <Badge variant="jade" size="md">
-            Pilares Tecnológicos del Dominio
-          </Badge>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1c1917]">
-            Las 4 superpotencias que protegen tu operación diaria
+        <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-emerald-400 text-xs font-bold backdrop-blur-sm shadow-sm">
+            Pilares Tecnológicos
+          </div>
+          <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Todo lo que tu negocio necesita para operar sin saturación
           </h2>
-          <p className="text-base text-[#57534e]">
-            A diferencia de un e-commerce genérico, JaldiShop está diseñado desde la raíz para la realidad de las MYPE que preparan bajo pedido.
+          <p className="text-sm sm:text-base lg:text-lg text-stone-300 max-w-xl mx-auto">
+            Diseñado especialmente para MYPEs que preparan bajo pedido: reposterías, comida artesanal, regalos y talleres.
           </p>
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {/* Bento Item 1: Large Featured Card - Capacidad Dinámica */}
           <MotionFade delay={0.1} className="md:col-span-2">
-            <Card className="p-8 h-full bg-white border-2 border-[#e7e0d6] shadow-sm flex flex-col justify-between group hover:border-[#005141] transition-all">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] text-[#005141] border border-[#ccfbf1] flex items-center justify-center">
+            <Card className="p-5 sm:p-7 lg:p-8 h-full bg-[#141413] border border-white/10 shadow-2xl shadow-black/40 rounded-3xl flex flex-col justify-between group transition-all">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 text-emerald-400 flex items-center justify-center">
                   <Clock className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-[#1c1917]">
+                <h3 className="font-display text-xl sm:text-2xl font-extrabold text-white">
                   Motor de Capacidad Operativa por Franjas Horarias
                 </h3>
-                <p className="text-sm text-[#57534e] leading-relaxed max-w-xl font-medium">
-                  Configura cuántos pedidos o productos puede procesar tu cocina por bloque de tiempo. Cuando se llena el cupo, esa hora queda deshabilitada automáticamente, evitando saturaciones y retrasos.
+                <p className="text-xs sm:text-sm lg:text-base text-stone-300 leading-relaxed max-w-xl font-normal">
+                  Configura cuántos pedidos o productos puede procesar tu taller, cocina o equipo por bloque de tiempo. Cuando se llena el cupo, ese horario queda deshabilitado automáticamente, evitando saturaciones y retrasos.
                 </p>
               </div>
 
-              {/* Visual preview */}
-              <div className="mt-8 p-4 rounded-2xl bg-[#faf7f2] border-2 border-[#e7e0d6] grid grid-cols-3 gap-3.5">
-                <div className="p-3.5 bg-white rounded-2xl text-center shadow-xs border-2 border-[#99f6e4]">
-                  <div className="text-xs font-bold text-[#57534e]">10:00 AM</div>
-                  <div className="text-sm font-extrabold text-[#005141] mt-0.5">4 cupos</div>
+              {/* Visual preview with responsive stacking */}
+              <div className="mt-6 sm:mt-8 p-3.5 sm:p-4 rounded-2xl bg-white/5 border border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+                <div className="p-3 bg-white/10 rounded-2xl flex sm:flex-col items-center justify-between sm:justify-center text-left sm:text-center shadow-xs border border-emerald-500/40">
+                  <div className="text-xs font-bold text-stone-300">10:00 AM</div>
+                  <div className="text-sm font-extrabold text-emerald-400 sm:mt-0.5">4 cupos libres</div>
                 </div>
-                <div className="p-3.5 bg-white rounded-2xl text-center shadow-xs border-2 border-[#fed7aa]">
-                  <div className="text-xs font-bold text-[#57534e]">11:00 AM</div>
-                  <div className="text-sm font-extrabold text-[#ea580c] mt-0.5">1 cupo (Último)</div>
+                <div className="p-3 bg-white/10 rounded-2xl flex sm:flex-col items-center justify-between sm:justify-center text-left sm:text-center shadow-xs border border-amber-500/40">
+                  <div className="text-xs font-bold text-stone-300">11:00 AM</div>
+                  <div className="text-sm font-extrabold text-[#feae2c] sm:mt-0.5">1 cupo (Último)</div>
                 </div>
-                <div className="p-3.5 bg-[#f7f3ec] rounded-2xl text-center opacity-70 border-2 border-[#e7e0d6]">
-                  <div className="text-xs font-bold text-[#78716c]">12:00 PM</div>
-                  <div className="text-sm font-extrabold text-[#b91c1c] mt-0.5">Agotado</div>
+                <div className="p-3 bg-white/[0.03] rounded-2xl flex sm:flex-col items-center justify-between sm:justify-center text-left sm:text-center opacity-60 border border-white/5">
+                  <div className="text-xs font-bold text-stone-500">12:00 PM</div>
+                  <div className="text-sm font-extrabold text-rose-400 sm:mt-0.5">Agotado</div>
                 </div>
               </div>
             </Card>
@@ -59,22 +61,22 @@ export function BentoFeatures() {
 
           {/* Bento Item 2: Hold Transaccional 10m */}
           <MotionFade delay={0.2} className="md:col-span-1">
-            <Card className="p-8 h-full bg-[#005141] text-white shadow-xl shadow-[#005141]/20 flex flex-col justify-between border-2 border-[#166a57]">
-              <div className="space-y-4">
+            <Card className="p-5 sm:p-7 lg:p-8 h-full bg-gradient-to-br from-[#005141] to-[#00382d] text-white shadow-2xl shadow-[#005141]/30 flex flex-col justify-between rounded-3xl border border-emerald-500/30">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-white/15 text-white flex items-center justify-center backdrop-blur-sm">
                   <Zap className="w-6 h-6 text-[#feae2c]" />
                 </div>
-                <h3 className="text-2xl font-extrabold">
-                  Hold Temporal de 10 Minutos
+                <h3 className="font-display text-xl sm:text-2xl font-extrabold text-white">
+                  Tiempo de Gracia de 10 Minutos
                 </h3>
-                <p className="text-sm text-[#ccfbf1] leading-relaxed font-normal">
-                  Bloquea transaccionalmente el cupo en base de datos mientras el comprador realiza la transferencia o pago. Cero doble reserva.
+                <p className="text-xs sm:text-sm lg:text-base text-emerald-100 leading-relaxed font-normal">
+                  Guarda el cupo del pedido automáticamente mientras el comprador realiza la transferencia o pago. Cero doble reserva.
                 </p>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-[#ccfbf1]">
-                <span className="font-bold">Reserva atómica</span>
-                <span className="font-mono font-extrabold bg-white/20 px-3 py-1 rounded-xl text-[#feae2c]">
+              <div className="mt-6 sm:mt-8 pt-4 border-t border-white/15 flex items-center justify-between text-xs text-emerald-200">
+                <span className="font-semibold">Reserva garantizada</span>
+                <span className="font-display font-extrabold bg-white/20 px-3 py-1 rounded-xl text-[#feae2c]">
                   10:00 min
                 </span>
               </div>
@@ -83,63 +85,63 @@ export function BentoFeatures() {
 
           {/* Bento Item 3: WhatsApp Bridge */}
           <MotionFade delay={0.3} className="md:col-span-1">
-            <Card className="p-8 h-full bg-white border-2 border-[#e7e0d6] shadow-sm flex flex-col justify-between hover:border-[#005141] transition-all">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#f0fdfa] text-[#005141] border border-[#ccfbf1] flex items-center justify-center">
+            <Card className="p-5 sm:p-7 lg:p-8 h-full bg-[#141413] border border-white/10 shadow-2xl shadow-black/40 flex flex-col justify-between rounded-3xl transition-all">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 text-emerald-400 flex items-center justify-center">
                   <MessageCircle className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1917]">
+                <h3 className="font-display text-lg sm:text-xl font-extrabold text-white">
                   WhatsApp Order Bridge
                 </h3>
-                <p className="text-sm text-[#57534e] leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-normal">
                   Genera el mensaje del pedido formateado y validado directamente al WhatsApp del comercio para resolver dudas o compartir comprobantes al instante.
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-[#005141] bg-[#f0fdfa] p-2.5 rounded-xl border border-[#ccfbf1]">
-                <Check className="w-4 h-4 text-[#005141]" /> Integración nativa con WhatsApp
+              <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-bold text-emerald-400 bg-white/5 border border-white/10 p-2.5 rounded-xl">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> Integración directa con WhatsApp
               </div>
             </Card>
           </MotionFade>
 
-          {/* Bento Item 4: Mobile & Next.js 15 App Router */}
+          {/* Bento Item 4: Mobile Experience */}
           <MotionFade delay={0.4} className="md:col-span-1">
-            <Card className="p-8 h-full bg-white border-2 border-[#e7e0d6] shadow-sm flex flex-col justify-between hover:border-[#005141] transition-all">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#fff7ed] text-[#ea580c] border border-[#fed7aa] flex items-center justify-center">
+            <Card className="p-5 sm:p-7 lg:p-8 h-full bg-[#141413] border border-white/10 shadow-2xl shadow-black/40 flex flex-col justify-between rounded-3xl transition-all">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 text-orange-400 flex items-center justify-center">
                   <Smartphone className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1917]">
-                  Experiencia Mobile Instantánea
+                <h3 className="font-display text-lg sm:text-xl font-extrabold text-white">
+                  Experiencia Móvil Instantánea
                 </h3>
-                <p className="text-sm text-[#57534e] leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-normal">
                   Diseñado para abrir a toda velocidad desde un enlace en bio de Instagram o estados de WhatsApp, sin lag ni tiempos de espera.
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-[#ea580c] bg-[#fff7ed] p-2.5 rounded-xl border border-[#fed7aa]">
-                <Check className="w-4 h-4 text-[#ea580c]" /> Core Web Vitals optimizados
+              <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-bold text-orange-400 bg-white/5 border border-white/10 p-2.5 rounded-xl">
+                <Check className="w-4 h-4 text-orange-400 shrink-0" /> Carga ultra rápida en celulares
               </div>
             </Card>
           </MotionFade>
 
-          {/* Bento Item 5: Panel MYPE Angular */}
+          {/* Bento Item 5: Panel MYPE */}
           <MotionFade delay={0.5} className="md:col-span-1">
-            <Card className="p-8 h-full bg-white border-2 border-[#e7e0d6] shadow-sm flex flex-col justify-between hover:border-[#005141] transition-all">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#fef3c7] text-[#92400e] border border-[#fde68a] flex items-center justify-center">
+            <Card className="p-5 sm:p-7 lg:p-8 h-full bg-[#141413] border border-white/10 shadow-2xl shadow-black/40 flex flex-col justify-between rounded-3xl transition-all">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 text-[#feae2c] flex items-center justify-center">
                   <BarChart3 className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1917]">
+                <h3 className="font-display text-lg sm:text-xl font-extrabold text-white">
                   Sincronización con Panel MYPE
                 </h3>
-                <p className="text-sm text-[#57534e] leading-relaxed font-medium">
-                  Tu cocina recibe los pedidos en tiempo real en la app de comerciante con notificaciones y control de estados de preparación.
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-normal">
+                  Tu equipo recibe los pedidos en tiempo real en la app de comerciante con notificaciones y control de estados de preparación y despacho.
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-[#92400e] bg-[#fef3c7] p-2.5 rounded-xl border border-[#fde68a]">
-                <Check className="w-4 h-4 text-[#92400e]" /> Angular 20 + Signals Reactivos
+              <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-bold text-[#feae2c] bg-white/5 border border-white/10 p-2.5 rounded-xl">
+                <Check className="w-4 h-4 text-[#feae2c] shrink-0" /> Control de preparación y despacho
               </div>
             </Card>
           </MotionFade>
