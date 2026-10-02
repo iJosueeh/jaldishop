@@ -12,9 +12,12 @@ import {
   matPhotoCameraOutline,
   matDeleteOutline,
   matUploadOutline,
+  matCategoryOutline,
+  matCheckOutline,
 } from '@ng-icons/material-symbols/outline';
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { StoreCategory } from '../../../../core/models/store.models';
 
 import { ConfirmModal } from '../../../../shared/components/confirm-modal/confirm-modal';
 
@@ -32,6 +35,8 @@ import { ConfirmModal } from '../../../../shared/components/confirm-modal/confir
       matPhotoCameraOutline,
       matDeleteOutline,
       matUploadOutline,
+      matCategoryOutline,
+      matCheckOutline,
     }),
   ],
   selector: 'app-store-identity-card',
@@ -44,6 +49,7 @@ export class StoreIdentityCard {
 
   readonly form = input<FormGroup>(new FormGroup({}));
   readonly slug = input<string>('');
+  readonly categories = input<StoreCategory[]>([]);
 
   readonly logoMode = signal<'upload' | 'url'>('upload');
   readonly bannerMode = signal<'upload' | 'url'>('upload');
@@ -56,6 +62,25 @@ export class StoreIdentityCard {
 
   readonly showDeleteModal = signal<boolean>(false);
   readonly pendingDeleteControl = signal<'logoUrl' | 'bannerUrl' | null>(null);
+
+  isSelected(categoryId: string): boolean {
+    const selected: string[] = this.form().get('categoryIds')?.value || [];
+    return selected.includes(categoryId);
+  }
+
+  toggleCategory(categoryId: string): void {
+    const control = this.form().get('categoryIds');
+    if (!control) return;
+    const current: string[] = control.value ? [...control.value] : [];
+    const index = current.indexOf(categoryId);
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(categoryId);
+    }
+    control.setValue(current);
+    control.markAsDirty();
+  }
 
   get deleteModalTitle(): string {
     return this.pendingDeleteControl() === 'logoUrl' ? '¿Quitar Logo de la Tienda?' : '¿Quitar Portada de la Tienda?';

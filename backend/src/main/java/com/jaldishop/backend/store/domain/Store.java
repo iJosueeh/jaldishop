@@ -4,8 +4,7 @@ import com.jaldishop.backend.shared.util.PhoneUtils;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 public class Store {
 
@@ -29,6 +28,7 @@ public class Store {
     private String instagramUrl;
     private String facebookUrl;
     private String whatsappNumber;
+    private Set<UUID> categoryIds;
     private StoreStatus status;
     private final Instant createdAt;
     private Instant updatedAt;
@@ -38,7 +38,7 @@ public class Store {
                   BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled,
                   boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency,
                   BigDecimal taxRate, String logoUrl, String bannerUrl, String instagramUrl,
-                  String facebookUrl, String whatsappNumber, StoreStatus status,
+                  String facebookUrl, String whatsappNumber, Set<UUID> categoryIds, StoreStatus status,
                   Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.merchantUserId = merchantUserId;
@@ -60,6 +60,7 @@ public class Store {
         this.instagramUrl = instagramUrl;
         this.facebookUrl = facebookUrl;
         this.whatsappNumber = whatsappNumber;
+        this.categoryIds = categoryIds != null ? new HashSet<>(categoryIds) : new HashSet<>();
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -125,6 +126,52 @@ public class Store {
             String facebookUrl,
             String whatsappNumber
     ) {
+        return create(
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                null
+        );
+    }
+
+    public static Store create(
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds
+    ) {
         if (merchantUserId == null) {
             throw new IllegalArgumentException("El ID del comerciante no puede ser nulo.");
         }
@@ -182,6 +229,7 @@ public class Store {
                 instagramUrl,
                 facebookUrl,
                 normalizedWhatsapp,
+                categoryIds,
                 StoreStatus.ACTIVE,
                 now,
                 now
@@ -229,6 +277,7 @@ public class Store {
                 null,
                 null,
                 null,
+                null,
                 status,
                 createdAt,
                 updatedAt
@@ -260,6 +309,60 @@ public class Store {
             Instant createdAt,
             Instant updatedAt
     ) {
+        return reconstitute(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                null,
+                status,
+                createdAt,
+                updatedAt
+        );
+    }
+
+    public static Store reconstitute(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
         return new Store(
                 id,
                 merchantUserId,
@@ -281,6 +384,7 @@ public class Store {
                 instagramUrl,
                 facebookUrl,
                 whatsappNumber,
+                categoryIds,
                 status,
                 createdAt,
                 updatedAt
@@ -318,7 +422,8 @@ public class Store {
                 this.bannerUrl,
                 this.instagramUrl,
                 this.facebookUrl,
-                this.whatsappNumber
+                this.whatsappNumber,
+                this.categoryIds
         );
     }
 
@@ -340,6 +445,48 @@ public class Store {
             String instagramUrl,
             String facebookUrl,
             String whatsappNumber
+    ) {
+        update(
+                name,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                this.categoryIds
+        );
+    }
+
+    public void update(
+            String name,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds
     ) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("El nombre no puede ser nulo ni vacio.");
@@ -371,16 +518,30 @@ public class Store {
         this.pickupEnabled = pickupEnabled;
         this.deliveryEnabled = deliveryEnabled;
         this.deliveryFeeAmount = deliveryFeeAmount;
-        this.deliveryFeeCurrency = (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank())
-                ? deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT)
-                : (this.deliveryFeeCurrency != null ? this.deliveryFeeCurrency : "PEN");
-        this.taxRate = taxRate != null ? taxRate : this.taxRate;
+        if (deliveryFeeCurrency != null && !deliveryFeeCurrency.isBlank()) {
+            this.deliveryFeeCurrency = deliveryFeeCurrency.trim().toUpperCase(Locale.ROOT);
+        }
+        if (taxRate != null) {
+            this.taxRate = taxRate;
+        }
         this.logoUrl = logoUrl;
         this.bannerUrl = bannerUrl;
         this.instagramUrl = instagramUrl;
         this.facebookUrl = facebookUrl;
         this.whatsappNumber = PhoneUtils.normalizePeruPhone(whatsappNumber);
+        if (categoryIds != null) {
+            this.categoryIds = new java.util.HashSet<>(categoryIds);
+        }
         this.updatedAt = Instant.now();
+    }
+
+    public void assignCategories(Set<UUID> categoryIds) {
+        this.categoryIds = categoryIds != null ? new HashSet<>(categoryIds) : new HashSet<>();
+        this.updatedAt = Instant.now();
+    }
+
+    public Set<UUID> getCategoryIds() {
+        return Collections.unmodifiableSet(categoryIds);
     }
 
     public void updateStorefront(

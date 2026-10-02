@@ -14,16 +14,29 @@ import java.util.UUID;
 public class StoreRepositoryAdapter implements StoreRepository {
 
     private final StoreJpaRepository storeJpaRepository;
+    private final com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository storeCategoryJpaRepository;
     private final StorePersistenceMapper mapper;
 
-    public StoreRepositoryAdapter(StoreJpaRepository storeJpaRepository, StorePersistenceMapper mapper) {
+    public StoreRepositoryAdapter(
+            StoreJpaRepository storeJpaRepository,
+            com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository storeCategoryJpaRepository,
+            StorePersistenceMapper mapper
+    ) {
         this.storeJpaRepository = storeJpaRepository;
+        this.storeCategoryJpaRepository = storeCategoryJpaRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Store save(Store store) {
         StoreEntity entity = mapper.toEntity(store);
+        if (store.getCategoryIds() != null && !store.getCategoryIds().isEmpty()) {
+            java.util.List<com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity> categories =
+                    storeCategoryJpaRepository.findAllById(store.getCategoryIds());
+            entity.setCategories(new java.util.HashSet<>(categories));
+        } else {
+            entity.setCategories(new java.util.HashSet<>());
+        }
         StoreEntity saved = storeJpaRepository.save(entity);
 
         return mapper.toDomain(saved);

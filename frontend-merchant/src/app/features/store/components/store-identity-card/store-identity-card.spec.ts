@@ -24,12 +24,26 @@ describe('StoreIdentityCard', () => {
       bannerUrl: new FormControl(''),
       instagramUrl: new FormControl(''),
       facebookUrl: new FormControl(''),
+      categoryIds: new FormControl<string[]>([]),
     }));
     await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('debe permitir seleccionar y deseleccionar categorias', () => {
+    const catId = 'cat-123';
+    expect(component.isSelected(catId)).toBe(false);
+
+    component.toggleCategory(catId);
+    expect(component.isSelected(catId)).toBe(true);
+    expect(component.form().get('categoryIds')?.value).toEqual([catId]);
+
+    component.toggleCategory(catId);
+    expect(component.isSelected(catId)).toBe(false);
+    expect(component.form().get('categoryIds')?.value).toEqual([]);
   });
 
   it('debe solicitar confirmación y remover el logo al confirmar', () => {

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -80,6 +82,14 @@ public class StoreEntity {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "store_category_assignments",
+            joinColumns = @JoinColumn(name = "store_id"),
+            inverseJoinColumns = @JoinColumn(name = "store_category_id")
+    )
+    private Set<StoreCategoryEntity> categories = new HashSet<>();
 
     protected StoreEntity() {
     }
@@ -204,6 +214,14 @@ public class StoreEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Set<StoreCategoryEntity> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<StoreCategoryEntity> categories) {
+        this.categories = categories != null ? categories : new HashSet<>();
     }
 
 }

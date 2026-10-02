@@ -1,8 +1,14 @@
 package com.jaldishop.backend.store.infrastructure.persistence.mapper;
 
 import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class StorePersistenceMapper {
@@ -11,6 +17,10 @@ public class StorePersistenceMapper {
         if (entity == null) {
             return null;
         }
+        Set<UUID> categoryIds = entity.getCategories() != null
+                ? entity.getCategories().stream().map(StoreCategoryEntity::getId).collect(Collectors.toSet())
+                : Collections.emptySet();
+
         return Store.reconstitute(
                 entity.getId(),
                 entity.getMerchantUserId(),
@@ -32,6 +42,7 @@ public class StorePersistenceMapper {
                 entity.getInstagramUrl(),
                 entity.getFacebookUrl(),
                 entity.getWhatsappNumber(),
+                categoryIds,
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()

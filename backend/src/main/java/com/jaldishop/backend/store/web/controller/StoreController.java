@@ -55,7 +55,8 @@ public class StoreController {
                 request.bannerUrl(),
                 request.instagramUrl(),
                 request.facebookUrl(),
-                request.whatsappNumber()
+                request.whatsappNumber(),
+                request.categoryIds()
         );
 
         Store store = createStoreService.execute(command);
@@ -96,7 +97,8 @@ public class StoreController {
                 request.bannerUrl(),
                 request.instagramUrl(),
                 request.facebookUrl(),
-                request.whatsappNumber()
+                request.whatsappNumber(),
+                request.categoryIds()
         );
 
         Store store = updateStoreService.execute(command);

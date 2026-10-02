@@ -73,6 +73,7 @@
       <app-store-identity-card
         [form]="storeForm"
         [slug]="storeService.currentStore()?.slug ?? ''"
+        [categories]="storeService.categories()"
       />
 
       <!-- Tarjeta 2: Modalidades de Entrega y Tarifas -->

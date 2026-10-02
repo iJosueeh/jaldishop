@@ -43,6 +43,10 @@ export class Store {
   readonly saveSuccess = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
+  constructor() {
+    this.storeService.getStoreCategories().subscribe();
+  }
+
   openPublicCatalog(): void {
     const slug = this.storeService.currentStore()?.slug;
     if (slug) {
@@ -71,6 +75,7 @@ export class Store {
       instagramUrl: [''],
       facebookUrl: [''],
       whatsappNumber: [''],
+      categoryIds: [[] as string[]],
     },
     {
       validators: [
@@ -131,6 +136,7 @@ export class Store {
       instagramUrl: store.instagramUrl ?? '',
       facebookUrl: store.facebookUrl ?? '',
       whatsappNumber: store.whatsappNumber ? store.whatsappNumber.replace(/^\+51\s*/, '') : '',
+      categoryIds: store.categoryIds ? Array.from(store.categoryIds) : [],
     });
   }
 
@@ -173,6 +179,7 @@ export class Store {
       instagramUrl: value.instagramUrl.trim() || undefined,
       facebookUrl: value.facebookUrl.trim() || undefined,
       whatsappNumber: normalizedWhatsapp,
+      categoryIds: value.categoryIds && value.categoryIds.length > 0 ? value.categoryIds : undefined,
     };
   }
 

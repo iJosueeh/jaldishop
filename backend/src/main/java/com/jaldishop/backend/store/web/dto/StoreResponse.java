@@ -5,6 +5,7 @@ import com.jaldishop.backend.store.domain.StoreStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 public record StoreResponse(
@@ -28,10 +29,64 @@ public record StoreResponse(
         String instagramUrl,
         String facebookUrl,
         String whatsappNumber,
+        Set<UUID> categoryIds,
         StoreStatus status,
         Instant createdAt,
         Instant updatedAt
 ) {
+    public StoreResponse(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                null,
+                status,
+                createdAt,
+                updatedAt
+        );
+    }
+
     public StoreResponse(
             UUID id,
             UUID merchantUserId,
@@ -73,6 +128,7 @@ public record StoreResponse(
                 null,
                 null,
                 null,
+                null,
                 status,
                 createdAt,
                 updatedAt
@@ -101,6 +157,7 @@ public record StoreResponse(
                 store.getInstagramUrl(),
                 store.getFacebookUrl(),
                 store.getWhatsappNumber(),
+                store.getCategoryIds(),
                 store.getStatus(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
