@@ -21,8 +21,8 @@ const DEFAULT_POSTER_URL =
   'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1600&auto=format&fit=crop';
 
 export function HeroVideoBackground({
-  videoUrl = DEFAULT_VIDEO_URL,
-  posterUrl = DEFAULT_POSTER_URL,
+  videoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || DEFAULT_VIDEO_URL,
+  posterUrl = process.env.NEXT_PUBLIC_HERO_POSTER_URL || DEFAULT_POSTER_URL,
 }: HeroVideoBackgroundProps) {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
