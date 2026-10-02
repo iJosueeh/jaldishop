@@ -6,19 +6,19 @@ import Image from 'next/image';
 interface HeroVideoBackgroundProps {
   /**
    * Fast CDN video source (MP4 / WebM)
-   * High quality loop of artisanal bakery, dough making and warm kitchen
+   * High quality loop of urban coffee shop & food establishment
    */
   videoUrl?: string;
   posterUrl?: string;
 }
 
-// Ultra-optimized warm artisanal bakery CDN video loop (Mixkit CDN)
+// Direct CDN Video URL: Urban coffee shop & artisan retail (Mixkit CDN)
 const DEFAULT_VIDEO_URL =
-  'https://assets.mixkit.co/videos/preview/mixkit-baker-putting-bread-dough-into-the-oven-41484-large.mp4';
+  'https://assets.mixkit.co/videos/4350/4350-720.mp4';
 
-// High-res warm artisan kitchen poster fallback
+// High-res Urban coffee shop poster thumbnail
 const DEFAULT_POSTER_URL =
-  'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1600&auto=format&fit=crop';
+  'https://assets.mixkit.co/videos/4350/4350-thumb-720-0.jpg';
 
 export function HeroVideoBackground({
   videoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || DEFAULT_VIDEO_URL,
@@ -30,7 +30,7 @@ export function HeroVideoBackground({
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.play().catch(() => {
-        // Fallback to static poster if autoplay is restricted
+        // Fallback to static poster if autoplay policy restricts
       });
     }
   }, []);
@@ -45,11 +45,11 @@ export function HeroVideoBackground({
       >
         <Image
           src={posterUrl}
-          alt="JaldiShop Artisan Kitchen"
+          alt="JaldiShop Urban Store Background"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center filter brightness-[0.98] saturate-[1.15]"
+          className="object-cover object-center filter brightness-[0.96] saturate-[1.15]"
         />
       </div>
 
@@ -70,7 +70,7 @@ export function HeroVideoBackground({
       </video>
 
       {/* 3. Refined Lateral Mask: Left is softly opaque for text readability, Right lets the video shine through */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#faf7f2]/95 via-[#faf7f2]/70 to-[#faf7f2]/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#faf7f2]/95 via-[#faf7f2]/70 to-[#faf7f2]/25" />
 
       {/* 4. Vertical Smooth Section Fade (Blends seamlessly into the next sections) */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#faf7f2]/30 via-transparent to-[#faf7f2]" />
