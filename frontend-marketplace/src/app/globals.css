@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  /* ==========================================================================
+     JALDISHOPE DESIGN SYSTEM v2.1 (Warm Modern Retail - Shopify / Warm Craft)
+     Paleta unificada con frontend-merchant (Angular)
+     ========================================================================== */
+
+  /* Tipografía */
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-display), "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+
+  /* Superficies Cálidas y Luminosas (Warm Modern) */
+  --color-warm-bg: #faf7f2;
+  --color-warm-surface: #faf7f2;
+  --color-warm-card: #ffffff;
+  --color-warm-muted: #f7f3ec;
+  --color-warm-subtle: #f0eae0;
+  --color-warm-border: #e7e0d6;
+
+  /* Textos y Contrastes Cálidos (Stone) */
+  --color-warm-text: #1c1917;
+  --color-warm-text-muted: #57534e;
+  --color-warm-text-subtle: #78716c;
+
+  /* Identidad Primaria: Verde Jade */
+  --color-jade-900: #005141;
+  --color-jade-800: #003d31;
+  --color-jade-700: #166a57;
+  --color-jade-600: #0d9488;
+  --color-jade-500: #14b8a6;
+  --color-jade-100: #ccfbf1;
+  --color-jade-50: #f0fdfa;
+
+  /* Identidad Secundaria: Naranja Terracota & Ámbar Miel */
+  --color-terracotta: #ea580c;
+  --color-terracotta-hover: #c2410c;
+  --color-amber-honey: #feae2c;
+  --color-amber-light: #fef3c7;
+  --color-amber-subtle: #fffbeb;
+}
+
+:root {
+  --background: #faf7f2;
+  --foreground: #1c1917;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  letter-spacing: -0.012em;
+  overflow-x: hidden;
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(168, 162, 158, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 113, 108, 0.6);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Decorative Shopify-style dot grid pattern */
+.bg-grid-warm {
+  background-size: 32px 32px;
+  background-image: radial-gradient(rgba(215, 207, 196, 0.4) 1px, transparent 1px);
+}

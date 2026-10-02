@@ -4,6 +4,7 @@ import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.*;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.web.dto.CreateStoreRequest;
+import com.jaldishop.backend.store.web.dto.PublicStoreResponse;
 import com.jaldishop.backend.store.web.dto.StoreResponse;
 import com.jaldishop.backend.store.web.dto.UpdateStoreRequest;
 import jakarta.validation.Valid;
@@ -20,11 +21,18 @@ public class StoreController {
     private final CreateStoreService createStoreService;
     private final GetMyStoreService getMyStoreService;
     private final UpdateStoreService updateStoreService;
+    private final GetStoreBySlugService getStoreBySlugService;
 
-    public StoreController(CreateStoreService createStoreService, GetMyStoreService getMyStoreService, UpdateStoreService updateStoreService) {
+    public StoreController(
+            CreateStoreService createStoreService,
+            GetMyStoreService getMyStoreService,
+            UpdateStoreService updateStoreService,
+            GetStoreBySlugService getStoreBySlugService
+    ) {
         this.createStoreService = createStoreService;
         this.getMyStoreService = getMyStoreService;
         this.updateStoreService = updateStoreService;
+        this.getStoreBySlugService = getStoreBySlugService;
     }
 
     @PostMapping()
@@ -103,6 +111,14 @@ public class StoreController {
 
         Store store = updateStoreService.execute(command);
         return ResponseEntity.ok(StoreResponse.fromDomain(store));
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<PublicStoreResponse> getStoreBySlug(
+            @PathVariable String slug
+    ) {
+        Store store = getStoreBySlugService.execute(slug);
+        return ResponseEntity.ok(PublicStoreResponse.fromDomain(store));
     }
 
 }

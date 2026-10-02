@@ -2,10 +2,7 @@ package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.CreateStoreCommand;
-import com.jaldishop.backend.store.application.CreateStoreService;
-import com.jaldishop.backend.store.application.GetMyStoreService;
-import com.jaldishop.backend.store.application.UpdateStoreService;
+import com.jaldishop.backend.store.application.*;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +43,9 @@ class StoreControllerTest {
     @Mock
     private UpdateStoreService updateStoreService;
 
+    @Mock
+    private GetStoreBySlugService getStoreBySlugService;
+
     private MockMvc mockMvc;
     private UUID testMerchantId;
     private JwtPrincipal currentPrincipal;
@@ -55,7 +55,12 @@ class StoreControllerTest {
         testMerchantId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("MERCHANT"));
 
-        StoreController controller = new StoreController(createStoreService, getMyStoreService, updateStoreService);
+        StoreController controller = new StoreController(
+                createStoreService,
+                getMyStoreService,
+                updateStoreService,
+                getStoreBySlugService
+        );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -230,5 +235,41 @@ class StoreControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Nombre Actualizado"))
                 .andExpect(jsonPath("$.description").value("Nueva Desc"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/stores/slug/{slug} - Consultar tienda pública por slug (200 OK)")
+    void getStoreBySlugSuccess() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        Store store = Store.reconstitute(
+                storeId,
+                testMerchantId,
+                "Pastelería Dulce Sabor",
+                "dulce-sabor",
+                "Los mejores postres",
+                "987654321",
+                "Av Larco 500",
+                "Miraflores",
+                new BigDecimal("-12.12"),
+                new BigDecimal("-77.03"),
+                true,
+                true,
+                new BigDecimal("6.00"),
+                "PEN",
+                new BigDecimal("18.00"),
+                StoreStatus.ACTIVE,
+                Instant.now(),
+                Instant.now()
+        );
+
+        when(getStoreBySlugService.execute("dulce-sabor")).thenReturn(store);
+
+        mockMvc.perform(get("/api/v1/stores/slug/dulce-sabor"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(storeId.toString()))
+                .andExpect(jsonPath("$.name").value("Pastelería Dulce Sabor"))
+                .andExpect(jsonPath("$.slug").value("dulce-sabor"))
+                .andExpect(jsonPath("$.pickupEnabled").value(true))
+                .andExpect(jsonPath("$.deliveryEnabled").value(true));
     }
 }

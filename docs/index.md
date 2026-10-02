@@ -60,10 +60,10 @@ flowchart LR
 |:---|:---|:---|
 | **Backend** | Spring Boot 3.4.x, Java 21 | API RESTful, Arquitectura Hexagonal/DDD y Transaccionalidad |
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
-| **Frontend** | Angular 20 Standalone, Next.js, Tailwind CSS | Panel de Comerciante (Angular) y Portal Cliente (Next.js) |
+| **Frontend** | Angular 20 Standalone, Next.js 15, Tailwind CSS | Panel de Comerciante (Angular) y [Portal Marketplace (Next.js)](./05-arquitectura/arquitectura-frontend-marketplace.md) |
 | **Persistencia** | PostgreSQL 16+ (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
 | **Despliegue & DevOps** | Render, Cloudflare Pages, Docker, GitHub Actions | Despliegue continuo y validación automatizada en la nube |
-| **Calidad / QA** | JUnit 5, Mockito, Vitest | 878 pruebas automatizadas pasando al 100% (428 Backend + 450 Frontend) |
+| **Calidad / QA** | JUnit 5, Mockito, Vitest | 904 pruebas automatizadas pasando al 100% (454 Backend + 450 Frontend) |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 
 ---

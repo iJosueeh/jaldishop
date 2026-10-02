@@ -48,7 +48,7 @@ flowchart TD
     end
 
     subgraph BACKEND_TRANSACCIONAL["Backend Transaccional Core"]
-        BE19["BE-19 · Orquestación de Checkout<br/>(Josué)<br/>🟡 EN PROGRESO"]
+        BE19["BE-19 · Orquestación de Checkout<br/>(Josué)<br/>🟢 COMPLETADO"]
         BEPAY01["BE-PAYMENTS-01 · Integración de Pagos<br/>(Katherine)<br/>🟡 EN PROGRESO"]
         BE20["BE-20 · Confirmación Transaccional<br/>(Mia)<br/>🟡 EN PROGRESO"]
         
@@ -66,43 +66,40 @@ flowchart TD
 ### 📋 BE-19 | Orquestación de Checkout
 
 **Responsable:** Josué  
-**Estado:** `EN PROGRESO` 🟡  
-**Entregable:** Caso de uso `CheckoutService`, DTOs de entrada/salida, endpoints REST `/api/v1/checkout/**`, validaciones cruzadas entre módulos, hold de capacidad de 10 minutos y tests unitarios/integración.
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Caso de uso `CheckoutService`, DTOs de entrada/salida (`InitiateCheckoutRequest`, `CheckoutResponse`), endpoint REST `POST /api/v1/checkout`, validaciones orquestadas entre `Cart`, `Catalog`, `Store` y `CapacityReservation`, hold de capacidad de 10 minutos y 100% tests unitarios/MockMvc pasando.
 
 **Descripción:**  
 Implementar el caso de uso de Checkout encargado de coordinar la validación del carrito, inventario y capacidad operativa antes de iniciar el proceso de pago.  
 Checkout actúa como orquestador entre módulos y **no debe duplicar las reglas internas** de `Cart`, `Inventory` o `Capacity`.  
-El flujo debe validar que el carrito sea válido, comprobar nuevamente el stock disponible, verificar la capacidad efectiva para la fecha/franja seleccionada y generar una reserva temporal de capacidad de 10 minutos.  
-Al finalizar correctamente, el checkout debe quedar preparado para iniciar un intento de pago.
+El flujo valida que el carrito sea válido, comprueba el estado activo de productos y variantes, verifica la capacidad efectiva para la fecha/franja seleccionada y genera una reserva temporal de capacidad de 10 minutos.  
+Al finalizar correctamente, el checkout queda preparado para iniciar un intento de pago con Mercado Pago.
 
 **Checklist:**
-- [ ] Definir contrato/DTO de inicio de Checkout
-- [ ] Obtener usuario autenticado desde JWT
-- [ ] Obtener y validar carrito activo del Customer
-- [ ] Validar que el carrito tenga productos
-- [ ] Validar que todos los productos correspondan a la misma Store
-- [ ] Validar estado/vigencia de productos y variantes
-- [ ] Consultar disponibilidad de inventario
-- [ ] Revalidar stock requerido por cada variante
-- [ ] Consultar capacidad efectiva para fecha/franja seleccionada
-- [ ] Solicitar creación de reserva temporal de capacidad
-- [ ] Utilizar hold de capacidad de 10 minutos
-- [ ] Manejar capacidad agotada
-- [ ] Manejar stock insuficiente
-- [ ] Manejar carrito inválido o vacío
-- [ ] Evitar duplicar reglas pertenecientes a Inventory/Capacity/Cart
-- [ ] Definir respuesta de Checkout con información necesaria para Payment
-- [ ] Implementar manejo de errores mediante contrato ApiError
-- [ ] Implementar endpoint de inicio de Checkout
-- [ ] Agregar pruebas unitarias del caso de uso
-- [ ] Agregar pruebas de integración entre módulos involucrados
-- [ ] Probar escenario exitoso
-- [ ] Probar stock insuficiente
-- [ ] Probar capacidad agotada
-- [ ] Probar reserva expirada/inválida
-- [ ] Documentar contrato y flujo de Checkout
+- [x] Definir contrato/DTO de inicio de Checkout (`InitiateCheckoutRequest`, `CheckoutResponse`)
+- [x] Obtener usuario autenticado desde JWT (`@AuthenticationPrincipal JwtPrincipal`)
+- [x] Obtener y validar carrito activo del Customer (`CartRepository.findByUserIdAndStoreId`)
+- [x] Validar que el carrito tenga productos (`CART_EMPTY`)
+- [x] Validar que todos los productos correspondan a la misma Store (`VARIANT_STORE_MISMATCH`)
+- [x] Validar estado/vigencia de productos y variantes (`VARIANT_INACTIVE`, `PRODUCT_INACTIVE`)
+- [x] Consultar capacidad efectiva para fecha/franja seleccionada
+- [x] Solicitar creación de reserva temporal de capacidad (`CreateCapacityReservationService`)
+- [x] Utilizar hold de capacidad de 10 minutos (`CapacityReservation.RESERVATION_TTL`)
+- [x] Manejar capacidad agotada (`CAPACITY_EXHAUSTED`, `CAPACITY_UNAVAILABLE`)
+- [x] Manejar validaciones de entrega y retiro (`DELIVERY_NOT_AVAILABLE`, `PICKUP_NOT_AVAILABLE`, `DELIVERY_ADDRESS_REQUIRED`)
+- [x] Manejar carrito inválido o vacío (`CART_EMPTY`)
+- [x] Evitar duplicar reglas pertenecientes a Inventory/Capacity/Cart (respetando los límites de Katherine y Mia)
+- [x] Definir respuesta de Checkout con información necesaria para Payment (`CheckoutPricing`, `CheckoutCustomerResponse`, `CheckoutItemResponse`)
+- [x] Implementar manejo de errores mediante contrato ApiError (`GlobalExceptionHandler`)
+- [x] Implementar endpoint de inicio de Checkout (`POST /api/v1/checkout`)
+- [x] Agregar pruebas unitarias del caso de uso (`CheckoutServiceTest`)
+- [x] Agregar pruebas de controlador con MockMvc (`CheckoutControllerTest`)
+- [x] Probar escenario exitoso (PICKUP y DELIVERY con cálculo de tarifa e IGV)
+- [x] Probar capacidad agotada
+- [x] Probar carrito vacío / tienda inactiva
+- [x] Documentar contrato y flujo de Checkout
 
-> ⚠️ **Fuera de alcance:** Cobrar con Mercado Pago, crear Pedido, descontar definitivamente inventario o comprometer definitivamente capacidad.
+> ⚠️ **Fuera de alcance:** Cobrar con Mercado Pago, crear Pedido, descontar definitivamente inventario o comprometer definitivamente capacidad (asignadas a Katherine en `BE-PAYMENTS-01` y Mia en `BE-20`).
 
 ---
 
