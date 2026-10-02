@@ -74,6 +74,7 @@
         [form]="storeForm"
         [slug]="storeService.currentStore()?.slug ?? ''"
         [categories]="storeService.categories()"
+        [isLoadingCategories]="storeService.isLoadingCategories()"
       />
 
       <!-- Tarjeta 2: Modalidades de Entrega y Tarifas -->

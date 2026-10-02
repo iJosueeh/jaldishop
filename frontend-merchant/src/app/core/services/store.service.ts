@@ -18,20 +18,27 @@ export class StoreService {
   readonly currentStore = signal<StoreResponse | null>(null);
   readonly categories = signal<StoreCategory[]>([]);
   readonly isLoading = signal<boolean>(false);
+  readonly isLoadingCategories = signal<boolean>(false);
   private readonly isLoaded = signal<boolean>(false);
 
   readonly hasStore = computed(() => !!this.currentStore());
   readonly storeName = computed(() => this.currentStore()?.name ?? 'Mi tienda');
   readonly storeStatus = computed(() => this.currentStore()?.status ?? 'INACTIVE');
 
-  getStoreCategories(): Observable<StoreCategory[]> {
-    if (this.categories().length > 0) {
+  getStoreCategories(forceRefresh = false): Observable<StoreCategory[]> {
+    if (this.categories().length > 0 && !forceRefresh) {
       return of(this.categories());
     }
 
+    this.isLoadingCategories.set(true);
+
     return this.http.get<StoreCategory[]>(this.categoriesUrl).pipe(
-      tap((cats) => this.categories.set(cats)),
+      tap((cats) => {
+        this.categories.set(cats || []);
+        this.isLoadingCategories.set(false);
+      }),
       catchError((error) => {
+        this.isLoadingCategories.set(false);
         return of([]);
       })
     );

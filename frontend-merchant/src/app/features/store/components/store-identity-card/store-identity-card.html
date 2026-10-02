@@ -281,8 +281,13 @@
               </button>
             }
           </div>
+        } @else if (isLoadingCategories()) {
+          <div class="flex items-center gap-2 pt-1 py-1">
+            <span class="w-4 h-4 border-2 border-primary-container border-t-transparent rounded-full animate-spin"></span>
+            <p class="text-xs text-on-surface-variant italic">Cargando rubros comerciales disponibles...</p>
+          </div>
         } @else {
-          <p class="text-xs text-on-surface-variant italic">Cargando rubros comerciales disponibles...</p>
+          <p class="text-xs text-on-surface-variant italic py-1">No se encontraron rubros registrados en el servidor.</p>
         }
       </div>
     </div>
