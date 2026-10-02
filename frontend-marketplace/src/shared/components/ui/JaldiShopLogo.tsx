@@ -5,12 +5,14 @@ import { cn } from '@/shared/utils/cn';
 interface JaldiShopLogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  variant?: 'light' | 'dark';
   className?: string;
 }
 
 export function JaldiShopLogo({
   size = 'md',
   showText = true,
+  variant = 'dark',
   className,
 }: JaldiShopLogoProps) {
   const sizes = {
@@ -20,6 +22,7 @@ export function JaldiShopLogo({
   };
 
   const { icon, text, subtext } = sizes[size];
+  const isLight = variant === 'light';
 
   return (
     <div className={cn('flex items-center gap-2.5 select-none', className)}>
@@ -36,10 +39,22 @@ export function JaldiShopLogo({
 
       {showText && (
         <div className="flex flex-col">
-          <span className={cn('font-extrabold tracking-tight text-[#1c1917] leading-none', text)}>
-            Jaldi<span className="text-[#ea580c]">Shop</span>
+          <span
+            className={cn(
+              'font-extrabold tracking-tight leading-none',
+              isLight ? 'text-white' : 'text-[#1c1917]',
+              text
+            )}
+          >
+            Jaldi<span className="text-[#feae2c]">Shop</span>
           </span>
-          <span className={cn('font-bold text-[#57534e] tracking-wider uppercase mt-0.5', subtext)}>
+          <span
+            className={cn(
+              'font-bold tracking-wider uppercase mt-0.5',
+              isLight ? 'text-stone-300' : 'text-[#57534e]',
+              subtext
+            )}
+          >
             Marketplace
           </span>
         </div>
@@ -47,3 +62,4 @@ export function JaldiShopLogo({
     </div>
   );
 }
+

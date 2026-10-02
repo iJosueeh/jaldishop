@@ -36,7 +36,7 @@ export function HeroVideoBackground({
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 select-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 select-none">
       {/* 1. Static High-Res Poster Image */}
       <div
         className={`absolute inset-0 transition-opacity duration-700 ${
@@ -49,11 +49,11 @@ export function HeroVideoBackground({
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center filter brightness-[0.98] contrast-[1.05]"
+          className="object-cover object-center filter brightness-[0.75] contrast-[1.05]"
         />
       </div>
 
-      {/* 2. Responsive Mixkit CDN Video Loop (Active on all viewports) */}
+      {/* 2. Responsive Mixkit CDN Video Loop */}
       <video
         ref={videoRef}
         autoPlay
@@ -62,18 +62,19 @@ export function HeroVideoBackground({
         playsInline
         preload="auto"
         onLoadedData={() => setIsVideoLoaded(true)}
-        className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 filter brightness-[0.95] contrast-[1.08] saturate-[1.15] ${
+        className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 filter brightness-[0.75] contrast-[1.08] saturate-[1.1] ${
           isVideoLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <source src={videoUrl} type="video/mp4" />
       </video>
 
-      {/* 3. Subtle Lateral Readable Gradient Mask (Lightweight: text is readable on left, video is clearly visible on right & center) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#faf7f2]/92 via-[#faf7f2]/50 to-transparent" />
+      {/* 3. Cinematic Dark Overlay for Maximum Contrast & Readability */}
+      <div className="absolute inset-0 bg-black/45" />
 
-      {/* 4. Bottom Blend Transition into the next section */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#faf7f2]" />
+      {/* 4. Ambient Gradient: subtle darkening at top, warm glow in middle, seamless blend at bottom */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#faf7f2]" />
     </div>
   );
 }
+
