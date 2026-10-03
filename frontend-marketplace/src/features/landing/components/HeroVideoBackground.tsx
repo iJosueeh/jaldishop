@@ -34,14 +34,14 @@ export function HeroVideoBackground({
           setIsVideoLoaded(true);
         })
         .catch(() => {
-          // Autoplay fallback
+          // Autoplay blocked by browser policy — poster remains visible
         });
     }
   }, []);
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 select-none bg-stone-900">
-      {/* 1. Static High-Res Poster Image Placeholder */}
+      {/* 1. Static High-Res Poster Image (LCP-optimised with priority) */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ${
           isVideoLoaded ? 'opacity-0' : 'opacity-100'
@@ -53,21 +53,21 @@ export function HeroVideoBackground({
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center filter brightness-[0.7] contrast-[1.05]"
+          className="object-cover object-center brightness-[0.7] contrast-[1.05]"
         />
       </div>
 
-      {/* 2. Seamless Responsive Video Loop */}
+      {/* 2. Seamless Video Loop — preload="metadata" lets the browser buffer enough to autoplay */}
       <video
         ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
-        preload="none"
+        preload="metadata"
         onLoadedData={() => setIsVideoLoaded(true)}
         onPlaying={() => setIsVideoLoaded(true)}
-        className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 filter brightness-[0.7] contrast-[1.08] saturate-[1.1] ${
+        className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 brightness-[0.7] contrast-[1.08] saturate-[1.1] ${
           isVideoLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -75,10 +75,8 @@ export function HeroVideoBackground({
         <source src={CDN_VIDEO_URL} type="video/mp4" />
       </video>
 
-      {/* 3. Clean, Uniform Cinematic Tint for Maximum Contrast (without murky gradients) */}
-      <div className="absolute inset-0 bg-black/45 backdrop-contrast-105" />
+      {/* 3. Single cinematic overlay — no stacked backdrop filters */}
+      <div className="absolute inset-0 bg-black/45" />
     </div>
   );
 }
-
-
