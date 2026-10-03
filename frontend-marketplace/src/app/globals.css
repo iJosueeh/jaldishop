@@ -87,3 +87,26 @@ body {
   background-size: 32px 32px;
   background-image: radial-gradient(rgba(215, 207, 196, 0.4) 1px, transparent 1px);
 }
+
+/* Continuous Marquee with Hover Pause */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover,
+.animate-marquee:focus-within {
+  animation-play-state: paused;
+}
+

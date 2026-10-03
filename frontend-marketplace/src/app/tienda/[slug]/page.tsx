@@ -52,7 +52,7 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+    <div className="flex flex-col min-h-screen bg-[#faf7f2]">
       {/* Store Header / Hero */}
       <StorefrontHero store={store} />
 

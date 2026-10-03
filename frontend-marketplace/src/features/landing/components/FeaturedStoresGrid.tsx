@@ -1,29 +1,135 @@
 import React from 'react';
 import Link from 'next/link';
-import { Star, Clock, Bike, ArrowRight, Sparkles, Store } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { Container } from '@/shared/components/ui/Container';
-import { MotionFade } from '@/shared/components/ui/MotionFade';
-import { Card } from '@/shared/components/ui/Card';
-import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
-import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { storeService } from '@/features/storefront/services/storeService';
 import { PublicStore } from '@/features/storefront/types/storefront.types';
+import { StorePeekSlider } from './StorePeekSlider';
 
 interface FeaturedStoresGridProps {
   initialStores?: PublicStore[];
 }
 
+const CURATED_DEFAULT_STORES: PublicStore[] = [
+  {
+    id: 'store-01',
+    name: 'Panadería Don Pepe',
+    slug: 'panaderia-don-pepe',
+    category: 'Panadería & Masa Madre',
+    tagline: 'Fermentación natural de 24 horas y horneado artesanal al alba en Miraflores.',
+    description: 'Fermentación natural de 24 horas y horneado artesanal al alba en Miraflores.',
+    bannerUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
+    iconEmoji: '🥐',
+    logoBg: 'bg-[#005141]',
+    rating: 4.9,
+    reviewsCount: 148,
+    preparationTimeMinutes: 20,
+    deliveryFee: 5.0,
+    deliveryEnabled: true,
+    pickupEnabled: true,
+    status: 'ACTIVE',
+    badge: 'Más Pedido',
+    badgeVariant: 'amber',
+  },
+  {
+    id: 'store-02',
+    name: 'Dulce Amor Repostería',
+    slug: 'dulce-amor',
+    category: 'Pastelería & Postres',
+    tagline: 'Tortas artesanales de autor, alfajores de maicena y bocaditos para celebraciones.',
+    description: 'Tortas artesanales de autor, alfajores de maicena y bocaditos para celebraciones.',
+    bannerUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop',
+    iconEmoji: '🍰',
+    logoBg: 'bg-[#ea580c]',
+    rating: 4.8,
+    reviewsCount: 94,
+    preparationTimeMinutes: 30,
+    deliveryFee: 6.0,
+    deliveryEnabled: true,
+    pickupEnabled: true,
+    status: 'ACTIVE',
+    badge: 'Horneado Hoy',
+    badgeVariant: 'terracotta',
+  },
+  {
+    id: 'store-03',
+    name: 'Café Villa Rica Barista',
+    slug: 'cafe-villa-rica',
+    category: 'Cafetería de Especialidad',
+    tagline: 'Granos de altura 100% arábica tostados semanalmente y cold brew embotellado.',
+    description: 'Granos de altura 100% arábica tostados semanalmente y cold brew embotellado.',
+    bannerUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=800&auto=format&fit=crop',
+    iconEmoji: '☕',
+    logoBg: 'bg-stone-900',
+    rating: 5.0,
+    reviewsCount: 210,
+    preparationTimeMinutes: 10,
+    deliveryFee: 0,
+    deliveryEnabled: true,
+    pickupEnabled: true,
+    status: 'ACTIVE',
+    badge: '100% Arábica',
+    badgeVariant: 'jade',
+  },
+  {
+    id: 'store-04',
+    name: 'La Focacceria Urbana',
+    slug: 'la-focacceria',
+    category: 'Pizzas & Masas Italianas',
+    tagline: 'Focaccias crujientes con romero fresco, aceite de oliva virgen extra y mortadela.',
+    description: 'Focaccias crujientes con romero fresco, aceite de oliva virgen extra y mortadela.',
+    bannerUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop',
+    iconEmoji: '🍕',
+    logoBg: 'bg-[#005141]',
+    rating: 4.9,
+    reviewsCount: 82,
+    preparationTimeMinutes: 25,
+    deliveryFee: 5.5,
+    deliveryEnabled: true,
+    pickupEnabled: true,
+    status: 'ACTIVE',
+    badge: 'Receta Romana',
+    badgeVariant: 'amber',
+  },
+  {
+    id: 'store-05',
+    name: 'El Taller del Bagel',
+    slug: 'el-taller-del-bagel',
+    category: 'Desayunos & Brunches',
+    tagline: 'Bagels hervidos estilo Montreal rellenos de salmón curado, queso crema y eneldo.',
+    description: 'Bagels hervidos estilo Montreal rellenos de salmón curado, queso crema y eneldo.',
+    bannerUrl: 'https://images.unsplash.com/photo-1585478259715-876a6a81ae08?q=80&w=800&auto=format&fit=crop',
+    iconEmoji: '🥯',
+    logoBg: 'bg-[#ea580c]',
+    rating: 4.8,
+    reviewsCount: 67,
+    preparationTimeMinutes: 15,
+    deliveryFee: 4.5,
+    deliveryEnabled: true,
+    pickupEnabled: true,
+    status: 'ACTIVE',
+    badge: 'Nuevo en Jaldi',
+    badgeVariant: 'jade',
+  },
+];
+
 export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridProps) {
-  const stores = initialStores ?? (await storeService.getFeaturedStores());
+  const fetchedStores = initialStores ?? (await storeService.getFeaturedStores());
+  // Si la API devuelve comercios, los mostramos; si viene vacío (ej. sin backend levantado), usamos los comercios curados con fallbacks
+  const storesToDisplay = fetchedStores.length > 0 ? fetchedStores : CURATED_DEFAULT_STORES;
 
   return (
-    <section id="tiendas-destacadas" className="py-24 bg-[#faf7f2] relative overflow-hidden">
+    <section id="tiendas-destacadas" className="py-20 sm:py-28 bg-[#faf7f2] relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
+      {/* Background soft ambient accents */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-[#feae2c]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#005141]/5 rounded-full blur-3xl pointer-events-none" />
+
       <Container size="lg">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-12 gap-4">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#005141] uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200 shadow-xs text-xs font-bold text-[#005141] uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
               Explora Tiendas Verificadas
             </div>
@@ -31,108 +137,24 @@ export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridPr
               Comercios destacados en JaldiShop
             </h2>
             <p className="text-sm sm:text-base text-[#57534e] max-w-xl">
-              Descubre negocios locales que sincronizan sus pedidos con precisión y calidad artesanal.
+              Descubre panaderías, reposterías y creadores locales que sincronizan sus pedidos con máxima precisión y calidad artesanal.
             </p>
           </div>
 
           <Link href="/tienda/panaderia-don-pepe">
-            <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white border-stone-200 hover:bg-stone-50 text-[#1c1917] font-bold shadow-xs cursor-pointer rounded-2xl"
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+            >
               Ver todas las tiendas
             </Button>
           </Link>
         </div>
 
-        {/* Dynamic Stores Grid / Empty State Handling (@empty pattern) */}
-        {stores.length === 0 ? (
-          <EmptyState
-            variant="card"
-            icon={<Store className="w-8 h-8 text-[#005141]" />}
-            title="Aún no hay comercios disponibles"
-            description="Actualmente no encontramos tiendas activas en esta sección. Vuelve pronto para descubrir nuevos comercios locales."
-            action={
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  Recargar página
-                </Button>
-              </Link>
-            }
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {stores.map((store, idx) => (
-              <MotionFade key={store.slug} delay={idx * 0.15}>
-                <Link href={`/tienda/${store.slug}`} className="block h-full group">
-                  <Card
-                    variant="interactive"
-                    className="h-full flex flex-col justify-between overflow-hidden shadow-md group-hover:shadow-xl rounded-3xl border-0 transition-all duration-300 bg-white"
-                  >
-                    {/* Top Cover Banner */}
-                    <div
-                      className={`h-32 bg-gradient-to-br ${
-                        store.coverGradient || 'from-[#feae2c]/25 via-[#ea580c]/10 to-[#faf7f2]'
-                      } p-5 flex items-start justify-between relative`}
-                    >
-                      {store.badge && (
-                        <Badge variant={store.badgeVariant || 'jade'} size="sm" className="bg-white shadow-xs">
-                          {store.badge}
-                        </Badge>
-                      )}
-                      <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5 bg-white px-3 py-1 rounded-full shadow-xs ml-auto">
-                        <Star className="w-3.5 h-3.5 text-[#feae2c] fill-[#feae2c]" />
-                        {store.rating || 4.9}{' '}
-                        <span className="text-[#a8a29e] text-[10px]">({store.reviewsCount || 100})</span>
-                      </div>
-                    </div>
-
-                    {/* Body Content */}
-                    <div className="p-6 pt-0 relative flex-1 flex flex-col justify-between">
-                      {/* Floating Store Logo */}
-                      <div className="flex items-end justify-between -mt-7 mb-4">
-                        <div
-                          className={`w-14 h-14 rounded-2xl ${
-                            store.logoBg || 'bg-[#ea580c]'
-                          } text-white flex items-center justify-center shadow-md font-extrabold text-2xl`}
-                        >
-                          {store.iconEmoji || '🏪'}
-                        </div>
-                        {store.category && (
-                          <span className="text-xs font-bold text-[#57534e] bg-[#faf7f2] px-3 py-1 rounded-xl">
-                            {store.category}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-[#1c1917] group-hover:text-[#005141] transition-colors">
-                          {store.name}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-[#57534e] line-clamp-2 leading-relaxed">
-                          {store.tagline || store.description}
-                        </p>
-                      </div>
-
-                      {/* Store Meta Info */}
-                      <div className="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-[#57534e]">
-                        <div className="flex items-center gap-1.5 font-medium">
-                          <Clock className="w-3.5 h-3.5 text-[#a8a29e]" />
-                          <span>{store.preparationTimeMinutes ? `${store.preparationTimeMinutes} min` : '25-40 min'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 font-semibold text-[#1c1917]">
-                          <Bike className="w-3.5 h-3.5 text-[#ea580c]" />
-                          <span>
-                            {store.deliveryFee !== undefined
-                              ? `Envío: S/ ${store.deliveryFee.toFixed(2)}`
-                              : 'Envío disponible'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              </MotionFade>
-            ))}
-          </div>
-        )}
+        {/* Peek Slider Carousel Component with Default Fallbacks & Interactive Controls */}
+        <StorePeekSlider stores={storesToDisplay} />
       </Container>
     </section>
   );

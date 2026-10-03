@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/core/providers/QueryProvider';
 import { Navbar } from '@/shared/components/layout/Navbar';
+import { HashScrollHandler } from '@/shared/components/layout/HashScrollHandler';
 import { Toaster } from 'sonner';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -18,25 +19,26 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'JaldiShop | Control Inteligente de Capacidad y Pedidos para MYPE',
+  title: 'JaldiShop | Pedidos sin sobreventa para pequeños negocios',
   description:
-    'Plataforma de pedidos y gestión de capacidad para micro y pequeñas empresas gastronómicas y artesanales. Vende por WhatsApp e Instagram con cero sobreventa.',
+    'Vende por WhatsApp e Instagram aceptando solo los pedidos que puedes preparar a tiempo. 10 minutos para pagar y cero sobreventa para tu negocio.',
   keywords: [
     'JaldiShop',
     'pedidos online',
-    'capacidad operativa',
+    'horarios de entrega',
     'MYPE',
     'WhatsApp pedidos',
     'tienda online',
-    'panaderías',
-    'dark kitchens',
-    'repostería',
+    'pastelerías',
+    'talleres artesanales',
+    'floristerías',
+    'comercio local',
   ],
   authors: [{ name: 'JaldiShop Team' }],
   openGraph: {
-    title: 'JaldiShop — Cero Sobreventa para tu Negocio Gastronómico',
+    title: 'JaldiShop — Pedidos organizados y sin sobreventa para tu negocio',
     description:
-      'Sincroniza tus pedidos con la capacidad real de tu cocina. Bloqueo automático de franjas y reserva de 10 minutos.',
+      'Acepta solo los pedidos que puedes entregar a tiempo. Horarios claros para tus clientes y pedidos directos a tu WhatsApp.',
     type: 'website',
     locale: 'es_PE',
   },
@@ -61,6 +63,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
         <QueryProvider>
+          <HashScrollHandler />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Toaster richColors position="top-right" />

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowUpRight, ArrowRight, HelpCircle, Sliders, ArrowLeftRight, Store, User, ChevronDown, Search } from 'lucide-react';
 import { Container } from '@/shared/components/ui/Container';
@@ -11,6 +12,8 @@ import { MobileSearchModal } from './MobileSearchModal';
 import { env } from '@/core/config/env';
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isHome = pathname === '/';
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -67,9 +70,11 @@ export function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-[#141413]/95 backdrop-blur-md shadow-xl shadow-black/40 py-2.5'
-            : 'bg-transparent py-4'
+          isHome
+            ? isScrolled
+              ? 'bg-[#141413]/95 backdrop-blur-md shadow-xl shadow-black/40 py-2.5'
+              : 'bg-transparent py-4'
+            : 'bg-[#141413]/95 backdrop-blur-md shadow-md py-2.5 sm:py-3 border-b border-white/10'
         }`}
       >
         <Container size="lg">
@@ -87,28 +92,28 @@ export function Navbar() {
             {/* Desktop Navigation Links */}
             <nav className="hidden xl:flex items-center gap-6 text-sm font-semibold text-stone-200">
               <Link
-                href="#como-funciona"
+                href="/#como-funciona"
                 className="hover:text-white transition-colors"
               >
                 ¿Cómo funciona?
               </Link>
               <Link
-                href="#simulador"
+                href="/#caracteristicas"
                 className="hover:text-white transition-colors"
               >
-                Simulador
+                Capacidad & Tecnología
               </Link>
               <Link
-                href="#antes-despues"
+                href="/#antes-despues"
                 className="hover:text-white transition-colors"
               >
                 Antes vs Después
               </Link>
               <Link
-                href="#tiendas-destacadas"
+                href="/#tiendas-destacadas"
                 className="hover:text-white transition-colors"
               >
-                Tiendas
+                Comercios
               </Link>
             </nav>
 
@@ -154,7 +159,7 @@ export function Navbar() {
                       <div className="space-y-1.5">
                         {/* Cliente Option */}
                         <Link
-                          href="/tienda/panaderia-don-pepe"
+                          href="/#tiendas-destacadas"
                           onClick={() => setIsAuthOpen(false)}
                           className="flex items-start gap-3 p-3 rounded-xl border border-white/5 hover:border-emerald-500/30 bg-white/[0.02] hover:bg-emerald-950/20 transition-all group cursor-pointer"
                         >
@@ -174,7 +179,7 @@ export function Navbar() {
                               <ArrowRight className="w-3.5 h-3.5 text-stone-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                             </div>
                             <p className="text-[11px] text-stone-400 mt-1 leading-relaxed">
-                              Sigue el estado de tus pedidos en vivo y explora tiendas locales.
+                              Explora panaderías, cafeterías, postres y obradores locales.
                             </p>
                           </div>
                         </Link>
@@ -309,24 +314,24 @@ export function Navbar() {
                 <nav className="flex flex-col space-y-1.5 pt-1">
                   {[
                     {
-                      href: '#como-funciona',
+                      href: '/#como-funciona',
                       icon: <HelpCircle className="w-4 h-4 text-emerald-400" />,
                       title: '¿Cómo funciona?',
                     },
                     {
-                      href: '#simulador',
+                      href: '/#caracteristicas',
                       icon: <Sliders className="w-4 h-4 text-[#feae2c]" />,
-                      title: 'Simulador de Capacidad',
+                      title: 'Capacidad & Tecnología',
                     },
                     {
-                      href: '#antes-despues',
+                      href: '/#antes-despues',
                       icon: <ArrowLeftRight className="w-4 h-4 text-orange-400" />,
                       title: 'Antes vs Después',
                     },
                     {
-                      href: '#tiendas-destacadas',
+                      href: '/#tiendas-destacadas',
                       icon: <Store className="w-4 h-4 text-emerald-400" />,
-                      title: 'Tiendas Populares',
+                      title: 'Comercios Destacados',
                     },
                   ].map((item) => (
                     <Link
@@ -355,7 +360,7 @@ export function Navbar() {
 
                 {/* Cliente Action */}
                 <Link
-                  href="/tienda/panaderia-don-pepe"
+                  href="/#tiendas-destacadas"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-white hover:bg-emerald-500/15 transition-all group"
                 >
@@ -365,7 +370,7 @@ export function Navbar() {
                     </div>
                     <div className="text-left">
                       <div className="text-xs font-bold text-emerald-300">Soy Cliente</div>
-                      <div className="text-[11px] text-stone-300">Mis pedidos y compras</div>
+                      <div className="text-[11px] text-stone-300">Explorar comercios gastronómicos</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
