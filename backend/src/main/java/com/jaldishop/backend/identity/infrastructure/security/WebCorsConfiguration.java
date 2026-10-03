@@ -20,7 +20,10 @@ public class WebCorsConfiguration {
                 "https://negocios-jaldishop.pages.dev",
                 "https://*.pages.dev",
                 "https://*.jaldishop.pe",
-                "https://jaldishop.pe"
+                "https://jaldishop.pe",
+                "https://*.jaldishop.net",
+                "https://jaldishop.net",
+                "https://*.vercel.app"
         ));
 
         configuration.setAllowedMethods(List.of(
@@ -32,10 +35,9 @@ public class WebCorsConfiguration {
                 "OPTIONS"
         ));
 
-        configuration.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type"
-        ));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
