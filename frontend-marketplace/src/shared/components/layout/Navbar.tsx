@@ -101,7 +101,7 @@ export function Navbar() {
                 href="/#caracteristicas"
                 className="hover:text-white transition-colors"
               >
-                Capacidad & Tecnología
+                Herramientas para tu negocio
               </Link>
               <Link
                 href="/#antes-despues"
@@ -321,7 +321,7 @@ export function Navbar() {
                     {
                       href: '/#caracteristicas',
                       icon: <Sliders className="w-4 h-4 text-[#feae2c]" />,
-                      title: 'Capacidad & Tecnología',
+                      title: 'Herramientas para tu negocio',
                     },
                     {
                       href: '/#antes-despues',

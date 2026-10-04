@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../core/services/product.service';
 import { StoreService } from '../../core/services/store.service';
@@ -9,6 +9,8 @@ import { ProductsAlertBanner } from './components/products-alert-banner/products
 import { ProductsFilterBar } from './components/products-filter-bar/products-filter-bar';
 import { ProductsGrid } from './components/products-grid/products-grid';
 import { ProductsList } from './components/products-list/products-list';
+import { ProductCreateDrawer } from './components/product-create-drawer/product-create-drawer';
+import { ProductEditDrawer } from './components/product-edit-drawer/product-edit-drawer';
 import { Pagination } from '../../shared/components/pagination/pagination';
 
 @Component({
@@ -21,6 +23,8 @@ import { Pagination } from '../../shared/components/pagination/pagination';
     ProductsFilterBar,
     ProductsGrid,
     ProductsList,
+    ProductCreateDrawer,
+    ProductEditDrawer,
     Pagination,
   ],
   templateUrl: './products.html',
@@ -30,6 +34,10 @@ export class Products implements OnInit {
   readonly productService = inject(ProductService);
   readonly storeService = inject(StoreService);
   private readonly toast = inject(ToastService);
+
+  readonly isCreateDrawerOpen = signal<boolean>(false);
+  readonly isEditDrawerOpen = signal<boolean>(false);
+  readonly selectedProductForEdit = signal<Product | null>(null);
 
   ngOnInit(): void {
     this.initCatalog();
@@ -104,7 +112,17 @@ export class Products implements OnInit {
   }
 
   onEditProduct(product: Product): void {
-    this.toast.info(`Editar "${product.name}" estará disponible en el modal de edición.`);
+    this.selectedProductForEdit.set(product);
+    this.isEditDrawerOpen.set(true);
+  }
+
+  onCloseEditDrawer(): void {
+    this.isEditDrawerOpen.set(false);
+    this.selectedProductForEdit.set(null);
+  }
+
+  onProductUpdated(updatedProduct: Product): void {
+    this.selectedProductForEdit.set(updatedProduct);
   }
 
   onAdjustQuota(product: Product): void {
@@ -112,6 +130,14 @@ export class Products implements OnInit {
   }
 
   onCreateProduct(): void {
-    this.toast.info('El formulario de nuevo producto se abrirá a continuación.');
+    this.isCreateDrawerOpen.set(true);
+  }
+
+  onCloseCreateDrawer(): void {
+    this.isCreateDrawerOpen.set(false);
+  }
+
+  onProductCreated(_product: Product): void {
+    this.isCreateDrawerOpen.set(false);
   }
 }

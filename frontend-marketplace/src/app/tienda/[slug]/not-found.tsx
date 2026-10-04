@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Store, ArrowLeft, Search } from 'lucide-react';
+import { Store, ArrowLeft } from 'lucide-react';
 import { Container } from '@/shared/components/ui/Container';
 import { Button } from '@/shared/components/ui/Button';
 
@@ -26,11 +26,6 @@ export default function StoreNotFound() {
             <Link href="/" className="w-full sm:w-auto">
               <Button variant="primary" size="md" className="w-full" leftIcon={<ArrowLeft className="w-4 h-4" />}>
                 Volver al Marketplace
-              </Button>
-            </Link>
-            <Link href="/tienda/panaderia-don-pepe" className="w-full sm:w-auto">
-              <Button variant="outline" size="md" className="w-full" leftIcon={<Search className="w-4 h-4" />}>
-                Ver Tienda Demo
               </Button>
             </Link>
           </div>

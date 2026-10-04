@@ -33,17 +33,22 @@ public class MediaController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @Valid @RequestBody GenerateSignatureRequest request
     ) {
+        // 1. Logos y Banners de Tienda: permitidos tanto para visitantes como para cualquier usuario registrado que esté abriendo su tienda
+        if (request.targetType() == MediaTargetType.STORE_LOGO || request.targetType() == MediaTargetType.STORE_BANNER) {
+            UUID userId = principal != null ? principal.userId() : null;
+            UUID explicitStoreId = request.storeId();
+            GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
+                    userId,
+                    request.targetType(),
+                    explicitStoreId
+            );
+            UploadSignature signature = generateUploadSignatureService.execute(command);
+            return ResponseEntity.ok(UploadSignatureResponse.fromDomain(signature));
+        }
+
+        // 2. Activos de Producto: requieren sesión autenticada como MERCHANT o ADMIN
         if (principal == null) {
-            if (request.targetType() == MediaTargetType.STORE_LOGO || request.targetType() == MediaTargetType.STORE_BANNER) {
-                GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
-                        null,
-                        request.targetType(),
-                        null
-                );
-                UploadSignature signature = generateUploadSignatureService.execute(command);
-                return ResponseEntity.ok(UploadSignatureResponse.fromDomain(signature));
-            }
-            throw new AccessDeniedException("No autenticado.");
+            throw new AccessDeniedException("No autenticado. Por favor inicia sesión nuevamente.");
         }
 
         boolean isMerchant = principal.roles().contains("MERCHANT");
@@ -53,7 +58,7 @@ public class MediaController {
             throw new AccessDeniedException("Solo comerciantes o administradores pueden generar firmas de subida.");
         }
 
-        UUID explicitStoreId = isAdmin ? request.storeId() : null;
+        UUID explicitStoreId = request.storeId();
 
         GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
                 principal.userId(),

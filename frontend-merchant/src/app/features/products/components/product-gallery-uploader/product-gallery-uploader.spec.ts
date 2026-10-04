@@ -72,4 +72,20 @@ describe('ProductGalleryUploader', () => {
     expect(component.internalImages().length).toBe(3);
     expect(component.internalImages()[2].imageUrl).toContain('sample3');
   });
+
+  it('debe agregar archivos seleccionados como previsualización local sin llamadas a la red', () => {
+    const file = new File(['content'], 'test.png', { type: 'image/png' });
+    const event = {
+      target: {
+        files: [file],
+      },
+    } as unknown as Event;
+
+    component.onFilesSelected(event);
+
+    expect(component.internalImages().length).toBe(3);
+    const added = component.internalImages()[2];
+    expect(added.file).toBe(file);
+    expect(added.imageUrl).toBeTruthy();
+  });
 });

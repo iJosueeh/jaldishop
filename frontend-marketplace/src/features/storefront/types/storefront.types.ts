@@ -7,6 +7,9 @@ export interface PublicStore {
   bannerUrl?: string;
   logoUrl?: string;
   phone?: string;
+  contactPhone?: string;
+  whatsappNumber?: string;
+  deliveryFeeAmount?: number;
   address?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   deliveryEnabled: boolean;

@@ -11,12 +11,16 @@ export const storeService = {
       const store = await apiClient<PublicStore>(`/stores/slug/${slug}`, {
         timeoutMs: 4000,
       });
-      return store;
+      return {
+        ...store,
+        ...((store.whatsappNumber || store.contactPhone) ? { phone: store.whatsappNumber || store.contactPhone } : {}),
+        ...(typeof store.deliveryFeeAmount === 'number' ? { deliveryFee: store.deliveryFeeAmount } : {}),
+      };
     } catch (error: unknown) {
       if (error instanceof ApiException && error.status === 404) {
         return null;
       }
-      return null;
+      throw error;
     }
   },
 

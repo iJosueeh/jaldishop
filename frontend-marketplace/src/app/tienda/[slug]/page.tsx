@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { storeService } from '@/features/storefront/services/storeService';
 import { StorefrontHero } from '@/features/storefront/components/StorefrontHero';
 import { StorefrontBadges } from '@/features/storefront/components/StorefrontBadges';
-import { StorefrontNav } from '@/features/storefront/components/StorefrontNav';
 import { CatalogContainer } from '@/features/storefront/components/CatalogContainer';
 import { Footer } from '@/shared/components/layout/Footer';
 import { Container } from '@/shared/components/ui/Container';
@@ -55,9 +54,6 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
     <div className="flex flex-col min-h-screen bg-[#faf7f2]">
       {/* Store Header / Hero */}
       <StorefrontHero store={store} />
-
-      {/* Sticky Category Nav */}
-      <StorefrontNav />
 
       {/* Main Container */}
       <Container size="lg" className="flex-1 py-8 space-y-8">

@@ -133,4 +133,35 @@ describe('Products', () => {
     expect(productService.selectedCategoryId()).toBeNull();
     expect(productService.searchQuery()).toBe('');
   });
+
+  it('should open and close product create drawer', () => {
+    initComponentWithData();
+    expect(component.isCreateDrawerOpen()).toBe(false);
+
+    component.onCreateProduct();
+    expect(component.isCreateDrawerOpen()).toBe(true);
+
+    component.onCloseCreateDrawer();
+    expect(component.isCreateDrawerOpen()).toBe(false);
+
+    component.onCreateProduct();
+    component.onProductCreated({ id: 'new-prod' } as any);
+    expect(component.isCreateDrawerOpen()).toBe(false);
+  });
+
+  it('should open and close product edit drawer when editing a product', () => {
+    initComponentWithData();
+    expect(component.isEditDrawerOpen()).toBe(false);
+    expect(component.selectedProductForEdit()).toBeNull();
+
+    const productToEdit = mockProducts[0];
+    component.onEditProduct(productToEdit);
+
+    expect(component.isEditDrawerOpen()).toBe(true);
+    expect(component.selectedProductForEdit()).toEqual(productToEdit);
+
+    component.onCloseEditDrawer();
+    expect(component.isEditDrawerOpen()).toBe(false);
+    expect(component.selectedProductForEdit()).toBeNull();
+  });
 });

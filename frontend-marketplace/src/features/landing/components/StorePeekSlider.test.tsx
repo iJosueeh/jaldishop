@@ -30,6 +30,22 @@ const mockStores: PublicStore[] = [
 ];
 
 describe('StorePeekSlider Component', () => {
+  it('only displays review data supplied by the store', () => {
+    render(<StorePeekSlider stores={mockStores} />);
+    expect(screen.getByText('4.9')).toBeInTheDocument();
+    expect(screen.getByText('(150)')).toBeInTheDocument();
+    const fallback = formatStoreData(mockStores[1]);
+    expect(screen.queryByText(`(${fallback.reviewsCount})`)).not.toBeInTheDocument();
+  });
+
+  it('labels demos and hides their illustrative review data', () => {
+    render(<StorePeekSlider stores={mockStores} isDemo />);
+    expect(screen.getAllByText('Demostración')).toHaveLength(2);
+    expect(screen.queryByText('4.9')).not.toBeInTheDocument();
+    expect(screen.queryByText('(150)')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver demostración: Panadería Don Pepe' })).toHaveAttribute('href', '/tienda/panaderia-don-pepe');
+  });
+
   it('renders store cards with proper titles and categories', () => {
     render(<StorePeekSlider stores={mockStores} />);
 

@@ -64,4 +64,21 @@
       (pageChange)="onPageChange($event)"
     />
   }
+
+  <!-- 6. Drawer Desplegable Lateral de Creación de Producto -->
+  <app-product-create-drawer
+    [isOpen]="isCreateDrawerOpen()"
+    [categories]="productService.categories()"
+    (closeDrawer)="onCloseCreateDrawer()"
+    (productCreated)="onProductCreated($event)"
+  />
+
+  <!-- 7. Drawer Desplegable Lateral de Edición de Producto y Variantes -->
+  <app-product-edit-drawer
+    [isOpen]="isEditDrawerOpen()"
+    [product]="selectedProductForEdit()"
+    [categories]="productService.categories()"
+    (closeDrawer)="onCloseEditDrawer()"
+    (productUpdated)="onProductUpdated($event)"
+  />
 </div>

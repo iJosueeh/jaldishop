@@ -1,4 +1,4 @@
-import { Component, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { Component, inject, input, linkedSignal, OnDestroy, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -40,7 +40,7 @@ export interface GalleryImageItem extends ProductImage {
   templateUrl: './product-gallery-uploader.html',
   styleUrl: './product-gallery-uploader.css',
 })
-export class ProductGalleryUploader {
+export class ProductGalleryUploader implements OnDestroy {
   private readonly mediaUploadService = inject(MediaUploadService);
   private readonly toast = inject(ToastService);
 
@@ -63,6 +63,17 @@ export class ProductGalleryUploader {
 
   readonly showDeleteModal = signal<boolean>(false);
   readonly pendingDeleteIndex = signal<number | null>(null);
+
+  ngOnDestroy(): void {
+    // Revocar cualquier URL local temporal para evitar fugas de memoria
+    for (const img of this.internalImages()) {
+      if (img.previewUrl && img.previewUrl.startsWith('blob:')) {
+        try {
+          URL.revokeObjectURL(img.previewUrl);
+        } catch {}
+      }
+    }
+  }
 
   requestDelete(index: number): void {
     this.pendingDeleteIndex.set(index);
@@ -94,81 +105,55 @@ export class ProductGalleryUploader {
       return;
     }
 
-    const filesToUpload = files.slice(0, availableSlots);
+    const filesToProcess = files.slice(0, availableSlots);
     if (files.length > availableSlots) {
-      this.toast.info(`Solo se cargarán ${availableSlots} imagen(es) para respetar el límite de ${this.maxImages()}.`);
+      this.toast.info(`Solo se añadirán ${availableSlots} imagen(es) para respetar el límite de ${this.maxImages()}.`);
     }
 
-    filesToUpload.forEach((file) => this.uploadSingleFile(file));
+    for (const file of filesToProcess) {
+      this.addLocalFilePreview(file);
+    }
     input.value = '';
+    this.emitChanges();
   }
 
-  private uploadSingleFile(file: File): void {
+  private addLocalFilePreview(file: File): void {
     const validation = this.mediaUploadService.validateImageFile(file);
     if (!validation.valid) {
       this.toast.error(validation.error ?? 'Archivo no válido.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const previewUrl = e.target?.result as string;
-      const newItem = this.createPreviewItem(previewUrl);
-      this.internalImages.update((list) => [...list, newItem]);
-      this.executeUpload(file, previewUrl);
-    };
-    reader.readAsDataURL(file);
+    // Previsualización instantánea en memoria local sin costo ni subida a red
+    let previewUrl: string;
+    try {
+      previewUrl = URL.createObjectURL(file);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        this.insertPreviewItem(file, dataUrl);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    this.insertPreviewItem(file, previewUrl);
   }
 
-  private createPreviewItem(previewUrl: string): GalleryImageItem {
+  private insertPreviewItem(file: File, previewUrl: string): void {
     const currentList = this.internalImages();
-    return {
+    const newItem: GalleryImageItem = {
       imageUrl: previewUrl,
       previewUrl,
+      file,
       position: currentList.length,
       isPrimary: currentList.length === 0,
-      isUploading: true,
-      uploadProgress: 10,
+      isUploading: false,
+      uploadProgress: 100,
     };
-  }
-
-  private executeUpload(file: File, previewUrl: string): void {
-    this.mediaUploadService.uploadImage(file, 'PRODUCT_IMAGE').subscribe({
-      next: (progress) => this.handleUploadProgress(previewUrl, progress),
-      error: (err) => this.handleUploadFailure(previewUrl, err?.message),
-    });
-  }
-
-  private handleUploadProgress(previewUrl: string, progress: any): void {
-    this.internalImages.update((list) =>
-      list.map((item) => {
-        if (item.previewUrl !== previewUrl || !item.isUploading) return item;
-
-        if (progress.state === 'COMPLETED' && progress.result?.secure_url) {
-          return { ...item, imageUrl: progress.result.secure_url, isUploading: false, uploadProgress: 100 };
-        }
-        if (progress.state === 'ERROR') {
-          return { ...item, isUploading: false, error: progress.error };
-        }
-        return { ...item, uploadProgress: progress.progress };
-      })
-    );
-
-    if (progress.state === 'COMPLETED') {
-      this.emitChanges();
-      this.toast.success('Imagen de producto subida exitosamente.');
-    } else if (progress.state === 'ERROR') {
-      this.toast.error(progress.error ?? 'Error al subir la imagen.');
-    }
-  }
-
-  private handleUploadFailure(previewUrl: string, errorMessage?: string): void {
-    this.internalImages.update((list) =>
-      list.map((item) =>
-        item.previewUrl === previewUrl ? { ...item, isUploading: false, error: errorMessage } : item
-      )
-    );
-    this.toast.error('No se pudo subir la imagen.');
+    this.internalImages.update((list) => [...list, newItem]);
+    this.emitChanges();
   }
 
   addFromUrl(): void {
@@ -223,6 +208,12 @@ export class ProductGalleryUploader {
     const list = [...this.internalImages()];
     const [removed] = list.splice(index, 1);
 
+    if (removed.previewUrl && removed.previewUrl.startsWith('blob:')) {
+      try {
+        URL.revokeObjectURL(removed.previewUrl);
+      } catch {}
+    }
+
     const updated = this.reindexList(list, removed.isPrimary);
     this.internalImages.set(updated);
     this.emitChanges();
@@ -239,11 +230,12 @@ export class ProductGalleryUploader {
 
   private emitChanges(): void {
     const cleanImages: ProductImage[] = this.internalImages()
-      .filter((img) => !img.isUploading && !img.error && img.imageUrl)
+      .filter((img) => !img.error && (img.imageUrl || img.previewUrl))
       .map((img, idx) => ({
         imageUrl: img.imageUrl,
         position: idx,
         isPrimary: img.isPrimary,
+        file: img.file,
       }));
 
     this.imagesChange.emit(cleanImages);

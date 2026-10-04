@@ -100,10 +100,37 @@ class GenerateUploadSignatureServiceTest {
     }
 
     @Test
-    @DisplayName("Lanzar excepción si merchant no tiene tienda asociada")
+    @DisplayName("Lanzar excepción si merchant no tiene tienda asociada para imágenes de producto")
     void throwExceptionWhenStoreNotFound() {
         UUID merchantUserId = UUID.randomUUID();
         when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.empty());
+
+        GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
+                merchantUserId,
+                MediaTargetType.PRODUCT_IMAGE,
+                null
+        );
+
+        assertThrows(ResourceNotFoundException.class, () -> service.execute(command));
+        verifyNoInteractions(mediaStorageService);
+    }
+
+    @Test
+    @DisplayName("Permitir firma de branding aunque la tienda aún no exista")
+    void allowBrandingSignatureWhenStoreNotFound() {
+        UUID merchantUserId = UUID.randomUUID();
+        when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.empty());
+
+        UploadSignature expectedSignature = new UploadSignature(
+                "demo-cloud",
+                "demo-key",
+                1700000000L,
+                "jaldishop/tenants/common/branding",
+                "signature-hash",
+                "https://api.cloudinary.com/v1_1/demo-cloud/image/upload"
+        );
+        when(mediaStorageService.generateSignature(eq(null), eq(MediaTargetType.STORE_BANNER)))
+                .thenReturn(expectedSignature);
 
         GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
                 merchantUserId,
@@ -111,7 +138,10 @@ class GenerateUploadSignatureServiceTest {
                 null
         );
 
-        assertThrows(ResourceNotFoundException.class, () -> service.execute(command));
-        verifyNoInteractions(mediaStorageService);
+        UploadSignature result = service.execute(command);
+
+        assertNotNull(result);
+        assertEquals("demo-cloud", result.cloudName());
+        verify(mediaStorageService).generateSignature(null, MediaTargetType.STORE_BANNER);
     }
 }

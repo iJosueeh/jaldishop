@@ -95,15 +95,39 @@ class MediaControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/media/upload-signature - Rechazar usuario sin rol autorizado (403 FORBIDDEN)")
-    void rejectUnauthorizedUser() throws Exception {
+    @DisplayName("POST /api/v1/media/upload-signature - Rechazar usuario sin rol autorizado para producto (403 FORBIDDEN)")
+    void rejectUnauthorizedUserForProduct() throws Exception {
         currentPrincipal = new JwtPrincipal(UUID.randomUUID(), Set.of("CUSTOMER"));
+
+        GenerateSignatureRequest request = new GenerateSignatureRequest(MediaTargetType.PRODUCT_IMAGE, null);
+
+        mockMvc.perform(post("/api/v1/media/upload-signature")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/media/upload-signature - Permitir logo de tienda para Customer en onboarding (200 OK)")
+    void allowStoreLogoForCustomerDuringOnboarding() throws Exception {
+        currentPrincipal = new JwtPrincipal(UUID.randomUUID(), Set.of("CUSTOMER"));
+
+        UploadSignature signature = new UploadSignature(
+                "demo-cloud",
+                "api-key-123",
+                1700000000L,
+                "jaldishop/tenants/common/branding",
+                "sig-hash",
+                "https://api.cloudinary.com/v1_1/demo-cloud/image/upload"
+        );
+        when(signatureService.execute(any(GenerateUploadSignatureCommand.class))).thenReturn(signature);
 
         GenerateSignatureRequest request = new GenerateSignatureRequest(MediaTargetType.STORE_LOGO, null);
 
         mockMvc.perform(post("/api/v1/media/upload-signature")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cloudName").value("demo-cloud"));
     }
 }

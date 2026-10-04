@@ -7,10 +7,10 @@ export function TrustMetrics() {
   const metrics = [
     {
       icon: <ShieldCheck className="w-5 h-5 text-[#34d399]" />,
-      value: '0',
-      unit: 'sobreventas',
-      label: 'Control de Capacidad Real',
-      sublabel: 'Bloqueo automático de franjas y días cuando la capacidad llega al 100%.',
+      value: 'Tus',
+      unit: 'límites',
+      label: 'Horarios bajo control',
+      sublabel: 'Decide cuántos pedidos aceptar por día o por horario. Al completarse, ese horario deja de estar disponible.',
       accentColor: 'from-emerald-500/20 to-transparent',
       hoverBorder: 'group-hover:border-emerald-500/40',
     },
@@ -18,15 +18,15 @@ export function TrustMetrics() {
       icon: <Clock className="w-5 h-5 text-[#feae2c]" />,
       value: '10 min',
       unit: 'de reserva',
-      label: 'Hold Transaccional Seguro',
-      sublabel: 'Cupo protegido en base de datos mientras el cliente realiza el pago con calma.',
+      label: 'Tiempo para iniciar el pago',
+      sublabel: 'Tu cliente conserva su horario durante 10 minutos para iniciar el pago con tranquilidad.',
       accentColor: 'from-amber-500/20 to-transparent',
       hoverBorder: 'group-hover:border-amber-500/40',
     },
     {
       icon: <CreditCard className="w-5 h-5 text-[#38bdf8]" />,
-      value: 'Pasarela',
-      unit: '& Billeteras',
+      value: 'Pagos',
+      unit: 'a tu manera',
       label: 'Mercado Pago + Yape / Plin',
       sublabel: 'Cobros verificados con tarjetas Visa/Mastercard y billeteras móviles peruanas.',
       accentColor: 'from-sky-500/20 to-transparent',
@@ -34,10 +34,10 @@ export function TrustMetrics() {
     },
     {
       icon: <Sparkles className="w-5 h-5 text-[#fb923c]" />,
-      value: '100%',
-      unit: 'puntualidad',
-      label: 'Despachos sin Saturación',
-      sublabel: 'Tu equipo cocina en armonía y tus clientes reciben sus pedidos siempre a la hora.',
+      value: 'Más',
+      unit: 'orden',
+      label: 'Organiza tus entregas',
+      sublabel: 'Consulta los horarios elegidos por tus clientes para planificar la preparación y entrega de sus pedidos.',
       accentColor: 'from-orange-500/20 to-transparent',
       hoverBorder: 'group-hover:border-orange-500/40',
     },
@@ -54,7 +54,7 @@ export function TrustMetrics() {
         <div className="flex items-center justify-center mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-stone-300 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Resultados probados para panaderías, reposterías y talleres bajo pedido</span>
+            <span>Pensado para panaderías, reposterías y negocios bajo pedido</span>
           </div>
         </div>
 

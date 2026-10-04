@@ -1,0 +1,616 @@
+@if (isOpen() && product()) {
+  <!-- Backdrop oscuro con desenfoque suave -->
+  <div
+    (click)="handleClose()"
+    class="fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 cursor-pointer"
+    [class.animate-fade-in]="!isClosing()"
+    [class.animate-fade-out]="isClosing()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Panel Lateral Desplegable (Slide-Over Drawer) -->
+  <aside
+    class="fixed top-0 right-0 h-full w-full sm:max-w-xl bg-surface-container-lowest shadow-2xl z-50 flex flex-col justify-between border-l border-outline-variant/30 font-sans overflow-hidden"
+    [class.animate-slide-in-right]="!isClosing()"
+    [class.animate-slide-out-right]="isClosing()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-product-edit-title"
+  >
+    <!-- Cabecera del Drawer -->
+    <div
+      class="p-4 sm:p-5 border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-low/80 backdrop-blur-xs shrink-0"
+    >
+      <div class="flex items-center gap-3 min-w-0">
+        <div
+          class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-2xs"
+        >
+          <ng-icon name="matEditOutline" class="text-2xl" />
+        </div>
+        <div class="flex flex-col min-w-0">
+          <div class="flex items-center gap-2">
+            <h2 id="drawer-product-edit-title" class="text-base font-extrabold text-on-surface truncate">
+              Editar Producto
+            </h2>
+            <span
+              class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0"
+              [class.bg-emerald-500/15]="status() === 'ACTIVE'"
+              [class.text-emerald-800]="status() === 'ACTIVE'"
+              [class.dark:text-emerald-300]="status() === 'ACTIVE'"
+              [class.bg-red-500/15]="status() === 'INACTIVE'"
+              [class.text-red-800]="status() === 'INACTIVE'"
+              [class.dark:text-red-300]="status() === 'INACTIVE'"
+            >
+              {{ status() === 'ACTIVE' ? 'Activo' : 'Pausado' }}
+            </span>
+          </div>
+          <span class="text-xs text-on-surface-variant font-medium truncate">
+            {{ product()?.name }}
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="handleClose()"
+        [disabled]="isSavingGeneral() || isSavingVariant()"
+        class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer disabled:opacity-50"
+        aria-label="Cerrar panel de edición"
+      >
+        <ng-icon name="matCloseOutline" class="text-xl" />
+      </button>
+    </div>
+
+    <!-- Pestañas de Navegación (Tabs) -->
+    <div class="flex items-center px-4 sm:px-6 border-b border-outline-variant/20 bg-surface-container-low/40 shrink-0">
+      <button
+        type="button"
+        (click)="setActiveTab('general')"
+        class="flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 transition-all cursor-pointer"
+        [class.border-primary]="activeTab() === 'general'"
+        [class.text-primary]="activeTab() === 'general'"
+        [class.border-transparent]="activeTab() !== 'general'"
+        [class.text-on-surface-variant]="activeTab() !== 'general'"
+        [class.hover:text-on-surface]="activeTab() !== 'general'"
+      >
+        <ng-icon name="matInventory2Outline" class="text-base" />
+        <span>Información Básica</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="setActiveTab('variants')"
+        class="flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 transition-all cursor-pointer"
+        [class.border-primary]="activeTab() === 'variants'"
+        [class.text-primary]="activeTab() === 'variants'"
+        [class.border-transparent]="activeTab() !== 'variants'"
+        [class.text-on-surface-variant]="activeTab() !== 'variants'"
+        [class.hover:text-on-surface]="activeTab() !== 'variants'"
+      >
+        <ng-icon name="matLayersOutline" class="text-base" />
+        <span>Formatos y Precios</span>
+        <span
+          class="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+          [class.bg-primary/20]="activeTab() === 'variants'"
+          [class.text-primary]="activeTab() === 'variants'"
+          [class.bg-surface-container-high]="activeTab() !== 'variants'"
+          [class.text-on-surface-variant]="activeTab() !== 'variants'"
+        >
+          {{ variants().length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Cuerpo del Drawer con Scroll -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Banner de Error si falla la API -->
+      @if (errorMessage()) {
+        <div
+          class="flex items-start gap-3 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs sm:text-sm animate-fade-in"
+        >
+          <ng-icon name="matWarningOutline" class="text-lg shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <span class="font-bold">Ocurrió un inconveniente:</span>
+            <p class="mt-0.5 text-xs text-red-600 dark:text-red-300">{{ errorMessage() }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- PESTAÑA 1: INFORMACIÓN GENERAL -->
+      @if (activeTab() === 'general') {
+        <div class="space-y-5 animate-fade-in">
+          <!-- 1. Galería de Fotos -->
+          <section class="space-y-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+              1. Fotos del Producto
+            </label>
+            <app-product-gallery-uploader
+              [images]="images()"
+              [maxImages]="4"
+              [disabled]="isSavingGeneral()"
+              (imagesChange)="onImagesChange($event)"
+            />
+          </section>
+
+          <!-- 2. Datos Principales -->
+          <section class="space-y-4 pt-2 border-t border-outline-variant/15">
+            <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+              2. Datos del Producto
+            </label>
+
+            <!-- Nombre -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="edit-prod-name" class="font-semibold text-on-surface">
+                  Nombre del producto <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] text-on-surface-variant">{{ name().length }}/160</span>
+              </div>
+              <input
+                id="edit-prod-name"
+                type="text"
+                [ngModel]="name()"
+                (ngModelChange)="name.set($event)"
+                placeholder="Ej: Torta Húmeda de Chocolate"
+                maxlength="160"
+                [disabled]="isSavingGeneral()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium"
+              />
+            </div>
+
+            <!-- Categoría -->
+            <div class="space-y-1.5">
+              <label for="edit-prod-cat" class="text-xs font-semibold text-on-surface block">
+                Categoría en el menú <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="edit-prod-cat"
+                [ngModel]="selectedCategoryId()"
+                (ngModelChange)="selectedCategoryId.set($event)"
+                [disabled]="isSavingGeneral()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
+              >
+                <option value="" disabled>Selecciona una categoría...</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Descripción -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="edit-prod-desc" class="font-semibold text-on-surface">
+                  Descripción o detalles <span class="text-stone-400 font-normal">(Opcional)</span>
+                </label>
+                <span class="text-[11px] text-on-surface-variant">{{ description().length }}/500</span>
+              </div>
+              <textarea
+                id="edit-prod-desc"
+                [ngModel]="description()"
+                (ngModelChange)="description.set($event)"
+                rows="3"
+                maxlength="500"
+                placeholder="Describe los ingredientes, porciones o detalles clave..."
+                [disabled]="isSavingGeneral()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Enlace web (Slug) -->
+            <div class="space-y-1.5">
+              <label for="edit-prod-slug" class="text-xs font-semibold text-on-surface block">
+                Enlace directo del producto (para compartir)
+              </label>
+              <div class="flex items-center rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+                <span class="font-mono text-on-surface-variant/70 shrink-0">/p/</span>
+                <input
+                  id="edit-prod-slug"
+                  type="text"
+                  [ngModel]="slug()"
+                  (ngModelChange)="slug.set($event)"
+                  placeholder="enlace-del-producto"
+                  maxlength="180"
+                  [disabled]="isSavingGeneral()"
+                  class="w-full pl-1 bg-transparent text-on-surface font-mono text-xs focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Estado de Visibilidad en Catálogo -->
+            <div class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-on-surface">
+                  {{ status() === 'ACTIVE' ? 'Producto disponible en catálogo' : 'Producto pausado temporalmente' }}
+                </span>
+                <span class="text-[11px] text-on-surface-variant">
+                  {{ status() === 'ACTIVE' ? 'Tus clientes pueden verlo y pedirlo desde tu tienda web.' : 'El producto no será visible para los clientes hasta que lo reactives.' }}
+                </span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  [checked]="status() === 'ACTIVE'"
+                  (change)="status.set(status() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')"
+                  [disabled]="isSavingGeneral()"
+                  class="sr-only peer"
+                />
+                <div
+                  class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"
+                ></div>
+              </label>
+            </div>
+          </section>
+
+          <!-- Botón Guardar Datos Básicos -->
+          <div class="pt-2 flex justify-end">
+            <button
+              type="button"
+              (click)="saveGeneralInfo()"
+              [disabled]="!isGeneralFormValid() || isSavingGeneral()"
+              class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              @if (isSavingGeneral()) {
+                <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+                <span>Guardando cambios...</span>
+              } @else {
+                <ng-icon name="matCheckOutline" class="text-base" />
+                <span>Guardar Cambios</span>
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- PESTAÑA 2: FORMATOS Y PRECIOS (VARIANTES) -->
+      @if (activeTab() === 'variants') {
+        <div class="space-y-5 animate-fade-in">
+          <!-- Explicación amigable -->
+          <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-2.5 text-xs text-on-surface">
+            <ng-icon name="matInfoOutline" class="text-primary text-base shrink-0 mt-0.5" />
+            <p class="leading-relaxed">
+              Define los diferentes tamaños, porciones o formatos en los que vendes este producto (ej: Porción, Molde Mediano, Vaso 12 oz). Cada uno tiene su propio precio y control de existencias.
+            </p>
+          </div>
+
+          <!-- Lista de Formatos Existentes -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                Formatos Activos ({{ variants().length }})
+              </span>
+              @if (!isAddingVariant()) {
+                <button
+                  type="button"
+                  (click)="toggleAddVariant()"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 transition-colors cursor-pointer"
+                >
+                  <ng-icon name="matAddOutline" class="text-sm" />
+                  <span>Agregar otro formato</span>
+                </button>
+              }
+            </div>
+
+            @if (isLoadingVariants()) {
+              <div class="p-6 text-center text-xs text-on-surface-variant">
+                <span class="inline-block w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mb-2"></span>
+                <p>Cargando formatos del producto...</p>
+              </div>
+            } @else if (variants().length === 0) {
+              <div class="p-6 text-center rounded-xl border border-dashed border-outline-variant/40 bg-surface-container-low/40">
+                <p class="text-xs text-on-surface-variant">Este producto aún no tiene formatos registrados.</p>
+              </div>
+            } @else {
+              <div class="space-y-2.5">
+                @for (variant of variants(); track variant.id) {
+                  @if (editingVariantId() === variant.id) {
+                    <div class="p-3.5 rounded-xl border-2 border-primary/40 bg-surface-container-lowest space-y-3 animate-fade-in shadow-xs">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-on-surface">Editar Formato</span>
+                        <button
+                          type="button"
+                          (click)="cancelEditVariant()"
+                          class="text-xs text-on-surface-variant hover:text-on-surface cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="space-y-1">
+                          <label class="text-[11px] font-medium text-on-surface block">
+                            Nombre del formato / tamaño <span class="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            [ngModel]="editVariantName()"
+                            (ngModelChange)="editVariantName.set($event)"
+                            placeholder="Ej: Chico, Mediano, Grande..."
+                            class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
+
+                        <div class="space-y-1">
+                          <label class="text-[11px] font-medium text-on-surface block">
+                            Precio al público <span class="text-red-500">*</span>
+                          </label>
+                          <div class="relative flex items-center">
+                            <span class="absolute left-2.5 text-xs font-bold text-on-surface-variant font-mono">S/</span>
+                            <input
+                              type="number"
+                              min="0.01"
+                              step="0.10"
+                              [ngModel]="editVariantPrice()"
+                              (ngModelChange)="editVariantPrice.set($event)"
+                              placeholder="0.00"
+                              class="w-full pl-8 pr-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-xs font-mono font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 text-[11px]">
+                        <div class="flex items-center gap-1.5 text-on-surface-variant">
+                          <span class="font-mono text-[10px]">Cód SKU:</span>
+                          <input
+                            type="text"
+                            [ngModel]="editVariantSku()"
+                            (ngModelChange)="editVariantSku.set($event)"
+                            placeholder="Opcional"
+                            class="px-2 py-0.5 rounded border border-outline-variant/30 bg-surface-container-low font-mono text-[10px] w-28 uppercase text-on-surface"
+                          />
+                        </div>
+
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-on-surface-variant select-none">
+                          <input
+                            type="checkbox"
+                            [checked]="editVariantTracksInventory()"
+                            (change)="editVariantTracksInventory.set(!editVariantTracksInventory())"
+                            class="rounded border-outline-variant text-primary focus:ring-primary h-3.5 w-3.5"
+                          />
+                          <span>Controla stock</span>
+                        </label>
+                      </div>
+
+                      <div class="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          (click)="cancelEditVariant()"
+                          [disabled]="isSavingEditVariant()"
+                          class="px-3 py-1 rounded-lg border border-outline-variant/40 text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          (click)="saveEditVariant(variant)"
+                          [disabled]="isSavingEditVariant()"
+                          class="px-3 py-1 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          @if (isSavingEditVariant()) {
+                            <span class="w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+                          }
+                          <span>Guardar</span>
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div
+                      class="p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      [class.border-outline-variant/30]="variant.status === 'ACTIVE'"
+                      [class.bg-surface-container-low]="variant.status === 'ACTIVE'"
+                      [class.border-red-500/20]="variant.status === 'INACTIVE'"
+                      [class.bg-red-500/5]="variant.status === 'INACTIVE'"
+                      [class.opacity-75]="variant.status === 'INACTIVE'"
+                    >
+                      <div class="flex flex-col gap-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm font-bold text-on-surface truncate">
+                            {{ variant.presentationName }}
+                          </span>
+                          <span
+                            class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                            [class.bg-emerald-500/15]="variant.status === 'ACTIVE'"
+                            [class.text-emerald-800]="variant.status === 'ACTIVE'"
+                            [class.dark:text-emerald-300]="variant.status === 'ACTIVE'"
+                            [class.bg-red-500/15]="variant.status === 'INACTIVE'"
+                            [class.text-red-800]="variant.status === 'INACTIVE'"
+                            [class.dark:text-red-300]="variant.status === 'INACTIVE'"
+                          >
+                            {{ variant.status === 'ACTIVE' ? 'Disponible' : 'Pausado' }}
+                          </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-on-surface-variant">
+                          <span class="inline-flex items-center gap-1 font-mono font-semibold text-primary">
+                            S/ {{ variant.priceAmount.toFixed(2) }}
+                          </span>
+                          <span>•</span>
+                          <span>{{ variant.tracksInventory ? 'Control de stock físico' : 'Elaborado a pedido / fresco' }}</span>
+                          @if (variant.sku) {
+                            <span>•</span>
+                            <span class="font-mono text-[10px] text-on-surface-variant/80">Cód: {{ variant.sku }}</span>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Botones para editar y pausar/reactivar formato específico -->
+                      <div class="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          (click)="startEditVariant(variant)"
+                          class="px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                          title="Editar precio y nombre de este formato"
+                        >
+                          <ng-icon name="matEditOutline" class="text-xs" />
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="toggleVariantStatus(variant)"
+                          class="px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer"
+                          [class.border-outline-variant/40]="variant.status === 'ACTIVE'"
+                          [class.bg-surface-container-lowest]="variant.status === 'ACTIVE'"
+                          [class.text-on-surface]="variant.status === 'ACTIVE'"
+                          [class.hover:bg-surface-container-high]="variant.status === 'ACTIVE'"
+                          [class.border-red-500/30]="variant.status === 'INACTIVE'"
+                          [class.bg-red-500/10]="variant.status === 'INACTIVE'"
+                          [class.text-red-700]="variant.status === 'INACTIVE'"
+                          [class.dark:text-red-300]="variant.status === 'INACTIVE'"
+                        >
+                          {{ variant.status === 'ACTIVE' ? 'Pausar' : 'Reactivar' }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Formulario Desplegable: Agregar Nuevo Formato -->
+          @if (isAddingVariant()) {
+            <div class="p-4 rounded-xl border-2 border-primary/30 bg-surface-container-low/90 space-y-4 animate-fade-in shadow-xs">
+              <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+                <span class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                  <ng-icon name="matAddOutline" class="text-primary text-base" />
+                  <span>Nuevo Formato o Presentación</span>
+                </span>
+                <button
+                  type="button"
+                  (click)="toggleAddVariant()"
+                  class="text-xs text-on-surface-variant hover:text-on-surface cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+
+              <!-- Nombre del formato -->
+              <div class="space-y-1.5">
+                <label for="new-var-name" class="text-xs font-semibold text-on-surface block">
+                  Nombre del formato <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="new-var-name"
+                  type="text"
+                  [ngModel]="newVariantName()"
+                  (ngModelChange)="onNewVariantNameChange($event)"
+                  placeholder="Ej: Molde Familiar 26 cm, Vaso 16 oz, Caja x 12..."
+                  maxlength="120"
+                  [disabled]="isSavingVariant()"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- Precio -->
+                <div class="space-y-1.5">
+                  <label for="new-var-price" class="text-xs font-semibold text-on-surface block">
+                    Precio al público <span class="text-red-500">*</span>
+                  </label>
+                  <div class="relative flex items-center">
+                    <span class="absolute left-3.5 text-xs font-bold text-on-surface-variant font-mono">
+                      S/
+                    </span>
+                    <input
+                      id="new-var-price"
+                      type="number"
+                      min="0.01"
+                      step="0.10"
+                      [ngModel]="newVariantPrice()"
+                      (ngModelChange)="newVariantPrice.set($event)"
+                      placeholder="0.00"
+                      [disabled]="isSavingVariant()"
+                      class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                <!-- Código SKU -->
+                <div class="space-y-1.5">
+                  <label for="new-var-sku" class="text-xs font-semibold text-on-surface block">
+                    Código interno (Opcional)
+                  </label>
+                  <input
+                    id="new-var-sku"
+                    type="text"
+                    [ngModel]="newVariantSku()"
+                    (ngModelChange)="newVariantSku.set($event)"
+                    placeholder="Ej: TORT-FAM-01"
+                    maxlength="100"
+                    [disabled]="isSavingVariant()"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all uppercase"
+                  />
+                </div>
+              </div>
+
+              <!-- Tipo de Elaboración para esta variante -->
+              <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-on-surface">
+                    {{ newVariantTracksInventory() ? 'Control de existencias (Stock limitado)' : 'Elaborado al momento / A pedido' }}
+                  </span>
+                  <span class="text-[11px] text-on-surface-variant">
+                    {{ newVariantTracksInventory() ? 'Descuenta existencias físicas en tienda.' : 'Sin límite de existencias previas.' }}
+                  </span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    [checked]="newVariantTracksInventory()"
+                    (change)="newVariantTracksInventory.set(!newVariantTracksInventory())"
+                    [disabled]="isSavingVariant()"
+                    class="sr-only peer"
+                  />
+                  <div
+                    class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
+                  ></div>
+                </label>
+              </div>
+
+              <!-- Acciones del mini-formulario -->
+              <div class="flex items-center justify-end gap-2.5 pt-1">
+                <button
+                  type="button"
+                  (click)="toggleAddVariant()"
+                  [disabled]="isSavingVariant()"
+                  class="px-3.5 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-semibold text-xs hover:bg-surface-container-high transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  (click)="submitNewVariant()"
+                  [disabled]="!isNewVariantValid() || isSavingVariant()"
+                  class="px-4 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  @if (isSavingVariant()) {
+                    <span class="w-3.5 h-3.5 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+                    <span>Guardando formato...</span>
+                  } @else {
+                    <ng-icon name="matCheckOutline" class="text-sm" />
+                    <span>Guardar Formato</span>
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pie del Drawer -->
+    <div
+      class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container-low/90 backdrop-blur-xs flex items-center justify-end gap-3 shrink-0"
+    >
+      <button
+        type="button"
+        (click)="handleClose()"
+        [disabled]="isSavingGeneral() || isSavingVariant()"
+        class="px-5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer"
+      >
+        Listo / Cerrar
+      </button>
+    </div>
+  </aside>
+}

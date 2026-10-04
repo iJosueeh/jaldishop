@@ -32,7 +32,7 @@ export function StorefrontBadges({ store }: StorefrontBadgesProps) {
               ? 'Delivery & Retiro'
               : store.deliveryEnabled
               ? 'Solo Delivery'
-              : 'Solo Retiro en local'}
+              : store.pickupEnabled ? 'Solo recojo en local' : 'Sin modalidades habilitadas'}
           </div>
         </div>
       </Card>
@@ -44,8 +44,11 @@ export function StorefrontBadges({ store }: StorefrontBadgesProps) {
         </div>
         <div className="min-w-0">
           <div className="text-[11px] font-bold text-[#78716c] uppercase tracking-wider">Envío / Mínimo</div>
-          <div className="text-xs sm:text-sm font-extrabold text-[#1c1917] truncate font-mono">
-            {formatCurrency(store.deliveryFee)} • Mín {formatCurrency(store.minOrderAmount)}
+          <div className="text-xs sm:text-sm font-semibold text-[#1c1917] leading-relaxed">
+            {store.deliveryEnabled
+              ? typeof store.deliveryFee === 'number' ? `Envío: ${formatCurrency(store.deliveryFee)}` : 'Tarifa de envío no publicada'
+              : 'Envío a domicilio no habilitado'}
+            {typeof store.minOrderAmount === 'number' && <span className="block">Mínimo: {formatCurrency(store.minOrderAmount)}</span>}
           </div>
         </div>
       </Card>
@@ -57,8 +60,8 @@ export function StorefrontBadges({ store }: StorefrontBadgesProps) {
         </div>
         <div className="min-w-0">
           <div className="text-[11px] font-bold text-[#78716c] uppercase tracking-wider">Horario de Atención</div>
-          <div className="text-xs sm:text-sm font-extrabold text-[#1c1917] truncate">
-            {store.openingHours || 'Lun - Sáb: 08:00 - 20:00'}
+          <div className="text-xs sm:text-sm font-semibold text-[#1c1917] leading-relaxed">
+            {store.openingHours || 'Horario de atención no publicado'}
           </div>
         </div>
       </Card>
@@ -92,7 +95,7 @@ export function StorefrontBadges({ store }: StorefrontBadgesProps) {
           </div>
           <div className="min-w-0">
             <div className="text-[11px] font-bold text-[#78716c] uppercase tracking-wider">Contacto</div>
-            <div className="text-xs sm:text-sm font-extrabold text-[#1c1917] truncate">En línea</div>
+            <div className="text-xs sm:text-sm font-semibold text-[#1c1917] leading-relaxed">Teléfono de contacto no publicado</div>
           </div>
         </Card>
       )}
