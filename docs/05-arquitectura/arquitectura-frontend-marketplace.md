@@ -139,32 +139,54 @@ A continuación se detallan funcionalidades clave sugeridas para maximizar la co
 frontend-marketplace/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── not-found.tsx
-│   │   ├── globals.css
+│   │   ├── layout.tsx                     # Shell raíz + HashScrollHandler + Footer
+│   │   ├── page.tsx                       # Landing Page principal
+│   │   ├── not-found.tsx                  # 404 global editorial
+│   │   ├── globals.css                    # Tailwind CSS v4 + tokens de color
+│   │   ├── accesibilidad/page.tsx         # Declaración de accesibilidad WCAG
+│   │   ├── ayuda/page.tsx                 # Centro de Ayuda & FAQ
+│   │   ├── sobre-nosotros/page.tsx        # Historia, misión y principios MYPE
+│   │   ├── trabaja-con-nosotros/page.tsx  # Cultura y atracción de talento
+│   │   ├── terminos/page.tsx              # Términos y Condiciones interactivos
+│   │   ├── privacidad/page.tsx            # Política de Privacidad & ARCO
+│   │   ├── libro-de-reclamaciones/page.tsx# Libro Virtual (D.S. 011-2011-PCM)
 │   │   └── tienda/
 │   │       └── [slug]/
-│   │           ├── page.tsx
+│   │           ├── page.tsx               # Storefront dinámico SSR + metadata SEO
 │   │           ├── loading.tsx
-│   │           ├── not-found.tsx
-│   │           └── opengraph-image.tsx
+│   │           └── not-found.tsx
 │   ├── features/
-│   │   ├── landing/
-│   │   ├── storefront/
-│   │   ├── catalog/
-│   │   └── cart/
+│   │   ├── landing/                       # Hero, Bento, Marquee, PeekSlider, Comparativa
+│   │   ├── storefront/                    # StorefrontHero, StorefrontNav, CatalogContainer
+│   │   ├── legal/                         # LegalLayout (Tabs/All), TLDR, ClaimsBookForm
+│   │   ├── company/                       # CompanyLayout editorial para páginas corporativas
+│   │   ├── catalog/                       # ProductGrid, VariantSelector (FE-STORE-03)
+│   │   └── cart/                          # CartDrawer, Resumen (FE-STORE-02)
 │   ├── shared/
 │   │   ├── components/
-│   │   │   ├── ui/
-│   │   │   └── layout/
+│   │   │   ├── ui/                        # Button, Badge, Card, EmptyState, Container
+│   │   │   └── layout/                    # Navbar (Buscador bimodal), Footer, HashScrollHandler
 │   │   └── utils/
 │   └── core/
-│       ├── api/
-│       ├── config/
-│       ├── providers/
+│       ├── api/                           # apiClient.ts (Wrapper fetch tipado)
+│       ├── config/                        # env.ts (Variables con fallback inteligente)
+│       ├── providers/                     # QueryProvider.tsx (TanStack Query Cache-First)
 │       └── types/
+├── .env                                   # Variables locales para despliegue
+├── .env.example                           # Plantilla con valores nulos para el equipo
+├── .env.local                             # Variables para desarrollo local (Spring Boot 8080)
 ├── package.json
-├── tsconfig.json
-└── tailwind.config.ts
+└── next.config.ts
 ```
+
+---
+
+## 7. Despliegue en Producción y Red Global
+
+El Marketplace se encuentra desplegado de forma continua en **Vercel** bajo el dominio oficial:
+👉 **`https://www.jaldishop.net/`**
+
+* **Gestión de DNS:** Google Cloud DNS (Zona `jaldishop-net`) con DNSSEC habilitado.
+* **Integración Backend:** Conectado a la API REST de Spring Boot en Render (`https://jaldishop-api.onrender.com/api/v1`) con orígenes CORS habilitados.
+* **Integración Merchant:** Conexión bidireccional hacia Cloudflare Pages (`https://negocios-jaldishop.pages.dev`).
+* **Suite de Pruebas:** 61 pruebas unitarias pasando al 100% en Vitest.

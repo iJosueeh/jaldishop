@@ -21,6 +21,7 @@ import { switchMap } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { ToastService } from '../../../../core/services/toast.service';
 import { StoreResponse } from '../../../../core/models/store.models';
+import { isValidImageUrl } from '../../../../core/utils/image.utils';
 
 @Component({
   imports: [NgIcon, DecimalPipe],
@@ -151,6 +152,27 @@ export class StorePreviewCard {
   readonly bannerUrl = computed(() =>
     this.getVal('bannerUrl', this.store()?.bannerUrl || ''),
   );
+
+  readonly logoImageError = signal<boolean>(false);
+  readonly bannerImageError = signal<boolean>(false);
+
+  readonly hasValidLogo = computed(() => {
+    const url = this.logoUrl();
+    return isValidImageUrl(url) && !this.logoImageError();
+  });
+
+  readonly hasValidBanner = computed(() => {
+    const url = this.bannerUrl();
+    return isValidImageUrl(url) && !this.bannerImageError();
+  });
+
+  onLogoError(): void {
+    this.logoImageError.set(true);
+  }
+
+  onBannerError(): void {
+    this.bannerImageError.set(true);
+  }
 
   readonly instagramUrl = computed(() =>
     this.getVal('instagramUrl', this.store()?.instagramUrl || ''),

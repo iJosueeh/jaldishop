@@ -1,0 +1,82 @@
+<section class="rounded-2xl border border-error/20 bg-surface-container-lowest p-5 sm:p-6 flex flex-col gap-5 shadow-xs font-sans">
+  <!-- Encabezado de la Tarjeta -->
+  <div class="flex items-start justify-between gap-4 border-b border-surface-container-highest pb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center text-error shrink-0">
+        <ng-icon name="matWarningOutline" class="text-[22px]" />
+      </div>
+      <div class="flex flex-col">
+        <h2 class="text-sm sm:text-base font-bold text-on-surface">
+          Zona de Cuidado: Cierre o Eliminación
+        </h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          Opciones para pausar temporalmente tus operaciones o dar de baja tu negocio en la plataforma.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado Actual en Español Claro -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/20">
+    <div class="flex flex-col gap-1">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        Estado Comercial Actual
+      </span>
+      <p class="text-xs text-on-surface-variant">
+        {{ statusInfo().description }}
+      </p>
+    </div>
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 self-start sm:self-center" [class]="statusInfo().badgeClass">
+      <span class="w-2 h-2 rounded-full" [class]="statusInfo().dotClass"></span>
+      <span>{{ statusInfo().label }}</span>
+    </div>
+  </div>
+
+  <!-- Explicación de Comportamiento Inteligente (2 Escenarios Claros) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <!-- Escenario 1: Sin historial -->
+    <div class="p-3.5 rounded-xl bg-surface-container-low/60 border border-outline-variant/25 flex flex-col gap-1.5">
+      <div class="flex items-center gap-2 text-xs font-bold text-on-surface">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Si aún no tienes ventas ni reservas</span>
+      </div>
+      <p class="text-[11px] text-on-surface-variant leading-relaxed">
+        <strong>Eliminación definitiva:</strong> Tu tienda y su catálogo en borrador se eliminarán por completo sin dejar registros, y tu cuenta volverá a ser de comprador particular.
+      </p>
+    </div>
+
+    <!-- Escenario 2: Con historial -->
+    <div class="p-3.5 rounded-xl bg-surface-container-low/60 border border-outline-variant/25 flex flex-col gap-1.5">
+      <div class="flex items-center gap-2 text-xs font-bold text-on-surface">
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        <span>Si ya registraste pedidos u operaciones</span>
+      </div>
+      <p class="text-[11px] text-on-surface-variant leading-relaxed">
+        <strong>Pausa y desactivación segura:</strong> Tu tienda dejará de estar visible al público pero se preservará su historial para garantizar los comprobantes y reclamos de tus clientes.
+      </p>
+    </div>
+  </div>
+
+  <!-- Barra de Acción Final -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-outline-variant/15">
+    <div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+      <ng-icon name="matInfoOutline" class="text-[16px] text-on-surface-variant/70 shrink-0" />
+      <span>Esta solicitud te pedirá confirmación antes de aplicar cualquier cambio.</span>
+    </div>
+
+    <button
+      type="button"
+      (click)="onRequestClose()"
+      [disabled]="isClosing()"
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-error/10 text-error hover:bg-error hover:text-white transition-all text-xs font-bold border border-error/25 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+    >
+      @if (isClosing()) {
+        <span class="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+        <span>Procesando solicitud...</span>
+      } @else {
+        <ng-icon name="matDeleteOutline" class="text-[18px]" />
+        <span>Cerrar o dar de baja mi tienda</span>
+      }
+    </button>
+  </div>
+</section>

@@ -2,7 +2,7 @@
   <!-- Backdrop oscuro con desenfoque suave -->
   <div
     (click)="handleClose()"
-    class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 cursor-pointer"
+    class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs z-50 cursor-pointer"
     [class.animate-fade-in]="!isClosing()"
     [class.animate-fade-out]="isClosing()"
     aria-hidden="true"
@@ -10,7 +10,7 @@
 
   <!-- Panel Lateral Desplegable (Slide-Over Drawer) -->
   <aside
-    class="fixed top-0 right-0 h-full w-full sm:max-w-md bg-surface-container-lowest shadow-2xl z-50 flex flex-col justify-between border-l border-outline-variant/30 font-sans overflow-hidden"
+    class="fixed top-0 right-0 h-full w-full sm:max-w-md bg-white shadow-2xl z-50 flex flex-col justify-between border-l border-[#e7e0d6] font-sans overflow-hidden"
     [class.animate-slide-in-right]="!isClosing()"
     [class.animate-slide-out-right]="isClosing()"
     role="dialog"
@@ -19,29 +19,29 @@
   >
     <!-- Cabecera del Drawer -->
     <div
-      class="p-4 sm:p-5 border-b border-surface-container-highest flex items-center justify-between bg-surface-container-low/50 shrink-0"
+      class="p-4 sm:p-5 border-b border-[#e7e0d6] flex items-center justify-between bg-[#faf7f2]/80 backdrop-blur-xs shrink-0"
     >
       <div class="flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-xl bg-primary-fixed/50 flex items-center justify-center text-primary-container shrink-0 shadow-2xs"
+          class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-500/20 flex items-center justify-center text-[#005141] shrink-0 shadow-2xs"
         >
           <ng-icon name="matReceiptLongOutline" class="text-[22px]" />
         </div>
         <div class="flex flex-col">
           <div class="flex items-center gap-2">
-            <h2 id="drawer-order-title" class="text-base font-bold text-on-surface font-mono">
+            <h2 id="drawer-order-title" class="text-base font-extrabold text-stone-900 font-mono">
               {{ order()?.orderNumber }}
             </h2>
             <button
               type="button"
               (click)="copyOrderNumber()"
               title="Copiar código de pedido"
-              class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+              class="p-1 rounded text-stone-400 hover:text-stone-700 hover:bg-[#faf7f2] transition-colors cursor-pointer"
             >
               <ng-icon name="matContentCopyOutline" class="text-[14px]" />
             </button>
           </div>
-          <span class="text-xs text-on-surface-variant font-medium">
+          <span class="text-xs text-stone-500 font-medium">
             Canal: {{ order()?.channelLabel }}
           </span>
         </div>
@@ -50,7 +50,7 @@
       <button
         type="button"
         (click)="handleClose()"
-        class="p-2 min-w-[36px] min-h-[36px] rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-center"
+        class="p-2 min-w-[36px] min-h-[36px] rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer flex items-center justify-center"
         aria-label="Cerrar detalle"
       >
         <ng-icon name="matCloseOutline" class="text-[20px]" />
@@ -58,16 +58,16 @@
     </div>
 
     <!-- Contenido con Scroll Independiente -->
-    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 bg-[#faf7f2]/30">
       <!-- Badge de Estado del Pedido -->
       <div
-        class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex items-center justify-between"
+        class="p-4 rounded-2xl bg-white border border-[#e7e0d6] shadow-2xs flex items-center justify-between"
       >
         <div class="flex flex-col">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+          <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500"
             >Estado Operativo</span
           >
-          <span class="text-xs font-bold text-on-surface mt-0.5">
+          <span class="text-xs font-bold text-stone-900 mt-0.5">
             @if (order()?.status === 'CONFIRMED') {
               Pedido Confirmado
             } @else if (order()?.status === 'IN_PREPARATION') {
@@ -87,17 +87,19 @@
         </div>
 
         <span
-          class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"
-          [class.bg-secondary-container/20]="order()?.status === 'IN_PREPARATION'"
-          [class.text-secondary]="order()?.status === 'IN_PREPARATION'"
-          [class.bg-primary-fixed/50]="
-            order()?.status === 'READY' || order()?.status === 'CONFIRMED'
-          "
-          [class.text-primary-container]="
-            order()?.status === 'READY' || order()?.status === 'CONFIRMED'
-          "
-          [class.bg-emerald-500/15]="order()?.status === 'COMPLETED'"
-          [class.text-emerald-700]="order()?.status === 'COMPLETED'"
+          class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border"
+          [class.bg-amber-50]="order()?.status === 'IN_PREPARATION'"
+          [class.text-amber-800]="order()?.status === 'IN_PREPARATION'"
+          [class.border-amber-200]="order()?.status === 'IN_PREPARATION'"
+          [class.bg-emerald-50]="order()?.status === 'READY' || order()?.status === 'CONFIRMED'"
+          [class.text-[#005141]]="order()?.status === 'READY' || order()?.status === 'CONFIRMED'"
+          [class.border-emerald-500/25]="order()?.status === 'READY' || order()?.status === 'CONFIRMED'"
+          [class.bg-emerald-100]="order()?.status === 'COMPLETED'"
+          [class.text-emerald-800]="order()?.status === 'COMPLETED'"
+          [class.border-emerald-300]="order()?.status === 'COMPLETED'"
+          [class.bg-rose-50]="order()?.status === 'CANCELLED'"
+          [class.text-rose-700]="order()?.status === 'CANCELLED'"
+          [class.border-rose-200]="order()?.status === 'CANCELLED'"
         >
           <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
           {{ statusLabel() }}
@@ -106,13 +108,13 @@
 
       <!-- Sección Cliente & Contacto WhatsApp -->
       <div
-        class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-3"
+        class="p-4 rounded-2xl bg-white border border-[#e7e0d6] shadow-2xs space-y-3"
       >
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+          <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500"
             >Datos del Cliente</span
           >
-          <span class="text-xs text-on-surface-variant font-medium">{{
+          <span class="text-xs text-stone-500 font-mono font-medium">{{
             order()?.customerPhone || 'Sin teléfono'
           }}</span>
         </div>
@@ -120,11 +122,11 @@
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-2.5 min-w-0">
             <div
-              class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0"
+              class="w-8 h-8 rounded-full bg-[#faf7f2] border border-[#e7e0d6] flex items-center justify-center text-stone-700 shrink-0"
             >
               <ng-icon name="matPersonOutline" class="text-[18px]" />
             </div>
-            <span class="text-sm font-bold text-on-surface truncate">
+            <span class="text-sm font-bold text-stone-900 truncate">
               {{ order()?.customerName }}
             </span>
           </div>
@@ -132,7 +134,7 @@
           <button
             type="button"
             (click)="openWhatsApp()"
-            class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <ng-icon name="matChatOutline" class="text-[15px]" />
             <span>WhatsApp</span>
@@ -142,31 +144,31 @@
 
       <!-- Sección Horario de Entrega & Modo -->
       <div
-        class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-2.5"
+        class="p-4 rounded-2xl bg-white border border-[#e7e0d6] shadow-2xs space-y-2.5"
       >
-        <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500"
           >Franja & Modalidad</span
         >
 
         <div class="grid grid-cols-2 gap-2">
           <div
-            class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/15 flex flex-col"
+            class="p-2.5 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] flex flex-col"
           >
-            <span class="text-[10px] text-on-surface-variant font-bold uppercase"
+            <span class="text-[10px] text-stone-500 font-bold uppercase"
               >Franja Horaria</span
             >
-            <span class="text-xs font-bold text-on-surface mt-0.5 flex items-center gap-1">
-              <ng-icon name="matScheduleOutline" class="text-[14px] text-primary-container" />
+            <span class="text-xs font-bold text-stone-900 mt-0.5 flex items-center gap-1">
+              <ng-icon name="matScheduleOutline" class="text-[14px] text-[#005141]" />
               {{ order()?.deliveryTimeLabel }}
             </span>
           </div>
 
           <div
-            class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/15 flex flex-col"
+            class="p-2.5 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] flex flex-col"
           >
-            <span class="text-[10px] text-on-surface-variant font-bold uppercase">Modalidad</span>
-            <span class="text-xs font-bold text-on-surface mt-0.5 flex items-center gap-1">
-              <ng-icon name="matStorefrontOutline" class="text-[14px] text-secondary" />
+            <span class="text-[10px] text-stone-500 font-bold uppercase">Modalidad</span>
+            <span class="text-xs font-bold text-stone-900 mt-0.5 flex items-center gap-1">
+              <ng-icon name="matStorefrontOutline" class="text-[14px] text-amber-800" />
               {{ order()?.deliveryMode === 'DELIVERY' ? 'Delivery' : 'Recojo en tienda' }}
             </span>
           </div>
@@ -174,16 +176,16 @@
 
         @if (order()?.deliveryAddress) {
           <div
-            class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/15 flex items-start gap-2 text-xs"
+            class="p-2.5 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] flex items-start gap-2 text-xs"
           >
             <ng-icon
               name="matLocationOnOutline"
-              class="text-[16px] text-primary-container shrink-0 mt-0.5"
+              class="text-[16px] text-[#005141] shrink-0 mt-0.5"
             />
             <div class="flex flex-col">
-              <span class="font-bold text-on-surface">{{ order()?.deliveryAddress }}</span>
+              <span class="font-bold text-stone-900">{{ order()?.deliveryAddress }}</span>
               @if (order()?.deliveryReference) {
-                <span class="text-[11px] text-on-surface-variant"
+                <span class="text-[11px] text-stone-500"
                   >Ref: {{ order()?.deliveryReference }}</span
                 >
               }
@@ -194,44 +196,44 @@
 
       <!-- Desglose de Productos Pedidos -->
       <div
-        class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-3"
+        class="p-4 rounded-2xl bg-white border border-[#e7e0d6] shadow-2xs space-y-3"
       >
         <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
+          <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500"
             >Productos Pedidos</span
           >
-          <span class="text-xs font-bold text-primary-container">{{ formattedTotal() }}</span>
+          <span class="text-sm font-extrabold text-[#005141] font-mono">{{ formattedTotal() }}</span>
         </div>
 
         <div class="space-y-2">
           @if (order()?.items && (order()?.items)!.length > 0) {
             @for (item of order()?.items; track item.name) {
               <div
-                class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/10 text-xs"
+                class="flex items-center justify-between p-2.5 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-xs"
               >
                 <div class="flex flex-col min-w-0">
-                  <span class="font-bold text-on-surface truncate">{{ item.name }}</span>
+                  <span class="font-bold text-stone-900 truncate">{{ item.name }}</span>
                   @if (item.variant) {
-                    <span class="text-[11px] text-on-surface-variant">{{ item.variant }}</span>
+                    <span class="text-[11px] text-stone-500">{{ item.variant }}</span>
                   }
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
                   <span
-                    class="px-2 py-0.5 rounded-md bg-surface-container font-bold text-on-surface text-[11px]"
+                    class="px-2 py-0.5 rounded-md bg-white border border-[#e7e0d6] font-bold text-stone-800 text-[11px]"
                   >
                     x{{ item.quantity }}
                   </span>
-                  <span class="font-bold text-on-surface">S/ {{ item.totalPrice.toFixed(2) }}</span>
+                  <span class="font-bold text-stone-900 font-mono">S/ {{ item.totalPrice.toFixed(2) }}</span>
                 </div>
               </div>
             }
           } @else {
             <div
-              class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/10 text-xs"
+              class="p-2.5 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-xs"
             >
-              <span class="font-bold text-on-surface">{{ order()?.itemSummary }}</span>
+              <span class="font-bold text-stone-900">{{ order()?.itemSummary }}</span>
               @if (order()?.itemDetails) {
-                <p class="text-[11px] text-on-surface-variant mt-0.5">{{ order()?.itemDetails }}</p>
+                <p class="text-[11px] text-stone-500 mt-0.5">{{ order()?.itemDetails }}</p>
               }
             </div>
           }
@@ -239,10 +241,10 @@
 
         @if (order()?.notes) {
           <div
-            class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-on-surface"
+            class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-stone-800"
           >
-            <span class="font-bold text-amber-700 block text-[11px]">Nota del cliente:</span>
-            <span class="text-[11px] text-on-surface-variant mt-0.5">{{ order()?.notes }}</span>
+            <span class="font-bold text-amber-800 block text-[11px]">Nota del cliente:</span>
+            <span class="text-[11px] text-stone-600 mt-0.5">{{ order()?.notes }}</span>
           </div>
         }
       </div>
@@ -250,13 +252,13 @@
 
     <!-- Pie de Acciones Operativas -->
     <div
-      class="p-4 sm:p-5 border-t border-surface-container-highest bg-surface-container-low/50 flex flex-col sm:flex-row items-center gap-2.5 shrink-0"
+      class="p-4 sm:p-5 border-t border-[#e7e0d6] bg-[#faf7f2]/80 backdrop-blur-xs flex flex-col sm:flex-row items-center gap-2.5 shrink-0"
     >
       @if (order()?.status === 'CONFIRMED') {
         <button
           type="button"
           (click)="onAdvanceStatus()"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-secondary-container hover:bg-secondary text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
         >
           <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
           <span>Comenzar Preparación</span>
@@ -265,7 +267,7 @@
         <button
           type="button"
           (click)="onAdvanceStatus()"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-primary-container hover:bg-primary text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
         >
           <ng-icon name="matDoneAllOutline" class="text-[18px]" />
           <span>Marcar como Listo</span>
@@ -274,7 +276,7 @@
         <button
           type="button"
           (click)="notifyCustomer.emit(order()!)"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-primary-container hover:bg-primary text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
         >
           <ng-icon name="matSendOutline" class="text-[18px]" />
           <span>Avisar al Cliente (Listo)</span>

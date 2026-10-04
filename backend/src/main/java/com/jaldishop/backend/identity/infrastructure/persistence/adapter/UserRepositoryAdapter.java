@@ -56,4 +56,9 @@ public class UserRepositoryAdapter implements UserRepository {
                 .map(mapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public void assignStoreToMerchantRole(UUID userId, UUID storeId) {
+        userJpaRepository.assignStoreToMerchantRole(userId, storeId);
+    }
 }

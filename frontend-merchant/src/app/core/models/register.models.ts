@@ -11,12 +11,24 @@ export interface RegisterStep2Data {
   name: string;
   businessType: string;
   contactPhone: string;
-  pickupEnabled: boolean;
-  deliveryEnabled: boolean;
+  pickupEnabled?: boolean;
+  deliveryEnabled?: boolean;
   address?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  categoryIds?: string[];
 }
 
 export interface RegisterStep3Data {
+  pickupEnabled: boolean;
+  deliveryEnabled: boolean;
+  address?: string;
+  addressReference?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface RegisterStep4Data {
   dailyOrderLimit: number | null;
   prepTime: string;
   openingTime: string;

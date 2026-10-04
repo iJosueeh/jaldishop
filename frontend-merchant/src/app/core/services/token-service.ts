@@ -16,8 +16,8 @@ export class TokenService {
     sessionStorage.removeItem(this.TOKEN_KEY);
   }
 
-  getPayload(): any | null {
-    const token = this.getToken();
+  getPayload(tokenStr?: string | null): any | null {
+    const token = tokenStr !== undefined ? tokenStr : this.getToken();
     if (!token) return null;
 
     try {
@@ -37,25 +37,25 @@ export class TokenService {
 
       const text = new TextDecoder('utf-8').decode(bytes);
       return JSON.parse(text);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
 
-  isTokenExpired(): boolean {
-    const payload = this.getPayload();
+  isTokenExpired(tokenStr?: string | null): boolean {
+    const payload = this.getPayload(tokenStr);
     if (!payload || !payload.exp) return false;
 
     return Date.now() >= payload.exp * 1000;
   }
 
-  hasValidToken(): boolean {
-    const token = this.getToken();
-    return !!token && !this.isTokenExpired();
+  hasValidToken(tokenStr?: string | null): boolean {
+    const token = tokenStr !== undefined ? tokenStr : this.getToken();
+    return !!token && !this.isTokenExpired(token);
   }
 
-  getRoles(): string[] {
-    const payload = this.getPayload();
+  getRoles(tokenStr?: string | null): string[] {
+    const payload = this.getPayload(tokenStr);
     if (!payload) return [];
 
     const rawRoles = payload.roles || payload.authorities || payload.role || [];
@@ -73,8 +73,8 @@ export class TokenService {
     return [];
   }
 
-  getUserId(): string | null {
-    const payload = this.getPayload();
+  getUserId(tokenStr?: string | null): string | null {
+    const payload = this.getPayload(tokenStr);
     return payload?.sub || payload?.userId || null;
   }
 }

@@ -1,34 +1,41 @@
 <main
-  class="w-full h-full bg-warmCream px-6 py-10 sm:px-12 lg:px-16 xl:px-24 flex flex-col justify-between overflow-y-auto"
+  class="w-full h-full bg-[#faf7f2] px-6 py-8 sm:px-12 lg:px-16 xl:px-20 flex flex-col justify-between overflow-y-auto"
 >
   <!-- Encabezado de Progreso -->
-  <app-register-step-header [currentStep]="1" />
+  <div class="w-full max-w-xl mx-auto pb-4">
+    <app-register-step-header [currentStep]="1" />
+  </div>
 
-  <!-- Contenedor del Formulario -->
-  <div class="max-w-xl w-full mx-auto space-y-6 my-auto">
+  <!-- Contenedor del Formulario (Abierto y espacioso) -->
+  <div class="max-w-xl w-full mx-auto space-y-6 my-auto py-2">
     <div>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>
+        <span class="text-[11px] font-extrabold text-[#ea580c] uppercase tracking-wider">
+          PASO 1 · CREACIÓN DE CUENTA
+        </span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0a0a09] tracking-tight">
         Crea tu cuenta en JaldiShop
       </h2>
-      <p class="mt-1.5 text-stone-600 text-sm sm:text-base font-normal">
-        Usaremos estos datos para crear tu acceso a la plataforma. En el siguiente paso
-        configuraremos tu negocio.
+      <p class="mt-1.5 text-stone-600 text-sm sm:text-base font-normal leading-relaxed">
+        Usaremos estos datos para crear tu acceso a la plataforma. En el siguiente paso configuraremos tu negocio.
       </p>
     </div>
 
     <!-- Alerta de Error Reactiva -->
     <app-alert-error [message]="errorMessage()" />
 
-    <form [formGroup]="registerForm" (ngSubmit)="handleContinue()" class="space-y-5">
+    <form [formGroup]="registerForm" (ngSubmit)="handleContinue()" class="space-y-4">
       <!-- Nombres y Apellidos -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
+        <div class="space-y-1.5">
           <label
-            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            class="block text-xs font-bold text-[#0a0a09] tracking-wide"
             for="first-name"
             >Nombres</label
           >
-          <div class="relative rounded-xl shadow-sm">
+          <div class="relative rounded-xl shadow-2xs">
             <div
               class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
             >
@@ -51,7 +58,7 @@
               type="text"
               formControlName="firstName"
               placeholder="Ingresa tus nombres"
-              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid
               "
@@ -61,17 +68,17 @@
             registerForm.get('firstName')?.touched &&
             registerForm.get('firstName')?.hasError('required')
           ) {
-            <p class="text-[11px] text-red-600 font-medium mt-1">El nombre es obligatorio.</p>
+            <p class="text-[11px] text-red-600 font-medium pl-1">El nombre es obligatorio.</p>
           }
         </div>
 
-        <div>
+        <div class="space-y-1.5">
           <label
-            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            class="block text-xs font-bold text-[#0a0a09] tracking-wide"
             for="last-name"
             >Apellidos</label
           >
-          <div class="relative rounded-xl shadow-sm">
+          <div class="relative rounded-xl shadow-2xs">
             <div
               class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
             >
@@ -94,7 +101,7 @@
               type="text"
               formControlName="lastName"
               placeholder="Ingresa tus apellidos"
-              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid
               "
@@ -104,17 +111,17 @@
             registerForm.get('lastName')?.touched &&
             registerForm.get('lastName')?.hasError('required')
           ) {
-            <p class="text-[11px] text-red-600 font-medium mt-1">El apellido es obligatorio.</p>
+            <p class="text-[11px] text-red-600 font-medium pl-1">El apellido es obligatorio.</p>
           }
         </div>
       </div>
 
       <!-- Correo Electrónico -->
-      <div>
-        <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5" for="user-email"
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="user-email"
           >Correo electrónico</label
         >
-        <div class="relative rounded-xl shadow-sm">
+        <div class="relative rounded-xl shadow-2xs">
           <div
             class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
           >
@@ -137,7 +144,7 @@
             type="email"
             formControlName="email"
             placeholder="nombre@correo.com"
-            class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+            class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
             [class.border-red-500]="
               registerForm.get('email')?.touched && registerForm.get('email')?.invalid
             "
@@ -146,22 +153,22 @@
         @if (
           registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')
         ) {
-          <p class="text-[11px] text-red-600 font-medium mt-1">El correo es obligatorio.</p>
+          <p class="text-[11px] text-red-600 font-medium pl-1">El correo es obligatorio.</p>
         } @else if (
           registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')
         ) {
-          <p class="text-[11px] text-red-600 font-medium mt-1">Ingresa un correo válido.</p>
+          <p class="text-[11px] text-red-600 font-medium pl-1">Ingresa un correo válido.</p>
         }
       </div>
 
       <!-- Contraseña y Confirmar Contraseña -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- Contraseña -->
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5" for="password"
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="password"
             >Contraseña</label
           >
-          <div class="relative rounded-xl shadow-sm">
+          <div class="relative rounded-xl shadow-2xs">
             <div
               class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
             >
@@ -184,7 +191,7 @@
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               placeholder="Crea una contraseña"
-              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('password')?.touched && registerForm.get('password')?.invalid
               "
@@ -193,7 +200,7 @@
               type="button"
               (click)="togglePassword()"
               aria-label="Mostrar u ocultar contraseña"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
             >
               @if (showPassword()) {
                 <ng-icon name="matVisibilityOffOutline" class="text-lg" />
@@ -205,13 +212,13 @@
         </div>
 
         <!-- Confirmar Contraseña -->
-        <div>
+        <div class="space-y-1.5">
           <label
-            class="block text-xs sm:text-sm font-semibold text-stone-800 mb-1.5"
+            class="block text-xs font-bold text-[#0a0a09] tracking-wide"
             for="password-confirm"
             >Confirmar contraseña</label
           >
-          <div class="relative rounded-xl shadow-sm">
+          <div class="relative rounded-xl shadow-2xs">
             <div
               class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
             >
@@ -234,7 +241,7 @@
               [type]="showConfirmPassword() ? 'text' : 'password'"
               formControlName="passwordConfirm"
               placeholder="Repite tu contraseña"
-              class="block w-full rounded-xl border border-stone-300 bg-white py-2.5 pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:border-jade-700 focus:ring-jade-700"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('passwordConfirm')?.touched &&
                 (registerForm.get('passwordConfirm')?.invalid || registerForm.hasError('mismatch'))
@@ -244,7 +251,7 @@
               type="button"
               (click)="toggleConfirmPassword()"
               aria-label="Mostrar u ocultar contraseña"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-600 transition-colors"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
             >
               @if (showConfirmPassword()) {
                 <ng-icon name="matVisibilityOffOutline" class="text-lg" />
@@ -260,25 +267,25 @@
       <div class="space-y-1.5">
         <div class="flex items-center gap-1.5">
           <div
-            class="h-1.5 flex-1 rounded-full"
+            class="h-1.5 flex-1 rounded-full transition-colors"
             [class]="
               registerForm.get('password')?.value?.length >= 6 ? 'bg-emerald-500' : 'bg-stone-200'
             "
           ></div>
           <div
-            class="h-1.5 flex-1 rounded-full"
+            class="h-1.5 flex-1 rounded-full transition-colors"
             [class]="
               registerForm.get('password')?.value?.length >= 8 ? 'bg-emerald-500' : 'bg-stone-200'
             "
           ></div>
           <div
-            class="h-1.5 flex-1 rounded-full"
+            class="h-1.5 flex-1 rounded-full transition-colors"
             [class]="
               registerForm.get('password')?.value?.length >= 10 ? 'bg-emerald-500' : 'bg-stone-200'
             "
           ></div>
         </div>
-        <p class="text-[11px] text-stone-500">La contraseña debe tener al menos 8 caracteres</p>
+        <p class="text-[11px] text-stone-500">Mínimo 8 caracteres alfanuméricos</p>
         @if (registerForm.get('passwordConfirm')?.touched && registerForm.hasError('mismatch')) {
           <p class="text-[11px] text-red-600 font-medium">Las contraseñas no coinciden.</p>
         }
@@ -290,40 +297,40 @@
           id="terms"
           type="checkbox"
           formControlName="terms"
-          class="h-4 w-4 mt-0.5 rounded border-stone-300 text-jade-700 focus:ring-jade-700 cursor-pointer shrink-0"
+          class="h-4 w-4 mt-0.5 rounded border-stone-300 text-[#005141] focus:ring-[#005141] cursor-pointer shrink-0 accent-[#005141]"
         />
         <label class="text-xs text-stone-700 leading-relaxed cursor-pointer" for="terms">
           Al crear mi cuenta, acepto los
           <a
             routerLink="/terms"
             target="_blank"
-            class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
+            class="font-semibold text-[#005141] underline underline-offset-2 hover:text-[#003d31] transition-colors"
             >Términos y condiciones</a
           >
           y la
           <a
             routerLink="/terms"
             target="_blank"
-            class="font-semibold text-jade-700 underline underline-offset-2 hover:text-jade-800 transition-colors"
+            class="font-semibold text-[#005141] underline underline-offset-2 hover:text-[#003d31] transition-colors"
             >Política de privacidad</a
           >.
         </label>
       </div>
 
       <!-- Botón Continuar -->
-      <div class="space-y-1.5">
+      <div class="space-y-2 pt-1">
         <button
           type="submit"
           [disabled]="registerForm.invalid || isLoading()"
-          class="w-full flex items-center justify-center gap-2 rounded-xl bg-jade-700 px-5 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-jade-700/20 hover:bg-jade-800 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-jade-700 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+          class="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[#005141] hover:bg-[#003d31] px-5 text-sm sm:text-base font-bold text-white shadow-md shadow-[#005141]/20 hover:shadow-lg active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-[#005141] focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           @if (isLoading()) {
             <span
               class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
             ></span>
-            <span>Guardando...</span>
+            <span>Guardando datos...</span>
           } @else {
-            <span>Continuar</span>
+            <span>Continuar al Paso 2</span>
             <svg
               class="w-4 h-4"
               fill="none"
@@ -347,11 +354,11 @@
 
     <!-- Enlace a Login -->
     <div class="text-center pt-2">
-      <p class="text-xs sm:text-sm text-stone-600">
+      <p class="text-xs sm:text-sm text-stone-600 font-medium">
         ¿Ya tienes una cuenta?
         <a
           routerLink="/login"
-          class="font-bold text-jade-700 hover:text-jade-800 hover:underline transition-colors ml-1"
+          class="font-bold text-[#005141] hover:underline transition-colors ml-1"
         >
           Iniciar sesión
         </a>
@@ -360,5 +367,7 @@
   </div>
 
   <!-- Footer Discreto -->
-  <app-register-footer />
+  <div class="pt-4">
+    <app-register-footer />
+  </div>
 </main>

@@ -2,6 +2,7 @@ package com.jaldishop.backend.identity.web.controller;
 
 import com.jaldishop.backend.identity.application.*;
 import com.jaldishop.backend.identity.domain.User;
+import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.LoginRequest;
 import com.jaldishop.backend.identity.web.dto.RegisterMerchantRequest;
 import com.jaldishop.backend.identity.web.dto.RegisterRequest;
@@ -9,6 +10,8 @@ import com.jaldishop.backend.identity.web.dto.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,15 +24,18 @@ public class AuthController {
     private final AuthenticateUserService authenticateUserService;
     private final RegisterCustomerService registerCustomerService;
     private final RegisterMerchantService registerMerchantService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthController(
             AuthenticateUserService authenticateUserService,
             RegisterCustomerService registerCustomerService,
-            RegisterMerchantService registerMerchantService
+            RegisterMerchantService registerMerchantService,
+            RefreshTokenService refreshTokenService
     ) {
         this.authenticateUserService = authenticateUserService;
         this.registerCustomerService = registerCustomerService;
         this.registerMerchantService = registerMerchantService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/register")
@@ -76,12 +82,29 @@ public class AuthController {
                 request.businessType(),
                 request.storeContactPhone(),
                 request.address(),
+                request.addressReference(),
+                request.latitude(),
+                request.longitude(),
                 request.pickupEnabled(),
-                request.deliveryEnabled()
+                request.deliveryEnabled(),
+                request.logoUrl(),
+                request.bannerUrl(),
+                request.categoryIds()
         );
 
         AuthResult result = registerMerchantService.execute(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResult> refresh(
+            @AuthenticationPrincipal JwtPrincipal principal
+    ) {
+        if (principal == null) {
+            throw new AccessDeniedException("Usuario no autenticado.");
+        }
+        AuthResult result = refreshTokenService.execute(principal.userId());
+        return ResponseEntity.ok(result);
     }
 
 }

@@ -140,4 +140,45 @@ describe('StoreService', () => {
     });
     httpTesting.expectNone(`${environment.apiUrl}/store-categories`);
   });
+
+  it('debe procesar eliminación física cuando la tienda no tiene historial (DELETED)', () => {
+    service.getMyStore().subscribe();
+    httpTesting.expectOne(`${baseUrl}/me`).flush(mockStore);
+    expect(service.hasStore()).toBe(true);
+
+    service.closeMyStore('Sin uso').subscribe((res) => {
+      expect(res.action).toBe('DELETED');
+      expect(service.currentStore()).toBeNull();
+      expect(service.hasStore()).toBe(false);
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/me`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.body).toEqual({ reason: 'Sin uso' });
+    req.flush({
+      storeId: 'store-1',
+      action: 'DELETED',
+      message: 'Eliminada',
+    });
+  });
+
+  it('debe procesar desactivación lógica cuando la tienda tiene historial (DEACTIVATED)', () => {
+    service.getMyStore().subscribe();
+    httpTesting.expectOne(`${baseUrl}/me`).flush(mockStore);
+    expect(service.currentStore()?.status).toBe('ACTIVE');
+
+    service.closeMyStore().subscribe((res) => {
+      expect(res.action).toBe('DEACTIVATED');
+      expect(service.currentStore()?.status).toBe('INACTIVE');
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/me`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({
+      storeId: 'store-1',
+      action: 'DEACTIVATED',
+      status: 'INACTIVE',
+      message: 'Desactivada',
+    });
+  });
 });

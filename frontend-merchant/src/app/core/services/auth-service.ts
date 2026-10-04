@@ -27,8 +27,14 @@ export class AuthService {
   readonly token = signal<string | null>(this.tokenService.getToken());
   readonly currentUser = signal<AuthResult | null>(null);
 
-  readonly isAuthenticated = computed(() => !!this.token() && this.tokenService.hasValidToken());
-  readonly userRoles = computed(() => (this.isAuthenticated() ? this.tokenService.getRoles() : []));
+  readonly isAuthenticated = computed(() => {
+    const t = this.token();
+    return !!t && this.tokenService.hasValidToken(t);
+  });
+  readonly userRoles = computed(() => {
+    const t = this.token();
+    return t && this.tokenService.hasValidToken(t) ? this.tokenService.getRoles(t) : [];
+  });
   readonly isMerchant = computed(() => this.userRoles().includes('MERCHANT'));
   readonly isAdmin = computed(() => this.userRoles().includes('ADMIN'));
 
@@ -36,15 +42,16 @@ export class AuthService {
     return this.http.post<AuthResult>(`${environment.apiUrl}/auth/login`, credentials).pipe(
       tap((result) => {
         this.tokenService.setToken(result.token);
-        const tokenRoles = this.tokenService.getRoles();
+        this.token.set(result.token);
+        this.currentUser.set(result);
+      }),
+    );
+  }
 
-        if (!tokenRoles.includes('MERCHANT') && !tokenRoles.includes('ADMIN')) {
-          this.logout();
-          throw new Error(
-            'Acceso denegado: Este panel es exclusivo para comerciantes y administradores.',
-          );
-        }
-
+  refreshToken(): Observable<AuthResult> {
+    return this.http.post<AuthResult>(`${environment.apiUrl}/auth/refresh`, {}).pipe(
+      tap((result) => {
+        this.tokenService.setToken(result.token);
         this.token.set(result.token);
         this.currentUser.set(result);
       }),

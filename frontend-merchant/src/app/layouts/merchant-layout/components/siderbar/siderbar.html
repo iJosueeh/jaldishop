@@ -1,23 +1,29 @@
 <aside
-  class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-4 border-r border-outline-variant/30 font-sans transition-transform duration-300 ease-in-out lg:translate-x-0"
+  class="fixed left-0 top-0 h-screen w-64 bg-[#0a0a09] shadow-2xl lg:shadow-[1px_0_24px_rgba(0,0,0,0.35)] z-50 flex flex-col justify-between py-4 border-r border-white/10 font-sans transition-transform duration-300 ease-in-out lg:translate-x-0 text-white"
   [class.-translate-x-full]="!isOpen()"
   [class.translate-x-0]="isOpen()"
 >
-  <div class="flex flex-col gap-4 px-4">
-    <!-- Brand / Store Name con botón Cerrar en móvil -->
-    <div class="flex items-center justify-between pb-2 border-b border-surface-container-highest">
-      <div class="flex flex-col gap-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-center shadow-2xs shrink-0 p-1">
-            <img src="favicon.svg" alt="JaldiShop" class="w-full h-full object-contain" />
+  <div class="flex flex-col gap-4 px-4 overflow-y-auto">
+    <!-- Brand / Store Header con botón Cerrar en móvil -->
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center gap-2.5 min-w-0">
+        @if (hasValidLogo()) {
+          <div class="w-9 h-9 rounded-xl overflow-hidden border border-emerald-500/40 shadow-xs shrink-0 bg-stone-900">
+            <img [src]="storeLogoUrl()" (error)="onLogoError()" alt="" class="w-full h-full object-cover" />
           </div>
-          <span class="text-lg font-bold text-on-surface tracking-tight truncate">JaldiShop</span>
-        </div>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span class="w-2 h-2 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
-          <span class="text-xs text-on-surface-variant truncate font-medium">
-            {{ storeName() }} · {{ storeOperationalStatus().label }}
-          </span>
+        } @else {
+          <div class="w-9 h-9 rounded-xl bg-[#005141] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 ring-1 ring-white/15">
+            {{ storeName() ? storeName().charAt(0).toUpperCase() : 'J' }}
+          </div>
+        }
+        <div class="flex flex-col min-w-0">
+          <span class="text-sm font-bold text-white tracking-tight truncate leading-tight">{{ storeName() }}</span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
+            <span class="text-[11px] font-medium text-stone-400 truncate">
+              {{ storeOperationalStatus().label }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -25,94 +31,106 @@
       <button
         type="button"
         (click)="closeSidebar.emit()"
-        class="lg:hidden p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+        class="lg:hidden p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         aria-label="Cerrar menú"
       >
         <ng-icon name="matCloseOutline" class="text-[20px]" />
       </button>
     </div>
 
-    <!-- Capacidad Hoy Widget -->
-    <div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-1.5 border border-outline-variant/20">
+    <!-- Módulo Craft de Capacidad de Hoy -->
+    <div class="p-3.5 rounded-2xl bg-[#141413] flex flex-col gap-2 border border-white/10 shadow-inner">
       <div class="flex items-center justify-between">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Capacidad Hoy</span>
-        <span class="text-xs font-bold text-primary-container">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1">
+          <ng-icon name="matViewWeekOutline" class="text-[14px] text-emerald-400" />
+          Capacidad Hoy
+        </span>
+        <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
           {{ capacityOccupied() }}/{{ capacityTotal() > 0 ? capacityTotal() : 0 }}
         </span>
       </div>
+
+      <!-- 10 Bloques Reactivos Craft -->
       <div class="flex items-center gap-1 py-1">
         @for (block of capacityBlocks(); track block.index) {
           <span
-            class="h-3.5 flex-1 rounded-xs transition-colors"
-            [class.bg-primary-container]="block.isFilled"
-            [class.bg-surface-container-highest]="!block.isFilled"
+            class="h-2.5 flex-1 rounded-xs transition-all duration-300"
+            [class.bg-emerald-500]="block.isFilled"
+            [class.shadow-[0_0_8px_rgba(16,185,129,0.4)]]="block.isFilled"
+            [class.bg-white/10]="!block.isFilled"
           ></span>
         }
       </div>
-      <span class="text-xs text-on-surface-variant">
-        @if (capacityTotal() > 0) {
-          Quedan {{ capacityTotal() - capacityOccupied() }} {{ (capacityTotal() - capacityOccupied()) === 1 ? 'cupo' : 'cupos' }} disponibles
-        } @else {
-          Sin límite configurado
-        }
-      </span>
+
+      <div class="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
+        <span>
+          @if (capacityTotal() > 0) {
+            Quedan <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied() }}</strong> {{ (capacityTotal() - capacityOccupied()) === 1 ? 'cupo' : 'cupos' }}
+          } @else {
+            Sin límite fijo
+          }
+        </span>
+        <a routerLink="/capacity" (click)="closeSidebar.emit()" class="text-emerald-400 hover:text-emerald-300 font-bold hover:underline">
+          Ajustar
+        </a>
+      </div>
     </div>
 
     <!-- Navegación Principal -->
     <nav class="flex flex-col gap-1">
       <a
         routerLink="/dashboard"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
         [routerLinkActiveOptions]="{ exact: true }"
         (click)="closeSidebar.emit()"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
       >
         <ng-icon name="matHomeOutline" class="text-[20px]" />
         <span>Inicio</span>
       </a>
 
       <a
-        routerLink="/store"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
-        (click)="closeSidebar.emit()"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
-      >
-        <ng-icon name="matStoreOutline" class="text-[20px]" />
-        <span>Mi Tienda</span>
-      </a>
-
-      <a
         routerLink="/orders"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
         (click)="closeSidebar.emit()"
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
       >
         <div class="flex items-center gap-2.5">
           <ng-icon name="matReceiptLongOutline" class="text-[20px]" />
           <span>Pedidos</span>
         </div>
         @if (activeOrdersCount() > 0) {
-          <span class="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary-container text-[11px] font-bold">
+          <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
             {{ activeOrdersCount() }} hoy
           </span>
         }
       </a>
 
       <a
-        routerLink="/capacity"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
+        routerLink="/store"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
         (click)="closeSidebar.emit()"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
+      >
+        <ng-icon name="matStoreOutline" class="text-[20px]" />
+        <span>Mi Tienda</span>
+      </a>
+
+      <a
+        routerLink="/capacity"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
+        (click)="closeSidebar.emit()"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
       >
         <ng-icon name="matViewWeekOutline" class="text-[20px]" />
-        <span>Capacidad</span>
+        <span>Capacidad & Horarios</span>
       </a>
 
       <a
         routerLink="/products"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
         (click)="closeSidebar.emit()"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
       >
         <ng-icon name="matInventory2Outline" class="text-[20px]" />
         <span>Productos</span>
@@ -120,9 +138,9 @@
 
       <a
         routerLink="/customers"
-        routerLinkActive="bg-primary-container text-white font-bold shadow-xs"
+        routerLinkActive="bg-[#005141] text-white font-bold shadow-md shadow-[#005141]/30 ring-1 ring-emerald-500/30"
         (click)="closeSidebar.emit()"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
       >
         <ng-icon name="matGroupOutline" class="text-[20px]" />
         <span>Clientes</span>
@@ -131,18 +149,18 @@
   </div>
 
   <!-- Pie de la barra lateral: Perfil & Logout -->
-  <div class="flex flex-col gap-2 px-4">
+  <div class="flex flex-col gap-2 px-4 pt-2 border-t border-white/10">
     <a
       routerLink="/settings"
-      routerLinkActive="bg-primary-container text-white font-bold"
+      routerLinkActive="bg-[#005141] text-white font-bold shadow-xs"
       (click)="closeSidebar.emit()"
-      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors text-sm font-semibold cursor-pointer"
+      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
     >
       <ng-icon name="matTuneOutline" class="text-[20px]" />
       <span>Configuración</span>
     </a>
 
-    <div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-2 border border-outline-variant/20">
+    <div class="p-3 rounded-2xl bg-[#141413] flex flex-col gap-2 border border-white/10">
       <div class="flex items-center justify-between">
         <a
           routerLink="/profile"
@@ -150,14 +168,14 @@
           title="Ver mi perfil"
           class="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-85 transition-opacity"
         >
-          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-2xs">
+          <div class="w-8 h-8 rounded-full bg-[#005141] flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-xs ring-1 ring-white/15">
             {{ userInitials() }}
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-on-surface truncate">
+            <span class="text-xs font-bold text-white truncate">
               {{ userName() }}
             </span>
-            <span class="text-[11px] text-on-surface-variant truncate">
+            <span class="text-[11px] text-stone-400 truncate">
               Comerciante
             </span>
           </div>
@@ -167,15 +185,15 @@
           type="button"
           (click)="handleLogout()"
           title="Cerrar sesión"
-          class="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors cursor-pointer shrink-0"
+          class="p-1.5 rounded-lg text-stone-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
         >
           <ng-icon name="matLogoutOutline" class="text-[18px]" />
         </button>
       </div>
 
-      <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border {{ storeOperationalStatus().footerClass }}">
-        <span class="text-[10px] font-bold uppercase tracking-wider">{{ storeOperationalStatus().footerLabel }}</span>
-        <span class="w-2 h-2 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
+      <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider {{ storeOperationalStatus().footerClass }}">
+        <span>{{ storeOperationalStatus().footerLabel }}</span>
+        <span class="w-1.5 h-1.5 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
       </div>
     </div>
   </div>

@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/register/**",
                                 "/api/v1/store-categories",
                                 "/api/v1/store-categories/**",
+                                "/api/v1/media/upload-signature",
                                 "/api/v1/stores/slug/**",
                                 "/api/v1/stores/search",
                                 "/api/v1/stores/featured"

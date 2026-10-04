@@ -53,4 +53,19 @@ class CloudinaryMediaStorageServiceTest {
         assertEquals("https://api.cloudinary.com/v1_1/test-cloud/image/upload", signature.uploadUrl());
         assertTrue(signature.timestamp() > 0);
     }
+
+    @Test
+    @DisplayName("deleteStoreMedia con storeId nulo no realiza peticiones")
+    void deleteStoreMediaWithNullStoreId() {
+        assertDoesNotThrow(() -> storageService.deleteStoreMedia(null));
+    }
+
+    @Test
+    @DisplayName("deleteStoreMedia captura excepciones de Cloudinary sin interrumpir flujo")
+    void deleteStoreMediaHandlesCloudinaryExceptionGracefully() {
+        UUID storeId = UUID.randomUUID();
+        when(cloudinary.api()).thenThrow(new RuntimeException("Cloudinary API unavailable"));
+
+        assertDoesNotThrow(() -> storageService.deleteStoreMedia(storeId));
+    }
 }

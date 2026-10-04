@@ -231,7 +231,6 @@ export class Capacity implements OnInit {
   }
 
   private getTodayDayOfWeek(): number {
-    const day = new Date().getDay();
-    return day === 0 ? 7 : day;
+    return new Date().getDay();
   }
 }

@@ -300,9 +300,8 @@ describe('CapacityService', () => {
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-      // Configuración base
-      const isDay = today.getDay();
-      const todayDayOfWeek = isDay === 0 ? 7 : isDay;
+      // Configuración base (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
+      const todayDayOfWeek = today.getDay();
       const baseConfig: CapacityConfiguration = {
         id: 'cfg-today',
         storeId: 'store-1',

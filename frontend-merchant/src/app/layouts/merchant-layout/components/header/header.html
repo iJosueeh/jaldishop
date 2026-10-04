@@ -1,5 +1,5 @@
 <header
-  class="fixed top-0 left-0 lg:left-60 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-outline-variant/30 font-sans transition-all"
+  class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-[#faf7f2]/90 backdrop-blur-md shadow-[0_1px_4px_rgba(0,0,0,0.03)] z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-[#e7e0d6] font-sans transition-all"
 >
   <!-- Lado Izquierdo: Botón Hamburguesa Mobile + Buscador -->
   <div class="flex items-center gap-2.5 sm:gap-3 flex-1 max-w-md">
@@ -7,7 +7,7 @@
     <button
       type="button"
       (click)="toggleSidebar.emit()"
-      class="lg:hidden p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-center shrink-0"
+      class="lg:hidden p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer flex items-center justify-center shrink-0 border border-transparent hover:border-[#e7e0d6]"
       aria-label="Abrir menú de navegación"
     >
       <ng-icon name="matMenuOutline" class="text-[24px]" />
@@ -15,29 +15,32 @@
 
     <!-- Barra de Búsqueda Flexible -->
     <div
-      class="flex items-center gap-2 w-full bg-surface-container-lowest px-3 py-2 rounded-xl shadow-2xs border border-outline-variant/30"
+      class="flex items-center gap-2.5 w-full bg-white px-3.5 py-2 rounded-xl shadow-2xs border border-[#e7e0d6] focus-within:border-[#005141] focus-within:ring-2 focus-within:ring-[#005141]/10 transition-all"
     >
-      <ng-icon name="matSearchOutline" class="text-on-surface-variant text-[18px]" />
+      <ng-icon name="matSearchOutline" class="text-stone-400 text-[18px]" />
       <input
-        class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none text-xs"
-        placeholder="Buscar pedido o producto..."
+        class="w-full bg-transparent text-stone-900 placeholder:text-stone-400 focus:outline-none text-xs"
+        placeholder="Buscar por cliente, #pedido o producto..."
         aria-label="Buscar pedido o producto"
         type="text"
       />
+      <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] text-stone-400 bg-[#faf7f2] border border-[#e7e0d6] rounded font-mono">
+        ⌘K
+      </kbd>
     </div>
   </div>
 
   <!-- Lado Derecho: Ritmo Operativo + Nuevo Pedido + Avatar -->
-  <div class="flex items-center gap-2 sm:gap-4 pl-3">
+  <div class="flex items-center gap-2 sm:gap-3.5 pl-3">
     <div
-      class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface border border-outline-variant/20 shrink-0"
+      class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-stone-700 border border-[#e7e0d6] shadow-2xs shrink-0"
     >
-      <ng-icon name="matSpeedOutline" class="text-primary-container text-[18px]" />
+      <ng-icon name="matSpeedOutline" class="text-emerald-700 text-[18px]" />
       <span class="text-xs font-semibold">
         @if (operationRhythmMin() > 0) {
-          Ritmo de hoy: {{ operationRhythmMin() }} min / pedido
+          Ritmo de hoy: <strong class="text-stone-900 font-mono">{{ operationRhythmMin() }} min</strong> / pedido
         } @else {
-          En operación
+          En operación continua
         }
       </span>
     </div>
@@ -45,7 +48,7 @@
     <button
       type="button"
       (click)="handleNewOrder()"
-      class="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-primary-container text-white text-xs font-bold hover:bg-primary transition-colors cursor-pointer shadow-xs active:scale-98 shrink-0"
+      class="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98 shrink-0 shadow-emerald-950/20"
     >
       <ng-icon name="matAddCircleOutline" class="text-[18px]" />
       <span class="hidden sm:inline">Nuevo Pedido</span>
@@ -55,7 +58,7 @@
     <a
       routerLink="/profile"
       title="Mi Perfil"
-      class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shadow-xs shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all"
+      class="w-9 h-9 rounded-full bg-[#005141] flex items-center justify-center text-white text-xs font-bold shadow-xs shrink-0 cursor-pointer ring-2 ring-emerald-500/20 hover:ring-emerald-500/50 transition-all"
     >
       {{ profileService.userInitials() }}
     </a>

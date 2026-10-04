@@ -1,12 +1,18 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
+import com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreRepository;
+import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.mapper.StorePersistenceMapper;
+import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository;
 import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,16 +20,19 @@ import java.util.UUID;
 public class StoreRepositoryAdapter implements StoreRepository {
 
     private final StoreJpaRepository storeJpaRepository;
-    private final com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository storeCategoryJpaRepository;
+    private final StoreCategoryJpaRepository storeCategoryJpaRepository;
+    private final UserJpaRepository userJpaRepository;
     private final StorePersistenceMapper mapper;
 
     public StoreRepositoryAdapter(
             StoreJpaRepository storeJpaRepository,
-            com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository storeCategoryJpaRepository,
+            StoreCategoryJpaRepository storeCategoryJpaRepository,
+            UserJpaRepository userJpaRepository,
             StorePersistenceMapper mapper
     ) {
         this.storeJpaRepository = storeJpaRepository;
         this.storeCategoryJpaRepository = storeCategoryJpaRepository;
+        this.userJpaRepository = userJpaRepository;
         this.mapper = mapper;
     }
 
@@ -31,14 +40,14 @@ public class StoreRepositoryAdapter implements StoreRepository {
     public Store save(Store store) {
         StoreEntity entity = mapper.toEntity(store);
         if (store.getCategoryIds() != null && !store.getCategoryIds().isEmpty()) {
-            java.util.List<com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity> categories =
+            List<StoreCategoryEntity> categories =
                     storeCategoryJpaRepository.findAllById(store.getCategoryIds());
-            entity.setCategories(new java.util.HashSet<>(categories));
+            entity.setCategories(new HashSet<>(categories));
         } else {
-            entity.setCategories(new java.util.HashSet<>());
+            entity.setCategories(new HashSet<>());
         }
         StoreEntity saved = storeJpaRepository.save(entity);
-
+        userJpaRepository.assignStoreToMerchantRole(saved.getMerchantUserId(), saved.getId());
         return mapper.toDomain(saved);
     }
 
@@ -71,10 +80,21 @@ public class StoreRepositoryAdapter implements StoreRepository {
     }
 
     @Override
-    public java.util.List<Store> findAllStores(String query, com.jaldishop.backend.store.domain.StoreStatus status) {
+    public List<Store> findAllStores(String query, StoreStatus status) {
         String cleanQuery = (query != null && !query.isBlank()) ? query.trim() : null;
         return storeJpaRepository.searchStores(cleanQuery, status).stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public boolean hasOperationalHistory(UUID storeId) {
+        return storeJpaRepository.hasOperationalHistory(storeId);
+    }
+
+    @Override
+    public void deleteStore(UUID storeId, UUID merchantUserId) {
+        storeJpaRepository.deleteStoreAndDraftCatalog(storeId);
+        userJpaRepository.removeMerchantRole(merchantUserId);
     }
 }

@@ -17,9 +17,14 @@ public class StorePersistenceMapper {
         if (entity == null) {
             return null;
         }
-        Set<UUID> categoryIds = entity.getCategories() != null
-                ? entity.getCategories().stream().map(StoreCategoryEntity::getId).collect(Collectors.toSet())
-                : Collections.emptySet();
+        Set<UUID> categoryIds;
+        try {
+            categoryIds = (entity.getCategories() != null)
+                    ? entity.getCategories().stream().map(StoreCategoryEntity::getId).collect(Collectors.toSet())
+                    : Collections.emptySet();
+        } catch (Exception ignored) {
+            categoryIds = Collections.emptySet();
+        }
 
         return Store.reconstitute(
                 entity.getId(),

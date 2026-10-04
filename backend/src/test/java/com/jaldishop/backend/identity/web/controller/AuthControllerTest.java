@@ -37,18 +37,44 @@ class AuthControllerTest {
     @Mock
     private RegisterMerchantService registerMerchantService;
 
+    @Mock
+    private com.jaldishop.backend.identity.application.RefreshTokenService refreshTokenService;
+
     private MockMvc mockMvc;
+    private UUID testUserId;
+    private com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal currentPrincipal;
 
     @BeforeEach
     void setUp() {
+        testUserId = UUID.randomUUID();
+        currentPrincipal = new com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal(testUserId, Set.of("CUSTOMER"));
+
         AuthController controller = new AuthController(
                 authenticateUserService,
                 registerCustomerService,
-                registerMerchantService
+                registerMerchantService,
+                refreshTokenService
         );
+
+        org.springframework.web.method.support.HandlerMethodArgumentResolver authPrincipalResolver =
+                new org.springframework.web.method.support.HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
+                        return parameter.hasParameterAnnotation(org.springframework.security.core.annotation.AuthenticationPrincipal.class);
+                    }
+
+                    @Override
+                    public Object resolveArgument(org.springframework.core.MethodParameter parameter,
+                                                  org.springframework.web.method.support.ModelAndViewContainer mavContainer,
+                                                  org.springframework.web.context.request.NativeWebRequest webRequest,
+                                                  org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
+                        return currentPrincipal;
+                    }
+                };
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(authPrincipalResolver)
                 .build();
     }
 
@@ -118,5 +144,24 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.errors.firstName").exists())
                 .andExpect(jsonPath("$.errors.lastName").exists())
                 .andExpect(jsonPath("$.errors.storeName").exists());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/refresh - 200 OK con nuevo token y roles")
+    void refreshTokenSuccessfully() throws Exception {
+        AuthResult authResult = new AuthResult(
+                "refreshed-jwt-token",
+                testUserId,
+                "user@test.com",
+                "Carlos Mendoza",
+                Set.of("MERCHANT", "CUSTOMER")
+        );
+
+        when(refreshTokenService.execute(testUserId)).thenReturn(authResult);
+
+        mockMvc.perform(post("/api/v1/auth/refresh"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("refreshed-jwt-token"))
+                .andExpect(jsonPath("$.roles").isArray());
     }
 }

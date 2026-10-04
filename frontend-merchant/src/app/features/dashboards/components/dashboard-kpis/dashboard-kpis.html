@@ -1,44 +1,47 @@
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- KPI 1: Capacidad de Hoy -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4">
+  <div class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+        <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
           Capacidad de Hoy
         </span>
         @if (todayException()) {
           @if (isClosedToday()) {
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-500/20">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 text-[10px] font-bold uppercase tracking-wider border border-rose-300/40">
               <ng-icon name="matBlockOutline" class="text-[12px]" />
               Cerrado
             </span>
           } @else {
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[10px] font-bold uppercase tracking-wider border border-secondary-container/30">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-bold uppercase tracking-wider border border-amber-300/40">
               <ng-icon name="matStarOutline" class="text-[12px]" />
               Especial
             </span>
           }
         }
       </div>
-      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+      <span class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-emerald-800 flex items-center justify-center shrink-0">
         <ng-icon name="matViewWeekOutline" class="text-[18px]" />
       </span>
     </div>
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline justify-between">
-        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
           {{ capacityOccupied() }}
-          <span class="text-base sm:text-lg font-bold text-on-surface-variant">
+          <span class="text-base sm:text-lg font-bold text-stone-400">
             / {{ capacityTotal() > 0 ? capacityTotal() : 0 }} Cupos
           </span>
         </span>
         <span
           class="text-[11px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
-          [class.bg-rose-500/15]="isClosedToday()"
+          [class.bg-rose-50]="isClosedToday()"
           [class.text-rose-700]="isClosedToday()"
-          [class.bg-surface-container]="!isClosedToday()"
-          [class.text-primary-container]="!isClosedToday()"
+          [class.border]="true"
+          [class.border-rose-200]="isClosedToday()"
+          [class.bg-emerald-50]="!isClosedToday()"
+          [class.text-emerald-800]="!isClosedToday()"
+          [class.border-emerald-200]="!isClosedToday()"
         >
           {{ isClosedToday() ? 'Cerrado' : capacityPercentage() + '% ocupado' }}
         </span>
@@ -48,23 +51,26 @@
       <div class="flex items-center gap-1 pt-1">
         @for (block of capacityBlocks(); track block.index) {
           <span
-            class="h-3 sm:h-3.5 flex-1 rounded-xs transition-colors"
-            [class.bg-primary-container]="block.isFilled && !isClosedToday()"
+            class="h-3 sm:h-3.5 flex-1 rounded-xs transition-all duration-300"
+            [class.bg-[#005141]]="block.isFilled && !isClosedToday()"
+            [class.shadow-2xs]="block.isFilled && !isClosedToday()"
             [class.bg-rose-500]="block.isFilled && isClosedToday()"
-            [class.bg-surface-container-highest]="!block.isFilled"
+            [class.bg-stone-100]="!block.isFilled"
+            [class.border]="!block.isFilled"
+            [class.border-stone-200]="!block.isFilled"
           ></span>
         }
       </div>
     </div>
 
-    <div class="flex flex-col gap-1 pt-2 border-t border-surface-container-highest text-xs">
-      <span class="text-on-surface-variant font-medium truncate" [title]="shiftSchedule()">
+    <div class="flex flex-col gap-1 pt-2.5 border-t border-[#e7e0d6] text-xs">
+      <span class="text-stone-500 font-medium truncate" [title]="shiftSchedule()">
         {{ shiftSchedule() }}
       </span>
       <span
         class="font-bold"
         [class.text-rose-700]="isClosedToday()"
-        [class.text-primary-container]="!isClosedToday()"
+        [class.text-emerald-800]="!isClosedToday()"
       >
         @if (isClosedToday()) {
           Sin recepción de pedidos hoy
@@ -78,76 +84,76 @@
   </div>
 
   <!-- KPI 2: Pedidos de Hoy -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4">
+  <div class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4">
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
         Pedidos de Hoy
       </span>
-      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+      <span class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-emerald-800 flex items-center justify-center shrink-0">
         <ng-icon name="matReceiptLongOutline" class="text-[18px]" />
       </span>
     </div>
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
-      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+      <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
         {{ metrics().totalOrdersToday }} {{ metrics().totalOrdersToday === 1 ? 'pedido' : 'pedidos' }}
       </span>
       <div class="flex items-center gap-1.5 flex-wrap pt-1">
-        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface text-[11px] sm:text-xs font-medium">
+        <span class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-semibold">
           {{ metrics().confirmedOrders }} confirmados
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[11px] sm:text-xs font-bold">
+        <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-300/40 text-[11px] sm:text-xs font-bold">
           {{ metrics().inPrepOrders }} en preparación
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-surface-container text-primary-container text-[11px] sm:text-xs font-bold">
+        <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300/40 text-[11px] sm:text-xs font-bold">
           {{ metrics().readyOrders }} listos
         </span>
-        <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant text-[11px] sm:text-xs">
+        <span class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-500 text-[11px] sm:text-xs">
           {{ metrics().completedOrders }} completados
         </span>
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest text-xs">
-      <span class="text-on-surface-variant">Total programados para el día</span>
-      <span class="font-bold text-primary-container">Al día</span>
+    <div class="flex items-center justify-between pt-2.5 border-t border-[#e7e0d6] text-xs">
+      <span class="text-stone-500">Total programados para el día</span>
+      <span class="font-bold text-emerald-800">Al día</span>
     </div>
   </div>
 
   <!-- KPI 3: Ritmo Operativo -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/30 flex flex-col justify-between gap-3 sm:gap-4 sm:col-span-2 lg:col-span-1">
+  <div class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4 sm:col-span-2 lg:col-span-1">
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
         Ritmo Operativo
       </span>
-      <span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+      <span class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-emerald-800 flex items-center justify-center shrink-0">
         <ng-icon name="matTimerOutline" class="text-[18px]" />
       </span>
     </div>
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline gap-2">
-        <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
           {{ metrics().operatingRhythmMin }}
         </span>
-        <span class="text-xs sm:text-sm font-semibold text-on-surface-variant">min / pedido</span>
+        <span class="text-xs sm:text-sm font-semibold text-stone-500">min / pedido</span>
       </div>
       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
-        <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-primary-container bg-surface-container px-2 py-0.5 rounded-md">
+        <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
           <ng-icon name="matCheckCircleOutline" class="text-[15px]" />
           {{ metrics().operatingRhythmMin > 0 ? 'Dentro del ritmo' : 'Sin registros' }}
         </span>
         @if (metrics().targetRhythmMin > 0) {
-          <span class="text-[11px] sm:text-xs text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-md">
+          <span class="text-[11px] sm:text-xs text-stone-600 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-md font-mono">
             Meta: &lt; {{ metrics().targetRhythmMin }} min
           </span>
         }
       </div>
     </div>
 
-    <div class="flex items-center justify-between pt-2 border-t border-surface-container-highest text-xs">
-      <span class="text-on-surface-variant">Promedio de preparación</span>
-      <span class="font-bold text-primary-container">
+    <div class="flex items-center justify-between pt-2.5 border-t border-[#e7e0d6] text-xs">
+      <span class="text-stone-500">Promedio de preparación</span>
+      <span class="font-bold text-emerald-800">
         {{ metrics().operatingRhythmMin > 0 ? 'Operación ágil' : 'Pendiente' }}
       </span>
     </div>

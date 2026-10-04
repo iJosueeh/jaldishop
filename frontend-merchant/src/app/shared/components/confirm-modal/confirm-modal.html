@@ -1,6 +1,6 @@
 @if (isRendered()) {
   <div
-    class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans"
+    class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[1000] flex items-center justify-center p-4 font-sans"
     [class.modal-backdrop-animate]="!isClosing()"
     [class.modal-backdrop-exit]="isClosing()"
     role="dialog"
@@ -47,7 +47,9 @@
 
       <!-- Mensaje / Explicación -->
       <div class="p-3.5 rounded-2xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface leading-relaxed">
-        <p>{{ message() }}</p>
+        <ng-content>
+          <p>{{ message() }}</p>
+        </ng-content>
       </div>
 
       <!-- Botones de Acción -->

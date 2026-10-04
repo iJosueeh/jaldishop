@@ -3,6 +3,7 @@ package com.jaldishop.backend.store.web.controller;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.*;
+import com.jaldishop.backend.store.domain.CloseStoreAction;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,9 @@ class StoreControllerTest {
     @Mock
     private SearchPublicStoresService searchPublicStoresService;
 
+    @Mock
+    private CloseMyStoreService closeMyStoreService;
+
     private MockMvc mockMvc;
     private UUID testMerchantId;
     private JwtPrincipal currentPrincipal;
@@ -63,7 +67,8 @@ class StoreControllerTest {
                 getMyStoreService,
                 updateStoreService,
                 getStoreBySlugService,
-                searchPublicStoresService
+                searchPublicStoresService,
+                closeMyStoreService
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -139,13 +144,42 @@ class StoreControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/stores - 403 Forbidden cuando el usuario no tiene rol MERCHANT")
-    void createStoreForbiddenWhenNotMerchant() throws Exception {
+    @DisplayName("POST /api/v1/stores - 201 Created cuando el usuario tiene rol CUSTOMER (onboarding de usuario existente)")
+    void createStoreSuccessWhenCustomer() throws Exception {
         currentPrincipal = new JwtPrincipal(testMerchantId, Set.of("CUSTOMER"));
+
+        Store store = Store.reconstitute(
+                UUID.randomUUID(),
+                testMerchantId,
+                "Tienda Emprendedor",
+                "tienda-emprendedor",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                false,
+                null,
+                "PEN",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                StoreStatus.ACTIVE,
+                Instant.now(),
+                Instant.now()
+        );
+
+        when(createStoreService.execute(any(CreateStoreCommand.class))).thenReturn(store);
 
         String jsonRequest = """
                 {
-                    "name": "Tienda Intruso",
+                    "name": "Tienda Emprendedor",
                     "pickupEnabled": true,
                     "deliveryEnabled": false
                 }
@@ -154,8 +188,10 @@ class StoreControllerTest {
         mockMvc.perform(post("/api/v1/stores")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Tienda Emprendedor"))
+                .andExpect(jsonPath("$.slug").value("tienda-emprendedor"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
 
     @Test
@@ -275,5 +311,37 @@ class StoreControllerTest {
                 .andExpect(jsonPath("$.slug").value("dulce-sabor"))
                 .andExpect(jsonPath("$.pickupEnabled").value(true))
                 .andExpect(jsonPath("$.deliveryEnabled").value(true));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/stores/me - Eliminar tienda permanentemente cuando no tiene historial")
+    void closeMyStoreHardDeleted() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        when(closeMyStoreService.execute(any(CloseMyStoreCommand.class)))
+                .thenReturn(new CloseStoreResult(storeId, CloseStoreAction.DELETED, null, "La tienda y sus configuraciones fueron eliminadas permanentemente al no registrar historial operativo."));
+
+        mockMvc.perform(delete("/api/v1/stores/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\":\"Sin ventas\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storeId").value(storeId.toString()))
+                .andExpect(jsonPath("$.action").value("DELETED"))
+                .andExpect(jsonPath("$.status").doesNotExist())
+                .andExpect(jsonPath("$.message").value("La tienda y sus configuraciones fueron eliminadas permanentemente al no registrar historial operativo."));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/stores/me - Desactivar tienda lógicamente cuando tiene historial")
+    void closeMyStoreDeactivated() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        when(closeMyStoreService.execute(any(CloseMyStoreCommand.class)))
+                .thenReturn(new CloseStoreResult(storeId, CloseStoreAction.DEACTIVATED, StoreStatus.INACTIVE, "La tienda fue desactivada exitosamente para preservar su historial operativo y de auditoría."));
+
+        mockMvc.perform(delete("/api/v1/stores/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storeId").value(storeId.toString()))
+                .andExpect(jsonPath("$.action").value("DEACTIVATED"))
+                .andExpect(jsonPath("$.status").value("INACTIVE"))
+                .andExpect(jsonPath("$.message").value("La tienda fue desactivada exitosamente para preservar su historial operativo y de auditoría."));
     }
 }
