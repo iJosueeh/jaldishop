@@ -14,48 +14,7 @@ export interface CapacitySlot {
   estimatedDeliveryMinutes: number;
 }
 
-export const DEFAULT_SLOTS: CapacitySlot[] = [
-  {
-    id: 'slot-1',
-    timeRange: '09:00 - 10:00 AM',
-    totalCapacity: 12,
-    reservedCount: 12,
-    status: 'sold_out',
-    estimatedDeliveryMinutes: 25,
-  },
-  {
-    id: 'slot-2',
-    timeRange: '10:00 - 11:00 AM',
-    totalCapacity: 15,
-    reservedCount: 13,
-    status: 'few_left',
-    estimatedDeliveryMinutes: 30,
-  },
-  {
-    id: 'slot-3',
-    timeRange: '11:00 - 12:00 PM',
-    totalCapacity: 15,
-    reservedCount: 8,
-    status: 'available',
-    estimatedDeliveryMinutes: 35,
-  },
-  {
-    id: 'slot-4',
-    timeRange: '12:00 - 01:00 PM',
-    totalCapacity: 10,
-    reservedCount: 4,
-    status: 'available',
-    estimatedDeliveryMinutes: 40,
-  },
-  {
-    id: 'slot-5',
-    timeRange: '01:00 - 02:00 PM',
-    totalCapacity: 10,
-    reservedCount: 9,
-    status: 'few_left',
-    estimatedDeliveryMinutes: 35,
-  },
-];
+
 
 export interface CapacitySlotPickerProps {
   slots?: CapacitySlot[];
@@ -66,7 +25,7 @@ export interface CapacitySlotPickerProps {
 }
 
 export function CapacitySlotPicker({
-  slots = DEFAULT_SLOTS,
+  slots = [],
   selectedSlotId: controlledSelectedId,
   onSelectSlot,
   fulfillmentType = 'DELIVERY',
@@ -74,7 +33,7 @@ export function CapacitySlotPicker({
 }: CapacitySlotPickerProps) {
   // Find first available slot if not selected
   const defaultSlot = slots.find((s) => s.status !== 'sold_out') || slots[0];
-  const [internalSelectedId, setInternalSelectedId] = useState(defaultSlot.id);
+  const [internalSelectedId, setInternalSelectedId] = useState(defaultSlot?.id);
   const activeSlotId = controlledSelectedId !== undefined ? controlledSelectedId : internalSelectedId;
 
   const handleSelect = (slot: CapacitySlot) => {
@@ -84,6 +43,7 @@ export function CapacitySlotPicker({
   };
 
   const selectedSlot = slots.find((s) => s.id === activeSlotId);
+  if (slots.length === 0) return <section className="rounded-3xl border border-stone-200 bg-white p-6"><h3 className="font-semibold">No hay horarios disponibles</h3><p className="mt-2 text-sm text-stone-600">Esta tienda no tiene horarios publicados para seleccionar. No se ha reservado ningún cupo.</p></section>;
 
   return (
     <div className="bg-white rounded-3xl p-5 sm:p-7 border border-stone-200/90 shadow-xl shadow-stone-900/5 space-y-5">
@@ -104,7 +64,7 @@ export function CapacitySlotPicker({
         <div className="flex items-center gap-2">
           <Badge variant="jade" size="sm" className="font-bold flex items-center gap-1 shadow-2xs">
             <ShieldCheck className="w-3.5 h-3.5 text-[#005141]" />
-            Cupo protegido 10 min
+            Elige tu horario
           </Badge>
         </div>
       </div>
@@ -145,7 +105,7 @@ export function CapacitySlotPicker({
             <Clock className="w-3.5 h-3.5 text-[#ea580c]" /> Franjas de hoy (capacidad en tiempo real)
           </span>
           <span className="text-[11px] text-[#78716c] font-medium hidden sm:inline">
-            Al seleccionar se aparta tu lugar
+            Seleccionar no reserva un cupo
           </span>
         </div>
 
@@ -245,7 +205,7 @@ export function CapacitySlotPicker({
 
           <div className="text-[11px] text-[#005141] font-bold flex items-center gap-1.5 self-start sm:self-auto">
             <Clock className="w-3.5 h-3.5 text-[#005141]" />
-            <span>10 minutos de gracia para pagar al confirmar</span>
+            <span>Horario elegido; sin reserva confirmada</span>
           </div>
         </motion.div>
       )}

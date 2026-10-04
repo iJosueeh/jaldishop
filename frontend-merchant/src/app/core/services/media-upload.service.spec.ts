@@ -111,4 +111,23 @@ describe('MediaUploadService', () => {
       expect(completed?.result?.secure_url).toBe(mockUploadResult.secure_url);
     });
   });
+
+  describe('uploadPendingImages', () => {
+    it('debe retornar lista vacía si no se proporcionan imágenes', () => {
+      service.uploadPendingImages([]).subscribe((res) => {
+        expect(res).toEqual([]);
+      });
+    });
+
+    it('debe preservar imágenes que no tengan archivo File pendiente', () => {
+      const existingImages = [
+        { imageUrl: 'https://res.cloudinary.com/test/img1.webp', position: 0, isPrimary: true },
+        { imageUrl: 'https://res.cloudinary.com/test/img2.webp', position: 1, isPrimary: false },
+      ];
+
+      service.uploadPendingImages(existingImages).subscribe((res) => {
+        expect(res).toEqual(existingImages);
+      });
+    });
+  });
 });

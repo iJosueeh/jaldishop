@@ -2,12 +2,18 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import {
+  CreateCategoryRequest,
+  CreateProductRequest,
+  CreateProductVariantRequest,
+  CreateProductWithVariantPayload,
   Product,
   ProductCategory,
+  ProductVariant,
   ProductViewMode,
   UpdateProductRequest,
+  UpdateProductVariantRequest,
 } from '../models/product.models';
-import { catchError, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -148,6 +154,167 @@ export class ProductService {
         this.isCategoriesLoaded.set(true);
       }),
       catchError((error) => {
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  /**
+   * Crea una nueva categoría para la tienda y actualiza la señal reactiva categories.
+   */
+  createCategory(storeId: string, request: CreateCategoryRequest): Observable<ProductCategory> {
+    return this.http
+      .post<ProductCategory>(`${this.baseUrl}/${storeId}/categories`, request)
+      .pipe(
+        tap((newCategory) => {
+          this.categories.update((cats) => [...cats, newCategory]);
+        }),
+      );
+  }
+
+  /**
+   * Crea un producto base en la tienda.
+   */
+  createProduct(storeId: string, request: CreateProductRequest): Observable<Product> {
+    return this.http.post<Product>(`${this.baseUrl}/${storeId}/products`, request);
+  }
+
+  /**
+   * Obtiene la lista de variantes (formatos y precios) de un producto.
+   */
+  getProductVariants(storeId: string, productId: string): Observable<ProductVariant[]> {
+    return this.http.get<ProductVariant[]>(
+      `${this.baseUrl}/${storeId}/products/${productId}/variants`,
+    );
+  }
+
+  /**
+   * Crea una variante para un producto existente.
+   */
+  createProductVariant(
+    storeId: string,
+    productId: string,
+    request: CreateProductVariantRequest,
+  ): Observable<ProductVariant> {
+    return this.http.post<ProductVariant>(
+      `${this.baseUrl}/${storeId}/products/${productId}/variants`,
+      request,
+    );
+  }
+
+  /**
+   * Actualiza una variante existente de un producto.
+   */
+  updateProductVariant(
+    storeId: string,
+    productId: string,
+    variantId: string,
+    request: UpdateProductVariantRequest,
+  ): Observable<ProductVariant> {
+    return this.http.put<ProductVariant>(
+      `${this.baseUrl}/${storeId}/products/${productId}/variants/${variantId}`,
+      request,
+    );
+  }
+
+  /**
+   * Recalcula y actualiza los rangos de precio (minPrice, maxPrice) y variantes de un producto en el estado reactivo.
+   */
+  syncProductVariants(productId: string, variants: ProductVariant[]): void {
+    const activeVariants = variants.filter((v) => v.status === 'ACTIVE');
+    const prices = (activeVariants.length > 0 ? activeVariants : variants).map((v) => v.priceAmount);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : undefined;
+
+    this.products.update((current) =>
+      current.map((p) => (p.id === productId ? { ...p, variants, minPrice, maxPrice } : p)),
+    );
+  }
+
+  /**
+   * Orquesta la creación atómica de un producto y su variante estándar:
+   * 1. Resuelve la categoría (si se ingresó una nueva, la crea; de lo contrario usa la existente).
+   * 2. Registra el producto base.
+   * 3. Registra la variante estándar con su precio y control operativo.
+   * 4. Ensambla y actualiza la lista reactiva de productos sin requerir recargar la página.
+   */
+  createProductWithDefaultVariant(
+    storeId: string,
+    payload: CreateProductWithVariantPayload,
+  ): Observable<Product> {
+    this.isLoading.set(true);
+
+    const resolveCategory$: Observable<string> =
+      payload.newCategoryName && !payload.categoryId
+        ? this.createCategory(storeId, { name: payload.newCategoryName.trim() }).pipe(
+            map((cat) => cat.id),
+          )
+        : payload.categoryId
+          ? of(payload.categoryId)
+          : throwError(() => new Error('Debes seleccionar o crear una categoría para el producto.'));
+
+    return resolveCategory$.pipe(
+      switchMap((categoryId) => {
+        const createProductPayload: CreateProductRequest = {
+          categoryId,
+          name: payload.name.trim(),
+          slug: payload.slug?.trim() || undefined,
+          description: payload.description?.trim() || undefined,
+          imageUrl: payload.imageUrl || undefined,
+        };
+        return this.createProduct(storeId, createProductPayload);
+      }),
+      switchMap((createdProduct) => {
+        const variantRequests: CreateProductVariantRequest[] =
+          payload.variants && payload.variants.length > 0
+            ? payload.variants.map((v) => ({
+                presentationName: v.presentationName.trim(),
+                sku: v.sku?.trim() || undefined,
+                priceAmount: Number(v.priceAmount),
+                priceCurrency: v.priceCurrency?.trim() || 'PEN',
+                tracksInventory: !!v.tracksInventory,
+                attributes: v.attributes || [],
+              }))
+            : [
+                {
+                  presentationName: payload.presentationName?.trim() || 'Unidad Estándar',
+                  sku: payload.sku?.trim() || undefined,
+                  priceAmount: Number(payload.priceAmount || 0),
+                  priceCurrency: payload.priceCurrency?.trim() || 'PEN',
+                  tracksInventory: !!payload.tracksInventory,
+                  attributes: payload.attributes || [],
+                },
+              ];
+
+        const variantObservables = variantRequests.map((req) =>
+          this.createProductVariant(storeId, createdProduct.id, req),
+        );
+
+        return forkJoin(variantObservables).pipe(
+          map((createdVariants) => {
+            const categoryObj = this.categories().find((c) => c.id === createdProduct.categoryId);
+            const prices = createdVariants.map((v) => v.priceAmount);
+            const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
+            const maxPrice = prices.length > 0 ? Math.max(...prices) : undefined;
+
+            const fullProduct: Product = {
+              ...createdProduct,
+              categoryName: categoryObj?.name || payload.newCategoryName || 'General',
+              minPrice,
+              maxPrice,
+              variants: createdVariants,
+              status: (createdProduct.status as any) || 'ACTIVE',
+            };
+
+            this.products.update((current) => [fullProduct, ...current]);
+            this.isLoaded.set(true);
+            this.isLoading.set(false);
+            return fullProduct;
+          }),
+        );
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
         return throwError(() => error);
       }),
     );

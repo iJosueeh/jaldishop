@@ -1,0 +1,545 @@
+@if (isOpen()) {
+  <!-- Backdrop oscuro con desenfoque suave -->
+  <div
+    (click)="handleClose()"
+    class="fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 cursor-pointer"
+    [class.animate-fade-in]="!isClosing()"
+    [class.animate-fade-out]="isClosing()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Panel Lateral Desplegable (Slide-Over Drawer) -->
+  <aside
+    class="fixed top-0 right-0 h-full w-full sm:max-w-xl bg-surface-container-lowest shadow-2xl z-50 flex flex-col justify-between border-l border-outline-variant/30 font-sans overflow-hidden"
+    [class.animate-slide-in-right]="!isClosing()"
+    [class.animate-slide-out-right]="isClosing()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-product-title"
+  >
+    <!-- Cabecera del Drawer -->
+    <div
+      class="p-4 sm:p-5 border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-low/80 backdrop-blur-xs shrink-0"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-2xs"
+        >
+          <ng-icon name="matInventory2Outline" class="text-2xl" />
+        </div>
+        <div class="flex flex-col">
+          <h2 id="drawer-product-title" class="text-base font-extrabold text-on-surface">
+            {{ categories().length === 0 ? 'Publicar Primer Producto' : 'Nuevo Producto' }}
+          </h2>
+          <span class="text-xs text-on-surface-variant font-medium">
+            Completa la información básica para que tus clientes puedan pedirlo desde tu catálogo.
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="handleClose()"
+        [disabled]="isLoading()"
+        class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer disabled:opacity-50"
+        aria-label="Cerrar panel de producto"
+      >
+        <ng-icon name="matCloseOutline" class="text-xl" />
+      </button>
+    </div>
+
+    <!-- Cuerpo del Drawer con Scroll -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Banner de Error si falla la API -->
+      @if (errorMessage()) {
+        <div
+          class="flex items-start gap-3 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs sm:text-sm animate-fade-in"
+        >
+          <ng-icon name="matWarningOutline" class="text-lg shrink-0 mt-0.5" />
+          <div class="flex-1">
+            <span class="font-bold">No pudimos guardar el producto:</span>
+            <p class="mt-0.5 text-xs text-red-600 dark:text-red-300">{{ errorMessage() }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- SECCIÓN 1: Fotografía del Producto -->
+      <section class="space-y-2">
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          1. Fotos del Producto
+        </label>
+        <app-product-gallery-uploader
+          [images]="images()"
+          [maxImages]="4"
+          [disabled]="isLoading()"
+          (imagesChange)="onImagesChange($event)"
+        />
+        <p class="text-[11px] text-on-surface-variant flex items-center gap-1.5 pt-1">
+          <ng-icon name="matInfoOutline" class="text-primary text-sm shrink-0" />
+          <span>La primera foto será la portada principal que verán tus clientes en el catálogo y WhatsApp.</span>
+        </p>
+      </section>
+
+      <!-- SECCIÓN 2: Información Básica del Producto -->
+      <section class="space-y-4 pt-2 border-t border-outline-variant/15">
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          2. Información del Producto
+        </label>
+
+        <!-- Nombre del Producto -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <label for="prod-name" class="font-semibold text-on-surface">
+              Nombre del producto <span class="text-red-500">*</span>
+            </label>
+            <span class="text-[11px] text-on-surface-variant">{{ name().length }}/160</span>
+          </div>
+          <input
+            id="prod-name"
+            type="text"
+            [ngModel]="name()"
+            (ngModelChange)="onNameChange($event)"
+            placeholder="Ej: Torta Húmeda de Chocolate, Croissant de Mantequilla..."
+            maxlength="160"
+            [disabled]="isLoading()"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium"
+          />
+        </div>
+
+        <!-- Categoría del Producto (Con soporte de creación al vuelo) -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <label class="font-semibold text-on-surface">
+              Categoría en el menú <span class="text-red-500">*</span>
+            </label>
+            @if (categories().length > 0) {
+              <button
+                type="button"
+                (click)="toggleCategoryMode(!isNewCategory())"
+                class="text-[11px] font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1"
+              >
+                @if (isNewCategory()) {
+                  <span>Elegir de mis categorías</span>
+                } @else {
+                  <ng-icon name="matAddOutline" class="text-sm" />
+                  <span>Crear nueva categoría</span>
+                }
+              </button>
+            }
+          </div>
+
+          @if (isNewCategory() || categories().length === 0) {
+            <!-- Input para nueva categoría -->
+            <div class="space-y-1.5 animate-fade-in">
+              <input
+                type="text"
+                [ngModel]="newCategoryName()"
+                (ngModelChange)="newCategoryName.set($event)"
+                placeholder="Ej: Tortas y Pasteles, Bebidas Frías, Desayunos..."
+                maxlength="120"
+                [disabled]="isLoading()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-primary/40 bg-primary/5 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              />
+              @if (categories().length === 0) {
+                <p class="text-[11px] text-primary font-medium flex items-center gap-1">
+                  <ng-icon name="matCheckOutline" class="text-sm" />
+                  <span>Esta será tu primera categoría y se guardará automáticamente con este producto.</span>
+                </p>
+              }
+            </div>
+          } @else {
+            <!-- Selector desplegable de categorías existentes -->
+            <select
+              [ngModel]="selectedCategoryId()"
+              (ngModelChange)="selectedCategoryId.set($event)"
+              [disabled]="isLoading()"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
+            >
+              <option value="" disabled>Selecciona una categoría de tu menú...</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <label for="prod-desc" class="font-semibold text-on-surface">
+              Descripción o detalles <span class="text-stone-400 font-normal">(Opcional)</span>
+            </label>
+            <span class="text-[11px] text-on-surface-variant">{{ description().length }}/500</span>
+          </div>
+          <textarea
+            id="prod-desc"
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
+            rows="3"
+            maxlength="500"
+            placeholder="Describe los ingredientes, porciones o detalles clave (ej: Bizcocho húmedo bañado en chocolate, rinde 8 a 10 porciones)..."
+            [disabled]="isLoading()"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: Precio y Forma de Venta -->
+      <section class="space-y-4 pt-2 border-t border-outline-variant/15">
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          3. Precios y Variantes
+        </label>
+
+        <!-- Selector: Precio único vs Variantes -->
+        <div class="grid grid-cols-2 p-1 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-xs font-semibold">
+          <button
+            type="button"
+            (click)="setPricingMode('single')"
+            [disabled]="isLoading()"
+            class="py-2 px-3 rounded-lg text-center transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            [class.bg-surface-container-lowest]="pricingMode() === 'single'"
+            [class.text-primary]="pricingMode() === 'single'"
+            [class.shadow-2xs]="pricingMode() === 'single'"
+            [class.text-on-surface-variant]="pricingMode() !== 'single'"
+          >
+            <span>Precio Único</span>
+          </button>
+          <button
+            type="button"
+            (click)="setPricingMode('multiple')"
+            [disabled]="isLoading()"
+            class="py-2 px-3 rounded-lg text-center transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            [class.bg-surface-container-lowest]="pricingMode() === 'multiple'"
+            [class.text-primary]="pricingMode() === 'multiple'"
+            [class.shadow-2xs]="pricingMode() === 'multiple'"
+            [class.text-on-surface-variant]="pricingMode() !== 'multiple'"
+          >
+            <ng-icon name="matLayersOutline" class="text-sm" />
+            <span>Múltiples Formatos / Tamaños</span>
+          </button>
+        </div>
+
+        @if (pricingMode() === 'single') {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-in">
+            <!-- Precio -->
+            <div class="space-y-1.5">
+              <label for="prod-price" class="text-xs font-semibold text-on-surface block">
+                Precio al público <span class="text-red-500">*</span>
+              </label>
+              <div class="relative flex items-center">
+                <span class="absolute left-3.5 text-xs font-bold text-on-surface-variant font-mono">
+                  S/
+                </span>
+                <input
+                  id="prod-price"
+                  type="number"
+                  min="0.01"
+                  step="0.10"
+                  [ngModel]="priceAmount()"
+                  (ngModelChange)="priceAmount.set($event)"
+                  placeholder="0.00"
+                  [disabled]="isLoading()"
+                  class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- Nombre de Presentación / Formato de Venta -->
+            <div class="space-y-1.5">
+              <label for="prod-pres" class="text-xs font-semibold text-on-surface block">
+                Formato o porción de venta
+              </label>
+              <input
+                id="prod-pres"
+                type="text"
+                [ngModel]="presentationName()"
+                (ngModelChange)="presentationName.set($event)"
+                placeholder="Ej: Porción individual, Entera (20 cm), Vaso 12 oz..."
+                maxlength="120"
+                [disabled]="isLoading()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              />
+            </div>
+          </div>
+          <p class="text-[11px] text-on-surface-variant">
+            Indica cómo entregas el producto para que tu cliente sepa qué incluye su pedido.
+          </p>
+        } @else {
+          <!-- Múltiples formatos/variantes -->
+          <div class="space-y-3 animate-fade-in">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-on-surface">
+                Opciones y Tamaños de Venta ({{ formVariants().length }}) <span class="text-red-500">*</span>
+              </span>
+              <button
+                type="button"
+                (click)="addVariantOption()"
+                [disabled]="isLoading()"
+                class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline cursor-pointer"
+              >
+                <ng-icon name="matAddOutline" class="text-sm" />
+                <span>Agregar otra opción</span>
+              </button>
+            </div>
+
+            <div class="space-y-2.5">
+              @for (variant of formVariants(); track variant.id; let idx = $index) {
+                <div class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                      Opción #{{ idx + 1 }}
+                    </span>
+                    @if (formVariants().length > 1) {
+                      <button
+                        type="button"
+                        (click)="removeVariantOption(idx)"
+                        [disabled]="isLoading()"
+                        class="p-1 rounded-lg text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        title="Eliminar esta opción"
+                      >
+                        <ng-icon name="matDeleteOutline" class="text-sm" />
+                      </button>
+                    }
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                      <label class="text-[11px] font-medium text-on-surface block">
+                        Nombre del formato / tamaño <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        [ngModel]="variant.presentationName"
+                        (ngModelChange)="updateVariantName(idx, $event)"
+                        placeholder="Ej: Chico, Mediano, Grande, 500g..."
+                        maxlength="120"
+                        [disabled]="isLoading()"
+                        class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div class="space-y-1">
+                      <label class="text-[11px] font-medium text-on-surface block">
+                        Precio al público <span class="text-red-500">*</span>
+                      </label>
+                      <div class="relative flex items-center">
+                        <span class="absolute left-2.5 text-xs font-bold text-on-surface-variant font-mono">
+                          S/
+                        </span>
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.10"
+                          [ngModel]="variant.priceAmount"
+                          (ngModelChange)="updateVariantPrice(idx, $event)"
+                          placeholder="0.00"
+                          [disabled]="isLoading()"
+                          class="w-full pl-8 pr-2.5 py-2 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 text-[11px]">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant">
+                      <span class="font-mono text-[10px]">Cód SKU:</span>
+                      <input
+                        type="text"
+                        [ngModel]="variant.sku"
+                        (ngModelChange)="updateVariantSku(idx, $event)"
+                        placeholder="AUTO"
+                        class="px-2 py-0.5 rounded border border-outline-variant/30 bg-surface-container-lowest font-mono text-[10px] w-28 uppercase text-on-surface"
+                      />
+                    </div>
+
+                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-on-surface-variant select-none">
+                      <input
+                        type="checkbox"
+                        [checked]="variant.tracksInventory"
+                        (change)="updateVariantTracksInventory(idx, !variant.tracksInventory)"
+                        [disabled]="isLoading()"
+                        class="rounded border-outline-variant text-primary focus:ring-primary h-3.5 w-3.5"
+                      />
+                      <span>Controla stock</span>
+                    </label>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <p class="text-[11px] text-on-surface-variant flex items-center gap-1">
+              <ng-icon name="matInfoOutline" class="text-primary text-xs shrink-0" />
+              <span>Tus clientes podrán elegir su formato o tamaño favorito en el catálogo y verán el rango de precios.</span>
+            </p>
+          </div>
+        }
+      </section>
+
+      <!-- SECCIÓN 4: Disponibilidad y Forma de Preparación -->
+      <section class="space-y-3 pt-2 border-t border-outline-variant/15">
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+          4. Disponibilidad y Tipo de Elaboración
+        </label>
+
+        <div class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low space-y-3">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-on-surface">
+                {{ tracksInventory() ? 'Control de existencias limitadas (Stock)' : 'Elaborado al momento / A pedido' }}
+              </span>
+              <span class="text-[11px] text-on-surface-variant leading-relaxed">
+                {{ tracksInventory() ? 'Cada venta descontará unidades disponibles en tu tienda.' : 'Tus clientes pueden ordenar siempre fresco sin límite de existencias (ideal para cocina, cafetería o pastelería artesanal).' }}
+              </span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                [checked]="tracksInventory()"
+                (change)="tracksInventory.set(!tracksInventory())"
+                [disabled]="isLoading()"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
+              ></div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: Enlace web y Código interno (Colapsable con auto-generación transparente) -->
+      <section class="pt-2 border-t border-outline-variant/15 space-y-3">
+        <button
+          type="button"
+          (click)="toggleAdvancedOptions()"
+          class="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer text-left border border-outline-variant/20"
+        >
+          <div class="flex items-center gap-2">
+            <ng-icon name="matTuneOutline" class="text-primary text-base" />
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-on-surface">Enlace web y código interno (Automáticos)</span>
+              <span class="text-[11px] text-on-surface-variant">
+                Se crean solos a partir del nombre. Puedes abrirlos si deseas personalizarlos.
+              </span>
+            </div>
+          </div>
+          <ng-icon
+            [name]="showAdvancedOptions() ? 'matKeyboardArrowUpOutline' : 'matKeyboardArrowDownOutline'"
+            class="text-lg text-on-surface-variant shrink-0"
+          />
+        </button>
+
+        @if (showAdvancedOptions()) {
+          <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface-container-low/70 space-y-4 animate-fade-in">
+            <!-- Enlace Web (Slug) -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="prod-slug-adv" class="font-semibold text-on-surface">
+                  Enlace directo del producto (para compartir)
+                </label>
+                @if (isCustomSlug()) {
+                  <button
+                    type="button"
+                    (click)="resetSlugToDefault()"
+                    class="text-[11px] text-primary hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <ng-icon name="matRefreshOutline" class="text-xs" />
+                    <span>Volver a generar desde el nombre</span>
+                  </button>
+                }
+              </div>
+              <div class="flex items-center rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-xs text-on-surface-variant">
+                <span class="font-mono text-on-surface-variant/70 shrink-0">/p/</span>
+                <input
+                  id="prod-slug-adv"
+                  type="text"
+                  [ngModel]="slug()"
+                  (ngModelChange)="onSlugChange($event)"
+                  placeholder="torta-humeda-de-chocolate"
+                  maxlength="180"
+                  [disabled]="isLoading()"
+                  class="w-full pl-1 bg-transparent text-on-surface font-mono text-xs focus:outline-none"
+                />
+              </div>
+              <p class="text-[11px] text-on-surface-variant">
+                Es la dirección web que se abrirá cuando compartas este producto en WhatsApp o redes sociales.
+              </p>
+            </div>
+
+            <!-- Código interno / Código de barras -->
+            <div class="space-y-1.5 pt-2 border-t border-outline-variant/15">
+              <div class="flex justify-between items-center text-xs">
+                <label for="prod-sku-adv" class="font-semibold text-on-surface">
+                  Código interno o de barras (Opcional)
+                </label>
+                <div class="flex items-center gap-2">
+                  @if (isCustomSku()) {
+                    <button
+                      type="button"
+                      (click)="resetSkuToDefault()"
+                      class="text-[11px] text-primary hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <ng-icon name="matRefreshOutline" class="text-xs" />
+                      <span>Sugerir código</span>
+                    </button>
+                  }
+                  @if (sku()) {
+                    <button
+                      type="button"
+                      (click)="clearSku()"
+                      class="text-[11px] text-on-surface-variant hover:text-red-500 cursor-pointer"
+                    >
+                      Dejar sin código
+                    </button>
+                  }
+                </div>
+              </div>
+              <input
+                id="prod-sku-adv"
+                type="text"
+                [ngModel]="sku()"
+                (ngModelChange)="onSkuChange($event)"
+                placeholder="Ej: TORT-CHOC-01 o escanea tu código"
+                maxlength="100"
+                [disabled]="isLoading()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all uppercase"
+              />
+              <p class="text-[11px] text-on-surface-variant">
+                Útil si manejas lector de código de barras o inventario propio. Es privado, tus clientes no lo verán.
+              </p>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+
+    <!-- Pie del Drawer (Acciones Principales) -->
+    <div
+      class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container-low/90 backdrop-blur-xs flex items-center justify-end gap-3 shrink-0"
+    >
+      <button
+        type="button"
+        (click)="handleClose()"
+        [disabled]="isLoading()"
+        class="px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-semibold text-xs hover:bg-surface-container-high transition-colors cursor-pointer disabled:opacity-50"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="!canSubmit()"
+        class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        @if (isLoading()) {
+          <span class="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+          <span>Guardando producto...</span>
+        } @else {
+          <ng-icon name="matCheckOutline" class="text-base" />
+          <span>Publicar en Catálogo</span>
+        }
+      </button>
+    </div>
+  </aside>
+}

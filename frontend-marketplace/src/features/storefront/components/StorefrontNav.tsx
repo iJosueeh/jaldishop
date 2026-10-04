@@ -10,16 +10,10 @@ interface StorefrontNavProps {
   onSelectCategory?: (id: string) => void;
 }
 
-const DEFAULT_CATEGORIES: StoreCategory[] = [
-  { id: 'all', name: 'Todos los productos', slug: 'todos', itemCount: 6 },
-  { id: 'destacados', name: '⭐ Más Populares', slug: 'destacados', itemCount: 3 },
-  { id: 'panaderia', name: '🥐 Panes & Masas', slug: 'panes', itemCount: 2 },
-  { id: 'pasteleria', name: '🍰 Pastelería & Dulces', slug: 'pasteles', itemCount: 2 },
-  { id: 'bebidas', name: '☕ Cafetería & Bebidas', slug: 'bebidas', itemCount: 1 },
-];
+
 
 export function StorefrontNav({
-  categories = DEFAULT_CATEGORIES,
+  categories = [],
   activeCategoryId = 'all',
   onSelectCategory,
 }: StorefrontNavProps) {
@@ -32,13 +26,17 @@ export function StorefrontNav({
     }
   };
 
+  if (categories.length === 0) return null;
+
   return (
     <div className="sticky top-16 sm:top-20 z-30 bg-[#faf7f2]/95 backdrop-blur-md border-y border-stone-200/80 py-3 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 relative">
           {categories.map((cat) => {
             const isSelected = selected === cat.id;
-            return (
+            if (categories.length === 0) return null;
+
+  return (
               <button
                 key={cat.id}
                 onClick={() => handleSelect(cat.id)}

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { HeroSection } from '@/features/landing/components/HeroSection';
 import { TrustMetrics } from '@/features/landing/components/TrustMetrics';
 import { CraftMarqueeSection } from '@/features/landing/components/CraftMarqueeSection';
@@ -8,6 +9,25 @@ import { BentoFeatures } from '@/features/landing/components/BentoFeatures';
 import { FeaturedStoresGrid } from '@/features/landing/components/FeaturedStoresGrid';
 import { FinalCtaSection } from '@/features/landing/components/FinalCtaSection';
 import { Footer } from '@/shared/components/layout/Footer';
+
+const title = 'JaldiShop | Catálogo digital y pedidos por WhatsApp';
+const description = 'Comparte tu catálogo digital por WhatsApp e Instagram y organiza los pedidos de tu negocio con cupos por día y horarios de entrega o recojo.';
+
+export const metadata: Metadata = {
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: 'website',
+    locale: 'es_PE',
+  },
+  twitter: {
+    card: 'summary',
+    title,
+    description,
+  },
+};
 
 export default function HomePage() {
   return (

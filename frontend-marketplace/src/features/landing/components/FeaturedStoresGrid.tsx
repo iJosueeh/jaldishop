@@ -117,7 +117,8 @@ const CURATED_DEFAULT_STORES: PublicStore[] = [
 export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridProps) {
   const fetchedStores = initialStores ?? (await storeService.getFeaturedStores());
   // Si la API devuelve comercios, los mostramos; si viene vacío (ej. sin backend levantado), usamos los comercios curados con fallbacks
-  const storesToDisplay = fetchedStores.length > 0 ? fetchedStores : CURATED_DEFAULT_STORES;
+  const isDemo = fetchedStores.length === 0;
+  const storesToDisplay = isDemo ? CURATED_DEFAULT_STORES : fetchedStores;
 
   return (
     <section id="tiendas-destacadas" className="py-20 sm:py-28 bg-[#faf7f2] relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
@@ -131,30 +132,32 @@ export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridPr
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200 shadow-xs text-xs font-bold text-[#005141] uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
-              Explora Tiendas Verificadas
+              {isDemo ? 'Tiendas de demostración' : 'Explora negocios locales'}
             </div>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1c1917]">
-              Comercios destacados en JaldiShop
+              {isDemo ? 'Así puede verse tu tienda' : 'Comercios destacados en JaldiShop'}
             </h2>
             <p className="text-sm sm:text-base text-[#57534e] max-w-xl">
-              Descubre panaderías, reposterías y creadores locales que sincronizan sus pedidos con máxima precisión y calidad artesanal.
+              {isDemo
+                ? 'Conoce ejemplos de catálogos para negocios bajo pedido. Los comercios, productos y datos que ves aquí son ilustrativos.'
+                : 'Descubre panaderías, reposterías y negocios locales. Consulta sus productos y horarios para organizar tu próxima compra.'}
             </p>
           </div>
 
-          <Link href="/tienda/panaderia-don-pepe">
+          <Link href={`/tienda/${storesToDisplay[0].slug}`}>
             <Button
               variant="outline"
               size="sm"
               className="bg-white border-stone-200 hover:bg-stone-50 text-[#1c1917] font-bold shadow-xs cursor-pointer rounded-2xl"
               rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
             >
-              Ver todas las tiendas
+              {isDemo ? 'Ver una demostración' : 'Explorar una tienda'}
             </Button>
           </Link>
         </div>
 
         {/* Peek Slider Carousel Component with Default Fallbacks & Interactive Controls */}
-        <StorePeekSlider stores={storesToDisplay} />
+        <StorePeekSlider stores={storesToDisplay} isDemo={isDemo} />
       </Container>
     </section>
   );

@@ -10,7 +10,6 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
   Store,
 } from 'lucide-react';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -18,6 +17,7 @@ import { PublicStore } from '@/features/storefront/types/storefront.types';
 
 export interface StorePeekSliderProps {
   stores: PublicStore[];
+  isDemo?: boolean;
 }
 
 export type StoreCategoryFilter = 'ALL' | 'PANADERIA' | 'REPOSTERIA' | 'CAFE' | 'SALADOS';
@@ -310,24 +310,25 @@ export function formatStoreData(store: Partial<PublicStore>) {
   };
 }
 
-function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
+function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; isDemo: boolean }) {
   const store = formatStoreData(rawStore);
+  const hasReviews = !isDemo && typeof rawStore.rating === 'number' && rawStore.rating > 0 && typeof rawStore.reviewsCount === 'number' && rawStore.reviewsCount > 0;
   const [bannerSrc, setBannerSrc] = useState(store.bannerUrl);
   const [logoError, setLogoError] = useState(false);
 
   return (
     <div className="w-[84vw] sm:w-[350px] lg:w-[380px] shrink-0 snap-start flex flex-col group">
-      <Link href={`/tienda/${store.slug}`} className="block h-full">
+      <Link href={`/tienda/${store.slug}`} aria-label={`${isDemo ? 'Ver demostración' : 'Ver tienda'}: ${store.name}`} className="block h-full rounded-3xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#005141]">
         <div className="h-full flex flex-col justify-between bg-white rounded-3xl border border-stone-200/90 shadow-lg shadow-stone-900/5 group-hover:shadow-2xl group-hover:shadow-stone-900/15 group-hover:border-[#005141]/60 transition-all duration-500 overflow-hidden relative">
           {/* Top Photographic Cover Banner with Shine & Hover Zoom */}
-          <div className="h-44 sm:h-48 w-full relative overflow-hidden bg-stone-900">
+          <div className="aspect-[16/9] w-full relative overflow-hidden bg-stone-900">
             <Image
               src={bannerSrc}
               alt={store.name}
               fill
               sizes="(max-width: 768px) 85vw, 380px"
               onError={() => setBannerSrc(DEFAULT_BANNER)}
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110 filter brightness-[0.92] group-hover:brightness-100"
+              className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110 filter brightness-[0.92] group-hover:brightness-100"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
@@ -335,31 +336,31 @@ function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
             {/* Top Badges */}
-            <div className="absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-4 sm:right-4 flex items-center justify-between z-10">
+            <div className="absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-2 z-10">
               <Badge
                 variant={store.badgeVariant}
                 size="sm"
                 className="bg-white/95 backdrop-blur-md shadow-md border-0 font-bold"
               >
-                {store.badge}
+                {isDemo ? 'Demostración' : 'Negocio local'}
               </Badge>
 
-              <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2.5 sm:px-3 py-1 rounded-full shadow-md">
+              {hasReviews && <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2.5 sm:px-3 py-1 rounded-full shadow-md">
                 <Star className="w-3.5 h-3.5 text-[#feae2c] fill-[#feae2c]" />
-                <span>{store.rating.toFixed(1)}</span>
+                <span>{rawStore.rating!.toFixed(1)}</span>
                 <span className="text-[#78716c] text-[10px] font-medium">
-                  ({store.reviewsCount})
+                  ({rawStore.reviewsCount})
                 </span>
-              </div>
+              </div>}
             </div>
           </div>
 
           {/* Body Content */}
           <div className="p-4 sm:p-6 pt-0 relative flex-1 flex flex-col justify-between">
             {/* Floating Store Logo / Avatar */}
-            <div className="flex items-end justify-between -mt-7 sm:-mt-8 mb-3 sm:mb-4 relative z-10">
+            <div className="flex items-end justify-between gap-3 -mt-7 sm:-mt-8 mb-3 sm:mb-4 relative z-10">
               <div
-                className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl ${store.logoBg} text-white flex items-center justify-center shadow-lg font-black text-2xl border-2 border-white group-hover:scale-105 transition-transform duration-300 overflow-hidden`}
+                className={`w-13 h-13 sm:w-14 sm:h-14 shrink-0 rounded-2xl ${store.logoBg} text-white flex items-center justify-center shadow-lg font-black text-2xl border-2 border-white group-hover:scale-105 transition-transform duration-300 overflow-hidden`}
               >
                 {store.logoUrl && !logoError ? (
                   <Image
@@ -383,21 +384,20 @@ function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
             {/* Title & Tagline */}
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-lg sm:text-xl font-bold text-[#1c1917] group-hover:text-[#005141] transition-colors leading-snug">
+                <h3 className="min-h-14 line-clamp-2 text-lg sm:text-xl font-bold text-[#1c1917] group-hover:text-[#005141] transition-colors leading-snug">
                   {store.name}
                 </h3>
-                <ShieldCheck className="w-4 h-4 text-[#005141] shrink-0 opacity-80" />
               </div>
-              <p className="text-xs sm:text-sm text-[#57534e] line-clamp-2 leading-relaxed">
+              <p className="min-h-10 text-sm text-[#57534e] line-clamp-2 leading-relaxed">
                 {store.description}
               </p>
             </div>
 
             {/* Bottom Operational Metadata */}
-            <div className="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-[#57534e]">
+            <div className="mt-6 pt-4 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2 text-xs text-[#57534e]">
               <div className="flex items-center gap-1.5 font-medium">
                 <Clock className="w-3.5 h-3.5 text-[#a8a29e]" />
-                <span>{store.prepTime}</span>
+                <span>{store.prepTime.replace('min prep', 'min de preparación')}</span>
               </div>
 
               <div className="flex items-center gap-1.5 font-semibold text-[#1c1917]">
@@ -407,9 +407,9 @@ function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
             </div>
 
             {/* Hover Call-to-action bar */}
-            <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-black text-[#005141] group-hover:text-[#00382d]">
-              <span>Ver menú y reservar cupo</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#005141]" />
+            <div className="mt-4 rounded-xl bg-[#005141] px-4 py-3 flex items-center justify-between text-sm font-bold text-white group-hover:bg-[#00382d] transition-colors">
+              <span>{isDemo ? 'Ver demostración' : 'Ver tienda'}</span>
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </div>
@@ -418,7 +418,7 @@ function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
   );
 }
 
-export function StorePeekSlider({ stores }: StorePeekSliderProps) {
+export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<StoreCategoryFilter>('ALL');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -562,6 +562,7 @@ export function StorePeekSlider({ stores }: StorePeekSliderProps) {
             <StoreCardItem
               key={rawStore.id || rawStore.slug || Math.random().toString()}
               rawStore={rawStore}
+              isDemo={isDemo}
             />
           ))}
         </div>

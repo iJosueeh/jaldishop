@@ -23,11 +23,11 @@ export function HeroSection() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#ea580c]" />
               </span>
               <span className="text-stone-100 font-medium tracking-tight">
-                Vende por WhatsApp e Instagram sin sobreventa
+                Tu catálogo para WhatsApp e Instagram
               </span>
               <span className="hidden sm:inline-block text-white/30">•</span>
               <span className="hidden sm:inline-flex items-center gap-1 text-[#feae2c] font-bold text-xs">
-                <Sparkles className="w-3 h-3 text-[#feae2c]" /> Modo Inteligente
+                <Sparkles className="w-3 h-3 text-[#feae2c]" /> Pedidos organizados
               </span>
             </div>
           </MotionFade>
@@ -37,16 +37,16 @@ export function HeroSection() {
             <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-black tracking-tight text-white leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-xl">
               Vende por WhatsApp{' '}
               <span className="text-[#feae2c] underline underline-offset-[6px] decoration-[#ea580c] decoration-wavy decoration-2">
-                sin colapsar
+                sin recibir
               </span>{' '}
-              tu capacidad.
+              pedidos de más.
             </h1>
           </MotionFade>
 
           {/* Subtitle in clear merchant language */}
           <MotionFade delay={0.3}>
             <p className="text-stone-100/95 text-base lg:text-lg font-normal leading-relaxed max-w-lg lg:max-w-xl drop-shadow-md">
-              Acepta solo los pedidos que tu negocio o taller puede entregar a tiempo. Bloquea horarios saturados al instante y asegura 10 minutos de gracia para que tus clientes paguen sin perder su cupo.
+              Comparte tu catálogo digital por WhatsApp e Instagram. Tus clientes eligen sus productos y un horario de entrega o recojo según los cupos de tu negocio.
             </p>
           </MotionFade>
 
@@ -54,7 +54,7 @@ export function HeroSection() {
           <MotionFade delay={0.4}>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1.5">
               <a
-                href={env.merchantUrl}
+                href={new URL('/register', env.merchantUrl).href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
@@ -91,7 +91,7 @@ export function HeroSection() {
               </div>
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/55 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-stone-100 shadow-md">
                 <Clock className="w-4 h-4 text-[#feae2c] shrink-0" />
-                <span>10 min para pagar</span>
+                <span>Cupo reservado 10 min</span>
               </div>
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/55 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-stone-100 shadow-md">
                 <Flame className="w-4 h-4 text-[#ea580c] shrink-0" />

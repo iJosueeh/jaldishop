@@ -42,11 +42,17 @@ describe('storeService', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null on network error without fake fallback', async () => {
+    it('propagates a network failure so it is not shown as a missing store', async () => {
       vi.mocked(apiClient).mockRejectedValueOnce(new Error('Network error'));
 
-      const result = await storeService.getStoreBySlug('any-store');
-      expect(result).toBeNull();
+      await expect(storeService.getStoreBySlug('any-store')).rejects.toThrow('Network error');
+    });
+
+    it('uses the published contact and shipping fields from the backend', async () => {
+      vi.mocked(apiClient).mockResolvedValueOnce({ id: '1', name: 'Toddy', whatsappNumber: '51999999999', contactPhone: '51888888888', deliveryFeeAmount: 7.5 });
+      const store = await storeService.getStoreBySlug('toddy');
+      expect(store?.phone).toBe('51999999999');
+      expect(store?.deliveryFee).toBe(7.5);
     });
   });
 

@@ -33,13 +33,13 @@ export function ComparisonSection() {
         <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4 mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200 shadow-xs text-xs font-bold text-[#ea580c]">
             <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
-            La Transformación Operativa
+            Más orden en tu día a día
           </div>
           <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1c1917] leading-tight sm:leading-snug">
             ¿Por qué vender por chat tradicional te cuesta dinero y clientes?
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-[#57534e] max-w-xl mx-auto">
-            Compara el estrés diario de coordinar pedidos manualmente frente a la tranquilidad de un sistema con capacidad inteligente.
+            Compara el estrés diario de coordinar pedidos manualmente frente a la tranquilidad de una tienda con horarios y cupos definidos.
           </p>
 
           {/* Interactive Mode Switcher Tabs */}
@@ -149,7 +149,7 @@ export function ComparisonSection() {
                 </div>
 
                 <div className="mt-6 p-4 bg-rose-50 border border-rose-200/70 rounded-2xl text-xs text-rose-700 font-bold text-center leading-relaxed">
-                  ❌ Pérdida promedio del 25% de clientes por mala experiencia y pedidos demorados
+                  Más mensajes para coordinar, menos claridad para preparar y entregar.
                 </div>
               </Card>
             </motion.div>
@@ -177,12 +177,12 @@ export function ComparisonSection() {
                         <h3 className="font-display text-base sm:text-lg font-bold text-[#1c1917]">
                           Capa de Orden JaldiShop Pro
                         </h3>
-                        <p className="text-xs text-[#005141] font-bold">Control de Capacidad Inteligente</p>
+                        <p className="text-xs text-[#005141] font-bold">Tú decides cuántos pedidos aceptar</p>
                       </div>
                     </div>
                     <div className="self-start sm:self-auto">
                       <Badge variant="jade" size="sm">
-                        Flujo Blindado
+                        Cupos bajo control
                       </Badge>
                     </div>
                   </div>
@@ -195,29 +195,29 @@ export function ComparisonSection() {
                     <li className="flex items-start gap-3 p-3 rounded-2xl bg-white border border-teal-200/80 shadow-xs">
                       <CheckCircle2 className="w-5 h-5 text-[#005141] shrink-0 mt-0.5" />
                       <div className="leading-relaxed">
-                        <strong className="text-[#1c1917] block font-bold mb-0.5">Límites exactos por franja horaria:</strong>
+                        <strong className="text-[#1c1917] block font-bold mb-0.5">Un límite para cada horario:</strong>
                         Tu tienda solo acepta los pedidos que tu equipo puede preparar con calidad. Al llenarse, se bloquea sola.
                       </div>
                     </li>
                     <li className="flex items-start gap-3 p-3 rounded-2xl bg-white border border-teal-200/80 shadow-xs">
                       <ShieldCheck className="w-5 h-5 text-[#005141] shrink-0 mt-0.5" />
                       <div className="leading-relaxed">
-                        <strong className="text-[#1c1917] block font-bold mb-0.5">Tiempo de gracia de 10 minutos:</strong>
-                        El cupo queda asegurado mientras el cliente realiza el pago, blindando tu tienda contra la doble venta.
+                        <strong className="text-[#1c1917] block font-bold mb-0.5">10 minutos para iniciar el pago:</strong>
+                        Al empezar la compra, reservamos el cupo durante 10 minutos para que el cliente pueda iniciar el pago.
                       </div>
                     </li>
                     <li className="flex items-start gap-3 p-3 rounded-2xl bg-white border border-teal-200/80 shadow-xs">
                       <MessageCircle className="w-5 h-5 text-[#005141] shrink-0 mt-0.5" />
                       <div className="leading-relaxed">
-                        <strong className="text-[#1c1917] block font-bold mb-0.5">WhatsApp Order Bridge estructurado:</strong>
-                        Los pedidos llegan limpios con producto, total, comprobante y franja de entrega lista para despachar.
+                        <strong className="text-[#1c1917] block font-bold mb-0.5">Un resumen para compartir por WhatsApp:</strong>
+                        Tu cliente puede enviarte los productos, el total y el horario elegido para coordinar el pedido.
                       </div>
                     </li>
                   </ul>
                 </div>
 
                 <div className="mt-6 p-4 bg-[#ccfbf1]/80 border border-teal-300/80 rounded-2xl text-xs text-[#005141] font-extrabold text-center leading-relaxed">
-                  ✨ 99.8% de entregas puntuales y 3x más recomendaciones de clientes satisfechos
+                  ✨ Productos, cantidades y horarios claros para organizar tus pedidos.
                 </div>
               </Card>
             </motion.div>

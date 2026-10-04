@@ -15,6 +15,7 @@ export interface ProductImage {
   position: number;
   isPrimary: boolean;
   createdAt?: string;
+  file?: File;
 }
 
 export interface ProductVariantAttribute {
@@ -64,13 +65,63 @@ export interface Product {
   stockIssueMessage?: string;
 }
 
-export interface CreateProductRequest {
-  categoryId?: string;
+export interface CreateCategoryRequest {
   name: string;
-  slug: string;
+  description?: string;
+}
+
+export interface CreateProductRequest {
+  categoryId: string;
+  name: string;
+  slug?: string;
   description?: string;
   imageUrl?: string;
   images?: ProductImage[];
+}
+
+export interface CreateProductVariantRequest {
+  presentationName: string;
+  sku?: string;
+  priceAmount: number;
+  priceCurrency: string;
+  tracksInventory: boolean;
+  attributes?: ProductVariantAttribute[];
+}
+
+export interface UpdateProductVariantRequest {
+  presentationName: string;
+  sku?: string;
+  priceAmount: number;
+  priceCurrency: string;
+  tracksInventory: boolean;
+  status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  attributes?: ProductVariantAttribute[];
+}
+
+export interface CreateProductVariantItem {
+  presentationName: string;
+  sku?: string;
+  priceAmount: number;
+  priceCurrency?: string;
+  tracksInventory: boolean;
+  attributes?: ProductVariantAttribute[];
+}
+
+export interface CreateProductWithVariantPayload {
+  categoryId?: string;
+  newCategoryName?: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  imageUrl?: string;
+  images?: ProductImage[];
+  presentationName?: string;
+  sku?: string;
+  priceAmount?: number;
+  priceCurrency?: string;
+  tracksInventory?: boolean;
+  attributes?: ProductVariantAttribute[];
+  variants?: CreateProductVariantItem[];
 }
 
 export interface UpdateProductRequest {

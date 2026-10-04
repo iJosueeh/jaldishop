@@ -1,6 +1,6 @@
 import { inject, Service } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { forkJoin, map, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CloudinaryUploadResult,
@@ -9,6 +9,7 @@ import {
   UploadSignatureRequest,
   UploadSignatureResponse,
 } from '../models/media.models';
+import { ProductImage } from '../models/product.models';
 
 @Service()
 export class MediaUploadService {
@@ -76,6 +77,62 @@ export class MediaUploadService {
         },
       });
     });
+  }
+
+  /**
+   * Sube un archivo a Cloudinary y retorna un Observable con la URL final segura (secure_url).
+   */
+  uploadImageDirect(
+    file: File,
+    targetType: MediaTargetType = 'PRODUCT_IMAGE',
+    storeId?: string,
+  ): Observable<string> {
+    return new Observable<string>((subscriber) => {
+      this.uploadImage(file, targetType, storeId).subscribe({
+        next: (progress) => {
+          if (progress.state === 'COMPLETED' && progress.result?.secure_url) {
+            subscriber.next(progress.result.secure_url);
+            subscriber.complete();
+          } else if (progress.state === 'ERROR') {
+            subscriber.error(new Error(progress.error || 'Error al subir la imagen.'));
+          }
+        },
+        error: (err) => subscriber.error(err),
+      });
+    });
+  }
+
+  /**
+   * Procesa una lista de imágenes que pueden contener archivos locales pendientes de subida (`file`).
+   * Sube a Cloudinary únicamente aquellos ítems que tengan `file` y preserva las URLs de los que ya existían.
+   */
+  uploadPendingImages(
+    images: ProductImage[],
+    targetType: MediaTargetType = 'PRODUCT_IMAGE',
+    storeId?: string,
+  ): Observable<ProductImage[]> {
+    if (!images || images.length === 0) {
+      return of([]);
+    }
+
+    const tasks$ = images.map((img, idx) => {
+      if (img.file) {
+        return this.uploadImageDirect(img.file, targetType, storeId).pipe(
+          map((uploadedUrl) => ({
+            ...img,
+            imageUrl: uploadedUrl,
+            file: undefined,
+            position: idx,
+          })),
+        );
+      }
+      return of({
+        ...img,
+        position: idx,
+      });
+    });
+
+    return forkJoin(tasks$);
   }
 
   private performDirectUpload(
