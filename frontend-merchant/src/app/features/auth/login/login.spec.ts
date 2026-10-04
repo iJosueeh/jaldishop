@@ -25,6 +25,7 @@ describe('LoginComponent', () => {
       success: vi.fn(),
       error: vi.fn(),
       warning: vi.fn(),
+      info: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -80,5 +81,37 @@ describe('LoginComponent', () => {
 
     expect(component.isLoading()).toBe(false);
     expect(component.errorMessage()).toBe('Correo o contraseña incorrectos.');
+  });
+
+  it('debe redirigir a /register?flow=open-store si la cuenta no tiene rol MERCHANT ni ADMIN', () => {
+    authServiceMock.login.mockReturnValue(of({ token: 'fake-jwt', user: {} }));
+    authServiceMock.isAdmin.mockReturnValue(false);
+    authServiceMock.isMerchant.mockReturnValue(false);
+
+    component.onLogin({ email: 'cliente@test.com', password: 'password123' });
+
+    expect(authServiceMock.login).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/register'], {
+      queryParams: { flow: 'open-store' },
+    });
+    expect(toastMock.info).toHaveBeenCalled();
+  });
+
+  it('debe manejar error de conexión de red cuando el servidor no responde (status 0)', () => {
+    authServiceMock.login.mockReturnValue(throwError(() => ({ status: 0 })));
+
+    component.onLogin({ email: 'test@test.com', password: 'password123' });
+
+    expect(component.isLoading()).toBe(false);
+    expect(component.errorMessage()).toContain('No se pudo conectar con el servidor');
+  });
+
+  it('debe manejar error 500 informando inconveniente temporal en el servidor', () => {
+    authServiceMock.login.mockReturnValue(throwError(() => ({ status: 500 })));
+
+    component.onLogin({ email: 'test@test.com', password: 'password123' });
+
+    expect(component.isLoading()).toBe(false);
+    expect(component.errorMessage()).toContain('inconveniente temporal');
   });
 });

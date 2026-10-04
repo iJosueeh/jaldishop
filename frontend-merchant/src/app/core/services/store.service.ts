@@ -1,5 +1,6 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import {
+  CloseStoreResponse,
   CreateStoreRequest,
   StoreCategory,
   StoreResponse,
@@ -90,6 +91,29 @@ export class StoreService {
       tap((updateStore) => {
         this.currentStore.set(updateStore);
         this.isLoading.set(false);
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  closeMyStore(reason?: string): Observable<CloseStoreResponse> {
+    this.isLoading.set(true);
+    const body = reason ? { reason } : undefined;
+    return this.http.delete<CloseStoreResponse>(`${this.baseUrl}/me`, { body }).pipe(
+      tap((res) => {
+        this.isLoading.set(false);
+        if (res.action === 'DELETED') {
+          this.currentStore.set(null);
+          this.isLoaded.set(false);
+        } else if (res.action === 'DEACTIVATED') {
+          const current = this.currentStore();
+          if (current) {
+            this.currentStore.set({ ...current, status: 'INACTIVE' });
+          }
+        }
       }),
       catchError((error) => {
         this.isLoading.set(false);

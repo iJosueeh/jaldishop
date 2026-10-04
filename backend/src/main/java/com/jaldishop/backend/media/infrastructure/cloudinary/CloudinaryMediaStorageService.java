@@ -5,6 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 import com.jaldishop.backend.media.domain.MediaStorageService;
 import com.jaldishop.backend.media.domain.MediaTargetType;
 import com.jaldishop.backend.media.domain.UploadSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.util.UUID;
 
 @Service
 public class CloudinaryMediaStorageService implements MediaStorageService {
+
+    private static final Logger log = LoggerFactory.getLogger(CloudinaryMediaStorageService.class);
 
     private final Cloudinary cloudinary;
     private final CloudinaryProperties properties;
@@ -55,6 +59,25 @@ public class CloudinaryMediaStorageService implements MediaStorageService {
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         } catch (IOException e) {
             throw new RuntimeException("Error al eliminar recurso multimedia de Cloudinary: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteStoreMedia(UUID storeId) {
+        if (storeId == null) {
+            return;
+        }
+        String prefix = "jaldishop/tenants/" + storeId;
+        try {
+            cloudinary.api().deleteResourcesByPrefix(prefix, ObjectUtils.emptyMap());
+            cloudinary.api().deleteFolder(prefix, ObjectUtils.emptyMap());
+            log.info("Archivos multimedia en Cloudinary eliminados correctamente para la tienda {}", storeId);
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("can't find folder")) {
+                log.info("No existían archivos o carpetas en Cloudinary para purgar de la tienda {}", storeId);
+            } else {
+                log.warn("No se pudieron purgar los archivos multimedia en Cloudinary para la tienda {}: {}", storeId, e.getMessage());
+            }
         }
     }
 

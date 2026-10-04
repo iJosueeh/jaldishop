@@ -85,27 +85,54 @@ describe('AuthService', () => {
       req.flush(mockAuthResult);
     });
 
-    it('debe rechazar el acceso si el usuario no tiene rol MERCHANT o ADMIN', () => {
+    it('debe permitir autenticar a usuarios sin rol MERCHANT (para flujo de onboarding)', () => {
       const credentials: LoginRequest = {
         email: 'cliente@jaldishop.com',
         password: 'password123',
       };
 
-      vi.spyOn(tokenService, 'getRoles').mockReturnValue(['CUSTOMER']);
-      const logoutSpy = vi.spyOn(service, 'logout');
+      const customerAuthResult: AuthResult = {
+        token: 'customer.jwt.token',
+        userId: 'uuid-5678',
+        email: 'cliente@jaldishop.com',
+        fullName: 'Cliente Perez',
+        roles: ['CUSTOMER'],
+      };
 
-      service.login(credentials).subscribe({
-        next: () => {
-          throw new Error('No debió autenticar');
-        },
-        error: (err) => {
-          expect(err.message).toContain('Acceso denegado');
-          expect(logoutSpy).toHaveBeenCalled();
-        },
+      vi.spyOn(tokenService, 'getRoles').mockReturnValue(['CUSTOMER']);
+
+      service.login(credentials).subscribe((result) => {
+        expect(result).toEqual(customerAuthResult);
+        expect(service.token()).toBe(customerAuthResult.token);
+        expect(service.currentUser()).toEqual(customerAuthResult);
+        expect(service.isAuthenticated()).toBe(true);
+        expect(service.isMerchant()).toBe(false);
       });
 
       const req = httpTesting.expectOne(`${environment.apiUrl}/auth/login`);
-      req.flush(mockAuthResult);
+      req.flush(customerAuthResult);
+    });
+  });
+
+  describe('refreshToken()', () => {
+    it('debe solicitar la actualización del token y actualizar el estado', () => {
+      const refreshedAuthResult: AuthResult = {
+        token: 'refreshed.jwt.token',
+        userId: 'uuid-1234',
+        email: 'josue@jaldishop.com',
+        fullName: 'Josue Tanta',
+        roles: ['CUSTOMER', 'MERCHANT'],
+      };
+
+      service.refreshToken().subscribe((result) => {
+        expect(result).toEqual(refreshedAuthResult);
+        expect(service.token()).toBe(refreshedAuthResult.token);
+        expect(service.currentUser()).toEqual(refreshedAuthResult);
+      });
+
+      const req = httpTesting.expectOne(`${environment.apiUrl}/auth/refresh`);
+      expect(req.request.method).toBe('POST');
+      req.flush(refreshedAuthResult);
     });
   });
 

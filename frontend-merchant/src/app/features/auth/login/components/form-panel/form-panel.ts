@@ -12,6 +12,7 @@ import {
   matVisibilityOffOutline,
   matArrowForwardOutline,
 } from '@ng-icons/material-symbols/outline';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, RegisterFooter, NgIcon],
@@ -31,6 +32,8 @@ import {
 })
 export class FormPanel {
   private readonly fb = inject(FormBuilder);
+
+  readonly marketplaceUrl = environment.marketplaceUrl;
 
   readonly isLoading = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);

@@ -4,6 +4,7 @@ import { AuthService } from '../../../../core/services/auth-service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
+import { isValidImageUrl } from '../../../../core/utils/image.utils';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matStorefrontOutline,
@@ -56,7 +57,17 @@ export class Siderbar implements OnInit {
     () => this.profileService.fullName() || this.authService.currentUser()?.fullName || 'Mi cuenta',
   );
   readonly storeName = computed(() => this.storeService.storeName());
+  readonly storeLogoUrl = computed(() => this.storeService.currentStore()?.logoUrl);
+  readonly logoLoadError = signal<boolean>(false);
+  readonly hasValidLogo = computed(() => {
+    const url = this.storeLogoUrl();
+    return isValidImageUrl(url) && !this.logoLoadError();
+  });
   readonly userInitials = computed(() => this.profileService.userInitials());
+
+  onLogoError(): void {
+    this.logoLoadError.set(true);
+  }
 
   readonly capacityBlocks = computed(() => {
     const total = this.capacityTotal();
@@ -80,16 +91,16 @@ export class Siderbar implements OnInit {
         label: 'Pausada',
         dotClass: 'bg-rose-500',
         footerLabel: 'Tienda en pausa',
-        footerClass: 'text-rose-600 bg-rose-500/10 border-rose-500/20',
+        footerClass: 'text-rose-400 bg-rose-500/15 border-rose-500/25',
       };
     }
 
     if (this.capacityService.isTodayClosed() || this.capacityService.todayEffectiveCapacity() === 0) {
       return {
         label: 'Cerrado hoy',
-        dotClass: 'bg-slate-400',
+        dotClass: 'bg-stone-400',
         footerLabel: 'Solo pedidos programados',
-        footerClass: 'text-on-surface-variant bg-surface-container-lowest border-outline-variant/20',
+        footerClass: 'text-stone-400 bg-white/5 border-white/10',
       };
     }
 
@@ -101,15 +112,15 @@ export class Siderbar implements OnInit {
         label: 'Lleno por hoy',
         dotClass: 'bg-amber-500',
         footerLabel: 'Cupos agotados hoy',
-        footerClass: 'text-amber-600 bg-amber-500/10 border-amber-500/20',
+        footerClass: 'text-amber-400 bg-amber-500/15 border-amber-500/25',
       };
     }
 
     return {
       label: 'Abierto',
-      dotClass: 'bg-emerald-500 animate-pulse',
+      dotClass: 'bg-emerald-400 animate-pulse',
       footerLabel: 'Recibiendo pedidos',
-      footerClass: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20',
+      footerClass: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/25',
     };
   });
 

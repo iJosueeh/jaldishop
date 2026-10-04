@@ -25,8 +25,7 @@ export class CapacityService {
   readonly isLoading = signal<boolean>(false);
 
   readonly todayConfigurations = computed(() => {
-    const isDay = new Date().getDay();
-    const currentDayOfWeek = isDay === 0 ? 7 : isDay;
+    const currentDayOfWeek = new Date().getDay();
     return this.configurations().filter(
       (c) => c.dayOfWeek === currentDayOfWeek && c.status === 'ACTIVE',
     );

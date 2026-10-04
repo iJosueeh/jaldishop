@@ -56,3 +56,14 @@ export interface CreateStoreRequest {
 }
 
 export type UpdateStoreRequest = Omit<CreateStoreRequest, 'slug'>;
+
+export interface CloseStoreRequest {
+    reason?: string;
+}
+
+export interface CloseStoreResponse {
+    storeId: string;
+    action: 'DELETED' | 'DEACTIVATED';
+    status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
+    message: string;
+}

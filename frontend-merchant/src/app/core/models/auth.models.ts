@@ -13,8 +13,14 @@ export interface RegisterMerchantRequest {
     businessType?: string;
     storeContactPhone?: string;
     address?: string;
+    addressReference?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     pickupEnabled: boolean;
     deliveryEnabled: boolean;
+    logoUrl?: string;
+    bannerUrl?: string;
+    categoryIds?: string[];
 }
 
 export interface AuthResult {

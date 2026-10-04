@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -85,17 +86,26 @@ public class RegisterMerchantService {
                 command.businessType(),
                 contactPhone,
                 command.address(),
-                null,
-                null,
-                null,
+                command.addressReference(),
+                command.latitude(),
+                command.longitude(),
                 command.pickupEnabled(),
                 command.deliveryEnabled(),
                 null,
                 "PEN",
-                new java.math.BigDecimal("18.00")
+                new BigDecimal("18.00"),
+                command.logoUrl(),
+                command.bannerUrl(),
+                null,
+                null,
+                contactPhone,
+                command.categoryIds()
         );
 
-        createStoreService.execute(storeCommand);
+        var store = createStoreService.execute(storeCommand);
+        if (store != null && store.getId() != null) {
+            userRepository.assignStoreToMerchantRole(user.getId(), store.getId());
+        }
 
         Set<String> roleName = user.getRoles().stream()
                 .map(r -> r.getName().name())

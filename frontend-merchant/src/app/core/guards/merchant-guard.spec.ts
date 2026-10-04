@@ -51,7 +51,7 @@ describe('merchantGuard', () => {
     expect(result).toBe(mockUrlTree);
   });
 
-  it('redirige a /unauthorized si el usuario está autenticado pero no es MERCHANT ni ADMIN', () => {
+  it('redirige a /register?flow=open-store si el usuario está autenticado pero no es MERCHANT ni ADMIN', () => {
     authServiceMock.isMerchant.mockReturnValue(false);
     authServiceMock.isAdmin.mockReturnValue(false);
     authServiceMock.isAuthenticated.mockReturnValue(true);
@@ -60,7 +60,9 @@ describe('merchantGuard', () => {
 
     const result = TestBed.runInInjectionContext(() => merchantGuard({} as any, {} as any));
 
-    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/unauthorized']);
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/register'], {
+      queryParams: { flow: 'open-store' },
+    });
     expect(result).toBe(mockUrlTree);
   });
 

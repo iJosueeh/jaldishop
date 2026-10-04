@@ -40,7 +40,7 @@ export const DAYS_OF_WEEK: DayScheduleOption[] = [
   { dayOfWeek: 4, label: 'Jueves', shortLabel: 'Jue' },
   { dayOfWeek: 5, label: 'Viernes', shortLabel: 'Vie' },
   { dayOfWeek: 6, label: 'Sábado', shortLabel: 'Sáb' },
-  { dayOfWeek: 7, label: 'Domingo', shortLabel: 'Dom' },
+  { dayOfWeek: 0, label: 'Domingo', shortLabel: 'Dom' },
 ];
 
 export type CapacityExceptionStatus = 'ACTIVE' | 'INACTIVE';

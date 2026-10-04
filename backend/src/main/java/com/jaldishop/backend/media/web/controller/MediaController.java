@@ -3,6 +3,7 @@ package com.jaldishop.backend.media.web.controller;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.media.application.GenerateUploadSignatureCommand;
 import com.jaldishop.backend.media.application.GenerateUploadSignatureService;
+import com.jaldishop.backend.media.domain.MediaTargetType;
 import com.jaldishop.backend.media.domain.UploadSignature;
 import com.jaldishop.backend.media.web.dto.GenerateSignatureRequest;
 import com.jaldishop.backend.media.web.dto.UploadSignatureResponse;
@@ -33,6 +34,15 @@ public class MediaController {
             @Valid @RequestBody GenerateSignatureRequest request
     ) {
         if (principal == null) {
+            if (request.targetType() == MediaTargetType.STORE_LOGO || request.targetType() == MediaTargetType.STORE_BANNER) {
+                GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
+                        null,
+                        request.targetType(),
+                        null
+                );
+                UploadSignature signature = generateUploadSignatureService.execute(command);
+                return ResponseEntity.ok(UploadSignatureResponse.fromDomain(signature));
+            }
             throw new AccessDeniedException("No autenticado.");
         }
 

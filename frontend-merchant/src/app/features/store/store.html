@@ -6,12 +6,21 @@
         <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
           Mi Tienda
         </h1>
-        <span
-          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-surface-container text-primary-container text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
-        >
-          <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-          Abierto al público
-        </span>
+        @if (storeService.storeStatus() === 'ACTIVE') {
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-surface-container text-primary-container text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
+          >
+            <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+            Abierto al público
+          </span>
+        } @else {
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-error-container/40 text-error text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
+          >
+            <span class="w-2 h-2 rounded-full bg-error"></span>
+            Tienda inactiva
+          </span>
+        }
       </div>
       <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
         Configura los datos comerciales, modalidades de despacho y enlaces públicos de tu catálogo.
@@ -85,6 +94,13 @@
         [form]="storeForm"
         [deliveryRadiusKm]="storeForm.get('deliveryRadiusKm')?.value"
       />
+
+      <!-- Tarjeta 4: Zona de Cuidado / Cierre y Baja -->
+      <app-store-danger-zone-card
+        [status]="storeService.storeStatus()"
+        [isClosing]="isClosingStore()"
+        (requestClose)="openDangerModal()"
+      />
     </div>
 
     <!-- Columna Derecha (4/12): Vista Previa en Vivo & Estado Operativo -->
@@ -96,4 +112,54 @@
       />
     </div>
   </div>
+
+  <!-- Modal de Confirmación para Eliminación / Desactivación -->
+  <app-confirm-modal
+    [isOpen]="isDangerModalOpen()"
+    title="¿Quieres cerrar o dar de baja tu tienda?"
+    confirmText="Sí, dar de baja"
+    cancelText="No, mantener mi tienda"
+    [isDanger]="true"
+    (confirm)="onConfirmCloseStore()"
+    (cancel)="isDangerModalOpen.set(false)"
+    (isOpenChange)="isDangerModalOpen.set($event)"
+  >
+    <div class="flex flex-col gap-3 font-sans">
+      <p class="text-xs text-on-surface leading-relaxed">
+        Antes de proceder, el sistema revisará automáticamente la actividad de tu negocio para aplicar la opción más segura:
+      </p>
+
+      <div class="flex flex-col gap-2">
+        <!-- Escenario 1: Tienda nueva o sin actividad -->
+        <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-2.5">
+          <div class="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
+            <span class="text-xs font-black">1</span>
+          </div>
+          <div class="flex flex-col text-[11px] leading-relaxed">
+            <strong class="font-bold text-on-surface text-xs">Si aún no tienes pedidos ni reservas:</strong>
+            <span class="text-on-surface-variant mt-0.5">
+              Tu tienda, productos y fotos de prueba se borrarán definitivamente sin dejar rastro. Tu cuenta continuará activa como comprador particular.
+            </span>
+          </div>
+        </div>
+
+        <!-- Escenario 2: Tienda con ventas previas -->
+        <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-2.5">
+          <div class="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+            <span class="text-xs font-black">2</span>
+          </div>
+          <div class="flex flex-col text-[11px] leading-relaxed">
+            <strong class="font-bold text-on-surface text-xs">Si ya atendiste pedidos con clientes:</strong>
+            <span class="text-on-surface-variant mt-0.5">
+              Tu tienda se pausará y saldrá del catálogo público al instante. Tu historial de ventas y boletas se resguardarán para cualquier consulta de tus compradores.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-on-surface-variant/80 italic text-center pt-1">
+        Podrás volver a crear o reactivar una tienda cuando lo desees.
+      </p>
+    </div>
+  </app-confirm-modal>
 </div>

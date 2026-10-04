@@ -1,4 +1,4 @@
-<div class="h-screen w-screen bg-warmCream font-sans text-stone-800 antialiased overflow-hidden">
+<div class="h-screen w-screen bg-[#faf7f2] font-sans text-stone-900 antialiased overflow-hidden">
   <div class="h-full w-full flex flex-col lg:flex-row">
     @if (currentStep() == 1) {
       <app-register-brand-panel
@@ -17,16 +17,19 @@
       <app-register-step2-brand
         class="hidden lg:flex lg:w-1/2 h-full flex-col"
         [storeName]="step2Data()?.name || 'Dulces Clara'"
-        [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
+        [businessType]="step2Data()?.businessType || 'Restaurantes y Cafeterías'"
         [contactPhone]="step2Data()?.contactPhone || '999999999'"
         [pickupEnabled]="step2Data()?.pickupEnabled ?? true"
         [deliveryEnabled]="step2Data()?.deliveryEnabled ?? true"
+        [logoUrl]="step2Data()?.logoUrl || ''"
+        [bannerUrl]="step2Data()?.bannerUrl || ''"
       />
       <app-register-step2-form
         class="flex flex-col w-full lg:w-1/2 h-full"
         [initialData]="step2Data()"
         [isLoading]="isLoading()"
         [errorMessage]="errorMessage()"
+        [isExistingUser]="isExistingUser()"
         (back)="onStep2Back()"
         (formChange)="onStep2Change($event)"
         (step2Submit)="onStep2Submit($event)"
@@ -35,23 +38,54 @@
     }
 
     @if (currentStep() == 3) {
-      <app-register-step3-brand
+      <app-register-step3-location-brand
         class="hidden lg:flex lg:w-1/2 h-full flex-col"
-        [storeName]="step2Data()?.name || 'Dulces Clara'"
-        [businessType]="step2Data()?.businessType || 'Reposteria y pasteleria'"
-        [dailyOrderLimit]="step3Data()?.dailyOrderLimit ?? 12"
-        [prepTime]="step3Data()?.prepTime || '30 - 60 min'"
-        [openingTime]="step3Data()?.openingTime || '09:00'"
-        [closingTime]="step3Data()?.closingTime || '19:00'"
+        [storeName]="step2Data()?.name || 'Tu negocio'"
+        [businessType]="step2Data()?.businessType || 'Giro comercial'"
+        [logoUrl]="step2Data()?.logoUrl || ''"
+        [bannerUrl]="step2Data()?.bannerUrl || ''"
+        [pickupEnabled]="step3Data()?.pickupEnabled ?? true"
+        [deliveryEnabled]="step3Data()?.deliveryEnabled ?? true"
+        [address]="step3Data()?.address || ''"
+        [addressReference]="step3Data()?.addressReference || ''"
+        [latitude]="step3Data()?.latitude"
+        [longitude]="step3Data()?.longitude"
       />
-      <app-register-step3-form
+      <app-register-step3-location-form
         class="flex flex-col w-full lg:w-1/2 h-full"
         [initialData]="step3Data()"
         [isLoading]="isLoading()"
         [errorMessage]="errorMessage()"
+        [isExistingUser]="isExistingUser()"
         (back)="onStep3Back()"
         (formChange)="onStep3Change($event)"
         (step3Submit)="onStep3Submit($event)"
+        (skip)="onStep3Skip()"
+      />
+    }
+
+    @if (currentStep() == 4) {
+      <app-register-step4-brand
+        class="hidden lg:flex lg:w-1/2 h-full flex-col"
+        [storeName]="step2Data()?.name || 'Tu negocio'"
+        [businessType]="step2Data()?.businessType || 'Giro comercial'"
+        [logoUrl]="step2Data()?.logoUrl || ''"
+        [bannerUrl]="step2Data()?.bannerUrl || ''"
+        [dailyOrderLimit]="step4Data()?.dailyOrderLimit ?? 12"
+        [prepTime]="step4Data()?.prepTime || '30 - 60 min'"
+        [openingTime]="step4Data()?.openingTime || '09:00'"
+        [closingTime]="step4Data()?.closingTime || '19:00'"
+        [operatingDays]="step4Data()?.operatingDays || ['L', 'M', 'X', 'J', 'V', 'S']"
+      />
+      <app-register-step4-form
+        class="flex flex-col w-full lg:w-1/2 h-full"
+        [initialData]="step4Data()"
+        [isLoading]="isLoading()"
+        [errorMessage]="errorMessage()"
+        [isExistingUser]="isExistingUser()"
+        (back)="onStep4Back()"
+        (formChange)="onStep4Change($event)"
+        (step4Submit)="onStep4Submit($event)"
       />
     }
   </div>

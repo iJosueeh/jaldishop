@@ -75,8 +75,8 @@ export function HeroVideoBackground({
         <source src={CDN_VIDEO_URL} type="video/mp4" />
       </video>
 
-      {/* 3. Single cinematic overlay — no stacked backdrop filters */}
-      <div className="absolute inset-0 bg-black/45" />
+      {/* Directional contrast keeps the copy readable while revealing the video on the right. */}
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.60)_0%,rgba(0,0,0,0.45)_55%,rgba(0,0,0,0.20)_100%)]" />
     </div>
   );
 }

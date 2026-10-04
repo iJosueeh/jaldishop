@@ -29,7 +29,10 @@
 | **Josué** | **BE-19** · Orquestación de Checkout | Backend | Es integración entre módulos. Tras trabajar Identity, Store y Cart, coordina la orquestación entre `Cart` + `Inventory` + `CapacityReservation` sin apropiarse de la lógica interna de esos módulos. |
 | **Mia** | **BE-20** · Confirmación Transaccional de Compra | Backend | Viene directamente de su trabajo con `Capacity/Reservations`. Aquí la reserva pasa a estado comprometido (`COMMITTED`) de forma atómica cuando la compra se confirma. |
 | **Katherine** | **BE-PAYMENTS-01** · Integración de Pagos | Backend | Viene de `Inventory` y permite repartir el backend crítico entre los tres. Trabaja Mercado Pago, intentos, idempotencia, estados de pago y webhooks. |
-| **Josué** | **FE-STORE-01** · Storefront público | Frontend | Inicia la estructura del marketplace / storefront público conectando la identidad de la tienda y el layout base. |
+| **Josué** | **FE-STORE-01** · Storefront Público | Frontend | Inicia la estructura del marketplace / storefront público conectando la identidad de la tienda, layout base y SSR con Next.js 15. |
+| **Josué** | **FE-LEGAL-01** · Ecosistema Legal y Reclamaciones | Frontend | Garantiza el cumplimiento normativo (D.S. 011-2011-PCM, Ley 29733) y optimiza la UX de Términos y Privacidad con lectura por pestañas y PDF. |
+| **Josué** | **FE-MKT-01** · Landing Page & Búsqueda Bimodal | Frontend | Implementa la experiencia principal del Marketplace: buscador en tiempo real, HUD en desktop, Drawer móvil, carruseles y páginas corporativas. |
+| **Josué** | **OPS-DEPLOY-01** · Despliegue Multi-Cloud & DNS | DevOps | Despliega el Marketplace en Vercel, enlaza Google Cloud DNS (`jaldishop.net`), configura CORS en Spring Boot y aísla entornos. |
 | **Mia** | **FE-STORE-02** · Carrito Customer | Frontend | Está directamente relacionado con el flujo previo a reserva/checkout y permite conectar su conocimiento de capacidad y validaciones con la experiencia del cliente. |
 | **Katherine** | **FE-STORE-03** · Catálogo Público de la Tienda | Frontend | Es la continuación natural de `BE-12 Catalog`: conoce a profundidad las categorías, productos y variantes que expone el backend. |
 
@@ -39,15 +42,19 @@
 
 ```mermaid
 flowchart TD
-    subgraph FRONTEND["Frontend Marketplace / Customer"]
-        FESTORE01["FE-STORE-01 · Storefront Público<br/>(Josué)<br/>🟡 EN PLANIFICACIÓN"]
+    subgraph FRONTEND["Frontend Marketplace / Customer (Next.js 15 en Vercel)"]
+        FEMKT01["FE-MKT-01 · Landing, Buscador & Páginas Institucionales<br/>(Josué)<br/>🟢 COMPLETADO"]
+        FELEGAL01["FE-LEGAL-01 · Ecosistema Legal & Libro Reclamaciones<br/>(Josué)<br/>🟢 COMPLETADO"]
+        FESTORE01["FE-STORE-01 · Storefront Público (/tienda/:slug)<br/>(Josué)<br/>🟢 COMPLETADO"]
         FESTORE03["FE-STORE-03 · Catálogo Público Tienda<br/>(Katherine)<br/>🟡 EN PLANIFICACIÓN"]
         FESTORE02["FE-STORE-02 · Carrito Customer<br/>(Mia)<br/>🟡 EN PLANIFICACIÓN"]
+        
+        FEMKT01 --> FESTORE01
         FESTORE01 --> FESTORE03
         FESTORE03 --> FESTORE02
     end
 
-    subgraph BACKEND_TRANSACCIONAL["Backend Transaccional Core"]
+    subgraph BACKEND_TRANSACCIONAL["Backend Transaccional Core (Spring Boot en Render)"]
         BE19["BE-19 · Orquestación de Checkout<br/>(Josué)<br/>🟢 COMPLETADO"]
         BEPAY01["BE-PAYMENTS-01 · Integración de Pagos<br/>(Katherine)<br/>🟡 EN PROGRESO"]
         BE20["BE-20 · Confirmación Transaccional<br/>(Mia)<br/>🟡 EN PROGRESO"]
@@ -56,7 +63,12 @@ flowchart TD
         BEPAY01 -->|Pago Aprobado + Webhook| BE20
     end
 
+    subgraph DEVOPS_CLOUD["Infraestructura y Despliegue Multi-Cloud"]
+        OPS01["OPS-DEPLOY-01 · Despliegue Vercel & Google Cloud DNS<br/>(Josué)<br/>🟢 COMPLETADO (jaldishop.net)"]
+    end
+
     FESTORE02 -. Inicia Checkout .-> BE19
+    FRONTEND -. CORS Habilitado .-> BACKEND_TRANSACCIONAL
 ```
 
 ---
@@ -194,35 +206,117 @@ El procesamiento externo no debe mantener abierta una transacción de base de da
 ### 📋 FE-STORE-01 | Storefront Público
 
 **Responsable:** Josué  
-**Estado:** `EN PLANIFICACIÓN` 🟡  
-**Entregable:** Módulo de Storefront público por slug de tienda, layout responsive, consumo de endpoints públicos de Store, loading/empty states y manejo de errores.
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Módulo de Storefront público por slug de tienda (`/tienda/[slug]`), layout responsive, consumo de endpoints públicos de Store (`storeService`), Server Components con SSR y OpenGraph dinámico, badges de fulfillment, navegación pegajosa, empty states, 404 con `notFound()`, y suite de pruebas unitarias en Vitest.
 
 **Descripción:**  
-Implementar la estructura pública de una tienda dentro de `frontend-marketplace`, permitiendo que cualquier visitante acceda mediante el slug de la Store y visualice su identidad comercial y navegación pública.  
+Implementar la estructura pública de una tienda dentro de `frontend-marketplace`, permitiendo que cualquier visitante acceda mediante el slug de la Store y visualice su identidad comercial, badges de capacidad y navegación pública.  
 Esta tarjeta establece el contenedor/layout de la tienda. El catálogo detallado se desarrolla independientemente en `FE-STORE-03`.
 
 **Checklist:**
-- [ ] Crear ruta pública basada en slug de Store (`/tienda/:slug`)
-- [ ] Crear layout del Storefront
-- [ ] Consultar información pública de Store desde backend
-- [ ] Mostrar nombre comercial
-- [ ] Mostrar logo
-- [ ] Mostrar banner
-- [ ] Mostrar descripción
-- [ ] Mostrar información básica disponible de la tienda
-- [ ] Crear navegación pública de la tienda
-- [ ] Preparar área/contenedor para catálogo
-- [ ] Preparar acceso visual al carrito
-- [ ] Implementar loading state
-- [ ] Implementar empty state cuando corresponda
-- [ ] Implementar Store no encontrada (404)
-- [ ] Implementar manejo mediante contrato ApiError
-- [ ] Adaptar diseño a desktop
-- [ ] Adaptar diseño a tablet
-- [ ] Adaptar diseño a mobile
-- [ ] Evitar información administrativa del Merchant
-- [ ] No utilizar datos mock como funcionalidad final
-- [ ] Agregar pruebas básicas de componentes/servicios
+- [x] Crear ruta pública basada en slug de Store (`/tienda/[slug]`)
+- [x] Crear layout del Storefront con Next.js 15 Server Components
+- [x] Consultar información pública de Store desde backend (`storeService.getStoreBySlug`)
+- [x] Mostrar nombre comercial
+- [x] Mostrar logo y avatar optimizados
+- [x] Mostrar banner editorial con gradientes y blur
+- [x] Mostrar descripción comercial
+- [x] Mostrar información básica disponible de la tienda (horarios, cupos, contacto)
+- [x] Crear navegación pública de la tienda (`StorefrontNav`)
+- [x] Preparar área/contenedor para catálogo (`CatalogContainer`)
+- [x] Preparar acceso visual al carrito (`CartDrawer`)
+- [x] Implementar loading state (`loading.tsx`)
+- [x] Implementar empty state cuando no hay productos (`EmptyState.tsx`)
+- [x] Implementar Store no encontrada (404) mediante `notFound()` de Next.js
+- [x] Implementar manejo mediante contrato ApiError (`ApiException` unificado)
+- [x] Adaptar diseño a desktop (HUD, sticky bar, grilla multi-columna)
+- [x] Adaptar diseño a tablet
+- [x] Adaptar diseño a mobile (drawer touch, espaciados generosos)
+- [x] Evitar información administrativa del Merchant (completamente aislada)
+- [x] Integrar endpoints reales del backend de Spring Boot en Render
+- [x] Agregar pruebas completas de componentes/servicios en Vitest (61/61 pasando)
+
+---
+
+### 📋 FE-LEGAL-01 | Ecosistema Legal y Libro de Reclamaciones
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Arquitectura legal modular (`features/legal`), páginas `/terminos` y `/privacidad` con navegación interactiva bimodal (Pestañas vs. Documento Completo), tarjeta "En pocas palabras (TLDR)" por cláusula, soporte de impresión formal `@media print` y Libro de Reclamaciones Virtual (`/libro-de-reclamaciones`) conforme a D.S. 011-2011-PCM con generación de código correlativo `RCL-YYYYMMDD-XXXX` y constancia digital descargable.
+
+**Descripción:**  
+Garantizar el cumplimiento normativo peruano (Código de Protección y Defensa del Consumidor - Ley N° 29571, Ley N° 29733 de Protección de Datos Personales, y D.S. 011-2011-PCM) resolviendo a su vez la fatiga de lectura legal mediante una UX moderna inspirada en Stripe/Linear.
+
+**Checklist:**
+- [x] Implementar layout legal interactivo (`LegalLayout.tsx`)
+- [x] Diseñar modo de lectura por cláusulas/pestañas (vista enfocada sin fatiga de scroll infinito)
+- [x] Diseñar barra de navegación secuencial al pie (`[← Anterior]` / `[Siguiente →]`) con porcentaje de lectura
+- [x] Diseñar interruptor dual: `[📑 Por Cláusulas]` vs `[📜 Ver Completo]`
+- [x] Crear índice lateral sticky y barra de píldoras móvil (`LegalTableOfContents.tsx`)
+- [x] Implementar tarjeta de resumen ciudadano TLDR (`LegalTldrCard.tsx`)
+- [x] Garantizar impresión completa de todas las cláusulas mediante `@media print` (`LegalPrintButton.tsx`)
+- [x] Redactar 7 cláusulas de Términos y Condiciones orientadas a comercio MYPE y capacidad operativa
+- [x] Redactar Política de Privacidad detallando derechos ARCO y banco de datos
+- [x] Crear página de Libro de Reclamaciones Virtual oficial (`/libro-de-reclamaciones`)
+- [x] Implementar formulario en 4 pasos legales: Identificación, Bien Contratado, Detalle de Reclamo/Queja y Pedido
+- [x] Validar formulario con Zod y React Hook Form (`claimsBook.schema.ts`)
+- [x] Generar comprobante y constancia imprimible con código `RCL-YYYYMMDD-XXXX` (`ClaimsBookReceipt.tsx`)
+- [x] Pruebas unitarias completas de componentes legales y libro de reclamaciones en Vitest
+
+---
+
+### 📋 FE-MKT-01 | Landing Page, Buscador Bimodal y Páginas Institucionales
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Landing Page de alta conversión (`/`), buscador de tiendas responsive bimodal (HUD en desktop, Drawer touch en mobile con debounce), carrusel dinámico `CraftMarqueeSection`, peek slider de tiendas `StorePeekSlider`, footer editorial de 4 columnas y 4 páginas institucionales (`/sobre-nosotros`, `/trabaja-con-nosotros`, `/accesibilidad`, `/ayuda`).
+
+**Descripción:**  
+Desarrollar la vitrina principal de JaldiShop conectando a compradores con negocios artesanales y gastronómicos. Se rediseñó el copywriting eliminando tecnicismos y tono IA para hablar en el lenguaje cotidiano de los emprendedores peruanos.
+
+**Checklist:**
+- [x] Diseñar e implementar Hero Section con propuesta de valor clara y llamadas a la acción
+- [x] Implementar buscador bimodal en tiempo real (`Navbar.tsx` + `SearchModal` + `Drawer`)
+- [x] Agregar debounce de 250ms para optimización de llamadas de búsqueda
+- [x] Diseñar sección Bento Features destacando capacidad, reserva de cupos y puente WhatsApp
+- [x] Implementar carrusel continuo artesanal (`CraftMarqueeSection`)
+- [x] Implementar slider horizontal de tiendas destacadas (`StorePeekSlider`)
+- [x] Diseñar comparativa de valor "Vender por Chat vs. JaldiShop" (`ComparisonSection`)
+- [x] Crear Footer de 4 columnas: Marca, Categorías (`store_categories`), Herramientas MYPE y Empresa
+- [x] Implementar página `/sobre-nosotros` con historia, misión y principios de JaldiShop
+- [x] Implementar página `/trabaja-con-nosotros` con cultura y posiciones abiertas
+- [x] Implementar página `/accesibilidad` con estándares WCAG 2.1 AA
+- [x] Implementar página `/ayuda` con preguntas frecuentes para clientes y comerciantes
+- [x] Manejar desplazamiento suave a secciones mediante anclas y compensación de navbar (`HashScrollHandler`)
+- [x] Humanizar textos y copys eliminando jerga técnica inaccesible
+
+---
+
+### 📋 OPS-DEPLOY-01 | Infraestructura Multi-Cloud y Despliegue en Producción
+
+**Responsable:** Josué  
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Despliegue continuo en producción del Marketplace en Vercel sobre el dominio oficial `https://www.jaldishop.net/`, enlace DNS en Google Cloud DNS preservando DNSSEC, corrección de CORS en Spring Boot y aislamiento de entornos `.env` / `.env.local`.
+
+**Descripción:**  
+Poner en producción el Frontend Marketplace garantizando alta disponibilidad, certificado SSL automático (HTTPS), compatibilidad multi-cloud entre Vercel, Render (Backend) y Cloudflare Pages (Frontend Merchant), y resolución de políticas de seguridad CORS.
+
+**Checklist:**
+- [x] Configurar proyecto en Vercel con Root Directory `frontend-marketplace`
+- [x] Generar build de producción con Next.js 15 App Router (11 rutas estáticas/dinámicas)
+- [x] Configurar registros DNS en Google Cloud DNS (Zona `jaldishop-net`):
+  - Registro `A` para `jaldishop.net.` apuntando a `76.76.21.21`
+  - Registro `CNAME` para `www.jaldishop.net.` apuntando a `cname.vercel-dns.com.`
+- [x] Mantener DNSSEC habilitado de forma segura sin tocar servidores de nombres
+- [x] Habilitar orígenes en `WebCorsConfiguration.java` del Backend (Spring Boot en Render):
+  - `https://*.jaldishop.net` y `https://jaldishop.net`
+  - `https://*.vercel.app`
+- [x] Configurar archivo `.env` con endpoints de producción (Render y Cloudflare Pages)
+- [x] Crear plantilla versionada `.env.example` con valores nulos para el equipo
+- [x] Configurar `.env.local` para desarrollo local aislado (Spring Boot en `localhost:8080`, Angular en `localhost:4200`)
+- [x] Validar funcionamiento en vivo en `https://www.jaldishop.net/`
+
+---
 
 ---
 

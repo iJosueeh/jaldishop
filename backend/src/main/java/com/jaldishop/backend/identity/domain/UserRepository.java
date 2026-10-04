@@ -11,5 +11,6 @@ public interface UserRepository {
     User save(User user);
     boolean existsByEmail(String email);
     List<User> findAll(String query, RoleName role, UserStatus status);
+    void assignStoreToMerchantRole(UUID userId, UUID storeId);
 
 }

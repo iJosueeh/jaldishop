@@ -1,45 +1,48 @@
 <header
-  class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1 font-sans"
+  class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pt-1 font-sans"
 >
   <div class="flex flex-col gap-1">
-    <div class="flex items-center gap-2 flex-wrap">
-      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight">
+    <div class="flex items-center gap-2.5 flex-wrap">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
         Buenos días, {{ firstName() }}
       </h1>
       <span
-        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0"
-        [class.bg-surface-container]="isOpen()"
-        [class.text-primary-container]="isOpen()"
-        [class.bg-surface-container-high]="!isOpen()"
-        [class.text-on-surface-variant]="!isOpen()"
+        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shrink-0 transition-colors"
+        [class]="
+          isOpen()
+            ? 'bg-emerald-50 text-emerald-800 border border-emerald-500/25'
+            : 'bg-stone-100 text-stone-600 border border-stone-200'
+        "
       >
         <span
           class="w-2 h-2 rounded-full"
-          [class.bg-primary-container]="isOpen()"
+          [class.bg-emerald-500]="isOpen()"
           [class.animate-pulse]="isOpen()"
-          [class.bg-outline-variant]="!isOpen()"
+          [class.bg-stone-400]="!isOpen()"
         ></span>
         {{ isOpen() ? 'En operación' : 'En pausa' }}
       </span>
-      <span class="text-xs text-on-surface-variant hidden sm:inline"> · {{ currentDate() }} </span>
+      <span class="text-xs text-stone-400 font-medium hidden sm:inline"> · {{ currentDate() }} </span>
     </div>
-    <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">Así marcha tu negocio hoy.</p>
+    <p class="text-xs sm:text-sm text-stone-500 max-w-2xl font-normal">
+      Monitorea tus pedidos, ritmo de preparación y cupos disponibles en tiempo real.
+    </p>
   </div>
 
-  <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+  <div class="flex items-center gap-2.5 self-stretch sm:self-auto shrink-0">
     <button
       type="button"
       (click)="copyStoreLink()"
-      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+      class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-white text-stone-800 hover:bg-[#faf7f2] hover:text-stone-900 transition-all text-xs font-bold shadow-2xs border border-[#e7e0d6] cursor-pointer active:scale-98"
       title="Copiar enlace de mi catálogo"
     >
-      <ng-icon name="matShareOutline" class="text-[18px] text-primary-container" />
+      <ng-icon name="matShareOutline" class="text-[18px] text-emerald-800" />
       <span>Compartir Catálogo</span>
     </button>
 
     <a
       routerLink="/store"
-      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-container text-white hover:bg-primary transition-colors text-xs font-bold shadow-2xs cursor-pointer active:scale-98"
+      class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#005141] text-white hover:bg-[#003d31] transition-all text-xs font-bold shadow-2xs cursor-pointer active:scale-98 shadow-emerald-950/20"
     >
       <ng-icon name="matStorefrontOutline" class="text-[18px]" />
       <span>Mi Tienda</span>

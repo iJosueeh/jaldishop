@@ -15,7 +15,7 @@ export const merchantGuard: CanActivateFn = () => {
   }
 
   if (authService.isAuthenticated()) {
-    return router.createUrlTree(['/unauthorized']);
+    return router.createUrlTree(['/register'], { queryParams: { flow: 'open-store' } });
   }
 
   return router.createUrlTree(['/login']);

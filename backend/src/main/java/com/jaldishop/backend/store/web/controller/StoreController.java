@@ -3,10 +3,7 @@ package com.jaldishop.backend.store.web.controller;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.*;
 import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.web.dto.CreateStoreRequest;
-import com.jaldishop.backend.store.web.dto.PublicStoreResponse;
-import com.jaldishop.backend.store.web.dto.StoreResponse;
-import com.jaldishop.backend.store.web.dto.UpdateStoreRequest;
+import com.jaldishop.backend.store.web.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,19 +22,22 @@ public class StoreController {
     private final UpdateStoreService updateStoreService;
     private final GetStoreBySlugService getStoreBySlugService;
     private final SearchPublicStoresService searchPublicStoresService;
+    private final CloseMyStoreService closeMyStoreService;
 
     public StoreController(
             CreateStoreService createStoreService,
             GetMyStoreService getMyStoreService,
             UpdateStoreService updateStoreService,
             GetStoreBySlugService getStoreBySlugService,
-            SearchPublicStoresService searchPublicStoresService
+            SearchPublicStoresService searchPublicStoresService,
+            CloseMyStoreService closeMyStoreService
     ) {
         this.createStoreService = createStoreService;
         this.getMyStoreService = getMyStoreService;
         this.updateStoreService = updateStoreService;
         this.getStoreBySlugService = getStoreBySlugService;
         this.searchPublicStoresService = searchPublicStoresService;
+        this.closeMyStoreService = closeMyStoreService;
     }
 
     @PostMapping()
@@ -45,10 +45,6 @@ public class StoreController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @Valid @RequestBody CreateStoreRequest request
     ) {
-        if (!principal.roles().contains("MERCHANT")) {
-            throw new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden crear una tienda.");
-        }
-
         CreateStoreCommand command = new CreateStoreCommand(
                 principal.userId(),
                 request.name(),
@@ -116,6 +112,16 @@ public class StoreController {
 
         Store store = updateStoreService.execute(command);
         return ResponseEntity.ok(StoreResponse.fromDomain(store));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<CloseStoreResponse> closeMyStore(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @Valid @RequestBody(required = false) CloseStoreRequest request
+    ) {
+        String reason = request != null ? request.reason() : null;
+        CloseStoreResult result = closeMyStoreService.execute(new CloseMyStoreCommand(principal.userId(), reason));
+        return ResponseEntity.ok(CloseStoreResponse.fromResult(result));
     }
 
     @GetMapping("/slug/{slug}")

@@ -4,6 +4,7 @@
 
 [![Sprint](https://img.shields.io/badge/Sprint-04%20En%20Progreso-yellow?style=flat-square)](./06-scrum/sprint-04.md)
 [![Docs](https://img.shields.io/badge/Docs-Estructuradas-success?style=flat-square&logo=markdown)](./index.md)
+[![Frontend Marketplace](https://img.shields.io/badge/Deploy-Vercel%20Production-black?style=flat-square&logo=vercel)](https://www.jaldishop.net/)
 [![Frontend Merchant](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?style=flat-square&logo=cloudflare)](https://negocios-jaldishop.pages.dev/)
 [![Backend API](https://img.shields.io/badge/Deploy-Render%20Web%20Service-46E3B7?style=flat-square&logo=render)](https://jaldishop-api.onrender.com/api/v1)
 
@@ -48,7 +49,7 @@ flowchart LR
 
 | Miembro | Rol | Responsabilidad Sprint 4 | Perfil |
 |---|:---:|---|:---:|
-| **Josue Royer Tanta Cieza** | Full Stack Dev | **BE-19** Orquestación de Checkout + **FE-STORE-01** Storefront Público | [@iJosueeh](https://github.com/iJosueeh) |
+| **Josue Royer Tanta Cieza** | Full Stack Dev | **BE-19** Checkout + **FE-STORE-01** Storefront + **FE-LEGAL-01** Legal + **FE-MKT-01** Landing + **OPS-DEPLOY-01** Vercel | [@iJosueeh](https://github.com/iJosueeh) |
 | **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-PAYMENTS-01** Integración de Pagos + **FE-STORE-03** Catálogo Público | [@kath144](https://github.com/kath144) |
 | **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-20** Confirmación Transaccional de Compra + **FE-STORE-02** Carrito Customer | [@miagv](https://github.com/miagv) |
 
@@ -62,7 +63,7 @@ flowchart LR
 | **Seguridad** | JWT, Spring Security | Autenticación sin estado y RBAC (CUSTOMER, MERCHANT, ADMIN) |
 | **Frontend** | Angular 20 Standalone, Next.js 15, Tailwind CSS | Panel de Comerciante (Angular) y [Portal Marketplace (Next.js)](./05-arquitectura/arquitectura-frontend-marketplace.md) |
 | **Persistencia** | PostgreSQL 16+ (NeonDB), Flyway, Hibernate | Base de datos relacional en la nube y JPA |
-| **Despliegue & DevOps** | Render, Cloudflare Pages, Docker, GitHub Actions | Despliegue continuo y validación automatizada en la nube |
+| **Despliegue & DevOps** | Vercel, Cloudflare Pages, Google Cloud DNS, Render, Docker, GitHub Actions | Despliegue continuo y validación automatizada multi-cloud |
 | **Calidad / QA** | JUnit 5, Mockito, Vitest | 904 pruebas automatizadas pasando al 100% (454 Backend + 450 Frontend) |
 | **Tiempo Real** | WebSockets | Actualización de estados y disponibilidad en vivo |
 

@@ -8,17 +8,17 @@ import { env } from '@/core/config/env';
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] lg:min-h-[94vh] flex items-end pb-14 sm:pb-20 lg:pb-24 pt-32 sm:pt-36 overflow-hidden">
+    <section className="relative min-h-[90svh] lg:min-h-[94vh] flex items-end pb-14 sm:pb-20 lg:pb-24 pt-32 sm:pt-36 overflow-hidden">
       {/* 1. Full-bleed background video loop with dark glass overlay */}
       <HeroVideoBackground />
 
       {/* 2. Left-aligned Cinematic HUD Container */}
       <div className="relative z-10 w-full px-6 sm:px-10 md:px-14 lg:px-16 xl:px-20">
-        <div className="max-w-xl lg:max-w-2xl text-left space-y-4 sm:space-y-5">
+        <div className="max-w-xl lg:max-w-2xl text-left space-y-5 sm:space-y-6">
           {/* Pill Tag with Live Status indicator */}
           <MotionFade delay={0.1}>
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl text-stone-200 text-xs sm:text-sm font-semibold shadow-2xl">
-              <span className="relative flex h-2.5 w-2.5">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#ea580c]" />
               </span>
@@ -34,9 +34,9 @@ export function HeroSection() {
 
           {/* Headline */}
           <MotionFade delay={0.2}>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-black tracking-tight text-white leading-[1.06] drop-shadow-xl">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-black tracking-tight text-white leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-xl">
               Vende por WhatsApp{' '}
-              <span className="text-[#feae2c] underline decoration-[#ea580c] decoration-wavy decoration-2">
+              <span className="text-[#feae2c] underline underline-offset-[6px] decoration-[#ea580c] decoration-wavy decoration-2">
                 sin colapsar
               </span>{' '}
               tu capacidad.
@@ -45,7 +45,7 @@ export function HeroSection() {
 
           {/* Subtitle in clear merchant language */}
           <MotionFade delay={0.3}>
-            <p className="text-stone-200/95 text-sm sm:text-base lg:text-lg font-normal leading-relaxed max-w-lg lg:max-w-xl drop-shadow-md">
+            <p className="text-stone-100/95 text-base lg:text-lg font-normal leading-relaxed max-w-lg lg:max-w-xl drop-shadow-md">
               Acepta solo los pedidos que tu negocio o taller puede entregar a tiempo. Bloquea horarios saturados al instante y asegura 10 minutos de gracia para que tus clientes paguen sin perder su cupo.
             </p>
           </MotionFade>

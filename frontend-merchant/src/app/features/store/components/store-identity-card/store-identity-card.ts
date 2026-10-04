@@ -18,6 +18,7 @@ import {
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { StoreCategory } from '../../../../core/models/store.models';
+import { isValidImageUrl } from '../../../../core/utils/image.utils';
 
 import { ConfirmModal } from '../../../../shared/components/confirm-modal/confirm-modal';
 
@@ -63,6 +64,27 @@ export class StoreIdentityCard {
 
   readonly showDeleteModal = signal<boolean>(false);
   readonly pendingDeleteControl = signal<'logoUrl' | 'bannerUrl' | null>(null);
+
+  readonly logoImageError = signal<boolean>(false);
+  readonly bannerImageError = signal<boolean>(false);
+
+  hasValidLogo(): boolean {
+    const url = this.form().get('logoUrl')?.value;
+    return isValidImageUrl(url) && !this.logoImageError();
+  }
+
+  hasValidBanner(): boolean {
+    const url = this.form().get('bannerUrl')?.value;
+    return isValidImageUrl(url) && !this.bannerImageError();
+  }
+
+  onLogoError(): void {
+    this.logoImageError.set(true);
+  }
+
+  onBannerError(): void {
+    this.bannerImageError.set(true);
+  }
 
   isSelected(categoryId: string): boolean {
     const selected: string[] = this.form().get('categoryIds')?.value || [];
@@ -117,6 +139,11 @@ export class StoreIdentityCard {
   }
 
   private showLocalPreview(file: File, controlName: 'logoUrl' | 'bannerUrl'): void {
+    if (controlName === 'logoUrl') {
+      this.logoImageError.set(false);
+    } else {
+      this.bannerImageError.set(false);
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const previewUrl = e.target?.result as string;
@@ -147,6 +174,11 @@ export class StoreIdentityCard {
   }
 
   private handleUploadSuccess(controlName: 'logoUrl' | 'bannerUrl', secureUrl: string): void {
+    if (controlName === 'logoUrl') {
+      this.logoImageError.set(false);
+    } else {
+      this.bannerImageError.set(false);
+    }
     this.form().get(controlName)?.setValue(secureUrl);
     this.form().get(controlName)?.markAsDirty();
     this.setUploadingState(controlName, false, 100);
@@ -197,6 +229,11 @@ export class StoreIdentityCard {
   }
 
   clearImage(controlName: 'logoUrl' | 'bannerUrl'): void {
+    if (controlName === 'logoUrl') {
+      this.logoImageError.set(false);
+    } else {
+      this.bannerImageError.set(false);
+    }
     this.form().get(controlName)?.setValue('');
     this.form().get(controlName)?.markAsDirty();
   }

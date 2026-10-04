@@ -12,4 +12,6 @@ public interface StoreRepository {
     boolean existsBySlug(String slug);
     boolean existsByMerchantUserId(UUID merchantUserId);
     List<Store> findAllStores(String query, StoreStatus status);
+    boolean hasOperationalHistory(UUID storeId);
+    void deleteStore(UUID storeId, UUID merchantUserId);
 }

@@ -14,7 +14,7 @@ export const env = {
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.NODE_ENV === "production"
-      ? "https://jaldishop.com"
+      ? "https://www.jaldishop.net"
       : "http://localhost:3000"),
   appName: "JaldiShop",
   appDescription:

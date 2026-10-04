@@ -3,8 +3,11 @@ import { StoreIdentityCard } from './components/store-identity-card/store-identi
 import { StoreDeliveryCard } from './components/store-delivery-card/store-delivery-card';
 import { StoreLocationCard } from './components/store-location-card/store-location-card';
 import { StorePreviewCard } from './components/store-preview-card/store-preview-card';
+import { StoreDangerZoneCard } from './components/store-danger-zone-card/store-danger-zone-card';
+import { ConfirmModal } from '../../shared/components/confirm-modal/confirm-modal';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { StoreService } from '../../core/services/store.service';
+import { AuthService } from '../../core/services/auth-service';
 import { ToastService } from '../../core/services/toast.service';
 import { StoreResponse, UpdateStoreRequest } from '../../core/models/store.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -13,6 +16,8 @@ import {
   matSaveOutline,
   matCheckCircleOutline,
   matErrorOutline,
+  matDeleteOutline,
+  matWarningOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -21,6 +26,8 @@ import {
     StoreDeliveryCard,
     StoreLocationCard,
     StorePreviewCard,
+    StoreDangerZoneCard,
+    ConfirmModal,
     NgIcon,
   ],
   providers: [
@@ -29,6 +36,8 @@ import {
       matSaveOutline,
       matCheckCircleOutline,
       matErrorOutline,
+      matDeleteOutline,
+      matWarningOutline,
     }),
   ],
   selector: 'app-store',
@@ -38,10 +47,13 @@ import {
 export class Store {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastService = inject(ToastService);
+  private readonly authService = inject(AuthService);
   readonly storeService = inject(StoreService);
 
   readonly saveSuccess = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly isDangerModalOpen = signal<boolean>(false);
+  readonly isClosingStore = signal<boolean>(false);
 
   constructor() {
     this.storeService.getStoreCategories().subscribe();
@@ -50,7 +62,7 @@ export class Store {
   openPublicCatalog(): void {
     const slug = this.storeService.currentStore()?.slug;
     if (slug) {
-      window.open(`https://jaldishop.pe/tienda/${slug}`, '_blank');
+      window.open(`https://www.jaldishop.net/tienda/${slug}`, '_blank');
     } else {
       this.toastService.info('Configura y guarda el nombre de tu tienda para generar tu enlace público.');
     }
@@ -196,5 +208,33 @@ export class Store {
   private handleSaveError(error: any): void {
     const message = error?.error?.message ?? 'No se pudo guardar los cambios de la tienda.';
     this.errorMessage.set(message);
+  }
+
+  openDangerModal(): void {
+    this.isDangerModalOpen.set(true);
+  }
+
+  onConfirmCloseStore(): void {
+    this.isClosingStore.set(true);
+    this.storeService.closeMyStore().subscribe({
+      next: (res) => {
+        this.isClosingStore.set(false);
+        this.isDangerModalOpen.set(false);
+        if (res.action === 'DELETED') {
+          this.toastService.success(res.message);
+          setTimeout(() => {
+            this.authService.logout();
+          }, 1500);
+        } else {
+          this.toastService.info(res.message);
+        }
+      },
+      error: (err) => {
+        this.isClosingStore.set(false);
+        this.isDangerModalOpen.set(false);
+        const msg = err?.error?.message ?? 'No se pudo procesar la solicitud para cerrar la tienda.';
+        this.toastService.error(msg);
+      },
+    });
   }
 }

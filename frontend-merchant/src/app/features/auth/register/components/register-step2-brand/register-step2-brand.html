@@ -1,113 +1,188 @@
-<aside aria-label="Identidad y modalidades" class="relative w-full h-full bg-jade-700 text-white p-8 lg:p-12 xl:p-14 flex flex-col
-justify-between overflow-hidden shadow-2xl z-10">
-    <!-- Luces sutiles de fondo -->
-    <div class="absolute -top-32 -right-32 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none">
+<aside
+  aria-label="Identidad y modalidades"
+  class="relative w-full h-full bg-[#0a0a09] text-white p-8 lg:p-12 xl:p-14 flex flex-col justify-between overflow-hidden shadow-2xl z-10 border-r border-white/10"
+>
+  <!-- Fotografía artesanal de fondo con tratamiento cinematográfico y luces ambientales -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <img
+      src="/images/auth/register-craft-bg.jpg"
+      alt="Ambiente comercial artesanal"
+      class="absolute inset-0 w-full h-full object-cover opacity-50 brightness-95 contrast-105"
+    />
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-[#0a0a09] via-[#0a0a09]/55 to-[#0a0a09]/30"
+    ></div>
+    <div
+      class="absolute -top-32 -left-32 w-96 h-96 bg-[#005141]/35 rounded-full blur-3xl"
+    ></div>
+    <div
+      class="absolute -bottom-28 -right-28 w-96 h-96 bg-[#ea580c]/25 rounded-full blur-3xl"
+    ></div>
+    <div
+      class="absolute top-1/2 left-1/3 -translate-y-1/2 w-80 h-80 bg-[#feae2c]/[0.06] rounded-full blur-3xl"
+    ></div>
+  </div>
+
+  <!-- Marca Superior & Pill de Progreso -->
+  <div class="relative z-10 space-y-6">
+    <header class="flex items-center gap-3">
+      <div
+        class="w-11 h-11 rounded-xl bg-white/95 flex items-center justify-center shadow-lg shadow-black/40 p-2"
+      >
+        <img src="favicon.svg" alt="JaldiShop Logo" class="w-full h-full object-contain" />
+      </div>
+      <div>
+        <div class="text-2xl font-bold tracking-tight text-white leading-none">JaldiShop</div>
+        <span class="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase"
+          >PORTAL COMERCIANTE</span
+        >
+      </div>
+    </header>
+
+    <div class="space-y-3">
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-emerald-300 shadow-xs"
+      >
+        <span class="w-2 h-2 rounded-full bg-[#feae2c] animate-pulse"></span>
+        Paso 2 de 4 · Identidad y marca
+      </div>
+
+      <!-- Encabezado Editorial -->
+      <h1
+        class="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-white leading-tight tracking-tight max-w-lg"
+      >
+        Dale identidad a tu negocio.<br />
+        <span
+          class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-200"
+        >
+          Organizado desde el primer día.
+        </span>
+      </h1>
+      <p class="text-stone-300 text-xs sm:text-sm leading-relaxed font-normal max-w-lg">
+        Esta información nos ayudará a preparar tu espacio y mantener organizada tu operación frente a tus clientes.
+      </p>
     </div>
+  </div>
 
-    <!-- Marca Superior -->
-    <div class="relative z-10">
-        <header class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm p-2">
-                <img src="favicon.svg" alt="JaldiShop Logo" class="w-full h-full object-contain" />
-            </div>
-            <div>
-                <div class="font-bold text-xl tracking-tight text-white leading-tight">JaldiShop</div>
-                <div class="text-[10px] tracking-widest uppercase font-semibold text-emerald-200">TU NEGOCIO EN MARCHA
-                </div>
-            </div>
-        </header>
+  <!-- TARJETA DE PREVIEW DEL NEGOCIO (Reactiva en Vivo en Dark Frosted Glass) -->
+  <div class="my-auto py-4 relative z-10">
+    <div
+      class="bg-[#121211]/85 backdrop-blur-xl text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-white/10 space-y-4 max-w-lg"
+    >
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <span class="relative flex h-2.5 w-2.5">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+            ></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span class="text-[11px] font-bold tracking-wider uppercase text-stone-300">
+            FICHA COMERCIAL · IDENTIDAD Y MARCA
+          </span>
+        </div>
+        <span
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 tracking-wider uppercase"
+        >
+          ● En vivo
+        </span>
+      </div>
 
-        <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-100 text-xs font-medium border
-border-white/15">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Paso 2 de 3 · Identidad y modalidades
+      <!-- Banner de la Tienda (Reactivo si existe o preview estilizado) -->
+      @if (hasValidBanner()) {
+        <div class="relative h-28 w-full rounded-xl overflow-hidden border border-white/10 shadow-inner">
+          <img [src]="bannerUrl()" (error)="onBannerError()" alt="" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+          <span class="absolute bottom-2 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-black/60 text-emerald-300 border border-emerald-500/30 backdrop-blur-xs flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Portada activa
+          </span>
+        </div>
+      } @else {
+        <div class="relative h-24 sm:h-28 w-full rounded-xl border border-dashed border-white/15 bg-white/[0.02] flex items-center justify-center gap-2 text-stone-400">
+          <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="text-xs text-stone-400 font-medium">Portada panorámica (opcional)</span>
+        </div>
+      }
+
+      <!-- Ficha del negocio -->
+      <div class="flex items-start gap-3.5">
+        <!-- Logo o Inicial del negocio -->
+        @if (hasValidLogo()) {
+          <div class="w-13 h-13 rounded-2xl overflow-hidden border-2 border-emerald-400/50 shadow-md bg-[#1c1917] shrink-0">
+            <img [src]="logoUrl()" (error)="onLogoError()" alt="" class="w-full h-full object-cover" />
+          </div>
+        } @else {
+          <app-business-avatar [name]="storeName() || 'Tu negocio'" size="lg" />
+        }
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base sm:text-lg font-bold text-white truncate">
+              {{ storeName() || 'Nombre de tu negocio' }}
+            </h3>
+            <span
+              class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0"
+              >Activo</span
+            >
+          </div>
+          <p class="text-xs font-medium text-stone-400 mt-0.5 truncate">
+            {{ businessType() || 'Giro del negocio · Catálogo oficial' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Bloque dinámico: Datos de Identidad y Contacto -->
+      <div class="space-y-2 pt-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Identidad de marca oficial
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-stone-300 border border-white/10">
+            Marketplace verificado
+          </span>
         </div>
 
-        <!-- Encabezado Editorial -->
-        <div class="mt-8">
-            <h1 class="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-[1.2]">
-                Dale identidad a tu negocio.
-            </h1>
-            <p class="mt-3 text-sm xl:text-base text-emerald-100/90 leading-relaxed font-normal">
-                Esta información nos ayudará a preparar tu espacio y mantener organizada tu operación desde el primer
-                día.
-            </p>
+        <!-- Teléfono de contacto -->
+        <div
+          class="pt-2.5 border-t border-dashed border-white/10 flex items-center justify-between text-xs text-stone-300"
+        >
+          <span class="text-stone-400">WhatsApp de atención:</span>
+          <span class="font-mono font-bold text-emerald-300">
+            {{ contactPhone() ? ('+51 ' + contactPhone()) : 'Sin registrar' }}
+          </span>
         </div>
+      </div>
+
+      <div
+        class="bg-white/[0.04] rounded-xl p-3 border border-white/[0.08] flex items-center gap-2.5 text-xs text-stone-300"
+      >
+        <span class="text-[#feae2c] text-sm font-bold">✦</span>
+        <span>Tus clientes verán esta imagen de marca y datos en catálogos y notas de pedido.</span>
+      </div>
     </div>
+  </div>
 
-    <!-- TARJETA DE PREVIEW DEL NEGOCIO (Reactiva en Vivo) -->
-    <div class="my-8 relative z-10">
-        <div class="bg-white text-stone-900 rounded-2xl p-6 shadow-xl border border-white/20">
-            <div class="flex items-center justify-between pb-4 border-b border-stone-100">
-                <span class="text-[11px] font-bold tracking-wider uppercase text-stone-400">VISTA PREVIA DEL
-                    NEGOCIO</span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-jade-700 border
-border-emerald-200">
-                    ● En vivo
-                </span>
-            </div>
-
-            <!-- Ficha del negocio -->
-            <div class="mt-5 flex items-start gap-4">
-                <!-- Inicial del negocio o logo -->
-                <app-business-avatar [name]="storeName()" size="lg" />
-
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                        <h3 class="text-lg font-bold text-stone-900 truncate">
-                            {{ storeName() || 'Nombre de tu negocio' }}
-                        </h3>
-                        <span
-                            class="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600">Activo</span>
-                    </div>
-                    <p class="text-xs font-medium text-stone-500 mt-0.5">
-                        {{ businessType() || 'Giro del negocio' }}
-                    </p>
-
-                    <!-- Badges de Modalidades de Entrega Reactivas -->
-                    <div class="flex flex-wrap items-center gap-2 mt-3">
-                        @if (pickupEnabled()) {
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-jade-50 text-jade-700
-border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-jade-700"></span>
-                            Recojo en local
-                        </span>
-                        }
-                        @if (deliveryEnabled()) {
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-jade-50 text-jade-700
-border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-jade-700"></span>
-                            Delivery propio
-                        </span>
-                        }
-                    </div>
-
-                    <!-- Teléfono de contacto -->
-                    <div
-                        class="mt-3 pt-3 border-t border-dashed border-stone-200 flex items-center justify-between text-xs text-stone-600">
-                        <span class="text-stone-400">Contacto de ventas:</span>
-                        <span class="font-semibold text-stone-800">
-                            {{ contactPhone() ? ('+51 ' + contactPhone()) : 'Sin registrar' }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4 bg-[#f9f3e4] rounded-xl p-3 flex items-center gap-2.5 text-xs text-amber-900/80">
-                <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0
-0118 0z"></path>
-                </svg>
-                <span>Tus clientes verán estos datos en las notas de pedido y confirmaciones.</span>
-            </div>
-        </div>
+  <!-- Testimonio / Pie -->
+  <div
+    class="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-stone-400"
+  >
+    <div class="space-y-0.5">
+      <p class="italic text-stone-300 text-xs sm:text-sm">
+        “Configurar el nombre y las entregas nos tomó menos de 2 minutos y empezamos a recibir pedidos al instante.”
+      </p>
+      <span class="block mt-1 text-[10px] text-emerald-400 font-medium">— Pequeño comercio verificado</span>
     </div>
-
-    <!-- Testimonio / Pie -->
-    <div class="pt-6 border-t border-white/15 relative z-10 text-xs text-emerald-100/80">
-        <p class="italic">“Configurar el nombre y las entregas nos tomó menos de 2 minutos y empezamos a recibir pedidos
-            al instante.”</p>
-        <span class="block mt-1 font-semibold text-white/90">— Pequeño negocio en JaldiShop</span>
-    </div>
+    <a
+      [href]="marketplaceUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden xl:inline-flex items-center gap-1 text-emerald-300 hover:text-white font-semibold transition-colors shrink-0 pl-4"
+    >
+      <span>Ver Marketplace</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
 </aside>
