@@ -8,6 +8,7 @@ import {
   CreateProductWithVariantPayload,
   Product,
   ProductCategory,
+  ProductImage,
   ProductVariant,
   ProductViewMode,
   UpdateProductRequest,
@@ -128,10 +129,61 @@ export class ProductService {
     this.isLoading.set(true);
 
     return this.http.get<Product[]>(`${this.baseUrl}/${storeId}/products`).pipe(
+      map((products) => {
+        return (products || []).map((p) => {
+          let minPrice = p.minPrice;
+          let maxPrice = p.maxPrice;
+          if (minPrice == null && p.variants && p.variants.length > 0) {
+            const activeVariants = p.variants.filter((v) => v.status === 'ACTIVE');
+            const target = activeVariants.length > 0 ? activeVariants : p.variants;
+            const prices = target.map((v) => v.priceAmount).filter((amt) => amt != null);
+            if (prices.length > 0) {
+              minPrice = Math.min(...prices);
+              maxPrice = Math.max(...prices);
+            }
+          }
+          const images: ProductImage[] =
+            p.images && p.images.length > 0
+              ? p.images
+              : p.imageUrl
+                ? [
+                    {
+                      id: `img-${p.id}`,
+                      productId: p.id,
+                      imageUrl: p.imageUrl,
+                      position: 0,
+                      isPrimary: true,
+                    },
+                  ]
+                : [];
+          return {
+            ...p,
+            minPrice,
+            maxPrice,
+            images,
+          };
+        });
+      }),
       tap((data) => {
-        this.products.set(data || []);
+        this.products.set(data);
         this.isLoaded.set(true);
         this.isLoading.set(false);
+
+        const missingPricing = data.filter(
+          (p) => p.minPrice == null && (!p.variants || p.variants.length === 0),
+        );
+        if (missingPricing.length > 0) {
+          missingPricing.forEach((p) => {
+            this.getProductVariants(storeId, p.id).subscribe({
+              next: (variants) => {
+                if (variants && variants.length > 0) {
+                  this.syncProductVariants(p.id, variants);
+                }
+              },
+              error: () => {},
+            });
+          });
+        }
       }),
       catchError((error) => {
         this.isLoading.set(false);
@@ -329,7 +381,32 @@ export class ProductService {
     return this.http.put<Product>(`${this.baseUrl}/${storeId}/products/${productId}`, request).pipe(
       tap((updated) => {
         const currentList = this.products();
-        this.products.set(currentList.map((p) => (p.id === productId ? { ...p, ...updated } : p)));
+        const primaryImage = request.imageUrl || updated.imageUrl;
+        const effectiveImages =
+          request.images && request.images.length > 0
+            ? request.images
+            : primaryImage
+              ? [
+                  {
+                    id: `img-${productId}`,
+                    productId,
+                    imageUrl: primaryImage,
+                    position: 0,
+                    isPrimary: true,
+                  },
+                ]
+              : [];
+        this.products.set(
+          currentList.map((p) =>
+            p.id === productId
+              ? {
+                  ...p,
+                  ...updated,
+                  images: effectiveImages,
+                }
+              : p,
+          ),
+        );
         this.isLoading.set(false);
       }),
       catchError((error) => {

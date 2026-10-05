@@ -9,6 +9,7 @@ import {
   matArrowForwardOutline,
   matLinkOutline,
   matCheckCircleOutline,
+  matDragIndicatorOutline,
 } from '@ng-icons/material-symbols/outline';
 import { ProductImage } from '../../../../core/models/product.models';
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
@@ -35,6 +36,7 @@ export interface GalleryImageItem extends ProductImage {
       matArrowForwardOutline,
       matLinkOutline,
       matCheckCircleOutline,
+      matDragIndicatorOutline,
     }),
   ],
   templateUrl: './product-gallery-uploader.html',
@@ -55,9 +57,11 @@ export class ProductGalleryUploader implements OnDestroy {
       ...img,
       position: idx,
       isPrimary: img.isPrimary ?? idx === 0,
+      previewUrl: (img as GalleryImageItem).previewUrl || img.imageUrl,
     }))
   );
 
+  readonly draggedIndex = signal<number | null>(null);
   readonly showUrlInput = signal<boolean>(false);
   readonly urlInputValue = signal<string>('');
 
@@ -191,6 +195,41 @@ export class ProductGalleryUploader implements OnDestroy {
     this.toast.info('Imagen principal de portada actualizada.');
   }
 
+  onDragStart(index: number, event: DragEvent): void {
+    if (this.disabled()) return;
+    this.draggedIndex.set(index);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', index.toString());
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  onDrop(targetIndex: number, event: DragEvent): void {
+    event.preventDefault();
+    const sourceIndex = this.draggedIndex();
+    this.draggedIndex.set(null);
+    if (sourceIndex === null || sourceIndex === targetIndex) return;
+
+    const list = [...this.internalImages()];
+    const [movedItem] = list.splice(sourceIndex, 1);
+    list.splice(targetIndex, 0, movedItem);
+
+    this.internalImages.set(this.reindexList(list));
+    this.emitChanges();
+    this.toast.info('Orden de fotos actualizado.');
+  }
+
+  onDragEnd(): void {
+    this.draggedIndex.set(null);
+  }
+
   movePosition(index: number, direction: 'left' | 'right'): void {
     const list = [...this.internalImages()];
     const targetIndex = direction === 'left' ? index - 1 : index + 1;
@@ -232,7 +271,9 @@ export class ProductGalleryUploader implements OnDestroy {
     const cleanImages: ProductImage[] = this.internalImages()
       .filter((img) => !img.error && (img.imageUrl || img.previewUrl))
       .map((img, idx) => ({
-        imageUrl: img.imageUrl,
+        id: img.id,
+        productId: img.productId,
+        imageUrl: img.imageUrl || img.previewUrl || '',
         position: idx,
         isPrimary: img.isPrimary,
         file: img.file,

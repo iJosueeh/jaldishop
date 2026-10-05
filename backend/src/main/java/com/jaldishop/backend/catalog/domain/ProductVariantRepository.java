@@ -8,6 +8,7 @@ public interface ProductVariantRepository {
     ProductVariant save(ProductVariant variant);
     Optional<ProductVariant> findById(UUID id);
     List<ProductVariant> findByProductId(UUID productId);
+    List<ProductVariant> findByStoreId(UUID storeId);
     boolean existsBySku(String sku);
     boolean existsBySkuAndIdNot(String sku, UUID id);
     boolean existsByStoreIdAndSku(UUID storeId, String sku);

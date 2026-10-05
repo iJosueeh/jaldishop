@@ -17,6 +17,39 @@ describe('storeService', () => {
     vi.clearAllMocks();
   });
 
+  describe('store catalog categories', () => {
+    const product = { id: 'p1', storeId: 's1', categoryId: 'c1', name: 'Tacos', minPrice: 12, variants: [] };
+    it('maps the store category ID to its own published name', async () => {
+      vi.mocked(apiClient).mockImplementation(async (endpoint) => endpoint.endsWith('/categories')
+        ? [{ id: 'c1', storeId: 's1', name: 'Comida mexicana', status: 'ACTIVE' }]
+        : [product]);
+      const result = await storeService.getStoreProducts('s1');
+      expect(result[0]).toMatchObject({ categoryId: 'c1', category: 'Comida mexicana' });
+      expect(apiClient).toHaveBeenCalledWith('/stores/s1/categories', expect.any(Object));
+    });
+    it('uses the same category mapping for slug-based product requests', async () => {
+      vi.mocked(apiClient).mockImplementation(async (endpoint) => endpoint.endsWith('/categories')
+        ? [{ id: 'c1', storeId: 's1', name: 'Comida mexicana', status: 'ACTIVE' }]
+        : [product]);
+      const result = await storeService.getStoreProductsBySlug('toddy');
+      expect(result[0].category).toBe('Comida mexicana');
+      expect(apiClient).toHaveBeenCalledWith('/stores/slug/toddy/categories', expect.any(Object));
+    });
+    it('does not invent General or use another store category when lookup fails', async () => {
+      vi.mocked(apiClient).mockImplementation(async (endpoint) => endpoint.endsWith('/categories')
+        ? [{ id: 'c1', storeId: 'other-store', name: 'Otra categoría', status: 'ACTIVE' }]
+        : [product]);
+      expect((await storeService.getStoreProducts('s1'))[0].category).toBe('');
+      vi.mocked(apiClient).mockImplementation(async (endpoint) => {
+        if (endpoint.endsWith('/categories')) throw new Error('Unavailable');
+        return [product];
+      });
+      const result = await storeService.getStoreProducts('s1');
+      expect(result[0].name).toBe('Tacos');
+      expect(result[0].category).toBe('');
+    });
+  });
+
   describe('getStoreBySlug', () => {
     it('returns store data when found in backend', async () => {
       const mockStore = {

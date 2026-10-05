@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.application.CreateProductService;
 import com.jaldishop.backend.catalog.application.GetProductsService;
 import com.jaldishop.backend.catalog.application.UpdateProductService;
 import com.jaldishop.backend.catalog.domain.Product;
+import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
@@ -48,6 +49,9 @@ class MerchantProductControllerTest {
     @Mock
     private ProductResponseMapper responseMapper;
 
+    @Mock
+    private ProductVariantRepository variantRepository;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -57,7 +61,8 @@ class MerchantProductControllerTest {
                 updateProductService,
                 getProductsService,
                 storeContextService,
-                responseMapper
+                responseMapper,
+                variantRepository
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)

@@ -51,6 +51,13 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
     }
 
     @Override
+    public List<ProductVariant> findByStoreId(UUID storeId) {
+        return repository.findByStoreId(storeId).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public boolean existsBySku(String sku) {
         return repository.existsBySku(sku);
     }

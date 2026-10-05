@@ -88,4 +88,23 @@ describe('ProductGalleryUploader', () => {
     expect(added.file).toBe(file);
     expect(added.imageUrl).toBeTruthy();
   });
+
+  it('debe permitir reordenar imágenes mediante arrastrar y soltar (drag and drop)', () => {
+    const dragEvent = {
+      preventDefault: vi.fn(),
+      dataTransfer: {
+        effectAllowed: '',
+        setData: vi.fn(),
+        dropEffect: '',
+      },
+    } as unknown as DragEvent;
+
+    component.onDragStart(0, dragEvent);
+    expect(component.draggedIndex()).toBe(0);
+
+    component.onDrop(1, dragEvent);
+    expect(component.draggedIndex()).toBeNull();
+    expect(component.internalImages()[0].imageUrl).toContain('sample2');
+    expect(component.internalImages()[1].imageUrl).toContain('sample1');
+  });
 });

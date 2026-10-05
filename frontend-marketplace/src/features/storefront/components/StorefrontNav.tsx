@@ -14,10 +14,10 @@ interface StorefrontNavProps {
 
 export function StorefrontNav({
   categories = [],
-  activeCategoryId = 'all',
+  activeCategoryId,
   onSelectCategory,
 }: StorefrontNavProps) {
-  const [selected, setSelected] = useState(activeCategoryId);
+  const [selected, setSelected] = useState('all');
 
   const handleSelect = (id: string) => {
     setSelected(id);
@@ -33,12 +33,12 @@ export function StorefrontNav({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 relative">
           {categories.map((cat) => {
-            const isSelected = selected === cat.id;
-            if (categories.length === 0) return null;
+            const isSelected = (activeCategoryId ?? selected) === cat.id;
 
-  return (
+            return (
               <button
                 key={cat.id}
+                aria-pressed={isSelected}
                 onClick={() => handleSelect(cat.id)}
                 className={`relative px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer select-none flex items-center gap-1.5 ${
                   isSelected ? 'text-white' : 'text-[#57534e] hover:text-[#1c1917] bg-white/80 border border-stone-200/80'

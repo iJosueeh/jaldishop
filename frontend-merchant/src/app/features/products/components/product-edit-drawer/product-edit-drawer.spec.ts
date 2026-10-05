@@ -256,4 +256,18 @@ describe('ProductEditDrawer', () => {
     component.handleClose();
     expect(component.isClosing()).toBe(true);
   });
+
+  it('debe inicializar la galería de fotos a partir de imageUrl si images no viene poblado', () => {
+    const productWithImageOnly: Product = {
+      ...mockProduct,
+      imageUrl: 'https://res.cloudinary.com/demo/image/upload/torta.jpg',
+      images: undefined,
+    };
+    fixture.componentRef.setInput('product', productWithImageOnly);
+    fixture.detectChanges();
+
+    expect(component.images().length).toBe(1);
+    expect(component.images()[0].imageUrl).toBe('https://res.cloudinary.com/demo/image/upload/torta.jpg');
+    expect(component.images()[0].isPrimary).toBe(true);
+  });
 });

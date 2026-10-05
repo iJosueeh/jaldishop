@@ -1,18 +1,64 @@
 import { apiClient, ApiException } from '@/core/api/apiClient';
-import { PublicStore, StoreCategory } from '../types/storefront.types';
+import { ProductItem, ProductVariantItem, PublicStore, StoreCategory } from '../types/storefront.types';
+
+interface CatalogCategoryDto {
+  id: string; storeId: string; name: string; status: 'ACTIVE' | 'INACTIVE';
+}
+interface PublicProductDto {
+  id: string; storeId: string; categoryId?: string; name: string; description?: string;
+  imageUrl?: string; minPrice?: number | null; maxPrice?: number | null;
+  variants?: ProductVariantItem[];
+}
+
+async function loadStoreProducts(storePath: string): Promise<ProductItem[]> {
+  try {
+    const [products, categories] = await Promise.all([
+      apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 4000 }),
+      apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 4000 }).catch(() => []),
+    ]);
+    if (!Array.isArray(products)) return [];
+    const catalogCategories = Array.isArray(categories) ? categories : [];
+    return products.map((product) => {
+      const category = catalogCategories.find((entry) => entry.id === product.categoryId && entry.storeId === product.storeId && entry.status === 'ACTIVE');
+      const price = product.minPrice ?? product.variants?.[0]?.priceAmount ?? 0;
+      return {
+        id: product.id, name: product.name, description: product.description || '',
+        price: Number(price), minPrice: product.minPrice != null ? Number(product.minPrice) : undefined,
+        maxPrice: product.maxPrice != null ? Number(product.maxPrice) : undefined,
+        categoryId: product.categoryId, category: category?.name || '',
+        imageUrl: product.imageUrl, imageBg: 'from-amber-700/20 to-stone-800/30',
+        iconText: product.name.substring(0, 2).toUpperCase(), variants: product.variants,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
 
 export const storeService = {
-  /**
-   * Fetches public store information by slug from backend API.
-   * Returns null if store does not exist (triggering notFound).
-   */
   async getStoreBySlug(slug: string): Promise<PublicStore | null> {
     try {
       const store = await apiClient<PublicStore>(`/stores/slug/${slug}`, {
-        timeoutMs: 4000,
+        timeoutMs: 12000,
       });
+      if (!store) return null;
+
+      let category = store.category;
+      if (!category && store.categoryIds && store.categoryIds.length > 0) {
+        try {
+          const categories = await storeService.getCategories();
+          const found = categories.find((c) => store.categoryIds?.includes(c.id));
+          if (found) {
+            category = found.name;
+          }
+        } catch {
+          // ignore lookup error and fallback gracefully
+        }
+      }
+
       return {
         ...store,
+        category: category || store.category,
         ...((store.whatsappNumber || store.contactPhone) ? { phone: store.whatsappNumber || store.contactPhone } : {}),
         ...(typeof store.deliveryFeeAmount === 'number' ? { deliveryFee: store.deliveryFeeAmount } : {}),
       };
@@ -24,9 +70,6 @@ export const storeService = {
     }
   },
 
-  /**
-   * Retrieves featured/active stores from backend API.
-   */
   async getFeaturedStores(limit = 6): Promise<PublicStore[]> {
     try {
       const stores = await apiClient<PublicStore[]>('/stores/featured', {
@@ -39,9 +82,6 @@ export const storeService = {
     }
   },
 
-  /**
-   * Searches active stores in real-time. If query is empty, returns initial active stores.
-   */
   async searchStores(query: string = '', limit = 5): Promise<PublicStore[]> {
     const cleanQuery = query.trim();
 
@@ -56,9 +96,6 @@ export const storeService = {
     }
   },
 
-  /**
-   * Fetches all active store categories from backend API.
-   */
   async getCategories(): Promise<StoreCategory[]> {
     try {
       const categories = await apiClient<StoreCategory[]>('/store-categories', {
@@ -68,5 +105,13 @@ export const storeService = {
     } catch {
       return [];
     }
+  },
+
+  getStoreProducts(storeId: string): Promise<ProductItem[]> {
+    return loadStoreProducts('/stores/' + encodeURIComponent(storeId));
+  },
+
+  getStoreProductsBySlug(slug: string): Promise<ProductItem[]> {
+    return loadStoreProducts('/stores/slug/' + encodeURIComponent(slug));
   },
 };
