@@ -17,6 +17,7 @@ interface FetchOptions extends RequestInit {
   baseUrl?: string;
   params?: Record<string, string | number | boolean | undefined>;
   timeoutMs?: number;
+  revalidate?: number | false;
 }
 
 /**
@@ -26,7 +27,7 @@ export async function apiClient<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { params, timeoutMs = 10000, headers, baseUrl = env.apiUrl, ...customConfig } = options;
+  const { params, timeoutMs = 10000, headers, baseUrl = env.apiUrl, revalidate, ...customConfig } = options;
 
   let url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
@@ -51,15 +52,21 @@ export async function apiClient<T>(
     Accept: 'application/json',
   };
 
+  const fetchConfig: RequestInit & { next?: { revalidate?: number | false } } = {
+    ...customConfig,
+    headers: {
+      ...defaultHeaders,
+      ...headers,
+    },
+    signal: controller.signal,
+  };
+
+  if (revalidate !== undefined) {
+    fetchConfig.next = { revalidate };
+  }
+
   try {
-    const response = await fetch(url, {
-      ...customConfig,
-      headers: {
-        ...defaultHeaders,
-        ...headers,
-      },
-      signal: controller.signal,
-    });
+    const response = await fetch(url, fetchConfig);
 
     if (!response.ok) {
       let errorData: ApiErrorResponse | undefined;

@@ -13,8 +13,8 @@ interface PublicProductDto {
 async function loadStoreProducts(storePath: string): Promise<ProductItem[]> {
   try {
     const [products, categories] = await Promise.all([
-      apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 12000 }),
-      apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 12000 }).catch(() => []),
+      apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 12000, revalidate: 300 }),
+      apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 12000, revalidate: 300 }).catch(() => []),
     ]);
     if (!Array.isArray(products)) return [];
     const catalogCategories = Array.isArray(categories) ? categories : [];
@@ -41,6 +41,7 @@ export const storeService = {
     try {
       const store = await apiClient<PublicStore>(`/stores/slug/${slug}`, {
         timeoutMs: 12000,
+        revalidate: 300,
       });
       if (!store) return null;
 

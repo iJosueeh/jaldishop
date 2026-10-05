@@ -14,6 +14,8 @@ interface StorefrontPageProps {
   }>;
 }
 
+export const revalidate = 300;
+
 export async function generateMetadata({
   params,
 }: StorefrontPageProps): Promise<Metadata> {
