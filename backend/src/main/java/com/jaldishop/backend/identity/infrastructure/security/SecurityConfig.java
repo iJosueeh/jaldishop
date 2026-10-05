@@ -4,6 +4,7 @@ import com.jaldishop.backend.shared.exception.RestAccessDeniedHandler;
 import com.jaldishop.backend.shared.exception.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,6 +38,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/categories").permitAll()
                         .requestMatchers(
                                 "/api/v1/health",
                                 "/actuator/**",
@@ -47,6 +49,7 @@ public class SecurityConfig {
                                 "/api/v1/store-categories/**",
                                 "/api/v1/media/upload-signature",
                                 "/api/v1/stores/slug/**",
+                                "/api/v1/stores/*/products",
                                 "/api/v1/stores/search",
                                 "/api/v1/stores/featured"
                         ).permitAll()

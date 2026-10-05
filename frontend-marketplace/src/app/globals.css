@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @keyframes storefront-enter {
   from { opacity: 0; transform: translateY(12px); }

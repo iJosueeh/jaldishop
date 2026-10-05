@@ -10,6 +10,7 @@ import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
 import { NavbarSearch } from './NavbarSearch';
 import { MobileSearchModal } from './MobileSearchModal';
 import { env } from '@/core/config/env';
+import { StorefrontCart } from '@/features/storefront/cart/StorefrontCart';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -66,6 +67,7 @@ export function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
+
   return (
     <>
       <header
@@ -77,20 +79,20 @@ export function Navbar() {
             : 'bg-[#141413]/95 backdrop-blur-md shadow-md py-2.5 sm:py-3 border-b border-white/10'
         }`}
       >
-        <Container size="lg">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-3">
+        <Container size="full" className="max-w-[1440px]">
+          <div className="flex items-center h-14 sm:h-16 gap-3 md:gap-6">
             {/* Brand Logo Oficial */}
             <Link href="/" className="group shrink-0">
-              <JaldiShopLogo size="md" variant="light" />
+              <JaldiShopLogo size="md" variant="light" className="max-[360px]:gap-2 max-[360px]:[&_img]:w-7 max-[360px]:[&_span]:text-base" />
             </Link>
 
             {/* Clean Real-time Search Input (Desktop) */}
-            <div className="hidden md:flex items-center flex-1 max-w-xs lg:max-w-sm ml-2">
+            <div className="hidden md:flex min-w-0 flex-1 items-center max-w-sm">
               <NavbarSearch className="w-full" />
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-6 text-sm font-semibold text-stone-200">
+            <nav className="hidden min-[1440px]:flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-semibold text-stone-200">
               <Link
                 href="/#como-funciona"
                 className="hover:text-white transition-colors"
@@ -117,8 +119,11 @@ export function Navbar() {
               </Link>
             </nav>
 
+            <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+            <div className="shrink-0"><StorefrontCart /></div>
+
             {/* Unified Role-Based Auth Dropdown (Desktop) */}
-            <div className="hidden sm:block relative" ref={dropdownRef}>
+            <div className="hidden md:block relative" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setIsAuthOpen((prev) => !prev)}
@@ -234,11 +239,11 @@ export function Navbar() {
             </div>
 
             {/* Mobile Action Triggers (Search & Menu) */}
-            <div className="flex items-center gap-1.5 md:hidden">
+            <div className="flex items-center gap-2 min-[1440px]:hidden">
               <button
                 type="button"
                 onClick={() => setIsMobileSearchOpen(true)}
-                className="p-2.5 rounded-2xl transition-all text-white hover:bg-white/15 bg-white/10 backdrop-blur-md cursor-pointer"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors cursor-pointer md:hidden"
                 aria-label="Buscar tiendas o productos"
               >
                 <Search className="w-5 h-5 text-white" />
@@ -246,11 +251,12 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 rounded-2xl transition-all text-white hover:bg-white/15 bg-white/10 backdrop-blur-md cursor-pointer"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors cursor-pointer"
                 aria-label="Abrir Menú"
               >
                 <Menu className="w-5 h-5 text-white" />
               </button>
+            </div>
             </div>
           </div>
         </Container>
@@ -259,7 +265,7 @@ export function Navbar() {
       {/* Option 3: Modern Side-over Drawer with Backdrop Blur */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden flex justify-end">
+          <div className="fixed inset-0 z-50 min-[1440px]:hidden flex justify-end">
             {/* Backdrop Blur Overlay */}
             <motion.div
               initial={{ opacity: 0 }}

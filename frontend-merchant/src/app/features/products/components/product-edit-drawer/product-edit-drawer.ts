@@ -169,8 +169,28 @@ export class ProductEditDrawer {
     this.selectedCategoryId.set(p.categoryId || '');
     this.slug.set(p.slug || '');
     this.status.set(p.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE');
-    this.images.set(p.images || []);
-    this.imageUrl.set(p.imageUrl || '');
+
+    let initialImages: ProductImage[] = [];
+    if (p.images && p.images.length > 0) {
+      initialImages = p.images.map((img, idx) => ({
+        ...img,
+        position: idx,
+        isPrimary: img.isPrimary ?? idx === 0,
+      }));
+    } else if (p.imageUrl && p.imageUrl.trim().length > 0) {
+      initialImages = [
+        {
+          id: p.id ? `img-${p.id}` : undefined,
+          productId: p.id,
+          imageUrl: p.imageUrl.trim(),
+          position: 0,
+          isPrimary: true,
+        },
+      ];
+    }
+
+    this.images.set(initialImages);
+    this.imageUrl.set(p.imageUrl || (initialImages[0]?.imageUrl ?? ''));
     this.errorMessage.set(null);
     this.isAddingVariant.set(false);
   }

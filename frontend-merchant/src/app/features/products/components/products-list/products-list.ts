@@ -42,8 +42,20 @@ export class ProductsList {
   clearFilters = output<void>();
 
   getPrice(p: Product): string {
+    if (p.minPrice != null && p.maxPrice != null && p.minPrice !== p.maxPrice) {
+      return `S/ ${p.minPrice.toFixed(2)} - S/ ${p.maxPrice.toFixed(2)}`;
+    }
     if (p.minPrice != null) return `S/ ${p.minPrice.toFixed(2)}`;
-    if (p.variants && p.variants.length > 0) return `S/ ${p.variants[0].priceAmount.toFixed(2)}`;
+    if (p.variants && p.variants.length > 0) {
+      const activeVars = p.variants.filter((v) => v.status === 'ACTIVE');
+      const targetVars = activeVars.length > 0 ? activeVars : p.variants;
+      const prices = targetVars.map((v) => v.priceAmount).filter((amt) => amt != null);
+      if (prices.length > 0) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        return min !== max ? `S/ ${min.toFixed(2)} - S/ ${max.toFixed(2)}` : `S/ ${min.toFixed(2)}`;
+      }
+    }
     return 'S/ 0.00';
   }
 

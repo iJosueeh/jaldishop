@@ -10,6 +10,7 @@ import java.util.UUID;
 @Repository
 public interface ProductVariantJpaRepository extends JpaRepository<ProductVariantEntity, UUID> {
     List<ProductVariantEntity> findByProductId(UUID productId);
+    List<ProductVariantEntity> findByStoreId(UUID storeId);
     boolean existsBySku(String sku);
     boolean existsBySkuAndIdNot(String sku, UUID id);
     boolean existsByStoreIdAndSku(UUID storeId, String sku);

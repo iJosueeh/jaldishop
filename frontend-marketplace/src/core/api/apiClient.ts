@@ -14,6 +14,7 @@ export class ApiException extends Error {
 }
 
 interface FetchOptions extends RequestInit {
+  baseUrl?: string;
   params?: Record<string, string | number | boolean | undefined>;
   timeoutMs?: number;
 }
@@ -25,9 +26,9 @@ export async function apiClient<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { params, timeoutMs = 10000, headers, ...customConfig } = options;
+  const { params, timeoutMs = 10000, headers, baseUrl = env.apiUrl, ...customConfig } = options;
 
-  let url = endpoint.startsWith('http') ? endpoint : `${env.apiUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  let url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
   if (params) {
     const searchParams = new URLSearchParams();

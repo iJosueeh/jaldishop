@@ -5,6 +5,7 @@ import { QueryProvider } from '@/core/providers/QueryProvider';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { HashScrollHandler } from '@/shared/components/layout/HashScrollHandler';
 import { Toaster } from 'sonner';
+import { StorefrontCartScope } from '@/features/storefront/cart/StorefrontCartProvider';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -63,13 +64,14 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
         <QueryProvider>
+          <StorefrontCartScope>
           <HashScrollHandler />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Toaster richColors position="top-right" />
+          </StorefrontCartScope>
         </QueryProvider>
       </body>
     </html>
   );
 }
-

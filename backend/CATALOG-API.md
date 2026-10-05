@@ -80,3 +80,11 @@ Base Path: /api/v1/merchants/stores/{storeId}
 * Ruta: /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}
 * Body: {"presentationName": "Molde Mediano", "sku": "TORTA-3L-M", "priceAmount": 35.00, "priceCurrency": "PEN", "tracksInventory": true, "status": "ACTIVE", "attributes": []}
 * Respuesta Exitosa (200 OK): Retorna ProductVariantResponse actualizado.
+# Categorías públicas del catálogo
+
+* GET `/api/v1/stores/{storeId}/categories`
+* GET `/api/v1/stores/slug/{slug}/categories`
+* Sin autenticación. Devuelven únicamente categorías activas de una tienda activa; una tienda inexistente o inactiva devuelve 404.
+* Cada categoría incluye `id`, `storeId`, `name`, `description`, `status`, `createdAt` y `updatedAt`.
+* El marketplace conecta `product.categoryId` con `category.id` y verifica `storeId` para mostrar el nombre y filtrar por ID. Estas categorías son las mismas que administra el comerciante en su catálogo, distintas de los rubros de negocios de `/store-categories`.
+* Si los nombres no están disponibles, conserva los productos y muestra un aviso; no inventa la categoría “General”. La barra muestra las categorías con productos disponibles y su cantidad.

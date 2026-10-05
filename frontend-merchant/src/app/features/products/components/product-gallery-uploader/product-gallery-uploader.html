@@ -3,7 +3,7 @@
     <div class="flex flex-col">
       <span class="text-xs font-bold text-on-surface">Galería de Imágenes del Producto</span>
       <span class="text-[11px] text-on-surface-variant">
-        Hasta {{ maxImages() }} fotografías (JPG, PNG, WebP). La primera será la portada de catálogo.
+        Hasta {{ maxImages() }} fotografías. Arrastra las fotos o usa las flechas para ordenar. La primera será la portada.
       </span>
     </div>
     <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant">
@@ -12,12 +12,20 @@
   </div>
 
   <!-- Grid de Miniaturas de la Galería -->
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
     @for (item of internalImages(); track $index) {
       <div
-        class="relative aspect-square rounded-xl bg-surface-container overflow-hidden border-2 transition-all flex flex-col items-center justify-center group"
+        draggable="true"
+        (dragstart)="onDragStart($index, $event)"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($index, $event)"
+        (dragend)="onDragEnd()"
+        class="relative aspect-square rounded-xl bg-surface-container overflow-hidden border-2 transition-all flex flex-col items-center justify-center group cursor-grab active:cursor-grabbing shadow-xs select-none"
         [class.border-primary]="item.isPrimary"
         [class.border-outline-variant]="!item.isPrimary"
+        [class.opacity-50]="draggedIndex() === $index"
+        [class.ring-2]="draggedIndex() !== null && draggedIndex() !== $index"
+        [class.ring-primary/40]="draggedIndex() !== null && draggedIndex() !== $index"
       >
         <!-- Overlay de carga / progreso -->
         @if (item.isUploading) {
@@ -34,68 +42,85 @@
         <img
           [src]="item.imageUrl || item.previewUrl"
           alt="Foto de producto"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover pointer-events-none"
         />
 
-        <!-- Insignia de Portada Principal -->
-        @if (item.isPrimary) {
-          <div class="absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded-md bg-primary text-on-primary text-[9px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1">
-            <ng-icon name="matStarOutline" class="text-[11px]" />
-            <span>Portada</span>
+        <!-- Insignia Superior Izquierda: Número de Orden / Portada -->
+        <div class="absolute top-1.5 left-1.5 z-10 flex items-center gap-1">
+          @if (item.isPrimary) {
+            <div class="px-1.5 py-0.5 rounded-md bg-primary text-on-primary text-[9px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1">
+              <ng-icon name="matStarOutline" class="text-[11px]" />
+              <span>Portada</span>
+            </div>
+          } @else {
+            <div class="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold shadow-xs">
+              #{{ $index + 1 }}
+            </div>
+          }
+        </div>
+
+        <!-- Indicador de Arrastre en el centro superior (cuando hay más de 1 imagen) -->
+        @if (internalImages().length > 1) {
+          <div
+            class="absolute top-1.5 left-1/2 -translate-x-1/2 z-10 px-1 py-0.5 rounded-md bg-black/50 text-white/80 text-[10px] sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center pointer-events-none"
+            title="Arrastra para reordenar"
+          >
+            <ng-icon name="matDragIndicatorOutline" class="text-xs" />
           </div>
         }
 
-        <!-- Overlay de Acciones Rápidas: Visible en móvil, hover en desktop -->
-        @if (!item.isUploading) {
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 flex flex-col justify-between p-1.5 pointer-events-none sm:pointer-events-auto">
-            <!-- Botón Eliminar Arriba a la Derecha -->
-            <div class="flex justify-end pointer-events-auto">
-              <button
-                type="button"
-                (click)="requestDelete($index)"
-                class="p-1.5 rounded-lg bg-error text-white hover:bg-error/90 active:scale-90 shadow-md transition-all cursor-pointer"
-                title="Eliminar foto"
-              >
-                <ng-icon name="matDeleteOutline" class="text-[14px]" />
-              </button>
-            </div>
+        <!-- Botón Eliminar Arriba a la Derecha -->
+        @if (!item.isUploading && !disabled()) {
+          <div class="absolute top-1.5 right-1.5 z-10 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <button
+              type="button"
+              (click)="requestDelete($index)"
+              class="p-1.5 rounded-lg bg-black/70 hover:bg-error text-white active:scale-90 shadow-md transition-all cursor-pointer flex items-center justify-center"
+              title="Eliminar foto"
+            >
+              <ng-icon name="matDeleteOutline" class="text-[13px]" />
+            </button>
+          </div>
+        }
 
-            <!-- Controles Inferiores: Mover y Establecer Portada -->
-            <div class="flex items-center justify-between gap-1 pointer-events-auto">
-              <div class="flex items-center gap-0.5">
-                @if ($index > 0) {
-                  <button
-                    type="button"
-                    (click)="movePosition($index, 'left')"
-                    class="p-1 rounded-md bg-surface-container-lowest/90 text-on-surface hover:bg-surface-container active:scale-90 text-xs shadow-xs transition-all"
-                    title="Mover a la izquierda"
-                  >
-                    <ng-icon name="matArrowBackOutline" class="text-[12px]" />
-                  </button>
-                }
-                @if ($index < internalImages().length - 1) {
-                  <button
-                    type="button"
-                    (click)="movePosition($index, 'right')"
-                    class="p-1 rounded-md bg-surface-container-lowest/90 text-on-surface hover:bg-surface-container active:scale-90 text-xs shadow-xs transition-all"
-                    title="Mover a la derecha"
-                  >
-                    <ng-icon name="matArrowForwardOutline" class="text-[12px]" />
-                  </button>
-                }
-              </div>
-
-              @if (!item.isPrimary) {
+        <!-- Barra Inferior de Acciones: Mover Izq / Der y Portada -->
+        @if (!item.isUploading && !disabled()) {
+          <div class="absolute bottom-0 inset-x-0 p-1.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 flex items-center justify-between gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <!-- Botones Mover Flechas -->
+            <div class="flex items-center gap-1">
+              @if ($index > 0) {
                 <button
                   type="button"
-                  (click)="setPrimary($index)"
-                  class="px-1.5 py-0.5 rounded-md bg-surface-container-lowest/90 text-on-surface text-[10px] font-bold hover:bg-primary hover:text-on-primary active:scale-90 shadow-xs transition-all cursor-pointer"
-                  title="Hacer foto principal"
+                  (click)="movePosition($index, 'left')"
+                  class="p-1 rounded-md bg-white/20 hover:bg-white/40 text-white active:scale-90 text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center"
+                  title="Mover a la izquierda"
                 >
-                  Portada
+                  <ng-icon name="matArrowBackOutline" class="text-[12px]" />
+                </button>
+              }
+              @if ($index < internalImages().length - 1) {
+                <button
+                  type="button"
+                  (click)="movePosition($index, 'right')"
+                  class="p-1 rounded-md bg-white/20 hover:bg-white/40 text-white active:scale-90 text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center"
+                  title="Mover a la derecha"
+                >
+                  <ng-icon name="matArrowForwardOutline" class="text-[12px]" />
                 </button>
               }
             </div>
+
+            <!-- Botón Hacer Portada -->
+            @if (!item.isPrimary) {
+              <button
+                type="button"
+                (click)="setPrimary($index)"
+                class="px-2 py-0.5 rounded-md bg-white/20 hover:bg-primary hover:text-on-primary text-white text-[10px] font-bold active:scale-90 shadow-xs transition-all cursor-pointer"
+                title="Establecer como imagen principal"
+              >
+                Hacer Portada
+              </button>
+            }
           </div>
         }
       </div>

@@ -7,6 +7,8 @@ import com.jaldishop.backend.catalog.application.GetProductsService;
 import com.jaldishop.backend.catalog.application.UpdateProductCommand;
 import com.jaldishop.backend.catalog.application.UpdateProductService;
 import com.jaldishop.backend.catalog.domain.Product;
+import com.jaldishop.backend.catalog.domain.ProductVariant;
+import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.CreateProductRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductRequest;
@@ -21,7 +23,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/merchants/stores/{storeId}/products")
@@ -33,19 +37,22 @@ public class MerchantProductController {
     private final GetProductsService getProductsService;
     private final StoreContextService storeContextService;
     private final ProductResponseMapper responseMapper;
+    private final ProductVariantRepository variantRepository;
 
     public MerchantProductController(
             CreateProductService createProductService,
             UpdateProductService updateProductService,
             GetProductsService getProductsService,
             StoreContextService storeContextService,
-            ProductResponseMapper responseMapper
+            ProductResponseMapper responseMapper,
+            ProductVariantRepository variantRepository
     ) {
         this.createProductService = createProductService;
         this.updateProductService = updateProductService;
         this.getProductsService = getProductsService;
         this.storeContextService = storeContextService;
         this.responseMapper = responseMapper;
+        this.variantRepository = variantRepository;
     }
 
     @PostMapping
@@ -75,8 +82,25 @@ public class MerchantProductController {
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
         List<Product> products = getProductsService.execute(new GetProductsQuery(storeId, categoryId));
+
+        if (variantRepository == null) {
+            List<ProductResponse> response = products.stream()
+                    .map(responseMapper::toResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        }
+
+        List<ProductVariant> allVariants = variantRepository.findByStoreId(storeId);
+        Map<UUID, List<ProductVariant>> variantsByProductId = allVariants.stream()
+                .collect(Collectors.groupingBy(ProductVariant::getProductId));
+
         List<ProductResponse> response = products.stream()
-                .map(responseMapper::toResponse)
+                .map(product -> {
+                    List<ProductVariant> vars = variantsByProductId.get(product.getId());
+                    return (vars != null && !vars.isEmpty())
+                            ? responseMapper.toResponse(product, vars)
+                            : responseMapper.toResponse(product);
+                })
                 .toList();
         return ResponseEntity.ok(response);
     }
@@ -89,6 +113,12 @@ public class MerchantProductController {
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
         Product product = getProductsService.execute(productId, storeId);
+        List<ProductVariant> variants = variantRepository != null
+                ? variantRepository.findByProductId(productId)
+                : null;
+        if (variants != null && !variants.isEmpty()) {
+            return ResponseEntity.ok(responseMapper.toResponse(product, variants));
+        }
         return ResponseEntity.ok(responseMapper.toResponse(product));
     }
 
