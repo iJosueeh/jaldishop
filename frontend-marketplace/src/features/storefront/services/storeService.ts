@@ -39,7 +39,7 @@ export const storeService = {
   async getStoreBySlug(slug: string): Promise<PublicStore | null> {
     try {
       const store = await apiClient<PublicStore>(`/stores/slug/${slug}`, {
-        timeoutMs: 4000,
+        timeoutMs: 12000,
       });
       if (!store) return null;
 

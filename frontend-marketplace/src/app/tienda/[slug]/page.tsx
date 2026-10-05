@@ -17,37 +17,88 @@ interface StorefrontPageProps {
 export async function generateMetadata({
   params,
 }: StorefrontPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const store = await storeService.getStoreBySlug(slug);
+  try {
+    const { slug } = await params;
+    const store = await storeService.getStoreBySlug(slug);
 
-  if (!store) {
+    if (!store) {
+      return {
+        title: 'Tienda no encontrada | JaldiShop',
+        description: 'La tienda que buscas no existe o se encuentra inactiva.',
+      };
+    }
+
     return {
-      title: 'Tienda no encontrada | JaldiShop',
-      description: 'La tienda que buscas no existe o se encuentra inactiva.',
-    };
-  }
-
-  return {
-    title: `${store.name} | JaldiShop`,
-    description:
-      store.description ||
-      `Ordena en línea en ${store.name}. Reserva tu cupo y recibe tus pedidos a tiempo con JaldiShop.`,
-    openGraph: {
-      title: `${store.name} — Pedidos Online`,
+      title: `${store.name} | JaldiShop`,
       description:
         store.description ||
-        `Ordena en línea con control de capacidad en tiempo real en ${store.name}.`,
-      type: 'website',
-    },
-  };
+        `Ordena en línea en ${store.name}. Reserva tu cupo y recibe tus pedidos a tiempo con JaldiShop.`,
+      openGraph: {
+        title: `${store.name} — Pedidos Online`,
+        description:
+          store.description ||
+          `Ordena en línea con control de capacidad en tiempo real en ${store.name}.`,
+        type: 'website',
+      },
+    };
+  } catch {
+    return {
+      title: 'Tienda | JaldiShop',
+      description: 'Plataforma de gestión de pedidos en línea con JaldiShop.',
+    };
+  }
 }
 
 export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const { slug } = await params;
-  const store = await storeService.getStoreBySlug(slug);
+  let store: import('@/features/storefront/types/storefront.types').PublicStore | null = null;
+  let loadFailed = false;
 
-  if (!store) {
+  try {
+    store = await storeService.getStoreBySlug(slug);
+  } catch (error) {
+    console.error(`[StorefrontPage] Error al obtener datos de la tienda '${slug}':`, error);
+    loadFailed = true;
+  }
+
+  if (!store && !loadFailed) {
     notFound();
+  }
+
+  if (loadFailed || !store) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#faf7f2]">
+        <main className="flex-1 flex items-center justify-center py-20 px-6">
+          <div className="max-w-md w-full text-center space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 text-[#ea580c] flex items-center justify-center mx-auto">
+              <span className="w-3 h-3 rounded-full bg-[#ea580c] animate-ping" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="font-display text-2xl font-black text-stone-900">
+                No pudimos conectar con la tienda
+              </h1>
+              <p className="text-sm text-stone-600 leading-relaxed">
+                Estamos teniendo una breve reconexión con el servidor backend. Esto no significa que la tienda no exista.
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col gap-3">
+              <a
+                href={`/tienda/${slug}`}
+                className="w-full inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-md transition-all"
+              >
+                Reintentar conexión
+              </a>
+              <Link
+                href="/"
+                className="text-xs font-semibold text-stone-500 hover:text-stone-800 transition-colors"
+              >
+                Volver al inicio de JaldiShop
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   // Cargar productos activos del catálogo público de la tienda
