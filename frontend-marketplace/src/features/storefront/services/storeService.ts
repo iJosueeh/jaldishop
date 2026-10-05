@@ -13,8 +13,8 @@ interface PublicProductDto {
 async function loadStoreProducts(storePath: string): Promise<ProductItem[]> {
   try {
     const [products, categories] = await Promise.all([
-      apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 4000 }),
-      apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 4000 }).catch(() => []),
+      apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 12000 }),
+      apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 12000 }).catch(() => []),
     ]);
     if (!Array.isArray(products)) return [];
     const catalogCategories = Array.isArray(categories) ? categories : [];
@@ -30,7 +30,8 @@ async function loadStoreProducts(storePath: string): Promise<ProductItem[]> {
         iconText: product.name.substring(0, 2).toUpperCase(), variants: product.variants,
       };
     });
-  } catch {
+  } catch (err) {
+    console.error(`[loadStoreProducts] Error consultando productos en ${storePath}:`, err);
     return [];
   }
 }
