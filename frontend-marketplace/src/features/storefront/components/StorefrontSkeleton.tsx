@@ -4,18 +4,18 @@ import { Container } from '@/shared/components/ui/Container';
 
 export function StorefrontSkeleton() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-[#faf7f2] pb-20">
       {/* Header Skeleton */}
-      <div className="bg-slate-900 pt-24 pb-12">
+      <div className="overflow-hidden bg-[#141413] pb-10 pt-24 sm:pb-12">
         <Container size="lg">
-          <div className="flex items-center gap-6">
-            <Skeleton className="w-24 h-24 rounded-3xl bg-slate-800" />
-            <div className="space-y-3 flex-1">
-              <Skeleton className="h-8 w-64 bg-slate-800" />
-              <Skeleton className="h-4 w-96 bg-slate-800" />
-              <div className="flex gap-3">
-                <Skeleton className="h-5 w-24 bg-slate-800" />
-                <Skeleton className="h-5 w-32 bg-slate-800" />
+          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
+            <Skeleton className="h-20 w-20 shrink-0 rounded-3xl bg-white/10 sm:h-24 sm:w-24" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <Skeleton className="h-7 w-48 max-w-full bg-white/10 sm:h-8 sm:w-64" />
+              <Skeleton className="h-4 w-full max-w-96 bg-white/10" />
+              <div className="flex max-w-full flex-wrap gap-3">
+                <Skeleton className="h-5 w-24 max-w-full bg-white/10" />
+                <Skeleton className="h-5 w-32 max-w-full bg-white/10" />
               </div>
             </div>
           </div>
@@ -23,7 +23,7 @@ export function StorefrontSkeleton() {
       </div>
 
       {/* Main Content Skeleton */}
-      <Container size="lg" className="pt-8 space-y-6">
+      <Container size="lg" className="min-w-0 space-y-6 pt-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-16 rounded-2xl" />

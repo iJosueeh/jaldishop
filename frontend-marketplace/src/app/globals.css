@@ -52,12 +52,16 @@
   --foreground: #1c1917;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   letter-spacing: -0.012em;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Custom smooth scrollbar */
