@@ -61,15 +61,31 @@ docker run --name jaldishop-postgres \
 
 ## 4. Migraciones de Base de Datos y Seed Data
 
-El esquema se aplica de forma automática al iniciar la aplicación mediante **Flyway**:
+El esquema se versiona y aplica automáticamente al iniciar la aplicación mediante **Flyway** (migraciones `V1` a `V14`):
 
-1. **`V1__initial_schema.sql`:** Creación de 19 tablas normalizadas (3FN), claves foráneas con políticas `ON DELETE RESTRICT/CASCADE`, restricciones `CHECK` e índices únicos parciales.
-2. **`V2__seed_roles.sql`:** Inserción de roles base (`CUSTOMER`, `MERCHANT`, `ADMIN`).
+1. **`V1__initial_schema.sql`:** Creación del esquema relacional base (3FN), claves foráneas con políticas `ON DELETE RESTRICT/CASCADE`, restricciones `CHECK` e índices únicos parciales.
+2. **`V2__seed_roles.sql`:** Catálogo de roles base (`CUSTOMER`, `MERCHANT`, `ADMIN`).
+3. **`V3__add_store_customers.sql`:** Registro histórico de relación cliente-tienda (migrado posteriormente en V12).
+4. **`V4__seed_complete_demo_data.sql`:** Semillas completas de demostración (usuarios, tiendas, catálogo y configuración de capacidad).
+5. **`V5__remove_tax_applies_from_stores.sql`:** Limpieza y simplificación de configuración tributaria en tiendas.
+6. **`V6__set_default_currency_and_normalize_phones.sql`:** Moneda por defecto `PEN` y normalización de teléfonos de contacto.
+7. **`V7__strengthen_relational_integrity_and_multitenancy.sql`:** Índices únicos parciales para roles globales (`store_id IS NULL`) y contextuales (`store_id IS NOT NULL`).
+8. **`V8__seed_store_categories_and_branding.sql`:** Catálogo de rubros comerciales y soporte de branding de tiendas.
+9. **`V10__fix_user_roles_id_default_and_store_sync.sql`:** Soporte de `DEFAULT gen_random_uuid()` para claves surrogate en `user_roles`.
+10. **`V11__refine_store_ownership.sql`:** Fortalecimiento de la propiedad de tiendas (`owner_user_id` NOT NULL con FK `ON DELETE RESTRICT`).
+11. **`V12__migrate_store_customers_to_user_roles_and_check_scope.sql`:** Unificación de clientes de tienda dentro de `user_roles` (`CUSTOMER` contextual), eliminación segura de `store_customers` y validación estricta de alcance vía `CHECK (ck_user_roles_role_scope)`.
+12. **`V13__strengthen_inventory_reservations_multitenancy.sql`:** Aislamiento multitenant de reservas de inventario (`store_id` obligatorio, FK compuesta `(capacity_reservation_id, store_id)` y clave candidata en `capacity_reservations`).
+13. **`V14__prevent_capacity_slot_overlaps.sql`:** Extensión `btree_gist` y restricción de exclusión física `EXCLUDE USING gist` para evitar solapamientos de franjas horarias de capacidad activas.
 
 Para verificar el estado de las migraciones sin levantar el servidor:
 ```bash
 ./mvnw flyway:info
 ```
+
+### Núcleo Transaccional & Pruebas de Concurrencia
+El checkout integra de forma atómica:
+* **Capacidad + Inventario en un Hold Atómico:** Bloqueos pesimistas `PESSIMISTIC_WRITE` (`FOR UPDATE`) sobre `capacity_configurations` e `inventories` con orden canónico determinista por variante para evitar deadlocks.
+* **Suite de pruebas de concurrencia:** Verificada en [`CheckoutHoldConcurrencyIntegrationTest`](src/test/java/com/jaldishop/backend/checkout/application/CheckoutHoldConcurrencyIntegrationTest.java), con bootstrap automático de Flyway para CI y limpieza (`teardown`) garantizada antes y después de su ejecución.
 
 ---
 
