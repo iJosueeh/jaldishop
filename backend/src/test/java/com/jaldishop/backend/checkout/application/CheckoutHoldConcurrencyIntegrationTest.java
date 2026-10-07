@@ -1,6 +1,8 @@
 package com.jaldishop.backend.checkout.application;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -42,8 +44,16 @@ class CheckoutHoldConcurrencyIntegrationTest {
         if (dbUrl != null && !dbUrl.isBlank() && dbUser != null) {
             try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
                 dbAvailable = true;
+                // Run Flyway migrations V1 through V14 to ensure DB is initialized in CI
+                Flyway flyway = Flyway.configure()
+                        .dataSource(dbUrl, dbUser, dbPassword)
+                        .locations("classpath:db/migration")
+                        .validateOnMigrate(false)
+                        .load();
+                MigrateResult result = flyway.migrate();
+                System.out.println("CheckoutHoldConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
             } catch (Exception e) {
-                System.err.println("Database connection failed: " + e.getMessage());
+                System.err.println("Database connection or Flyway failed: " + e.getMessage());
                 dbAvailable = false;
             }
         }
