@@ -243,6 +243,45 @@ class CapacityReservationTest {
         assertEquals(updatedAt, reservation.getUpdatedAt());
     }
 
+    @Test
+    @DisplayName("isExpired en PAYMENT_PROTECTED devuelve false mientras esté vigente")
+    void isExpiredPaymentProtectedBeforeDeadline() {
+        Instant now = Instant.now();
+        CapacityReservation reservation = CapacityReservation.reconstitute(
+                UUID.randomUUID(), storeId, userId, LocalDate.of(2026, 9, 22),
+                LocalTime.of(10, 0), LocalTime.of(12, 0),
+                CapacityReservationStatus.PAYMENT_PROTECTED, now.minusSeconds(100), now.plusSeconds(300),
+                now.minusSeconds(700), now.minusSeconds(100));
+
+        assertFalse(reservation.isExpired(now));
+    }
+
+    @Test
+    @DisplayName("isExpired en PAYMENT_PROTECTED devuelve true al vencer la protección")
+    void isExpiredPaymentProtectedAfterDeadline() {
+        Instant now = Instant.now();
+        CapacityReservation reservation = CapacityReservation.reconstitute(
+                UUID.randomUUID(), storeId, userId, LocalDate.of(2026, 9, 22),
+                LocalTime.of(10, 0), LocalTime.of(12, 0),
+                CapacityReservationStatus.PAYMENT_PROTECTED, now.minusSeconds(700), now.minusSeconds(10),
+                now.minusSeconds(700), now.minusSeconds(100));
+
+        assertTrue(reservation.isExpired(now));
+    }
+
+    @Test
+    @DisplayName("isExpired en PAYMENT_PROTECTED con paymentProtectionExpiresAt nulo se considera vencido/anómalo")
+    void isExpiredPaymentProtectedWithNullDeadline() {
+        Instant now = Instant.now();
+        CapacityReservation reservation = CapacityReservation.reconstitute(
+                UUID.randomUUID(), storeId, userId, LocalDate.of(2026, 9, 22),
+                LocalTime.of(10, 0), LocalTime.of(12, 0),
+                CapacityReservationStatus.PAYMENT_PROTECTED, now.minusSeconds(100), null,
+                now.minusSeconds(700), now.minusSeconds(100));
+
+        assertTrue(reservation.isExpired(now));
+    }
+
     private CapacityReservation activeFixture(Instant createdAt) {
         return CapacityReservation.reconstitute(
                 UUID.randomUUID(), storeId, userId, LocalDate.of(2026, 9, 22),

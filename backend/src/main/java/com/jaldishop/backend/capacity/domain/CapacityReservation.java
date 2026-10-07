@@ -73,8 +73,15 @@ public class CapacityReservation {
     }
 
     public boolean isExpired(Instant now) {
-        return status == CapacityReservationStatus.ACTIVE
-                && (now.isAfter(expiresAt) || now.equals(expiresAt));
+        if (status == CapacityReservationStatus.ACTIVE) {
+            return now.isAfter(expiresAt) || now.equals(expiresAt);
+        }
+        if (status == CapacityReservationStatus.PAYMENT_PROTECTED) {
+            return paymentProtectionExpiresAt == null
+                    || now.isAfter(paymentProtectionExpiresAt)
+                    || now.equals(paymentProtectionExpiresAt);
+        }
+        return false;
     }
 
     public void expireIfDue(Instant now) {

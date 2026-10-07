@@ -6,6 +6,7 @@ import java.util.UUID;
 public class InventoryReservation {
 
     private final UUID id;
+    private final UUID storeId;
     private final UUID capacityReservationId;
     private final UUID variantId;
     private final int quantity;
@@ -14,11 +15,14 @@ public class InventoryReservation {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public InventoryReservation(UUID id, UUID capacityReservationId, UUID variantId, int quantity,
+    public InventoryReservation(UUID id, UUID storeId, UUID capacityReservationId, UUID variantId, int quantity,
                                 InventoryReservationStatus status, Instant expiresAt,
                                 Instant createdAt, Instant updatedAt) {
         if (id == null) {
             throw new IllegalArgumentException("El ID de la reserva de inventario no puede ser nulo.");
+        }
+        if (storeId == null) {
+            throw new IllegalArgumentException("El ID de la tienda no puede ser nulo.");
         }
         if (capacityReservationId == null) {
             throw new IllegalArgumentException("El ID de la reserva de capacidad no puede ser nulo.");
@@ -33,6 +37,7 @@ public class InventoryReservation {
             throw new IllegalArgumentException("La fecha de expiración no puede ser nula.");
         }
         this.id = id;
+        this.storeId = storeId;
         this.capacityReservationId = capacityReservationId;
         this.variantId = variantId;
         this.quantity = quantity;
@@ -42,10 +47,11 @@ public class InventoryReservation {
         this.updatedAt = updatedAt != null ? updatedAt : Instant.now();
     }
 
-    public static InventoryReservation create(UUID capacityReservationId, UUID variantId, int quantity, Instant expiresAt) {
+    public static InventoryReservation create(UUID storeId, UUID capacityReservationId, UUID variantId, int quantity, Instant expiresAt) {
         Instant now = Instant.now();
         return new InventoryReservation(
                 UUID.randomUUID(),
+                storeId,
                 capacityReservationId,
                 variantId,
                 quantity,
@@ -85,6 +91,10 @@ public class InventoryReservation {
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
     }
 
     public UUID getCapacityReservationId() {

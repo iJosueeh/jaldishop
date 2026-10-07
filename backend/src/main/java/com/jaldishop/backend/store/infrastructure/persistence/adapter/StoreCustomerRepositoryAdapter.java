@@ -1,9 +1,6 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.store.domain.StoreCustomer;
 import com.jaldishop.backend.store.domain.StoreCustomerRepository;
-import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCustomerEntity;
-import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCustomerId;
 import com.jaldishop.backend.store.infrastructure.persistence.projection.StoreCustomerProjection;
 import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerJpaRepository;
 import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
@@ -24,15 +21,13 @@ public class StoreCustomerRepositoryAdapter implements StoreCustomerRepository {
     }
 
     @Override
-    public void save(StoreCustomer storeCustomer) {
-        StoreCustomerId id = new StoreCustomerId(storeCustomer.getStoreId(), storeCustomer.getUserId());
-        StoreCustomerEntity entity = new StoreCustomerEntity(id, storeCustomer.getCreatedAt());
-        storeCustomerJpaRepository.save(entity);
+    public void registerCustomer(UUID storeId, UUID userId) {
+        storeCustomerJpaRepository.assignCustomerToStore(storeId, userId);
     }
 
     @Override
     public boolean existsByStoreIdAndUserId(UUID storeId, UUID userId) {
-        return storeCustomerJpaRepository.existsByIdStoreIdAndIdUserId(storeId, userId);
+        return storeCustomerJpaRepository.existsByStoreIdAndUserId(storeId, userId);
     }
 
     @Override

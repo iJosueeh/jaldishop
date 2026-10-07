@@ -16,8 +16,8 @@ public class StoreEntity {
     @Id
     private UUID id;
 
-    @Column(name = "merchant_user_id", nullable = false, unique = true)
-    private UUID merchantUserId;
+    @Column(name = "owner_user_id", nullable = false, unique = true)
+    private UUID ownerUserId;
 
     @Column(name = "name", length = 160, nullable = false)
     private String name;
@@ -94,13 +94,13 @@ public class StoreEntity {
     protected StoreEntity() {
     }
 
-    public StoreEntity(UUID id, UUID merchantUserID, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
-        this(id, merchantUserID, name, slug, description, contactPhone, address, addressReference, latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount, deliveryFeeCurrency, taxRate, null, null, null, null, null, status, createdAt, updatedAt);
+    public StoreEntity(UUID id, UUID ownerUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, StoreStatus status, Instant createdAt, Instant updatedAt) {
+        this(id, ownerUserId, name, slug, description, contactPhone, address, addressReference, latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount, deliveryFeeCurrency, taxRate, null, null, null, null, null, status, createdAt, updatedAt);
     }
 
-    public StoreEntity(UUID id, UUID merchantUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, String logoUrl, String bannerUrl, String instagramUrl, String facebookUrl, String whatsappNumber, StoreStatus status, Instant createdAt, Instant updatedAt) {
+    public StoreEntity(UUID id, UUID ownerUserId, String name, String slug, String description, String contactPhone, String address, String addressReference, BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled, boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency, BigDecimal taxRate, String logoUrl, String bannerUrl, String instagramUrl, String facebookUrl, String whatsappNumber, StoreStatus status, Instant createdAt, Instant updatedAt) {
         this.id = id;
-        this.merchantUserId = merchantUserId;
+        this.ownerUserId = ownerUserId;
         this.name = name;
         this.slug = slug;
         this.description = description;
@@ -128,8 +128,12 @@ public class StoreEntity {
         return id;
     }
 
+    public UUID getOwnerUserId() {
+        return ownerUserId;
+    }
+
     public UUID getMerchantUserId() {
-        return merchantUserId;
+        return ownerUserId;
     }
 
     public String getName() {

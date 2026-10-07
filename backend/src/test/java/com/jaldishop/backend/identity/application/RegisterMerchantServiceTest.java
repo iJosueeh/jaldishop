@@ -128,7 +128,6 @@ class RegisterMerchantServiceTest {
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
         when(userRepository.findByEmail("cliente@test.com")).thenReturn(Optional.of(existingCustomer));
         when(passwordEncoder.matches("password123", "hashed-password")).thenReturn(true);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(jwtService.generateToken(any(), anySet())).thenReturn("upgrade-jwt-token");
 
         AuthResult result = registerMerchantService.execute(command);
@@ -140,7 +139,6 @@ class RegisterMerchantServiceTest {
         assertTrue(result.roles().contains("CUSTOMER"));
 
         assertTrue(existingCustomer.hasRole(RoleName.MERCHANT));
-        verify(userRepository).save(existingCustomer);
         verify(createStoreService).execute(any(CreateStoreCommand.class));
     }
 

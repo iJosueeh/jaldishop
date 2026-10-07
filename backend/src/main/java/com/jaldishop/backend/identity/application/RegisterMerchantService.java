@@ -57,8 +57,9 @@ public class RegisterMerchantService {
                 );
             }
 
-            existingUser.addRole(merchantRole);
-            user = userRepository.save(existingUser);
+            // No persistimos merchantRole aquí (tendría store_id=NULL, violando el CHECK de base de datos).
+            // Se asignará contextualmente con el store_id generado dentro de createStoreService.execute(...).
+            user = existingUser;
         } else {
             Role customerRole = roleRepository.findByName(RoleName.CUSTOMER)
                     .orElseThrow(() -> new ResourceNotFoundException("Rol CUSTOMER no encontrado."));
@@ -70,7 +71,7 @@ public class RegisterMerchantService {
                     command.firstName(),
                     command.lastName(),
                     command.phone(),
-                    Set.of(customerRole, merchantRole)
+                    Set.of(customerRole)
             );
             user = userRepository.save(newUser);
         }
@@ -103,9 +104,7 @@ public class RegisterMerchantService {
         );
 
         var store = createStoreService.execute(storeCommand);
-        if (store != null && store.getId() != null) {
-            userRepository.assignStoreToMerchantRole(user.getId(), store.getId());
-        }
+        user.addRole(merchantRole);
 
         Set<String> roleName = user.getRoles().stream()
                 .map(r -> r.getName().name())

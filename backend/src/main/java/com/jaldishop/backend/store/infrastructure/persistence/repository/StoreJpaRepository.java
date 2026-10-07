@@ -19,13 +19,21 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
     Optional<StoreEntity> findById(UUID id);
 
     @EntityGraph(attributePaths = "categories")
-    Optional<StoreEntity> findByMerchantUserId(UUID merchantUserID);
+    Optional<StoreEntity> findByOwnerUserId(UUID ownerUserId);
+
+    default Optional<StoreEntity> findByMerchantUserId(UUID merchantUserId) {
+        return findByOwnerUserId(merchantUserId);
+    }
 
     @EntityGraph(attributePaths = "categories")
     Optional<StoreEntity> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
-    boolean existsByMerchantUserId(UUID merchantUserId);
+    boolean existsByOwnerUserId(UUID ownerUserId);
+
+    default boolean existsByMerchantUserId(UUID merchantUserId) {
+        return existsByOwnerUserId(merchantUserId);
+    }
 
     @EntityGraph(attributePaths = "categories")
     @Query("SELECT s FROM StoreEntity s WHERE " +
@@ -59,7 +67,7 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
             DELETE FROM capacity_configurations WHERE store_id = :storeId;
             DELETE FROM capacity_exceptions WHERE store_id = :storeId;
             DELETE FROM store_category_assignments WHERE store_id = :storeId;
-            DELETE FROM store_customers WHERE store_id = :storeId;
+            DELETE FROM user_roles WHERE store_id = :storeId;
             DELETE FROM stores WHERE id = :storeId;
             """, nativeQuery = true)
     void deleteStoreAndDraftCatalog(@Param("storeId") UUID storeId);

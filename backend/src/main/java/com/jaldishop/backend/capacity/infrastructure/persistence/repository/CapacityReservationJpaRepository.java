@@ -20,8 +20,10 @@ public interface CapacityReservationJpaRepository extends JpaRepository<Capacity
               AND r.serviceDate = :serviceDate
               AND r.startTime = :startTime
               AND r.endTime = :endTime
-              AND (r.status = 'PAYMENT_PROTECTED'
-                   OR (r.status = 'ACTIVE' AND r.expiresAt > :now))
+              AND (
+                   (r.status = 'ACTIVE' AND r.expiresAt > :now)
+                OR (r.status = 'PAYMENT_PROTECTED' AND r.paymentProtectionExpiresAt IS NOT NULL AND r.paymentProtectionExpiresAt > :now)
+              )
             """)
     long countReserved(
             @Param("storeId") UUID storeId,
@@ -52,8 +54,10 @@ public interface CapacityReservationJpaRepository extends JpaRepository<Capacity
               AND r.serviceDate = :serviceDate
               AND r.startTime = :startTime
               AND r.endTime = :endTime
-              AND (r.status = 'PAYMENT_PROTECTED'
-                   OR (r.status = 'ACTIVE' AND r.expiresAt > :now))
+              AND (
+                   (r.status = 'ACTIVE' AND r.expiresAt > :now)
+                OR (r.status = 'PAYMENT_PROTECTED' AND r.paymentProtectionExpiresAt IS NOT NULL AND r.paymentProtectionExpiresAt > :now)
+              )
             """)
     boolean existsReservedByUserAndWindow(
             @Param("userId") UUID userId,

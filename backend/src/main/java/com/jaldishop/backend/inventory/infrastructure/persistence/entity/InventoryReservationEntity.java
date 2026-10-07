@@ -16,6 +16,9 @@ public class InventoryReservationEntity {
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    @Column(name = "store_id", nullable = false)
+    private UUID storeId;
+
     @Column(name = "capacity_reservation_id", nullable = false)
     private UUID capacityReservationId;
 
@@ -40,8 +43,9 @@ public class InventoryReservationEntity {
     public InventoryReservationEntity() {
     }
 
-    public InventoryReservationEntity(UUID id, UUID capacityReservationId, UUID variantId, int quantity, String status, Instant expiresAt, Instant createdAt, Instant updatedAt) {
+    public InventoryReservationEntity(UUID id, UUID storeId, UUID capacityReservationId, UUID variantId, int quantity, String status, Instant expiresAt, Instant createdAt, Instant updatedAt) {
         this.id = id;
+        this.storeId = storeId;
         this.capacityReservationId = capacityReservationId;
         this.variantId = variantId;
         this.quantity = quantity;
@@ -57,6 +61,14 @@ public class InventoryReservationEntity {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(UUID storeId) {
+        this.storeId = storeId;
     }
 
     public UUID getCapacityReservationId() {

@@ -48,6 +48,9 @@ class InitiateCheckoutServiceTest {
     @Mock
     private CreateCapacityReservationService createCapacityReservationService;
 
+    @Mock
+    private com.jaldishop.backend.inventory.application.ReserveInventoryService reserveInventoryService;
+
     @InjectMocks
     private InitiateCheckoutService initiateCheckoutService;
 

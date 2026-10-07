@@ -47,7 +47,7 @@ public class StoreRepositoryAdapter implements StoreRepository {
             entity.setCategories(new HashSet<>());
         }
         StoreEntity saved = storeJpaRepository.save(entity);
-        userJpaRepository.assignStoreToMerchantRole(saved.getMerchantUserId(), saved.getId());
+        userJpaRepository.assignStoreToMerchantRole(saved.getOwnerUserId(), saved.getId());
         return mapper.toDomain(saved);
     }
 
@@ -58,9 +58,14 @@ public class StoreRepositoryAdapter implements StoreRepository {
     }
 
     @Override
-    public Optional<Store> findByMerchantUserId(UUID merchantUserId) {
-        return storeJpaRepository.findByMerchantUserId(merchantUserId)
+    public Optional<Store> findByOwnerUserId(UUID ownerUserId) {
+        return storeJpaRepository.findByOwnerUserId(ownerUserId)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Store> findByMerchantUserId(UUID merchantUserId) {
+        return findByOwnerUserId(merchantUserId);
     }
 
     @Override
@@ -75,8 +80,13 @@ public class StoreRepositoryAdapter implements StoreRepository {
     }
 
     @Override
+    public boolean existsByOwnerUserId(UUID ownerUserId) {
+        return storeJpaRepository.existsByOwnerUserId(ownerUserId);
+    }
+
+    @Override
     public boolean existsByMerchantUserId(UUID merchantUserId) {
-        return storeJpaRepository.existsByMerchantUserId(merchantUserId);
+        return existsByOwnerUserId(merchantUserId);
     }
 
     @Override
@@ -93,8 +103,8 @@ public class StoreRepositoryAdapter implements StoreRepository {
     }
 
     @Override
-    public void deleteStore(UUID storeId, UUID merchantUserId) {
+    public void deleteStore(UUID storeId, UUID ownerUserId) {
         storeJpaRepository.deleteStoreAndDraftCatalog(storeId);
-        userJpaRepository.removeMerchantRole(merchantUserId);
+        userJpaRepository.removeMerchantRole(ownerUserId);
     }
 }

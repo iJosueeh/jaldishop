@@ -13,6 +13,7 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreRepository;
 import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.inventory.application.ReserveInventoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,20 @@ public class InitiateCheckoutService {
     private final StoreRepository storeRepository;
     private final CheckoutItemSnapshotAssembler snapshotAssembler;
     private final CreateCapacityReservationService createCapacityReservationService;
+    private final ReserveInventoryService reserveInventoryService;
 
     public InitiateCheckoutService(
             CartRepository cartRepository,
             StoreRepository storeRepository,
             CheckoutItemSnapshotAssembler snapshotAssembler,
-            CreateCapacityReservationService createCapacityReservationService
+            CreateCapacityReservationService createCapacityReservationService,
+            ReserveInventoryService reserveInventoryService
     ) {
         this.cartRepository = cartRepository;
         this.storeRepository = storeRepository;
         this.snapshotAssembler = snapshotAssembler;
         this.createCapacityReservationService = createCapacityReservationService;
+        this.reserveInventoryService = reserveInventoryService;
     }
 
     public CheckoutResult execute(InitiateCheckoutCommand command) {
@@ -68,6 +72,13 @@ public class InitiateCheckoutService {
                         command.startTime(),
                         command.endTime()
                 )
+        );
+
+        reserveInventoryService.execute(
+                command.storeId(),
+                capacityReservation.getId(),
+                capacityReservation.getExpiresAt(),
+                itemSnapshots
         );
 
         CheckoutPricing pricing = CheckoutPricing.calculate(
