@@ -52,10 +52,53 @@ class CheckoutHoldConcurrencyIntegrationTest {
                         .load();
                 MigrateResult result = flyway.migrate();
                 System.out.println("CheckoutHoldConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
+                // Limpiar cualquier residuo de ejecuciones anteriores
+                cleanUpTestData();
             } catch (Exception e) {
                 System.err.println("Database connection or Flyway failed: " + e.getMessage());
                 dbAvailable = false;
             }
+        }
+    }
+
+    @AfterAll
+    static void cleanUpTestData() {
+        if (!dbAvailable) return;
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            conn.setAutoCommit(true);
+            try (Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("""
+                    DELETE FROM inventory_reservations
+                    WHERE capacity_reservation_id IN (
+                        SELECT id FROM capacity_reservations
+                        WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com')
+                    )
+                    OR variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test');
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM capacity_reservations
+                    WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com');
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM inventories
+                    WHERE variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test');
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM product_variants
+                    WHERE presentation_name = 'Variante Test' OR sku LIKE 'SKU-%';
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM user_roles
+                    WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com');
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM users
+                    WHERE email LIKE 'user-%@example.com';
+                    """);
+                System.out.println("CheckoutHoldConcurrencyIntegrationTest: Datos de prueba limpiados exitosamente.");
+            }
+        } catch (Exception e) {
+            System.err.println("Advertencia: Falló la limpieza de datos de prueba: " + e.getMessage());
         }
     }
 
