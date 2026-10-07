@@ -1,0 +1,1944 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Arquitectura y Diseño Técnico: Frontend Marketplace (Next.js 15) - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#arquitectura-y-diseno-tecnico-frontend-marketplace-nextjs-15" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Arquitectura y Diseño Técnico: Frontend Marketplace (Next.js 15)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-portal-publico-de-clientes-y-storefront-de-tiendas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Portal Público de Clientes y Storefront de Tiendas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-vision-general-del-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Visión General del Marketplace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-principios-de-diseno-arquitectonico-solid-en-reactnextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Principios de Diseño Arquitectónico (SOLID en React/Next.js)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Principios de Diseño Arquitectónico (SOLID en React/Next.js)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aplicacion-de-solid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aplicación de SOLID:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-matriz-de-componentes-server-components-rsc-vs-client-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Matriz de Componentes: Server Components (RSC) vs. Client Components
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-estrategia-de-peticiones-y-cache-first-tanstack-query-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Estrategia de Peticiones y Cache-First (TanStack Query v5)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-propuestas-de-alto-valor-agregado-para-el-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Propuestas de Alto Valor Agregado para el Marketplace
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Propuestas de Alto Valor Agregado para el Marketplace">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-opengraph-dinamico-por-tienda-opengraph-imagetsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌟 1. OpenGraph Dinámico por Tienda (opengraph-image.tsx)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-whatsapp-order-bridge-respaldo-de-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📱 2. WhatsApp Order Bridge (Respaldo de Conversión)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-resiliencia-de-carrito-en-sessionstorage-localstorage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💾 3. Resiliencia de Carrito en sessionStorage / localStorage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-indicador-de-distancia-y-radio-de-cobertura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📍 4. Indicador de Distancia y Radio de Cobertura
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-atajos-de-teclado-y-busqueda-rapida-k-ctrlk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ 5. Atajos de Teclado y Búsqueda Rápida (⌘K / Ctrl+K)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-accesibilidad-completa-a11y-y-modo-oscuro-sutil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ♿ 6. Accesibilidad Completa (a11y) y Modo Oscuro Sutil
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-estructura-de-directorios-del-proyecto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Estructura de Directorios del Proyecto
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-despliegue-en-produccion-y-red-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Despliegue en Producción y Red Global
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="arquitectura-y-diseno-tecnico-frontend-marketplace-nextjs-15">Arquitectura y Diseño Técnico: Frontend Marketplace (Next.js 15)</h1>
+<h3 id="jaldishop-portal-publico-de-clientes-y-storefront-de-tiendas">JaldiShop — Portal Público de Clientes y Storefront de Tiendas</h3>
+<p><a href="https://nextjs.org/"><img alt="Next.js 15" src="https://img.shields.io/badge/Next.js-15.0_App_Router-black?style=for-the-badge&amp;logo=next.js&amp;logoColor=white" /></a>
+<a href="https://react.dev/"><img alt="React 19" src="https://img.shields.io/badge/React-19_RC-blue?style=for-the-badge&amp;logo=react&amp;logoColor=white" /></a>
+<a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" /></a>
+<a href="https://tailwindcss.com/"><img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-3.4_/_4.0-38B2AC?style=for-the-badge&amp;logo=tailwind-css&amp;logoColor=white" /></a>
+<a href="https://tanstack.com/query"><img alt="TanStack Query" src="https://img.shields.io/badge/TanStack_Query-v5-FF4154?style=for-the-badge&amp;logo=react-query&amp;logoColor=white" /></a>
+<a href="https://motion.dev/"><img alt="Framer Motion" src="https://img.shields.io/badge/Motion-Framer_Motion-purple?style=for-the-badge&amp;logo=framer&amp;logoColor=white" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>05-Arquitectura</code> &gt; <strong>Frontend Marketplace</strong><br />
+<a href="../../README.md">🏠 Índice General</a> | <a href="../arquitectura-sistema/">Arquitectura del Sistema ➡</a> | <a href="../../06-scrum/sprint-04/">Sprint 04 ➡</a></p>
+<hr />
+<h2 id="1-vision-general-del-marketplace">1. Visión General del Marketplace</h2>
+<p>El <strong><code>frontend-marketplace</code></strong> es la aplicación orientada al cliente final (<em>Customer</em>) y visitantes públicos de JaldiShop. A diferencia del panel administrativo (<code>frontend-merchant</code> en Angular), el marketplace prioriza:
+* <strong>Velocidad extrema de carga (0 ms TBT, Core Web Vitals optimizados).</strong>
+* <strong>SEO dinámico de primer nivel</strong> (Metadatos por slug, OpenGraph dinámico para compartir en WhatsApp e Instagram).
+* <strong>Experiencia de usuario visual, apetitosa y emocional</strong> al nivel de los SaaS modernos más reconocidos (<em>Linear, Stripe, Supabase</em>).
+* <strong>Control de disponibilidad y capacidad en tiempo real</strong> (hold temporal de 10 min, cupos visibles por franja).</p>
+<hr />
+<h2 id="2-principios-de-diseno-arquitectonico-solid-en-reactnextjs">2. Principios de Diseño Arquitectónico (SOLID en React/Next.js)</h2>
+<pre class="mermaid"><code>flowchart TD
+    subgraph ROUTING["🌐 Capa de Rutas (src/app)"]
+        PAGE_HOME["app/page.tsx&lt;br/&gt;(Landing Page)"]
+        PAGE_STORE["app/tienda/[slug]/page.tsx&lt;br/&gt;(Storefront SSR)"]
+    end
+
+    subgraph FEATURES["📦 Módulos de Dominio (src/features)"]
+        FEAT_LANDING["features/landing/&lt;br/&gt;• Hero, Bento, LiveDemo, Testimonials"]
+        FEAT_STOREFRONT["features/storefront/&lt;br/&gt;• Hero, Badges, Nav, Container (FE-STORE-01)"]
+        FEAT_CATALOG["features/catalog/&lt;br/&gt;• ProductGrid, VariantSelector (FE-STORE-03)"]
+        FEAT_CART["features/cart/&lt;br/&gt;• CartDrawer, CartSummary (FE-STORE-02)"]
+    end
+
+    subgraph SHARED["🧱 UI Atómica y Layout (src/shared)"]
+        UI_ATOMS["shared/components/ui/&lt;br/&gt;• Button, Badge, Card, Skeleton, Tooltip"]
+        LAYOUT_COMPS["shared/components/layout/&lt;br/&gt;• Navbar, Footer, MobileNav"]
+        UTILS["shared/utils/&lt;br/&gt;• cn.ts, formatters (PEN, fechas)"]
+    end
+
+    subgraph CORE["⚙️ Infraestructura y Datos (src/core)"]
+        API_CLIENT["core/api/apiClient.ts&lt;br/&gt;(Fetch wrapper tipado + ApiError)"]
+        QUERY_CLIENT["core/providers/QueryProvider.tsx&lt;br/&gt;(TanStack Query Cache-First)"]
+        CONFIG["core/config/env.ts&lt;br/&gt;(Configuración de entorno)"]
+    end
+
+    PAGE_HOME --&gt; FEAT_LANDING
+    PAGE_STORE --&gt; FEAT_STOREFRONT
+    FEAT_STOREFRONT --&gt; FEAT_CATALOG
+    PAGE_STORE --&gt; FEAT_CART
+
+    FEAT_LANDING --&gt; UI_ATOMS
+    FEAT_STOREFRONT --&gt; UI_ATOMS
+    FEAT_CATALOG --&gt; UI_ATOMS
+    FEAT_CART --&gt; UI_ATOMS
+
+    FEAT_STOREFRONT --&gt; API_CLIENT
+    FEAT_CATALOG --&gt; API_CLIENT
+    FEAT_CART --&gt; API_CLIENT
+    API_CLIENT --&gt; CONFIG</code></pre>
+<h3 id="aplicacion-de-solid">Aplicación de SOLID:</h3>
+<ol>
+<li><strong>S — Single Responsibility:</strong> Las páginas de <code>src/app</code> solo resuelven rutas y metadatos; los componentes de <code>features/</code> solo renderizan vistas de su dominio; las peticiones HTTP residen exclusivamente en <code>services/</code>.</li>
+<li><strong>O — Open/Closed:</strong> El <code>StorefrontContainer</code> expone <em>slots</em> semánticos (<code>children</code>, <code>catalogSlot</code>, <code>cartSlot</code>), permitiendo que Katherine y Mia conecten sus módulos sin alterar el layout base.</li>
+<li><strong>L — Liskov Substitution:</strong> Todos los componentes UI atómicos (<code>Button</code>, <code>Card</code>, <code>Badge</code>) extienden interfaces HTML estándar (<code>React.ButtonHTMLAttributes</code>).</li>
+<li><strong>I — Interface Segregation:</strong> Tipos granulares (<code>PublicStore</code>, <code>StoreContact</code>, <code>StoreFulfillmentInfo</code>, <code>CartItemView</code>) en vez de interfaces monolíticas.</li>
+<li><strong>D — Dependency Inversion:</strong> Los hooks y componentes dependen de abstracciones (<code>storeService</code>, <code>apiClient</code>) y no de llamadas <code>fetch</code> acopladas.</li>
+</ol>
+<hr />
+<h2 id="3-matriz-de-componentes-server-components-rsc-vs-client-components">3. Matriz de Componentes: Server Components (RSC) vs. Client Components</h2>
+<blockquote>
+<p>📌 <strong>Regla de Oro:</strong> <em>Server Components por defecto (0 KB JavaScript enviado al cliente), Client Components ('use client') solo en las hojas del árbol donde existe interactividad, animaciones de Framer Motion o hooks de estado.</em></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th style="text-align: center;">Tipo</th>
+<th>Motivo / Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/layout.tsx</code></td>
+<td style="text-align: center;"><strong>Server</strong></td>
+<td>Root shell, carga de fuentes Inter, metadatos base.</td>
+</tr>
+<tr>
+<td><code>app/page.tsx</code></td>
+<td style="text-align: center;"><strong>Server</strong></td>
+<td>Ensambla las secciones de la Landing sin JS de servidor en cliente.</td>
+</tr>
+<tr>
+<td><code>app/tienda/[slug]/page.tsx</code></td>
+<td style="text-align: center;"><strong>Server</strong></td>
+<td>Fetch SSR de la tienda + <code>generateMetadata</code> dinámico para SEO.</td>
+</tr>
+<tr>
+<td><code>features/landing/components/HeroSection.tsx</code></td>
+<td style="text-align: center;"><strong>Server</strong></td>
+<td>Titular, subtítulo y estructura base.</td>
+</tr>
+<tr>
+<td><code>features/landing/components/LiveDemoWidget.tsx</code></td>
+<td style="text-align: center;"><strong>Client (<code>'use client'</code>)</strong></td>
+<td><code>useState</code> para cambiar entre Pickup/Delivery y simular cupos en vivo.</td>
+</tr>
+<tr>
+<td><code>features/landing/components/BentoFeatures.tsx</code></td>
+<td style="text-align: center;"><strong>Server</strong></td>
+<td>Tarjetas informativas estáticas de alto impacto.</td>
+</tr>
+<tr>
+<td><code>shared/components/ui/MotionFade.tsx</code></td>
+<td style="text-align: center;"><strong>Client (<code>'use client'</code>)</strong></td>
+<td>Wrapper de Framer Motion (<code>whileInView</code>) para animaciones suaves al scroll.</td>
+</tr>
+<tr>
+<td><code>shared/components/layout/Navbar.tsx</code></td>
+<td style="text-align: center;"><strong>Client (<code>'use client'</code>)</strong></td>
+<td>Detección de scroll, menú responsive y modal <code>Ctrl+K</code>.</td>
+</tr>
+<tr>
+<td><code>features/cart/components/CartDrawer.tsx</code></td>
+<td style="text-align: center;"><strong>Client (<code>'use client'</code>)</strong></td>
+<td>Estado de apertura/cierre y modificación reactiva de cantidades.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-estrategia-de-peticiones-y-cache-first-tanstack-query-v5">4. Estrategia de Peticiones y Cache-First (TanStack Query v5)</h2>
+<p>Se utiliza <strong>TanStack Query v5</strong> con el patrón <strong>Stale-While-Revalidate</strong>:
+* <strong><code>staleTime: 5 minutos</code>:</strong> Las consultas ya cacheadas se sirven al instante (<strong>0 ms</strong>), revalidando en segundo plano solo si están vencidas.
+* <strong><code>gcTime: 30 minutos</code>:</strong> La información permanece en memoria evitando descargas innecesarias al navegar entre páginas.
+* <strong>Prefetch &amp; Hydration:</strong> El servidor Next.js ejecuta <code>prefetchQuery</code> durante el SSR y lo inyecta mediante <code>&lt;HydrationBoundary&gt;</code>, eliminando skeletons en la primera carga.
+* <strong>Deduplicación automática:</strong> Múltiples componentes que consumen el mismo slug ejecutan una sola petición HTTP compartida.</p>
+<hr />
+<h2 id="5-propuestas-de-alto-valor-agregado-para-el-marketplace">5. Propuestas de Alto Valor Agregado para el Marketplace</h2>
+<p>A continuación se detallan funcionalidades clave sugeridas para maximizar la conversión y robustez técnica:</p>
+<h3 id="1-opengraph-dinamico-por-tienda-opengraph-imagetsx">🌟 1. OpenGraph Dinámico por Tienda (<code>opengraph-image.tsx</code>)</h3>
+<ul>
+<li>Generación automática en el servidor de tarjetas visuales enriquecidas con el logo, nombre y badges de la tienda cuando los clientes compartan el enlace <code>jaldishop.com/tienda/mi-slug</code> por <strong>WhatsApp, Facebook o Twitter/X</strong>.</li>
+</ul>
+<h3 id="2-whatsapp-order-bridge-respaldo-de-conversion">📱 2. WhatsApp Order Bridge (Respaldo de Conversión)</h3>
+<ul>
+<li>Botón de contacto directo por WhatsApp preconfigurado con el resumen del carrito:<blockquote>
+<p><em>"¡Hola Panadería Don Pepe! Me gustaría ordenar 2x Pan Francés (S/ 20.00) para retiro a las 10:00 AM. Mi pedido en JaldiShop: https://jaldishop.com/tienda/panaderia-don-pepe"</em></p>
+</blockquote>
+</li>
+<li>Sirve como canal de contingencia si el usuario prefiere coordinar directamente.</li>
+</ul>
+<h3 id="3-resiliencia-de-carrito-en-sessionstorage-localstorage">💾 3. Resiliencia de Carrito en <code>sessionStorage</code> / <code>localStorage</code></h3>
+<ul>
+<li>Si el comprador cierra la pestaña por error o regresa más tarde, el carrito local conserva los productos seleccionados sin obligar a reiniciar el proceso.</li>
+</ul>
+<h3 id="4-indicador-de-distancia-y-radio-de-cobertura">📍 4. Indicador de Distancia y Radio de Cobertura</h3>
+<ul>
+<li>Integración con geolocalización del navegador para mostrar etiquetas contextuales: <em>"A 1.5 km de tu ubicación"</em> o <em>"Envío disponible a tu zona"</em>.</li>
+</ul>
+<h3 id="5-atajos-de-teclado-y-busqueda-rapida-k-ctrlk">⚡ 5. Atajos de Teclado y Búsqueda Rápida (<code>⌘K</code> / <code>Ctrl+K</code>)</h3>
+<ul>
+<li>Modal de búsqueda global flotante (estilo Spotlight/Raycast) para saltar rápidamente a cualquier tienda por nombre, rubro o slug.</li>
+</ul>
+<h3 id="6-accesibilidad-completa-a11y-y-modo-oscuro-sutil">♿ 6. Accesibilidad Completa (a11y) y Modo Oscuro Sutil</h3>
+<ul>
+<li>Focos visibles de navegación con teclado, contraste de colores WCAG AA y soporte de tema oscuro/claro armónico.</li>
+</ul>
+<hr />
+<h2 id="6-estructura-de-directorios-del-proyecto">6. Estructura de Directorios del Proyecto</h2>
+<div class="highlight"><pre><span></span><code>frontend-marketplace/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                     # Shell raíz + HashScrollHandler + Footer
+│   │   ├── page.tsx                       # Landing Page principal
+│   │   ├── not-found.tsx                  # 404 global editorial
+│   │   ├── globals.css                    # Tailwind CSS v4 + tokens de color
+│   │   ├── accesibilidad/page.tsx         # Declaración de accesibilidad WCAG
+│   │   ├── ayuda/page.tsx                 # Centro de Ayuda &amp; FAQ
+│   │   ├── sobre-nosotros/page.tsx        # Historia, misión y principios MYPE
+│   │   ├── trabaja-con-nosotros/page.tsx  # Cultura y atracción de talento
+│   │   ├── terminos/page.tsx              # Términos y Condiciones interactivos
+│   │   ├── privacidad/page.tsx            # Política de Privacidad &amp; ARCO
+│   │   ├── libro-de-reclamaciones/page.tsx# Libro Virtual (D.S. 011-2011-PCM)
+│   │   └── tienda/
+│   │       └── [slug]/
+│   │           ├── page.tsx               # Storefront dinámico SSR + metadata SEO
+│   │           ├── loading.tsx
+│   │           └── not-found.tsx
+│   ├── features/
+│   │   ├── landing/                       # Hero, Bento, Marquee, PeekSlider, Comparativa
+│   │   ├── storefront/                    # StorefrontHero, StorefrontNav, CatalogContainer
+│   │   ├── legal/                         # LegalLayout (Tabs/All), TLDR, ClaimsBookForm
+│   │   ├── company/                       # CompanyLayout editorial para páginas corporativas
+│   │   ├── catalog/                       # ProductGrid, VariantSelector (FE-STORE-03)
+│   │   └── cart/                          # CartDrawer, Resumen (FE-STORE-02)
+│   ├── shared/
+│   │   ├── components/
+│   │   │   ├── ui/                        # Button, Badge, Card, EmptyState, Container
+│   │   │   └── layout/                    # Navbar (Buscador bimodal), Footer, HashScrollHandler
+│   │   └── utils/
+│   └── core/
+│       ├── api/                           # apiClient.ts (Wrapper fetch tipado)
+│       ├── config/                        # env.ts (Variables con fallback inteligente)
+│       ├── providers/                     # QueryProvider.tsx (TanStack Query Cache-First)
+│       └── types/
+├── .env                                   # Variables locales para despliegue
+├── .env.example                           # Plantilla con valores nulos para el equipo
+├── .env.local                             # Variables para desarrollo local (Spring Boot 8080)
+├── package.json
+└── next.config.ts
+</code></pre></div>
+<hr />
+<h2 id="7-despliegue-en-produccion-y-red-global">7. Despliegue en Producción y Red Global</h2>
+<p>El Marketplace se encuentra desplegado de forma continua en <strong>Vercel</strong> bajo el dominio oficial:
+👉 <strong><code>https://www.jaldishop.net/</code></strong></p>
+<ul>
+<li><strong>Gestión de DNS:</strong> Google Cloud DNS (Zona <code>jaldishop-net</code>) con DNSSEC habilitado.</li>
+<li><strong>Integración Backend:</strong> Conectado a la API REST de Spring Boot en Render (<code>https://jaldishop-api.onrender.com/api/v1</code>) con orígenes CORS habilitados.</li>
+<li><strong>Integración Merchant:</strong> Conexión bidireccional hacia Cloudflare Pages (<code>https://negocios-jaldishop.pages.dev</code>).</li>
+<li><strong>Suite de Pruebas:</strong> 61 pruebas unitarias pasando al 100% en Vitest.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

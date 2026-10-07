@@ -1,0 +1,2112 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Sprint 4: Checkout, Pagos, Confirmación Transaccional y Storefront Público - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sprint-4-checkout-pagos-confirmacion-transaccional-y-storefront-publico" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sprint 4: Checkout, Pagos, Confirmación Transaccional y Storefront Público
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-gestion-agil-backlog-y-entregables-del-sprint-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 04
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objetivo-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objetivo del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-matriz-de-asignacion-y-responsabilidades" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Matriz de Asignación y Responsabilidades
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-backlog-del-sprint-y-cadena-transaccional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Backlog del Sprint y Cadena Transaccional
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-tarjetas-de-trabajo-detalladas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Tarjetas de Trabajo Detalladas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Tarjetas de Trabajo Detalladas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#be-19-orquestacion-de-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-19 | Orquestación de Checkout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-20-confirmacion-transaccional-de-compra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-20 | Confirmación Transaccional de Compra
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#be-payments-01-integracion-de-pagos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 BE-PAYMENTS-01 | Integración de Pagos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fe-store-01-storefront-publico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 FE-STORE-01 | Storefront Público
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fe-legal-01-ecosistema-legal-y-libro-de-reclamaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 FE-LEGAL-01 | Ecosistema Legal y Libro de Reclamaciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fe-mkt-01-landing-page-buscador-bimodal-y-paginas-institucionales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 FE-MKT-01 | Landing Page, Buscador Bimodal y Páginas Institucionales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ops-deploy-01-infraestructura-multi-cloud-y-despliegue-en-produccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 OPS-DEPLOY-01 | Infraestructura Multi-Cloud y Despliegue en Producción
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fe-store-02-carrito-customer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 FE-STORE-02 | Carrito Customer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fe-store-03-catalogo-publico-de-la-tienda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 FE-STORE-03 | Catálogo Público de la Tienda
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-criterios-de-exito-del-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Criterios de Éxito del Sprint
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="sprint-4-checkout-pagos-confirmacion-transaccional-y-storefront-publico">Sprint 4: Checkout, Pagos, Confirmación Transaccional y Storefront Público</h1>
+<h3 id="jaldishop-gestion-agil-backlog-y-entregables-del-sprint-04">JaldiShop — Gestión Ágil, Backlog y Entregables del Sprint 04</h3>
+<p><a href="./"><img alt="Estado" src="https://img.shields.io/badge/Estado-En_Progreso-yellow?style=for-the-badge&amp;logo=clockify&amp;logoColor=white" /></a>
+<a href="./"><img alt="Fase" src="https://img.shields.io/badge/Fase-Sprint_04-orange?style=for-the-badge" /></a></p>
+<hr />
+<p><code>📍 Docs</code> &gt; <code>06-Scrum</code> &gt; <strong>Sprint 04</strong><br />
+<a href="../sprint-03/">⬅ Sprint 03</a> | <a href="../../README.md">🏠 Índice General</a> | <a href="../../03-requisitos/alcance-mvp/">Alcance del MVP ➡</a></p>
+<hr />
+<h2 id="1-objetivo-del-sprint">1. Objetivo del Sprint</h2>
+<blockquote>
+<p>📌 <strong>Nota:</strong> Consolidar el flujo transaccional de compra y la experiencia pública del cliente (<em>Customer</em>). Se integran la orquestación del Checkout (validación simultánea de carrito, inventario y reserva de capacidad), el procesamiento seguro de pagos con Mercado Pago, la confirmación transaccional atómica de compras y la navegación del Storefront público y Carrito.</p>
+</blockquote>
+<ul>
+<li><strong>Fase:</strong> <em>Orquestación de Checkout, Pagos (Mercado Pago), Confirmación Transaccional, Storefront Público y Carrito Customer</em>.</li>
+<li><strong>Propósito:</strong> Conectar los módulos independientes construidos en sprints previos (<code>Cart</code>, <code>Inventory</code>, <code>CapacityReservation</code>) en un flujo de compra robusto, transaccional e idempotente que culmine en pedidos confirmados.</li>
+<li><strong>Meta Central:</strong> Disponer del circuito completo de compra operativo de extremo a extremo: desde la selección de productos y fechas en el Storefront hasta el cobro, hold de capacidad y creación de pedidos confirmados.</li>
+</ul>
+<hr />
+<h2 id="2-matriz-de-asignacion-y-responsabilidades">2. Matriz de Asignación y Responsabilidades</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Responsable</th>
+<th>Tarjeta</th>
+<th style="text-align: center;">Tipo</th>
+<th>Justificación / Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>Josué</strong></td>
+<td><strong>BE-19</strong> · Orquestación de Checkout</td>
+<td style="text-align: center;">Backend</td>
+<td>Es integración entre módulos. Tras trabajar Identity, Store y Cart, coordina la orquestación entre <code>Cart</code> + <code>Inventory</code> + <code>CapacityReservation</code> sin apropiarse de la lógica interna de esos módulos.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Mia</strong></td>
+<td><strong>BE-20</strong> · Confirmación Transaccional de Compra</td>
+<td style="text-align: center;">Backend</td>
+<td>Viene directamente de su trabajo con <code>Capacity/Reservations</code>. Aquí la reserva pasa a estado comprometido (<code>COMMITTED</code>) de forma atómica cuando la compra se confirma.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Katherine</strong></td>
+<td><strong>BE-PAYMENTS-01</strong> · Integración de Pagos</td>
+<td style="text-align: center;">Backend</td>
+<td>Viene de <code>Inventory</code> y permite repartir el backend crítico entre los tres. Trabaja Mercado Pago, intentos, idempotencia, estados de pago y webhooks.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Josué</strong></td>
+<td><strong>FE-STORE-01</strong> · Storefront Público</td>
+<td style="text-align: center;">Frontend</td>
+<td>Inicia la estructura del marketplace / storefront público conectando la identidad de la tienda, layout base y SSR con Next.js 15.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Josué</strong></td>
+<td><strong>FE-LEGAL-01</strong> · Ecosistema Legal y Reclamaciones</td>
+<td style="text-align: center;">Frontend</td>
+<td>Garantiza el cumplimiento normativo (D.S. 011-2011-PCM, Ley 29733) y optimiza la UX de Términos y Privacidad con lectura por pestañas y PDF.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Josué</strong></td>
+<td><strong>FE-MKT-01</strong> · Landing Page &amp; Búsqueda Bimodal</td>
+<td style="text-align: center;">Frontend</td>
+<td>Implementa la experiencia principal del Marketplace: buscador en tiempo real, HUD en desktop, Drawer móvil, carruseles y páginas corporativas.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Josué</strong></td>
+<td><strong>OPS-DEPLOY-01</strong> · Despliegue Multi-Cloud &amp; DNS</td>
+<td style="text-align: center;">DevOps</td>
+<td>Despliega el Marketplace en Vercel, enlaza Google Cloud DNS (<code>jaldishop.net</code>), configura CORS en Spring Boot y aísla entornos.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Mia</strong></td>
+<td><strong>FE-STORE-02</strong> · Carrito Customer</td>
+<td style="text-align: center;">Frontend</td>
+<td>Está directamente relacionado con el flujo previo a reserva/checkout y permite conectar su conocimiento de capacidad y validaciones con la experiencia del cliente.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Katherine</strong></td>
+<td><strong>FE-STORE-03</strong> · Catálogo Público de la Tienda</td>
+<td style="text-align: center;">Frontend</td>
+<td>Es la continuación natural de <code>BE-12 Catalog</code>: conoce a profundidad las categorías, productos y variantes que expone el backend.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-backlog-del-sprint-y-cadena-transaccional">3. Backlog del Sprint y Cadena Transaccional</h2>
+<pre class="mermaid"><code>flowchart TD
+    subgraph FRONTEND["Frontend Marketplace / Customer (Next.js 15 en Vercel)"]
+        FEMKT01["FE-MKT-01 · Landing, Buscador &amp; Páginas Institucionales&lt;br/&gt;(Josué)&lt;br/&gt;🟢 COMPLETADO"]
+        FELEGAL01["FE-LEGAL-01 · Ecosistema Legal &amp; Libro Reclamaciones&lt;br/&gt;(Josué)&lt;br/&gt;🟢 COMPLETADO"]
+        FESTORE01["FE-STORE-01 · Storefront Público (/tienda/:slug)&lt;br/&gt;(Josué)&lt;br/&gt;🟢 COMPLETADO"]
+        FESTORE03["FE-STORE-03 · Catálogo Público Tienda&lt;br/&gt;(Katherine)&lt;br/&gt;🟡 EN PLANIFICACIÓN"]
+        FESTORE02["FE-STORE-02 · Carrito Customer&lt;br/&gt;(Mia)&lt;br/&gt;🟡 EN PLANIFICACIÓN"]
+
+        FEMKT01 --&gt; FESTORE01
+        FESTORE01 --&gt; FESTORE03
+        FESTORE03 --&gt; FESTORE02
+    end
+
+    subgraph BACKEND_TRANSACCIONAL["Backend Transaccional Core (Spring Boot en Render)"]
+        BE19["BE-19 · Orquestación de Checkout&lt;br/&gt;(Josué)&lt;br/&gt;🟢 COMPLETADO"]
+        BEPAY01["BE-PAYMENTS-01 · Integración de Pagos&lt;br/&gt;(Katherine)&lt;br/&gt;🟡 EN PROGRESO"]
+        BE20["BE-20 · Confirmación Transaccional&lt;br/&gt;(Mia)&lt;br/&gt;🟡 EN PROGRESO"]
+
+        BE19 --&gt;|Hold 10 min + DTO Checkout| BEPAY01
+        BEPAY01 --&gt;|Pago Aprobado + Webhook| BE20
+    end
+
+    subgraph DEVOPS_CLOUD["Infraestructura y Despliegue Multi-Cloud"]
+        OPS01["OPS-DEPLOY-01 · Despliegue Vercel &amp; Google Cloud DNS&lt;br/&gt;(Josué)&lt;br/&gt;🟢 COMPLETADO (jaldishop.net)"]
+    end
+
+    FESTORE02 -. Inicia Checkout .-&gt; BE19
+    FRONTEND -. CORS Habilitado .-&gt; BACKEND_TRANSACCIONAL</code></pre>
+<hr />
+<h2 id="4-tarjetas-de-trabajo-detalladas">4. Tarjetas de Trabajo Detalladas</h2>
+<h3 id="be-19-orquestacion-de-checkout">📋 BE-19 | Orquestación de Checkout</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Estado:</strong> <code>COMPLETADO</code> 🟢<br />
+<strong>Entregable:</strong> Caso de uso <code>CheckoutService</code>, DTOs de entrada/salida (<code>InitiateCheckoutRequest</code>, <code>CheckoutResponse</code>), endpoint REST <code>POST /api/v1/checkout</code>, validaciones orquestadas entre <code>Cart</code>, <code>Catalog</code>, <code>Store</code> y <code>CapacityReservation</code>, hold de capacidad de 10 minutos y 100% tests unitarios/MockMvc pasando.</p>
+<p><strong>Descripción:</strong><br />
+Implementar el caso de uso de Checkout encargado de coordinar la validación del carrito, inventario y capacidad operativa antes de iniciar el proceso de pago.<br />
+Checkout actúa como orquestador entre módulos y <strong>no debe duplicar las reglas internas</strong> de <code>Cart</code>, <code>Inventory</code> o <code>Capacity</code>.<br />
+El flujo valida que el carrito sea válido, comprueba el estado activo de productos y variantes, verifica la capacidad efectiva para la fecha/franja seleccionada y genera una reserva temporal de capacidad de 10 minutos.<br />
+Al finalizar correctamente, el checkout queda preparado para iniciar un intento de pago con Mercado Pago.</p>
+<p><strong>Checklist:</strong>
+- [x] Definir contrato/DTO de inicio de Checkout (<code>InitiateCheckoutRequest</code>, <code>CheckoutResponse</code>)
+- [x] Obtener usuario autenticado desde JWT (<code>@AuthenticationPrincipal JwtPrincipal</code>)
+- [x] Obtener y validar carrito activo del Customer (<code>CartRepository.findByUserIdAndStoreId</code>)
+- [x] Validar que el carrito tenga productos (<code>CART_EMPTY</code>)
+- [x] Validar que todos los productos correspondan a la misma Store (<code>VARIANT_STORE_MISMATCH</code>)
+- [x] Validar estado/vigencia de productos y variantes (<code>VARIANT_INACTIVE</code>, <code>PRODUCT_INACTIVE</code>)
+- [x] Consultar capacidad efectiva para fecha/franja seleccionada
+- [x] Solicitar creación de reserva temporal de capacidad (<code>CreateCapacityReservationService</code>)
+- [x] Utilizar hold de capacidad de 10 minutos (<code>CapacityReservation.RESERVATION_TTL</code>)
+- [x] Manejar capacidad agotada (<code>CAPACITY_EXHAUSTED</code>, <code>CAPACITY_UNAVAILABLE</code>)
+- [x] Manejar validaciones de entrega y retiro (<code>DELIVERY_NOT_AVAILABLE</code>, <code>PICKUP_NOT_AVAILABLE</code>, <code>DELIVERY_ADDRESS_REQUIRED</code>)
+- [x] Manejar carrito inválido o vacío (<code>CART_EMPTY</code>)
+- [x] Evitar duplicar reglas pertenecientes a Inventory/Capacity/Cart (respetando los límites de Katherine y Mia)
+- [x] Definir respuesta de Checkout con información necesaria para Payment (<code>CheckoutPricing</code>, <code>CheckoutCustomerResponse</code>, <code>CheckoutItemResponse</code>)
+- [x] Implementar manejo de errores mediante contrato ApiError (<code>GlobalExceptionHandler</code>)
+- [x] Implementar endpoint de inicio de Checkout (<code>POST /api/v1/checkout</code>)
+- [x] Agregar pruebas unitarias del caso de uso (<code>CheckoutServiceTest</code>)
+- [x] Agregar pruebas de controlador con MockMvc (<code>CheckoutControllerTest</code>)
+- [x] Probar escenario exitoso (PICKUP y DELIVERY con cálculo de tarifa e IGV)
+- [x] Probar capacidad agotada
+- [x] Probar carrito vacío / tienda inactiva
+- [x] Documentar contrato y flujo de Checkout</p>
+<blockquote>
+<p>⚠️ <strong>Fuera de alcance:</strong> Cobrar con Mercado Pago, crear Pedido, descontar definitivamente inventario o comprometer definitivamente capacidad (asignadas a Katherine en <code>BE-PAYMENTS-01</code> y Mia en <code>BE-20</code>).</p>
+</blockquote>
+<hr />
+<h3 id="be-20-confirmacion-transaccional-de-compra">📋 BE-20 | Confirmación Transaccional de Compra</h3>
+<p><strong>Responsable:</strong> Mia<br />
+<strong>Estado:</strong> <code>EN PROGRESO</code> 🟡<br />
+<strong>Entregable:</strong> Caso de uso <code>ConfirmPurchaseService</code>, transacción ACID atómica, descuento definitivo de stock, transición de reserva a <code>COMMITTED</code>, creación de <code>Order</code> en estado <code>CONFIRMADO</code> y suite de tests de idempotencia.</p>
+<p><strong>Descripción:</strong><br />
+Implementar el caso de uso responsable de convertir una compra con pago aprobado en una operación confirmada de JaldiShop.<br />
+La confirmación debe ejecutarse de forma transaccional y coordinar <code>Payment</code>, <code>Capacity</code>, <code>Inventory</code> y <code>Ordering</code>, garantizando que una misma operación no produzca pedidos duplicados ni efectos repetidos.<br />
+Solo una operación con pago aprobado y reserva válida/protegida puede generar un Pedido.</p>
+<p><strong>Checklist:</strong>
+- [ ] Crear caso de uso <code>ConfirmPurchase</code>
+- [ ] Definir comando/contrato de confirmación
+- [ ] Obtener y validar <code>Payment</code>
+- [ ] Verificar que <code>Payment</code> esté <code>APPROVED</code>
+- [ ] Verificar que la operación no haya sido confirmada previamente
+- [ ] Obtener la reserva de capacidad asociada
+- [ ] Validar estado permitido de la reserva
+- [ ] Validar vigencia/protección de la reserva
+- [ ] Revalidar inventario antes de confirmar
+- [ ] Aplicar actualización atómica del inventario
+- [ ] Impedir stock negativo
+- [ ] Cambiar reserva a estado <code>COMMITTED</code> / COMPROMETIDA
+- [ ] Crear <code>Order</code> únicamente después del pago aprobado
+- [ ] Crear <code>Order</code> inicialmente en estado <code>CONFIRMED</code> / CONFIRMADO
+- [ ] Crear <code>OrderItems</code> a partir de la información correspondiente
+- [ ] Asociar <code>Order</code> con <code>Payment</code>
+- [ ] Asociar <code>Order</code> con <code>CapacityReservation</code>
+- [ ] Garantizar idempotencia de la confirmación
+- [ ] Evitar creación de <code>Orders</code> duplicados
+- [ ] Ejecutar cambios locales dentro de una transacción
+- [ ] Manejar fallo de inventario durante confirmación
+- [ ] Manejar reserva inválida/expirada
+- [ ] Manejar <code>Payment</code> no aprobado
+- [ ] Agregar pruebas unitarias
+- [ ] Agregar pruebas transaccionales/integración
+- [ ] Probar confirmación repetida/idempotencia
+- [ ] Documentar flujo de <code>ConfirmPurchase</code></p>
+<blockquote>
+<p>⚠️ <strong>Fuera de alcance:</strong> Llamar a Mercado Pago, procesar tarjeta, implementar UI o realizar automáticamente refund ante cualquier inconsistencia. La compensación/reconciliación se trata separadamente.</p>
+</blockquote>
+<hr />
+<h3 id="be-payments-01-integracion-de-pagos">📋 BE-PAYMENTS-01 | Integración de Pagos</h3>
+<p><strong>Responsable:</strong> Katherine<br />
+<strong>Estado:</strong> <code>EN PROGRESO</code> 🟡<br />
+<strong>Entregable:</strong> Módulo <code>Payment</code> y <code>PaymentAttempt</code>, adapter SDK/REST de Mercado Pago Sandbox, endpoint de webhook con validación de firma, control de idempotencia y protección de reserva.</p>
+<p><strong>Descripción:</strong><br />
+Implementar el módulo de pagos del MVP utilizando Mercado Pago como proveedor externo.<br />
+El módulo debe administrar <code>Payment</code> y <code>PaymentAttempt</code>, iniciar el pago utilizando una reserva de capacidad válida, manejar los estados del proveedor y procesar de manera idempotente la confirmación recibida.<br />
+El procesamiento externo no debe mantener abierta una transacción de base de datos mientras se espera la respuesta de Mercado Pago.</p>
+<p><strong>Checklist:</strong>
+- [ ] Configurar integración sandbox/test de Mercado Pago
+- [ ] Configurar credenciales mediante variables de entorno
+- [ ] Implementar <code>Payment</code>
+- [ ] Implementar <code>PaymentAttempt</code>
+- [ ] Implementar repositorios/puertos necesarios
+- [ ] Implementar adapter del proveedor Mercado Pago
+- [ ] Crear <code>Payment</code> a partir de un Checkout válido
+- [ ] Crear <code>PaymentAttempt</code> por cada intento
+- [ ] Implementar <code>Idempotency-Key</code>
+- [ ] Persistir identificadores devueltos por Mercado Pago
+- [ ] Manejar estado <code>CREATED</code>
+- [ ] Manejar estado <code>PROCESSING</code>
+- [ ] Manejar estado <code>APPROVED</code>
+- [ ] Manejar estado <code>REJECTED</code>
+- [ ] Manejar estado <code>ERROR</code>
+- [ ] Proteger la reserva cuando comienza un pago válido
+- [ ] Aplicar ventana de protección de pago definida por el MVP
+- [ ] Implementar recepción de webhook/notificación del proveedor
+- [ ] Validar y procesar webhook de forma idempotente
+- [ ] Evitar duplicar <code>PaymentAttempts</code> por reintentos del proveedor
+- [ ] Preparar llamada a <code>ConfirmPurchase</code> cuando el pago sea aprobado
+- [ ] Manejar aprobación tardía después de expirar la protección
+- [ ] No crear <code>Order</code> directamente desde el adapter de Mercado Pago
+- [ ] No almacenar datos sensibles de tarjeta
+- [ ] Implementar manejo de errores del proveedor
+- [ ] Agregar pruebas unitarias
+- [ ] Agregar pruebas de integración con respuestas simuladas del proveedor
+- [ ] Documentar variables de entorno
+- [ ] Documentar flujo <code>Payment</code> → <code>ConfirmPurchase</code></p>
+<hr />
+<h3 id="fe-store-01-storefront-publico">📋 FE-STORE-01 | Storefront Público</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Estado:</strong> <code>COMPLETADO</code> 🟢<br />
+<strong>Entregable:</strong> Módulo de Storefront público por slug de tienda (<code>/tienda/[slug]</code>), layout responsive, consumo de endpoints públicos de Store (<code>storeService</code>), Server Components con SSR y OpenGraph dinámico, badges de fulfillment, navegación pegajosa, empty states, 404 con <code>notFound()</code>, y suite de pruebas unitarias en Vitest.</p>
+<p><strong>Descripción:</strong><br />
+Implementar la estructura pública de una tienda dentro de <code>frontend-marketplace</code>, permitiendo que cualquier visitante acceda mediante el slug de la Store y visualice su identidad comercial, badges de capacidad y navegación pública.<br />
+Esta tarjeta establece el contenedor/layout de la tienda. El catálogo detallado se desarrolla independientemente en <code>FE-STORE-03</code>.</p>
+<p><strong>Checklist:</strong>
+- [x] Crear ruta pública basada en slug de Store (<code>/tienda/[slug]</code>)
+- [x] Crear layout del Storefront con Next.js 15 Server Components
+- [x] Consultar información pública de Store desde backend (<code>storeService.getStoreBySlug</code>)
+- [x] Mostrar nombre comercial
+- [x] Mostrar logo y avatar optimizados
+- [x] Mostrar banner editorial con gradientes y blur
+- [x] Mostrar descripción comercial
+- [x] Mostrar información básica disponible de la tienda (horarios, cupos, contacto)
+- [x] Crear navegación pública de la tienda (<code>StorefrontNav</code>)
+- [x] Preparar área/contenedor para catálogo (<code>CatalogContainer</code>)
+- [x] Preparar acceso visual al carrito (<code>CartDrawer</code>)
+- [x] Implementar loading state (<code>loading.tsx</code>)
+- [x] Implementar empty state cuando no hay productos (<code>EmptyState.tsx</code>)
+- [x] Implementar Store no encontrada (404) mediante <code>notFound()</code> de Next.js
+- [x] Implementar manejo mediante contrato ApiError (<code>ApiException</code> unificado)
+- [x] Adaptar diseño a desktop (HUD, sticky bar, grilla multi-columna)
+- [x] Adaptar diseño a tablet
+- [x] Adaptar diseño a mobile (drawer touch, espaciados generosos)
+- [x] Evitar información administrativa del Merchant (completamente aislada)
+- [x] Integrar endpoints reales del backend de Spring Boot en Render
+- [x] Agregar pruebas completas de componentes/servicios en Vitest (61/61 pasando)</p>
+<hr />
+<h3 id="fe-legal-01-ecosistema-legal-y-libro-de-reclamaciones">📋 FE-LEGAL-01 | Ecosistema Legal y Libro de Reclamaciones</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Estado:</strong> <code>COMPLETADO</code> 🟢<br />
+<strong>Entregable:</strong> Arquitectura legal modular (<code>features/legal</code>), páginas <code>/terminos</code> y <code>/privacidad</code> con navegación interactiva bimodal (Pestañas vs. Documento Completo), tarjeta "En pocas palabras (TLDR)" por cláusula, soporte de impresión formal <code>@media print</code> y Libro de Reclamaciones Virtual (<code>/libro-de-reclamaciones</code>) conforme a D.S. 011-2011-PCM con generación de código correlativo <code>RCL-YYYYMMDD-XXXX</code> y constancia digital descargable.</p>
+<p><strong>Descripción:</strong><br />
+Garantizar el cumplimiento normativo peruano (Código de Protección y Defensa del Consumidor - Ley N° 29571, Ley N° 29733 de Protección de Datos Personales, y D.S. 011-2011-PCM) resolviendo a su vez la fatiga de lectura legal mediante una UX moderna inspirada en Stripe/Linear.</p>
+<p><strong>Checklist:</strong>
+- [x] Implementar layout legal interactivo (<code>LegalLayout.tsx</code>)
+- [x] Diseñar modo de lectura por cláusulas/pestañas (vista enfocada sin fatiga de scroll infinito)
+- [x] Diseñar barra de navegación secuencial al pie (<code>[← Anterior]</code> / <code>[Siguiente →]</code>) con porcentaje de lectura
+- [x] Diseñar interruptor dual: <code>[📑 Por Cláusulas]</code> vs <code>[📜 Ver Completo]</code>
+- [x] Crear índice lateral sticky y barra de píldoras móvil (<code>LegalTableOfContents.tsx</code>)
+- [x] Implementar tarjeta de resumen ciudadano TLDR (<code>LegalTldrCard.tsx</code>)
+- [x] Garantizar impresión completa de todas las cláusulas mediante <code>@media print</code> (<code>LegalPrintButton.tsx</code>)
+- [x] Redactar 7 cláusulas de Términos y Condiciones orientadas a comercio MYPE y capacidad operativa
+- [x] Redactar Política de Privacidad detallando derechos ARCO y banco de datos
+- [x] Crear página de Libro de Reclamaciones Virtual oficial (<code>/libro-de-reclamaciones</code>)
+- [x] Implementar formulario en 4 pasos legales: Identificación, Bien Contratado, Detalle de Reclamo/Queja y Pedido
+- [x] Validar formulario con Zod y React Hook Form (<code>claimsBook.schema.ts</code>)
+- [x] Generar comprobante y constancia imprimible con código <code>RCL-YYYYMMDD-XXXX</code> (<code>ClaimsBookReceipt.tsx</code>)
+- [x] Pruebas unitarias completas de componentes legales y libro de reclamaciones en Vitest</p>
+<hr />
+<h3 id="fe-mkt-01-landing-page-buscador-bimodal-y-paginas-institucionales">📋 FE-MKT-01 | Landing Page, Buscador Bimodal y Páginas Institucionales</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Estado:</strong> <code>COMPLETADO</code> 🟢<br />
+<strong>Entregable:</strong> Landing Page de alta conversión (<code>/</code>), buscador de tiendas responsive bimodal (HUD en desktop, Drawer touch en mobile con debounce), carrusel dinámico <code>CraftMarqueeSection</code>, peek slider de tiendas <code>StorePeekSlider</code>, footer editorial de 4 columnas y 4 páginas institucionales (<code>/sobre-nosotros</code>, <code>/trabaja-con-nosotros</code>, <code>/accesibilidad</code>, <code>/ayuda</code>).</p>
+<p><strong>Descripción:</strong><br />
+Desarrollar la vitrina principal de JaldiShop conectando a compradores con negocios artesanales y gastronómicos. Se rediseñó el copywriting eliminando tecnicismos y tono IA para hablar en el lenguaje cotidiano de los emprendedores peruanos.</p>
+<p><strong>Checklist:</strong>
+- [x] Diseñar e implementar Hero Section con propuesta de valor clara y llamadas a la acción
+- [x] Implementar buscador bimodal en tiempo real (<code>Navbar.tsx</code> + <code>SearchModal</code> + <code>Drawer</code>)
+- [x] Agregar debounce de 250ms para optimización de llamadas de búsqueda
+- [x] Diseñar sección Bento Features destacando capacidad, reserva de cupos y puente WhatsApp
+- [x] Implementar carrusel continuo artesanal (<code>CraftMarqueeSection</code>)
+- [x] Implementar slider horizontal de tiendas destacadas (<code>StorePeekSlider</code>)
+- [x] Diseñar comparativa de valor "Vender por Chat vs. JaldiShop" (<code>ComparisonSection</code>)
+- [x] Crear Footer de 4 columnas: Marca, Categorías (<code>store_categories</code>), Herramientas MYPE y Empresa
+- [x] Implementar página <code>/sobre-nosotros</code> con historia, misión y principios de JaldiShop
+- [x] Implementar página <code>/trabaja-con-nosotros</code> con cultura y posiciones abiertas
+- [x] Implementar página <code>/accesibilidad</code> con estándares WCAG 2.1 AA
+- [x] Implementar página <code>/ayuda</code> con preguntas frecuentes para clientes y comerciantes
+- [x] Manejar desplazamiento suave a secciones mediante anclas y compensación de navbar (<code>HashScrollHandler</code>)
+- [x] Humanizar textos y copys eliminando jerga técnica inaccesible</p>
+<hr />
+<h3 id="ops-deploy-01-infraestructura-multi-cloud-y-despliegue-en-produccion">📋 OPS-DEPLOY-01 | Infraestructura Multi-Cloud y Despliegue en Producción</h3>
+<p><strong>Responsable:</strong> Josué<br />
+<strong>Estado:</strong> <code>COMPLETADO</code> 🟢<br />
+<strong>Entregable:</strong> Despliegue continuo en producción del Marketplace en Vercel sobre el dominio oficial <code>https://www.jaldishop.net/</code>, enlace DNS en Google Cloud DNS preservando DNSSEC, corrección de CORS en Spring Boot y aislamiento de entornos <code>.env</code> / <code>.env.local</code>.</p>
+<p><strong>Descripción:</strong><br />
+Poner en producción el Frontend Marketplace garantizando alta disponibilidad, certificado SSL automático (HTTPS), compatibilidad multi-cloud entre Vercel, Render (Backend) y Cloudflare Pages (Frontend Merchant), y resolución de políticas de seguridad CORS.</p>
+<p><strong>Checklist:</strong>
+- [x] Configurar proyecto en Vercel con Root Directory <code>frontend-marketplace</code>
+- [x] Generar build de producción con Next.js 15 App Router (11 rutas estáticas/dinámicas)
+- [x] Configurar registros DNS en Google Cloud DNS (Zona <code>jaldishop-net</code>):
+  - Registro <code>A</code> para <code>jaldishop.net.</code> apuntando a <code>76.76.21.21</code>
+  - Registro <code>CNAME</code> para <code>www.jaldishop.net.</code> apuntando a <code>cname.vercel-dns.com.</code>
+- [x] Mantener DNSSEC habilitado de forma segura sin tocar servidores de nombres
+- [x] Habilitar orígenes en <code>WebCorsConfiguration.java</code> del Backend (Spring Boot en Render):
+  - <code>https://*.jaldishop.net</code> y <code>https://jaldishop.net</code>
+  - <code>https://*.vercel.app</code>
+- [x] Configurar archivo <code>.env</code> con endpoints de producción (Render y Cloudflare Pages)
+- [x] Crear plantilla versionada <code>.env.example</code> con valores nulos para el equipo
+- [x] Configurar <code>.env.local</code> para desarrollo local aislado (Spring Boot en <code>localhost:8080</code>, Angular en <code>localhost:4200</code>)
+- [x] Validar funcionamiento en vivo en <code>https://www.jaldishop.net/</code></p>
+<hr />
+<hr />
+<h3 id="fe-store-02-carrito-customer">📋 FE-STORE-02 | Carrito Customer</h3>
+<p><strong>Responsable:</strong> Mia<br />
+<strong>Estado:</strong> <code>EN PLANIFICACIÓN</code> 🟡<br />
+<strong>Entregable:</strong> Componentes de Carrito, <code>CartService</code> reactivo, soporte para cantidades y variantes, aislamiento por tienda única y conexión con el backend real.</p>
+<p><strong>Descripción:</strong><br />
+Implementar la experiencia de carrito del cliente en <code>frontend-marketplace</code>, permitiendo agregar variantes de productos, modificar cantidades, eliminar productos y consultar el resumen previo al Checkout.<br />
+El carrito debe trabajar contra el backend real y respetar la regla de que un carrito pertenece a una única Store.<br />
+<strong>Agregar productos al carrito no reserva inventario ni capacidad.</strong> Estas validaciones se realizarán posteriormente durante Checkout.</p>
+<p><strong>Checklist:</strong>
+- [ ] Crear modelo/DTO de Cart en frontend
+- [ ] Crear <code>CartService</code>
+- [ ] Integrar endpoints reales del backend (<code>/api/v1/cart/**</code>)
+- [ ] Obtener carrito activo del Customer
+- [ ] Agregar <code>ProductVariant</code> al carrito
+- [ ] Actualizar cantidad de un <code>CartItem</code>
+- [ ] Eliminar <code>CartItem</code>
+- [ ] Vaciar carrito
+- [ ] Mostrar productos/variantes agregados
+- [ ] Mostrar cantidad por Item
+- [ ] Mostrar precio referencial por Item
+- [ ] Calcular/mostrar resumen visual del carrito
+- [ ] Mostrar cantidad total de Items en indicador del carrito
+- [ ] Mantener carrito asociado a una única Store
+- [ ] Impedir mezcla de productos de diferentes Stores
+- [ ] Manejar carrito vacío
+- [ ] Manejar producto/variante no disponible
+- [ ] Manejar usuario no autenticado según flujo definido
+- [ ] Implementar loading states
+- [ ] Implementar operation states
+- [ ] Integrar <code>ErrorHandlerService</code>
+- [ ] Integrar <code>ToastService</code>
+- [ ] Agregar acción "Continuar comprando"
+- [ ] Agregar acción "Continuar al checkout"
+- [ ] Preparar navegación hacia Checkout
+- [ ] Diseño responsive desktop/tablet/mobile
+- [ ] Agregar pruebas de <code>CartService</code>
+- [ ] Agregar pruebas de componentes principales
+- [ ] No reservar inventario al agregar productos
+- [ ] No reservar capacidad al agregar productos
+- [ ] No implementar pago dentro de esta tarjeta</p>
+<hr />
+<h3 id="fe-store-03-catalogo-publico-de-la-tienda">📋 FE-STORE-03 | Catálogo Público de la Tienda</h3>
+<p><strong>Responsable:</strong> Katherine<br />
+<strong>Estado:</strong> <code>EN PLANIFICACIÓN</code> 🟡<br />
+<strong>Entregable:</strong> Componentes de grilla de categorías, tarjetas de productos, selección de variantes, modal de detalle de producto y sincronización con el carrito.</p>
+<p><strong>Descripción:</strong><br />
+Implementar la visualización del catálogo digital de productos y variantes de la tienda dentro del Storefront público, permitiendo a los clientes explorar por categorías, ver detalles y agregar variantes al carrito.</p>
+<p><strong>Checklist:</strong>
+- [ ] Consumir categorías públicas de la tienda
+- [ ] Consumir productos y variantes activos de la tienda
+- [ ] Renderizar barra/chips de categorías públicas
+- [ ] Renderizar grilla de productos con imágenes y precio base
+- [ ] Selector visual de variantes (tamaño, sabor, presentación)
+- [ ] Validar disponibilidad visual de productos
+- [ ] Conectar acción "Agregar al carrito" con <code>CartService</code>
+- [ ] Responsive en desktop, tablet y móvil
+- [ ] Tests de componentes y servicios</p>
+<hr />
+<h2 id="5-criterios-de-exito-del-sprint">5. Criterios de Éxito del Sprint</h2>
+<ol>
+<li><strong>Flujo Transaccional Operativo:</strong> El usuario puede agregar productos al carrito, ir a Checkout, seleccionar fecha/franja horaria, obtener un hold de 10 minutos de capacidad y procesar el pago.</li>
+<li><strong>Atomicidad e Idempotencia:</strong> Un pago aprobado confirma el pedido, descuenta stock y compromete capacidad en una única transacción atómica; reintentos de webhook no duplican órdenes.</li>
+<li><strong>Calidad y Cobertura:</strong> 100% de pruebas unitarias y de integración pasando en Backend (Spring Boot) y Frontend (Angular/Vitest) en el pipeline de CI/CD.</li>
+</ol>
+<hr />
+<p><a href="../sprint-03/">⬅ Volver a Sprint 03</a> | <a href="../../README.md">🏠 Volver al Índice General</a> | <a href="../../03-requisitos/alcance-mvp/">Alcance del MVP ➡</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
