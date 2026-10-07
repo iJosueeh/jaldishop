@@ -1,8 +1,8 @@
 # Diagrama Entidad-Relación — JaldiShop
 
-**Modelo Físico v1.6.1**
+**Modelo Físico v1.8.0**
 **Fuente:** `docs/04-diseno/modelo-er.md`
-**Generado:** 2026-09-09
+**Generado:** 2026-10-07
 
 ---
 
@@ -70,7 +70,7 @@ store_category_assignments {
 %% ============================================
 stores {
     uuid id PK
-    uuid merchant_user_id UK,FK
+    uuid owner_user_id FK
     varchar name
     varchar slug UK
     text description
@@ -94,7 +94,7 @@ stores {
     timestamptz updated_at
 }
 
-users ||--o| stores : "UNIQUE + RESTRICT"
+users ||--o{ stores : "RESTRICT (owner_user_id)"
 stores ||--o{ user_roles : "CASCADE"
 stores ||--o{ store_category_assignments : "CASCADE"
 store_categories ||--o{ store_category_assignments : "CASCADE"
@@ -225,6 +225,7 @@ product_variants ||--o{ cart_items : "CASCADE (store_id, variant_id)"
 %% ============================================
 inventory_reservations {
     uuid id PK
+    uuid store_id FK
     uuid capacity_reservation_id FK
     uuid variant_id FK
     integer quantity
@@ -234,7 +235,8 @@ inventory_reservations {
     timestamptz updated_at
 }
 
-capacity_reservations ||--o{ inventory_reservations : "CASCADE"
+stores ||--o{ inventory_reservations : "RESTRICT"
+capacity_reservations ||--o{ inventory_reservations : "CASCADE (capacity_reservation_id, store_id)"
 product_variants ||--o{ inventory_reservations : "RESTRICT"
 
 %% ============================================

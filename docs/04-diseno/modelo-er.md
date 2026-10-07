@@ -1,10 +1,10 @@
 # Modelo Entidad-Relación
 
-### JaldiShop — Diseño de Persistencia v1.6.1
+### JaldiShop — Diseño de Persistencia v1.8.0 (Hardened & Multitenant)
 
-[![Estado](https://img.shields.io/badge/Estado-Listo%20para%20DDL-green?style=for-the-badge&logo=checkmarx&logoColor=white)](./modelo-er.md)
-[![Versión](https://img.shields.io/badge/Versión-v1.6.1-blue?style=for-the-badge)](./modelo-er.md)
-[![Fase](https://img.shields.io/badge/Fase-Listo%20para%20implementación-orange?style=for-the-badge)](../03-requisitos/modelo-dominio.md)
+[![Estado](https://img.shields.io/badge/Estado-Implementado%20en%20Flyway%20V1--V14-green?style=for-the-badge&logo=postgresql&logoColor=white)](./modelo-er.md)
+[![Versión](https://img.shields.io/badge/Versión-v1.8.0-blue?style=for-the-badge)](./modelo-er.md)
+[![Fase](https://img.shields.io/badge/Fase-Núcleo%20Transaccional%20Cerrado-orange?style=for-the-badge)](../03-requisitos/modelo-dominio.md)
 
 ---
 
@@ -13,67 +13,68 @@
 
 ---
 
-> 📌 **Nota:** Este documento traduce el modelo conceptual del dominio de JaldiShop a una propuesta de persistencia relacional para PostgreSQL. No representa todavía el DDL final ni el mapeo JPA. Las decisiones de dominio permanecen documentadas en: docs/03-requisitos/modelo-dominio.md
+> 📌 **Nota:** Este documento describe la arquitectura relacional y el modelo físico de persistencia de JaldiShop en PostgreSQL, consolidado hasta la migración Flyway **V14** y verificado con pruebas de concurrencia y multitenancy.
 
 ---
 
 ## 1. Principios de Diseño
 
 - PostgreSQL como base de datos relacional.
-- Diseño orientado a 3FN.
+- Diseño orientado a 3FN con refuerzo multitenant estricto (`store_id` en particiones transaccionales).
 - Los Value Objects no requieren necesariamente tablas propias.
 - Los snapshots históricos de Pedido son desnormalizaciones intencionales.
 - PK y UNIQUE generan índices automáticamente en PostgreSQL.
-- Las FK no generan índices automáticamente.
-- No crear índices sobre todas las FK sin una consulta que los justifique.
-- La selección final de índices podrá revisarse mediante EXPLAIN ANALYZE.
-- El modelo evita tablas innecesarias para conceptos derivados o infraestructura.
-- PK UUID generadas por aplicación (Spring/JPA), no por PostgreSQL.
+- Las FK no generan índices automáticamente; se indexan aquellas con soporte de navegación y filtros concurrentes.
+- Claves compuestas para integridad multitenant cruzada (ej. `(capacity_reservation_id, store_id)` en reservas de inventario).
+- Restricciones físicas en motor: `CHECK` para scopes y valores válidos, `EXCLUDE USING gist` para prevención de solapamientos horarios.
+- PK UUID: Entidades de negocio generadas por aplicación (Spring/JPA) y `DEFAULT gen_random_uuid()` para entidades relacionales como `user_roles`.
 - No utilizar PostgreSQL ENUM; usar VARCHAR + CHECK.
 
 **Aclaraciones:**
 
 | Capa | Responsabilidad |
 |---|---|
-| Dominio | Define responsabilidades e invariantes |
-| Modelo ER | Define persistencia y relaciones físicas |
-| JPA | Se definirá después del modelo ER |
+| Dominio | Define responsabilidades, agregados e invariantes de negocio |
+| Modelo ER | Define persistencia, restricciones físicas, concurrencia y relaciones físicas |
+| JPA / Repositorios | Mapea entidades, locking pesimista y adaptadores de infraestructura |
 
 ---
 
-## 2. Inventario Final de Tablas v1.7.0
+## 2. Inventario Final de Tablas v1.8.0
 
 | # | Tabla | Propósito | PK | Tipo PK |
 |---|---|---|---|---|
 | 1 | users | Usuarios de la plataforma | id | UUID |
-| 2 | roles | Catálogo de roles | id | SMALLINT |
-| 3 | user_roles | Relación contextual usuario-rol-tienda | id | UUID (Surrogate) |
+| 2 | roles | Catálogo de roles base | id | SMALLINT |
+| 3 | user_roles | Relación contextual usuario-rol-tienda (scopes global y tienda) | id | UUID (Surrogate) |
 | 4 | store_categories | Catálogo maestro de rubros comerciales | id | UUID |
 | 5 | store_category_assignments | Asignación N:M de rubros a tiendas | (store_id, store_category_id) | Compuesta |
 | 6 | stores | Tiendas de los comerciantes | id | UUID |
 | 7 | categories | Categorías de productos | id | UUID |
 | 8 | products | Productos dentro de una tienda | id | UUID |
-| 9 | product_images | Imágenes adicionales y principal por producto | id | UUID |
+| 9 | product_images | Galería de imágenes (principal y secundarias) por producto | id | UUID |
 | 10 | product_variants | Variantes/presentaciones de productos | id | UUID |
-| 11 | variant_attributes | Atributos de cada variante | (variant_id, name) | Compuesta |
-| 12 | inventories | Stock de variantes con control | variant_id | FK |
-| 13 | inventory_reservations | Holds temporales de stock para checkout | id | UUID |
-| 14 | carts | Carritos de compra | id | UUID |
+| 11 | variant_attributes | Atributos clave/valor de cada variante | (variant_id, name) | Compuesta |
+| 12 | inventories | Stock físico de variantes con control | variant_id | FK |
+| 13 | inventory_reservations | Holds temporales de stock para checkout (multitenant) | id | UUID |
+| 14 | carts | Carritos de compra por usuario y tienda | id | UUID |
 | 15 | cart_items | Items dentro de un carrito | (cart_id, variant_id) | Compuesta |
 | 16 | discounts | Descuentos definidos por tienda | id | UUID |
-| 17 | capacity_configurations | Capacidad base recurrente | id | UUID |
-| 18 | capacity_exceptions | Excepciones de capacidad | id | UUID |
-| 19 | capacity_reservations | Reservas temporales de cupo | id | UUID |
-| 20 | payments | Procesos de pago | id | UUID |
-| 21 | payment_attempts | Intentos de pago | id | UUID |
+| 17 | capacity_configurations | Capacidad base recurrente sin solapamientos | id | UUID |
+| 18 | capacity_exceptions | Excepciones de capacidad por fecha específica | id | UUID |
+| 19 | capacity_reservations | Reservas temporales de cupo de capacidad | id | UUID |
+| 20 | payments | Procesos de pago lógico | id | UUID |
+| 21 | payment_attempts | Intentos de pago e idempotencia de pasarela | id | UUID |
 | 22 | orders | Pedidos confirmados | id | UUID |
-| 23 | order_items | Detalles de cada pedido | id | UUID |
-| 24 | order_status_history | Historial de estados | id | UUID |
+| 23 | order_items | Detalles de items de cada pedido | id | UUID |
+| 24 | order_status_history | Historial inmutable de estados del pedido | id | UUID |
 | 25 | favorites | Favoritos de usuarios | (user_id, product_id) | Compuesta |
 | 26 | reviews | Reseñas de productos | id | UUID |
 | 27 | notifications | Notificaciones a usuarios | id | UUID |
 
 **Total: 27 tablas**
+
+> ℹ️ **Nota de unificación (V12):** La tabla anterior `store_customers` fue eliminada de forma limpia y unificada dentro de `user_roles` con `role_id = 1 (CUSTOMER)` y `store_id = <store_id>`, permitiendo modelar tanto clientes globales como clientes contextuales por tienda de forma normalizada.
 
 ---
 
@@ -84,7 +85,7 @@
 Se aplica UUID a las siguientes tablas:
 
 - users
-- user_roles
+- user_roles (surrogate con `DEFAULT gen_random_uuid()`)
 - store_categories
 - stores
 - categories
@@ -116,28 +117,19 @@ Se aplica UUID a las siguientes tablas:
 
 | Tabla | PK | Justificación |
 |---|---|---|
-| roles | id (SMALLINT) | PK artificial mínima para relación |
-| user_roles | (user_id, role_id) | PK natural de la relación |
-| variant_attributes | (variant_id, name) | PK natural del atributo |
+| roles | id (SMALLINT) | PK artificial mínima para relación estática |
+| variant_attributes | (variant_id, name) | PK natural del atributo por variante |
 | inventories | variant_id | PK coincide con FK a variante |
-| cart_items | (cart_id, variant_id) | PK natural del item |
+| cart_items | (cart_id, variant_id) | PK natural del item por carrito |
 | favorites | (user_id, product_id) | PK natural de la relación |
 
 ---
 
 ## 4. Generación de UUID
 
-**Decisión cerrada:** Los UUID son generados por Spring/JPA, no por PostgreSQL.
-
-```java
-@Id
-@GeneratedValue(strategy = GenerationType.UUID)
-private UUID id;
-```
-
-**PostgreSQL almacena:** `UUID PRIMARY KEY`
-
-**NO se utiliza:** `gen_random_uuid()` como DEFAULT.
+**Regla de aplicación:**
+- **Entidades de negocio principales:** Los UUID son generados por Spring/JPA (`@GeneratedValue(strategy = GenerationType.UUID)` o aplicación) previo al insert para permitir trazabilidad e idempotencia en tests y auditoría.
+- **Entidades de relación (como `user_roles`):** PostgreSQL provee `DEFAULT gen_random_uuid()` para facilitar inserciones de DDL y scripts directos.
 
 **Motivos:**
 - Independencia de funciones específicas de PostgreSQL
@@ -401,12 +393,25 @@ private UUID id;
 
 | Columna | Tipo | Restricciones |
 |---|---|---|
-| user_id | UUID | PK, FK -> users.id, ON DELETE CASCADE |
-| role_id | SMALLINT | PK, FK -> roles.id, ON DELETE RESTRICT |
+| id | UUID | PK, DEFAULT gen_random_uuid() |
+| user_id | UUID | NOT NULL, FK -> users.id, ON DELETE CASCADE |
+| role_id | SMALLINT | NOT NULL, FK -> roles.id, ON DELETE RESTRICT |
+| store_id | UUID | NULL, FK -> stores.id, ON DELETE CASCADE |
 
-**PK compuesta:** (user_id, role_id)
-
-**Índice adicional:** INDEX(role_id)
+**Restricciones de Unicidad y Scope (V7, V10, V12):**
+- **Índice único parcial global:** `uq_idx_user_roles_global UNIQUE (user_id, role_id) WHERE store_id IS NULL`
+- **Índice único parcial contextual:** `uq_idx_user_roles_store UNIQUE (user_id, role_id, store_id) WHERE store_id IS NOT NULL`
+- **Restricción de Scope de Rol:** `ck_user_roles_role_scope`
+  ```sql
+  CHECK (
+      role_id = 1
+      OR (role_id = 2 AND store_id IS NOT NULL)
+      OR (role_id = 3 AND store_id IS NULL)
+  )
+  ```
+  - **CUSTOMER (1):** Puede existir a nivel global (`store_id IS NULL`) para compradores del marketplace y a nivel contextual (`store_id NOT NULL`) como cliente de una tienda específica (reemplazo semántico oficial de `store_customers`).
+  - **MERCHANT (2):** Estrictamente contextual (`store_id NOT NULL` obligatorio).
+  - **ADMIN (3):** Estrictamente global de plataforma (`store_id IS NULL` obligatorio).
 
 ---
 
@@ -415,7 +420,7 @@ private UUID id;
 | Columna | Tipo | Restricciones |
 |---|---|---|
 | id | UUID | PK |
-| merchant_user_id | UUID | FK -> users.id, UNIQUE, ON DELETE RESTRICT |
+| owner_user_id | UUID | NOT NULL, FK -> users.id, ON DELETE RESTRICT |
 | name | VARCHAR(160) | NOT NULL |
 | slug | VARCHAR(180) | UNIQUE |
 | description | TEXT | |
@@ -428,14 +433,19 @@ private UUID id;
 | delivery_enabled | BOOLEAN | NOT NULL |
 | delivery_fee_amount | NUMERIC(12,2) | CHECK >= 0 |
 | delivery_fee_currency | CHAR(3) | |
-| tax_applies | BOOLEAN | NOT NULL |
 | tax_rate | NUMERIC(5,2) | CHECK > 0 AND <= 100 |
+| logo_url | TEXT | |
+| banner_url | TEXT | |
+| instagram_url | VARCHAR(255) | |
+| facebook_url | VARCHAR(255) | |
+| whatsapp_number | VARCHAR(30) | |
 | status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, INACTIVE, SUSPENDED, CLOSED) |
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
-**Restricciones:**
-- UNIQUE(merchant_user_id) — máximo una Tienda por comerciante.
+**Restricciones e Integridad (V11):**
+- FK `fk_stores_owner_user` a `users(id)` con regla estricta `ON DELETE RESTRICT`.
+- `owner_user_id` es obligatorio (`NOT NULL`).
 - UNIQUE(slug)
 
 **Semántica de entrega:**
@@ -443,12 +453,6 @@ private UUID id;
 |---|---|---|
 | true | >= 0 | Delivery disponible (gratuito si 0) |
 | false | NULL | Delivery no disponible |
-
-**Semántica tributaria:**
-| tax_applies | tax_rate | Significado |
-|---|---|---|
-| false | NULL | Sin impuesto |
-| true | > 0 | Impuesto aplicado |
 
 ---
 
@@ -504,7 +508,25 @@ UNIQUE(store_id, (lower(trim(name)))) WHERE status = 'ACTIVE'
 
 ---
 
-## 15. product_variants
+## 15. product_images
+
+| Columna | Tipo | Restricciones |
+|---|---|---|
+| id | UUID | PK |
+| product_id | UUID | NOT NULL, FK -> products.id, ON DELETE CASCADE |
+| image_url | TEXT | NOT NULL |
+| position | INTEGER | NOT NULL, CHECK >= 0 |
+| is_primary | BOOLEAN | NOT NULL DEFAULT false |
+| created_at | TIMESTAMPTZ | NOT NULL |
+
+**Restricciones y Decisiones de Dominio:**
+- **Imagen principal única por producto:** Índice único parcial `uq_idx_product_images_primary UNIQUE (product_id) WHERE is_primary = true`.
+- **Posición válida:** Restricción física `CHECK (position >= 0)`.
+- **Decisión arquitectónica:** NO se impone `UNIQUE(product_id, position)` en PostgreSQL. El dominio y frontend manejan el ordenamiento con holgura para permitir intercambios o reordenamientos dinámicos de galería sin fallos de colisión transitoria en el motor.
+
+---
+
+## 16. product_variants
 
 | Columna | Tipo | Restricciones |
 |---|---|---|
@@ -529,7 +551,7 @@ UNIQUE(store_id, (lower(trim(name)))) WHERE status = 'ACTIVE'
 
 ---
 
-## 16. variant_attributes
+## 17. variant_attributes
 
 | Columna | Tipo | Restricciones |
 |---|---|---|
@@ -541,7 +563,7 @@ UNIQUE(store_id, (lower(trim(name)))) WHERE status = 'ACTIVE'
 
 ---
 
-## 17. inventories
+## 18. inventories
 
 | Columna | Tipo | Restricciones |
 |---|---|---|
@@ -555,7 +577,30 @@ UNIQUE(store_id, (lower(trim(name)))) WHERE status = 'ACTIVE'
 
 ---
 
-## 18. carts
+## 19. inventory_reservations
+
+| Columna | Tipo | Restricciones |
+|---|---|---|
+| id | UUID | PK |
+| store_id | UUID | NOT NULL, FK -> stores.id, ON DELETE RESTRICT |
+| capacity_reservation_id | UUID | NOT NULL, ON DELETE CASCADE |
+| variant_id | UUID | NOT NULL, FK -> product_variants.id, ON DELETE RESTRICT |
+| quantity | INTEGER | NOT NULL, CHECK > 0 |
+| status | VARCHAR(30) | NOT NULL, CHECK IN (ACTIVE, COMMITTED, EXPIRED, RELEASED) |
+| expires_at | TIMESTAMPTZ | NOT NULL |
+| created_at | TIMESTAMPTZ | NOT NULL |
+| updated_at | TIMESTAMPTZ | NOT NULL |
+
+**Reforzamiento Multitenant y Claves Compuestas (V13):**
+- **Aislamiento de Tienda:** `store_id UUID NOT NULL` directamente en la entidad de reserva de inventario.
+- **FK simple a Store:** `fk_inventory_reservations_store REFERENCES stores(id) ON DELETE RESTRICT`.
+- **FK compuesta a Capacidad:** `fk_inventory_reservations_capacity_store FOREIGN KEY (capacity_reservation_id, store_id) REFERENCES capacity_reservations(id, store_id) ON DELETE CASCADE`.
+- Requiere clave única candidata en `capacity_reservations`: `uq_capacity_reservations_id_store UNIQUE (id, store_id)`.
+- **Índice de disponibilidad concurrente:** `idx_inventory_reservations_variant_status (store_id, variant_id, status)`.
+
+---
+
+## 20. carts
 
 | Columna | Tipo | Restricciones |
 |---|---|---|
@@ -640,6 +685,17 @@ UNIQUE(store_id, code) WHERE code IS NOT NULL
 **Restricciones:**
 - (start_time IS NULL) = (end_time IS NULL)
 - start_time < end_time (si existen)
+- **Exclusión de Solapamientos (V14):** Constraint `excl_capacity_configurations_no_overlap` respaldada por `btree_gist`:
+  ```sql
+  CONSTRAINT excl_capacity_configurations_no_overlap
+  EXCLUDE USING gist (
+      store_id WITH =,
+      day_of_week WITH =,
+      tsrange('2000-01-01'::date + start_time, '2000-01-01'::date + end_time, '[)') WITH &&
+  )
+  WHERE (status = 'ACTIVE');
+  ```
+  Evita a nivel físico de motor que una misma tienda configure franjas horarias activas superpuestas en el mismo día.
 
 **Índice:**
 ```
@@ -687,7 +743,14 @@ INDEX(store_id, day_of_week, status, start_time, end_time)
 | created_at | TIMESTAMPTZ | NOT NULL |
 | updated_at | TIMESTAMPTZ | NOT NULL |
 
-**Consumen capacidad:** ACTIVE, PAYMENT_PROTECTED, COMMITTED
+**Restricciones e Integridad Multitenant:**
+- **Clave Candidata:** `uq_capacity_reservations_id_store UNIQUE (id, store_id)` para soportar la clave foránea compuesta desde `inventory_reservations`.
+
+**Reglas de Consumo de Capacidad y Expiración Lógica:**
+- **`ACTIVE`:** Consume capacidad mientras `expires_at > NOW()`.
+- **`PAYMENT_PROTECTED`:** Consume capacidad **únicamente** si `payment_protection_expires_at IS NOT NULL` Y `payment_protection_expires_at > NOW()`. (Si es `NULL` o menor a `NOW()`, se considera anómalo/expirado y no consume capacidad).
+- **`COMMITTED`:** Consume capacidad definitivamente como pedido.
+- **`EXPIRED` / `RELEASED`:** No consumen cupo; liberan inmediatamente la capacidad de la franja.
 
 **No consumen:** EXPIRED, RELEASED
 
@@ -1023,13 +1086,20 @@ Las PK/UUID no deben modificarse una vez creadas.
 |---|---|---|
 | user_roles.user_id | users.id | CASCADE |
 | user_roles.role_id | roles.id | RESTRICT |
-| stores.merchant_user_id | users.id | RESTRICT |
+| user_roles.store_id | stores.id | CASCADE |
+| store_category_assignments.store_id | stores.id | CASCADE |
+| store_category_assignments.store_category_id | store_categories.id | RESTRICT |
+| stores.owner_user_id | users.id | RESTRICT |
 | categories.store_id | stores.id | RESTRICT |
 | products.store_id | stores.id | RESTRICT |
 | products.category_id | categories.id | RESTRICT |
+| product_images.product_id | products.id | CASCADE |
 | product_variants.product_id | products.id | CASCADE |
 | variant_attributes.variant_id | product_variants.id | CASCADE |
 | inventories.variant_id | product_variants.id | CASCADE |
+| inventory_reservations.store_id | stores.id | RESTRICT |
+| inventory_reservations.(capacity_reservation_id, store_id) | capacity_reservations(id, store_id) | CASCADE |
+| inventory_reservations.variant_id | product_variants.id | RESTRICT |
 | carts.user_id | users.id | CASCADE |
 | carts.store_id | stores.id | CASCADE |
 | cart_items.cart_id | carts.id | CASCADE |
@@ -1117,20 +1187,26 @@ slug: "torta-tres-leches"  (sin cambios)
 
 ---
 
-## 37. Resumen de Índices Adicionales
+## 37. Resumen de Índices y Restricciones Especiales
 
-| Tabla | Índice | Propósito |
+| Tabla | Índice / Restricción | Propósito |
 |---|---|---|
+| user_roles | UNIQUE(user_id, role_id) WHERE store_id IS NULL | Unicidad para roles globales (CUSTOMER global, ADMIN) |
+| user_roles | UNIQUE(user_id, role_id, store_id) WHERE store_id IS NOT NULL | Unicidad para roles contextuales por tienda (CUSTOMER de tienda, MERCHANT) |
 | user_roles | INDEX(role_id) | Consultar usuarios por rol |
 | categories | INDEX(store_id) | Categorías por tienda |
 | categories | UNIQUE(store_id, lower(trim(name))) WHERE status = 'ACTIVE' | Unicidad de nombre normalizado |
 | products | INDEX(category_id) | Productos por categoría |
 | products | INDEX(store_id, status) | Productos por tienda y estado |
+| product_images | UNIQUE(product_id) WHERE is_primary = true | Garantía de imagen principal única |
 | product_variants | INDEX(product_id, status) | Variantes por producto y estado |
 | product_variants | INDEX(sku) WHERE sku IS NOT NULL | Búsqueda/validación SKU |
+| inventory_reservations | INDEX(store_id, variant_id, status) | Búsqueda de holds activos para cálculo de stock disponible |
 | discounts | INDEX(store_id, modality, status) | Descuentos por tienda y modalidad |
+| capacity_configurations | EXCLUDE USING gist (store_id, day_of_week, tsrange(...)) WHERE status = 'ACTIVE' | Prevención matemática de franjas horarias solapadas |
 | capacity_configurations | INDEX(store_id, day_of_week, status, start_time, end_time) | Configuraciones por tienda y día |
 | capacity_exceptions | INDEX(store_id, service_date, status) | Excepciones por tienda y fecha |
+| capacity_reservations | UNIQUE(id, store_id) | Clave candidata multitenant para FK compuesta |
 | capacity_reservations | INDEX(store_id, service_date, start_time, end_time, status) | Disponibilidad por periodo |
 | capacity_reservations | INDEX(expires_at) WHERE status = 'ACTIVE' | Limpieza de reservas expiradas |
 | capacity_reservations | INDEX(payment_protection_expires_at) WHERE status = 'PAYMENT_PROTECTED' | Limpieza de protecciones expiradas |
