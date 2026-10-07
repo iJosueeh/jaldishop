@@ -115,9 +115,12 @@ class ReleaseCapacityReservationServiceTest {
 
     private CapacityReservation fixture(UUID id, UUID ownerId, CapacityReservationStatus status) {
         Instant createdAt = Instant.now().minusSeconds(300);
+        Instant protectionExpiresAt = status == CapacityReservationStatus.PAYMENT_PROTECTED
+                ? createdAt.plusSeconds(600)
+                : null;
         return CapacityReservation.reconstitute(
                 id, storeId, ownerId, LocalDate.of(2026, 9, 22),
                 LocalTime.of(10, 0), LocalTime.of(12, 0), status,
-                createdAt.plusSeconds(600), null, createdAt, createdAt);
+                createdAt.plusSeconds(600), protectionExpiresAt, createdAt, createdAt);
     }
 }

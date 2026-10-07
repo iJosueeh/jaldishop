@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface StoreCustomerRepository {
-
-    void save(StoreCustomer storeCustomer);
-
+    void registerCustomer(UUID storeId, UUID userId);
     boolean existsByStoreIdAndUserId(UUID storeId, UUID userId);
-
     List<StoreCustomerResponse> findCustomersByStoreId(UUID storeId, String query);
 }

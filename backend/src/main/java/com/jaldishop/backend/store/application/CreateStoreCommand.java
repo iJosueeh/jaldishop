@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record CreateStoreCommand(
-        UUID merchantUserId,
+        UUID ownerUserId,
         String name,
         String slug,
         String description,
@@ -25,6 +25,9 @@ public record CreateStoreCommand(
         String whatsappNumber,
         java.util.Set<UUID> categoryIds
 ) {
+    public UUID merchantUserId() {
+        return ownerUserId;
+    }
     public CreateStoreCommand(
             UUID merchantUserId,
             String name,

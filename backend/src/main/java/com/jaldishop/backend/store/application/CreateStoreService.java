@@ -1,5 +1,6 @@
 package com.jaldishop.backend.store.application;
 
+import com.jaldishop.backend.identity.domain.UserRepository;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreRepository;
@@ -13,13 +14,15 @@ import java.util.Locale;
 public class CreateStoreService {
 
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
-    public CreateStoreService(StoreRepository storeRepository) {
+    public CreateStoreService(StoreRepository storeRepository, UserRepository userRepository) {
         this.storeRepository = storeRepository;
+        this.userRepository = userRepository;
     }
 
     public Store execute(CreateStoreCommand command) {
-        if (storeRepository.existsByMerchantUserId(command.merchantUserId())) {
+        if (storeRepository.existsByOwnerUserId(command.ownerUserId())) {
             throw new ConflictException("MERCHANT_ALREADY_HAS_STORE", "El comerciante ya tiene una tienda registrada.");
         }
 
@@ -29,7 +32,7 @@ public class CreateStoreService {
         }
 
         Store store = Store.create(
-                command.merchantUserId(),
+                command.ownerUserId(),
                 command.name(),
                 resolveSlug,
                 command.description(),
@@ -51,7 +54,9 @@ public class CreateStoreService {
                 command.categoryIds()
         );
 
-        return storeRepository.save(store);
+        Store savedStore = storeRepository.save(store);
+        userRepository.assignStoreToMerchantRole(command.ownerUserId(), savedStore.getId());
+        return savedStore;
     }
 
     private String resolveSlug(String name, String slug) {

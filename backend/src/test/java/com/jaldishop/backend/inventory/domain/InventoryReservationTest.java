@@ -14,13 +14,15 @@ class InventoryReservationTest {
     @Test
     @DisplayName("Crear reserva de stock con estado ACTIVE")
     void createInventoryReservation() {
+        UUID storeId = UUID.randomUUID();
         UUID capResId = UUID.randomUUID();
         UUID variantId = UUID.randomUUID();
         Instant expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES);
 
-        InventoryReservation reservation = InventoryReservation.create(capResId, variantId, 3, expiresAt);
+        InventoryReservation reservation = InventoryReservation.create(storeId, capResId, variantId, 3, expiresAt);
 
         assertNotNull(reservation.getId());
+        assertEquals(storeId, reservation.getStoreId());
         assertEquals(capResId, reservation.getCapacityReservationId());
         assertEquals(variantId, reservation.getVariantId());
         assertEquals(3, reservation.getQuantity());
@@ -32,31 +34,34 @@ class InventoryReservationTest {
     @Test
     @DisplayName("Transición de ciclo de vida: commit, release, expire")
     void lifecycleTransitions() {
+        UUID storeId = UUID.randomUUID();
         UUID capResId = UUID.randomUUID();
         UUID variantId = UUID.randomUUID();
         Instant expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES);
 
-        InventoryReservation res1 = InventoryReservation.create(capResId, variantId, 2, expiresAt);
+        InventoryReservation res1 = InventoryReservation.create(storeId, capResId, variantId, 2, expiresAt);
         res1.commit();
         assertEquals(InventoryReservationStatus.COMMITTED, res1.getStatus());
 
-        InventoryReservation res2 = InventoryReservation.create(capResId, variantId, 2, expiresAt);
+        InventoryReservation res2 = InventoryReservation.create(storeId, capResId, variantId, 2, expiresAt);
         res2.release();
         assertEquals(InventoryReservationStatus.RELEASED, res2.getStatus());
 
-        InventoryReservation res3 = InventoryReservation.create(capResId, variantId, 2, expiresAt);
+        InventoryReservation res3 = InventoryReservation.create(storeId, capResId, variantId, 2, expiresAt);
         res3.expire();
         assertEquals(InventoryReservationStatus.EXPIRED, res3.getStatus());
     }
 
     @Test
-    @DisplayName("Lanzar excepción cuando la cantidad no es positiva")
-    void throwWhenInvalidQuantity() {
+    @DisplayName("Lanzar excepción cuando la cantidad no es positiva o storeId nulo")
+    void throwWhenInvalidQuantityOrStoreId() {
+        UUID storeId = UUID.randomUUID();
         UUID capResId = UUID.randomUUID();
         UUID variantId = UUID.randomUUID();
         Instant expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES);
 
-        assertThrows(IllegalArgumentException.class, () -> InventoryReservation.create(capResId, variantId, 0, expiresAt));
-        assertThrows(IllegalArgumentException.class, () -> InventoryReservation.create(capResId, variantId, -1, expiresAt));
+        assertThrows(IllegalArgumentException.class, () -> InventoryReservation.create(null, capResId, variantId, 1, expiresAt));
+        assertThrows(IllegalArgumentException.class, () -> InventoryReservation.create(storeId, capResId, variantId, 0, expiresAt));
+        assertThrows(IllegalArgumentException.class, () -> InventoryReservation.create(storeId, capResId, variantId, -1, expiresAt));
     }
 }

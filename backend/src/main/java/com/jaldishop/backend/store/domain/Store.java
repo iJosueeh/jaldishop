@@ -9,7 +9,7 @@ import java.util.*;
 public class Store {
 
     private final UUID id;
-    private final UUID merchantUserId;
+    private final UUID ownerUserId;
     private String name;
     private final String slug;
     private String description;
@@ -33,7 +33,7 @@ public class Store {
     private final Instant createdAt;
     private Instant updatedAt;
 
-    private Store(UUID id, UUID merchantUserId, String name, String slug, String description,
+    private Store(UUID id, UUID ownerUserId, String name, String slug, String description,
                   String contactPhone, String address, String addressReference,
                   BigDecimal latitude, BigDecimal longitude, boolean pickupEnabled,
                   boolean deliveryEnabled, BigDecimal deliveryFeeAmount, String deliveryFeeCurrency,
@@ -41,7 +41,7 @@ public class Store {
                   String facebookUrl, String whatsappNumber, Set<UUID> categoryIds, StoreStatus status,
                   Instant createdAt, Instant updatedAt) {
         this.id = id;
-        this.merchantUserId = merchantUserId;
+        this.ownerUserId = ownerUserId;
         this.name = name.trim();
         this.slug = slug.trim().toLowerCase(Locale.ROOT);
         this.description = description;
@@ -151,7 +151,7 @@ public class Store {
     }
 
     public static Store create(
-            UUID merchantUserId,
+            UUID ownerUserId,
             String name,
             String slug,
             String description,
@@ -172,7 +172,7 @@ public class Store {
             String whatsappNumber,
             Set<UUID> categoryIds
     ) {
-        if (merchantUserId == null) {
+        if (ownerUserId == null) {
             throw new IllegalArgumentException("El ID del comerciante no puede ser nulo.");
         }
 
@@ -210,7 +210,7 @@ public class Store {
 
         return new Store(
                 id,
-                merchantUserId,
+                ownerUserId,
                 name,
                 slug,
                 description,
@@ -339,7 +339,7 @@ public class Store {
 
     public static Store reconstitute(
             UUID id,
-            UUID merchantUserId,
+            UUID ownerUserId,
             String name,
             String slug,
             String description,
@@ -365,7 +365,7 @@ public class Store {
     ) {
         return new Store(
                 id,
-                merchantUserId,
+                ownerUserId,
                 name,
                 slug,
                 description,
@@ -644,8 +644,12 @@ public class Store {
         return name;
     }
 
+    public UUID getOwnerUserId() {
+        return ownerUserId;
+    }
+
     public UUID getMerchantUserId() {
-        return merchantUserId;
+        return ownerUserId;
     }
 
     public UUID getId() {

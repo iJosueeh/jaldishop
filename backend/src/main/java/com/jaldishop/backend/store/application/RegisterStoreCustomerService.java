@@ -1,6 +1,5 @@
 package com.jaldishop.backend.store.application;
 
-import com.jaldishop.backend.store.domain.StoreCustomer;
 import com.jaldishop.backend.store.domain.StoreCustomerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +21,6 @@ public class RegisterStoreCustomerService {
             return;
         }
 
-        if (!storeCustomerRepository.existsByStoreIdAndUserId(storeId, userId)) {
-            StoreCustomer storeCustomer = StoreCustomer.create(storeId, userId);
-            storeCustomerRepository.save(storeCustomer);
-        }
+        storeCustomerRepository.registerCustomer(storeId, userId);
     }
 }

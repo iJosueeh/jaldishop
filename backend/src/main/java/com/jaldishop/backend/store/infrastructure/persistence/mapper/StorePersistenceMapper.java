@@ -28,7 +28,7 @@ public class StorePersistenceMapper {
 
         return Store.reconstitute(
                 entity.getId(),
-                entity.getMerchantUserId(),
+                entity.getOwnerUserId(),
                 entity.getName(),
                 entity.getSlug(),
                 entity.getDescription(),
@@ -60,7 +60,7 @@ public class StorePersistenceMapper {
         }
         return new StoreEntity(
                 domain.getId(),
-                domain.getMerchantUserId(),
+                domain.getOwnerUserId(),
                 domain.getName(),
                 domain.getSlug(),
                 domain.getDescription(),
