@@ -57,7 +57,7 @@ flowchart TD
     subgraph BACKEND_TRANSACCIONAL["Backend Transaccional Core (Spring Boot en Render)"]
         BE19["BE-19 · Orquestación de Checkout<br/>(Josué)<br/>🟢 COMPLETADO"]
         BEPAY01["BE-PAYMENTS-01 · Integración de Pagos<br/>(Katherine)<br/>🟡 EN PROGRESO"]
-        BE20["BE-20 · Confirmación Transaccional<br/>(Mia)<br/>🟡 EN PROGRESO"]
+        BE20["BE-20 · Confirmación Transaccional<br/>(Mia)<br/>🟢 COMPLETADO"]
         
         BE19 -->|Hold 10 min + DTO Checkout| BEPAY01
         BEPAY01 -->|Pago Aprobado + Webhook| BE20
@@ -118,8 +118,8 @@ Al finalizar correctamente, el checkout queda preparado para iniciar un intento 
 ### 📋 BE-20 | Confirmación Transaccional de Compra
 
 **Responsable:** Mia  
-**Estado:** `EN PROGRESO` 🟡  
-**Entregable:** Caso de uso `ConfirmPurchaseService`, transacción ACID atómica, descuento definitivo de stock, transición de reserva a `COMMITTED`, creación de `Order` en estado `CONFIRMADO` y suite de tests de idempotencia.
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Caso de uso `ConfirmPurchaseService` transaccional e idempotente, capa JPA de `Ordering` (entities `Order`, `OrderItem`, `OrderStatusHistory` + adapter), helpers de commit para Inventory y Capacity (`CommitInventoryReservationService`, `CommitCapacityReservationService`), lectura read-only del pago (`PaymentReader`/`JpaPaymentReader`), endpoint/flujo `ConfirmPurchase` → `Order CONFIRMED` y 100% de pruebas unitarias e integración pasando.
 
 **Descripción:**  
 Implementar el caso de uso responsable de convertir una compra con pago aprobado en una operación confirmada de JaldiShop.  
@@ -127,33 +127,33 @@ La confirmación debe ejecutarse de forma transaccional y coordinar `Payment`, `
 Solo una operación con pago aprobado y reserva válida/protegida puede generar un Pedido.
 
 **Checklist:**
-- [ ] Crear caso de uso `ConfirmPurchase`
-- [ ] Definir comando/contrato de confirmación
-- [ ] Obtener y validar `Payment`
-- [ ] Verificar que `Payment` esté `APPROVED`
-- [ ] Verificar que la operación no haya sido confirmada previamente
-- [ ] Obtener la reserva de capacidad asociada
-- [ ] Validar estado permitido de la reserva
-- [ ] Validar vigencia/protección de la reserva
-- [ ] Revalidar inventario antes de confirmar
-- [ ] Aplicar actualización atómica del inventario
-- [ ] Impedir stock negativo
-- [ ] Cambiar reserva a estado `COMMITTED` / COMPROMETIDA
-- [ ] Crear `Order` únicamente después del pago aprobado
-- [ ] Crear `Order` inicialmente en estado `CONFIRMED` / CONFIRMADO
-- [ ] Crear `OrderItems` a partir de la información correspondiente
-- [ ] Asociar `Order` con `Payment`
-- [ ] Asociar `Order` con `CapacityReservation`
-- [ ] Garantizar idempotencia de la confirmación
-- [ ] Evitar creación de `Orders` duplicados
-- [ ] Ejecutar cambios locales dentro de una transacción
-- [ ] Manejar fallo de inventario durante confirmación
-- [ ] Manejar reserva inválida/expirada
-- [ ] Manejar `Payment` no aprobado
-- [ ] Agregar pruebas unitarias
-- [ ] Agregar pruebas transaccionales/integración
-- [ ] Probar confirmación repetida/idempotencia
-- [ ] Documentar flujo de `ConfirmPurchase`
+- [x] Crear caso de uso `ConfirmPurchase`
+- [x] Definir comando/contrato de confirmación
+- [x] Obtener y validar `Payment`
+- [x] Verificar que `Payment` esté `APPROVED`
+- [x] Verificar que la operación no haya sido confirmada previamente
+- [x] Obtener la reserva de capacidad asociada
+- [x] Validar estado permitido de la reserva
+- [x] Validar vigencia/protección de la reserva
+- [x] Revalidar inventario antes de confirmar
+- [x] Aplicar actualización atómica del inventario
+- [x] Impedir stock negativo
+- [x] Cambiar reserva a estado `COMMITTED` / COMPROMETIDA
+- [x] Crear `Order` únicamente después del pago aprobado
+- [x] Crear `Order` inicialmente en estado `CONFIRMED` / CONFIRMADO
+- [x] Crear `OrderItems` a partir de la información correspondiente
+- [x] Asociar `Order` con `Payment`
+- [x] Asociar `Order` con `CapacityReservation`
+- [x] Garantizar idempotencia de la confirmación
+- [x] Evitar creación de `Orders` duplicados
+- [x] Ejecutar cambios locales dentro de una transacción
+- [x] Manejar fallo de inventario durante confirmación
+- [x] Manejar reserva inválida/expirada
+- [x] Manejar `Payment` no aprobado
+- [x] Agregar pruebas unitarias
+- [x] Agregar pruebas transaccionales/integración
+- [x] Probar confirmación repetida/idempotencia
+- [x] Documentar flujo de `ConfirmPurchase`
 
 > ⚠️ **Fuera de alcance:** Llamar a Mercado Pago, procesar tarjeta, implementar UI o realizar automáticamente refund ante cualquier inconsistencia. La compensación/reconciliación se trata separadamente.
 

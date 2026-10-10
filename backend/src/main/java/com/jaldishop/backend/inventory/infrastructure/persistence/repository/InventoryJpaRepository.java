@@ -4,6 +4,7 @@ import com.jaldishop.backend.inventory.infrastructure.persistence.entity.Invento
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -51,5 +52,49 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
     int sumActiveReservedQuantity(
             @Param("storeId") UUID storeId,
             @Param("variantId") UUID variantId,
+            @Param("now") Instant now);
+
+    /**
+     * Suma de cantidades reservadas activas y vigentes de OTROS holds
+     * (excluye la reserva de capacidad own): la base para la guardantía del
+     * decremento atómico de ConfirmPurchase.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(ir.quantity), 0)
+            FROM InventoryReservationEntity ir, CapacityReservationEntity cr
+            WHERE ir.capacityReservationId = cr.id
+              AND ir.storeId = cr.storeId
+              AND ir.storeId = :storeId
+              AND ir.variantId = :variantId
+              AND ir.status = 'ACTIVE'
+              AND ir.capacityReservationId <> :capacityReservationId
+              AND (
+                   (cr.status = 'ACTIVE' AND cr.expiresAt > :now)
+                OR (cr.status = 'PAYMENT_PROTECTED' AND cr.paymentProtectionExpiresAt IS NOT NULL AND cr.paymentProtectionExpiresAt > :now)
+              )
+            """)
+    int sumActiveReservedQuantityExcluding(
+            @Param("storeId") UUID storeId,
+            @Param("variantId") UUID variantId,
+            @Param("capacityReservationId") UUID capacityReservationId,
+            @Param("now") Instant now);
+
+    /**
+     * Decremento atómico condicional de stock (estrategia §16.1).
+     * 1 fila actualizada = stock descontado correctamente.
+     * 0 filas = stock insuficiente o insuficiente para sostener holds ajenos vigentes.
+     * Requiere haber adquirido el lock pesimista previo con findByVariantIdInForUpdate.
+     */
+    @Modifying
+    @Query("""
+            UPDATE InventoryEntity i
+            SET i.quantity = i.quantity - :quantity, i.updatedAt = :now
+            WHERE i.variantId = :variantId
+              AND i.quantity - :quantity - :otherActiveReservedQuantity >= 0
+            """)
+    int decrementStockConditionally(
+            @Param("variantId") UUID variantId,
+            @Param("quantity") int quantity,
+            @Param("otherActiveReservedQuantity") int otherActiveReservedQuantity,
             @Param("now") Instant now);
 }

@@ -31,6 +31,11 @@ public class CapacityReservationRepositoryAdapter implements CapacityReservation
     }
 
     @Override
+    public Optional<CapacityReservation> findByIdForUpdate(UUID id) {
+        return jpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
     public int countReserved(UUID storeId, LocalDate serviceDate, LocalTime startTime, LocalTime endTime,
                              Instant now) {
         return (int) jpaRepository.countReserved(storeId, serviceDate, startTime, endTime, now);

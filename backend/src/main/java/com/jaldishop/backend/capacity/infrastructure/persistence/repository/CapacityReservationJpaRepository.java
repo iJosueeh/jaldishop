@@ -1,7 +1,9 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.repository;
 
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityReservationEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -9,10 +11,19 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CapacityReservationJpaRepository extends JpaRepository<CapacityReservationEntity, UUID> {
+
+    /**
+     * Lock pesimista sobre la fila de la reserva para ConfirmPurchase.
+     * Debe adquirirse ANTES que cualquier lock de inventario (protocolo §16).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM CapacityReservationEntity r WHERE r.id = :id")
+    Optional<CapacityReservationEntity> findByIdForUpdate(@Param("id") UUID id);
 
     @Query("""
             SELECT COUNT(r) FROM CapacityReservationEntity r
