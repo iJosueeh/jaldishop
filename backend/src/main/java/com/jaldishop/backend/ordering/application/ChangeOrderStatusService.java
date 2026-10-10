@@ -7,6 +7,8 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 public class ChangeOrderStatusService {
 
@@ -17,11 +19,11 @@ public class ChangeOrderStatusService {
     }
 
     @Transactional
-    public void execute(Long orderId, OrderStatus newStatus) {
+    public void execute(UUID orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", orderId));
 
-        order.transitionTo(newStatus);
+        order.transitionTo(newStatus, null, null);
 
         orderRepository.save(order);
     }

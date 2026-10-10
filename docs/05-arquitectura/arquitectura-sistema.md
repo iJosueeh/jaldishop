@@ -400,15 +400,20 @@ sequenceDiagram
 
 > ⏱️ **Flujo Crítico:** Pago aprobado → ConfirmPurchaseUseCase debe permanecer síncrono.
 
+**Implementación (BE-20):** `ConfirmPurchaseService` (`@Transactional`, `checkout/application`). Detalle en [`docs/04-diseno/api-compra-confirmacion.md`](../04-diseno/api-compra-confirmacion.md).
+
 ```text
-1. Verifica pago aprobado
-2. Evita doble confirmación
-3. Verifica reserva de capacidad
-4. Revalida stock
-5. Crea Pedido
-6. Descuenta inventario
-7. Convierte capacidad reservada en comprometida
-8. Commit todo o rollback todo
+1. Lee el pago (read-only) y verifica APPROVED            (RN-PAY-02)
+2. Idempotencia: si el pedido ya existe por payment o reserva → responde el existente
+3. Commit reserva de capacidad: lock FOR UPDATE de la fila, expireIfDue,
+   exige PAYMENT_PROTECTED vigente → COMMITTED   (serializa la carrera)
+4. Valida tienda ACTIVE y fulfilment (PICKUP/DELIVERY)
+5. Carga carrito y arma snapshots (catalog) + pricing (IGV, delivery fee)
+6. Commit inventario: decremento atómico condicional de TODAS las variantes
+   (nunca stock negativo) y holds → COMMITTED
+7. Crea Order CONFIRMED + OrderItems + historial inicial (order_number = JAL-YYYY-####)
+8. Vacía el carrito
+9. Commit todo o rollback todo (una sola transacción ACID)
 ```
 
 ### 11.5 Operación Externa
@@ -423,7 +428,7 @@ La llamada al proveedor de pago ocurre **fuera** de una transacción larga de ba
 
 > ⚠️ **Regla Arquitectónica:** Un pago aprobado externamente no garantiza por sí mismo la creación de un Pedido.
 
-Como el inventario no se reserva en el MVP, puede ocurrir que el pago sea aprobado pero el stock ya no esté disponible.
+Como el inventario se retiene por **holds temporales** (`inventory_reservations`) y estos pueden no cubrirse, puede ocurrir que el pago sea aprobado pero el stock ya no esté disponible (por ejemplo, un hold ajeno venció o el decremento condicional falló).
 
 **En ese caso:**
 - No crear Pedido
@@ -664,26 +669,26 @@ El lock de PostgreSQL dura únicamente la transacción corta necesaria para vali
 
 **DECIDIDO PARA MVP:**
 
-La estrategia preferida para el consumo de stock es una actualización atómica condicional en PostgreSQL:
+La estrategia preferida para el consumo de stock es una actualización atómica condicional en PostgreSQL sobre la tabla `inventories` (`quantity`):
 
 ```sql
-UPDATE inventory
-SET stock = stock - :quantity
+UPDATE inventories
+SET quantity = quantity - :ownQuantity
 WHERE variant_id = :variantId
-  AND stock >= :quantity;
+  AND quantity - :ownQuantity - :otherActiveReservedQuantity >= 0;
 ```
 
 **Interpretación:**
 - 1 fila actualizada = stock descontado correctamente
-- 0 filas actualizadas = stock insuficiente o recurso no disponible
+- 0 filas actualizadas = stock insuficiente, o insuficiente para sostener holds ajenos vigentes (`:otherActiveReservedQuantity`)
+
+**Variante BE-20 (ConfirmPurchase):** `InventoryJpaRepository.decrementStockConditionally(...)` añade la guarda del *other active reserved*: el propio hold se excluye del conteo (para no doblar el cupo propio), pero el stock debe cubrir además los holds `ACTIVE` no vencidos de otras reservas. Antes de decrementar se adquieren los locks de los `inventories` en orden canónico (`variant_id ASC`). Orden de locks obligatorio del flujo (§11.4): **primero** la fila `capacity_reservations` (`FOR UPDATE`), **después** los inventarios — nunca invertirlo.
 
 **Justificación:**
 - Evita el patrón inseguro: SELECT → validar en Java → otro proceso modifica → UPDATE
 - El chequeo y la modificación se realizan como una única operación atómica
 
-> ⚠️ **CHECK de integridad:** Agregar restricción `CHECK (stock >= 0)` o equivalente en PostgreSQL.
-
-> 💡 **Alcance:** Esto se aplica principalmente a las operaciones críticas de consumo/descuento concurrente de stock. Las operaciones administrativas normales pueden utilizar persistencia JPA convencional.
+> 📌 **Implementado:** el decremento condicional es el mecanismo real de confirmación de compra BE-20, complementado por la estrategia *ticket* de reservas transitorias (`inventory_reservations`) que mantiene el cupo del cliente durante el checkout.
 
 ### 16.2 Estrategia de Capacity: Bloqueo Pesimista
 
@@ -717,6 +722,8 @@ Para pagos/webhooks considerar:
 - Identificador externo de pago único
 - Identificador/evento de webhook único
 - Una misma confirmación lógica no crea múltiples pedidos
+
+> ✅ **ConfirmPurchase (BE-20):** idempotencia triple — consulta previa por `payment_id`/`capacity_reservation_id`, serialización real mediante el lock pesimista de la reserva (quien lo obtiene completa; el concurrente re-lee el pedido del ganador) y *backstop* por constraints `UNIQUE` en `orders`. Verificado por `ConfirmPurchaseConcurrencyIntegrationTest`.
 
 ---
 

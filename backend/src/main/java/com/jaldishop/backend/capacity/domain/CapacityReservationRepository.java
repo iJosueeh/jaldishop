@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface CapacityReservationRepository {
     Optional<CapacityReservation> findById(UUID id);
+    Optional<CapacityReservation> findByIdForUpdate(UUID id);
     int countReserved(UUID storeId, LocalDate serviceDate, LocalTime startTime, LocalTime endTime, Instant now);
     int countCommitted(UUID storeId, LocalDate serviceDate, LocalTime startTime, LocalTime endTime);
     boolean existsReservedByUserAndWindow(UUID userId, UUID storeId, LocalDate serviceDate,

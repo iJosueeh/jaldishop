@@ -54,7 +54,7 @@ flowchart LR
 |---|:---:|---|:---:|
 | **Josue Royer Tanta Cieza** | Full Stack Dev | **BE-19** · Orquestación de Checkout (✅ Hecho), **FE-STORE-01** · Storefront Público & Landing Next.js 15 (🟢 En Progreso), **CI/CD** & Despliegue continuo | [![GitHub](https://img.shields.io/badge/-@iJosueeh-181717?style=flat-square&logo=github)](https://github.com/iJosueeh) |
 | **Katherine Patricia Salas Quiroz** | Full Stack Dev | **BE-PAYMENTS-01** · Pagos Base (🟢 En Progreso) & **FE-STORE-03** · Carrito y Flujo de Checkout | [![GitHub](https://img.shields.io/badge/-@kath144-181717?style=flat-square&logo=github)](https://github.com/kath144) |
-| **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-20** · Integración de Capacidad en Checkout (🟢 En Progreso) & **FE-STORE-02** · Selección de Slots y Cumplimiento | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
+| **Mia Vitalia Gual Vega** | Full Stack Dev | **BE-20** · Confirmación Transaccional de Compra (✅ Hecho) & **FE-STORE-02** · Carrito Customer (✅ Hecho) | [![GitHub](https://img.shields.io/badge/-@miagv-181717?style=flat-square&logo=github)](https://github.com/miagv) |
 
 ---
 
