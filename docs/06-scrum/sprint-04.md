@@ -47,7 +47,7 @@ flowchart TD
         FELEGAL01["FE-LEGAL-01 · Ecosistema Legal & Libro Reclamaciones<br/>(Josué)<br/>🟢 COMPLETADO"]
         FESTORE01["FE-STORE-01 · Storefront Público (/tienda/:slug)<br/>(Josué)<br/>🟢 COMPLETADO"]
         FESTORE03["FE-STORE-03 · Catálogo Público Tienda<br/>(Katherine)<br/>🟡 EN PLANIFICACIÓN"]
-        FESTORE02["FE-STORE-02 · Carrito Customer<br/>(Mia)<br/>🟡 EN PLANIFICACIÓN"]
+        FESTORE02["FE-STORE-02 · Carrito Customer<br/>(Mia)<br/>🟢 COMPLETADO"]
         
         FEMKT01 --> FESTORE01
         FESTORE01 --> FESTORE03
@@ -323,8 +323,8 @@ Poner en producción el Frontend Marketplace garantizando alta disponibilidad, c
 ### 📋 FE-STORE-02 | Carrito Customer
 
 **Responsable:** Mia  
-**Estado:** `EN PLANIFICACIÓN` 🟡  
-**Entregable:** Componentes de Carrito, `CartService` reactivo, soporte para cantidades y variantes, aislamiento por tienda única y conexión con el backend real.
+**Estado:** `COMPLETADO` 🟢  
+**Entregable:** Carrito de cliente completo en `frontend-marketplace` contra el backend real: `CartService` (5 endpoints vía proxy server), `StorefrontCartProvider` (sesión + carrito por `storeId`, aislamiento por tienda, login/logout, `loginRequired`, reanudación de intención de compra, `loading/pending/error` + toasts, sin optimismo fabricado), `StorefrontCart` (icono + badge + panel) y `CartSummarySidebar` (resumen, cantidades, precios, empty/unavailable, vaciar, continuar comprando, "Ver opciones de entrega" → `#entrega`). 100/100 tests en verde, lint y build OK.
 
 **Descripción:**  
 Implementar la experiencia de carrito del cliente en `frontend-marketplace`, permitiendo agregar variantes de productos, modificar cantidades, eliminar productos y consultar el resumen previo al Checkout.  
@@ -332,37 +332,37 @@ El carrito debe trabajar contra el backend real y respetar la regla de que un ca
 **Agregar productos al carrito no reserva inventario ni capacidad.** Estas validaciones se realizarán posteriormente durante Checkout.
 
 **Checklist:**
-- [ ] Crear modelo/DTO de Cart en frontend
-- [ ] Crear `CartService`
-- [ ] Integrar endpoints reales del backend (`/api/v1/cart/**`)
-- [ ] Obtener carrito activo del Customer
-- [ ] Agregar `ProductVariant` al carrito
-- [ ] Actualizar cantidad de un `CartItem`
-- [ ] Eliminar `CartItem`
-- [ ] Vaciar carrito
-- [ ] Mostrar productos/variantes agregados
-- [ ] Mostrar cantidad por Item
-- [ ] Mostrar precio referencial por Item
-- [ ] Calcular/mostrar resumen visual del carrito
-- [ ] Mostrar cantidad total de Items en indicador del carrito
-- [ ] Mantener carrito asociado a una única Store
-- [ ] Impedir mezcla de productos de diferentes Stores
-- [ ] Manejar carrito vacío
-- [ ] Manejar producto/variante no disponible
-- [ ] Manejar usuario no autenticado según flujo definido
-- [ ] Implementar loading states
-- [ ] Implementar operation states
-- [ ] Integrar `ErrorHandlerService`
-- [ ] Integrar `ToastService`
-- [ ] Agregar acción "Continuar comprando"
-- [ ] Agregar acción "Continuar al checkout"
-- [ ] Preparar navegación hacia Checkout
-- [ ] Diseño responsive desktop/tablet/mobile
-- [ ] Agregar pruebas de `CartService`
-- [ ] Agregar pruebas de componentes principales
-- [ ] No reservar inventario al agregar productos
-- [ ] No reservar capacidad al agregar productos
-- [ ] No implementar pago dentro de esta tarjeta
+- [x] Crear modelo/DTO de Cart en frontend
+- [x] Crear `CartService`
+- [x] Integrar endpoints reales del backend (`/api/v1/cart/**` vía `app/api/customer`)
+- [x] Obtener carrito activo del Customer
+- [x] Agregar `ProductVariant` al carrito
+- [x] Actualizar cantidad de un `CartItem`
+- [x] Eliminar `CartItem`
+- [x] Vaciar carrito
+- [x] Mostrar productos/variantes agregados
+- [x] Mostrar cantidad por Item
+- [x] Mostrar precio referencial por Item
+- [x] Calcular/mostrar resumen visual del carrito
+- [x] Mostrar cantidad total de Items en indicador del carrito
+- [x] Mantener carrito asociado a una única Store
+- [x] Impedir mezcla de productos de diferentes Stores
+- [x] Manejar carrito vacío
+- [x] Manejar producto/variante no disponible
+- [x] Manejar usuario no autenticado según flujo definido
+- [x] Implementar loading states
+- [x] Implementar operation states
+- [x] Integrar `ErrorHandlerService` (patrón del marketplace: `ApiException` + `reportError` + toasts)
+- [x] Integrar `ToastService` (sonner `Toaster` en `layout.tsx`)
+- [x] Agregar acción "Continuar comprando"
+- [x] Agregar acción "Continuar al checkout" (conduce al selector de entrega/horario `#entrega`)
+- [x] Preparar navegación hacia Checkout (scroll/push a `#entrega`; página de checkout es flujo separado)
+- [x] Diseño responsive desktop/tablet/mobile
+- [x] Agregar pruebas de `CartService` (3 tests de contrato)
+- [x] Agregar pruebas de componentes principales (`StorefrontCart.test.tsx` 7 tests)
+- [x] No reservar inventario al agregar productos
+- [x] No reservar capacidad al agregar productos
+- [x] No implementar pago dentro de esta tarjeta
 
 ---
 
