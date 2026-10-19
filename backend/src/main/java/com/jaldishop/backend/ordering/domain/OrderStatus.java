@@ -3,20 +3,20 @@ package com.jaldishop.backend.ordering.domain;
 import java.util.Set;
 
 public enum OrderStatus {
-    CONFIRMADO,
-    EN_PREPARACION,
-    LISTO,
-    EN_ENTREGA,
-    COMPLETADO,
-    CANCELADO;
+    CONFIRMED,
+    IN_PREPARATION,
+    READY,
+    OUT_FOR_DELIVERY,
+    COMPLETED,
+    CANCELLED;
 
     public boolean canTransitionTo(OrderStatus next) {
         return switch (this) {
-            case CONFIRMADO -> Set.of(EN_PREPARACION, CANCELADO).contains(next);
-            case EN_PREPARACION -> Set.of(LISTO, CANCELADO).contains(next);
-            case LISTO -> Set.of(EN_ENTREGA, COMPLETADO).contains(next);
-            case EN_ENTREGA -> Set.of(COMPLETADO).contains(next);
-            case COMPLETADO, CANCELADO -> false;
+            case CONFIRMED -> Set.of(IN_PREPARATION, CANCELLED).contains(next);
+            case IN_PREPARATION -> Set.of(READY, CANCELLED).contains(next);
+            case READY -> Set.of(OUT_FOR_DELIVERY, COMPLETED).contains(next);
+            case OUT_FOR_DELIVERY -> Set.of(COMPLETED).contains(next);
+            case COMPLETED, CANCELLED -> false;
         };
     }
 
