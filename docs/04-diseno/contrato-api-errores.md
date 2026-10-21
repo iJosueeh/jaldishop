@@ -73,7 +73,7 @@ export interface NormalizedApiError {
 
 | HTTP Status | Código `code` Backend | Significado | Comportamiento en Frontend |
 |:---:|:---|:---|:---|
-| **`400`** | `VALIDATION_ERROR` | Error de validación en formulario (`@Valid`) | `ErrorHandlerService` extrae `fieldErrors` para marcar controles específicos en formularios reactivos. |
+| **`400`** | `VALIDATION_ERROR` | Error de validación en formulario (`@Valid`) o de parámetros de consulta/ruta (`@Validated` a nivel de clase con `@Min/@Max/@Size` sobre `@RequestParam` y `@PathVariable`) | `ErrorHandlerService` extrae `fieldErrors` para marcar controles específicos en formularios reactivos. En parámetros de listado, el mapa `errors` identifica el método y el parámetro inválido (p. ej. `searchPublicStores.limit`). |
 | **`400`** | `MALFORMED_JSON` | Cuerpo de solicitud JSON no legible | Emite mensaje descriptivo al usuario. |
 | **`401`** | `UNAUTHORIZED` / `INVALID_CREDENTIALS` | Token expirado, inválido o credenciales erróneas | `errorInterceptor` ejecuta `tokenService.removeToken()`, emite toast de advertencia y redirige a `/login?expired=true`. |
 | **`403`** | `FORBIDDEN` | Usuario sin rol `MERCHANT` o sin permisos | `errorInterceptor` emite toast de acceso denegado. |

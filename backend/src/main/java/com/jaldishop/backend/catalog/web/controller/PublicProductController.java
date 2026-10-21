@@ -10,7 +10,9 @@ import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.store.application.GetStoreBySlugService;
 import com.jaldishop.backend.store.domain.Store;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/stores")
+@Validated
 public class PublicProductController {
 
     private final GetProductsService getProductsService;
@@ -49,7 +52,7 @@ public class PublicProductController {
 
     @GetMapping("/slug/{slug}/products")
     public ResponseEntity<List<ProductResponse>> getStoreProductsBySlug(
-            @PathVariable String slug,
+            @PathVariable @Size(max = 180, message = "El slug no puede exceder 180 caracteres") String slug,
             @RequestParam(required = false) UUID categoryId
     ) {
         Store store = getStoreBySlugService.execute(slug);

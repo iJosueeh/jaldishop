@@ -7,6 +7,7 @@ import com.jaldishop.backend.notification.application.MarkNotificationAsReadServ
 import com.jaldishop.backend.notification.domain.Notification;
 import com.jaldishop.backend.notification.domain.NotificationType;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -72,7 +74,7 @@ class NotificationControllerTest {
             }
         };
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(authPrincipalResolver)
                 .build();
@@ -147,5 +149,26 @@ class NotificationControllerTest {
         mockMvc.perform(patch("/api/v1/notifications/" + notificationId + "/read"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/notifications - 400 VALIDATION_ERROR con page/size fuera de rango y recuperación posterior")
+    void listNotificationsInvalidParameters() throws Exception {
+        mockMvc.perform(get("/api/v1/notifications").param("page", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/notifications").param("size", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/notifications").param("size", "500"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(listUserNotificationsService);
+
+        when(listUserNotificationsService.execute(eq(testUserId), any())).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/notifications").param("page", "0").param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }

@@ -5,16 +5,21 @@ import com.jaldishop.backend.store.application.*;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.web.dto.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/stores")
+@Validated
 public class StoreController {
 
     private final CreateStoreService createStoreService;
@@ -126,7 +131,7 @@ public class StoreController {
 
     @GetMapping("/slug/{slug}")
     public ResponseEntity<PublicStoreResponse> getStoreBySlug(
-            @PathVariable String slug
+            @PathVariable @Size(max = 180, message = "El slug no puede exceder 180 caracteres") String slug
     ) {
         Store store = getStoreBySlugService.execute(slug);
         return ResponseEntity.ok(PublicStoreResponse.fromDomain(store));
@@ -134,8 +139,11 @@ public class StoreController {
 
     @GetMapping("/search")
     public ResponseEntity<List<PublicStoreResponse>> searchPublicStores(
-            @RequestParam(required = false, defaultValue = "") String q,
-            @RequestParam(required = false, defaultValue = "5") int limit
+            @RequestParam(required = false, defaultValue = "")
+            @Size(max = 100, message = "El texto de búsqueda no puede exceder 100 caracteres") String q,
+            @RequestParam(required = false, defaultValue = "5")
+            @Min(value = 1, message = "El límite debe ser al menos 1")
+            @Max(value = 50, message = "El límite no puede exceder 50") int limit
     ) {
         List<PublicStoreResponse> stores = searchPublicStoresService.execute(q).stream()
                 .limit(limit)
@@ -146,7 +154,9 @@ public class StoreController {
 
     @GetMapping("/featured")
     public ResponseEntity<List<PublicStoreResponse>> getFeaturedStores(
-            @RequestParam(required = false, defaultValue = "6") int limit
+            @RequestParam(required = false, defaultValue = "6")
+            @Min(value = 1, message = "El límite debe ser al menos 1")
+            @Max(value = 50, message = "El límite no puede exceder 50") int limit
     ) {
         List<PublicStoreResponse> stores = searchPublicStoresService.execute("").stream()
                 .limit(limit)

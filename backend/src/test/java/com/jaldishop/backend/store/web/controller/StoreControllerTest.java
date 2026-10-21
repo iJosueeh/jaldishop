@@ -2,6 +2,7 @@ package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.*;
 import com.jaldishop.backend.store.domain.CloseStoreAction;
 import com.jaldishop.backend.store.domain.Store;
@@ -24,11 +25,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -85,7 +88,7 @@ class StoreControllerTest {
             }
         };
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(authPrincipalResolver)
                 .build();
@@ -343,5 +346,29 @@ class StoreControllerTest {
                 .andExpect(jsonPath("$.action").value("DEACTIVATED"))
                 .andExpect(jsonPath("$.status").value("INACTIVE"))
                 .andExpect(jsonPath("$.message").value("La tienda fue desactivada exitosamente para preservar su historial operativo y de auditoría."));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/stores/search, /featured y /slug/{slug} - 400 VALIDATION_ERROR con parámetros fuera de rango y recuperación posterior")
+    void searchAndSlugInvalidParameters() throws Exception {
+        mockMvc.perform(get("/api/v1/stores/search").param("limit", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/stores/search").param("q", "x".repeat(101)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/stores/featured").param("limit", "999"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/stores/slug/" + "a".repeat(181)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(searchPublicStoresService, getStoreBySlugService);
+
+        when(searchPublicStoresService.execute("")).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/stores/search").param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }

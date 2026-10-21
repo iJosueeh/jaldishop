@@ -9,8 +9,10 @@ import com.jaldishop.backend.store.domain.StoreStatus;
 import com.jaldishop.backend.store.web.dto.AdminStoreDetailResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreSummaryResponse;
 import com.jaldishop.backend.store.web.mapper.AdminStoreResponseMapper;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/admin/stores")
 @PreAuthorize("hasRole('ADMIN')")
+@Validated
 public class AdminStoreController {
 
     private final GetAdminStoresService getAdminStoresService;
@@ -37,7 +40,8 @@ public class AdminStoreController {
 
     @GetMapping
     public ResponseEntity<List<AdminStoreSummaryResponse>> listStores(
-            @RequestParam(required = false) String query,
+            @RequestParam(required = false)
+            @Size(max = 100, message = "El texto de búsqueda no puede exceder 100 caracteres") String query,
             @RequestParam(required = false) StoreStatus status
     ) {
         List<Store> stores = getAdminStoresService.execute(new GetAdminStoresQuery(query, status));

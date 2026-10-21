@@ -14,6 +14,7 @@ import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
 import com.jaldishop.backend.identity.web.mapper.AdminUserResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -103,7 +105,7 @@ class AdminUserControllerTest {
             }
         };
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setCustomArgumentResolvers(authPrincipalResolver)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -246,5 +248,20 @@ class AdminUserControllerTest {
                         .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.roles").isArray());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/admin/users - 400 VALIDATION_ERROR con query demasiado largo y recuperación posterior")
+    void listUsersInvalidQueryParameter() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/users").param("query", "x".repeat(101)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(getAdminUsersService);
+
+        when(getAdminUsersService.execute(any(GetAdminUsersQuery.class))).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/admin/users").param("query", "carlos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }

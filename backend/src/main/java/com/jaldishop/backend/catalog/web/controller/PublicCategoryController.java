@@ -4,7 +4,9 @@ import com.jaldishop.backend.catalog.application.GetPublicCategoriesService;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.store.application.GetStoreBySlugService;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/stores")
+@Validated
 public class PublicCategoryController {
     private final GetPublicCategoriesService service;
     private final GetStoreBySlugService getStoreBySlugService;
@@ -32,7 +35,9 @@ public class PublicCategoryController {
     }
 
     @GetMapping("/slug/{slug}/categories")
-    public ResponseEntity<List<CategoryResponse>> getCategoriesBySlug(@PathVariable String slug) {
+    public ResponseEntity<List<CategoryResponse>> getCategoriesBySlug(
+            @PathVariable @Size(max = 180, message = "El slug no puede exceder 180 caracteres") String slug
+    ) {
         return getCategories(getStoreBySlugService.execute(slug).getId());
     }
 }
