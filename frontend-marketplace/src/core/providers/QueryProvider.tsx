@@ -2,7 +2,17 @@
 
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import dynamic from 'next/dynamic';
+
+// Devtools cargados de forma dinámica: quedan fuera del bundle de producción
+// y evitan arrastrar solid-js/seroval al árbol de dependencias efectivas.
+const ReactQueryDevtools = dynamic(
+  () =>
+    import('@tanstack/react-query-devtools').then((m) => ({
+      default: m.ReactQueryDevtools,
+    })),
+  { ssr: false }
+);
 
 interface QueryProviderProps {
   children: React.ReactNode;
