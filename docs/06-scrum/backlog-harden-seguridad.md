@@ -20,7 +20,7 @@
 
 Este documento es la **fuente de planificación** del ciclo de hardening: cada tarjeta define entregable, checklist, criterios de aceptación y archivos a tocar para poder ejecutarla en ramas/PR pequeños **sin interferir con las tarjetas de Katherine (`payment`, catálogo storefront) ni las de Mia (`ordering`, carrito)**.
 
-> ⚠️ **Numeración:** `HARDEN-01` y `HARDEN-02` están consumidos (02 completado en PR #60). La numeración `HARDEN-03+` y `DEPS-01` es **propuesta de esta auditoría** y debe confirmarse contra el backlog externo del equipo antes de abrir ramas.
+> ⚠️ **Numeración:** `HARDEN-01` y `HARDEN-02` están consumidos (02 completado en PR #60 · `DEPS-01` completado en PR #62). La numeración `HARDEN-03+` es **propuesta de esta auditoría** y debe confirmarse contra el backlog externo del equipo antes de abrir ramas.
 
 **Alcance de este documento:** tarjetas ALTA (🔴) y MEDIA (🟠). Las de prioridad BAJA se listan solo a modo de trazabilidad en la sección 7.
 
@@ -32,7 +32,7 @@ Este documento es la **fuente de planificación** del ciclo de hardening: cada t
 flowchart TD
     subgraph ALTA["Prioridad ALTA 🔴"]
         H01["HARDEN-01 · Handler de validación de métodos"]
-        DEPS["DEPS-01 · npm audit fix (2 críticas)"]
+        DEPS["DEPS-01 · npm audit fix ✅ (PR #62)"]
         H03["HARDEN-03 · Rate limiting en autenticación"]
         H04["HARDEN-04 · CORS estricto"]
     end
@@ -61,7 +61,7 @@ flowchart TD
 | ID | Tarjeta | Prioridad | Esfuerzo | Responsable | Archivos críticos |
 |:---:|---|:---:|:---:|:---:|---|
 | **HARDEN-01** | Handler global de validación de métodos | 🔴 ALTA | S | Josué | `shared/exception/GlobalExceptionHandler.java` 🔥 |
-| **DEPS-01** | Remediar vulnerabilidades `npm audit` | 🔴 ALTA | S | Josué | `*/package-lock.json` 🔥 |
+| **DEPS-01** ✅ | Remediar vulnerabilidades `npm audit` (PR #62) | 🔴 ALTA | S | Josué | `*/package-lock.json` 🔥 |
 | **HARDEN-03** | Rate limiting y anti brute-force en auth | 🔴 ALTA | M | Josué | `identity/infrastructure/security/SecurityConfig.java` 🔥 |
 | **HARDEN-04** | Endurecimiento de la política CORS | 🔴 ALTA | S | Josué | `identity/infrastructure/security/WebCorsConfiguration.java` 🔥 |
 | **HARDEN-05** | Límites de payload y de paginación | 🟠 MEDIA | S | Josué | `application.properties` 🔥 |
@@ -99,8 +99,8 @@ Con `@Validated` activo en 7 controllers (HARDEN-02), una violación de parámet
 
 ### 📋 DEPS-01 | Remediar vulnerabilidades de dependencias (`npm audit`)
 
-**Responsable:** Josué · **Prioridad:** 🔴 ALTA · **Esfuerzo:** S · **Estado:** `PENDIENTE`
-**Entregable:** `npm audit` sin vulnerabilidades *critical/high* en ambos frontends, con tests y build verificados.
+**Responsable:** Josué · **Prioridad:** 🔴 ALTA · **Esfuerzo:** S · **Estado:** `COMPLETADO` ✅ (PR #62, 22-10-2026)
+**Entregable:** `npm audit` sin vulnerabilidades *critical/high* en ambos frontends, con tests y build verificados. → **cumplido**
 
 **Descripción:**
 Auditoría del 22-10-2026 (`npm audit --omit=dev`):
@@ -110,16 +110,19 @@ Auditoría del 22-10-2026 (`npm audit --omit=dev`):
 | `frontend-marketplace` (`solid-js` → `seroval`) | 4 | **2 critical**, 1 high, 1 moderate |
 | `frontend-merchant` (`fast-uri`, `source-map-js`) | 3 | 1 moderate, 2 high |
 
-**Checklist:**
-- [ ] `npm audit fix` en `frontend-marketplace` (sin `--force`)
-- [ ] `npm audit fix` en `frontend-merchant`
-- [ ] Verificar compatibilidad: `npm test` (100/100) + `npm run build` en marketplace
-- [ ] Verificar `npm test` en merchant
-- [ ] Si alguna corrección es *breaking*, evaluar upgrade menor manual y documentar la decisión
-- [ ] Confirmar `npm audit --omit=dev` en verde (0 critical/high)
+**Checklist (ejecutado en PR #62):**
+- [x] `npm audit fix` en `frontend-marketplace` (sin `--force`)
+- [x] `npm audit fix` en `frontend-merchant`
+- [x] Verificar compatibilidad: `npm test` (100/100) + `npm run build` en marketplace
+- [x] Verificar `npm test` (503) + build en merchant
+- [x] Correcciones no automatizables: `next` 15.5.27 → 15.5.28 (RCE image optimization) · Angular 22.1.6 → 22.2.3 + build/cli 22.2.4 (`@angular/router` DoS SSR) · `overrides` de `postcss` 8.5.31 y `vite` 8.3.5
+- [x] `@tanstack/react-query-devtools` → `devDependencies` con `next/dynamic` (`ssr: false`) → `solid-js`/`seroval` fuera del bundle de producción
+- [x] Node en CI fijado a `22.23.4` (CVE-2026-111497, RCE Brotli · local en 24.22.1)
+- [x] Confirmar `npm audit --omit=dev` en verde (0 critical/high)
 
-**Criterios de aceptación:** 0 vulnerabilidades *critical* y *high*; suites de ambos frontends en verde.
-**Archivos:** `frontend-marketplace/package-lock.json` 🔥 · `frontend-merchant/package-lock.json` 🔥.
+**Criterios de aceptación:** ✅ 0 vulnerabilidades *critical* y *high* en producción; suites de ambos frontends en verde (marketplace 100/100 · merchant 503 · builds OK · `npm ci` OK).
+**Residual conocido:** marketplace mantiene 5 *high* **solo dev** (cadena `braces`/`micromatch`/`fast-glob` vía `eslint-config-next`, sin versión parchada upstream; no afecta al deploy).
+**Archivos:** `frontend-marketplace/package-lock.json` 🔥 · `frontend-merchant/package-lock.json` 🔥 · `frontend-marketplace/package.json` · `frontend-marketplace/src/core/providers/QueryProvider.tsx` · `.github/workflows/ci.yml`.
 **⚠️ Nota:** los locks los pueden tocar otros PRs → rebase corto antes de mergear.
 
 ---
