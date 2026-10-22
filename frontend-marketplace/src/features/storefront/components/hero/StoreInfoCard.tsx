@@ -38,20 +38,20 @@ export function StoreInfoCard({ store }: StoreInfoCardProps) {
               <Badge
                 variant="jade"
                 size="sm"
-                className="bg-emerald-50 text-emerald-800 border-emerald-300 font-bold px-2.5 py-0.5"
+                className="bg-emerald-50 text-[#005141] border-emerald-200/80 font-bold px-3 py-1 rounded-full shadow-2xs"
               >
-                <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
+                <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-[#005141]" />
                 Tienda activa
               </Badge>
             )}
             {store.category && (
-              <span className="text-xs font-bold text-[#005141] bg-emerald-50/90 px-3 py-0.5 rounded-full border border-emerald-200/80">
+              <span className="text-xs font-semibold text-stone-700 bg-stone-100 px-3 py-1 rounded-full border border-stone-200/80">
                 {store.category}
               </span>
             )}
             {store.rating && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-stone-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
-                <Star className="w-3 h-3 text-[#feae2c] fill-[#feae2c]" />
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-stone-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/80 shadow-2xs">
+                <Star className="w-3.5 h-3.5 text-[#feae2c] fill-[#feae2c]" />
                 <span>{store.rating}</span>
                 {store.reviewsCount ? (
                   <span className="text-stone-500 font-normal">({store.reviewsCount})</span>
@@ -68,27 +68,27 @@ export function StoreInfoCard({ store }: StoreInfoCardProps) {
           )}
         </div>
 
-        {/* Acciones Rápidas: WhatsApp y Catálogo */}
+        {/* Acciones Rápidas: WhatsApp y Catálogo en Pill Buttons (rounded-full) */}
         <div className="flex items-center gap-2.5 shrink-0">
           {whatsappUrl && (
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-[#005141] border border-emerald-200/80 text-xs sm:text-sm font-bold shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#005141] border border-emerald-200/80 text-xs sm:text-sm font-bold shadow-xs transition-all hover:-translate-y-0.5 active:scale-95"
               title="Escribir por WhatsApp"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <MessageCircle className="w-4 h-4 text-[#005141]" />
               <span>WhatsApp</span>
             </a>
           )}
 
           <Link
             href="#catalogo"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#005141] hover:bg-[#00382d] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#005141]/20 transition-all hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:brightness-105 text-white text-xs sm:text-sm font-bold shadow-md shadow-orange-950/20 transition-all hover:-translate-y-0.5 active:scale-95"
           >
             <span>Ver productos</span>
-            <ArrowRight className="w-4 h-4 text-[#feae2c]" />
+            <ArrowRight className="w-4 h-4 text-white" />
           </Link>
         </div>
       </div>

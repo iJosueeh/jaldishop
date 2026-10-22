@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Sparkles, CheckCircle2, Store, Flame, Clock } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, Store, Clock, Flame } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { HeroVideoBackground } from './HeroVideoBackground';
 import { MotionFade } from '@/shared/components/ui/MotionFade';
@@ -15,28 +15,28 @@ export function HeroSection() {
       {/* 2. Left-aligned Cinematic HUD Container */}
       <div className="relative z-10 w-full px-6 sm:px-10 md:px-14 lg:px-16 xl:px-20">
         <div className="max-w-xl lg:max-w-2xl text-left space-y-5 sm:space-y-6">
-          {/* Pill Tag with Live Status indicator */}
+          {/* Pill Tag with Live Status indicator — Warm & Tech Balance */}
           <MotionFade delay={0.1}>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl text-stone-200 text-xs sm:text-sm font-semibold shadow-2xl">
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#0b0f10]/85 border border-white/15 backdrop-blur-xl text-stone-200 text-xs sm:text-sm font-medium shadow-2xl">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#ea580c]" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ea580c]" />
               </span>
               <span className="text-stone-100 font-medium tracking-tight">
                 Tu catálogo para WhatsApp e Instagram
               </span>
-              <span className="hidden sm:inline-block text-white/30">•</span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[#feae2c] font-bold text-xs">
-                <Sparkles className="w-3 h-3 text-[#feae2c]" /> Pedidos organizados
+              <span className="hidden sm:inline-block text-white/20">•</span>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[#feae2c] font-semibold text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-[#feae2c]" /> Pedidos organizados
               </span>
             </div>
           </MotionFade>
 
-          {/* Headline */}
+          {/* Headline — Display Typography (DESIGN.md weight 330-400) + Warm Amber Accent */}
           <MotionFade delay={0.2}>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-black tracking-tight text-white leading-[1.12] sm:leading-[1.08] text-balance drop-shadow-xl">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-light tracking-tight text-white leading-[1.08] text-balance drop-shadow-lg">
               Vende por WhatsApp{' '}
-              <span className="text-[#feae2c] underline underline-offset-[6px] decoration-[#ea580c] decoration-wavy decoration-2">
+              <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#feae2c] via-[#fbbf24] to-[#ea580c]">
                 sin recibir
               </span>{' '}
               pedidos de más.
@@ -45,12 +45,12 @@ export function HeroSection() {
 
           {/* Subtitle in clear merchant language */}
           <MotionFade delay={0.3}>
-            <p className="text-stone-100/95 text-base lg:text-lg font-normal leading-relaxed max-w-lg lg:max-w-xl drop-shadow-md">
+            <p className="text-[#a1a1aa] text-base lg:text-lg font-normal leading-relaxed max-w-lg lg:max-w-xl">
               Comparte tu catálogo digital por WhatsApp e Instagram. Tus clientes eligen sus productos y un horario de entrega o recojo según los cupos de tu negocio.
             </p>
           </MotionFade>
 
-          {/* Action Buttons */}
+          {/* Action Buttons — Pill buttons (9999px radius) */}
           <MotionFade delay={0.4}>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1.5">
               <a
@@ -62,8 +62,8 @@ export function HeroSection() {
                 <Button
                   variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-2xl shadow-black/60 cursor-pointer bg-[#005141] hover:bg-[#00382d] text-white px-7 py-3.5 rounded-2xl transition-all hover:scale-[1.02] will-change-transform border border-emerald-400/30 ring-4 ring-[#005141]/20"
-                  leftIcon={<Store className="w-5 h-5 text-emerald-300" />}
+                  className="w-full sm:w-auto text-sm sm:text-base font-semibold shadow-xl cursor-pointer bg-white hover:bg-stone-100 text-[#02090a] px-8 py-3.5 rounded-full transition-all hover:scale-[1.02] will-change-transform border border-white"
+                  leftIcon={<Store className="w-4 h-4 text-[#02090a]" />}
                 >
                   Crear mi Tienda Gratis
                 </Button>
@@ -73,8 +73,8 @@ export function HeroSection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto text-sm sm:text-base font-extrabold cursor-pointer bg-white/15 hover:bg-white/25 text-white backdrop-blur-xl px-7 py-3.5 rounded-2xl transition-all hover:scale-[1.02] will-change-transform border border-white/20 shadow-lg"
-                  rightIcon={<ArrowRight className="w-5 h-5 text-stone-200" />}
+                  className="w-full sm:w-auto text-sm sm:text-base font-medium cursor-pointer bg-white/10 hover:bg-white/15 text-white backdrop-blur-xl px-7 py-3.5 rounded-full transition-all hover:scale-[1.02] will-change-transform border border-white/20 shadow-lg"
+                  rightIcon={<ArrowRight className="w-4 h-4 text-stone-300" />}
                 >
                   Explorar Tiendas
                 </Button>
@@ -82,19 +82,22 @@ export function HeroSection() {
             </div>
           </MotionFade>
 
-          {/* 3 Clear Merchant Value Guarantees with Glass Badges */}
+          {/* 3 Clear Merchant Value Guarantees with Distinct Multi-Color Accents */}
           <MotionFade delay={0.5}>
             <div className="pt-2 flex flex-wrap items-center gap-2 sm:gap-2.5">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/55 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-stone-100 shadow-md">
-                <CheckCircle2 className="w-4 h-4 text-[#34d399] shrink-0" />
+              {/* Green / Mint: Operational safety */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0b0f10]/80 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-normal text-stone-200 shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#34d399] shrink-0" />
                 <span>Cero pedidos de más</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/55 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-stone-100 shadow-md">
-                <Clock className="w-4 h-4 text-[#feae2c] shrink-0" />
+              {/* Warm Amber: 10 min hold */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0b0f10]/80 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-normal text-stone-200 shadow-sm">
+                <Clock className="w-3.5 h-3.5 text-[#feae2c] shrink-0" />
                 <span>Cupo reservado 10 min</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/55 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-stone-100 shadow-md">
-                <Flame className="w-4 h-4 text-[#ea580c] shrink-0" />
+              {/* Warm Terracotta: Zero fixed fees */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0b0f10]/80 border border-white/10 backdrop-blur-md text-xs sm:text-sm font-normal text-stone-200 shadow-sm">
+                <Flame className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
                 <span>Sin comisiones fijas</span>
               </div>
             </div>

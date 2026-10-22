@@ -138,7 +138,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh]"
+            className="relative w-full max-w-lg bg-white rounded-[12px] shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh] border border-stone-200/90"
           >
             {/* WhatsApp Window Header */}
             <div className="p-4 sm:p-5 bg-[#075e54] text-white flex items-center justify-between shadow-md">
@@ -161,7 +161,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
                 aria-label="Cerrar modal"
               >
                 <X className="w-4 h-4" />
@@ -240,7 +240,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
               <button
                 type="button"
                 onClick={handleCopyMessage}
-                className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-5 py-3 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-[#005141]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Mensaje copiado' : 'Copiar texto'}</span>
@@ -251,7 +251,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                 variant="primary"
                 size="lg"
                 onClick={handleSendToWhatsApp}
-                className="w-full sm:flex-1 py-3.5 rounded-2xl font-black text-xs sm:text-sm bg-[#25d366] hover:bg-[#128c7e] text-white border-0 shadow-lg shadow-emerald-500/25 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs sm:text-sm bg-[#25d366] hover:bg-[#128c7e] text-white border-0 shadow-md shadow-emerald-500/25 cursor-pointer flex items-center justify-center gap-2 active:scale-95 transition-all"
               >
                 <Send className="w-4 h-4" />
                 <span>Abrir WhatsApp y Enviar Pedido</span>

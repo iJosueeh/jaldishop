@@ -138,7 +138,7 @@ export function CatalogContainer({
       </section>
 
       {(catalogError || items.length === 0) && contactUrl && <div className="-mt-4 text-center">
-        <a href={contactUrl} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-2xl bg-[#005141] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#00382d]">Consultar productos por WhatsApp</a>
+        <a href={contactUrl} target="_blank" rel="noopener noreferrer" className="inline-flex rounded-full bg-[#005141] px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-[#00382d] active:scale-95">Consultar productos por WhatsApp</a>
       </div>}
 
       {/* Selector de Horarios y Capacidad Operativa */}
@@ -156,7 +156,7 @@ export function CatalogContainer({
             onFulfillmentTypeChange={setFulfillment}
           />
         ) : (
-          <section className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs">
+          <section className="rounded-[12px] border border-stone-200/90 bg-white p-6 sm:p-8 shadow-2xs">
             <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-stone-900">
               <Clock aria-hidden="true" className="h-5 w-5 text-[#005141]" />
               {capacityTitle}

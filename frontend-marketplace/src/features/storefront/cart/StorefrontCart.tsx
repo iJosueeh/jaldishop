@@ -42,26 +42,26 @@ export function StorefrontCart() {
     <button ref={triggerRef} type="button" onClick={() => open ? close() : setOpen(true)}
       aria-label={`Carrito, ${count} ${count === 1 ? 'producto' : 'productos'}`}
       aria-expanded={open} aria-controls="storefront-cart" aria-haspopup="dialog"
-      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 text-white transition hover:bg-white/10">
+      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10">
       <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-      {count > 0 && <span aria-hidden="true" className="absolute -right-1.5 -top-1.5 flex min-w-5 h-5 items-center justify-center rounded-full bg-[#feae2c] px-1 text-[10px] font-bold text-stone-900">{count}</span>}
+      {count > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-[#feae2c] px-1 text-[10px] font-bold text-stone-900 shadow-xs">{count}</span>}
     </button>
     {open && <div id="storefront-cart" role="dialog" aria-label="Carrito de la tienda"
-      className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-3xl border border-stone-200 bg-white p-4 text-stone-900 shadow-2xl sm:absolute sm:inset-x-auto sm:top-14 sm:right-0 sm:w-96">
+      className="fixed inset-x-4 top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-[12px] border border-stone-200/90 bg-white p-5 text-stone-900 shadow-2xl sm:absolute sm:inset-x-auto sm:top-14 sm:right-0 sm:w-96">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="font-display font-bold">Tu carrito{count > 0 ? ` en ${storeName}` : ''}</h2>
-        <button ref={closeRef} type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-lg p-2 hover:bg-stone-100"><X className="h-4 w-4" /></button>
+        <button ref={closeRef} type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-full p-2 hover:bg-stone-100 transition-colors"><X className="h-4 w-4" /></button>
       </div>
-      {error && <div role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}<button type="button" onClick={retry} disabled={pending} className="mt-2 block font-semibold underline">Volver a intentar</button></div>}
+      {error && <div role="alert" className="mb-4 rounded-[12px] bg-red-50 p-3 text-sm text-red-700">{error}<button type="button" onClick={retry} disabled={pending} className="mt-2 block font-semibold underline">Volver a intentar</button></div>}
       {loading ? <p role="status" className="py-4 text-sm text-stone-600">Consultando tu carrito...</p> : !authenticated || loginRequired ? <form onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         void login(String(data.get('email')), String(data.get('password')));
       }} className="space-y-3">
         <p className="text-sm text-stone-600">Inicia sesión como cliente para guardar tu carrito y recuperarlo cuando vuelvas.</p>
-        <label className="block text-sm font-semibold">Correo<input required type="email" name="email" autoComplete="username" className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 font-normal" /></label>
-        <label className="block text-sm font-semibold">Contraseña<input required type="password" name="password" autoComplete="current-password" className="mt-1 w-full rounded-xl border border-stone-300 p-2.5 font-normal" /></label>
-        <button disabled={pending} className="w-full rounded-xl bg-[#005141] p-3 font-semibold text-white disabled:opacity-50">{pending ? 'Iniciando sesión...' : 'Ingresar como cliente'}</button>
+        <label className="block text-sm font-semibold">Correo<input required type="email" name="email" autoComplete="username" className="mt-1 w-full rounded-[8px] border border-stone-300 p-2.5 font-normal" /></label>
+        <label className="block text-sm font-semibold">Contraseña<input required type="password" name="password" autoComplete="current-password" className="mt-1 w-full rounded-[8px] border border-stone-300 p-2.5 font-normal" /></label>
+        <button disabled={pending} className="w-full rounded-full bg-[#005141] hover:bg-[#00382d] p-3 font-bold text-white shadow-xs disabled:opacity-50 transition-all active:scale-95">{pending ? 'Iniciando sesión...' : 'Ingresar como cliente'}</button>
       </form> : !store ? <p className="py-4 text-sm text-stone-600">Explora una tienda para consultar su carrito y elegir productos.</p> : <>
       <CartSummarySidebar embedded pending={pending} currency={currency} cart={items} storeName={storeName} subtotal={subtotal}
         onChangeQuantity={changeQuantity} onCheckout={count > 0 ? () => {

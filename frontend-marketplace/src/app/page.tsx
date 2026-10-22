@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf7f2]">
+    <div className="flex flex-col min-h-screen bg-[#02090a] text-white selection:bg-[#36f4a4] selection:text-[#02090a]">
       {/* 1. Hero Section (Intact) */}
       <HeroSection />
 

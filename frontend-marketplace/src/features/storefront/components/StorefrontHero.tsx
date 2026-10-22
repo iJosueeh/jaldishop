@@ -16,11 +16,11 @@ export function StorefrontHero({ store }: StorefrontHeroProps) {
       {/* 1. Lienzo Fotográfico de Portada y Navegación Superior */}
       <StoreBanner bannerUrl={store.bannerUrl} storeName={store.name} />
 
-      {/* 2. Tarjeta Isla de Identidad del Comercio */}
+      {/* 2. Tarjeta Isla de Identidad del Comercio con 12px border radius (DESIGN.md) sobre blanco puro */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl shadow-xl shadow-stone-900/5 border border-stone-200/80 p-5 sm:p-7 md:p-8 -mt-10 sm:-mt-12 md:-mt-14 relative z-20 transition-shadow">
+        <div className="bg-white rounded-[12px] shadow-xl shadow-stone-900/5 border border-stone-200/90 p-5 sm:p-7 md:p-8 -mt-10 sm:-mt-12 md:-mt-14 relative z-20 transition-all">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-5 sm:gap-7">
-            {/* Logo squircle adaptativo */}
+            {/* Logo squircle adaptativo con 12px radius */}
             <StoreLogo
               logoUrl={store.logoUrl}
               storeName={store.name}

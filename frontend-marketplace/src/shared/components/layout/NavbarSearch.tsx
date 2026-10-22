@@ -141,7 +141,7 @@ export function NavbarSearch({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar tiendas o productos..."
-          className="w-full pl-9 pr-8 py-2 bg-white/10 hover:bg-white/15 focus:bg-[#141413] border border-white/10 focus:border-white/25 rounded-2xl text-xs sm:text-sm text-white placeholder-stone-300 backdrop-blur-md outline-none transition-all shadow-xs text-left"
+          className="w-full pl-9 pr-8 py-2 bg-white/10 hover:bg-white/15 focus:bg-white border border-white/20 focus:border-stone-200 rounded-full text-xs sm:text-sm text-white focus:text-stone-900 placeholder-stone-300 focus:placeholder-stone-400 backdrop-blur-md outline-none transition-all shadow-xs text-left"
         />
         {query && (
           <button
@@ -158,7 +158,7 @@ export function NavbarSearch({
         )}
       </form>
 
-      {/* Inline Suggestions Popover */}
+      {/* Inline Suggestions Popover estilo Boutique MYPE */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -166,20 +166,17 @@ export function NavbarSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full left-0 right-0 sm:min-w-[360px] mt-2 bg-[#121211]/98 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/80 border border-white/12 overflow-hidden z-50 text-white"
+            className="absolute top-full left-0 right-0 sm:min-w-[360px] mt-2 bg-white rounded-[12px] shadow-2xl shadow-stone-900/15 border border-stone-200/90 overflow-hidden z-50 text-stone-900"
           >
-            {/* Top Brand Ambient Line */}
-            <div className="h-[2px] w-full bg-gradient-to-r from-[#d9532f] via-[#feae2c] to-[#005141]" />
-
-            <div className="p-2">
+            <div className="p-3">
               {/* Header */}
-              <div className="px-3 py-1.5 flex items-center justify-between text-[11px] font-semibold text-stone-400 border-b border-white/5 mb-1 pb-1.5">
-                <span className="flex items-center gap-1.5 text-stone-300">
-                  <Sparkles className="w-3.5 h-3.5 text-[#feae2c]" />
-                  {query ? "Resultados encontrados" : "Tiendas recomendadas"}
+              <div className="px-2 py-1 flex items-center justify-between text-[11px] font-semibold text-stone-500 border-b border-stone-100 mb-2 pb-2">
+                <span className="flex items-center gap-1.5 text-stone-700 font-bold">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
+                  {query ? "Resultados de búsqueda" : "Comercios y Emprendimientos MYPE"}
                 </span>
-                <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-stone-300">
-                  {filteredStores.length} sugerencias
+                <span className="text-[10px] bg-stone-100 px-2 py-0.5 rounded-full text-stone-600 font-bold">
+                  {filteredStores.length} disponibles
                 </span>
               </div>
 
@@ -197,60 +194,62 @@ export function NavbarSearch({
                         type="button"
                         onClick={() => handleSelectStore(store.slug)}
                         onMouseEnter={() => setSelectedIndex(idx)}
-                        className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer border ${
+                        className={`w-full flex items-center justify-between p-2.5 rounded-[10px] transition-all text-left cursor-pointer border ${
                           isHighlighted
-                            ? "bg-white/[0.08] border-white/15 text-white"
-                            : "bg-transparent border-transparent text-stone-300 hover:bg-white/[0.05]"
+                            ? "bg-stone-50 border-stone-200 text-stone-900 shadow-2xs"
+                            : "bg-transparent border-transparent text-stone-700 hover:bg-stone-50/80"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            className={`w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 transition-colors ${
                               isJade
-                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                                ? "bg-emerald-50 text-[#005141] border border-emerald-200/80"
                                 : isTerracotta
-                                  ? "bg-[#d9532f]/15 text-[#feae2c] border border-[#d9532f]/25"
-                                  : "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                                  ? "bg-orange-50 text-[#ea580c] border border-orange-200/80"
+                                  : "bg-amber-50 text-amber-800 border border-amber-200/80"
                             }`}
                           >
                             <Store className="w-4 h-4" />
                           </div>
                           <div className="min-w-0 text-left">
-                            <div className="text-xs font-bold text-white truncate group-hover:text-[#feae2c]">
+                            <div className="text-xs font-bold text-stone-900 truncate">
                               {store.name}
                             </div>
-                            <div className="text-[11px] text-stone-400 truncate">
-                              {store.category}
+                            <div className="text-[11px] text-stone-500 truncate">
+                              {store.category || store.tagline}
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <div
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                              isJade
-                                ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                                : isTerracotta
-                                  ? "bg-[#d9532f]/15 text-orange-300 border border-[#d9532f]/30"
-                                  : "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
+                          {store.badge && (
+                            <div
+                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 isJade
-                                  ? "bg-emerald-400 animate-pulse"
+                                  ? "bg-emerald-50 text-[#005141] border border-emerald-200/80"
                                   : isTerracotta
-                                    ? "bg-[#d9532f]"
-                                    : "bg-amber-400"
+                                    ? "bg-orange-50 text-[#ea580c] border border-orange-200/80"
+                                    : "bg-amber-50 text-amber-800 border border-amber-200/80"
                               }`}
-                            />
-                            {store.badge}
-                          </div>
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isJade
+                                    ? "bg-[#005141]"
+                                    : isTerracotta
+                                      ? "bg-[#ea580c]"
+                                      : "bg-amber-500"
+                                }`}
+                              />
+                              {store.badge}
+                            </div>
+                          )}
                           <ArrowRight
                             className={`w-3.5 h-3.5 transition-all ${
                               isHighlighted
-                                ? "text-[#feae2c] translate-x-0.5"
-                                : "text-stone-600"
+                                ? "text-[#005141] translate-x-0.5"
+                                : "text-stone-400"
                             }`}
                           />
                         </div>
@@ -258,14 +257,14 @@ export function NavbarSearch({
                     );
                   })
                 ) : (
-                  <div className="p-4 text-center space-y-2">
-                    <p className="text-xs text-stone-400">
+                  <div className="p-4 text-center space-y-3">
+                    <p className="text-xs text-stone-600">
                       {query
-                        ? `No encontramos tiendas con "${query}"`
-                        : 'Aún no hay tiendas activas disponibles'}
+                        ? `No encontramos comercios con "${query}"`
+                        : 'Explora por los rubros más solicitados:'}
                     </p>
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-                      {["Panadería", "Tortas", "Dark Kitchen"].map((chip) => (
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
+                      {["Regalos & Detalles", "Panadería & Pastelería", "Florerías", "Talleres"].map((chip) => (
                         <button
                           key={chip}
                           type="button"
@@ -273,7 +272,7 @@ export function NavbarSearch({
                             setQuery(chip);
                             inputRef.current?.focus();
                           }}
-                          className="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 border border-white/10 transition-colors cursor-pointer"
+                          className="text-[11px] px-3 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium border border-stone-200/80 transition-colors cursor-pointer"
                         >
                           {chip}
                         </button>
@@ -284,20 +283,20 @@ export function NavbarSearch({
               </div>
 
               {/* Bottom Quick Action */}
-              <div className="mt-1 pt-2 border-t border-white/5 px-2 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-stone-400">
-                  ¿Buscas una categoría específica?
+              <div className="mt-2 pt-2 border-t border-stone-100 px-1 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-stone-500">
+                  ¿Buscas un comercio local?
                 </span>
                 <button
                   type="button"
                   onClick={() => {
                     setIsOpen(false);
                     onNavigate?.();
-                    router.push("/tienda/panaderia-don-pepe");
+                    router.push("/#tiendas-destacadas");
                   }}
-                  className="text-[11px] font-semibold text-[#feae2c] hover:text-[#ffd276] flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-[11px] font-bold text-[#005141] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
                 >
-                  <span>Explorar todas</span>
+                  <span>Ver comercios destacados</span>
                   <ArrowRight className="w-3 h-3" />
                 </button>
               </div>

@@ -31,14 +31,14 @@ export function CartSummarySidebar({
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <aside className={embedded ? 'space-y-4' : 'rounded-3xl border border-stone-200/90 bg-white p-5 sm:p-6 shadow-sm space-y-4'}>
+    <aside className={embedded ? 'space-y-4' : 'rounded-[12px] border border-stone-200/90 bg-white p-5 sm:p-6 shadow-sm space-y-4'}>
       <div className="flex items-center justify-between pb-3 border-b border-stone-100">
         <h3 className="flex items-center gap-2 font-display text-base font-bold text-stone-900">
           <ShoppingBag className="h-5 w-5 text-[#005141]" />
           <span>Tu selección</span>
         </h3>
         {totalItems > 0 && (
-          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#005141] font-bold text-xs">
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#005141] font-bold text-xs border border-emerald-200/60">
             {totalItems} {totalItems === 1 ? 'ítem' : 'ítems'}
           </span>
         )}
@@ -71,25 +71,25 @@ export function CartSummarySidebar({
                 <span className="text-xs text-stone-500">
                   {formatCurrency(product.price, product.priceCurrency || currency)} c/u
                 </span>
-                <div className="flex items-center gap-2 bg-stone-50 rounded-xl p-1 border border-stone-200/60">
+                <div className="flex items-center gap-1.5 bg-stone-100/90 rounded-full px-2 py-0.5 border border-stone-200/80">
                   <button
                     aria-label={`Quitar una unidad de ${product.name}`}
                     disabled={pending}
                     onClick={() => onChangeQuantity(product, -1)}
-                    className="p-1 rounded-lg hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer"
+                    className="p-1 rounded-full hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer"
                   >
-                    <Minus className="h-3.5 w-3.5" />
+                    <Minus className="h-3 w-3" />
                   </button>
-                  <span className="text-xs font-bold w-4 text-center text-stone-800">
+                  <span className="text-xs font-bold w-4 text-center text-stone-900">
                     {quantity}
                   </span>
                   <button
                     aria-label={`Añadir una unidad de ${product.name}`}
                     disabled={pending || available === false}
                     onClick={() => onChangeQuantity(product, 1)}
-                    className="p-1 rounded-lg hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer"
+                    className="p-1 rounded-full hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer"
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-3 w-3" />
                   </button>
                 </div>
               </div>
@@ -114,7 +114,7 @@ export function CartSummarySidebar({
           <Button
             onClick={onCheckout}
             disabled={!onCheckout || pending || cart.some((item) => item.available === false)}
-            className="w-full rounded-2xl bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-md shadow-[#005141]/20 py-3"
+            className="w-full rounded-full bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-xs py-3 active:scale-95 transition-all"
             leftIcon={<MessageCircle className="h-4 w-4 text-[#feae2c]" />}
           >
             {onCheckout ? 'Ver opciones de entrega' : 'Compra en línea no disponible'}
