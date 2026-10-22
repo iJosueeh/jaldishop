@@ -107,10 +107,10 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
   }, [lat, lng, hasCoords, store.name, address]);
 
   return (
-    <section id="ubicacion" aria-labelledby="map-heading" className="scroll-mt-28 rounded-3xl border border-stone-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-4">
+    <section id="ubicacion" aria-labelledby="map-heading" className="scroll-mt-28 rounded-[12px] border border-stone-200/90 bg-white p-5 sm:p-7 shadow-2xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-orange-100/70 text-[#ea580c] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-[8px] bg-orange-100/70 text-[#ea580c] flex items-center justify-center">
             <MapPin className="w-4 h-4" />
           </div>
           <div>
@@ -127,7 +127,7 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
         <div className="flex items-center gap-2">
           {address && <button
             onClick={copyAddress}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors cursor-pointer"
             title="Copiar dirección completa"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
@@ -138,7 +138,7 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#005141] hover:bg-[#00382d] text-white text-xs font-semibold transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#005141] hover:bg-[#00382d] text-white text-xs font-semibold transition-all shadow-2xs active:scale-95"
             title="Abrir en Google Maps"
           >
             <Navigation className="w-3.5 h-3.5 text-[#feae2c]" />
@@ -150,7 +150,7 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
             href={wazeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors"
             title="Abrir en Waze"
           >
             <span>Waze</span>
@@ -159,7 +159,7 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
       </div>
 
       {/* Contenedor del Mapa OpenStreetMap */}
-      {hasCoords ? <div className="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden border border-stone-200/80 bg-stone-100 shadow-inner">
+      {hasCoords ? <div className="relative w-full h-56 sm:h-64 rounded-[12px] overflow-hidden border border-stone-200/80 bg-stone-100 shadow-inner">
         <div ref={mapContainerRef} className="w-full h-full z-10" />
 
         {!mapLoaded && (
@@ -171,7 +171,7 @@ export function StoreLocationMap({ store }: StoreLocationMapProps) {
       </div> : <p className="text-sm text-stone-500">La tienda aún no ha publicado su ubicación en el mapa.</p>}
 
       {/* Tarjeta de Resumen de Dirección */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#faf7f2] border border-stone-200/70 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-[12px] bg-stone-50/80 border border-stone-200/80 text-xs">
         <div className="space-y-0.5">
           <p className="font-bold text-stone-800 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />

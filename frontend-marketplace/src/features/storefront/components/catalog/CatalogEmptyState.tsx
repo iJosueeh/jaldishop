@@ -13,7 +13,7 @@ interface CatalogEmptyStateProps {
 export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStateProps) {
   if (type === 'no-results') {
     return (
-      <div className="col-span-full rounded-3xl bg-white p-8 sm:p-12 text-center border border-stone-200/80 shadow-xs">
+      <div className="col-span-full rounded-[12px] bg-white p-8 sm:p-12 text-center border border-stone-200/90 shadow-2xs">
         <SearchX className="mx-auto mb-4 h-10 w-10 text-stone-400" />
         <h3 className="font-display text-lg font-bold text-stone-900">
           No hay productos que coincidan con tu búsqueda
@@ -24,7 +24,7 @@ export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStat
         {onReset && (
           <Button
             variant="outline"
-            className="mt-5 rounded-xl border-stone-300 hover:bg-stone-50 text-xs font-bold"
+            className="mt-5 rounded-full border-stone-300 hover:bg-stone-50 text-xs font-bold px-6 py-2.5 transition-all active:scale-95"
             onClick={onReset}
           >
             Ver todos los productos
@@ -36,7 +36,7 @@ export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStat
 
   if (type === 'error') {
     return (
-      <div className="col-span-full rounded-3xl bg-white p-8 sm:p-12 text-center border border-red-200 shadow-xs">
+      <div className="col-span-full rounded-[12px] bg-white p-8 sm:p-12 text-center border border-red-200/90 shadow-2xs">
         <PackageOpen className="mx-auto mb-4 h-10 w-10 text-red-500" />
         <h3 className="font-display text-lg font-bold text-stone-900">
           No pudimos cargar los productos
@@ -45,7 +45,7 @@ export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStat
           No pudimos consultar el catálogo de {storeName}. Recarga la página para volver a intentarlo.
         </p>
         {onReset && (
-          <Button className="mt-5 rounded-xl bg-[#005141] text-xs font-bold" onClick={onReset}>
+          <Button className="mt-5 rounded-full bg-[#005141] hover:bg-[#00382d] text-xs font-bold px-6 py-2.5 text-white shadow-xs transition-all active:scale-95" onClick={onReset}>
             Volver a intentar
           </Button>
         )}
@@ -55,7 +55,7 @@ export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStat
 
   if (type === 'unavailable') {
     return (
-      <div className="col-span-full rounded-3xl bg-white p-8 sm:p-12 text-center border border-stone-200/80 shadow-xs">
+      <div className="col-span-full rounded-[12px] bg-white p-8 sm:p-12 text-center border border-stone-200/90 shadow-2xs">
         <PackageOpen className="mx-auto mb-4 h-10 w-10 text-[#005141]" />
         <h3 className="font-display text-xl font-bold text-stone-900">
           El catálogo todavía no está disponible
@@ -68,7 +68,7 @@ export function CatalogEmptyState({ type, storeName, onReset }: CatalogEmptyStat
   }
 
   return (
-    <div className="col-span-full rounded-3xl bg-white p-8 sm:p-12 text-center border border-stone-200/80 shadow-xs">
+    <div className="col-span-full rounded-[12px] bg-white p-8 sm:p-12 text-center border border-stone-200/90 shadow-2xs">
       <PackageOpen className="mx-auto mb-4 h-10 w-10 text-[#005141]" />
       <h3 className="font-display text-xl font-bold text-stone-900">
         Esta tienda aún no tiene productos publicados

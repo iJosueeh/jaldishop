@@ -42,7 +42,7 @@ export function CatalogFilterBar({
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Buscar en el catálogo..."
-              className="w-full rounded-2xl border border-stone-200 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] shadow-2xs transition-all"
+              className="w-full rounded-full border border-stone-200/90 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141]/20 focus:border-[#005141] shadow-2xs transition-all"
             />
             {query && (
               <button

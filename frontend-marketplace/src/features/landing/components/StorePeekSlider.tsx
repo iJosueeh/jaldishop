@@ -318,8 +318,8 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
 
   return (
     <div className="w-[84vw] sm:w-[350px] lg:w-[380px] shrink-0 snap-start flex flex-col group">
-      <Link href={`/tienda/${store.slug}`} aria-label={`${isDemo ? 'Ver demostración' : 'Ver tienda'}: ${store.name}`} className="block h-full rounded-3xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#005141]">
-        <div className="h-full flex flex-col justify-between bg-white rounded-3xl border border-stone-200/90 shadow-lg shadow-stone-900/5 group-hover:shadow-2xl group-hover:shadow-stone-900/15 group-hover:border-[#005141]/60 transition-all duration-500 overflow-hidden relative">
+      <Link href={`/tienda/${store.slug}`} aria-label={`${isDemo ? 'Ver demostración' : 'Ver tienda'}: ${store.name}`} className="block h-full rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#072720]">
+        <div className="h-full flex flex-col justify-between bg-white rounded-[12px] border border-stone-200/90 shadow-md group-hover:shadow-xl group-hover:border-stone-400 transition-all duration-300 overflow-hidden relative">
           {/* Top Photographic Cover Banner with Shine & Hover Zoom */}
           <div className="aspect-[16/9] w-full relative overflow-hidden bg-stone-900">
             <Image
@@ -407,7 +407,7 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
             </div>
 
             {/* Hover Call-to-action bar */}
-            <div className="mt-4 rounded-xl bg-[#005141] px-4 py-3 flex items-center justify-between text-sm font-bold text-white group-hover:bg-[#00382d] transition-colors">
+            <div className="mt-4 rounded-full bg-[#02090a] px-5 py-2.5 flex items-center justify-between text-sm font-medium text-white group-hover:bg-[#072720] transition-colors shadow-xs">
               <span>{isDemo ? 'Ver demostración' : 'Ver tienda'}</span>
               <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -517,7 +517,7 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
               onClick={() => scrollByAmount(-380)}
               disabled={!canScrollLeft}
               aria-label="Ver comercios anteriores"
-              className="w-9 h-9 rounded-xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-700 hover:text-[#005141] hover:border-[#005141] hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
+              className="w-9 h-9 rounded-full bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-700 hover:text-[#02090a] hover:border-stone-400 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
             >
               <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             </button>
@@ -527,7 +527,7 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
               onClick={() => scrollByAmount(380)}
               disabled={!canScrollRight}
               aria-label="Ver siguientes comercios"
-              className="w-9 h-9 rounded-xl bg-[#005141] text-white shadow-md shadow-[#005141]/20 flex items-center justify-center hover:bg-[#00382d] disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
+              className="w-9 h-9 rounded-full bg-[#02090a] text-white shadow-sm flex items-center justify-center hover:bg-[#072720] disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
             >
               <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { MessageCircle } from 'lucide-react';
 import { storeService } from '@/features/storefront/services/storeService';
 import { StorefrontHero } from '@/features/storefront/components/StorefrontHero';
 import { CatalogContainer } from '@/features/storefront/components/CatalogContainer';
@@ -69,14 +70,14 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
 
   if (loadFailed || !store) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#faf7f2]">
+      <div className="flex flex-col min-h-screen bg-[#fcfbfa]">
         <main className="flex-1 flex items-center justify-center py-20 px-6">
-          <div className="max-w-md w-full text-center space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
-            <div className="w-16 h-16 rounded-3xl bg-amber-50 text-[#ea580c] flex items-center justify-center mx-auto">
+          <div className="max-w-md w-full text-center space-y-6 bg-white p-8 sm:p-10 rounded-[12px] border border-stone-200/90 shadow-xl">
+            <div className="w-16 h-16 rounded-full bg-amber-50 border border-amber-200 text-[#ea580c] flex items-center justify-center mx-auto">
               <span className="w-3 h-3 rounded-full bg-[#ea580c] animate-ping" />
             </div>
             <div className="space-y-2">
-              <h1 className="font-display text-2xl font-black text-stone-900">
+              <h1 className="font-display text-2xl font-bold text-stone-900">
                 No pudimos conectar con la tienda
               </h1>
               <p className="text-sm text-stone-600 leading-relaxed">
@@ -86,7 +87,7 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
             <div className="pt-2 flex flex-col gap-3">
               <a
                 href={`/tienda/${slug}`}
-                className="w-full inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-md transition-all"
+                className="w-full inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-md transition-all"
               >
                 Reintentar conexión
               </a>
@@ -109,7 +110,7 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const whatsappUrl = contactNumber?.replace(/\D/g, '') ? `https://wa.me/${contactNumber.replace(/\D/g, '')}` : null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#faf7f2]">
+    <div className="flex flex-col min-h-screen bg-[#fcfbfa]">
       {/* Store Header / Hero Modular */}
       <StorefrontHero store={store} />
 
@@ -125,22 +126,34 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
 
         {/* Mapa Interactivo del Local con Coordenadas OpenStreetMap Leaflet */}
         <StoreLocationMap store={store} />
-        <section aria-labelledby="contact-heading" className="flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+
+        {/* Sección de Consulta Directa con 12px radius & Pill Button */}
+        <section aria-labelledby="contact-heading" className="flex flex-col gap-4 rounded-[12px] border border-stone-200/90 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7 shadow-xs">
           <div>
             <h2 id="contact-heading" className="font-display text-lg font-bold text-stone-900">¿Tienes una consulta para {store.name}?</h2>
             <p className="mt-1 text-sm text-stone-600">{whatsappUrl ? 'Consulta directamente con la tienda antes de elegir.' : 'La tienda aún no ha publicado un número de contacto.'}</p>
           </div>
-          {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 rounded-2xl bg-emerald-50 px-5 py-3 text-sm font-semibold text-[#005141] transition hover:bg-emerald-100">Contactar por WhatsApp</a>}
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-6 py-3 text-sm font-bold text-[#005141] transition-all hover:-translate-y-0.5 active:scale-95 shadow-2xs"
+            >
+              <MessageCircle className="w-4 h-4 text-[#005141]" />
+              <span>Contactar por WhatsApp</span>
+            </a>
+          )}
         </section>
       </Container>
 
-      {/* Footer */}
-      <footer className="border-t border-stone-200 py-6 text-center text-sm text-stone-500">
-        <Link href="/" className="font-semibold text-[#005141]">JaldiShop</Link>
-        <span className="mx-2">·</span>
-        <Link href="/terminos" className="hover:underline">Términos</Link>
-        <span className="mx-2">·</span>
-        <Link href="/privacidad" className="hover:underline">Privacidad</Link>
+      {/* Footer sobrio conforme a DESIGN.md */}
+      <footer className="border-t border-stone-200/90 py-6 text-center text-xs text-stone-500 bg-white">
+        <Link href="/" className="font-bold text-[#005141] hover:underline transition-colors">JaldiShop</Link>
+        <span className="mx-2 text-stone-300">·</span>
+        <Link href="/terminos" className="hover:text-stone-800 transition-colors">Términos</Link>
+        <span className="mx-2 text-stone-300">·</span>
+        <Link href="/privacidad" className="hover:text-stone-800 transition-colors">Privacidad</Link>
       </footer>
     </div>
   );

@@ -8,16 +8,32 @@
 
 @theme {
   /* ==========================================================================
-     JALDISHOPE DESIGN SYSTEM v2.1 (Warm Modern Retail - Shopify / Warm Craft)
-     Paleta unificada con frontend-merchant (Angular)
+     JALDISHOPE DESIGN SYSTEM — Midnight Greenhouse & Modern Retail
+     Conforme a las directrices de DESIGN.md (Shopify Dark Theme & Mint Accent)
      ========================================================================== */
 
   /* Tipografía */
-  --font-sans: var(--font-sans), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-display), "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-sans), "Inter", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-display), "Neue Haas Grotesk", "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
+  /* DESIGN.md Tokens — Midnight Greenhouse Surfaces & Accents */
+  --color-midnight-forest: #02090a;
+  --color-deep-lichen: #061a1c;
+  --color-shaded-fern: #072720;
+  --color-spruce-border: #1e2c31;
+  --color-abyss-indigo: #000a1e;
+  --color-pure-white: #ffffff;
+  --color-mist-gray: #a1a1aa;
+  --color-sage-gray: #99b3ad;
+  --color-faded-steel: #9dabad;
+  --color-soft-pearl: #9797a2;
+  --color-carbon-black: #000000;
+  --color-slate: #71717a;
+  --color-graphite: #333333;
+  --color-shopify-mint: #36f4a4;
+  --color-mossy-edge: #133b32;
 
-  /* Superficies Cálidas y Luminosas (Warm Modern) */
+  /* Superficies Cálidas y Luminosas (Conservadas para compatibilidad y sección clara) */
   --color-warm-bg: #faf7f2;
   --color-warm-surface: #faf7f2;
   --color-warm-card: #ffffff;
@@ -25,12 +41,12 @@
   --color-warm-subtle: #f0eae0;
   --color-warm-border: #e7e0d6;
 
-  /* Textos y Contrastes Cálidos (Stone) */
+  /* Textos y Contrastes Cálidos */
   --color-warm-text: #1c1917;
   --color-warm-text-muted: #57534e;
   --color-warm-text-subtle: #78716c;
 
-  /* Identidad Primaria: Verde Jade */
+  /* Identidad Primaria (Jade) & Acentos Cálidos JaldiShop */
   --color-jade-900: #005141;
   --color-jade-800: #003d31;
   --color-jade-700: #166a57;
@@ -39,7 +55,6 @@
   --color-jade-100: #ccfbf1;
   --color-jade-50: #f0fdfa;
 
-  /* Identidad Secundaria: Naranja Terracota & Ámbar Miel */
   --color-terracotta: #ea580c;
   --color-terracotta-hover: #c2410c;
   --color-amber-honey: #feae2c;
@@ -48,8 +63,8 @@
 }
 
 :root {
-  --background: #faf7f2;
-  --foreground: #1c1917;
+  --background: #02090a;
+  --foreground: #ffffff;
 }
 
 html {
@@ -96,6 +111,11 @@ body {
 .bg-grid-warm {
   background-size: 32px 32px;
   background-image: radial-gradient(rgba(215, 207, 196, 0.4) 1px, transparent 1px);
+}
+
+.bg-grid-dark {
+  background-size: 32px 32px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
 }
 
 /* Continuous Marquee with Hover Pause */
