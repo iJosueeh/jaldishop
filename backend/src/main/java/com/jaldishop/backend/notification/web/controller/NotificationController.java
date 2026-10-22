@@ -4,11 +4,14 @@ import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.notification.application.*;
 import com.jaldishop.backend.notification.domain.Notification;
 import com.jaldishop.backend.notification.web.dto.NotificationResponse;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/notifications")
+@Validated
 public class NotificationController {
 
     private final ListUserNotificationsService listUserNotificationsService;
@@ -35,8 +39,11 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> listNotifications(
             @AuthenticationPrincipal JwtPrincipal principal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "La página no puede ser negativa") int page,
+            @RequestParam(defaultValue = "20")
+            @Min(value = 1, message = "El tamaño de página debe ser al menos 1")
+            @Max(value = 100, message = "El tamaño de página no puede exceder 100") int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<Notification> notifications = listUserNotificationsService.execute(principal.userId(), pageable);
         List<NotificationResponse> response = notifications.stream()

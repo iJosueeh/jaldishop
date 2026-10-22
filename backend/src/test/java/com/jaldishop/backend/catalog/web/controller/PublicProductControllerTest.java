@@ -7,6 +7,7 @@ import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.GetStoreBySlugService;
 import com.jaldishop.backend.store.domain.Store;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +56,7 @@ class PublicProductControllerTest {
                 getStoreBySlugService
         );
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -119,5 +121,26 @@ class PublicProductControllerTest {
         mockMvc.perform(get("/api/v1/stores/slug/{slug}/products", "panaderia-pepe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Pastel"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/stores/slug/{slug}/products - 400 VALIDATION_ERROR con slug demasiado largo y recuperación posterior")
+    void shouldRejectTooLongSlug() throws Exception {
+        mockMvc.perform(get("/api/v1/stores/slug/{slug}/products", "a".repeat(181)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(getStoreBySlugService, getProductsService, variantRepository);
+
+        UUID storeId = UUID.randomUUID();
+        Store mockStore = org.mockito.Mockito.mock(Store.class);
+        when(mockStore.getId()).thenReturn(storeId);
+        when(getStoreBySlugService.execute("panaderia-pepe")).thenReturn(mockStore);
+        when(getProductsService.execute(any(GetProductsQuery.class))).thenReturn(List.of());
+        when(variantRepository.findByStoreId(storeId)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/stores/slug/{slug}/products", "panaderia-pepe"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }
