@@ -172,12 +172,12 @@ export function OrderTrackerModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-[#faf7f2] rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh] border border-stone-200"
+            className="relative w-full max-w-lg bg-[#faf7f2] rounded-[12px] shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh] border border-stone-200/90"
           >
             {/* Top Bar Header */}
             <div className="p-4 sm:p-5 bg-stone-900 text-white flex items-center justify-between shadow-md">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#005141] text-emerald-300 flex items-center justify-center font-mono font-black text-sm shadow-sm ring-1 ring-white/10">
+                <div className="w-10 h-10 rounded-[8px] bg-[#005141] text-emerald-300 flex items-center justify-center font-mono font-black text-sm shadow-sm ring-1 ring-white/10">
                   {storeName.substring(0, 2).toUpperCase()}
                 </div>
                 <div>
@@ -485,7 +485,7 @@ export function OrderTrackerModal({
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-[#1c1917] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-5 py-3 rounded-full bg-stone-100 hover:bg-stone-200 text-[#1c1917] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-[#005141]" /> : <Share2 className="w-3.5 h-3.5" />}
                 <span>{copiedLink ? 'Enlace copiado' : 'Compartir'}</span>
@@ -496,7 +496,7 @@ export function OrderTrackerModal({
                 variant="primary"
                 size="md"
                 onClick={handleOpenSupport}
-                className="w-full sm:flex-1 py-3 rounded-2xl font-black text-xs sm:text-sm bg-[#005141] hover:bg-[#00382d] text-white border-0 shadow-lg shadow-[#005141]/20 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:flex-1 py-3 rounded-full font-black text-xs sm:text-sm bg-[#005141] hover:bg-[#00382d] text-white border-0 shadow-md shadow-[#005141]/20 cursor-pointer flex items-center justify-center gap-2 active:scale-95 transition-all"
               >
                 <span>Consultar con el Local</span>
                 <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-80" />

@@ -43,41 +43,41 @@ export function CapacitySlotPicker({
   };
 
   const selectedSlot = slots.find((s) => s.id === activeSlotId);
-  if (slots.length === 0) return <section className="rounded-3xl border border-stone-200 bg-white p-6"><h3 className="font-semibold">No hay horarios disponibles</h3><p className="mt-2 text-sm text-stone-600">Esta tienda no tiene horarios publicados para seleccionar. No se ha reservado ningún cupo.</p></section>;
+  if (slots.length === 0) return <section className="rounded-[12px] border border-stone-200/90 bg-white p-6 shadow-2xs"><h3 className="font-semibold text-stone-900">No hay horarios disponibles</h3><p className="mt-2 text-sm text-stone-600">Esta tienda no tiene horarios publicados para seleccionar. No se ha reservado ningún cupo.</p></section>;
 
   return (
-    <div className="bg-white rounded-3xl p-5 sm:p-7 border border-stone-200/90 shadow-xl shadow-stone-900/5 space-y-5">
+    <div className="bg-white rounded-[12px] p-5 sm:p-7 border border-stone-200/90 shadow-sm space-y-5">
       {/* Top Header: Title & Guarantee Badge */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#005141] animate-pulse" />
-            <h3 className="text-base sm:text-lg font-black text-[#1c1917] tracking-tight flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-2">
               Horario de Entrega / Despacho
             </h3>
           </div>
-          <p className="text-xs text-[#57534e] mt-0.5">
+          <p className="text-xs text-stone-600 mt-0.5">
             Selecciona la franja horaria para asegurar tu turno de preparación sin retrasos.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="jade" size="sm" className="font-bold flex items-center gap-1 shadow-2xs">
+          <Badge variant="jade" size="sm" className="font-bold flex items-center gap-1 shadow-2xs rounded-full px-3 py-1">
             <ShieldCheck className="w-3.5 h-3.5 text-[#005141]" />
             Elige tu horario
           </Badge>
         </div>
       </div>
 
-      {/* Fulfillment Toggle (Delivery vs Pickup) */}
-      <div className="flex items-center gap-2 p-1.5 bg-[#faf7f2] rounded-2xl border border-stone-200/80 max-w-sm">
+      {/* Fulfillment Toggle (Delivery vs Pickup) estilo Shopify Pills */}
+      <div className="flex items-center gap-1 p-1 bg-stone-100/80 rounded-full border border-stone-200/80 max-w-sm">
         <button
           type="button"
           onClick={() => onFulfillmentTypeChange?.('DELIVERY')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-3.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             fulfillmentType === 'DELIVERY'
-              ? 'bg-[#005141] text-white shadow-sm'
-              : 'text-[#57534e] hover:text-[#1c1917] hover:bg-white/60'
+              ? 'bg-[#005141] text-white shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
           }`}
         >
           <Bike className="w-3.5 h-3.5" />
@@ -87,10 +87,10 @@ export function CapacitySlotPicker({
         <button
           type="button"
           onClick={() => onFulfillmentTypeChange?.('PICKUP')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-3.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             fulfillmentType === 'PICKUP'
-              ? 'bg-[#005141] text-white shadow-sm'
-              : 'text-[#57534e] hover:text-[#1c1917] hover:bg-white/60'
+              ? 'bg-[#005141] text-white shadow-xs'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
           }`}
         >
           <Store className="w-3.5 h-3.5" />
@@ -100,11 +100,11 @@ export function CapacitySlotPicker({
 
       {/* Horizontal Visual Timeline of Slots */}
       <div>
-        <div className="flex items-center justify-between text-xs text-[#57534e] font-bold mb-3">
+        <div className="flex items-center justify-between text-xs text-stone-600 font-bold mb-3">
           <span className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#ea580c]" /> Franjas de hoy (capacidad en tiempo real)
           </span>
-          <span className="text-[11px] text-[#78716c] font-medium hidden sm:inline">
+          <span className="text-[11px] text-stone-500 font-medium hidden sm:inline">
             Seleccionar no reserva un cupo
           </span>
         </div>
@@ -123,12 +123,12 @@ export function CapacitySlotPicker({
                 type="button"
                 disabled={isSoldOut}
                 onClick={() => handleSelect(slot)}
-                className={`relative p-3.5 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[110px] ${
+                className={`relative p-3.5 rounded-[12px] text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[110px] ${
                   isSoldOut
-                    ? 'bg-stone-50 border-stone-200/60 opacity-50 cursor-not-allowed'
+                    ? 'bg-stone-50/70 border-stone-200/60 opacity-50 cursor-not-allowed'
                     : isSelected
-                    ? 'bg-[#f0fdfa] border-[#005141] ring-2 ring-[#005141]/20 shadow-md scale-[1.02]'
-                    : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50/70 shadow-xs'
+                    ? 'bg-emerald-50/60 border-[#005141] ring-2 ring-[#005141]/20 shadow-xs scale-[1.01]'
+                    : 'bg-white border-stone-200/90 hover:border-stone-300 hover:bg-stone-50/60 shadow-2xs'
                 }`}
               >
                 {/* Active Checkmark Pill */}
@@ -139,7 +139,7 @@ export function CapacitySlotPicker({
                 )}
 
                 <div className="space-y-1">
-                  <div className="text-xs font-black text-[#1c1917] font-mono">
+                  <div className="text-xs font-bold text-stone-900 font-mono">
                     {slot.timeRange}
                   </div>
 
@@ -174,7 +174,7 @@ export function CapacitySlotPicker({
                       style={{ width: `${occupancyPct}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[9px] font-bold text-[#78716c]">
+                  <div className="flex items-center justify-between text-[9px] font-bold text-stone-500">
                     <span>{occupancyPct}% lleno</span>
                     <span>~{slot.estimatedDeliveryMinutes}m</span>
                   </div>
@@ -190,15 +190,15 @@ export function CapacitySlotPicker({
         <motion.div
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-[#faf7f2] rounded-2xl border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+          className="p-3 bg-stone-50/80 rounded-[12px] border border-stone-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
         >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#005141]" />
-            <span className="text-[#1c1917] font-bold">
+            <span className="text-stone-900 font-bold">
               Franja seleccionada: <strong className="font-mono text-[#005141]">{selectedSlot.timeRange}</strong>
             </span>
-            <span className="text-[#78716c] hidden sm:inline">•</span>
-            <span className="text-[#57534e]">
+            <span className="text-stone-300 hidden sm:inline">•</span>
+            <span className="text-stone-600">
               Modalidad: <strong>{fulfillmentType === 'DELIVERY' ? 'Envío a Domicilio' : 'Retiro en Tienda'}</strong>
             </span>
           </div>

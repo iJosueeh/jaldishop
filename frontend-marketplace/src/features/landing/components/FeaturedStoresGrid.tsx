@@ -21,7 +21,7 @@ const CURATED_DEFAULT_STORES: PublicStore[] = [
     description: 'Fermentación natural de 24 horas y horneado artesanal al alba en Miraflores.',
     bannerUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
     iconEmoji: '🥐',
-    logoBg: 'bg-[#005141]',
+    logoBg: 'bg-[#072720]',
     rating: 4.9,
     reviewsCount: 148,
     preparationTimeMinutes: 20,
@@ -81,7 +81,7 @@ const CURATED_DEFAULT_STORES: PublicStore[] = [
     description: 'Focaccias crujientes con romero fresco, aceite de oliva virgen extra y mortadela.',
     bannerUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop',
     iconEmoji: '🍕',
-    logoBg: 'bg-[#005141]',
+    logoBg: 'bg-[#072720]',
     rating: 4.9,
     reviewsCount: 82,
     preparationTimeMinutes: 25,
@@ -116,28 +116,23 @@ const CURATED_DEFAULT_STORES: PublicStore[] = [
 
 export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridProps) {
   const fetchedStores = initialStores ?? (await storeService.getFeaturedStores());
-  // Si la API devuelve comercios, los mostramos; si viene vacío (ej. sin backend levantado), usamos los comercios curados con fallbacks
   const isDemo = fetchedStores.length === 0;
   const storesToDisplay = isDemo ? CURATED_DEFAULT_STORES : fetchedStores;
 
   return (
-    <section id="tiendas-destacadas" className="py-20 sm:py-28 bg-[#faf7f2] relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
-      {/* Background soft ambient accents */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-[#feae2c]/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#005141]/5 rounded-full blur-3xl pointer-events-none" />
-
+    <section id="tiendas-destacadas" className="py-20 sm:py-28 bg-[#fbfcfb] relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       <Container size="lg">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-12 gap-4">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-stone-200 shadow-xs text-xs font-bold text-[#005141] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-100 border border-stone-200 shadow-xs text-xs font-semibold text-[#072720] uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               {isDemo ? 'Tiendas de demostración' : 'Explora negocios locales'}
             </div>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1c1917]">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[#1c1917]">
               {isDemo ? 'Así puede verse tu tienda' : 'Comercios destacados en JaldiShop'}
             </h2>
-            <p className="text-sm sm:text-base text-[#57534e] max-w-xl">
+            <p className="text-sm sm:text-base text-stone-600 max-w-xl">
               {isDemo
                 ? 'Conoce ejemplos de catálogos para negocios bajo pedido. Los comercios, productos y datos que ves aquí son ilustrativos.'
                 : 'Descubre panaderías, reposterías y negocios locales. Consulta sus productos y horarios para organizar tu próxima compra.'}
@@ -148,7 +143,7 @@ export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridPr
             <Button
               variant="outline"
               size="sm"
-              className="bg-white border-stone-200 hover:bg-stone-50 text-[#1c1917] font-bold shadow-xs cursor-pointer rounded-2xl"
+              className="bg-white border-stone-200 hover:bg-stone-50 text-[#02090a] font-medium shadow-xs cursor-pointer rounded-full px-5 py-2.5"
               rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
             >
               {isDemo ? 'Ver una demostración' : 'Explorar una tienda'}
@@ -156,7 +151,7 @@ export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridPr
           </Link>
         </div>
 
-        {/* Peek Slider Carousel Component with Default Fallbacks & Interactive Controls */}
+        {/* Peek Slider Carousel Component with 12px card geometry */}
         <StorePeekSlider stores={storesToDisplay} isDemo={isDemo} />
       </Container>
     </section>

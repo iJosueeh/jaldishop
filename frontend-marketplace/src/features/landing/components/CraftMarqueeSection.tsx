@@ -127,21 +127,9 @@ export const MARQUEE_ITEMS: MarqueeItem[] = [
 ];
 
 export interface CraftMarqueeSectionProps {
-  /**
-   * Título general estático opcional. Si no se pasa, utiliza el rotador de frases multirubro.
-   */
   title?: string;
-  /**
-   * Frases variables para rotar cuando no se define un título fijo.
-   */
   phrases?: string[];
-  /**
-   * Subtítulo explicativo del carrusel.
-   */
   subtitle?: string;
-  /**
-   * Lista personalizada de ítems para el marquee.
-   */
   items?: MarqueeItem[];
 }
 
@@ -170,42 +158,41 @@ export function CraftMarqueeSection({
     return () => clearInterval(interval);
   }, [title, phrases]);
 
-  // Duplicamos la lista para crear un loop infinito continuo y fluido al 100%
   const duplicatedItems = [...items, ...items];
   const activeTitle = title || phrases[phraseIndex] || DEFAULT_ROTATING_PHRASES[0];
 
   return (
-    <section className="py-8 bg-[#faf7f2] relative overflow-hidden border-y border-stone-200/80">
+    <section className="py-10 bg-[#090b0c] relative">
       {/* Subtle Section Title Ribbon */}
       <div className="max-w-7xl mx-auto px-6 mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5 text-xs font-black text-[#1c1917] uppercase tracking-wider">
-          {/* Live pulsing badge */}
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100/90 border border-emerald-300/60 text-[#005141] text-[10px] font-black tracking-wide">
+        <div className="flex items-center gap-2.5 text-xs font-semibold text-white uppercase tracking-wider">
+          {/* Live pulsing badge in Amber & Jade */}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#161c1e] border border-[#232b2f] text-emerald-400 text-[10px] font-semibold tracking-wide">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-600" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
             </span>
             <span>EN VIVO</span>
           </span>
 
-          {/* Dynamic rotating or static general heading */}
+          {/* Dynamic rotating heading */}
           <span
-            className={`transition-all duration-300 text-xs font-black text-[#1c1917] uppercase tracking-wider ${
+            className={`transition-all duration-300 text-xs font-semibold text-white uppercase tracking-wider ${
               isFading ? 'opacity-0 translate-y-0.5' : 'opacity-100 translate-y-0'
             }`}
           >
             {activeTitle}
           </span>
 
-          <span className="text-stone-300 hidden sm:inline">•</span>
-          <span className="text-[11px] font-semibold text-[#78716c] normal-case hidden sm:inline">
+          <span className="text-stone-700 hidden sm:inline">•</span>
+          <span className="text-[11px] font-normal text-stone-400 normal-case hidden sm:inline">
             {subtitle}
           </span>
         </div>
 
         <Link
           href="/#tiendas-destacadas"
-          className="text-xs font-extrabold text-[#005141] hover:text-[#00382d] inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-[#feae2c] hover:text-[#ea580c] inline-flex items-center gap-1 transition-all"
         >
           <span>Ver todas las tiendas</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
@@ -213,7 +200,7 @@ export function CraftMarqueeSection({
       </div>
 
       {/* Marquee Track Container with smooth lateral gradient masks */}
-      <div className="relative w-full overflow-hidden before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-16 sm:before:w-28 before:bg-gradient-to-r before:from-[#faf7f2] before:to-transparent before:z-10 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-16 sm:after:w-28 after:bg-gradient-to-l after:from-[#faf7f2] after:to-transparent after:z-10">
+      <div className="relative w-full overflow-hidden before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-16 sm:before:w-28 before:bg-gradient-to-r before:from-[#090b0c] before:to-transparent before:z-10 after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-16 sm:after:w-28 after:bg-gradient-to-l after:from-[#090b0c] after:to-transparent after:z-10">
         <div className="animate-marquee gap-5 flex items-center py-2 px-4">
           {duplicatedItems.map((item, index) => (
             <Link
@@ -221,54 +208,51 @@ export function CraftMarqueeSection({
               href={`/tienda/${item.storeSlug}`}
               className="group shrink-0 block"
             >
-              <div className="w-72 sm:w-80 bg-white rounded-3xl p-3.5 border border-stone-200/90 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-stone-900/10 hover:border-[#005141] hover:-translate-y-1.5 cursor-pointer relative overflow-hidden">
-                {/* Product Photo with Hover Zoom & Diagonal Light Shine */}
-                <div className="relative h-40 w-full rounded-2xl overflow-hidden bg-stone-100 mb-3">
+              <div className="w-72 sm:w-80 bg-[#121618] rounded-[12px] p-3.5 border border-[#1e2426] shadow-sm transition-all duration-300 hover:border-stone-500 hover:-translate-y-1 cursor-pointer relative overflow-hidden">
+                {/* Product Photo with Rich Food Contrast */}
+                <div className="relative h-40 w-full rounded-[10px] overflow-hidden bg-stone-900 mb-3">
                   <Image
                     src={item.imageUrl}
                     alt={item.name}
                     fill
                     sizes="320px"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  {/* Subtle gradient vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+                  {/* Subtle dark vignette */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
-                  {/* Shine effect that sweeps on hover */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
-
-                  {/* Top Badge */}
+                  {/* Top Badge (Varied by Product: Amber, Terracotta, Jade) */}
                   <div className="absolute top-2.5 left-2.5 z-10">
-                    <Badge variant={item.badgeVariant} size="sm" className="shadow-xs font-bold text-[10px]">
+                    <Badge variant={item.badgeVariant} size="sm" className="shadow-xs font-semibold text-[10px]">
                       {item.badge}
                     </Badge>
                   </div>
 
-                  {/* Prep Time pill */}
-                  <div className="absolute bottom-2.5 right-2.5 z-10 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-bold text-white flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-amber-300" />
+                  {/* Prep Time pill in Amber */}
+                  <div className="absolute bottom-2.5 right-2.5 z-10 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 text-[10px] font-medium text-white flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#feae2c]" />
                     <span>{item.prepTime}</span>
                   </div>
                 </div>
 
                 {/* Product Info */}
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px] text-[#78716c] font-medium">
+                  <div className="flex items-center justify-between text-[11px] text-stone-400 font-medium">
                     <span>{item.category}</span>
-                    <span className="text-[#005141] font-bold group-hover:underline">
+                    <span className="text-stone-300 font-medium group-hover:text-white transition-colors">
                       {item.store}
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-black text-[#1c1917] group-hover:text-[#005141] transition-colors truncate">
+                  <h4 className="text-sm font-semibold text-white group-hover:text-[#feae2c] transition-colors truncate">
                     {item.name}
                   </h4>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-stone-100 mt-2">
-                    <span className="font-mono font-black text-sm text-[#1c1917]">
+                  <div className="flex items-center justify-between pt-1 border-t border-[#1e2426] mt-2">
+                    <span className="font-mono font-semibold text-sm text-white">
                       {item.price}
                     </span>
-                    <span className="text-[11px] font-extrabold text-[#ea580c] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                    <span className="text-[11px] font-bold text-[#ea580c] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
                       <span>Pedir</span>
                       <ArrowUpRight className="w-3 h-3" />
                     </span>

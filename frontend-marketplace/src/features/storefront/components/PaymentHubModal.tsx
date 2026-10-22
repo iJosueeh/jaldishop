@@ -101,19 +101,19 @@ export function PaymentHubModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh]"
+            className="relative w-full max-w-lg bg-white rounded-[12px] border border-stone-200/90 shadow-2xl overflow-hidden z-10 flex flex-col max-h-[92vh]"
           >
             {/* Modal Header */}
             <div className="p-5 sm:p-6 pb-4 border-b border-stone-200 flex items-center justify-between bg-white sticky top-0 z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#005141] text-white flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-[8px] bg-[#005141] text-white flex items-center justify-center shadow-xs">
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-[#1c1917] tracking-tight">
+                  <h3 className="text-lg font-black text-stone-900 tracking-tight">
                     Pagar y Confirmar Pedido
                   </h3>
-                  <p className="text-xs text-[#57534e]">
+                  <p className="text-xs text-stone-600">
                     Transfiere con tu billetera digital o banco preferido
                   </p>
                 </div>
@@ -122,7 +122,7 @@ export function PaymentHubModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-[#1c1917] cursor-pointer transition-colors"
+                className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 cursor-pointer transition-colors"
                 aria-label="Cerrar modal de pago"
               >
                 <X className="w-4 h-4" />
@@ -380,7 +380,7 @@ export function PaymentHubModal({
               </div>
 
               {/* Slot Protection Guarantee */}
-              <div className="p-3 bg-[#f0fdfa] rounded-xl border border-teal-200/80 flex items-start gap-2.5 text-xs text-[#065f46]">
+              <div className="p-3 bg-emerald-50/70 rounded-[8px] border border-emerald-200/80 flex items-start gap-2.5 text-xs text-[#005141]">
                 <Lock className="w-4 h-4 text-[#005141] shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
                   Tu turno para la franja <strong className="font-bold text-[#005141]">{slotTime}</strong> está apartado. Al pulsar en continuar, se redactará el mensaje oficial para WhatsApp.
@@ -395,7 +395,7 @@ export function PaymentHubModal({
                 variant="outline"
                 size="md"
                 onClick={onClose}
-                className="w-full sm:w-auto text-xs font-bold rounded-2xl border-stone-300"
+                className="w-full sm:w-auto text-xs font-bold rounded-full border-stone-300 hover:bg-stone-50"
               >
                 Volver al carrito
               </Button>
@@ -411,7 +411,7 @@ export function PaymentHubModal({
                     total,
                   });
                 }}
-                className="w-full sm:flex-1 py-3.5 rounded-2xl font-black text-xs shadow-lg shadow-[#ea580c]/30 cursor-pointer border-0 bg-[#ea580c] hover:bg-[#c2410c] flex items-center justify-center gap-2"
+                className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs shadow-md shadow-[#ea580c]/25 cursor-pointer border-0 bg-[#ea580c] hover:bg-[#c2410c] flex items-center justify-center gap-2 active:scale-95 transition-all"
               >
                 <span>Confirmar Pedido por WhatsApp</span>
                 <ArrowRight className="w-4 h-4" />
