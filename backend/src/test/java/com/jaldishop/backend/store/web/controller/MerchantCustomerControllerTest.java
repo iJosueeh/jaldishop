@@ -2,6 +2,7 @@ package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.GetStoreCustomersService;
 import com.jaldishop.backend.store.application.StoreContextService;
 import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
@@ -29,6 +30,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -70,7 +72,7 @@ class MerchantCustomerControllerTest {
             }
         };
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setCustomArgumentResolvers(authPrincipalResolver)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -103,5 +105,21 @@ class MerchantCustomerControllerTest {
                 .andExpect(jsonPath("$[0].firstName").value("Carlos"))
                 .andExpect(jsonPath("$[0].ordersCount").value(2))
                 .andExpect(jsonPath("$[0].totalSpentAmount").value(85.50));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/merchant/customers - 400 VALIDATION_ERROR con query demasiado largo y recuperación posterior")
+    void listCustomersInvalidQueryParameter() throws Exception {
+        mockMvc.perform(get("/api/v1/merchant/customers").param("query", "x".repeat(101)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(storeContextService, getStoreCustomersService);
+
+        when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
+        when(getStoreCustomersService.execute(testStoreId, "carlos")).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/merchant/customers").param("query", "carlos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }

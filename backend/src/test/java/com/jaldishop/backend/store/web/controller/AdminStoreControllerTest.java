@@ -2,6 +2,7 @@ package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.ChangeStoreStatusCommand;
 import com.jaldishop.backend.store.application.ChangeStoreStatusService;
 import com.jaldishop.backend.store.application.GetAdminStoresQuery;
@@ -36,6 +37,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -101,7 +103,7 @@ class AdminStoreControllerTest {
             }
         };
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+        mockMvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setCustomArgumentResolvers(authPrincipalResolver)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -235,5 +237,20 @@ class AdminStoreControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/admin/stores - 400 VALIDATION_ERROR con query demasiado largo y recuperación posterior")
+    void listStoresInvalidQueryParameter() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/stores").param("query", "x".repeat(101)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(getAdminStoresService);
+
+        when(getAdminStoresService.execute(any(GetAdminStoresQuery.class))).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/admin/stores").param("query", "demo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }
