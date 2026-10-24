@@ -1,6 +1,6 @@
 package com.jaldishop.backend.checkout.application;
 
-import com.jaldishop.backend.capacity.application.CommitCapacityReservationService;
+import com.jaldishop.backend.capacity.application.reservation.CommitCapacityReservationService;
 import com.jaldishop.backend.capacity.domain.CapacityReservation;
 import com.jaldishop.backend.capacity.domain.CapacityReservationStatus;
 import com.jaldishop.backend.cart.application.ClearCartCommand;

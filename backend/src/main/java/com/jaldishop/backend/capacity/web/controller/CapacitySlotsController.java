@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.CapacitySlotAvailability;
-import com.jaldishop.backend.capacity.application.ListStoreCapacitySlotsService;
+import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvailability;
+import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotsResponse;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;

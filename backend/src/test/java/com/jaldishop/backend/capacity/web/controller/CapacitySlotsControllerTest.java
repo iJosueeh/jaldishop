@@ -1,8 +1,8 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.CapacityAvailabilityResult;
-import com.jaldishop.backend.capacity.application.CapacitySlotAvailability;
-import com.jaldishop.backend.capacity.application.ListStoreCapacitySlotsService;
+import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
+import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvailability;
+import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;

@@ -1,6 +1,11 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.*;
+import com.jaldishop.backend.capacity.application.configuration.CreateCapacityConfigurationCommand;
+import com.jaldishop.backend.capacity.application.configuration.CreateCapacityConfigurationService;
+import com.jaldishop.backend.capacity.application.configuration.GetStoreCapacityConfigurationsService;
+import com.jaldishop.backend.capacity.application.configuration.ToggleCapacityConfigurationStatusService;
+import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityConfigurationCommand;
+import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityConfigurationService;
 import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
 import com.jaldishop.backend.capacity.web.dto.CapacityConfigurationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityConfigurationRequest;

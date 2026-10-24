@@ -1,6 +1,6 @@
 package com.jaldishop.backend.capacity.web.dto;
 
-import com.jaldishop.backend.capacity.application.CapacityAvailabilityResult;
+import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

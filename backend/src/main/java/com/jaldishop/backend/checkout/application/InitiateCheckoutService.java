@@ -1,7 +1,7 @@
 package com.jaldishop.backend.checkout.application;
 
-import com.jaldishop.backend.capacity.application.CreateCapacityReservationCommand;
-import com.jaldishop.backend.capacity.application.CreateCapacityReservationService;
+import com.jaldishop.backend.capacity.application.reservation.CreateCapacityReservationCommand;
+import com.jaldishop.backend.capacity.application.reservation.CreateCapacityReservationService;
 import com.jaldishop.backend.capacity.domain.CapacityReservation;
 import com.jaldishop.backend.cart.domain.Cart;
 import com.jaldishop.backend.cart.domain.CartRepository;
