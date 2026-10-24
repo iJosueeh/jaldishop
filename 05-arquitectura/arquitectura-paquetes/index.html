@@ -1,0 +1,2124 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Arquitectura de Paquetes (Backend) - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#arquitectura-de-paquetes-backend" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Arquitectura de Paquetes (Backend)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jaldishop-convencion-de-organizacion-java-y-reglas-de-dependencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JaldiShop · Convención de organización Java y reglas de dependencia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Propósito
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-convencion-aprobada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Convención aprobada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Convención aprobada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-estructura-de-modulos-y-capas-inalterable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Estructura de módulos y capas (inalterable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-organizacion-interna-de-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Organización interna de application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-sufijos-de-clase-nivel-3-por-rol-no-por-carpeta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Sufijos de clase (nivel 3 — por rol, no por carpeta)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-reglas-de-dependencia-entre-modulos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Reglas de dependencia entre módulos
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-deuda-existente-problemas-pendientes-no-son-la-convencion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Deuda existente (problemas pendientes — NO son la convención)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Deuda existente (problemas pendientes — NO son la convención)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deuda-arc-01-dto-web-dentro-de-store-capas-invertidas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEUDA-ARC-01 — DTO web dentro de store (capas invertidas)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deuda-arc-02-ciclos-de-modulo-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEUDA-ARC-02 — Ciclos de módulo (3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deuda-arc-03-jwtprincipal-en-infraestructura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DEUDA-ARC-03 — JwtPrincipal en infraestructura
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#otras-observaciones-registradas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Otras observaciones registradas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-fases-de-refactorizacion-pendientes-de-aprobacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Fases de refactorización pendientes de aprobación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-zonas-con-trabajo-activo-no-reorganizar-sin-coordinar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Zonas con trabajo activo (no reorganizar sin coordinar)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-registro-de-cambios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Registro de cambios
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="arquitectura-de-paquetes-backend">Arquitectura de Paquetes (Backend)</h1>
+<h3 id="jaldishop-convencion-de-organizacion-java-y-reglas-de-dependencia">JaldiShop · Convención de organización Java y reglas de dependencia</h3>
+<p><a href="./"><img alt="Estado" src="https://img.shields.io/badge/Estado-Aprobado-green?style=for-the-badge&amp;logo=checkmarx&amp;logoColor=white" /></a>
+<a href="./"><img alt="Fase" src="https://img.shields.io/badge/Fase-F0_Documentaci%C3%B3n-blue?style=for-the-badge" /></a></p>
+<hr />
+<p><code>Docs</code> &gt; <code>05-Arquitectura</code> &gt; <strong>Arquitectura de Paquetes</strong>
+<a href="../arquitectura-sistema/">Arquitectura del Sistema</a> | <a href="../../">Índice General</a> | <a href="../../03-requisitos/modelo-dominio/">Modelo de Dominio</a></p>
+<hr />
+<h2 id="1-proposito">1. Propósito</h2>
+<p>Este documento define la <strong>convención de paquetes del backend</strong> (<code>com.jaldishop.backend</code>), acordada por el equipo tras la auditoría de organización de paquetes (345 clases <code>main</code> / 114 <code>test</code>), y las <strong>reglas de dependencia</strong> permitidas entre módulos.</p>
+<p>Distingue claramente entre:</p>
+<ul>
+<li><strong>Reglas deseadas:</strong> cómo debe organizarse el código <em>a partir de ahora</em>.</li>
+<li><strong>Deuda existente:</strong> problemas arquitectónicos ya presentes en <code>main</code>, registrados con evidencia y pendientes de tarjeta propia. <strong>No son la convención</strong> y no deben copiarse como patrón.</li>
+</ul>
+<p>Alcance de este documento: solo convención y deuda. <strong>No implica por sí mismo ningún movimiento de clases</strong>; cada reorganización se ejecuta en una fase propia (F1–F5) con aprobación previa.</p>
+<hr />
+<h2 id="2-convencion-aprobada">2. Convención aprobada</h2>
+<h3 id="21-estructura-de-modulos-y-capas-inalterable">2.1 Estructura de módulos y capas (inalterable)</h3>
+<p>El backend es un <strong>modular monolith</strong>: paquete por funcionalidad en el nivel 1, capas en el nivel 2.</p>
+<div class="highlight"><pre><span></span><code>com.jaldishop.backend.{modulo}
+├── domain/            # Entidades, value objects, enums y puertos (interfaces de repositorio)
+├── application/       # Casos de uso (servicios), inputs (commands/queries), outputs (results)
+├── infrastructure/    # Adaptadores: persistence/{adapter,entity,mapper,repository}, security, cloudinary
+└── web/               # Controllers, dto/{request,response}, mapper
+</code></pre></div>
+<p>Módulos actuales: <code>capacity</code>, <code>catalog</code>, <code>checkout</code>, <code>identity</code>, <code>inventory</code>, <code>cart</code>, <code>ordering</code>, <code>notification</code>, <code>media</code>, <code>store</code>, <code>shared</code>.</p>
+<p>Reglas fijas:</p>
+<ol>
+<li>Los 4 niveles de capa existen siempre en cada módulo (aunque una capa hoy no tenga clases, como <code>inventory/web</code>).</li>
+<li><code>infrastructure/persistence</code> conserva su subestructura de 4 subpaquetes: <code>adapter</code>, <code>entity</code>, <code>mapper</code>, <code>repository</code>.</li>
+<li>Los puertos de repositorio (<code>XxxRepository</code>) viven <strong>siempre en <code>domain</code></strong>.</li>
+<li>No se crean módulos nuevos sin un caso de negocio real que lo justifique.</li>
+</ol>
+<h3 id="22-organizacion-interna-de-application">2.2 Organización interna de <code>application</code></h3>
+<ol>
+<li><strong><code>application</code> es plano por defecto.</strong> Todas las clases del caso de uso viven directamente en <code>com.jaldishop.backend.{modulo}.application</code>.</li>
+<li><strong>Subdivisión por responsabilidad funcional</strong>, nunca por tipo de clase, cuando exista <strong>suficiente cohesión</strong>: un subdominio con responsabilidad y razón de cambiar propias.</li>
+<li><strong>El umbral de clases es orientativo, no obligatorio</strong>: como referencia, ~15 clases y ≥ 2 grupos cohesivos de ≥ 4 clases. La decisión final la da la cohesión real, no el número.</li>
+<li><strong>Prohibido agrupar por tipo:</strong> no existirán carpetas <code>service/</code>, <code>command/</code>, <code>query/</code>, <code>result/</code>, <code>port/</code> ni similares dentro de <code>application</code>.</li>
+<li>Decisión por módulo (aprobada):</li>
+<li><strong><code>capacity/application</code> → subdividir</strong> en <code>configuration/</code>, <code>reservation/</code> y <code>availability/</code>. <em>(Aprobado; <strong>pendiente de ejecución</strong> en fase propia — no se ha movido todavía ninguna clase.)</em><ul>
+<li><code>configuration/</code> (~12): creación/actualización/toggle/consulta de configuraciones y excepciones de capacidad.</li>
+<li><code>reservation/</code> (~5): crear, confirmar, liberar y consultar reservas de capacidad.</li>
+<li><code>availability/</code> (~9): motor de disponibilidad (<code>EffectiveCapacity*</code>, <code>GetCapacityAvailabilityService</code>, <code>ListStoreCapacitySlotsService</code>, <code>CapacitySlotAvailability</code>).</li>
+</ul>
+</li>
+<li><strong><code>store</code>, <code>identity</code>, <code>cart</code> y <code>checkout</code> → sin subdivisiones por ahora.</strong> Reevaluar solo si crecen y aparecen grupos cohesivos reales.</li>
+</ol>
+<h3 id="23-sufijos-de-clase-nivel-3-por-rol-no-por-carpeta">2.3 Sufijos de clase (nivel 3 — por rol, no por carpeta)</h3>
+<table>
+<thead>
+<tr>
+<th>Sufijo</th>
+<th>Rol</th>
+<th>Regla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>XxxService</code></td>
+<td>Caso de uso en <code>application</code></td>
+<td>Siempre, en todos los módulos (110 actuales, 100% consistente)</td>
+</tr>
+<tr>
+<td><code>XxxCommand</code></td>
+<td>Input de escritura</td>
+<td>Solo si el caso de uso tiene ≥ 2 parámetros o se espera crecer</td>
+</tr>
+<tr>
+<td><code>XxxQuery</code></td>
+<td>Input de lectura</td>
+<td>Ídem; no crear queries de un solo campo</td>
+</tr>
+<tr>
+<td><code>XxxResult</code> / <code>XxxView</code></td>
+<td>Output de caso de uso / proyección de lectura</td>
+<td><code>Result</code> para casos de uso; <code>View</code> para proyecciones</td>
+</tr>
+<tr>
+<td><code>XxxRequest</code> / <code>XxxResponse</code></td>
+<td>DTO web</td>
+<td>Solo en <code>web/dto</code></td>
+</tr>
+<tr>
+<td><code>XxxRepository</code></td>
+<td>Puerto en <code>domain</code></td>
+<td>Implementado por <code>XxxRepositoryAdapter</code> (infra) sobre <code>XxxJpaRepository</code></td>
+</tr>
+<tr>
+<td><code>XxxEntity</code> / <code>XxxPersistenceMapper</code></td>
+<td>Persistencia JPA</td>
+<td>Solo en <code>infrastructure/persistence</code></td>
+</tr>
+</tbody>
+</table>
+<p>Reglas complementarias:</p>
+<ul>
+<li><strong>DTO web:</strong> factory estática <code>from(...)</code> cuando el mapeo es 1:1 con un registro; <strong>clase mapper</strong> solo cuando agrega o compone campos de varias fuentes.</li>
+<li><strong>Validadores:</strong> Bean Validation (<code>@ValidXxx</code>) para sintaxis de entrada web; servicio estático en <code>domain</code> para reglas de negocio. No crear nuevos paquetes <code>web/validation</code>.</li>
+</ul>
+<hr />
+<h2 id="3-reglas-de-dependencia-entre-modulos">3. Reglas de dependencia entre módulos</h2>
+<p>Matriz permitida (de izquierda a derecha desde cualquier clase):</p>
+<table>
+<thead>
+<tr>
+<th>Desde → Hacia</th>
+<th>¿Permitido?</th>
+<th>Condición</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cualquier módulo → <code>shared.*</code></td>
+<td>✅ Siempre</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>X.application</code> / <code>X.web</code> → <code>Y.domain</code></td>
+<td>✅ Sí</td>
+<td>Solo si no crea ciclo entre módulos</td>
+</tr>
+<tr>
+<td><code>X.web</code> → <code>Y.application</code></td>
+<td>✅ Sí</td>
+<td>Patrón de consumo (controllers usando servicios ajenos)</td>
+</tr>
+<tr>
+<td><code>X.application</code> → <code>Y.application</code></td>
+<td>⚠️ Solo orquestadores declarados</td>
+<td>Hoy: <code>checkout → capacity/inventory/ordering</code>, <code>identity → store</code> (registro de merchant). Prohibido en <code>domain</code> e <code>infrastructure</code></td>
+</tr>
+<tr>
+<td>cualquier módulo → <code>Y.infrastructure</code></td>
+<td>❌ No</td>
+<td><strong>Deuda DEUDA-ARC-03</strong> (ver §4): <code>JwtPrincipal</code></td>
+</tr>
+<tr>
+<td>cualquier módulo → <code>Y.web</code></td>
+<td>❌ Nunca</td>
+<td><strong>Deuda DEUDA-ARC-01</strong> (ver §4): DTOs en <code>store</code></td>
+</tr>
+</tbody>
+</table>
+<p>Reglas complementarias:</p>
+<ul>
+<li><strong>Ciclos entre módulos prohibidos.</strong> Hoy existen 3 (§4); no se introduzcan nuevos.</li>
+<li><strong>Los módulos no deben conocer los paquetes internos de otros módulos más allá de <code>domain</code></strong> salvo la excepción de orquestadores.</li>
+<li>La verificación de esta matriz es <strong>manual hoy</strong>; se contempla un test de arquitectura automatizado en una fase posterior (F5).</li>
+</ul>
+<hr />
+<h2 id="4-deuda-existente-problemas-pendientes-no-son-la-convencion">4. Deuda existente (problemas pendientes — NO son la convención)</h2>
+<p>Registrada con evidencia de archivos en <code>main</code>. <strong>Ninguno de estos puntos está resuelto ni debe entenderse como patrón a seguir.</strong></p>
+<h3 id="deuda-arc-01-dto-web-dentro-de-store-capas-invertidas">DEUDA-ARC-01 — DTO web dentro de <code>store</code> (capas invertidas)</h3>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Capa</th>
+<th>Importa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>store/domain/StoreCustomerRepository.java:3</code></td>
+<td>domain</td>
+<td><code>store.web.dto.StoreCustomerResponse</code></td>
+</tr>
+<tr>
+<td><code>store/application/GetStoreCustomersService.java:4</code></td>
+<td>application</td>
+<td><code>store.web.dto.StoreCustomerResponse</code></td>
+</tr>
+<tr>
+<td><code>store/infrastructure/persistence/adapter/StoreCustomerRepositoryAdapter.java:6</code></td>
+<td>infrastructure</td>
+<td><code>store.web.dto.StoreCustomerResponse</code></td>
+</tr>
+</tbody>
+</table>
+<p>La interfaz de repositorio del dominio devuelve una respuesta HTTP. Su arreglo <strong>exige cambiar una interfaz pública</strong> → tarjeta propia; prohibido en esta fase.</p>
+<h3 id="deuda-arc-02-ciclos-de-modulo-3">DEUDA-ARC-02 — Ciclos de módulo (3)</h3>
+<table>
+<thead>
+<tr>
+<th>Ciclo</th>
+<th>Aristas causantes</th>
+<th>Evaluación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>identity ↔ store</strong></td>
+<td><code>identity/application/RegisterMerchantService</code> → <code>store.application.{CreateStoreCommand, CreateStoreService}</code>; vuelta por <code>UserRepository</code>/<code>UserJpaRepository</code>/<code>UserEntity</code> (4 vías)</td>
+<td>Romperlo requiere diseño (puerto inverso), no solo mover archivos. Decisión <strong>D1</strong> pendiente</td>
+</tr>
+<tr>
+<td><strong>checkout ↔ inventory</strong></td>
+<td><code>inventory/application/ReserveInventoryService</code> → <code>checkout.domain.CheckoutItemSnapshot</code>; vuelta por <code>InitiateCheckoutService</code>/<code>ConfirmPurchaseService</code></td>
+<td>Decisión <strong>D2</strong> pendiente: la propuesta revisada es un <strong>contrato independiente en <code>inventory/domain</code></strong> (<code>InventoryReservationItem</code>), <strong>no</strong> mover <code>CheckoutItemSnapshot</code> a inventory (invertiría la semántica: precios/presentación en el módulo de stock). <em>No implementado.</em></td>
+</tr>
+<tr>
+<td><strong>store ↔ media</strong></td>
+<td><code>media/application/GenerateUploadSignatureService</code> → <code>store.domain.{Store,StoreRepository}</code>; <code>store/application/CloseMyStoreService</code> → <code>media.domain.MediaStorageService</code></td>
+<td>Decisión <strong>D3</strong> pendiente (puerto de borrado de medios)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deuda-arc-03-jwtprincipal-en-infraestructura">DEUDA-ARC-03 — <code>JwtPrincipal</code> en infraestructura</h3>
+<p><code>identity/infrastructure/security/JwtPrincipal</code> es importado por <strong>7 controllers</strong> de capacity, cart, catalog, checkout, media, notification y store: toda la API depende de la infraestructura de seguridad de identity (arista <code>→ Y.infrastructure</code>, prohibida en §3). Moverlo a <code>shared/security</code> toca ~12 archivos en 7 módulos → fase F5 con todas las ramas verdes.</p>
+<h3 id="otras-observaciones-registradas">Otras observaciones registradas</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Hallazgo</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OBS-ARC-01</td>
+<td><code>ChangeOrderStatusService</code> sin test (único servicio de <code>ordering</code>)</td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>OBS-ARC-02</td>
+<td><code>ordering/web/**</code> (<code>CreateOrderRequest</code>, <code>OrderDeliveryValidator</code>, <code>ValidOrderDelivery</code>): código muerto (0 referencias externas) que duplica la regla viva <code>checkout/domain/CheckoutFulfillmentValidator</code></td>
+<td>Eliminación aprobada en principio (F1), <strong>pendiente de confirmación con Mia</strong> (territorio <code>ordering/**</code>); no eliminado</td>
+</tr>
+<tr>
+<td>OBS-ARC-03</td>
+<td>No existe módulo <code>payment</code>: pagos embebidos en <code>checkout</code> (<code>PaymentEntity</code>, <code>PaymentReader</code>, <code>PaymentResume</code>)</td>
+<td>Registrado, sin acción</td>
+</tr>
+<tr>
+<td>OBS-ARC-04</td>
+<td>Doble estilo de validación de entrega (Bean Validation en <code>ordering/web</code> muerto vs. validador de dominio en checkout)</td>
+<td>Se resuelve al ejecutar F1</td>
+</tr>
+<tr>
+<td>OBS-C1-01</td>
+<td>Pools de capacidad independientes entre ventanas solapadas (contabilidad por ventana exacta)</td>
+<td>Preexistente; revisión con Mia (ticket propio)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-fases-de-refactorizacion-pendientes-de-aprobacion">5. Fases de refactorización pendientes de aprobación</h2>
+<p>Solo documentación hoy (F0). Ninguna fase está ejecutada.</p>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Cambio</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>F0</strong></td>
+<td>Este documento (convención + reglas + deuda)</td>
+<td><strong>Ejecutado en esta tarjeta</strong></td>
+</tr>
+<tr>
+<td><strong>F1</strong></td>
+<td>Eliminar <code>ordering/web/**</code> (3 clases muertas)</td>
+<td>Bloqueada: confirmación con Mia</td>
+</tr>
+<tr>
+<td><strong>F2</strong></td>
+<td>Mover <code>SlugUtils</code> de <code>catalog/application</code> a <code>catalog/domain</code></td>
+<td>Pendiente de aprobación</td>
+</tr>
+<tr>
+<td><strong>F3</strong></td>
+<td>Contrato independiente <code>InventoryReservationItem</code> en <code>inventory/domain</code> (reemplaza a la propuesta anterior de mover <code>CheckoutItemSnapshot</code>)</td>
+<td>Pendiente de decisión D2</td>
+</tr>
+<tr>
+<td><strong>F4</strong></td>
+<td>Ciclo identity↔store (puerto inverso, D1)</td>
+<td>Pendiente de decisión</td>
+</tr>
+<tr>
+<td><strong>F5</strong></td>
+<td>Ciclo store↔media (D3) + <code>JwtPrincipal</code> → <code>shared/security</code> (DEUDA-ARC-03) + test de arquitectura de la matriz §3</td>
+<td>Pendiente de decisión</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regla de oro por fase:</strong> una fase = un PR pequeño y verificable (<code>mvnw clean test</code> con línea base actual de 560 tests verdes, <code>git diff</code> limitado a los archivos esperados). Si el diff supera lo estimado, se detiene y se re-planifica. Ninguna fase toca <code>SecurityConfig</code>, <code>GlobalExceptionHandler</code>, contratos REST, migraciones Flyway ni lógica de negocio.</p>
+<hr />
+<h2 id="6-zonas-con-trabajo-activo-no-reorganizar-sin-coordinar">6. Zonas con trabajo activo (no reorganizar sin coordinar)</h2>
+<table>
+<thead>
+<tr>
+<th>Zona</th>
+<th>Motivo</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>catalog/**</code> (backend)</td>
+<td>Rama sin merge de Katherine: <code>origin/feature/BE-12-catalog-module</code> (4 commits, archivos propios de catálogo)</td>
+<td><code>git diff --name-only origin/main...origin/feature/BE-12-catalog-module</code></td>
+</tr>
+<tr>
+<td><code>cart/**</code>, <code>ordering/**</code></td>
+<td>Territorio de Mia según DoD</td>
+<td>DoD del equipo</td>
+</tr>
+<tr>
+<td><code>identity/infrastructure/security/**</code>, handlers de <code>shared/exception</code></td>
+<td>Compartidos en revisión HARDEN</td>
+<td>Backlog <code>06-scrum/backlog-harden-seguridad.md</code></td>
+</tr>
+<tr>
+<td><code>capacity/**</code></td>
+<td>Actividad reciente (C1 mergeada; OBS-C1-01 pendiente con Mia)</td>
+<td>PR #63</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-registro-de-cambios">7. Registro de cambios</h2>
+<table>
+<thead>
+<tr>
+<th>Fecha</th>
+<th>Versión</th>
+<th>Cambio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-10-24</td>
+<td>v1.0</td>
+<td>F0: convención aprobada (§2), matriz de dependencias (§3), deuda existente DEUDA-ARC-01..03 y OBS (§4), plan de fases (§5), zonas activas (§6)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
