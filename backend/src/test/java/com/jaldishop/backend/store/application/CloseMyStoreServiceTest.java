@@ -1,15 +1,16 @@
 package com.jaldishop.backend.store.application;
 
-import com.jaldishop.backend.media.domain.MediaStorageService;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.CloseStoreAction;
 import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.domain.StoreMediaCleaner;
 import com.jaldishop.backend.store.domain.StoreRepository;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,7 +27,7 @@ class CloseMyStoreServiceTest {
     private StoreRepository storeRepository;
 
     @Mock
-    private MediaStorageService mediaStorageService;
+    private StoreMediaCleaner storeMediaCleaner;
 
     private CloseMyStoreService closeMyStoreService;
 
@@ -35,7 +36,7 @@ class CloseMyStoreServiceTest {
 
     @BeforeEach
     void setUp() {
-        closeMyStoreService = new CloseMyStoreService(storeRepository, mediaStorageService);
+        closeMyStoreService = new CloseMyStoreService(storeRepository, storeMediaCleaner);
         merchantUserId = UUID.randomUUID();
         store = Store.create(
                 merchantUserId,
@@ -60,7 +61,7 @@ class CloseMyStoreServiceTest {
         assertNull(result.storeStatus());
 
         verify(storeRepository).deleteStore(store.getId(), merchantUserId);
-        verify(mediaStorageService).deleteStoreMedia(store.getId());
+        verify(storeMediaCleaner).deleteStoreMedia(store.getId());
         verify(storeRepository, never()).save(any());
     }
 
@@ -79,7 +80,7 @@ class CloseMyStoreServiceTest {
         assertEquals(StoreStatus.INACTIVE, result.storeStatus());
 
         verify(storeRepository, never()).deleteStore(any(), any());
-        verify(mediaStorageService, never()).deleteStoreMedia(any());
+        verify(storeMediaCleaner, never()).deleteStoreMedia(any());
         verify(storeRepository).save(argThat(s -> s.getStatus() == StoreStatus.INACTIVE));
     }
 
@@ -96,5 +97,37 @@ class CloseMyStoreServiceTest {
         assertEquals("RESOURCE_NOT_FOUND", exception.getCode());
         verify(storeRepository, never()).deleteStore(any(), any());
         verify(storeRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Limpiar los medios de la tienda después de eliminarla, preservando el orden de operaciones")
+    void cleanupStoreMediaAfterDeletionInOrder() {
+        when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));
+        when(storeRepository.hasOperationalHistory(store.getId())).thenReturn(false);
+
+        closeMyStoreService.execute(new CloseMyStoreCommand(merchantUserId, "Cierre sin actividad"));
+
+        InOrder inOrder = inOrder(storeRepository, storeMediaCleaner);
+        inOrder.verify(storeRepository).deleteStore(store.getId(), merchantUserId);
+        inOrder.verify(storeMediaCleaner).deleteStoreMedia(store.getId());
+    }
+
+    @Test
+    @DisplayName("Un fallo en la limpieza de medios no impide el cierre permanente de la tienda")
+    void storeMediaCleanupFailureDoesNotPreventStoreDeletion() {
+        when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));
+        when(storeRepository.hasOperationalHistory(store.getId())).thenReturn(false);
+        doThrow(new RuntimeException("Cloudinary no disponible"))
+                .when(storeMediaCleaner).deleteStoreMedia(store.getId());
+
+        CloseStoreResult result = closeMyStoreService.execute(
+                new CloseMyStoreCommand(merchantUserId, "Cierre sin actividad")
+        );
+
+        assertNotNull(result);
+        assertEquals(CloseStoreAction.DELETED, result.action());
+        assertNull(result.storeStatus());
+        verify(storeRepository).deleteStore(store.getId(), merchantUserId);
+        verify(storeMediaCleaner).deleteStoreMedia(store.getId());
     }
 }

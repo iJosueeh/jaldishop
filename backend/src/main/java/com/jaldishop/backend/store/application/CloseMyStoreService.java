@@ -1,9 +1,9 @@
 package com.jaldishop.backend.store.application;
 
-import com.jaldishop.backend.media.domain.MediaStorageService;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.CloseStoreAction;
 import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.domain.StoreMediaCleaner;
 import com.jaldishop.backend.store.domain.StoreRepository;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import org.springframework.stereotype.Service;
@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CloseMyStoreService {
 
     private final StoreRepository storeRepository;
-    private final MediaStorageService mediaStorageService;
+    private final StoreMediaCleaner storeMediaCleaner;
 
-    public CloseMyStoreService(StoreRepository storeRepository, MediaStorageService mediaStorageService) {
+    public CloseMyStoreService(StoreRepository storeRepository, StoreMediaCleaner storeMediaCleaner) {
         this.storeRepository = storeRepository;
-        this.mediaStorageService = mediaStorageService;
+        this.storeMediaCleaner = storeMediaCleaner;
     }
 
     public CloseStoreResult execute(CloseMyStoreCommand command) {
@@ -39,7 +39,7 @@ public class CloseMyStoreService {
         } else {
             storeRepository.deleteStore(store.getId(), command.merchantUserId());
             try {
-                mediaStorageService.deleteStoreMedia(store.getId());
+                storeMediaCleaner.deleteStoreMedia(store.getId());
             } catch (Exception ignored) {
                 // Aislamiento: si Cloudinary tiene latencia o error, la transacción de BD ya está confirmada
             }
