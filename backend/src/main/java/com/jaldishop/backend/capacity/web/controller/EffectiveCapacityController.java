@@ -1,8 +1,8 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.EffectiveCapacityQuery;
-import com.jaldishop.backend.capacity.application.EffectiveCapacityResult;
-import com.jaldishop.backend.capacity.application.GetEffectiveCapacityService;
+import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityQuery;
+import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
+import com.jaldishop.backend.capacity.application.availability.GetEffectiveCapacityService;
 import com.jaldishop.backend.capacity.web.dto.EffectiveCapacityResponse;
 import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;

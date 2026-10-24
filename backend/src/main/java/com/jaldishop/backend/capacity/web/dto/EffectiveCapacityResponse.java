@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.web.dto;
 
-import com.jaldishop.backend.capacity.application.EffectiveCapacityResult;
-import com.jaldishop.backend.capacity.application.EffectiveCapacitySource;
+import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
+import com.jaldishop.backend.capacity.application.availability.EffectiveCapacitySource;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
