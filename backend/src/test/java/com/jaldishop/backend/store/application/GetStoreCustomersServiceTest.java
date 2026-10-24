@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.application;
 
 import com.jaldishop.backend.store.domain.StoreCustomerRepository;
-import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
+import com.jaldishop.backend.store.domain.StoreCustomerSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ class GetStoreCustomersServiceTest {
     @Test
     void shouldReturnCustomersList() {
         UUID storeId = UUID.randomUUID();
-        StoreCustomerResponse response = new StoreCustomerResponse(
+        StoreCustomerSummary summary = new StoreCustomerSummary(
                 UUID.randomUUID(),
                 "Valeria",
                 "Ramos",
@@ -44,9 +44,9 @@ class GetStoreCustomersServiceTest {
                 Instant.now()
         );
 
-        when(storeCustomerRepository.findCustomersByStoreId(storeId, "valeria")).thenReturn(List.of(response));
+        when(storeCustomerRepository.findCustomersByStoreId(storeId, "valeria")).thenReturn(List.of(summary));
 
-        List<StoreCustomerResponse> result = getStoreCustomersService.execute(storeId, "valeria");
+        List<StoreCustomerSummary> result = getStoreCustomersService.execute(storeId, "valeria");
 
         assertNotNull(result);
         assertEquals(1, result.size());

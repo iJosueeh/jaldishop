@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.application;
 
 import com.jaldishop.backend.store.domain.StoreCustomerRepository;
-import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
+import com.jaldishop.backend.store.domain.StoreCustomerSummary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ public class GetStoreCustomersService {
     }
 
     @Transactional(readOnly = true)
-    public List<StoreCustomerResponse> execute(UUID storeId, String query) {
+    public List<StoreCustomerSummary> execute(UUID storeId, String query) {
         if (storeId == null) {
             throw new IllegalArgumentException("El ID de la tienda no puede ser nulo.");
         }

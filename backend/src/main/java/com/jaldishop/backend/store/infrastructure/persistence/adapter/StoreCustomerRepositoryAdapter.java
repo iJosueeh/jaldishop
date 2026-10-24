@@ -1,9 +1,9 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
 import com.jaldishop.backend.store.domain.StoreCustomerRepository;
+import com.jaldishop.backend.store.domain.StoreCustomerSummary;
 import com.jaldishop.backend.store.infrastructure.persistence.projection.StoreCustomerProjection;
 import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerJpaRepository;
-import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -31,12 +31,12 @@ public class StoreCustomerRepositoryAdapter implements StoreCustomerRepository {
     }
 
     @Override
-    public List<StoreCustomerResponse> findCustomersByStoreId(UUID storeId, String query) {
+    public List<StoreCustomerSummary> findCustomersByStoreId(UUID storeId, String query) {
         List<StoreCustomerProjection> projections =
                 storeCustomerJpaRepository.findCustomersByStoreId(storeId, query != null ? query.trim() : null);
 
         return projections.stream()
-                .map(p -> new StoreCustomerResponse(
+                .map(p -> new StoreCustomerSummary(
                         p.getUserId(),
                         p.getFirstName(),
                         p.getLastName(),
