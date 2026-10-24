@@ -1,4 +1,4 @@
-package com.jaldishop.backend.identity.infrastructure.security;
+package com.jaldishop.backend.shared.security;
 
 import java.util.Set;
 import java.util.UUID;

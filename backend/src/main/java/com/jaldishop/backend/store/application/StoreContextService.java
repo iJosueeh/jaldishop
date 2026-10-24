@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.application;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.domain.Store;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,6 @@
 package com.jaldishop.backend.identity.infrastructure.security;
 
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

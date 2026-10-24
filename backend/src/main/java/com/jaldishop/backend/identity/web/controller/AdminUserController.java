@@ -8,7 +8,7 @@ import com.jaldishop.backend.identity.application.UpdateUserRolesService;
 import com.jaldishop.backend.identity.domain.RoleName;
 import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.domain.UserStatus;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
 import com.jaldishop.backend.identity.web.dto.UpdateUserRolesRequest;

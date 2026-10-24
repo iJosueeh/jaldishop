@@ -10,7 +10,7 @@ import com.jaldishop.backend.capacity.domain.CapacityException;
 import com.jaldishop.backend.capacity.web.dto.CapacityExceptionResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityExceptionRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityExceptionRequest;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

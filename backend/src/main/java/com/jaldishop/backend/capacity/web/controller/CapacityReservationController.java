@@ -11,7 +11,7 @@ import com.jaldishop.backend.capacity.domain.CapacityReservation;
 import com.jaldishop.backend.capacity.web.dto.CapacityAvailabilityResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacityReservationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityReservationRequest;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

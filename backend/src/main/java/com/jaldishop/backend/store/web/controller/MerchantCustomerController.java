@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.web.controller;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.GetStoreCustomersService;
 import com.jaldishop.backend.store.application.StoreContextService;
 import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;

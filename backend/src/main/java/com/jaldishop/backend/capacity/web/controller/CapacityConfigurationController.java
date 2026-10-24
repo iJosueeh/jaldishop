@@ -10,7 +10,7 @@ import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
 import com.jaldishop.backend.capacity.web.dto.CapacityConfigurationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityConfigurationRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityConfigurationRequest;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.GetMyStoreService;
 import com.jaldishop.backend.store.application.StoreContextService;
 import com.jaldishop.backend.store.domain.Store;

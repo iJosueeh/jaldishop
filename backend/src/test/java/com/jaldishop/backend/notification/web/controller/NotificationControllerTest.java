@@ -1,6 +1,6 @@
 package com.jaldishop.backend.notification.web.controller;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.notification.application.CountUnreadNotificationsService;
 import com.jaldishop.backend.notification.application.ListUserNotificationsService;
 import com.jaldishop.backend.notification.application.MarkNotificationAsReadService;

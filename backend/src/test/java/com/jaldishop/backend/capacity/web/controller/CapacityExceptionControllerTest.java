@@ -8,7 +8,7 @@ import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityEx
 import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityExceptionService;
 import com.jaldishop.backend.capacity.domain.CapacityException;
 import com.jaldishop.backend.capacity.domain.CapacityExceptionStatus;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;

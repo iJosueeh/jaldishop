@@ -2,7 +2,7 @@ package com.jaldishop.backend.identity.web.controller;
 
 import com.jaldishop.backend.identity.application.*;
 import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.LoginRequest;
 import com.jaldishop.backend.identity.web.dto.RegisterMerchantRequest;
 import com.jaldishop.backend.identity.web.dto.RegisterRequest;
