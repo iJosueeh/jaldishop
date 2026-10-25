@@ -103,27 +103,33 @@ jobs:
 
           total_tests = 0
           total_skipped = 0
+
+          def attr(node, name):
+              value = node.get(name)
+              return int(value) if value is not None and value.isdigit() else None
+
+          def count_tests(node):
+              tests = attr(node, "tests")
+              if tests is not None:
+                  return tests
+              return sum(count_tests(child) for child in node.findall("./testsuite"))
+
+          def count_skipped(node):
+              by_attribute = (attr(node, "skipped") or 0) + (attr(node, "aborted") or 0)
+              by_child = sum(count_skipped(child) for child in node.findall("./testsuite"))
+              by_element = sum(
+                  1 for child in node if child.tag != "testsuite"
+                  for element in child.iter() if element.tag in ("skipped", "aborted")
+              )
+              return max(by_attribute, by_child + by_element)
+
           for path in files:
               try:
                   root = ET.parse(path).getroot()
               except ET.ParseError as exc:
                   fail(f"Cannot parse Surefire report '{path}': {exc}")
-              if root.tag == "testsuite":
-                  suites = [root]
-              else:
-                  suites = root.findall(".//testsuite")
-              for suite in suites:
-                  def attr(name):
-                      value = suite.get(name)
-                      return int(value) if value is not None and value.isdigit() else 0
-
-                  tests = attr("tests")
-                  # Detect both skipped and aborted tests: prefer the summary
-                  # attributes, fall back to counting the child elements.
-                  by_attribute = attr("skipped") + attr("aborted")
-                  by_element = len(suite.findall(".//skipped")) + len(suite.findall(".//aborted"))
-                  total_tests += tests
-                  total_skipped += max(by_attribute, by_element)
+              total_tests += count_tests(root)
+              total_skipped += count_skipped(root)
 
           if total_tests == 0:
               fail("Surefire reports exist but no test was executed (sum of 'tests' attributes is 0).")
