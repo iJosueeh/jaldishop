@@ -4,7 +4,7 @@ import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvail
 import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotsResponse;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

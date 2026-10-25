@@ -10,7 +10,7 @@ import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.dto.CreateCategoryRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateCategoryRequest;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

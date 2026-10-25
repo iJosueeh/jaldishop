@@ -15,7 +15,7 @@ import com.jaldishop.backend.cart.application.UpdateCartItemQuantityService;
 import com.jaldishop.backend.cart.web.dto.CartItemResponse;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import com.jaldishop.backend.cart.web.mapper.CartResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

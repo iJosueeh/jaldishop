@@ -13,7 +13,7 @@ import com.jaldishop.backend.catalog.web.dto.CreateProductRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductRequest;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

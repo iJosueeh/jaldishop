@@ -10,7 +10,7 @@ import com.jaldishop.backend.capacity.domain.CapacityReservationStatus;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

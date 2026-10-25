@@ -1,5 +1,6 @@
 package com.jaldishop.backend.identity.infrastructure.security;
 
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

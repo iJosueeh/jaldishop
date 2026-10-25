@@ -3,7 +3,7 @@ package com.jaldishop.backend.capacity.web.controller;
 import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
 import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvailability;
 import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;

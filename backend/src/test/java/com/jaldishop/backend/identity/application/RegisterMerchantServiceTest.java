@@ -7,19 +7,20 @@ import com.jaldishop.backend.identity.domain.User;
 import com.jaldishop.backend.identity.domain.UserRepository;
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
 import com.jaldishop.backend.shared.exception.ConflictException;
-import com.jaldishop.backend.store.application.CreateStoreCommand;
-import com.jaldishop.backend.store.application.CreateStoreService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +41,7 @@ class RegisterMerchantServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private CreateStoreService createStoreService;
+    private StoreProvisioning storeProvisioning;
 
     @Mock
     private JwtService jwtService;
@@ -56,7 +57,7 @@ class RegisterMerchantServiceTest {
                 userRepository,
                 roleRepository,
                 passwordEncoder,
-                createStoreService,
+                storeProvisioning,
                 jwtService
         );
     }
@@ -95,7 +96,7 @@ class RegisterMerchantServiceTest {
         assertTrue(result.roles().contains("CUSTOMER"));
 
         verify(userRepository).save(any(User.class));
-        verify(createStoreService).execute(any(CreateStoreCommand.class));
+        verify(storeProvisioning).provisionStore(any(StoreProvisioningData.class));
         verify(jwtService).generateToken(any(), anySet());
     }
 
@@ -139,7 +140,7 @@ class RegisterMerchantServiceTest {
         assertTrue(result.roles().contains("CUSTOMER"));
 
         assertTrue(existingCustomer.hasRole(RoleName.MERCHANT));
-        verify(createStoreService).execute(any(CreateStoreCommand.class));
+        verify(storeProvisioning).provisionStore(any(StoreProvisioningData.class));
     }
 
     @Test
@@ -178,7 +179,7 @@ class RegisterMerchantServiceTest {
 
         assertEquals("MERCHANT_ALREADY_EXISTS", exception.getCode());
         verify(userRepository, never()).save(any(User.class));
-        verify(createStoreService, never()).execute(any(CreateStoreCommand.class));
+        verify(storeProvisioning, never()).provisionStore(any(StoreProvisioningData.class));
     }
 
     @Test
@@ -218,7 +219,7 @@ class RegisterMerchantServiceTest {
 
         assertTrue(exception.getMessage().contains("contraseña"));
         verify(userRepository, never()).save(any(User.class));
-        verify(createStoreService, never()).execute(any(CreateStoreCommand.class));
+        verify(storeProvisioning, never()).provisionStore(any(StoreProvisioningData.class));
     }
 
     @Test
@@ -244,7 +245,7 @@ class RegisterMerchantServiceTest {
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(createStoreService.execute(any(CreateStoreCommand.class)))
+        when(storeProvisioning.provisionStore(any(StoreProvisioningData.class)))
                 .thenThrow(new ConflictException("STORE_SLUG_ALREADY_EXISTS", "El slug ya existe"));
 
         ConflictException exception = assertThrows(
@@ -254,5 +255,85 @@ class RegisterMerchantServiceTest {
 
         assertEquals("STORE_SLUG_ALREADY_EXISTS", exception.getCode());
         verify(jwtService, never()).generateToken(any(), anySet());
+    }
+
+    @Test
+    @DisplayName("Mapear los 20 campos exactos de StoreProvisioningData con los defaults del registro")
+    void provisionStoreWithExactlyTwentyMappedFields() {
+        UUID categoryId = UUID.randomUUID();
+        UUID storeCategoryId = UUID.randomUUID();
+        RegisterMerchantCommand command = new RegisterMerchantCommand(
+                "nuevo@comercio.com",
+                "password123",
+                "Carlos",
+                "Mendoza",
+                "987654321",
+                "Pastelería Dulce",
+                "Repostería",
+                "911111111",
+                "Av. Principal 123",
+                "Jr. Secundaria 456",
+                new BigDecimal("-12.0464"),
+                new BigDecimal("-77.0428"),
+                true,
+                false,
+                "https://cdn/logo.png",
+                "https://cdn/banner.png",
+                Set.of(categoryId, storeCategoryId)
+        );
+
+        when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
+        when(userRepository.findByEmail("nuevo@comercio.com")).thenReturn(Optional.empty());
+        when(roleRepository.findByName(RoleName.CUSTOMER)).thenReturn(Optional.of(customerRole));
+        when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateToken(any(), anySet())).thenReturn("mocked-jwt-token");
+
+        registerMerchantService.execute(command);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        UUID savedUserId = userCaptor.getValue().getId();
+
+        ArgumentCaptor<StoreProvisioningData> dataCaptor =
+                ArgumentCaptor.forClass(StoreProvisioningData.class);
+        verify(storeProvisioning).provisionStore(dataCaptor.capture());
+        StoreProvisioningData data = dataCaptor.getValue();
+
+        // 1. ownerUserId: el usuario persistido por identity
+        assertEquals(savedUserId, data.ownerUserId());
+        // 2. name: storeName del formulario
+        assertEquals("Pastelería Dulce", data.name());
+        // 3. slug: null (lo resuelve CreateStoreService)
+        assertNull(data.slug());
+        // 4. description: businessType del formulario
+        assertEquals("Repostería", data.description());
+        // 5. contactPhone: fallback storeContactPhone (no vacío) en vez de phone
+        assertEquals("911111111", data.contactPhone());
+        // 6-7. address / addressReference
+        assertEquals("Av. Principal 123", data.address());
+        assertEquals("Jr. Secundaria 456", data.addressReference());
+        // 8-9. latitude / longitude
+        assertEquals(0, new BigDecimal("-12.0464").compareTo(data.latitude()));
+        assertEquals(0, new BigDecimal("-77.0428").compareTo(data.longitude()));
+        // 10-11. pickupEnabled / deliveryEnabled
+        assertTrue(data.pickupEnabled());
+        assertFalse(data.deliveryEnabled());
+        // 12. deliveryFeeAmount: null por defecto en el registro
+        assertNull(data.deliveryFeeAmount());
+        // 13. deliveryFeeCurrency: literal "PEN"
+        assertEquals("PEN", data.deliveryFeeCurrency());
+        // 14. taxRate: literal 18.00
+        assertEquals(0, new BigDecimal("18.00").compareTo(data.taxRate()));
+        // 15-16. logoUrl / bannerUrl
+        assertEquals("https://cdn/logo.png", data.logoUrl());
+        assertEquals("https://cdn/banner.png", data.bannerUrl());
+        // 17-18. instagramUrl / facebookUrl: null por defecto en el registro
+        assertNull(data.instagramUrl());
+        assertNull(data.facebookUrl());
+        // 19. whatsappNumber: derivado del mismo contactPhone
+        assertEquals(data.contactPhone(), data.whatsappNumber());
+        // 20. categoryIds
+        assertEquals(Set.of(categoryId, storeCategoryId), data.categoryIds());
     }
 }

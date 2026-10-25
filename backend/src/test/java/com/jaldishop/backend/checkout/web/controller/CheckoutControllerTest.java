@@ -11,7 +11,7 @@ import com.jaldishop.backend.checkout.web.dto.CheckoutItemResponse;
 import com.jaldishop.backend.checkout.web.dto.CheckoutPricingResponse;
 import com.jaldishop.backend.checkout.web.dto.CheckoutResponse;
 import com.jaldishop.backend.checkout.web.mapper.CheckoutResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;

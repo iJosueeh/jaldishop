@@ -42,12 +42,12 @@ class AuthControllerTest {
 
     private MockMvc mockMvc;
     private UUID testUserId;
-    private com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal currentPrincipal;
+    private com.jaldishop.backend.shared.security.JwtPrincipal currentPrincipal;
 
     @BeforeEach
     void setUp() {
         testUserId = UUID.randomUUID();
-        currentPrincipal = new com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal(testUserId, Set.of("CUSTOMER"));
+        currentPrincipal = new com.jaldishop.backend.shared.security.JwtPrincipal(testUserId, Set.of("CUSTOMER"));
 
         AuthController controller = new AuthController(
                 authenticateUserService,

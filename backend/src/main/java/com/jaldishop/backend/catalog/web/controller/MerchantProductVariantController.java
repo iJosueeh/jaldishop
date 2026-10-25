@@ -11,7 +11,7 @@ import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

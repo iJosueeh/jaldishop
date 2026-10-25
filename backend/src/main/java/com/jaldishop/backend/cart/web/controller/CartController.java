@@ -15,7 +15,7 @@ import com.jaldishop.backend.cart.web.dto.AddItemToCartRequest;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import com.jaldishop.backend.cart.web.dto.UpdateCartItemRequest;
 import com.jaldishop.backend.cart.web.mapper.CartResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

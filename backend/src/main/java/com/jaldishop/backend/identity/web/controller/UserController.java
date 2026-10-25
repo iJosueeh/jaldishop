@@ -4,7 +4,7 @@ import com.jaldishop.backend.identity.application.GetMyProfileService;
 import com.jaldishop.backend.identity.application.UpdateProfileCommand;
 import com.jaldishop.backend.identity.application.UpdateProfileService;
 import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.UpdateUserRequest;
 import com.jaldishop.backend.identity.web.dto.UserProfileResponse;
 import jakarta.validation.Valid;

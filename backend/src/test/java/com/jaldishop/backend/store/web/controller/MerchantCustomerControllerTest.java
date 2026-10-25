@@ -1,11 +1,12 @@
 package com.jaldishop.backend.store.web.controller;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.GetStoreCustomersService;
 import com.jaldishop.backend.store.application.StoreContextService;
-import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
+import com.jaldishop.backend.store.domain.StoreCustomerSummary;
+import com.jaldishop.backend.store.web.mapper.StoreCustomerResponseMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,8 @@ class MerchantCustomerControllerTest {
 
         MerchantCustomerController controller = new MerchantCustomerController(
                 storeContextService,
-                getStoreCustomersService
+                getStoreCustomersService,
+                new StoreCustomerResponseMapper()
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -82,7 +84,7 @@ class MerchantCustomerControllerTest {
     @DisplayName("GET /api/v1/merchant/customers - Retorna 200 OK con lista de clientes de la tienda")
     void shouldReturnCustomersList() throws Exception {
         UUID customerId = UUID.randomUUID();
-        StoreCustomerResponse response = new StoreCustomerResponse(
+        StoreCustomerSummary summary = new StoreCustomerSummary(
                 customerId,
                 "Carlos",
                 "García",
@@ -95,7 +97,7 @@ class MerchantCustomerControllerTest {
         );
 
         when(storeContextService.requireStoreId(any())).thenReturn(testStoreId);
-        when(getStoreCustomersService.execute(testStoreId, null)).thenReturn(List.of(response));
+        when(getStoreCustomersService.execute(testStoreId, null)).thenReturn(List.of(summary));
 
         mockMvc.perform(get("/api/v1/merchant/customers")
                         .contentType(MediaType.APPLICATION_JSON))

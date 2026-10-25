@@ -6,7 +6,7 @@ import com.jaldishop.backend.checkout.application.InitiateCheckoutService;
 import com.jaldishop.backend.checkout.web.dto.CheckoutResponse;
 import com.jaldishop.backend.checkout.web.dto.InitiateCheckoutRequest;
 import com.jaldishop.backend.checkout.web.mapper.CheckoutResponseMapper;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,7 +4,7 @@ import com.jaldishop.backend.capacity.application.availability.EffectiveCapacity
 import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
 import com.jaldishop.backend.capacity.application.availability.EffectiveCapacitySource;
 import com.jaldishop.backend.capacity.application.availability.GetEffectiveCapacityService;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.store.application.StoreContextService;

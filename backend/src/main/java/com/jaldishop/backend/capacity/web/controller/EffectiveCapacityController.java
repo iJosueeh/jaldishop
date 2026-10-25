@@ -4,7 +4,7 @@ import com.jaldishop.backend.capacity.application.availability.EffectiveCapacity
 import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
 import com.jaldishop.backend.capacity.application.availability.GetEffectiveCapacityService;
 import com.jaldishop.backend.capacity.web.dto.EffectiveCapacityResponse;
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.StoreContextService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;

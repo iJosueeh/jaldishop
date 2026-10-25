@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.application;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.domain.Store;
 import com.jaldishop.backend.store.domain.StoreStatus;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,6 +1,6 @@
 package com.jaldishop.backend.notification.web.controller;
 
-import com.jaldishop.backend.identity.infrastructure.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.notification.application.*;
 import com.jaldishop.backend.notification.domain.Notification;
 import com.jaldishop.backend.notification.web.dto.NotificationResponse;
