@@ -4,8 +4,6 @@ import com.jaldishop.backend.identity.domain.*;
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
-import com.jaldishop.backend.store.application.CreateStoreCommand;
-import com.jaldishop.backend.store.application.CreateStoreService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,14 +21,14 @@ public class RegisterMerchantService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CreateStoreService createStoreService;
+    private final StoreProvisioning storeProvisioning;
     private final JwtService jwtService;
 
-    public RegisterMerchantService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, CreateStoreService createStoreService, JwtService jwtService) {
+    public RegisterMerchantService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, StoreProvisioning storeProvisioning, JwtService jwtService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-        this.createStoreService = createStoreService;
+        this.storeProvisioning = storeProvisioning;
         this.jwtService = jwtService;
     }
 
@@ -80,7 +78,7 @@ public class RegisterMerchantService {
                 ? command.storeContactPhone()
                 : command.phone();
 
-        CreateStoreCommand storeCommand = new CreateStoreCommand(
+        StoreProvisioningData provisioningData = new StoreProvisioningData(
                 user.getId(),
                 command.storeName(),
                 null,
@@ -103,7 +101,7 @@ public class RegisterMerchantService {
                 command.categoryIds()
         );
 
-        var store = createStoreService.execute(storeCommand);
+        storeProvisioning.provisionStore(provisioningData);
         user.addRole(merchantRole);
 
         Set<String> roleName = user.getRoles().stream()
