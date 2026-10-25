@@ -14,7 +14,7 @@
 
 ## 1. Propósito
 
-Este documento define la **convención de paquetes del backend** (`com.jaldishop.backend`), acordada por el equipo tras la auditoría de organización de paquetes (345 clases `main` / 114 `test`), y las **reglas de dependencia** permitidas entre módulos.
+Este documento define la **convención de paquetes del backend** (`com.jaldishop.backend`), acordada por el equipo tras la auditoría de organización de paquetes (345 clases `main` / 114 `test` en F0), y las **reglas de dependencia** permitidas entre módulos.
 
 Distingue claramente entre:
 
@@ -55,7 +55,7 @@ Reglas fijas:
 3. **El umbral de clases es orientativo, no obligatorio**: como referencia, ~15 clases y ≥ 2 grupos cohesivos de ≥ 4 clases. La decisión final la da la cohesión real, no el número.
 4. **Prohibido agrupar por tipo:** no existirán carpetas `service/`, `command/`, `query/`, `result/`, `port/` ni similares dentro de `application`.
 5. Decisión por módulo (aprobada):
-   - **`capacity/application` → subdividir** en `configuration/`, `reservation/` y `availability/`. *(Aprobado; **pendiente de ejecución** en fase propia — no se ha movido todavía ninguna clase.)*
+   - **`capacity/application` → subdividir** en `configuration/`, `reservation/` y `availability/`. *(Aprobado y **ejecutado en `main`** vía PR #65: las clases ya viven en esos subpaquetes — 12 / 5 / 9.)*
      - `configuration/` (~12): creación/actualización/toggle/consulta de configuraciones y excepciones de capacidad.
      - `reservation/` (~5): crear, confirmar, liberar y consultar reservas de capacidad.
      - `availability/` (~9): motor de disponibilidad (`EffectiveCapacity*`, `GetCapacityAvailabilityService`, `ListStoreCapacitySlotsService`, `CapacitySlotAvailability`).
@@ -89,13 +89,13 @@ Matriz permitida (de izquierda a derecha desde cualquier clase):
 | cualquier módulo → `shared.*` | ✅ Siempre | — |
 | `X.application` / `X.web` → `Y.domain` | ✅ Sí | Solo si no crea ciclo entre módulos |
 | `X.web` → `Y.application` | ✅ Sí | Patrón de consumo (controllers usando servicios ajenos) |
-| `X.application` → `Y.application` | ⚠️ Solo orquestadores declarados | Hoy: `checkout → capacity/inventory/ordering`, `identity → store` (registro de merchant). Prohibido en `domain` e `infrastructure` |
-| cualquier módulo → `Y.infrastructure` | ❌ No | **Deuda DEUDA-ARC-03** (ver §4): `JwtPrincipal` |
-| cualquier módulo → `Y.web` | ❌ Nunca | **Deuda DEUDA-ARC-01** (ver §4): DTOs en `store` |
+| `X.application` → `Y.application` | ⚠️ Solo orquestadores declarados | Hoy: `checkout → capacity/inventory/ordering`, `store → identity` (implementación del puerto `identity.application.StoreProvisioning` desde `store.application` para el registro de merchant; antes `identity → store`, excepción retirada en E4). Prohibido en `domain` e `infrastructure` |
+| cualquier módulo → `Y.infrastructure` | ❌ No | **DEUDA-ARC-03 resuelta (E1)**: `JwtPrincipal` ahora en `shared/security`. Permanece `store.infrastructure → identity.infrastructure` (`UserEntity`/`UserJpaRepository`), registrado como vuelta de identity↔store en **DEUDA-ARC-02** (ver §4) |
+| cualquier módulo → `Y.web` | ❌ Nunca | Sin violaciones desde **E2**: **DEUDA-ARC-01** resuelta con `StoreCustomerSummary` (ver §4) |
 
 Reglas complementarias:
 
-- **Ciclos entre módulos prohibidos.** Hoy existen 3 (§4); no se introduzcan nuevos.
+- **Ciclos entre módulos prohibidos.** Hoy existen 2 (§4); no se introduzcan nuevos.
 - **Los módulos no deben conocer los paquetes internos de otros módulos más allá de `domain`** salvo la excepción de orquestadores.
 - La verificación de esta matriz es **manual hoy**; se contempla un test de arquitectura automatizado en una fase posterior (F5).
 
@@ -103,29 +103,29 @@ Reglas complementarias:
 
 ## 4. Deuda existente (problemas pendientes — NO son la convención)
 
-Registrada con evidencia de archivos en `main`. **Ninguno de estos puntos está resuelto ni debe entenderse como patrón a seguir.**
+Registrada con evidencia de archivos. Los puntos resueltos por la rama `refactor/backend-architecture-cleanup` se marcan ✅ con su etapa (E1–E3) y se conservan como histórico; **los pendientes no están resueltos ni deben entenderse como patrón a seguir**.
 
-### DEUDA-ARC-01 — DTO web dentro de `store` (capas invertidas)
+### DEUDA-ARC-01 — DTO web dentro de `store` (capas invertidas) — ✅ Resuelto (E2)
 
-| Archivo | Capa | Importa |
+| Archivo (antes de E2) | Capa | Importaba |
 |---|---|---|
 | `store/domain/StoreCustomerRepository.java:3` | domain | `store.web.dto.StoreCustomerResponse` |
 | `store/application/GetStoreCustomersService.java:4` | application | `store.web.dto.StoreCustomerResponse` |
 | `store/infrastructure/persistence/adapter/StoreCustomerRepositoryAdapter.java:6` | infrastructure | `store.web.dto.StoreCustomerResponse` |
 
-La interfaz de repositorio del dominio devuelve una respuesta HTTP. Su arreglo **exige cambiar una interfaz pública** → tarjeta propia; prohibido en esta fase.
+La interfaz de repositorio del dominio devolvía una respuesta HTTP. Su arreglo **exigía cambiar una interfaz pública** → por eso quedó como tarjeta propia. **Resuelto en E2:** el dominio expone el read-model `store/domain/StoreCustomerSummary` (`findCustomersByStoreId` devuelve `List<StoreCustomerSummary>`), `GetStoreCustomersService` y el adaptador devuelven ese tipo, y el mapeo a DTO vive en `store/web/mapper/StoreCustomerResponseMapper` (patrón `AdminStoreResponseMapper`). Hoy: 0 imports de `store.web.dto` fuera de `web`.
 
-### DEUDA-ARC-02 — Ciclos de módulo (3)
+### DEUDA-ARC-02 — Ciclos de módulo (2)
 
 | Ciclo | Aristas causantes | Evaluación |
 |---|---|---|
-| **identity ↔ store** | `identity/application/RegisterMerchantService` → `store.application.{CreateStoreCommand, CreateStoreService}`; vuelta por `UserRepository`/`UserJpaRepository`/`UserEntity` (4 vías) | Romperlo requiere diseño (puerto inverso), no solo mover archivos. Decisión **D1** pendiente |
+| **identity ↔ store** | **Inversión ejecutada en E4:** `identity/application/RegisterMerchantService` ya no importa `store` (puerto `identity.application.StoreProvisioning`, implementado en `store.application` y declarado en §3; antes → `store.application.{CreateStoreCommand, CreateStoreService}`). **Pendiente:** `identity/web/mapper/AdminUserResponseMapper` → `store.domain.{Store, StoreRepository}` (no tocado en E4); vuelta por `store.*` → `identity.*` (`UserRepository`, `UserJpaRepository`/`UserEntity`, `store.application → identity.application`) | **El par sigue existiendo a nivel de módulo** y no se afirma eliminado. La deuda restante es la capa `web` de identity mostrando datos de tienda; inversión aprobada en **D1**, cierre total pendiente |
 | **checkout ↔ inventory** | `inventory/application/ReserveInventoryService` → `checkout.domain.CheckoutItemSnapshot`; vuelta por `InitiateCheckoutService`/`ConfirmPurchaseService` | Decisión **D2** pendiente: la propuesta revisada es un **contrato independiente en `inventory/domain`** (`InventoryReservationItem`), **no** mover `CheckoutItemSnapshot` a inventory (invertiría la semántica: precios/presentación en el módulo de stock). *No implementado.* |
-| **store ↔ media** | `media/application/GenerateUploadSignatureService` → `store.domain.{Store,StoreRepository}`; `store/application/CloseMyStoreService` → `media.domain.MediaStorageService` | Decisión **D3** pendiente (puerto de borrado de medios) |
+| **store ↔ media** | ✅ **Roto en E3:** `store/application/CloseMyStoreService` ya no importa `media`; usa el puerto `store/domain/StoreMediaCleaner`, implementado por `media/application/StoreMediaCleanupAdapter`. Se conserva la dirección permitida `media → store` (`X.application` → `Y.domain`) | Sin ciclo: queda una sola arista (D3 ejecutada en E3) |
 
-### DEUDA-ARC-03 — `JwtPrincipal` en infraestructura
+### DEUDA-ARC-03 — `JwtPrincipal` en infraestructura — ✅ Resuelto (E1)
 
-`identity/infrastructure/security/JwtPrincipal` es importado por **7 controllers** de capacity, cart, catalog, checkout, media, notification y store: toda la API depende de la infraestructura de seguridad de identity (arista `→ Y.infrastructure`, prohibida en §3). Moverlo a `shared/security` toca ~12 archivos en 7 módulos → fase F5 con todas las ramas verdes.
+`identity/infrastructure/security/JwtPrincipal` era importado por **7 controllers** de capacity, cart, catalog, checkout, media, notification y store: toda la API dependía de la infraestructura de seguridad de identity (arista `→ Y.infrastructure`, prohibida en §3). **Resuelto en E1:** el archivo vive en `shared/security/JwtPrincipal` (35 archivos tocados, solo package/imports) y `shared.*` es siempre permitido (§3). Permanece la arista `store.infrastructure → identity.infrastructure` (`UserEntity`/`UserJpaRepository`), registrada como vuelta de identity↔store en DEUDA-ARC-02.
 
 ### Otras observaciones registradas
 
@@ -141,7 +141,7 @@ La interfaz de repositorio del dominio devuelve una respuesta HTTP. Su arreglo *
 
 ## 5. Fases de refactorización pendientes de aprobación
 
-Solo documentación hoy (F0). Ninguna fase está ejecutada.
+Solo documentación hoy (F0). F4 y F5 se ejecutaron **parcialmente** en la rama `refactor/backend-architecture-cleanup` (E1–E4); F1–F3 siguen sin ejecutarse.
 
 | Fase | Cambio | Estado |
 |---|---|---|
@@ -149,10 +149,10 @@ Solo documentación hoy (F0). Ninguna fase está ejecutada.
 | **F1** | Eliminar `ordering/web/**` (3 clases muertas) | Bloqueada: confirmación con Mia |
 | **F2** | Mover `SlugUtils` de `catalog/application` a `catalog/domain` | Pendiente de aprobación |
 | **F3** | Contrato independiente `InventoryReservationItem` en `inventory/domain` (reemplaza a la propuesta anterior de mover `CheckoutItemSnapshot`) | Pendiente de decisión D2 |
-| **F4** | Ciclo identity↔store (puerto inverso, D1) | Pendiente de decisión |
-| **F5** | Ciclo store↔media (D3) + `JwtPrincipal` → `shared/security` (DEUDA-ARC-03) + test de arquitectura de la matriz §3 | Pendiente de decisión |
+| **F4** | Ciclo identity↔store (puerto inverso, D1) | **Ejecutado parcialmente (E4):** puerto `StoreProvisioning` implementado e `identity/application` sin imports de `store`; el par de módulos sigue pendiente por `identity.web → store.domain` (DEUDA-ARC-02) |
+| **F5** | Ciclo store↔media (D3) + `JwtPrincipal` → `shared/security` (DEUDA-ARC-03) + test de arquitectura de la matriz §3 | **Ejecutado parcialmente:** `JwtPrincipal` → `shared/security` (E1) y ciclo store↔media roto con `StoreMediaCleaner` (E3); test de arquitectura de §3 **pendiente** |
 
-**Regla de oro por fase:** una fase = un PR pequeño y verificable (`mvnw clean test` con línea base actual de 560 tests verdes, `git diff` limitado a los archivos esperados). Si el diff supera lo estimado, se detiene y se re-planifica. Ninguna fase toca `SecurityConfig`, `GlobalExceptionHandler`, contratos REST, migraciones Flyway ni lógica de negocio.
+**Regla de oro por fase:** una fase = un PR pequeño y verificable (`mvnw clean test` con línea base actual de 572 tests verdes, `git diff` limitado a los archivos esperados). Si el diff supera lo estimado, se detiene y se re-planifica. Ninguna fase toca `SecurityConfig`, `GlobalExceptionHandler`, contratos REST, migraciones Flyway ni lógica de negocio.
 
 ---
 
@@ -172,3 +172,4 @@ Solo documentación hoy (F0). Ninguna fase está ejecutada.
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-10-24 | v1.0 | F0: convención aprobada (§2), matriz de dependencias (§3), deuda existente DEUDA-ARC-01..03 y OBS (§4), plan de fases (§5), zonas activas (§6) |
+| 2026-10-24 | v1.1 | Actualización tras E1–E4 de la rama `refactor/backend-architecture-cleanup`: `JwtPrincipal` → `shared/security` (E1, DEUDA-ARC-03 ✅), read-model `StoreCustomerSummary` (E2, DEUDA-ARC-01 ✅), puerto `StoreMediaCleaner` rompe store↔media (E3), inversión `StoreProvisioning` del registro (E4); matriz §3 con la arista `store → identity` declarada y la excepción `identity → store` retirada; ciclos 3 → 2; capacity subdivision reflejada (PR #65) |
