@@ -1,11 +1,10 @@
 package com.jaldishop.backend.checkout.application;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.sql.*;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -35,32 +34,22 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
     private static final UUID PRODUCT_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf201");
 
     @BeforeAll
-    static void initDatabase() {
-        String envDir = new File("backend/.env").exists() ? "./backend" : "./";
-        Dotenv dotenv = Dotenv.configure()
-                .directory(envDir)
-                .ignoreIfMissing()
-                .load();
+    static void initDatabase() throws SQLException {
+        TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+        dbUrl = config.url();
+        dbUser = config.username();
+        dbPassword = config.password();
 
-        dbUrl = dotenv.get("DB_URL", System.getenv("DB_URL"));
-        dbUser = dotenv.get("DB_USERNAME", System.getenv("DB_USERNAME"));
-        dbPassword = dotenv.get("DB_PASSWORD", System.getenv("DB_PASSWORD"));
-
-        if (dbUrl != null && !dbUrl.isBlank() && dbUser != null) {
-            try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
-                dbAvailable = true;
-                Flyway flyway = Flyway.configure()
-                        .dataSource(dbUrl, dbUser, dbPassword)
-                        .locations("classpath:db/migration")
-                        .validateOnMigrate(false)
-                        .load();
-                MigrateResult result = flyway.migrate();
-                System.out.println("ConfirmPurchaseConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
-                cleanUpTestData();
-            } catch (Exception e) {
-                System.err.println("Database connection or Flyway failed: " + e.getMessage());
-                dbAvailable = false;
-            }
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            Flyway flyway = Flyway.configure()
+                    .dataSource(dbUrl, dbUser, dbPassword)
+                    .locations("classpath:db/migration")
+                    .validateOnMigrate(false)
+                    .load();
+            MigrateResult result = flyway.migrate();
+            System.out.println("ConfirmPurchaseConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
+            dbAvailable = true;
+            cleanUpTestData();
         }
     }
 
@@ -116,12 +105,11 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
                 System.out.println("ConfirmPurchaseConcurrencyIntegrationTest: Datos de prueba limpiados exitosamente.");
             }
         } catch (Exception e) {
-            System.err.println("Advertencia: Falló la limpieza de datos de prueba: " + e.getMessage());
+            throw new IllegalStateException("Test database cleanup failed.", e);
         }
     }
 
     private Connection getConnection() throws SQLException {
-        Assumptions.assumeTrue(dbAvailable, "Base de datos PostgreSQL no disponible para integration tests.");
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
         conn.setAutoCommit(false);
         return conn;
