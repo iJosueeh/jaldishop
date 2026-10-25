@@ -1,11 +1,10 @@
 package com.jaldishop.backend.checkout.application;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.*;
 
-import java.io.File;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,34 +29,24 @@ class CheckoutHoldConcurrencyIntegrationTest {
     private static final UUID CAPACITY_CONFIG_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9c1");
 
     @BeforeAll
-    static void initDatabase() {
-        String envDir = new File("backend/.env").exists() ? "./backend" : "./";
-        Dotenv dotenv = Dotenv.configure()
-                .directory(envDir)
-                .ignoreIfMissing()
-                .load();
+    static void initDatabase() throws SQLException {
+        TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+        dbUrl = config.url();
+        dbUser = config.username();
+        dbPassword = config.password();
 
-        dbUrl = dotenv.get("DB_URL", System.getenv("DB_URL"));
-        dbUser = dotenv.get("DB_USERNAME", System.getenv("DB_USERNAME"));
-        dbPassword = dotenv.get("DB_PASSWORD", System.getenv("DB_PASSWORD"));
-
-        if (dbUrl != null && !dbUrl.isBlank() && dbUser != null) {
-            try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
-                dbAvailable = true;
-                // Run Flyway migrations V1 through V14 to ensure DB is initialized in CI
-                Flyway flyway = Flyway.configure()
-                        .dataSource(dbUrl, dbUser, dbPassword)
-                        .locations("classpath:db/migration")
-                        .validateOnMigrate(false)
-                        .load();
-                MigrateResult result = flyway.migrate();
-                System.out.println("CheckoutHoldConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
-                // Limpiar cualquier residuo de ejecuciones anteriores
-                cleanUpTestData();
-            } catch (Exception e) {
-                System.err.println("Database connection or Flyway failed: " + e.getMessage());
-                dbAvailable = false;
-            }
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            // Run Flyway migrations V1 through V14 to ensure DB is initialized in CI
+            Flyway flyway = Flyway.configure()
+                    .dataSource(dbUrl, dbUser, dbPassword)
+                    .locations("classpath:db/migration")
+                    .validateOnMigrate(false)
+                    .load();
+            MigrateResult result = flyway.migrate();
+            System.out.println("CheckoutHoldConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");
+            dbAvailable = true;
+            // Limpiar cualquier residuo de ejecuciones anteriores
+            cleanUpTestData();
         }
     }
 
@@ -98,15 +87,25 @@ class CheckoutHoldConcurrencyIntegrationTest {
                 System.out.println("CheckoutHoldConcurrencyIntegrationTest: Datos de prueba limpiados exitosamente.");
             }
         } catch (Exception e) {
-            System.err.println("Advertencia: Falló la limpieza de datos de prueba: " + e.getMessage());
+            throw new IllegalStateException("Test database cleanup failed.", e);
         }
     }
 
     private Connection getConnection() throws SQLException {
-        Assumptions.assumeTrue(dbAvailable, "Base de datos PostgreSQL no disponible para integration tests.");
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
         conn.setAutoCommit(false);
         return conn;
+    }
+
+    private static void awaitFutures(Future<?>... futures) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+        for (Future<?> future : futures) {
+            try {
+                future.get(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+            } catch (ExecutionException e) {
+                throw new AssertionError("Concurrent checkout failed unexpectedly.", e.getCause());
+            }
+        }
     }
 
     private void createTestUser(Connection conn, UUID userId) throws SQLException {
@@ -363,7 +362,6 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
 
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
@@ -377,9 +375,9 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
         };
 
@@ -392,19 +390,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
         };
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        executor.submit(taskA);
-        executor.submit(taskB);
-
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(1, successCount.get(), "Exactamente 1 checkout debe tener éxito");
         assertEquals(1, insufficientStockCount.get(), "Exactamente 1 checkout debe fallar con INSUFFICIENT_STOCK");
@@ -444,13 +445,11 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
 
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        executor.submit(() -> {
+        Runnable taskA = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerA, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -459,13 +458,13 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        executor.submit(() -> {
+        Runnable taskB = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerB, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -474,15 +473,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(1, successCount.get(), "Solo 1 checkout puede reservar 4 unidades de las 5 disponibles");
         assertEquals(1, insufficientStockCount.get(), "El segundo debe fallar con INSUFFICIENT_STOCK");
@@ -511,16 +517,12 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
-
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
         AtomicInteger deadlockCount = new AtomicInteger(0);
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
         // Customer A solicita [V1, V2]
-        executor.submit(() -> {
+        Runnable taskA = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerA, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -531,14 +533,14 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     deadlockCount.incrementAndGet();
                 } else if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
         // Customer B solicita orden inverso [V2, V1]
-        executor.submit(() -> {
+        Runnable taskB = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerB, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -549,15 +551,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     deadlockCount.incrementAndGet();
                 } else if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(0, deadlockCount.get(), "El orden canónico DEBE evitar deadlocks en PostgreSQL");
         assertEquals(1, successCount.get(), "Un checkout obtiene ambos recursos");

@@ -1,7 +1,8 @@
 package com.jaldishop.backend.identity.application;
 
 import com.jaldishop.backend.shared.exception.ConflictException;
-import io.github.cdimascio.dotenv.Dotenv;
+import com.jaldishop.backend.testutil.TestPostgresConfig;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -10,14 +11,21 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * proxies transaccionales reales de RegisterMerchantService/CreateStoreService.
  */
 @SpringBootTest
+@Import(RegisterMerchantRollbackIntegrationTest.SafeTestDatabase.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RegisterMerchantRollbackIntegrationTest {
 
@@ -44,31 +53,53 @@ class RegisterMerchantRollbackIntegrationTest {
     private static final String EMAIL_OWNER = "rollback-owner@jaldi.test";
     private static final String EMAIL_CONFLICT = "rollback-conflict@jaldi.test";
 
-    private static String dbUrl;
-    private static String dbUser;
-    private static String dbPassword;
+    private static final TestPostgresConfig database = TestPostgresConfig.fromEnvironment();
 
-    static {
-        String envDir = new File("backend/.env").exists() ? "./backend" : "./";
-        Dotenv dotenv = Dotenv.configure()
-                .directory(envDir)
-                .ignoreIfMissing()
-                .ignoreIfMalformed()
-                .load();
-
-        dotenv.entries().forEach(entry -> {
-            if (System.getenv(entry.getKey()) == null) {
-                System.setProperty(entry.getKey(), entry.getValue());
-            }
-        });
-
-        dbUrl = dotenv.get("DB_URL", System.getenv("DB_URL"));
-        dbUser = dotenv.get("DB_USERNAME", System.getenv("DB_USERNAME"));
-        dbPassword = dotenv.get("DB_PASSWORD", System.getenv("DB_PASSWORD"));
+    @DynamicPropertySource
+    static void configureTestDatabase(DynamicPropertyRegistry registry) {
+        // The static database field is validated before JUnit setup or Spring startup.
+        // Override connection properties with the values used by direct JDBC checks.
+        registry.add("spring.datasource.url", database::url);
+        registry.add("spring.datasource.hikari.jdbc-url", database::url);
+        registry.add("spring.datasource.username", database::username);
+        registry.add("spring.datasource.hikari.username", database::username);
+        registry.add("spring.datasource.password", database::password);
+        registry.add("spring.datasource.hikari.password", database::password);
+        registry.add("spring.flyway.url", database::url);
+        registry.add("spring.flyway.user", database::username);
+        registry.add("spring.flyway.password", database::password);
     }
 
     @Autowired
     private RegisterMerchantService registerMerchantService;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private Flyway flyway;
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class SafeTestDatabase {
+        @Bean
+        DataSource dataSource() {
+            TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+            dataSource.setUrl(config.url());
+            dataSource.setUsername(config.username());
+            dataSource.setPassword(config.password());
+            return dataSource;
+        }
+
+        @Bean(initMethod = "migrate")
+        Flyway flyway(DataSource dataSource) {
+            return Flyway.configure()
+                    .dataSource(dataSource)
+                    .locations("classpath:db/migration")
+                    .validateOnMigrate(false)
+                    .load();
+        }
+    }
 
     @BeforeAll
     static void cleanPreexistingData() throws SQLException {
@@ -81,10 +112,7 @@ class RegisterMerchantRollbackIntegrationTest {
     }
 
     private static void cleanTestData() throws SQLException {
-        if (dbUrl == null || dbUrl.isBlank()) {
-            return;
-        }
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+        try (Connection conn = DriverManager.getConnection(database.url(), database.username(), database.password())) {
             conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(
                     "DELETE FROM store_category_assignments WHERE store_id IN (SELECT id FROM stores WHERE slug = ?)")) {
@@ -112,7 +140,7 @@ class RegisterMerchantRollbackIntegrationTest {
     }
 
     private static int count(String sql, String param) throws SQLException {
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        try (Connection conn = DriverManager.getConnection(database.url(), database.username(), database.password());
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, param);
             try (ResultSet rs = ps.executeQuery()) {
@@ -126,6 +154,12 @@ class RegisterMerchantRollbackIntegrationTest {
     @Order(1)
     @DisplayName("Registro exitoso crea usuario, roles y tienda contra PostgreSQL real")
     void registerMerchantCreatesUserRolesAndStore() throws SQLException {
+        try (Connection springConnection = dataSource.getConnection();
+             Connection flywayConnection = flyway.getConfiguration().getDataSource().getConnection()) {
+            assertEquals(database.url(), springConnection.getMetaData().getURL());
+            assertEquals(database.url(), flywayConnection.getMetaData().getURL());
+        }
+
         RegisterMerchantCommand command = new RegisterMerchantCommand(
                 EMAIL_OWNER,
                 "password123",
