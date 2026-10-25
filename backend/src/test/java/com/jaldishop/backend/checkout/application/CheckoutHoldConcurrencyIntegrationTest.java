@@ -40,7 +40,7 @@ class CheckoutHoldConcurrencyIntegrationTest {
             Flyway flyway = Flyway.configure()
                     .dataSource(dbUrl, dbUser, dbPassword)
                     .locations("classpath:db/migration")
-                    .validateOnMigrate(false)
+                    .validateOnMigrate(config.validateOnMigrate())
                     .load();
             MigrateResult result = flyway.migrate();
             System.out.println("CheckoutHoldConcurrencyIntegrationTest: Flyway migration completed (" + result.migrationsExecuted + " migrations executed).");

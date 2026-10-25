@@ -96,7 +96,7 @@ class RegisterMerchantRollbackIntegrationTest {
             return Flyway.configure()
                     .dataSource(dataSource)
                     .locations("classpath:db/migration")
-                    .validateOnMigrate(false)
+                    .validateOnMigrate(TestPostgresConfig.flywayValidateOnMigrate())
                     .load();
         }
     }

@@ -14,18 +14,28 @@ public final class TestPostgresConfig {
     private final String url;
     private final String username;
     private final String password;
+    private final boolean validateOnMigrate;
 
-    private TestPostgresConfig(String url, String username, String password) {
+    private TestPostgresConfig(String url, String username, String password, boolean validateOnMigrate) {
         this.url = url;
         this.username = username;
         this.password = password;
+        this.validateOnMigrate = validateOnMigrate;
     }
 
     public static TestPostgresConfig fromEnvironment() {
-        return fromValues(System.getenv("DB_URL"), System.getenv("DB_USERNAME"), System.getenv("DB_PASSWORD"));
+        return fromValues(
+                System.getenv("DB_URL"),
+                System.getenv("DB_USERNAME"),
+                System.getenv("DB_PASSWORD"),
+                System.getenv("FLYWAY_VALIDATE_ON_MIGRATE"));
     }
 
     static TestPostgresConfig fromValues(String url, String username, String password) {
+        return fromValues(url, username, password, null);
+    }
+
+    static TestPostgresConfig fromValues(String url, String username, String password, String flywayValidateOnMigrate) {
         if (url == null || username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new IllegalStateException("DB_URL, DB_USERNAME and DB_PASSWORD must be set in the process environment for integration tests.");
         }
@@ -47,7 +57,26 @@ public final class TestPostgresConfig {
             }
         }
 
-        return new TestPostgresConfig(url, username, password);
+        boolean validate = parseValidateOnMigrate(flywayValidateOnMigrate);
+        return new TestPostgresConfig(url, username, password, validate);
+    }
+
+    public static boolean flywayValidateOnMigrate() {
+        return parseValidateOnMigrate(System.getenv("FLYWAY_VALIDATE_ON_MIGRATE"));
+    }
+
+    static boolean parseValidateOnMigrate(String rawValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return false;
+        }
+        String trimmed = rawValue.trim();
+        if (trimmed.equalsIgnoreCase("true")) {
+            return true;
+        }
+        if (trimmed.equalsIgnoreCase("false")) {
+            return false;
+        }
+        throw new IllegalStateException("FLYWAY_VALIDATE_ON_MIGRATE must be either 'true' or 'false' (case-insensitive) if set, but was: " + rawValue);
     }
 
     public String url() {
@@ -60,5 +89,9 @@ public final class TestPostgresConfig {
 
     public String password() {
         return password;
+    }
+
+    public boolean validateOnMigrate() {
+        return validateOnMigrate;
     }
 }
