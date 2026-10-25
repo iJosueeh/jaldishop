@@ -54,12 +54,86 @@ jobs:
         run: chmod +x mvnw
 
       - name: Run Backend Tests
+        id: backend-tests
+        continue-on-error: true
         env:
           DB_URL: jdbc:postgresql://localhost:5432/jaldishop_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgrespassword
           JWT_SECRET: c2VjdXJlX2p3dF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nX3B1cnBvc2VzXzEyMzQ1Njc4OTA=
         run: ./mvnw clean test
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-surefire-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Validate test reports (fail on missing reports, zero tests or skipped tests)
+        if: always()
+        env:
+          MAVEN_OUTCOME: ${{ steps.backend-tests.outcome }}
+        run: |
+          status=0
+          if [ "$MAVEN_OUTCOME" != "success" ]; then
+            echo "::error::Backend tests step did not succeed (outcome: $MAVEN_OUTCOME). See the 'Run Backend Tests' step log for the original Maven error."
+            status=1
+          fi
+
+          python3 - <<'PY' || status=1
+          import glob
+          import os
+          import sys
+          import xml.etree.ElementTree as ET
+
+          REPORTS_DIR = "target/surefire-reports"
+
+          def fail(message):
+              print(f"::error::{message}")
+              sys.exit(1)
+
+          files = sorted(glob.glob(os.path.join(REPORTS_DIR, "TEST-*.xml")))
+          if not files:
+              files = sorted(glob.glob(os.path.join(REPORTS_DIR, "*.xml")))
+          if not files:
+              fail(f"No Surefire XML reports found in '{REPORTS_DIR}' (missing reports directory or no tests executed).")
+
+          total_tests = 0
+          total_skipped = 0
+          for path in files:
+              try:
+                  root = ET.parse(path).getroot()
+              except ET.ParseError as exc:
+                  fail(f"Cannot parse Surefire report '{path}': {exc}")
+              if root.tag == "testsuite":
+                  suites = [root]
+              else:
+                  suites = root.findall(".//testsuite")
+              for suite in suites:
+                  def attr(name):
+                      value = suite.get(name)
+                      return int(value) if value is not None and value.isdigit() else 0
+
+                  tests = attr("tests")
+                  # Detect both skipped and aborted tests: prefer the summary
+                  # attributes, fall back to counting the child elements.
+                  by_attribute = attr("skipped") + attr("aborted")
+                  by_element = len(suite.findall(".//skipped")) + len(suite.findall(".//aborted"))
+                  total_tests += tests
+                  total_skipped += max(by_attribute, by_element)
+
+          if total_tests == 0:
+              fail("Surefire reports exist but no test was executed (sum of 'tests' attributes is 0).")
+          if total_skipped > 0:
+              fail(f"{total_skipped} skipped/aborted test(s) detected in Surefire reports. Integration tests must run, not be skipped.")
+
+          print(f"OK: {total_tests} test(s) executed, 0 skipped, across {len(files)} report file(s).")
+          PY
+
+          exit $status
 
   frontend-merchant-ci:
     name: Frontend Merchant CI (Angular / Vitest)
