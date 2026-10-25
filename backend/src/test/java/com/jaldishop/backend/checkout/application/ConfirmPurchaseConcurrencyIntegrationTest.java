@@ -8,8 +8,10 @@ import org.junit.jupiter.api.*;
 import java.sql.*;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -113,6 +115,17 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
         conn.setAutoCommit(false);
         return conn;
+    }
+
+    private static void awaitFutures(Future<?>... futures) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+        for (Future<?> future : futures) {
+            try {
+                future.get(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+            } catch (ExecutionException e) {
+                throw new AssertionError("Concurrent confirmation failed unexpectedly.", e.getCause());
+            }
+        }
     }
 
     private void createTestUser(Connection conn, UUID userId) throws SQLException {
@@ -384,7 +397,6 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
         paymentId = findPaymentId(capResId);
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
         AtomicInteger committedCount = new AtomicInteger(0);
         AtomicInteger skippedCount = new AtomicInteger(0);
 
@@ -396,18 +408,20 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
                 if ("COMMITTED".equals(outcome)) committedCount.incrementAndGet();
                 else if ("SKIP_COMMITTED".equals(outcome)) skippedCount.incrementAndGet();
             } catch (Exception e) {
-                fail("Confirm concurrente falló inesperadamente: " + e.getMessage());
-            } finally {
-                doneLatch.countDown();
+                throw new AssertionError("Confirm concurrente falló inesperadamente.", e);
             }
         };
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        executor.submit(confirmTask);
-        executor.submit(confirmTask);
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        try {
+            Future<?> first = executor.submit(confirmTask);
+            Future<?> second = executor.submit(confirmTask);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(1, committedCount.get(), "Exactamente 1 confirmación debe hacer el trabajo");
         assertEquals(1, skippedCount.get(), "La otra confirmación debe detectar COMMITTED y no hacer nada");

@@ -97,6 +97,17 @@ class CheckoutHoldConcurrencyIntegrationTest {
         return conn;
     }
 
+    private static void awaitFutures(Future<?>... futures) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+        for (Future<?> future : futures) {
+            try {
+                future.get(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+            } catch (ExecutionException e) {
+                throw new AssertionError("Concurrent checkout failed unexpectedly.", e.getCause());
+            }
+        }
+    }
+
     private void createTestUser(Connection conn, UUID userId) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("""
                 INSERT INTO users (id, email, password_encoded, first_name, last_name, status, created_at, updated_at)
@@ -351,7 +362,6 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
 
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
@@ -365,9 +375,9 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
         };
 
@@ -380,19 +390,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
         };
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        executor.submit(taskA);
-        executor.submit(taskB);
-
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(1, successCount.get(), "Exactamente 1 checkout debe tener éxito");
         assertEquals(1, insufficientStockCount.get(), "Exactamente 1 checkout debe fallar con INSUFFICIENT_STOCK");
@@ -432,13 +445,11 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
 
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        executor.submit(() -> {
+        Runnable taskA = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerA, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -447,13 +458,13 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        executor.submit(() -> {
+        Runnable taskB = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerB, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -462,15 +473,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(1, successCount.get(), "Solo 1 checkout puede reservar 4 unidades de las 5 disponibles");
         assertEquals(1, insufficientStockCount.get(), "El segundo debe fallar con INSUFFICIENT_STOCK");
@@ -499,16 +517,12 @@ class CheckoutHoldConcurrencyIntegrationTest {
         }
 
         CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(2);
-
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger insufficientStockCount = new AtomicInteger(0);
         AtomicInteger deadlockCount = new AtomicInteger(0);
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
         // Customer A solicita [V1, V2]
-        executor.submit(() -> {
+        Runnable taskA = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerA, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -519,14 +533,14 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     deadlockCount.incrementAndGet();
                 } else if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
         // Customer B solicita orden inverso [V2, V1]
-        executor.submit(() -> {
+        Runnable taskB = () -> {
             try (Connection conn = getConnection()) {
                 startLatch.await();
                 executeCheckoutHold(conn, STORE_ID, customerB, CAPACITY_CONFIG_ID, serviceDate, startTime, endTime,
@@ -537,15 +551,22 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     deadlockCount.incrementAndGet();
                 } else if (e.getMessage() != null && e.getMessage().contains("INSUFFICIENT_STOCK")) {
                     insufficientStockCount.incrementAndGet();
+                } else {
+                    throw new AssertionError("Unexpected concurrent checkout failure.", e);
                 }
-            } finally {
-                doneLatch.countDown();
             }
-        });
+        };
 
-        startLatch.countDown();
-        assertTrue(doneLatch.await(15, TimeUnit.SECONDS));
-        executor.shutdown();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> first = executor.submit(taskA);
+            Future<?> second = executor.submit(taskB);
+            startLatch.countDown();
+            awaitFutures(first, second);
+        } finally {
+            startLatch.countDown();
+            executor.shutdownNow();
+        }
 
         assertEquals(0, deadlockCount.get(), "El orden canónico DEBE evitar deadlocks en PostgreSQL");
         assertEquals(1, successCount.get(), "Un checkout obtiene ambos recursos");
