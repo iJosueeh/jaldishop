@@ -5,7 +5,8 @@
 --   1. Enable btree_gist extension for PostgreSQL GiST scalar indexing.
 --   2. Define IMMUTABLE helper function fn_capacity_time_to_int8range mapping [start, end)
 --      into seconds since midnight (supporting full-day slots as [0, 86400)).
---   3. Validate that diagnosed secondary test slot matches expected state and deactivate it.
+--   3. Sanitize diagnosed secondary test slot when present: deactivate it if it matches
+--      the expected state, abort on any mismatch, and skip on fresh databases (no row).
 --   4. Perform strict general pre-validation for capacity_configurations & capacity_exceptions.
 --   5. Add EXCLUDE USING gist constraints preventing overlapping ACTIVE slots.
 -- ==============================================================================
@@ -32,11 +33,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- 3. Targeted Remediation: Verify diagnosed secondary test slot and deactivate it
+-- 3. Targeted Remediation: verify diagnosed secondary test slot (idempotent on fresh databases)
 DO $$
 DECLARE
-    v_matches INTEGER;
+    v_present  INTEGER;
+    v_matches  INTEGER;
 BEGIN
+    SELECT COUNT(*)
+    INTO v_present
+    FROM capacity_configurations
+    WHERE id = 'daf162d3-8f57-4c69-b587-1b81d6364524';
+
+    IF v_present = 0 THEN
+        RAISE NOTICE 'V14: slot diagnostico ausente (base de datos nueva); saneamiento omitido.';
+        RETURN;
+    END IF;
+
     SELECT COUNT(*)
     INTO v_matches
     FROM capacity_configurations
@@ -49,13 +61,13 @@ BEGIN
       AND status = 'ACTIVE';
 
     IF v_matches <> 1 THEN
-        RAISE EXCEPTION 'El slot secundario esperado para saneamiento no coincide con el estado diagnosticado. Abortando V14.';
+        RAISE EXCEPTION 'El slot diagnostico existe pero no coincide con el estado esperado (store_id=80acf0ba-5a79-4888-b00d-b5aef8fcf9e5, day_of_week=6, 14:00:00-16:00:00, max_capacity=8, status=ACTIVE). Abortando V14.';
     END IF;
-END $$;
 
-UPDATE capacity_configurations
-SET status = 'INACTIVE'
-WHERE id = 'daf162d3-8f57-4c69-b587-1b81d6364524';
+    UPDATE capacity_configurations
+    SET status = 'INACTIVE'
+    WHERE id = 'daf162d3-8f57-4c69-b587-1b81d6364524';
+END $$;
 
 -- 4. General Pre-Validation: Detect any remaining overlaps among ACTIVE slots before applying EXCLUDE
 DO $$
