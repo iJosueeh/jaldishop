@@ -7,6 +7,7 @@ import com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPer
 import com.jaldishop.backend.ordering.infrastructure.persistence.repository.OrderJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,8 +45,27 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     }
 
     @Override
+    public List<Order> findByUserId(UUID userId) {
+        return jpaRepository.findByUserIdOrderByConfirmedAtDesc(userId).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Order> findByOrderNumber(String orderNumber) {
+        return jpaRepository.findByOrderNumber(orderNumber).map(mapper::toDomain);
+    }
+
+    @Override
     public long nextOrderNumber() {
         return jpaRepository.nextOrderNumber();
     }
 
+    @Override
+    public boolean hasCompletedOrderWithProduct(UUID userId, UUID productId) {
+        if (userId == null || productId == null) {
+            return false;
+        }
+        return jpaRepository.hasCompletedOrderWithProduct(userId, productId);
+    }
 }
