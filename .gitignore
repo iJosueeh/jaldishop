@@ -22,6 +22,9 @@ target/
 ### Env
 .env
 
+### Node (monorepo root — los subproyectos tienen su propio ignore)
+node_modules/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -37,4 +40,6 @@ build/
 
 ### Screenshots & Temporary Test Outputs ###
 output/
+.agents/
+skills-lock.json
 

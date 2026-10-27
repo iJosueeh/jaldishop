@@ -58,13 +58,18 @@ describe('Backend storefront cart', () => {
     await waitFor(() => expect(cartService.remove).toHaveBeenCalledWith(store.id, 'variant-1'), { timeout: 3000 });
     await waitFor(() => expect(screen.queryByText('Entrega y horarios')).not.toBeInTheDocument(), { timeout: 3000 });
   });
-  it('requires customer authentication without fabricating a saved item', async () => {
+  it('requires customer authentication without fabricating a saved item and displays login/register links', async () => {
     vi.mocked(customerSessionService.get).mockResolvedValue({ authenticated: false });
     setup();
     await waitFor(() => expect(customerSessionService.get).toHaveBeenCalled());
     await waitFor(() => expect(screen.getByRole('button', { name: 'Añadir' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Añadir' }));
-    await screen.findByRole('button', { name: 'Ingresar como cliente' });
+    const loginLink = await screen.findByRole('link', { name: 'Ingresar como cliente' });
+    expect(loginLink).toBeInTheDocument();
+    expect(loginLink).toHaveAttribute('href', expect.stringContaining('/login?redirect='));
+    const registerLink = screen.getByRole('link', { name: '¿No tienes cuenta? Regístrate aquí' });
+    expect(registerLink).toBeInTheDocument();
+    expect(registerLink).toHaveAttribute('href', expect.stringContaining('/registro?redirect='));
     expect(cartService.add).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Carrito, 0 productos' })).toBeInTheDocument();
   });
@@ -88,19 +93,13 @@ describe('Backend storefront cart', () => {
     await waitFor(() => expect(cartService.clear).toHaveBeenCalledWith(store.id));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Carrito, 0 productos' })).toBeInTheDocument());
   });
-  it('resumes the selected variant after customer login succeeds', async () => {
+  it('preserves store navigation context in login and register links when unauthenticated', async () => {
     vi.mocked(customerSessionService.get).mockResolvedValue({ authenticated: false });
-    vi.mocked(customerSessionService.login).mockResolvedValue({ authenticated: true });
-    vi.mocked(cartService.add).mockResolvedValue(filled);
-    vi.mocked(cartService.get).mockResolvedValue(filled);
     setup();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Añadir' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Añadir' }));
-    fireEvent.change(await screen.findByLabelText('Correo'), { target: { value: 'customer@example.test' } });
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'test-password' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Ingresar como cliente' }).closest('form')!);
-    await waitFor(() => expect(cartService.add).toHaveBeenCalledWith(store.id, 'variant-1', 1));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Carrito, 2 productos' })).toBeInTheDocument());
+    const loginLink = await screen.findByRole('link', { name: 'Ingresar como cliente' });
+    expect(loginLink.getAttribute('href')).toContain(encodeURIComponent('/tienda/toddy'));
   });
   it('closes with Escape and returns focus to the trigger', async () => {
     setup();

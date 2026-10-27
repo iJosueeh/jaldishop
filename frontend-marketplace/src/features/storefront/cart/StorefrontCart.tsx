@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 export function StorefrontCart() {
-  const { items, count, subtotal, currency, storeName, store, authenticated, loading, pending, error, loginRequired, dismissLogin, login, logout, clear, retry, changeQuantity } = useStorefrontCart();
+  const { items, count, subtotal, currency, storeName, store, authenticated, loading, pending, error, loginRequired, dismissLogin, logout, clear, retry, changeQuantity } = useStorefrontCart();
   const pathname = usePathname();
   const router = useRouter();
   const [manuallyOpen, setOpen] = useState(false);
@@ -53,16 +53,33 @@ export function StorefrontCart() {
         <button ref={closeRef} type="button" onClick={close} aria-label="Cerrar carrito" className="rounded-full p-2 hover:bg-stone-100 transition-colors"><X className="h-4 w-4" /></button>
       </div>
       {error && <div role="alert" className="mb-4 rounded-[12px] bg-red-50 p-3 text-sm text-red-700">{error}<button type="button" onClick={retry} disabled={pending} className="mt-2 block font-semibold underline">Volver a intentar</button></div>}
-      {loading ? <p role="status" className="py-4 text-sm text-stone-600">Consultando tu carrito...</p> : !authenticated || loginRequired ? <form onSubmit={(event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        void login(String(data.get('email')), String(data.get('password')));
-      }} className="space-y-3">
-        <p className="text-sm text-stone-600">Inicia sesión como cliente para guardar tu carrito y recuperarlo cuando vuelvas.</p>
-        <label className="block text-sm font-semibold">Correo<input required type="email" name="email" autoComplete="username" className="mt-1 w-full rounded-[8px] border border-stone-300 p-2.5 font-normal" /></label>
-        <label className="block text-sm font-semibold">Contraseña<input required type="password" name="password" autoComplete="current-password" className="mt-1 w-full rounded-[8px] border border-stone-300 p-2.5 font-normal" /></label>
-        <button disabled={pending} className="w-full rounded-full bg-[#005141] hover:bg-[#00382d] p-3 font-bold text-white shadow-xs disabled:opacity-50 transition-all active:scale-95">{pending ? 'Iniciando sesión...' : 'Ingresar como cliente'}</button>
-      </form> : !store ? <p className="py-4 text-sm text-stone-600">Explora una tienda para consultar su carrito y elegir productos.</p> : <>
+      {loading ? (
+        <p role="status" className="py-4 text-sm text-stone-600">Consultando tu carrito...</p>
+      ) : !authenticated || loginRequired ? (
+        <div className="space-y-4 py-3">
+          <p className="text-sm text-stone-600 leading-relaxed">
+            Inicia sesión o crea tu cuenta de cliente para guardar tu carrito y realizar pedidos.
+          </p>
+          <div className="flex flex-col gap-2 pt-1">
+            <Link
+              href={`/login?redirect=${encodeURIComponent(store ? `/tienda/${store.slug}` : pathname || '/')}`}
+              onClick={close}
+              className="inline-flex items-center justify-center w-full rounded-full bg-[#005141] hover:bg-[#00382d] p-3 text-sm font-bold text-white shadow-xs transition-all active:scale-95 text-center cursor-pointer"
+            >
+              Ingresar como cliente
+            </Link>
+            <Link
+              href={`/registro?redirect=${encodeURIComponent(store ? `/tienda/${store.slug}` : pathname || '/')}`}
+              onClick={close}
+              className="inline-flex items-center justify-center w-full rounded-full border border-stone-300 hover:bg-stone-50 p-2.5 text-xs font-semibold text-stone-700 transition-colors text-center cursor-pointer"
+            >
+              ¿No tienes cuenta? Regístrate aquí
+            </Link>
+          </div>
+        </div>
+      ) : !store ? (
+        <p className="py-4 text-sm text-stone-600">Explora una tienda para consultar su carrito y elegir productos.</p>
+      ) : <>
       <CartSummarySidebar embedded pending={pending} currency={currency} cart={items} storeName={storeName} subtotal={subtotal}
         onChangeQuantity={changeQuantity} onCheckout={count > 0 ? () => {
           close();
