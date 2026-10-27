@@ -103,6 +103,16 @@ class RegisterMerchantRollbackIntegrationTest {
 
     @BeforeAll
     static void cleanPreexistingData() throws SQLException {
+        // @BeforeAll runs before the Spring context (and its Flyway bean) is created.
+        // Against a fresh CI database this class can be the first to execute, so migrate
+        // here first — same pattern as the other JDBC integration tests — otherwise the
+        // cleanup DELETEs fail with "relation ... does not exist".
+        Flyway.configure()
+                .dataSource(database.url(), database.username(), database.password())
+                .locations("classpath:db/migration")
+                .validateOnMigrate(database.validateOnMigrate())
+                .load()
+                .migrate();
         cleanTestData();
     }
 
