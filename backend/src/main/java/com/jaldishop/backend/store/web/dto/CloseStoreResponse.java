@@ -1,8 +1,8 @@
 package com.jaldishop.backend.store.web.dto;
 
-import com.jaldishop.backend.store.application.CloseStoreResult;
-import com.jaldishop.backend.store.domain.CloseStoreAction;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.application.result.CloseStoreResult;
+import com.jaldishop.backend.store.domain.enums.CloseStoreAction;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 
 import java.util.UUID;
 

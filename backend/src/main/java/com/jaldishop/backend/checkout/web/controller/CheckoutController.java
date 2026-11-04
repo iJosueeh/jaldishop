@@ -1,8 +1,8 @@
 package com.jaldishop.backend.checkout.web.controller;
 
-import com.jaldishop.backend.checkout.application.CheckoutResult;
-import com.jaldishop.backend.checkout.application.InitiateCheckoutCommand;
-import com.jaldishop.backend.checkout.application.InitiateCheckoutService;
+import com.jaldishop.backend.checkout.application.result.CheckoutResult;
+import com.jaldishop.backend.checkout.application.command.InitiateCheckoutCommand;
+import com.jaldishop.backend.checkout.application.service.InitiateCheckoutService;
 import com.jaldishop.backend.checkout.web.dto.CheckoutResponse;
 import com.jaldishop.backend.checkout.web.dto.InitiateCheckoutRequest;
 import com.jaldishop.backend.checkout.web.mapper.CheckoutResponseMapper;

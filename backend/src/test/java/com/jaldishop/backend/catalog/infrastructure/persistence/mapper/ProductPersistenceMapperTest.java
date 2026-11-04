@@ -1,7 +1,15 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.mapper;
+import com.jaldishop.backend.catalog.domain.model.*;
+import com.jaldishop.backend.catalog.domain.enums.*;
+import com.jaldishop.backend.catalog.domain.repository.*;
+import com.jaldishop.backend.catalog.application.command.*;
+import com.jaldishop.backend.catalog.application.query.*;
+import com.jaldishop.backend.catalog.application.service.*;
+import com.jaldishop.backend.catalog.application.util.*;
 
-import com.jaldishop.backend.catalog.domain.Product;
-import com.jaldishop.backend.catalog.domain.ProductStatus;
+
+import com.jaldishop.backend.catalog.domain.model.Product;
+import com.jaldishop.backend.catalog.domain.enums.ProductStatus;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.ProductEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

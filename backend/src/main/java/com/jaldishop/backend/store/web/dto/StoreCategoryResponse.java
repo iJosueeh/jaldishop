@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.web.dto;
 
-import com.jaldishop.backend.store.domain.StoreCategory;
-import com.jaldishop.backend.store.domain.StoreCategoryStatus;
+import com.jaldishop.backend.store.domain.model.StoreCategory;
+import com.jaldishop.backend.store.domain.enums.StoreCategoryStatus;
 
 import java.util.UUID;
 

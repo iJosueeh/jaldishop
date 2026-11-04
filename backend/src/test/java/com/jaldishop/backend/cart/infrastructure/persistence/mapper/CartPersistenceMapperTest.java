@@ -1,7 +1,14 @@
 package com.jaldishop.backend.cart.infrastructure.persistence.mapper;
+import com.jaldishop.backend.cart.domain.model.*;
+import com.jaldishop.backend.cart.domain.repository.*;
+import com.jaldishop.backend.cart.application.command.*;
+import com.jaldishop.backend.cart.application.query.*;
+import com.jaldishop.backend.cart.application.result.*;
+import com.jaldishop.backend.cart.application.service.*;
 
-import com.jaldishop.backend.cart.domain.Cart;
-import com.jaldishop.backend.cart.domain.CartItem;
+
+import com.jaldishop.backend.cart.domain.model.Cart;
+import com.jaldishop.backend.cart.domain.model.CartItem;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartEntity;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartItemEntity;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartItemId;

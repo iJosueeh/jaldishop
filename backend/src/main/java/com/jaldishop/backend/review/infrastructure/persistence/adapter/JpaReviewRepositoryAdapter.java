@@ -1,8 +1,8 @@
 package com.jaldishop.backend.review.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.review.domain.Review;
-import com.jaldishop.backend.review.domain.ReviewRepository;
-import com.jaldishop.backend.review.domain.ReviewStatus;
+import com.jaldishop.backend.review.domain.model.Review;
+import com.jaldishop.backend.review.domain.repository.ReviewRepository;
+import com.jaldishop.backend.review.domain.enums.ReviewStatus;
 import com.jaldishop.backend.review.infrastructure.persistence.entity.ReviewEntity;
 import com.jaldishop.backend.review.infrastructure.persistence.mapper.ReviewPersistenceMapper;
 import com.jaldishop.backend.review.infrastructure.persistence.repository.ReviewJpaRepository;

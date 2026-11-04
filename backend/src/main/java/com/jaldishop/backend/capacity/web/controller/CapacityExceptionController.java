@@ -1,17 +1,17 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.configuration.CreateCapacityExceptionCommand;
-import com.jaldishop.backend.capacity.application.configuration.CreateCapacityExceptionService;
-import com.jaldishop.backend.capacity.application.configuration.GetStoreCapacityExceptionsService;
-import com.jaldishop.backend.capacity.application.configuration.ToggleCapacityExceptionStatusService;
-import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityExceptionCommand;
-import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityExceptionService;
-import com.jaldishop.backend.capacity.domain.CapacityException;
+import com.jaldishop.backend.capacity.application.configuration.command.CreateCapacityExceptionCommand;
+import com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityExceptionService;
+import com.jaldishop.backend.capacity.application.configuration.service.GetStoreCapacityExceptionsService;
+import com.jaldishop.backend.capacity.application.configuration.service.ToggleCapacityExceptionStatusService;
+import com.jaldishop.backend.capacity.application.configuration.command.UpdateCapacityExceptionCommand;
+import com.jaldishop.backend.capacity.application.configuration.service.UpdateCapacityExceptionService;
+import com.jaldishop.backend.capacity.domain.model.CapacityException;
 import com.jaldishop.backend.capacity.web.dto.CapacityExceptionResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityExceptionRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityExceptionRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

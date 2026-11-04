@@ -1,6 +1,6 @@
 package com.jaldishop.backend.checkout.web.dto;
 
-import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
+import com.jaldishop.backend.checkout.domain.enums.CheckoutFulfillmentType;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

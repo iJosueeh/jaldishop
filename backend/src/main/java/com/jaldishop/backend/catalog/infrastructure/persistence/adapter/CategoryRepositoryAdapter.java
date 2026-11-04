@@ -1,7 +1,7 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.catalog.domain.Category;
-import com.jaldishop.backend.catalog.domain.CategoryRepository;
+import com.jaldishop.backend.catalog.domain.model.Category;
+import com.jaldishop.backend.catalog.domain.repository.CategoryRepository;
 import com.jaldishop.backend.catalog.infrastructure.persistence.mapper.CategoryPersistenceMapper;
 import com.jaldishop.backend.catalog.infrastructure.persistence.repository.CategoryJpaRepository;
 import org.springframework.stereotype.Component;

@@ -1,14 +1,24 @@
 package com.jaldishop.backend.catalog.web.controller;
+import com.jaldishop.backend.catalog.domain.model.*;
+import com.jaldishop.backend.catalog.domain.enums.*;
+import com.jaldishop.backend.catalog.domain.repository.*;
+import com.jaldishop.backend.catalog.application.command.*;
+import com.jaldishop.backend.catalog.application.query.*;
+import com.jaldishop.backend.catalog.application.service.*;
+import com.jaldishop.backend.catalog.application.util.*;
 
-import com.jaldishop.backend.catalog.application.CreateProductVariantCommand;
-import com.jaldishop.backend.catalog.application.CreateProductVariantService;
-import com.jaldishop.backend.catalog.application.GetProductVariantsService;
-import com.jaldishop.backend.catalog.application.UpdateProductVariantService;
-import com.jaldishop.backend.catalog.domain.ProductVariant;
+
+import com.jaldishop.backend.catalog.application.command.CreateProductVariantCommand;
+import com.jaldishop.backend.catalog.application.service.CreateProductVariantService;
+import com.jaldishop.backend.catalog.application.service.GetProductVariantsService;
+import com.jaldishop.backend.catalog.application.service.UpdateProductVariantService;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -26,7 +37,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -179,5 +192,75 @@ class MerchantProductVariantControllerTest {
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].presentationName").value("Porción Grande"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants - 403 Forbidden cuando el storeId no pertenece al comerciante")
+    void shouldReturn403WhenStoreNotOwnedOnCreate() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+        doThrow(new AccessDeniedException("Solo los usuarios con el rol MERCHANT pueden realizar esta operación."))
+                .when(storeContextService).validateStoreOwnership(eq(storeId), any());
+
+        String requestJson = """
+                {
+                    "presentationName": "Porción Individual",
+                    "sku": "CHEESE-IND-01",
+                    "priceAmount": 18.50,
+                    "priceCurrency": "PEN",
+                    "tracksInventory": true,
+                    "attributes": []
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants - 409 Conflict cuando el SKU ya existe en la tienda")
+    void shouldReturn409WhenSkuAlreadyExists() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        when(createVariantService.execute(any(CreateProductVariantCommand.class)))
+                .thenThrow(new ConflictException("SKU_ALREADY_EXISTS", "El SKU 'CHEESE-IND-01' ya está en uso"));
+
+        String requestJson = """
+                {
+                    "presentationName": "Porción Individual",
+                    "sku": "CHEESE-IND-01",
+                    "priceAmount": 18.50,
+                    "priceCurrency": "PEN",
+                    "tracksInventory": true,
+                    "attributes": []
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/products/{productId}/variants", storeId, productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SKU_ALREADY_EXISTS"))
+                .andExpect(jsonPath("$.message").value("El SKU 'CHEESE-IND-01' ya está en uso"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId} - 404 Not Found cuando la variante no existe")
+    void shouldReturn404WhenVariantNotFound() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+        UUID variantId = UUID.randomUUID();
+        doNothing().when(storeContextService).validateStoreOwnership(any(), any());
+        when(getVariantsService.execute(variantId, productId, storeId))
+                .thenThrow(new ResourceNotFoundException("Variante no encontrada"));
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}", storeId, productId, variantId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Variante no encontrada"));
     }
 }

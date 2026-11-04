@@ -1,22 +1,31 @@
 package com.jaldishop.backend.cart.web.controller;
+import com.jaldishop.backend.cart.domain.model.*;
+import com.jaldishop.backend.cart.domain.repository.*;
+import com.jaldishop.backend.cart.application.command.*;
+import com.jaldishop.backend.cart.application.query.*;
+import com.jaldishop.backend.cart.application.result.*;
+import com.jaldishop.backend.cart.application.service.*;
 
-import com.jaldishop.backend.cart.application.AddItemToCartCommand;
-import com.jaldishop.backend.cart.application.AddItemToCartService;
-import com.jaldishop.backend.cart.application.CartItemView;
-import com.jaldishop.backend.cart.application.CartView;
-import com.jaldishop.backend.cart.application.ClearCartCommand;
-import com.jaldishop.backend.cart.application.ClearCartService;
-import com.jaldishop.backend.cart.application.GetCartQuery;
-import com.jaldishop.backend.cart.application.GetCartService;
-import com.jaldishop.backend.cart.application.RemoveCartItemCommand;
-import com.jaldishop.backend.cart.application.RemoveCartItemService;
-import com.jaldishop.backend.cart.application.UpdateCartItemQuantityCommand;
-import com.jaldishop.backend.cart.application.UpdateCartItemQuantityService;
+
+import com.jaldishop.backend.cart.application.command.AddItemToCartCommand;
+import com.jaldishop.backend.cart.application.service.AddItemToCartService;
+import com.jaldishop.backend.cart.application.result.CartItemView;
+import com.jaldishop.backend.cart.application.result.CartView;
+import com.jaldishop.backend.cart.application.command.ClearCartCommand;
+import com.jaldishop.backend.cart.application.service.ClearCartService;
+import com.jaldishop.backend.cart.application.query.GetCartQuery;
+import com.jaldishop.backend.cart.application.service.GetCartService;
+import com.jaldishop.backend.cart.application.command.RemoveCartItemCommand;
+import com.jaldishop.backend.cart.application.service.RemoveCartItemService;
+import com.jaldishop.backend.cart.application.command.UpdateCartItemQuantityCommand;
+import com.jaldishop.backend.cart.application.service.UpdateCartItemQuantityService;
 import com.jaldishop.backend.cart.web.dto.CartItemResponse;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import com.jaldishop.backend.cart.web.mapper.CartResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -343,5 +353,175 @@ class CartControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalItems").value(0));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 400 VALIDATION_ERROR cuando la cantidad es menor a 1")
+    void shouldRejectAddItemWithZeroQuantity() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        String json = """
+                {
+                    "storeId": "%s",
+                    "variantId": "%s",
+                    "quantity": 0
+                }
+                """.formatted(testStoreId, variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.quantity").value("La cantidad debe ser al menos 1"));
+
+        verifyNoInteractions(addItemToCartService);
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 400 VALIDATION_ERROR cuando falta storeId")
+    void shouldRejectAddItemWithMissingStoreId() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        String json = """
+                {
+                    "variantId": "%s",
+                    "quantity": 2
+                }
+                """.formatted(variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.storeId").value("El ID de la tienda es obligatorio"));
+
+        verifyNoInteractions(addItemToCartService);
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/cart/items/{variantId} - 400 VALIDATION_ERROR cuando cantidad es negativa")
+    void shouldRejectUpdateItemWithNegativeQuantity() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        String json = """
+                {
+                    "storeId": "%s",
+                    "quantity": -1
+                }
+                """.formatted(testStoreId);
+
+        mockMvc.perform(put("/api/v1/cart/items/{variantId}", variantId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.quantity").value("La cantidad no puede ser negativa"));
+
+        verifyNoInteractions(updateCartItemQuantityService);
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 409 Conflict cuando la variante está inactiva")
+    void shouldReturn409WhenVariantIsInactive() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        when(addItemToCartService.execute(any(AddItemToCartCommand.class)))
+                .thenThrow(new ConflictException("VARIANT_INACTIVE", "La variante de producto no se encuentra disponible"));
+
+        String json = """
+                {
+                    "storeId": "%s",
+                    "variantId": "%s",
+                    "quantity": 1
+                }
+                """.formatted(testStoreId, variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("VARIANT_INACTIVE"))
+                .andExpect(jsonPath("$.message").value("La variante de producto no se encuentra disponible"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 409 Conflict cuando el producto no pertenece a la tienda")
+    void shouldReturn409WhenProductStoreMismatch() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        when(addItemToCartService.execute(any(AddItemToCartCommand.class)))
+                .thenThrow(new ConflictException("VARIANT_STORE_MISMATCH", "El producto no pertenece a la tienda especificada"));
+
+        String json = """
+                {
+                    "storeId": "%s",
+                    "variantId": "%s",
+                    "quantity": 1
+                }
+                """.formatted(testStoreId, variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("VARIANT_STORE_MISMATCH"))
+                .andExpect(jsonPath("$.message").value("El producto no pertenece a la tienda especificada"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 409 Conflict cuando el producto está inactivo")
+    void shouldReturn409WhenProductIsInactive() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        when(addItemToCartService.execute(any(AddItemToCartCommand.class)))
+                .thenThrow(new ConflictException("PRODUCT_INACTIVE", "El producto no se encuentra activo"));
+
+        String json = """
+                {
+                    "storeId": "%s",
+                    "variantId": "%s",
+                    "quantity": 1
+                }
+                """.formatted(testStoreId, variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("PRODUCT_INACTIVE"))
+                .andExpect(jsonPath("$.message").value("El producto no se encuentra activo"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/cart/items - 404 Not Found cuando la variante no existe")
+    void shouldReturn404WhenVariantNotFound() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        when(addItemToCartService.execute(any(AddItemToCartCommand.class)))
+                .thenThrow(new ResourceNotFoundException("Variante no encontrada"));
+
+        String json = """
+                {
+                    "storeId": "%s",
+                    "variantId": "%s",
+                    "quantity": 1
+                }
+                """.formatted(testStoreId, variantId);
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Variante no encontrada"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/cart - 404 Not Found cuando la tienda no existe")
+    void shouldReturn404WhenStoreNotFoundOnGetCart() throws Exception {
+        when(getCartService.execute(any(GetCartQuery.class)))
+                .thenThrow(new ResourceNotFoundException("Tienda no encontrada"));
+
+        mockMvc.perform(get("/api/v1/cart")
+                        .param("storeId", testStoreId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Tienda no encontrada"));
     }
 }

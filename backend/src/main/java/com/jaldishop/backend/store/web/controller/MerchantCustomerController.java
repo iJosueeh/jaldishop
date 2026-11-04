@@ -1,9 +1,9 @@
 package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.GetStoreCustomersService;
-import com.jaldishop.backend.store.application.StoreContextService;
-import com.jaldishop.backend.store.domain.StoreCustomerSummary;
+import com.jaldishop.backend.store.application.service.GetStoreCustomersService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
+import com.jaldishop.backend.store.domain.model.StoreCustomerSummary;
 import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
 import com.jaldishop.backend.store.web.mapper.StoreCustomerResponseMapper;
 import jakarta.validation.constraints.Size;

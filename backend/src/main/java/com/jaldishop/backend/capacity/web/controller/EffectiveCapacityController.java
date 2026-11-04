@@ -1,11 +1,11 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityQuery;
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
-import com.jaldishop.backend.capacity.application.availability.GetEffectiveCapacityService;
+import com.jaldishop.backend.capacity.application.availability.query.EffectiveCapacityQuery;
+import com.jaldishop.backend.capacity.application.availability.result.EffectiveCapacityResult;
+import com.jaldishop.backend.capacity.application.availability.service.GetEffectiveCapacityService;
 import com.jaldishop.backend.capacity.web.dto.EffectiveCapacityResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

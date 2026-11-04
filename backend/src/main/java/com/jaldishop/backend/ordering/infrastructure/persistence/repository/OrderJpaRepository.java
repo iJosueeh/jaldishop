@@ -1,7 +1,12 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.repository;
 
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,6 +17,10 @@ import java.util.UUID;
 
 @Repository
 public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM OrderEntity o WHERE o.id = :id")
+    Optional<OrderEntity> findByIdForUpdate(@Param("id") UUID id);
 
     Optional<OrderEntity> findByPaymentId(UUID paymentId);
 
@@ -34,5 +43,13 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
           AND pv.product_id = :productId
     """, nativeQuery = true)
     boolean hasCompletedOrderWithProduct(@Param("userId") UUID userId, @Param("productId") UUID productId);
+
+    Page<OrderEntity> findByStoreIdOrderByConfirmedAtDescIdDesc(UUID storeId, Pageable pageable);
+
+    Page<OrderEntity> findByStoreIdAndStatusOrderByConfirmedAtDescIdDesc(UUID storeId, OrderStatus status, Pageable pageable);
+
+    Optional<OrderEntity> findByIdAndStoreId(UUID id, UUID storeId);
+
+    Optional<OrderEntity> findByOrderNumberAndStoreId(String orderNumber, UUID storeId);
 
 }

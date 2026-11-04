@@ -1,7 +1,7 @@
 package com.jaldishop.backend.cart.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.cart.domain.Cart;
-import com.jaldishop.backend.cart.domain.CartRepository;
+import com.jaldishop.backend.cart.domain.model.Cart;
+import com.jaldishop.backend.cart.domain.repository.CartRepository;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartEntity;
 import com.jaldishop.backend.cart.infrastructure.persistence.mapper.CartPersistenceMapper;
 import com.jaldishop.backend.cart.infrastructure.persistence.repository.CartJpaRepository;

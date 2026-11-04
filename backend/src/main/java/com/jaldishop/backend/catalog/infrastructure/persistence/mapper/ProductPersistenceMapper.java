@@ -1,7 +1,7 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.catalog.domain.Product;
-import com.jaldishop.backend.catalog.domain.ProductStatus;
+import com.jaldishop.backend.catalog.domain.model.Product;
+import com.jaldishop.backend.catalog.domain.enums.ProductStatus;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.ProductEntity;
 import org.springframework.stereotype.Component;
 

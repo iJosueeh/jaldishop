@@ -1,7 +1,7 @@
 package com.jaldishop.backend.identity.web.dto;
 
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 
 import java.time.Instant;
 import java.util.Set;

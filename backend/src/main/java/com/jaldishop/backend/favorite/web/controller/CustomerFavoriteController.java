@@ -1,9 +1,9 @@
 package com.jaldishop.backend.favorite.web.controller;
 
-import com.jaldishop.backend.favorite.application.AddFavoriteProductService;
-import com.jaldishop.backend.favorite.application.CheckFavoriteProductService;
-import com.jaldishop.backend.favorite.application.GetCustomerFavoriteProductsService;
-import com.jaldishop.backend.favorite.application.RemoveFavoriteProductService;
+import com.jaldishop.backend.favorite.application.service.AddFavoriteProductService;
+import com.jaldishop.backend.favorite.application.service.CheckFavoriteProductService;
+import com.jaldishop.backend.favorite.application.service.GetCustomerFavoriteProductsService;
+import com.jaldishop.backend.favorite.application.service.RemoveFavoriteProductService;
 import com.jaldishop.backend.favorite.web.dto.FavoriteProductResponse;
 import com.jaldishop.backend.favorite.web.dto.FavoriteStatusResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;

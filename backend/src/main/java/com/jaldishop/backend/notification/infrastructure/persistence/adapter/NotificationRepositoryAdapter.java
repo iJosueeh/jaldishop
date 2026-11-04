@@ -1,8 +1,8 @@
 package com.jaldishop.backend.notification.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.notification.domain.Notification;
-import com.jaldishop.backend.notification.domain.NotificationRepository;
-import com.jaldishop.backend.notification.domain.NotificationStatus;
+import com.jaldishop.backend.notification.domain.model.Notification;
+import com.jaldishop.backend.notification.domain.repository.NotificationRepository;
+import com.jaldishop.backend.notification.domain.enums.NotificationStatus;
 import com.jaldishop.backend.notification.infrastructure.persistence.entity.NotificationEntity;
 import com.jaldishop.backend.notification.infrastructure.persistence.mapper.NotificationPersistenceMapper;
 import com.jaldishop.backend.notification.infrastructure.persistence.repository.NotificationJpaRepository;

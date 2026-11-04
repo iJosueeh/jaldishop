@@ -1,6 +1,6 @@
 package com.jaldishop.backend.address.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.address.domain.CustomerAddress;
+import com.jaldishop.backend.address.domain.model.CustomerAddress;
 import com.jaldishop.backend.address.infrastructure.persistence.entity.CustomerAddressEntity;
 import org.springframework.stereotype.Component;
 

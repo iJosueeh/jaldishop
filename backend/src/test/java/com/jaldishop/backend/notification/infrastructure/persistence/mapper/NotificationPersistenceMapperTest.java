@@ -1,8 +1,15 @@
 package com.jaldishop.backend.notification.infrastructure.persistence.mapper;
+import com.jaldishop.backend.notification.application.command.*;
+import com.jaldishop.backend.notification.application.service.*;
+import com.jaldishop.backend.notification.domain.model.*;
+import com.jaldishop.backend.notification.domain.enums.*;
+import com.jaldishop.backend.notification.domain.repository.*;
+import com.jaldishop.backend.notification.domain.port.*;
 
-import com.jaldishop.backend.notification.domain.Notification;
-import com.jaldishop.backend.notification.domain.NotificationStatus;
-import com.jaldishop.backend.notification.domain.NotificationType;
+
+import com.jaldishop.backend.notification.domain.model.Notification;
+import com.jaldishop.backend.notification.domain.enums.NotificationStatus;
+import com.jaldishop.backend.notification.domain.enums.NotificationType;
 import com.jaldishop.backend.notification.infrastructure.persistence.entity.NotificationEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

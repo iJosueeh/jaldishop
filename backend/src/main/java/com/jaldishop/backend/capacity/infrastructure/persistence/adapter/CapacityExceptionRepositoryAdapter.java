@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.capacity.domain.CapacityException;
-import com.jaldishop.backend.capacity.domain.CapacityExceptionRepository;
+import com.jaldishop.backend.capacity.domain.model.CapacityException;
+import com.jaldishop.backend.capacity.domain.repository.CapacityExceptionRepository;
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityExceptionEntity;
 import com.jaldishop.backend.capacity.infrastructure.persistence.mapper.CapacityExceptionPersistenceMapper;
 import com.jaldishop.backend.capacity.infrastructure.persistence.repository.CapacityExceptionJpaRepository;

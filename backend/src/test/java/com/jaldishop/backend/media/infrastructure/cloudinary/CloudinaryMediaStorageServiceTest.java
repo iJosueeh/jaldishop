@@ -1,8 +1,8 @@
 package com.jaldishop.backend.media.infrastructure.cloudinary;
 
 import com.cloudinary.Cloudinary;
-import com.jaldishop.backend.media.domain.MediaTargetType;
-import com.jaldishop.backend.media.domain.UploadSignature;
+import com.jaldishop.backend.media.domain.enums.MediaTargetType;
+import com.jaldishop.backend.media.domain.model.UploadSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

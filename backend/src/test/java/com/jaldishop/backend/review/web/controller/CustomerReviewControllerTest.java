@@ -1,10 +1,10 @@
 package com.jaldishop.backend.review.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jaldishop.backend.review.application.CheckReviewEligibilityService;
-import com.jaldishop.backend.review.application.CreateProductReviewService;
-import com.jaldishop.backend.review.application.GetCustomerReviewsService;
-import com.jaldishop.backend.review.application.UpdateProductReviewService;
+import com.jaldishop.backend.review.application.service.CheckReviewEligibilityService;
+import com.jaldishop.backend.review.application.service.CreateProductReviewService;
+import com.jaldishop.backend.review.application.service.GetCustomerReviewsService;
+import com.jaldishop.backend.review.application.service.UpdateProductReviewService;
 import com.jaldishop.backend.review.web.dto.CreateReviewRequest;
 import com.jaldishop.backend.review.web.dto.CustomerReviewResponse;
 import com.jaldishop.backend.review.web.dto.ReviewEligibilityResponse;

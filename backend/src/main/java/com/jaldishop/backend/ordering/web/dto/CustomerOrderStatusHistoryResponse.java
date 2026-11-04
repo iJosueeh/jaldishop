@@ -1,6 +1,6 @@
 package com.jaldishop.backend.ordering.web.dto;
 
-import com.jaldishop.backend.ordering.domain.OrderStatus;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import java.time.Instant;
 
 public record CustomerOrderStatusHistoryResponse(

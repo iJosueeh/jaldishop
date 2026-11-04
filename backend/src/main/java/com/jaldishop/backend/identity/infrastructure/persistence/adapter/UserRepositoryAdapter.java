@@ -1,9 +1,9 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserRepository;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.repository.UserRepository;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.identity.infrastructure.persistence.entity.UserEntity;
 import com.jaldishop.backend.identity.infrastructure.persistence.mapper.UserPersistenceMapper;
 import com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository;

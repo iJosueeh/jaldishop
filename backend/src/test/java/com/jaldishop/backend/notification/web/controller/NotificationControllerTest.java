@@ -1,11 +1,19 @@
 package com.jaldishop.backend.notification.web.controller;
+import com.jaldishop.backend.notification.application.command.*;
+import com.jaldishop.backend.notification.application.service.*;
+import com.jaldishop.backend.notification.domain.model.*;
+import com.jaldishop.backend.notification.domain.enums.*;
+import com.jaldishop.backend.notification.domain.repository.*;
+import com.jaldishop.backend.notification.domain.port.*;
+
 
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.notification.application.CountUnreadNotificationsService;
-import com.jaldishop.backend.notification.application.ListUserNotificationsService;
-import com.jaldishop.backend.notification.application.MarkNotificationAsReadService;
-import com.jaldishop.backend.notification.domain.Notification;
-import com.jaldishop.backend.notification.domain.NotificationType;
+import com.jaldishop.backend.notification.application.service.CountUnreadNotificationsService;
+import com.jaldishop.backend.notification.application.service.ListUserNotificationsService;
+import com.jaldishop.backend.notification.application.service.MarkNotificationAsReadService;
+import com.jaldishop.backend.notification.domain.model.Notification;
+import com.jaldishop.backend.notification.domain.enums.NotificationType;
+import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
@@ -149,6 +157,21 @@ class NotificationControllerTest {
         mockMvc.perform(patch("/api/v1/notifications/" + notificationId + "/read"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/notifications/{id}/read - 422 cuando la notificación ya fue leída")
+    void markAsReadAlreadyRead() throws Exception {
+        UUID notificationId = UUID.randomUUID();
+
+        when(markNotificationAsReadService.execute(notificationId, testUserId))
+                .thenThrow(new BusinessRuleException("NOTIFICATION_ALREADY_READ", "La notificación ya fue marcada como leída."));
+
+        mockMvc.perform(patch("/api/v1/notifications/" + notificationId + "/read"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("NOTIFICATION_ALREADY_READ"))
+                .andExpect(jsonPath("$.message").value("La notificación ya fue marcada como leída."))
+                .andExpect(jsonPath("$.errors").doesNotExist());
     }
 
     @Test

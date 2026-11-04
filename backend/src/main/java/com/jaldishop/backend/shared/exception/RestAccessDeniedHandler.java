@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
@@ -28,10 +27,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
         objectMapper.writeValue(
                 response.getOutputStream(),
-                Map.of(
-                        "code", "FORBIDDEN",
-                        "message", "No tienes permisos para realizar esta operación"
-                )
+                new ApiError("FORBIDDEN", "No tienes permisos para realizar esta operación")
         );
     }
 }

@@ -1,6 +1,6 @@
 package com.jaldishop.backend.media.web.dto;
 
-import com.jaldishop.backend.media.domain.MediaTargetType;
+import com.jaldishop.backend.media.domain.enums.MediaTargetType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;

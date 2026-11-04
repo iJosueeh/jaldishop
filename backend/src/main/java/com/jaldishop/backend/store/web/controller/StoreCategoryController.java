@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.web.controller;
 
-import com.jaldishop.backend.store.application.GetStoreCategoriesService;
+import com.jaldishop.backend.store.application.service.GetStoreCategoriesService;
 import com.jaldishop.backend.store.web.dto.StoreCategoryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

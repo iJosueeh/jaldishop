@@ -1,11 +1,11 @@
 package com.jaldishop.backend.checkout.web.controller;
 
-import com.jaldishop.backend.checkout.application.CheckoutResult;
-import com.jaldishop.backend.checkout.application.InitiateCheckoutCommand;
-import com.jaldishop.backend.checkout.application.InitiateCheckoutService;
-import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
-import com.jaldishop.backend.checkout.domain.CheckoutItemSnapshot;
-import com.jaldishop.backend.checkout.domain.CheckoutPricing;
+import com.jaldishop.backend.checkout.application.result.CheckoutResult;
+import com.jaldishop.backend.checkout.application.command.InitiateCheckoutCommand;
+import com.jaldishop.backend.checkout.application.service.InitiateCheckoutService;
+import com.jaldishop.backend.checkout.domain.enums.CheckoutFulfillmentType;
+import com.jaldishop.backend.checkout.domain.model.CheckoutItemSnapshot;
+import com.jaldishop.backend.checkout.domain.model.CheckoutPricing;
 import com.jaldishop.backend.checkout.web.dto.CheckoutCustomerResponse;
 import com.jaldishop.backend.checkout.web.dto.CheckoutItemResponse;
 import com.jaldishop.backend.checkout.web.dto.CheckoutPricingResponse;

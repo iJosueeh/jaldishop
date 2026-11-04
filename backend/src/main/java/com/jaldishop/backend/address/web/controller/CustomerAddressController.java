@@ -1,6 +1,6 @@
 package com.jaldishop.backend.address.web.controller;
 
-import com.jaldishop.backend.address.application.*;
+import com.jaldishop.backend.address.application.service.*;
 import com.jaldishop.backend.address.web.dto.*;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import jakarta.validation.Valid;

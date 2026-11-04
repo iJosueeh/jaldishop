@@ -1,8 +1,8 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.VariantAttribute;
-import com.jaldishop.backend.catalog.domain.VariantStatus;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.model.VariantAttribute;
+import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.ProductVariantEntity;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.VariantAttributeEntity;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.VariantAttributeId;

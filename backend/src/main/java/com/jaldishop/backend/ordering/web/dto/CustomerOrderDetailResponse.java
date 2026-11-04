@@ -1,7 +1,7 @@
 package com.jaldishop.backend.ordering.web.dto;
 
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
-import com.jaldishop.backend.ordering.domain.OrderStatus;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;

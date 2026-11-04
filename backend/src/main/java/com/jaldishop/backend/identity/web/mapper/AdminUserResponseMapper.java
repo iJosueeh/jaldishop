@@ -1,12 +1,12 @@
 package com.jaldishop.backend.identity.web.mapper;
 
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.User;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserStoreSummaryResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreRepository;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

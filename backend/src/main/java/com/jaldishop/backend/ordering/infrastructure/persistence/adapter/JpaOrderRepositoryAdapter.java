@@ -1,10 +1,13 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.ordering.domain.Order;
-import com.jaldishop.backend.ordering.domain.OrderRepository;
+import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPersistenceMapper;
 import com.jaldishop.backend.ordering.infrastructure.persistence.repository.OrderJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -32,6 +35,11 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     @Override
     public Optional<Order> findById(UUID id) {
         return jpaRepository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Order> findByIdForUpdate(UUID id) {
+        return jpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
     }
 
     @Override
@@ -67,5 +75,29 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
             return false;
         }
         return jpaRepository.hasCompletedOrderWithProduct(userId, productId);
+    }
+
+    @Override
+    public Page<Order> findByStoreId(UUID storeId, Pageable pageable) {
+        return jpaRepository.findByStoreIdOrderByConfirmedAtDescIdDesc(storeId, pageable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<Order> findByStoreIdAndStatus(UUID storeId, OrderStatus status, Pageable pageable) {
+        return jpaRepository.findByStoreIdAndStatusOrderByConfirmedAtDescIdDesc(storeId, status, pageable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Order> findByIdAndStoreId(UUID id, UUID storeId) {
+        return jpaRepository.findByIdAndStoreId(id, storeId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Order> findByOrderNumberAndStoreId(String orderNumber, UUID storeId) {
+        return jpaRepository.findByOrderNumberAndStoreId(orderNumber, storeId)
+                .map(mapper::toDomain);
     }
 }

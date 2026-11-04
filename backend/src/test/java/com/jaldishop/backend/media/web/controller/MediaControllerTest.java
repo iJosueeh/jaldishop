@@ -2,10 +2,10 @@ package com.jaldishop.backend.media.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.media.application.GenerateUploadSignatureCommand;
-import com.jaldishop.backend.media.application.GenerateUploadSignatureService;
-import com.jaldishop.backend.media.domain.MediaTargetType;
-import com.jaldishop.backend.media.domain.UploadSignature;
+import com.jaldishop.backend.media.application.command.GenerateUploadSignatureCommand;
+import com.jaldishop.backend.media.application.service.GenerateUploadSignatureService;
+import com.jaldishop.backend.media.domain.enums.MediaTargetType;
+import com.jaldishop.backend.media.domain.model.UploadSignature;
 import com.jaldishop.backend.media.web.dto.GenerateSignatureRequest;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;

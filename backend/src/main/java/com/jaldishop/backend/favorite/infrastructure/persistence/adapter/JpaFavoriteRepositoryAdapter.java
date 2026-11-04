@@ -1,7 +1,7 @@
 package com.jaldishop.backend.favorite.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.favorite.domain.Favorite;
-import com.jaldishop.backend.favorite.domain.FavoriteRepository;
+import com.jaldishop.backend.favorite.domain.model.Favorite;
+import com.jaldishop.backend.favorite.domain.repository.FavoriteRepository;
 import com.jaldishop.backend.favorite.infrastructure.persistence.entity.FavoriteEntity;
 import com.jaldishop.backend.favorite.infrastructure.persistence.entity.FavoriteId;
 import com.jaldishop.backend.favorite.infrastructure.persistence.mapper.FavoritePersistenceMapper;

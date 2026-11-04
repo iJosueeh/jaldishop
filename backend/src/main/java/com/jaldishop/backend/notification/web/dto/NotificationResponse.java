@@ -1,8 +1,8 @@
 package com.jaldishop.backend.notification.web.dto;
 
-import com.jaldishop.backend.notification.domain.Notification;
-import com.jaldishop.backend.notification.domain.NotificationStatus;
-import com.jaldishop.backend.notification.domain.NotificationType;
+import com.jaldishop.backend.notification.domain.model.Notification;
+import com.jaldishop.backend.notification.domain.enums.NotificationStatus;
+import com.jaldishop.backend.notification.domain.enums.NotificationType;
 
 import java.time.Instant;
 import java.util.UUID;

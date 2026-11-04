@@ -1,17 +1,17 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.CreateCategoryCommand;
-import com.jaldishop.backend.catalog.application.CreateCategoryService;
-import com.jaldishop.backend.catalog.application.GetCategoriesService;
-import com.jaldishop.backend.catalog.application.UpdateCategoryCommand;
-import com.jaldishop.backend.catalog.application.UpdateCategoryService;
-import com.jaldishop.backend.catalog.domain.Category;
+import com.jaldishop.backend.catalog.application.command.CreateCategoryCommand;
+import com.jaldishop.backend.catalog.application.service.CreateCategoryService;
+import com.jaldishop.backend.catalog.application.service.GetCategoriesService;
+import com.jaldishop.backend.catalog.application.command.UpdateCategoryCommand;
+import com.jaldishop.backend.catalog.application.service.UpdateCategoryService;
+import com.jaldishop.backend.catalog.domain.model.Category;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.dto.CreateCategoryRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateCategoryRequest;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

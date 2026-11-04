@@ -1,16 +1,27 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.configuration.CreateCapacityConfigurationCommand;
-import com.jaldishop.backend.capacity.application.configuration.CreateCapacityConfigurationService;
-import com.jaldishop.backend.capacity.application.configuration.GetStoreCapacityConfigurationsService;
-import com.jaldishop.backend.capacity.application.configuration.ToggleCapacityConfigurationStatusService;
-import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityConfigurationCommand;
-import com.jaldishop.backend.capacity.application.configuration.UpdateCapacityConfigurationService;
-import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
-import com.jaldishop.backend.capacity.domain.CapacityConfigurationStatus;
+import com.jaldishop.backend.capacity.domain.model.*;
+import com.jaldishop.backend.capacity.domain.enums.*;
+import com.jaldishop.backend.capacity.domain.repository.*;
+import com.jaldishop.backend.capacity.application.availability.query.*;
+import com.jaldishop.backend.capacity.application.availability.result.*;
+import com.jaldishop.backend.capacity.application.availability.service.*;
+import com.jaldishop.backend.capacity.application.configuration.command.*;
+import com.jaldishop.backend.capacity.application.configuration.service.*;
+import com.jaldishop.backend.capacity.application.reservation.command.*;
+import com.jaldishop.backend.capacity.application.reservation.service.*;
+
+import com.jaldishop.backend.capacity.application.configuration.command.CreateCapacityConfigurationCommand;
+import com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityConfigurationService;
+import com.jaldishop.backend.capacity.application.configuration.service.GetStoreCapacityConfigurationsService;
+import com.jaldishop.backend.capacity.application.configuration.service.ToggleCapacityConfigurationStatusService;
+import com.jaldishop.backend.capacity.application.configuration.command.UpdateCapacityConfigurationCommand;
+import com.jaldishop.backend.capacity.application.configuration.service.UpdateCapacityConfigurationService;
+import com.jaldishop.backend.capacity.domain.model.CapacityConfiguration;
+import com.jaldishop.backend.capacity.domain.enums.CapacityConfigurationStatus;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
+import com.jaldishop.backend.capacity.domain.model.CapacityConfiguration;
+import com.jaldishop.backend.capacity.domain.model.CapacityPeriod;
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityConfigurationEntity;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,7 @@ public class CapacityConfigurationPersistenceMapper {
                 entity.getId(),
                 entity.getStoreId(),
                 entity.getDayOfWeek(),
-                entity.getStartTime(),
-                entity.getEndTime(),
+                CapacityPeriod.of(entity.getStartTime(), entity.getEndTime()),
                 entity.getMaxCapacity(),
                 entity.getStatus(),
                 entity.getCreatedAt(),
@@ -25,8 +25,8 @@ public class CapacityConfigurationPersistenceMapper {
                 domain.getId(),
                 domain.getStoreId(),
                 domain.getDayOfWeek(),
-                domain.getStartTime(),
-                domain.getEndTime(),
+                domain.getPeriod() != null ? domain.getPeriod().startTime() : null,
+                domain.getPeriod() != null ? domain.getPeriod().endTime() : null,
                 domain.getMaxCapacity(),
                 domain.getStatus(),
                 domain.getCreatedAt(),

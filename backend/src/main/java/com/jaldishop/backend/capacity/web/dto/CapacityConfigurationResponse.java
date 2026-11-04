@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.web.dto;
 
-import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
-import com.jaldishop.backend.capacity.domain.CapacityConfigurationStatus;
+import com.jaldishop.backend.capacity.domain.model.CapacityConfiguration;
+import com.jaldishop.backend.capacity.domain.enums.CapacityConfigurationStatus;
 
 import java.time.Instant;
 import java.time.LocalTime;

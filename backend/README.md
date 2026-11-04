@@ -82,6 +82,27 @@ Para verificar el estado de las migraciones sin levantar el servidor:
 ./mvnw flyway:info
 ```
 
+### Seed Reproducible para Desarrollo y Pruebas E2E
+
+Para sembrar un conjunto coherente, determinista y seguro de datos para demostración y validación end-to-end, se dispone del script reproducible [`seed-e2e.sh`](./seed-e2e.sh) y su archivo SQL canónico [`seed_e2e_demo_data.sql`](./src/main/resources/db/seed/seed_e2e_demo_data.sql).
+
+**Características del Seed E2E:**
+- **Idempotente y Seguro:** Emplea cláusulas `ON CONFLICT DO UPDATE / NOTHING` con UUIDs deterministas. Rechaza ejecución automática fuera de `localhost` o `127.0.0.1`.
+- **Cero Secretos Reales:** Mocks locales exclusivamente; no contiene credenciales reales ni activa cobros externos.
+- **Entidades sembradas:**
+  - Usuarios: Cliente (`cliente.demo@jaldishop.com`), Comerciante (`merchant.demo@jaldishop.com`), Admin (`admin.demo@jaldishop.com`) con password común `Password123!`.
+  - Tienda y Catálogo: Tienda `dulce-deleite` (Pastelería Dulce Deleite) con horarios, configuración de capacidad (10 cupos/franja), categorías y productos con variantes (`Torta de Chocolate Artesanal`, `Cheesecake de Frutos Rojos`, etc.) e inventarios sincronizados.
+  - Libreta de Direcciones: Direcciones con códigos UBIGEO oficiales de Lima (`150122`, `150119`).
+  - Carrito, Reservas y Pagos: Reservas de capacidad e inventario, pagos simulados (`APPROVED`, `REFUNDED`) e historial de auditoría de órdenes (`JAL-2026-000001`, `JAL-2026-000002`).
+
+**Ejecución:**
+```bash
+# Parámetros explícitos obligatorios (restringido a bases de datos locales de prueba autorizadas)
+DB_HOST=127.0.0.1 DB_PORT=5434 DB_NAME=jaldishop_test DB_USER=test_user PGPASSWORD=test_pass ./seed-e2e.sh
+# o alternativamente con DB_URL:
+DB_URL="jdbc:postgresql://127.0.0.1:5434/jaldishop_test" DB_USERNAME=test_user DB_PASSWORD=test_pass ./seed-e2e.sh
+```
+
 ### Núcleo Transaccional & Pruebas de Concurrencia
 El checkout integra de forma atómica:
 * **Capacidad + Inventario en un Hold Atómico:** Bloqueos pesimistas `PESSIMISTIC_WRITE` (`FOR UPDATE`) sobre `capacity_configurations` e `inventories` con orden canónico determinista por variante para evitar deadlocks.
@@ -132,16 +153,15 @@ curl -X GET http://localhost:8080/api/v1/health
 
 ## 7. Pruebas con Colección Postman
 
-1. Importa en Postman el archivo:
-   - [`backend/jaldishop-api.postman_collection.json`](./jaldishop-api.postman_collection.json)
+1. Importa en Postman o Bruno los 2 archivos unificados:
+   - [`postman/jaldishop.postman_collection.json`](../postman/jaldishop.postman_collection.json)
+   - [`postman/jaldishop.postman_environment.json`](../postman/jaldishop.postman_environment.json)
 2. La colección incluye scripts automáticos para almacenar el JWT al hacer login:
-   - `01. Register Merchant` -> Crea comerciante y tienda.
-   - `03. Login Merchant` -> Auto-captura el `merchantToken`.
-   - `02. Tiendas (Stores)` -> Configuración logística.
-   - `04. Capacidad & Slots` -> Reglas de cupos semanales y excepciones.
-   - `05. Comandas & Pedidos` -> Registro y avance de pedidos.
+   - `01. Identity > Register Merchant` -> Crea comerciante y tienda.
+   - `02. Identity > Auth > Iniciar Sesión — Merchant` -> Auto-captura el `authToken` en el entorno.
+   - Carpetas completas de `Stores`, `Catalog`, `Capacity`, `Cart`, `Checkout`, `Ordering` y `Notifications`.
 
-Consulta la guía detallada en [`docs/04-diseno/guia-pruebas-postman.md`](../docs/04-diseno/guia-pruebas-postman.md).
+Consulta la guía detallada en [`postman/README.md`](../postman/README.md).
 
 ---
 

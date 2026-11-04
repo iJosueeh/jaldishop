@@ -1,6 +1,8 @@
 package com.jaldishop.backend.store.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.domain.model.DeliveryConfiguration;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.model.StoreLocation;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,20 @@ public class StorePersistenceMapper {
             categoryIds = Collections.emptySet();
         }
 
+        StoreLocation location = StoreLocation.of(
+                entity.getAddress(),
+                entity.getAddressReference(),
+                entity.getLatitude(),
+                entity.getLongitude()
+        );
+        DeliveryConfiguration deliveryConfig = DeliveryConfiguration.of(
+                entity.isPickupEnabled(),
+                entity.isDeliveryEnabled(),
+                entity.getDeliveryFeeAmount(),
+                entity.getDeliveryFeeCurrency(),
+                entity.getTaxRate()
+        );
+
         return Store.reconstitute(
                 entity.getId(),
                 entity.getOwnerUserId(),
@@ -33,15 +49,8 @@ public class StorePersistenceMapper {
                 entity.getSlug(),
                 entity.getDescription(),
                 entity.getContactPhone(),
-                entity.getAddress(),
-                entity.getAddressReference(),
-                entity.getLatitude(),
-                entity.getLongitude(),
-                entity.isPickupEnabled(),
-                entity.isDeliveryEnabled(),
-                entity.getDeliveryFeeAmount(),
-                entity.getDeliveryFeeCurrency(),
-                entity.getTaxRate(),
+                location,
+                deliveryConfig,
                 entity.getLogoUrl(),
                 entity.getBannerUrl(),
                 entity.getInstagramUrl(),

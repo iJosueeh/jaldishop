@@ -1,6 +1,6 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.capacity.domain.CapacityReservationStatus;
+import com.jaldishop.backend.capacity.domain.enums.CapacityReservationStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;

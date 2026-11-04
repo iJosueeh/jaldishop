@@ -1,9 +1,9 @@
 package com.jaldishop.backend.ordering.web.controller;
 
-import com.jaldishop.backend.ordering.application.GetCustomerOrderDetailService;
-import com.jaldishop.backend.ordering.application.GetCustomerOrdersService;
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
-import com.jaldishop.backend.ordering.domain.OrderStatus;
+import com.jaldishop.backend.ordering.application.service.GetCustomerOrderDetailService;
+import com.jaldishop.backend.ordering.application.service.GetCustomerOrdersService;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.web.dto.*;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;

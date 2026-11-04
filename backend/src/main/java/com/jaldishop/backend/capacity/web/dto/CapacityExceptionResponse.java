@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.web.dto;
 
-import com.jaldishop.backend.capacity.domain.CapacityException;
-import com.jaldishop.backend.capacity.domain.CapacityExceptionStatus;
+import com.jaldishop.backend.capacity.domain.model.CapacityException;
+import com.jaldishop.backend.capacity.domain.enums.CapacityExceptionStatus;
 
 import java.time.Instant;
 import java.time.LocalDate;

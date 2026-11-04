@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.web.mapper;
 
-import com.jaldishop.backend.store.domain.StoreCustomerSummary;
+import com.jaldishop.backend.store.domain.model.StoreCustomerSummary;
 import com.jaldishop.backend.store.web.dto.StoreCustomerResponse;
 import org.springframework.stereotype.Component;
 

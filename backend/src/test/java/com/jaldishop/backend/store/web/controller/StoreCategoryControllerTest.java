@@ -1,9 +1,9 @@
 package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.GetStoreCategoriesService;
-import com.jaldishop.backend.store.domain.StoreCategory;
-import com.jaldishop.backend.store.domain.StoreCategoryStatus;
+import com.jaldishop.backend.store.application.service.GetStoreCategoriesService;
+import com.jaldishop.backend.store.domain.model.StoreCategory;
+import com.jaldishop.backend.store.domain.enums.StoreCategoryStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

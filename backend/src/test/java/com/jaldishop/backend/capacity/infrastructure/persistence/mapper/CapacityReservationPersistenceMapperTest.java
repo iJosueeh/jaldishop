@@ -1,7 +1,18 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.capacity.domain.CapacityReservation;
-import com.jaldishop.backend.capacity.domain.CapacityReservationStatus;
+import com.jaldishop.backend.capacity.domain.model.*;
+import com.jaldishop.backend.capacity.domain.enums.*;
+import com.jaldishop.backend.capacity.domain.repository.*;
+import com.jaldishop.backend.capacity.application.availability.query.*;
+import com.jaldishop.backend.capacity.application.availability.result.*;
+import com.jaldishop.backend.capacity.application.availability.service.*;
+import com.jaldishop.backend.capacity.application.configuration.command.*;
+import com.jaldishop.backend.capacity.application.configuration.service.*;
+import com.jaldishop.backend.capacity.application.reservation.command.*;
+import com.jaldishop.backend.capacity.application.reservation.service.*;
+
+import com.jaldishop.backend.capacity.domain.model.CapacityReservation;
+import com.jaldishop.backend.capacity.domain.enums.CapacityReservationStatus;
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityReservationEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

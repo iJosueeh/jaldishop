@@ -1,7 +1,7 @@
 package com.jaldishop.backend.ordering.web.controller;
 
-import com.jaldishop.backend.ordering.application.GetCustomerOrderDetailService;
-import com.jaldishop.backend.ordering.application.GetCustomerOrdersService;
+import com.jaldishop.backend.ordering.application.service.GetCustomerOrderDetailService;
+import com.jaldishop.backend.ordering.application.service.GetCustomerOrdersService;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderDetailResponse;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderSummaryResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;

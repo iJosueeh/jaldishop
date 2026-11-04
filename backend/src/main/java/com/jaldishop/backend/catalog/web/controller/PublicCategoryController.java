@@ -1,9 +1,9 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.GetPublicCategoriesService;
+import com.jaldishop.backend.catalog.application.service.GetPublicCategoriesService;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
-import com.jaldishop.backend.store.application.GetStoreBySlugService;
+import com.jaldishop.backend.store.application.service.GetStoreBySlugService;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -28,10 +27,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         objectMapper.writeValue(
                 response.getOutputStream(),
-                Map.of(
-                        "code", "UNAUTHORIZED",
-                        "message", "Autenticación requerida"
-                )
+                new ApiError("UNAUTHORIZED", "Autenticación requerida")
         );
-    };
+    }
 }

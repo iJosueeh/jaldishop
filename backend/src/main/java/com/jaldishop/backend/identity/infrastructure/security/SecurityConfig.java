@@ -56,7 +56,9 @@ public class SecurityConfig {
                                 "/api/v1/stores/*/products",
                                 "/api/v1/stores/search",
                                 "/api/v1/stores/featured",
-                                "/api/v1/products/*/reviews"
+                                "/api/v1/products/*/reviews",
+                                "/ws/**",
+                                "/api/v1/checkout/mercado-pago/webhook"
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
