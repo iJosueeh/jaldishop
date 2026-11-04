@@ -1,6 +1,14 @@
 package com.jaldishop.backend.catalog.web.mapper;
+import com.jaldishop.backend.catalog.domain.model.*;
+import com.jaldishop.backend.catalog.domain.enums.*;
+import com.jaldishop.backend.catalog.domain.repository.*;
+import com.jaldishop.backend.catalog.application.command.*;
+import com.jaldishop.backend.catalog.application.query.*;
+import com.jaldishop.backend.catalog.application.service.*;
+import com.jaldishop.backend.catalog.application.util.*;
 
-import com.jaldishop.backend.catalog.domain.Product;
+
+import com.jaldishop.backend.catalog.domain.model.Product;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,10 +48,10 @@ class ProductResponseMapperTest {
         UUID categoryId = UUID.randomUUID();
         Product product = Product.create(storeId, categoryId, "Cheesecake", "cheesecake", "Desc", "https://img.png");
 
-        com.jaldishop.backend.catalog.domain.ProductVariant v1 = com.jaldishop.backend.catalog.domain.ProductVariant.create(
+        com.jaldishop.backend.catalog.domain.model.ProductVariant v1 = com.jaldishop.backend.catalog.domain.model.ProductVariant.create(
                 product.getId(), "Porción", "SKU-1", new java.math.BigDecimal("15.50"), "PEN", false, null
         );
-        com.jaldishop.backend.catalog.domain.ProductVariant v2 = com.jaldishop.backend.catalog.domain.ProductVariant.create(
+        com.jaldishop.backend.catalog.domain.model.ProductVariant v2 = com.jaldishop.backend.catalog.domain.model.ProductVariant.create(
                 product.getId(), "Entero", "SKU-2", new java.math.BigDecimal("45.00"), "PEN", false, null
         );
 

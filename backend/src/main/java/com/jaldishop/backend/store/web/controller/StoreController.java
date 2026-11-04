@@ -1,8 +1,11 @@
 package com.jaldishop.backend.store.web.controller;
 
+import com.jaldishop.backend.store.application.command.*;
+import com.jaldishop.backend.store.application.result.*;
+import com.jaldishop.backend.store.application.service.*;
+
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.*;
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.web.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

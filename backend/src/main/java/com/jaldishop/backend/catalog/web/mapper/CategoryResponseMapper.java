@@ -1,6 +1,6 @@
 package com.jaldishop.backend.catalog.web.mapper;
 
-import com.jaldishop.backend.catalog.domain.Category;
+import com.jaldishop.backend.catalog.domain.model.Category;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import org.springframework.stereotype.Component;
 

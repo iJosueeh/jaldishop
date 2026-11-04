@@ -1,7 +1,7 @@
 package com.jaldishop.backend.cart.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.cart.domain.Cart;
-import com.jaldishop.backend.cart.domain.CartItem;
+import com.jaldishop.backend.cart.domain.model.Cart;
+import com.jaldishop.backend.cart.domain.model.CartItem;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartEntity;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartItemEntity;
 import com.jaldishop.backend.cart.infrastructure.persistence.entity.CartItemId;

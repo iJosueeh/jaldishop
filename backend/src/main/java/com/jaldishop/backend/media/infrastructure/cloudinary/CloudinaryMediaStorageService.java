@@ -2,9 +2,9 @@ package com.jaldishop.backend.media.infrastructure.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.jaldishop.backend.media.domain.MediaStorageService;
-import com.jaldishop.backend.media.domain.MediaTargetType;
-import com.jaldishop.backend.media.domain.UploadSignature;
+import com.jaldishop.backend.media.domain.repository.MediaStorageService;
+import com.jaldishop.backend.media.domain.enums.MediaTargetType;
+import com.jaldishop.backend.media.domain.model.UploadSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

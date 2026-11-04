@@ -1,13 +1,13 @@
 package com.jaldishop.backend.identity.web.mapper;
 
-import com.jaldishop.backend.identity.domain.Role;
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreRepository;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

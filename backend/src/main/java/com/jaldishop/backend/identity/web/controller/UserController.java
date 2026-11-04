@@ -1,9 +1,9 @@
 package com.jaldishop.backend.identity.web.controller;
 
-import com.jaldishop.backend.identity.application.GetMyProfileService;
-import com.jaldishop.backend.identity.application.UpdateProfileCommand;
-import com.jaldishop.backend.identity.application.UpdateProfileService;
-import com.jaldishop.backend.identity.domain.User;
+import com.jaldishop.backend.identity.application.service.GetMyProfileService;
+import com.jaldishop.backend.identity.application.command.UpdateProfileCommand;
+import com.jaldishop.backend.identity.application.service.UpdateProfileService;
+import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.UpdateUserRequest;
 import com.jaldishop.backend.identity.web.dto.UserProfileResponse;

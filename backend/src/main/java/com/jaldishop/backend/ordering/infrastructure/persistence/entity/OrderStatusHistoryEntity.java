@@ -1,6 +1,6 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.ordering.domain.OrderStatus;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

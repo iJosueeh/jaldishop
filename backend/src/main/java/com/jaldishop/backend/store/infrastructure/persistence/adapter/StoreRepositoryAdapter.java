@@ -1,9 +1,9 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
 import com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreRepository;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.mapper.StorePersistenceMapper;

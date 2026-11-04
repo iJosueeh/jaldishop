@@ -1,8 +1,19 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
-import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvailability;
-import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
+import com.jaldishop.backend.capacity.domain.model.*;
+import com.jaldishop.backend.capacity.domain.enums.*;
+import com.jaldishop.backend.capacity.domain.repository.*;
+import com.jaldishop.backend.capacity.application.availability.query.*;
+import com.jaldishop.backend.capacity.application.availability.result.*;
+import com.jaldishop.backend.capacity.application.availability.service.*;
+import com.jaldishop.backend.capacity.application.configuration.command.*;
+import com.jaldishop.backend.capacity.application.configuration.service.*;
+import com.jaldishop.backend.capacity.application.reservation.command.*;
+import com.jaldishop.backend.capacity.application.reservation.service.*;
+
+import com.jaldishop.backend.capacity.application.availability.result.CapacityAvailabilityResult;
+import com.jaldishop.backend.capacity.application.availability.result.CapacitySlotAvailability;
+import com.jaldishop.backend.capacity.application.availability.service.ListStoreCapacitySlotsService;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
@@ -141,43 +152,43 @@ class CapacitySlotsControllerTest {
     }
 
     @Test
-    @DisplayName("Sin storeId - 422 INVALID_CAPACITY_QUERY")
+    @DisplayName("Sin storeId - 400 INVALID_ARGUMENT")
     void missingStoreId() throws Exception {
         mockMvc.perform(get("/api/v1/capacity/slots")
                         .param("date", futureDate.toString()))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code").value("INVALID_CAPACITY_QUERY"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
     @Test
-    @DisplayName("Sin date - 422 INVALID_CAPACITY_QUERY")
+    @DisplayName("Sin date - 400 INVALID_ARGUMENT")
     void missingDate() throws Exception {
         mockMvc.perform(get("/api/v1/capacity/slots")
                         .param("storeId", testStoreId.toString()))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code").value("INVALID_CAPACITY_QUERY"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"))
                 .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
     @Test
-    @DisplayName("storeId mal formado - 422 INVALID_CAPACITY_QUERY")
+    @DisplayName("storeId mal formado - 400 INVALID_ARGUMENT")
     void malformedStoreId() throws Exception {
         mockMvc.perform(get("/api/v1/capacity/slots")
                         .param("storeId", "no-es-uuid")
                         .param("date", futureDate.toString()))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code").value("INVALID_CAPACITY_QUERY"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"));
     }
 
     @Test
-    @DisplayName("date mal formada - 422 INVALID_CAPACITY_QUERY")
+    @DisplayName("date mal formada - 400 INVALID_ARGUMENT")
     void malformedDate() throws Exception {
         mockMvc.perform(get("/api/v1/capacity/slots")
                         .param("storeId", testStoreId.toString())
                         .param("date", "22-09-2026"))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code").value("INVALID_CAPACITY_QUERY"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"));
     }
 
     @Test

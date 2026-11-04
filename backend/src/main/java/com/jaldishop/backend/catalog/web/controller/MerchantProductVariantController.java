@@ -1,18 +1,18 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.CreateProductVariantCommand;
-import com.jaldishop.backend.catalog.application.CreateProductVariantService;
-import com.jaldishop.backend.catalog.application.GetProductVariantsService;
-import com.jaldishop.backend.catalog.application.UpdateProductVariantCommand;
-import com.jaldishop.backend.catalog.application.UpdateProductVariantService;
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.VariantAttribute;
+import com.jaldishop.backend.catalog.application.command.CreateProductVariantCommand;
+import com.jaldishop.backend.catalog.application.service.CreateProductVariantService;
+import com.jaldishop.backend.catalog.application.service.GetProductVariantsService;
+import com.jaldishop.backend.catalog.application.command.UpdateProductVariantCommand;
+import com.jaldishop.backend.catalog.application.service.UpdateProductVariantService;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.model.VariantAttribute;
 import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

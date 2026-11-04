@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.store.domain.StoreCustomerRepository;
-import com.jaldishop.backend.store.domain.StoreCustomerSummary;
+import com.jaldishop.backend.store.domain.repository.StoreCustomerRepository;
+import com.jaldishop.backend.store.domain.model.StoreCustomerSummary;
 import com.jaldishop.backend.store.infrastructure.persistence.projection.StoreCustomerProjection;
 import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerJpaRepository;
 import org.springframework.stereotype.Component;

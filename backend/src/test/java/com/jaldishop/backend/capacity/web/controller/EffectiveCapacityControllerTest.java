@@ -1,13 +1,24 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityQuery;
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityResult;
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacitySource;
-import com.jaldishop.backend.capacity.application.availability.GetEffectiveCapacityService;
+import com.jaldishop.backend.capacity.domain.model.*;
+import com.jaldishop.backend.capacity.domain.enums.*;
+import com.jaldishop.backend.capacity.domain.repository.*;
+import com.jaldishop.backend.capacity.application.availability.query.*;
+import com.jaldishop.backend.capacity.application.availability.result.*;
+import com.jaldishop.backend.capacity.application.availability.service.*;
+import com.jaldishop.backend.capacity.application.configuration.command.*;
+import com.jaldishop.backend.capacity.application.configuration.service.*;
+import com.jaldishop.backend.capacity.application.reservation.command.*;
+import com.jaldishop.backend.capacity.application.reservation.service.*;
+
+import com.jaldishop.backend.capacity.application.availability.query.EffectiveCapacityQuery;
+import com.jaldishop.backend.capacity.application.availability.result.EffectiveCapacityResult;
+import com.jaldishop.backend.capacity.application.availability.result.EffectiveCapacitySource;
+import com.jaldishop.backend.capacity.application.availability.service.GetEffectiveCapacityService;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
-import com.jaldishop.backend.store.application.StoreContextService;
+import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

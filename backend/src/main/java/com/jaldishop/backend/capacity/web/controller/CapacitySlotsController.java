@@ -1,11 +1,10 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.CapacitySlotAvailability;
-import com.jaldishop.backend.capacity.application.availability.ListStoreCapacitySlotsService;
+import com.jaldishop.backend.capacity.application.availability.result.CapacitySlotAvailability;
+import com.jaldishop.backend.capacity.application.availability.service.ListStoreCapacitySlotsService;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacitySlotsResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -59,23 +58,23 @@ public class CapacitySlotsController {
 
     private UUID parseStoreId(String storeId) {
         if (storeId == null || storeId.isBlank()) {
-            throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "El identificador de la tienda es obligatorio.");
+            throw new IllegalArgumentException("El identificador de la tienda es obligatorio.");
         }
         try {
             return UUID.fromString(storeId.trim());
         } catch (IllegalArgumentException e) {
-            throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "El identificador de la tienda no es válido.");
+            throw new IllegalArgumentException("El identificador de la tienda no es válido.");
         }
     }
 
     private LocalDate parseDate(String date) {
         if (date == null || date.isBlank()) {
-            throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "La fecha es obligatoria para consultar las franjas.");
+            throw new IllegalArgumentException("La fecha es obligatoria para consultar las franjas.");
         }
         try {
             return LocalDate.parse(date.trim());
         } catch (DateTimeParseException e) {
-            throw new BusinessRuleException("INVALID_CAPACITY_QUERY", "La fecha debe tener formato YYYY-MM-DD.");
+            throw new IllegalArgumentException("La fecha debe tener formato YYYY-MM-DD.");
         }
     }
 }

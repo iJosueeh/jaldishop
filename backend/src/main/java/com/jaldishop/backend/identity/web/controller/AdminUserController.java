@@ -1,13 +1,13 @@
 package com.jaldishop.backend.identity.web.controller;
 
-import com.jaldishop.backend.identity.application.ChangeUserStatusCommand;
-import com.jaldishop.backend.identity.application.ChangeUserStatusService;
-import com.jaldishop.backend.identity.application.GetAdminUsersQuery;
-import com.jaldishop.backend.identity.application.GetAdminUsersService;
-import com.jaldishop.backend.identity.application.UpdateUserRolesService;
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.application.command.ChangeUserStatusCommand;
+import com.jaldishop.backend.identity.application.service.ChangeUserStatusService;
+import com.jaldishop.backend.identity.application.query.GetAdminUsersQuery;
+import com.jaldishop.backend.identity.application.service.GetAdminUsersService;
+import com.jaldishop.backend.identity.application.service.UpdateUserRolesService;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;

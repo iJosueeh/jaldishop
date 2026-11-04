@@ -1,6 +1,6 @@
 package com.jaldishop.backend.notification.infrastructure.persistence.repository;
 
-import com.jaldishop.backend.notification.domain.NotificationStatus;
+import com.jaldishop.backend.notification.domain.enums.NotificationStatus;
 import com.jaldishop.backend.notification.infrastructure.persistence.entity.NotificationEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

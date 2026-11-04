@@ -1,7 +1,7 @@
 package com.jaldishop.backend.review.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.review.domain.Review;
-import com.jaldishop.backend.review.domain.ReviewStatus;
+import com.jaldishop.backend.review.domain.model.Review;
+import com.jaldishop.backend.review.domain.enums.ReviewStatus;
 import com.jaldishop.backend.review.infrastructure.persistence.entity.ReviewEntity;
 import org.springframework.stereotype.Component;
 

@@ -1,14 +1,15 @@
 package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
-import com.jaldishop.backend.store.application.ChangeStoreStatusCommand;
-import com.jaldishop.backend.store.application.ChangeStoreStatusService;
-import com.jaldishop.backend.store.application.GetAdminStoresQuery;
-import com.jaldishop.backend.store.application.GetAdminStoresService;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.application.command.ChangeStoreStatusCommand;
+import com.jaldishop.backend.store.application.service.ChangeStoreStatusService;
+import com.jaldishop.backend.store.application.query.GetAdminStoresQuery;
+import com.jaldishop.backend.store.application.service.GetAdminStoresService;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.web.dto.AdminStoreDetailResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreSummaryResponse;
 import com.jaldishop.backend.store.web.mapper.AdminStoreResponseMapper;
@@ -252,5 +253,33 @@ class AdminStoreControllerTest {
         mockMvc.perform(get("/api/v1/admin/stores").param("query", "demo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/admin/stores/{id}/suspend - Retorna 409 Conflict cuando la tienda ya está suspendida")
+    void shouldReturn409WhenStoreAlreadySuspended() throws Exception {
+        when(changeStoreStatusService.execute(any(ChangeStoreStatusCommand.class)))
+                .thenThrow(new ConflictException("STORE_ALREADY_SUSPENDED", "La tienda ya se encuentra suspendida."));
+
+        mockMvc.perform(patch("/api/v1/admin/stores/{id}/suspend", storeId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STORE_ALREADY_SUSPENDED"))
+                .andExpect(jsonPath("$.message").value("La tienda ya se encuentra suspendida."))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/admin/stores/{id}/activate - Retorna 409 Conflict cuando la tienda ya está activa")
+    void shouldReturn409WhenStoreAlreadyActive() throws Exception {
+        when(changeStoreStatusService.execute(any(ChangeStoreStatusCommand.class)))
+                .thenThrow(new ConflictException("STORE_ALREADY_ACTIVE", "La tienda ya se encuentra activa."));
+
+        mockMvc.perform(patch("/api/v1/admin/stores/{id}/activate", storeId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STORE_ALREADY_ACTIVE"))
+                .andExpect(jsonPath("$.message").value("La tienda ya se encuentra activa."))
+                .andExpect(jsonPath("$.errors").doesNotExist());
     }
 }

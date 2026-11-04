@@ -1,13 +1,13 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
-import com.jaldishop.backend.capacity.application.reservation.CreateCapacityReservationCommand;
-import com.jaldishop.backend.capacity.application.reservation.CreateCapacityReservationService;
-import com.jaldishop.backend.capacity.application.availability.EffectiveCapacityQuery;
-import com.jaldishop.backend.capacity.application.availability.GetCapacityAvailabilityService;
-import com.jaldishop.backend.capacity.application.reservation.GetCapacityReservationService;
-import com.jaldishop.backend.capacity.application.reservation.ReleaseCapacityReservationService;
-import com.jaldishop.backend.capacity.domain.CapacityReservation;
+import com.jaldishop.backend.capacity.application.availability.result.CapacityAvailabilityResult;
+import com.jaldishop.backend.capacity.application.reservation.command.CreateCapacityReservationCommand;
+import com.jaldishop.backend.capacity.application.reservation.service.CreateCapacityReservationService;
+import com.jaldishop.backend.capacity.application.availability.query.EffectiveCapacityQuery;
+import com.jaldishop.backend.capacity.application.availability.service.GetCapacityAvailabilityService;
+import com.jaldishop.backend.capacity.application.reservation.service.GetCapacityReservationService;
+import com.jaldishop.backend.capacity.application.reservation.service.ReleaseCapacityReservationService;
+import com.jaldishop.backend.capacity.domain.model.CapacityReservation;
 import com.jaldishop.backend.capacity.web.dto.CapacityAvailabilityResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacityReservationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityReservationRequest;

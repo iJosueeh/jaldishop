@@ -1,6 +1,6 @@
 package com.jaldishop.backend.media.web.dto;
 
-import com.jaldishop.backend.media.domain.UploadSignature;
+import com.jaldishop.backend.media.domain.model.UploadSignature;
 
 public record UploadSignatureResponse(
         String cloudName,

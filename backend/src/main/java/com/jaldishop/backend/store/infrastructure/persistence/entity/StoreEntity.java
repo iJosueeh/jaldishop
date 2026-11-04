@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

@@ -1,6 +1,6 @@
 package com.jaldishop.backend.store.infrastructure.persistence.repository;
 
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

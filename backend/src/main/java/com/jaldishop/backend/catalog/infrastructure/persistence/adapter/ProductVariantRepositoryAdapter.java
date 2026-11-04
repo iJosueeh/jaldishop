@@ -1,7 +1,7 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.infrastructure.persistence.mapper.ProductVariantPersistenceMapper;
 import com.jaldishop.backend.catalog.infrastructure.persistence.repository.ProductJpaRepository;
 import com.jaldishop.backend.catalog.infrastructure.persistence.repository.ProductVariantJpaRepository;

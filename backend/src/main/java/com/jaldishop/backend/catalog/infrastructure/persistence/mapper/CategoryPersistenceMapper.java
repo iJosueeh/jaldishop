@@ -1,7 +1,7 @@
 package com.jaldishop.backend.catalog.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.catalog.domain.Category;
-import com.jaldishop.backend.catalog.domain.CategoryStatus;
+import com.jaldishop.backend.catalog.domain.model.Category;
+import com.jaldishop.backend.catalog.domain.enums.CategoryStatus;
 import com.jaldishop.backend.catalog.infrastructure.persistence.entity.CategoryEntity;
 import org.springframework.stereotype.Component;
 

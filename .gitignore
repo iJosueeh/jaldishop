@@ -42,4 +42,6 @@ build/
 output/
 .agents/
 skills-lock.json
-
+*.log
+logs/
+backend/start-local-backend.sh

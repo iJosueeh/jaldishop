@@ -1,6 +1,6 @@
 package com.jaldishop.backend.review.web.controller;
 
-import com.jaldishop.backend.review.application.GetProductPublicReviewsService;
+import com.jaldishop.backend.review.application.service.GetProductPublicReviewsService;
 import com.jaldishop.backend.review.web.dto.ProductReviewsSummaryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

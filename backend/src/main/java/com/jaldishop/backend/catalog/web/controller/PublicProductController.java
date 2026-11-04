@@ -1,15 +1,15 @@
 package com.jaldishop.backend.catalog.web.controller;
 
-import com.jaldishop.backend.catalog.application.GetProductsQuery;
-import com.jaldishop.backend.catalog.application.GetProductsService;
-import com.jaldishop.backend.catalog.domain.Product;
-import com.jaldishop.backend.catalog.domain.ProductStatus;
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.ProductVariantRepository;
+import com.jaldishop.backend.catalog.application.query.GetProductsQuery;
+import com.jaldishop.backend.catalog.application.service.GetProductsService;
+import com.jaldishop.backend.catalog.domain.model.Product;
+import com.jaldishop.backend.catalog.domain.enums.ProductStatus;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
-import com.jaldishop.backend.store.application.GetStoreBySlugService;
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.application.service.GetStoreBySlugService;
+import com.jaldishop.backend.store.domain.model.Store;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

@@ -1,7 +1,7 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.capacity.domain.CapacityConfiguration;
-import com.jaldishop.backend.capacity.domain.CapacityConfigurationRepository;
+import com.jaldishop.backend.capacity.domain.model.CapacityConfiguration;
+import com.jaldishop.backend.capacity.domain.repository.CapacityConfigurationRepository;
 import com.jaldishop.backend.capacity.infrastructure.persistence.entity.CapacityConfigurationEntity;
 import com.jaldishop.backend.capacity.infrastructure.persistence.mapper.CapacityConfigurationPersistenceMapper;
 import com.jaldishop.backend.capacity.infrastructure.persistence.repository.CapacityConfigurationJpaRepository;

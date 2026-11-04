@@ -1,7 +1,7 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.identity.domain.Role;
-import com.jaldishop.backend.identity.domain.User;
+import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.infrastructure.persistence.entity.RoleEntity;
 import com.jaldishop.backend.identity.infrastructure.persistence.entity.UserEntity;
 import org.springframework.stereotype.Component;

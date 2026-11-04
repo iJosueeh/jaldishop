@@ -1,7 +1,7 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.repository;
 
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.identity.infrastructure.persistence.entity.UserEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

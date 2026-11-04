@@ -1,7 +1,7 @@
 package com.jaldishop.backend.inventory.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.inventory.domain.InventoryReservation;
-import com.jaldishop.backend.inventory.domain.InventoryReservationStatus;
+import com.jaldishop.backend.inventory.domain.model.InventoryReservation;
+import com.jaldishop.backend.inventory.domain.enums.InventoryReservationStatus;
 import com.jaldishop.backend.inventory.infrastructure.persistence.entity.InventoryReservationEntity;
 import org.springframework.stereotype.Component;
 

@@ -1,11 +1,19 @@
 package com.jaldishop.backend.catalog.web.controller;
+import com.jaldishop.backend.catalog.domain.model.*;
+import com.jaldishop.backend.catalog.domain.enums.*;
+import com.jaldishop.backend.catalog.domain.repository.*;
+import com.jaldishop.backend.catalog.application.command.*;
+import com.jaldishop.backend.catalog.application.query.*;
+import com.jaldishop.backend.catalog.application.service.*;
+import com.jaldishop.backend.catalog.application.util.*;
 
-import com.jaldishop.backend.catalog.application.GetPublicCategoriesService;
+
+import com.jaldishop.backend.catalog.application.service.GetPublicCategoriesService;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
-import com.jaldishop.backend.store.application.GetStoreBySlugService;
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.store.application.service.GetStoreBySlugService;
+import com.jaldishop.backend.store.domain.model.Store;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

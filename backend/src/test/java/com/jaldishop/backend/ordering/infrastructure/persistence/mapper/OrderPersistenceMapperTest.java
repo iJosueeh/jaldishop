@@ -1,10 +1,10 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
-import com.jaldishop.backend.ordering.domain.Order;
-import com.jaldishop.backend.ordering.domain.OrderItem;
-import com.jaldishop.backend.ordering.domain.OrderStatus;
-import com.jaldishop.backend.ordering.domain.OrderStatusHistory;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.model.OrderItem;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
+import com.jaldishop.backend.ordering.domain.model.OrderStatusHistory;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderItemEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderStatusHistoryEntity;

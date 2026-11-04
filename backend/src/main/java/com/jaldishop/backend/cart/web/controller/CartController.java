@@ -1,16 +1,16 @@
 package com.jaldishop.backend.cart.web.controller;
 
-import com.jaldishop.backend.cart.application.AddItemToCartCommand;
-import com.jaldishop.backend.cart.application.AddItemToCartService;
-import com.jaldishop.backend.cart.application.CartView;
-import com.jaldishop.backend.cart.application.ClearCartCommand;
-import com.jaldishop.backend.cart.application.ClearCartService;
-import com.jaldishop.backend.cart.application.GetCartQuery;
-import com.jaldishop.backend.cart.application.GetCartService;
-import com.jaldishop.backend.cart.application.RemoveCartItemCommand;
-import com.jaldishop.backend.cart.application.RemoveCartItemService;
-import com.jaldishop.backend.cart.application.UpdateCartItemQuantityCommand;
-import com.jaldishop.backend.cart.application.UpdateCartItemQuantityService;
+import com.jaldishop.backend.cart.application.command.AddItemToCartCommand;
+import com.jaldishop.backend.cart.application.service.AddItemToCartService;
+import com.jaldishop.backend.cart.application.result.CartView;
+import com.jaldishop.backend.cart.application.command.ClearCartCommand;
+import com.jaldishop.backend.cart.application.service.ClearCartService;
+import com.jaldishop.backend.cart.application.query.GetCartQuery;
+import com.jaldishop.backend.cart.application.service.GetCartService;
+import com.jaldishop.backend.cart.application.command.RemoveCartItemCommand;
+import com.jaldishop.backend.cart.application.service.RemoveCartItemService;
+import com.jaldishop.backend.cart.application.command.UpdateCartItemQuantityCommand;
+import com.jaldishop.backend.cart.application.service.UpdateCartItemQuantityService;
 import com.jaldishop.backend.cart.web.dto.AddItemToCartRequest;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import com.jaldishop.backend.cart.web.dto.UpdateCartItemRequest;

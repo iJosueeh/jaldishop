@@ -1,6 +1,6 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;

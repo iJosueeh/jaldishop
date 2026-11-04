@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

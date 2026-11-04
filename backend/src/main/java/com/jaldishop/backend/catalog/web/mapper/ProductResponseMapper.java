@@ -1,8 +1,8 @@
 package com.jaldishop.backend.catalog.web.mapper;
 
-import com.jaldishop.backend.catalog.domain.Product;
-import com.jaldishop.backend.catalog.domain.ProductVariant;
-import com.jaldishop.backend.catalog.domain.VariantStatus;
+import com.jaldishop.backend.catalog.domain.model.Product;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import org.springframework.stereotype.Component;

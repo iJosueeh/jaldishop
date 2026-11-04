@@ -45,6 +45,10 @@ public class WebCorsConfiguration {
                 "/api/**",
                 configuration
         );
+        source.registerCorsConfiguration(
+                "/ws/**",
+                configuration
+        );
 
         return source;
     }

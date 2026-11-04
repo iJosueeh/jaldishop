@@ -1,10 +1,10 @@
 package com.jaldishop.backend.identity.web.controller;
 
-import com.jaldishop.backend.identity.application.AuthResult;
-import com.jaldishop.backend.identity.application.AuthenticateUserService;
-import com.jaldishop.backend.identity.application.RegisterCustomerService;
-import com.jaldishop.backend.identity.application.RegisterMerchantCommand;
-import com.jaldishop.backend.identity.application.RegisterMerchantService;
+import com.jaldishop.backend.identity.application.result.AuthResult;
+import com.jaldishop.backend.identity.application.service.AuthenticateUserService;
+import com.jaldishop.backend.identity.application.service.RegisterCustomerService;
+import com.jaldishop.backend.identity.application.command.RegisterMerchantCommand;
+import com.jaldishop.backend.identity.application.service.RegisterMerchantService;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ class AuthControllerTest {
     private RegisterMerchantService registerMerchantService;
 
     @Mock
-    private com.jaldishop.backend.identity.application.RefreshTokenService refreshTokenService;
+    private com.jaldishop.backend.identity.application.service.RefreshTokenService refreshTokenService;
 
     private MockMvc mockMvc;
     private UUID testUserId;

@@ -1,18 +1,19 @@
 package com.jaldishop.backend.identity.web.controller;
 
-import com.jaldishop.backend.identity.application.ChangeUserStatusCommand;
-import com.jaldishop.backend.identity.application.ChangeUserStatusService;
-import com.jaldishop.backend.identity.application.GetAdminUsersQuery;
-import com.jaldishop.backend.identity.application.GetAdminUsersService;
-import com.jaldishop.backend.identity.application.UpdateUserRolesService;
-import com.jaldishop.backend.identity.domain.Role;
-import com.jaldishop.backend.identity.domain.RoleName;
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserStatus;
+import com.jaldishop.backend.identity.application.command.ChangeUserStatusCommand;
+import com.jaldishop.backend.identity.application.service.ChangeUserStatusService;
+import com.jaldishop.backend.identity.application.query.GetAdminUsersQuery;
+import com.jaldishop.backend.identity.application.service.GetAdminUsersService;
+import com.jaldishop.backend.identity.application.service.UpdateUserRolesService;
+import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.AdminUserDetailResponse;
 import com.jaldishop.backend.identity.web.dto.AdminUserSummaryResponse;
 import com.jaldishop.backend.identity.web.mapper.AdminUserResponseMapper;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
@@ -263,5 +264,33 @@ class AdminUserControllerTest {
         mockMvc.perform(get("/api/v1/admin/users").param("query", "carlos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/admin/users/{id}/suspend - Retorna 409 Conflict cuando el usuario ya está suspendido")
+    void shouldReturn409WhenUserAlreadySuspended() throws Exception {
+        when(changeUserStatusService.execute(any(ChangeUserStatusCommand.class)))
+                .thenThrow(new ConflictException("USER_ALREADY_SUSPENDED", "El usuario ya se encuentra suspendido."));
+
+        mockMvc.perform(patch("/api/v1/admin/users/{id}/suspend", targetUserId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("USER_ALREADY_SUSPENDED"))
+                .andExpect(jsonPath("$.message").value("El usuario ya se encuentra suspendido."))
+                .andExpect(jsonPath("$.errors").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/admin/users/{id}/activate - Retorna 409 Conflict cuando el usuario ya está activo")
+    void shouldReturn409WhenUserAlreadyActive() throws Exception {
+        when(changeUserStatusService.execute(any(ChangeUserStatusCommand.class)))
+                .thenThrow(new ConflictException("USER_ALREADY_ACTIVE", "El usuario ya se encuentra activo."));
+
+        mockMvc.perform(patch("/api/v1/admin/users/{id}/activate", targetUserId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("USER_ALREADY_ACTIVE"))
+                .andExpect(jsonPath("$.message").value("El usuario ya se encuentra activo."))
+                .andExpect(jsonPath("$.errors").doesNotExist());
     }
 }

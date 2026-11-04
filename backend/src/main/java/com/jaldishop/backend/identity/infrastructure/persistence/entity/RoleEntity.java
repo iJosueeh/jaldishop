@@ -1,6 +1,6 @@
 package com.jaldishop.backend.identity.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.identity.domain.RoleName;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
 import jakarta.persistence.*;
 
 @Entity

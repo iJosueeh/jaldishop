@@ -1,7 +1,7 @@
 package com.jaldishop.backend.inventory.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.inventory.domain.InventoryReservation;
-import com.jaldishop.backend.inventory.domain.InventoryReservationRepository;
+import com.jaldishop.backend.inventory.domain.model.InventoryReservation;
+import com.jaldishop.backend.inventory.domain.repository.InventoryReservationRepository;
 import com.jaldishop.backend.inventory.infrastructure.persistence.entity.InventoryReservationEntity;
 import com.jaldishop.backend.inventory.infrastructure.persistence.mapper.InventoryReservationPersistenceMapper;
 import com.jaldishop.backend.inventory.infrastructure.persistence.repository.InventoryReservationJpaRepository;

@@ -1,7 +1,7 @@
 package com.jaldishop.backend.address.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.address.domain.CustomerAddress;
-import com.jaldishop.backend.address.domain.CustomerAddressRepository;
+import com.jaldishop.backend.address.domain.model.CustomerAddress;
+import com.jaldishop.backend.address.domain.repository.CustomerAddressRepository;
 import com.jaldishop.backend.address.infrastructure.persistence.entity.CustomerAddressEntity;
 import com.jaldishop.backend.address.infrastructure.persistence.mapper.CustomerAddressPersistenceMapper;
 import com.jaldishop.backend.address.infrastructure.persistence.repository.CustomerAddressJpaRepository;

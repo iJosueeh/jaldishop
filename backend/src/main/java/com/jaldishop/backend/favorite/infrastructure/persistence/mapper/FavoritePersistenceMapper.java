@@ -1,6 +1,6 @@
 package com.jaldishop.backend.favorite.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.favorite.domain.Favorite;
+import com.jaldishop.backend.favorite.domain.model.Favorite;
 import com.jaldishop.backend.favorite.infrastructure.persistence.entity.FavoriteEntity;
 import org.springframework.stereotype.Component;
 

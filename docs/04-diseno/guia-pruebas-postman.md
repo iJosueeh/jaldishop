@@ -2,18 +2,20 @@
 
 **Entregable 1 — Modelado de Datos + Backend API (Núcleo Transaccional)**
 
-La colección oficial de Postman para JaldiShop se encuentra disponible en:
-- `docs/04-diseno/jaldishop-api.postman_collection.json`
-- `backend/jaldishop-api.postman_collection.json`
+La colección oficial y unificada de Postman para JaldiShop se encuentra centralizada en:
+- [`postman/jaldishop.postman_collection.json`](file:///home/ijosueeh/Documentos/Proyectos/jaldishop/postman/jaldishop.postman_collection.json) (Colección completa de 86 endpoints y 9 dominios)
+- [`postman/jaldishop.postman_environment.json`](file:///home/ijosueeh/Documentos/Proyectos/jaldishop/postman/jaldishop.postman_environment.json) (Entorno y variables unificadas)
 
 ---
 
-## 1. Importación Rápida en Postman / Insomnia
+## 1. Importación Rápida en Postman / Insomnia / Bruno
 
-1. Abre **Postman** (o **Insomnia**).
+1. Abre **Postman** (o **Bruno**).
 2. Haz clic en el botón superior **Import**.
-3. Selecciona el archivo [`jaldishop-api.postman_collection.json`](file:///C:/Users/IJosueeh/Documents/Proyectos/jaldishop/docs/04-diseno/jaldishop-api.postman_collection.json).
-4. La colección se importará con el nombre **"JaldiShop API - Entregable 1"** conteniendo todas las carpetas estructuradas y variables configuradas.
+3. Selecciona los dos archivos canónicos:
+   - `postman/jaldishop.postman_collection.json`
+   - `postman/jaldishop.postman_environment.json`
+4. La colección se importará con el nombre **"JaldiShop API"** conteniendo todos los dominios y la automatización de tokens.
 
 ---
 

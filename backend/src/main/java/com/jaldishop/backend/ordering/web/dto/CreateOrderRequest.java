@@ -1,6 +1,6 @@
 package com.jaldishop.backend.ordering.web.dto;
 
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.web.validation.ValidOrderDelivery;
 import jakarta.validation.constraints.NotNull;
 

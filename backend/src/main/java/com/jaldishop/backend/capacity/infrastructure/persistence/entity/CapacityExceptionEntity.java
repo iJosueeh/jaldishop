@@ -1,6 +1,6 @@
 package com.jaldishop.backend.capacity.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.capacity.domain.CapacityExceptionStatus;
+import com.jaldishop.backend.capacity.domain.enums.CapacityExceptionStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;

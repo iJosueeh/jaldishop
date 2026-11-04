@@ -1,7 +1,7 @@
 package com.jaldishop.backend.ordering.web.validation;
 
 import com.jaldishop.backend.ordering.web.dto.CreateOrderRequest;
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

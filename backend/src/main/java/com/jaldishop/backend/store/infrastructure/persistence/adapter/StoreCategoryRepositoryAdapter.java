@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.store.domain.StoreCategory;
-import com.jaldishop.backend.store.domain.StoreCategoryRepository;
+import com.jaldishop.backend.store.domain.model.StoreCategory;
+import com.jaldishop.backend.store.domain.repository.StoreCategoryRepository;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreCategoryEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.mapper.StoreCategoryPersistenceMapper;
 import com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCategoryJpaRepository;

@@ -1,6 +1,6 @@
 package com.jaldishop.backend.checkout.web.dto;
 
-import com.jaldishop.backend.checkout.domain.CheckoutFulfillmentType;
+import com.jaldishop.backend.checkout.domain.enums.CheckoutFulfillmentType;
 
 import java.time.Instant;
 import java.time.LocalDate;

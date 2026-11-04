@@ -1,11 +1,11 @@
 package com.jaldishop.backend.store.web.controller;
 
-import com.jaldishop.backend.store.application.ChangeStoreStatusCommand;
-import com.jaldishop.backend.store.application.ChangeStoreStatusService;
-import com.jaldishop.backend.store.application.GetAdminStoresQuery;
-import com.jaldishop.backend.store.application.GetAdminStoresService;
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.application.command.ChangeStoreStatusCommand;
+import com.jaldishop.backend.store.application.service.ChangeStoreStatusService;
+import com.jaldishop.backend.store.application.query.GetAdminStoresQuery;
+import com.jaldishop.backend.store.application.service.GetAdminStoresService;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.web.dto.AdminStoreDetailResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreSummaryResponse;
 import com.jaldishop.backend.store.web.mapper.AdminStoreResponseMapper;

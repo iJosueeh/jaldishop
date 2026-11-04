@@ -1,7 +1,7 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.entity;
 
-import com.jaldishop.backend.ordering.domain.DeliveryMode;
-import com.jaldishop.backend.ordering.domain.OrderStatus;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -109,10 +111,12 @@ public class OrderEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @BatchSize(size = 50)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     private List<OrderItemEntity> items = new ArrayList<>();
 
+    @BatchSize(size = 50)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     private List<OrderStatusHistoryEntity> statusHistory = new ArrayList<>();

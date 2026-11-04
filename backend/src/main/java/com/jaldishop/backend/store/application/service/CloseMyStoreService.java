@@ -1,0 +1,57 @@
+package com.jaldishop.backend.store.application.service;
+
+import com.jaldishop.backend.store.application.command.CloseMyStoreCommand;
+import com.jaldishop.backend.store.application.result.CloseStoreResult;
+
+import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import com.jaldishop.backend.store.domain.enums.CloseStoreAction;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.port.StoreMediaCleaner;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class CloseMyStoreService {
+
+    private final StoreRepository storeRepository;
+    private final StoreMediaCleaner storeMediaCleaner;
+
+    public CloseMyStoreService(StoreRepository storeRepository, StoreMediaCleaner storeMediaCleaner) {
+        this.storeRepository = storeRepository;
+        this.storeMediaCleaner = storeMediaCleaner;
+    }
+
+    public CloseStoreResult execute(CloseMyStoreCommand command) {
+        Store store = storeRepository.findByMerchantUserId(command.merchantUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró ninguna tienda asociada a tu cuenta de comerciante."));
+
+        boolean hasHistory = storeRepository.hasOperationalHistory(store.getId());
+
+        if (hasHistory) {
+            store.deactivate();
+            storeRepository.save(store);
+            return new CloseStoreResult(
+                    store.getId(),
+                    CloseStoreAction.DEACTIVATED,
+                    StoreStatus.INACTIVE,
+                    "Tu tienda tiene pedidos o reservas registradas y ha sido desactivada para preservar la integridad transaccional."
+            );
+        } else {
+            storeRepository.deleteStore(store.getId(), command.merchantUserId());
+            try {
+                storeMediaCleaner.deleteStoreMedia(store.getId());
+            } catch (Exception ignored) {
+                // Aislamiento: si Cloudinary tiene latencia o error, la transacción de BD ya está confirmada
+            }
+            return new CloseStoreResult(
+                    store.getId(),
+                    CloseStoreAction.DELETED,
+                    null,
+                    "Tu tienda no registraba operaciones previas y ha sido eliminada permanentemente de la plataforma."
+            );
+        }
+    }
+}

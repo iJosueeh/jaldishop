@@ -1,11 +1,14 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.ordering.domain.Order;
-import com.jaldishop.backend.ordering.domain.OrderItem;
-import com.jaldishop.backend.ordering.domain.OrderStatusHistory;
+import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.model.OrderItem;
+import com.jaldishop.backend.ordering.domain.model.OrderStatusHistory;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderItemEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderStatusHistoryEntity;
+import com.jaldishop.backend.shared.domain.model.CustomerSnapshot;
+import com.jaldishop.backend.shared.domain.model.DeliveryAddressSnapshot;
+import com.jaldishop.backend.shared.domain.model.MonetarySummary;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -17,16 +20,27 @@ public class OrderPersistenceMapper {
         if (entity == null) {
             return null;
         }
+
+        CustomerSnapshot customer = CustomerSnapshot.of(
+                entity.getCustomerName(), entity.getCustomerPhone(), entity.getCustomerEmail()
+        );
+        DeliveryAddressSnapshot deliveryAddressSnapshot = DeliveryAddressSnapshot.of(
+                entity.getDeliveryAddress(), entity.getDeliveryReference(),
+                entity.getDeliveryLatitude(), entity.getDeliveryLongitude()
+        );
+        MonetarySummary pricing = MonetarySummary.of(
+                entity.getProductsSubtotalAmount(), entity.getDiscountAmount(),
+                entity.getDiscountCode(), entity.getDeliveryFeeAmount(),
+                entity.getIncludedTaxAmount(), entity.getTotalAmount(),
+                entity.getCurrency()
+        );
+
         return Order.reconstitute(
                 entity.getId(), entity.getOrderNumber(), entity.getUserId(), entity.getStoreId(),
                 entity.getPaymentId(), entity.getCapacityReservationId(), entity.getDeliveryMode(),
                 entity.getServiceDate(), entity.getServiceStartTime(), entity.getServiceEndTime(),
-                entity.getCustomerName(), entity.getCustomerPhone(), entity.getCustomerEmail(),
-                entity.getDeliveryAddress(), entity.getDeliveryReference(),
-                entity.getDeliveryLatitude(), entity.getDeliveryLongitude(),
-                entity.getCurrency(), entity.getProductsSubtotalAmount(), entity.getDiscountAmount(),
-                entity.getDiscountCode(), entity.getDeliveryFeeAmount(), entity.getIncludedTaxAmount(),
-                entity.getTotalAmount(), entity.getConfirmedAt(), entity.getStatus(), entity.getUpdatedAt(),
+                customer, deliveryAddressSnapshot, pricing,
+                entity.getConfirmedAt(), entity.getStatus(), entity.getUpdatedAt(),
                 entity.getItems().stream().map(this::toDomainItem).toList(),
                 entity.getStatusHistory().stream().map(this::toDomainHistory).toList()
         );

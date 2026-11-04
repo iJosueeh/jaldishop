@@ -1,6 +1,6 @@
 package com.jaldishop.backend.notification.infrastructure.persistence.mapper;
 
-import com.jaldishop.backend.notification.domain.Notification;
+import com.jaldishop.backend.notification.domain.model.Notification;
 import com.jaldishop.backend.notification.infrastructure.persistence.entity.NotificationEntity;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,7 @@ public class NotificationPersistenceMapper {
                 entity.getType(),
                 entity.getTitle(),
                 entity.getMessage(),
+                entity.getDeduplicationKey(),
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getReadAt());
@@ -26,6 +27,7 @@ public class NotificationPersistenceMapper {
                 domain.getType(),
                 domain.getTitle(),
                 domain.getMessage(),
+                domain.getDeduplicationKey(),
                 domain.getStatus(),
                 domain.getCreatedAt(),
                 domain.getReadAt());

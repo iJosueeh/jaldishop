@@ -1,9 +1,9 @@
 package com.jaldishop.backend.checkout.infrastructure.persistence.adapter;
 
-import com.jaldishop.backend.checkout.application.PaymentReader;
-import com.jaldishop.backend.checkout.application.PaymentResume;
-import com.jaldishop.backend.checkout.infrastructure.persistence.entity.PaymentEntity;
-import com.jaldishop.backend.checkout.infrastructure.persistence.repository.PaymentJpaRepository;
+import com.jaldishop.backend.checkout.application.port.PaymentReader;
+import com.jaldishop.backend.checkout.application.port.PaymentResume;
+import com.jaldishop.backend.payment.infrastructure.persistence.entity.PaymentEntity;
+import com.jaldishop.backend.payment.infrastructure.persistence.repository.PaymentJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -30,7 +30,21 @@ public class JpaPaymentReader implements PaymentReader {
                 entity.getStatus(),
                 entity.getApprovedAt(),
                 entity.getAmount(),
-                entity.getCurrency()
+                entity.getCurrency(),
+                entity.getFulfillmentType(),
+                entity.getCustomerName(),
+                entity.getCustomerPhone(),
+                entity.getCustomerEmail(),
+                entity.getDeliveryAddress(),
+                entity.getDeliveryReference(),
+                entity.getDeliveryLatitude(),
+                entity.getDeliveryLongitude(),
+                entity.getProductsSubtotalAmount(),
+                entity.getDiscountAmount(),
+                entity.getDiscountCode(),
+                entity.getDeliveryFeeAmount(),
+                entity.getIncludedTaxAmount(),
+                entity.getItemsSnapshot()
         );
     }
 

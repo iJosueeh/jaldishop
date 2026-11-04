@@ -1,7 +1,7 @@
 package com.jaldishop.backend.cart.web.mapper;
 
-import com.jaldishop.backend.cart.application.CartItemView;
-import com.jaldishop.backend.cart.application.CartView;
+import com.jaldishop.backend.cart.application.result.CartItemView;
+import com.jaldishop.backend.cart.application.result.CartView;
 import com.jaldishop.backend.cart.web.dto.CartItemResponse;
 import com.jaldishop.backend.cart.web.dto.CartResponse;
 import org.springframework.stereotype.Component;

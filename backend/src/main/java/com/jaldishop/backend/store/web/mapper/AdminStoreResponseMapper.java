@@ -1,8 +1,8 @@
 package com.jaldishop.backend.store.web.mapper;
 
-import com.jaldishop.backend.identity.domain.User;
-import com.jaldishop.backend.identity.domain.UserRepository;
-import com.jaldishop.backend.store.domain.Store;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.repository.UserRepository;
+import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.web.dto.AdminStoreDetailResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreOwnerResponse;
 import com.jaldishop.backend.store.web.dto.AdminStoreSummaryResponse;

@@ -1,6 +1,6 @@
 package com.jaldishop.backend.identity.web.dto;
 
-import com.jaldishop.backend.identity.domain.RoleName;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.Set;

@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.web.dto;
 
-import com.jaldishop.backend.store.domain.Store;
-import com.jaldishop.backend.store.domain.StoreStatus;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;

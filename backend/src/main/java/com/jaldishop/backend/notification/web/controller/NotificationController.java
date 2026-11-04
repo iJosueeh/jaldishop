@@ -1,8 +1,8 @@
 package com.jaldishop.backend.notification.web.controller;
 
 import com.jaldishop.backend.shared.security.JwtPrincipal;
-import com.jaldishop.backend.notification.application.*;
-import com.jaldishop.backend.notification.domain.Notification;
+import com.jaldishop.backend.notification.application.service.*;
+import com.jaldishop.backend.notification.domain.model.Notification;
 import com.jaldishop.backend.notification.web.dto.NotificationResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

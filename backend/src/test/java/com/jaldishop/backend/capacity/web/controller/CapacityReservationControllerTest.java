@@ -1,12 +1,23 @@
 package com.jaldishop.backend.capacity.web.controller;
 
-import com.jaldishop.backend.capacity.application.availability.CapacityAvailabilityResult;
-import com.jaldishop.backend.capacity.application.reservation.CreateCapacityReservationService;
-import com.jaldishop.backend.capacity.application.availability.GetCapacityAvailabilityService;
-import com.jaldishop.backend.capacity.application.reservation.GetCapacityReservationService;
-import com.jaldishop.backend.capacity.application.reservation.ReleaseCapacityReservationService;
-import com.jaldishop.backend.capacity.domain.CapacityReservation;
-import com.jaldishop.backend.capacity.domain.CapacityReservationStatus;
+import com.jaldishop.backend.capacity.domain.model.*;
+import com.jaldishop.backend.capacity.domain.enums.*;
+import com.jaldishop.backend.capacity.domain.repository.*;
+import com.jaldishop.backend.capacity.application.availability.query.*;
+import com.jaldishop.backend.capacity.application.availability.result.*;
+import com.jaldishop.backend.capacity.application.availability.service.*;
+import com.jaldishop.backend.capacity.application.configuration.command.*;
+import com.jaldishop.backend.capacity.application.configuration.service.*;
+import com.jaldishop.backend.capacity.application.reservation.command.*;
+import com.jaldishop.backend.capacity.application.reservation.service.*;
+
+import com.jaldishop.backend.capacity.application.availability.result.CapacityAvailabilityResult;
+import com.jaldishop.backend.capacity.application.reservation.service.CreateCapacityReservationService;
+import com.jaldishop.backend.capacity.application.availability.service.GetCapacityAvailabilityService;
+import com.jaldishop.backend.capacity.application.reservation.service.GetCapacityReservationService;
+import com.jaldishop.backend.capacity.application.reservation.service.ReleaseCapacityReservationService;
+import com.jaldishop.backend.capacity.domain.model.CapacityReservation;
+import com.jaldishop.backend.capacity.domain.enums.CapacityReservationStatus;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
