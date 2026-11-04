@@ -1,17 +1,18 @@
 package com.jaldishop.backend.ordering.web.controller;
 
+import com.jaldishop.backend.ordering.application.service.CancelCustomerOrderService;
 import com.jaldishop.backend.ordering.application.service.GetCustomerOrderDetailService;
 import com.jaldishop.backend.ordering.application.service.GetCustomerOrdersService;
+import com.jaldishop.backend.ordering.web.dto.CancelOrderRequest;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderDetailResponse;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderSummaryResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,11 +22,24 @@ public class CustomerOrderController {
 
     private final GetCustomerOrdersService getCustomerOrdersService;
     private final GetCustomerOrderDetailService getCustomerOrderDetailService;
+    private final CancelCustomerOrderService cancelCustomerOrderService;
 
-    public CustomerOrderController(GetCustomerOrdersService getCustomerOrdersService,
-                                   GetCustomerOrderDetailService getCustomerOrderDetailService) {
+    @Autowired
+    public CustomerOrderController(
+            GetCustomerOrdersService getCustomerOrdersService,
+            GetCustomerOrderDetailService getCustomerOrderDetailService,
+            CancelCustomerOrderService cancelCustomerOrderService
+    ) {
         this.getCustomerOrdersService = getCustomerOrdersService;
         this.getCustomerOrderDetailService = getCustomerOrderDetailService;
+        this.cancelCustomerOrderService = cancelCustomerOrderService;
+    }
+
+    public CustomerOrderController(
+            GetCustomerOrdersService getCustomerOrdersService,
+            GetCustomerOrderDetailService getCustomerOrderDetailService
+    ) {
+        this(getCustomerOrdersService, getCustomerOrderDetailService, null);
     }
 
     @GetMapping
@@ -44,6 +58,18 @@ public class CustomerOrderController {
     ) {
         validateCustomerPrincipal(principal);
         CustomerOrderDetailResponse order = getCustomerOrderDetailService.execute(principal.userId(), orderNumber);
+        return ResponseEntity.ok(order);
+    }
+
+    @PatchMapping("/{orderNumber}/cancel")
+    public ResponseEntity<CustomerOrderDetailResponse> cancelOrder(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable String orderNumber,
+            @Valid @RequestBody(required = false) CancelOrderRequest request
+    ) {
+        validateCustomerPrincipal(principal);
+        String reason = request != null ? request.reason() : null;
+        CustomerOrderDetailResponse order = cancelCustomerOrderService.execute(principal.userId(), orderNumber, reason);
         return ResponseEntity.ok(order);
     }
 
