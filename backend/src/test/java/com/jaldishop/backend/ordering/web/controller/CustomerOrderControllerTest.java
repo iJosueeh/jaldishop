@@ -1,10 +1,12 @@
 package com.jaldishop.backend.ordering.web.controller;
 
+import com.jaldishop.backend.ordering.application.service.CancelCustomerOrderService;
 import com.jaldishop.backend.ordering.application.service.GetCustomerOrderDetailService;
 import com.jaldishop.backend.ordering.application.service.GetCustomerOrdersService;
 import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.web.dto.*;
+import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
@@ -32,8 +34,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +49,9 @@ class CustomerOrderControllerTest {
 
     @Mock
     private GetCustomerOrderDetailService getCustomerOrderDetailService;
+
+    @Mock
+    private CancelCustomerOrderService cancelCustomerOrderService;
 
     private MockMvc mockMvc;
     private UUID customerUserId;
@@ -56,7 +64,8 @@ class CustomerOrderControllerTest {
 
         CustomerOrderController controller = new CustomerOrderController(
                 getCustomerOrdersService,
-                getCustomerOrderDetailService
+                getCustomerOrderDetailService,
+                cancelCustomerOrderService
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -194,5 +203,44 @@ class CustomerOrderControllerTest {
         mockMvc.perform(get("/api/v1/customer/orders/ORD-UNKNOWN")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/customer/orders/{orderNumber}/cancel cancela el pedido y retorna 200 OK con estado CANCELLED")
+    void shouldCancelOrderSuccessfully() throws Exception {
+        CustomerOrderStoreInfo storeInfo = new CustomerOrderStoreInfo(
+                UUID.randomUUID(), "Bodega San José", "bodega-san-jose",
+                "987654321", "987654321", "Calle 1", null, null
+        );
+        CustomerOrderDetailResponse cancelledDetail = new CustomerOrderDetailResponse(
+                UUID.randomUUID(), "JAL-2026-000001", storeInfo, OrderStatus.CANCELLED,
+                DeliveryMode.DELIVERY, LocalDate.of(2026, 10, 25), LocalTime.of(18, 0), LocalTime.of(19, 0),
+                "Carlos Gómez", "987654321", "carlos@gmail.com", "Calle Los Sauces 456", null,
+                null, null, "PEN", new BigDecimal("10.00"), BigDecimal.ZERO, null,
+                new BigDecimal("3.00"), BigDecimal.ZERO, new BigDecimal("13.00"),
+                Instant.parse("2026-10-25T15:30:00Z"), Instant.now(), List.of(), List.of()
+        );
+
+        when(cancelCustomerOrderService.execute(eq(customerUserId), eq("JAL-2026-000001"), eq("No deseo el producto")))
+                .thenReturn(cancelledDetail);
+
+        mockMvc.perform(patch("/api/v1/customer/orders/JAL-2026-000001/cancel")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\": \"No deseo el producto\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderNumber").value("JAL-2026-000001"))
+                .andExpect(jsonPath("$.status").value("CANCELLED"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/customer/orders/{orderNumber}/cancel retorna 422 si el pedido no está en CONFIRMED")
+    void shouldReturn422WhenOrderIsNotInConfirmedStatus() throws Exception {
+        when(cancelCustomerOrderService.execute(eq(customerUserId), eq("JAL-2026-000002"), any()))
+                .thenThrow(new BusinessRuleException("RN-ORD-09", "Solo los pedidos en estado CONFIRMED pueden ser cancelados"));
+
+        mockMvc.perform(patch("/api/v1/customer/orders/JAL-2026-000002/cancel")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("RN-ORD-09"));
     }
 }

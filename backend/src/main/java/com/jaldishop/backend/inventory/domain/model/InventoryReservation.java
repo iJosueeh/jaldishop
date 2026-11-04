@@ -80,6 +80,15 @@ public class InventoryReservation {
         this.updatedAt = Instant.now();
     }
 
+    public boolean releaseFromCancelledOrder() {
+        if (this.status == InventoryReservationStatus.COMMITTED) {
+            this.status = InventoryReservationStatus.RELEASED;
+            this.updatedAt = Instant.now();
+            return true;
+        }
+        return false;
+    }
+
     public void expire() {
         if (this.status == InventoryReservationStatus.ACTIVE) {
             this.status = InventoryReservationStatus.EXPIRED;

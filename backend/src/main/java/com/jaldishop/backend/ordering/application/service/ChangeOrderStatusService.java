@@ -5,6 +5,7 @@ import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.domain.event.OrderStatusChangedDomainEvent;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,21 @@ public class ChangeOrderStatusService {
 
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final OrderCancellationCompensator cancellationCompensator;
 
-    public ChangeOrderStatusService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher) {
+    @Autowired
+    public ChangeOrderStatusService(
+            OrderRepository orderRepository,
+            ApplicationEventPublisher eventPublisher,
+            OrderCancellationCompensator cancellationCompensator
+    ) {
         this.orderRepository = orderRepository;
         this.eventPublisher = eventPublisher;
+        this.cancellationCompensator = cancellationCompensator;
+    }
+
+    public ChangeOrderStatusService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher) {
+        this(orderRepository, eventPublisher, null);
     }
 
     @Transactional
@@ -47,6 +59,10 @@ public class ChangeOrderStatusService {
         order.transitionTo(newStatus, null, null);
 
         Order savedOrder = orderRepository.save(order);
+
+        if (newStatus == OrderStatus.CANCELLED && cancellationCompensator != null) {
+            cancellationCompensator.compensate(savedOrder, previousStatus, null);
+        }
 
         eventPublisher.publishEvent(new OrderStatusChangedDomainEvent(
                 savedOrder.getId(),

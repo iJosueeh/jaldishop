@@ -117,6 +117,15 @@ public class CapacityReservation {
         this.updatedAt = Instant.now();
     }
 
+    public boolean releaseFromCancelledOrder() {
+        if (this.status == CapacityReservationStatus.COMMITTED) {
+            this.status = CapacityReservationStatus.RELEASED;
+            this.updatedAt = Instant.now();
+            return true;
+        }
+        return false;
+    }
+
     public void protectPayment() {
         if (status != CapacityReservationStatus.ACTIVE) {
             throw new IllegalStateException("Solo una reserva activa puede protegerse por pago.");

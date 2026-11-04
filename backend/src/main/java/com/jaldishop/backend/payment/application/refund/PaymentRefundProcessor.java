@@ -1,5 +1,7 @@
 package com.jaldishop.backend.payment.application.refund;
 
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
+import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.gateway.MercadoPagoGateway;
 import com.jaldishop.backend.payment.application.gateway.dto.ExecuteRefundCommand;
@@ -26,12 +28,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Orquestador en 3 fases desacopladas para el reembolso seguro de pagos Mercado Pago.
- * Fase 1: Reclamación transaccional corta con token de lease y persistencia de intención.
- * Fase 2: Ejecución HTTP externa fuera de transacción de base de datos.
- * Fase 3: Consolidación transaccional corta con revalidación de propiedad del claim.
- */
 @Component
 public class PaymentRefundProcessor {
 
@@ -65,20 +61,15 @@ public class PaymentRefundProcessor {
         this.mercadoPagoGateway = mercadoPagoGateway;
     }
 
-    // =========================================================================
-    // FASE 1: RECLAMACIÓN TRANSACCIONAL CORTA
-    // =========================================================================
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RefundClaimResult claimOrCreateRefundIntent(UUID paymentId, UUID workerToken) {
         Instant now = Instant.now();
 
-        // 1. Bloqueo pesimista del pago
         Payment payment = paymentRepository.findByIdForUpdate(paymentId).orElse(null);
         if (payment == null) {
             return RefundClaimResult.skipped("Pago inexistente: " + paymentId);
         }
 
-        // 2. Validar que el pago requiere devolución
         if (!payment.isApproved()) {
             return RefundClaimResult.skipped("El pago no se encuentra en estado APPROVED");
         }
@@ -86,7 +77,6 @@ public class PaymentRefundProcessor {
             return RefundClaimResult.skipped("El pago no está pendiente ni en procesamiento de reembolso: " + payment.getRefundStatus());
         }
 
-        // 3. Revalidación de elegibilidad operativa de la incidencia post-bloqueo
         if (incidenceRepository != null) {
             Optional<PaymentIncidence> activeIncidenceOpt = incidenceRepository.findActiveByPaymentIdAndProcessType(
                     paymentId, IncidenceProcessType.REFUND_EXECUTION
@@ -110,13 +100,18 @@ public class PaymentRefundProcessor {
             }
         }
 
-        // 4. Verificar ausencia de orden confirmada
-        if (orderRepository.findByPaymentId(paymentId).isPresent()) {
-            log.error("Anomalía: el pago {} ya tiene un pedido confirmado. Abortando solicitud de reembolso.", paymentId);
-            return RefundClaimResult.skipped("El pago ya tiene pedido confirmado asociado");
+        Optional<Order> orderOpt = orderRepository.findByPaymentId(paymentId);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            if (order.getStatus() != OrderStatus.CANCELLED) {
+                log.error("Anomalía: el pago {} ya tiene un pedido confirmado activo (número: {}, estado: {}). Abortando solicitud de reembolso.",
+                        paymentId, order.getOrderNumber(), order.getStatus());
+                return RefundClaimResult.skipped("El pago ya tiene pedido confirmado activo asociado");
+            }
+            log.info("Pago {} corresponde a un pedido legítimamente cancelado (número: {}, estado: {}). Procediendo con la intención de reembolso.",
+                    paymentId, order.getOrderNumber(), order.getStatus());
         }
 
-        // 5. Identificar el intento de pago aprobado
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         List<PaymentAttempt> successfulAttempts = attempts.stream()
                 .filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED && a.getProviderPaymentId() != null && !a.getProviderPaymentId().isBlank())
@@ -139,7 +134,6 @@ public class PaymentRefundProcessor {
         String providerPaymentId = targetAttempt.getProviderPaymentId();
         BigDecimal refundAmount = payment.getRefundAmount() != null ? payment.getRefundAmount() : payment.getAmount();
 
-        // 5. Gestionar intención única de reembolso
         Optional<PaymentRefundIntent> existingOpt = refundIntentRepository.findByPaymentIdForUpdate(paymentId);
         PaymentRefundIntent intent;
         RefundIntentStatus previousStatus = RefundIntentStatus.PENDING;
@@ -180,7 +174,6 @@ public class PaymentRefundProcessor {
                 return RefundClaimResult.skipped("Lease activo de otro worker");
             }
 
-            // Renovar lease para este worker
             intent.acquireClaim(workerToken, LEASE_DURATION, now);
             intent = refundIntentRepository.save(intent);
 
@@ -200,14 +193,10 @@ public class PaymentRefundProcessor {
         );
     }
 
-    // =========================================================================
-    // FASE 2: LLAMADA EXTERNA (FUERA DE TRANSACCIÓN JDBC)
-    // =========================================================================
     public RefundExecutionResult executeExternalRefund(RefundClaimResult claim) {
         log.info("Iniciando llamada externa de reembolso para pago {} (providerPaymentId: {})",
                 claim.paymentId(), claim.providerPaymentId());
 
-        // 1. Si la intención estaba en UNKNOWN o reanudada tras lease vencido, consultar primero GET /refunds
         if (claim.previousStatus() == RefundIntentStatus.UNKNOWN || claim.previousStatus() == RefundIntentStatus.PROCESSING) {
             log.info("Consultando al proveedor antes de intentar POST para el pago {}", claim.paymentId());
             try {
@@ -233,7 +222,6 @@ public class PaymentRefundProcessor {
             }
         }
 
-        // 2. Ejecutar POST /v1/payments/{id}/refunds con la misma X-Idempotency-Key
         try {
             ExecuteRefundCommand command = new ExecuteRefundCommand(
                     claim.providerPaymentId(),
@@ -268,15 +256,11 @@ public class PaymentRefundProcessor {
         }
     }
 
-    // =========================================================================
-    // FASE 3: CONSOLIDACIÓN TRANSACCIONAL CORTA CON VERIFICACIÓN DE CLAIM
-    // =========================================================================
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RefundConsolidationResult consolidateRefundResult(RefundClaimResult claim, RefundExecutionResult execResult) {
         Instant now = Instant.now();
         UUID paymentId = claim.paymentId();
 
-        // 1. Bloqueo pesimista del pago y la intención
         Payment payment = paymentRepository.findByIdForUpdate(paymentId).orElse(null);
         PaymentRefundIntent intent = refundIntentRepository.findByPaymentIdForUpdate(paymentId).orElse(null);
 
@@ -285,14 +269,12 @@ public class PaymentRefundProcessor {
             return RefundConsolidationResult.error("Entidad no encontrada");
         }
 
-        // 2. COMPROBACIÓN CRÍTICA: Propiedad del Claim
         if (!intent.isClaimOwnedBy(claim.claimToken(), now)) {
             log.warn("CLAIM OBSOLETO: El worker con token {} perdió el lease para el pago {}. Consolidación rechazada.",
                     claim.claimToken(), paymentId);
             return RefundConsolidationResult.claimLost("El lease expiró o fue reclamado por otro worker");
         }
 
-        // 3. Auditar el intento técnico en payment_refund_execution_attempts
         int nextAttempt = executionAttemptRepository.findNextAttemptNumber(intent.getId());
         String auditStatus = switch (execResult.status()) {
             case SUCCESSFUL -> "SUCCESSFUL";
@@ -312,7 +294,6 @@ public class PaymentRefundProcessor {
         );
         executionAttemptRepository.save(attemptRecord);
 
-        // 4. Actualizar estado según el resultado de la llamada
         switch (execResult.status()) {
             case SUCCESSFUL -> {
                 intent.complete(execResult.providerRefundId(), now);
@@ -357,9 +338,6 @@ public class PaymentRefundProcessor {
                 return RefundConsolidationResult.failed(execResult.errorMessage());
             }
             case SUSPENDED_OPERATIONAL -> {
-                // No marcar el pago ni la intención como fallidos definitivos.
-                // Quedan en estado recuperable y se registra incidencia OPERATIONAL en MANUAL_REVIEW_REQUIRED
-                // para suspender reintentos automáticos hasta que se corrijan credenciales/permisos.
                 intent.markUnknown(execResult.errorMessage(), now);
                 refundIntentRepository.save(intent);
 
@@ -382,7 +360,6 @@ public class PaymentRefundProcessor {
                 intent.markUnknown(execResult.errorMessage(), now);
                 refundIntentRepository.save(intent);
 
-                // El pago permanece en PENDING para que el reconciliador lo retome tras el backoff
                 try {
                     recordRefundTechnicalRetry(paymentId, execResult.errorCode(), execResult.errorMessage(), now);
                 } catch (Exception ex) {
@@ -485,7 +462,6 @@ public class PaymentRefundProcessor {
         return httpStatus == 401 || httpStatus == 403;
     }
 
-    // Records de resultado para cada fase
     public record RefundClaimResult(
             boolean claimed,
             String skipReason,

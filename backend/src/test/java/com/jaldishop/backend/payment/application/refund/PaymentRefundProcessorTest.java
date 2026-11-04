@@ -384,4 +384,97 @@ class PaymentRefundProcessorTest {
         assertEquals(RefundExecutionResult.ExecutionStatus.FAILED, execResult.status());
         assertEquals("refund_amount_exceeded", execResult.errorCode());
     }
+
+    @Test
+    @DisplayName("Fase 1: Admite reembolso cuando el pedido asociado está legítimamente CANCELLED")
+    void shouldAllowRefundWhenOrderIsCancelled() {
+        UUID paymentId = UUID.randomUUID();
+        UUID workerToken = UUID.randomUUID();
+
+        Payment payment = Payment.createPending(
+                UUID.randomUUID(), BigDecimal.valueOf(80.00), "PEN",
+                FulfillmentType.DELIVERY, "Cliente", "999", "c@test.com",
+                "Av Test", null, null, null, BigDecimal.valueOf(80.00),
+                BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, "{}"
+        );
+        payment.markApproved(Instant.now());
+        payment.requestRefund(BigDecimal.valueOf(80.00), "Cancelación de pedido");
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                paymentId, 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-cancel"
+        );
+        attempt.markApproved("mp-pay-cancel", "approved", "accredited", PaymentMethod.CARD, Instant.now());
+
+        com.jaldishop.backend.ordering.domain.model.Order cancelledOrder = mock(com.jaldishop.backend.ordering.domain.model.Order.class);
+        when(cancelledOrder.getStatus()).thenReturn(com.jaldishop.backend.ordering.domain.enums.OrderStatus.CANCELLED);
+        when(cancelledOrder.getOrderNumber()).thenReturn("JAL-2026-000001");
+
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(payment));
+        when(orderRepository.findByPaymentId(paymentId)).thenReturn(Optional.of(cancelledOrder));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(attempt));
+        when(refundIntentRepository.findByPaymentIdForUpdate(paymentId)).thenReturn(Optional.empty());
+        when(refundIntentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RefundClaimResult result = processor.claimOrCreateRefundIntent(paymentId, workerToken);
+
+        assertTrue(result.claimed());
+        assertEquals(paymentId, result.paymentId());
+        assertEquals("mp-pay-cancel", result.providerPaymentId());
+    }
+
+    @Test
+    @DisplayName("Fase 1: Rechaza reembolso cuando el pedido asociado está activo en CONFIRMED")
+    void shouldRejectRefundWhenOrderIsActiveConfirmed() {
+        UUID paymentId = UUID.randomUUID();
+        UUID workerToken = UUID.randomUUID();
+
+        Payment payment = Payment.createPending(
+                UUID.randomUUID(), BigDecimal.valueOf(80.00), "PEN",
+                FulfillmentType.DELIVERY, "Cliente", "999", "c@test.com",
+                "Av Test", null, null, null, BigDecimal.valueOf(80.00),
+                BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, "{}"
+        );
+        payment.markApproved(Instant.now());
+        payment.requestRefund(BigDecimal.valueOf(80.00), "Falso intento de reembolso");
+
+        com.jaldishop.backend.ordering.domain.model.Order activeOrder = mock(com.jaldishop.backend.ordering.domain.model.Order.class);
+        when(activeOrder.getStatus()).thenReturn(com.jaldishop.backend.ordering.domain.enums.OrderStatus.CONFIRMED);
+        when(activeOrder.getOrderNumber()).thenReturn("JAL-2026-000002");
+
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(payment));
+        when(orderRepository.findByPaymentId(paymentId)).thenReturn(Optional.of(activeOrder));
+
+        RefundClaimResult result = processor.claimOrCreateRefundIntent(paymentId, workerToken);
+
+        assertFalse(result.claimed());
+        assertEquals("El pago ya tiene pedido confirmado activo asociado", result.skipReason());
+    }
+
+    @Test
+    @DisplayName("Fase 1: Rechaza reembolso cuando el pedido asociado está activo en IN_PREPARATION")
+    void shouldRejectRefundWhenOrderIsActiveInPreparation() {
+        UUID paymentId = UUID.randomUUID();
+        UUID workerToken = UUID.randomUUID();
+
+        Payment payment = Payment.createPending(
+                UUID.randomUUID(), BigDecimal.valueOf(80.00), "PEN",
+                FulfillmentType.DELIVERY, "Cliente", "999", "c@test.com",
+                "Av Test", null, null, null, BigDecimal.valueOf(80.00),
+                BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, "{}"
+        );
+        payment.markApproved(Instant.now());
+        payment.requestRefund(BigDecimal.valueOf(80.00), "Falso intento de reembolso");
+
+        com.jaldishop.backend.ordering.domain.model.Order activeOrder = mock(com.jaldishop.backend.ordering.domain.model.Order.class);
+        when(activeOrder.getStatus()).thenReturn(com.jaldishop.backend.ordering.domain.enums.OrderStatus.IN_PREPARATION);
+        when(activeOrder.getOrderNumber()).thenReturn("JAL-2026-000003");
+
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(payment));
+        when(orderRepository.findByPaymentId(paymentId)).thenReturn(Optional.of(activeOrder));
+
+        RefundClaimResult result = processor.claimOrCreateRefundIntent(paymentId, workerToken);
+
+        assertFalse(result.claimed());
+        assertEquals("El pago ya tiene pedido confirmado activo asociado", result.skipReason());
+    }
 }
