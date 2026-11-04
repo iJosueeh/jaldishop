@@ -97,8 +97,10 @@ Para sembrar un conjunto coherente, determinista y seguro de datos para demostra
 
 **Ejecución:**
 ```bash
-# Variables opcionales (defaults: localhost, 5432, jaldishop, postgres, postgres)
+# Parámetros explícitos obligatorios (restringido a bases de datos locales de prueba autorizadas)
 DB_HOST=127.0.0.1 DB_PORT=5434 DB_NAME=jaldishop_test DB_USER=test_user PGPASSWORD=test_pass ./seed-e2e.sh
+# o alternativamente con DB_URL:
+DB_URL="jdbc:postgresql://127.0.0.1:5434/jaldishop_test" DB_USERNAME=test_user DB_PASSWORD=test_pass ./seed-e2e.sh
 ```
 
 ### Núcleo Transaccional & Pruebas de Concurrencia

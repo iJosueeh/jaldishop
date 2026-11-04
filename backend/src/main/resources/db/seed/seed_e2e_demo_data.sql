@@ -308,23 +308,19 @@ INSERT INTO capacity_reservations (
     CURRENT_DATE - INTERVAL '2 days', '09:00:00', '13:00:00',
     'COMMITTED', NOW() - INTERVAL '2 days', NULL, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'
 ) ON CONFLICT (id) DO UPDATE SET
-    store_id = EXCLUDED.store_id,
-    user_id = EXCLUDED.user_id,
     status = 'COMMITTED';
 
--- Reserva 2: Pedido 2 (Valeria)
+-- Reserva 2: Pedido 2 (Juan)
 INSERT INTO capacity_reservations (
     id, store_id, user_id, service_date, start_time, end_time,
     status, expires_at, payment_protection_expires_at, created_at, updated_at
 ) VALUES (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf602',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5',
-    '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2',
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf9f2',
     CURRENT_DATE, '14:00:00', '19:00:00',
     'COMMITTED', NOW() + INTERVAL '2 hours', NULL, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '1 hour'
 ) ON CONFLICT (id) DO UPDATE SET
-    store_id = EXCLUDED.store_id,
-    user_id = EXCLUDED.user_id,
     status = 'COMMITTED';
 
 -- Reserva 3: Activa para Demo de Checkout (Mañana)
@@ -387,7 +383,7 @@ INSERT INTO payments (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf602',
     60.00, 'PEN', 'APPROVED',
     'NOT_REQUIRED', NULL, NULL, NOW() - INTERVAL '1 hour', NULL, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '1 hour',
-    'PICKUP', 'Valeria Ríos', '+51965432109', 'cliente.demo@jaldishop.com', NULL, NULL,
+    'PICKUP', 'Juan Pérez', '+51912345678', 'cliente.juan@jaldishop.com', NULL, NULL,
     60.00, 0.00, 0.00, 9.15,
     '[{"variantId":"80acf0ba-5a79-4888-b00d-b5aef8fcf303","productName":"Cheesecake de Frutos Rojos","variantName":"Entero","quantity":1,"unitPrice":60.00,"subtotal":60.00}]'::jsonb
 ) ON CONFLICT (id) DO UPDATE SET
@@ -464,12 +460,12 @@ INSERT INTO orders (
 ) VALUES (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf802',
     'JAL-2026-000002',
-    '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2',
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf9f2',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf702',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf602',
     'IN_PREPARATION', 'PICKUP', CURRENT_DATE, '14:00:00', '19:00:00',
-    'Valeria Ríos', '+51965432109', 'cliente.demo@jaldishop.com', NULL, NULL,
+    'Juan Pérez', '+51912345678', 'cliente.juan@jaldishop.com', NULL, NULL,
     NULL, NULL, 60.00, 0.00,
     0.00, 9.15, 60.00, 'PEN',
     NOW() - INTERVAL '1 hour', NOW() - INTERVAL '30 minutes'
@@ -498,15 +494,16 @@ ON CONFLICT (id) DO NOTHING;
 -- --------------------------------------------------------------------
 INSERT INTO carts (id, user_id, store_id, created_at, updated_at)
 VALUES (
-    '80acf0ba-5a79-4888-b00d-b5aef8fcfc01',
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf901',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5',
     NOW() - INTERVAL '2 hours', NOW()
-) ON CONFLICT (id) DO UPDATE SET updated_at = NOW();
+) ON CONFLICT (user_id, store_id) DO UPDATE SET updated_at = NOW();
 
 INSERT INTO cart_items (cart_id, variant_id, quantity, reference_price_amount, reference_price_currency, created_at, updated_at, store_id)
-VALUES
-    ('80acf0ba-5a79-4888-b00d-b5aef8fcfc01', '80acf0ba-5a79-4888-b00d-b5aef8fcf304', 2, 30.00, 'PEN', NOW() - INTERVAL '2 hours', NOW(), '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5')
+SELECT c.id, '80acf0ba-5a79-4888-b00d-b5aef8fcf304', 2, 30.00, 'PEN', NOW() - INTERVAL '2 hours', NOW(), '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5'
+FROM carts c
+WHERE c.user_id = '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2' AND c.store_id = '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5'
 ON CONFLICT (cart_id, variant_id) DO UPDATE SET quantity = 2;
 
 -- --------------------------------------------------------------------
@@ -562,9 +559,13 @@ VALUES (
 
 INSERT INTO reviews (id, user_id, product_id, rating, comment, status, created_at, updated_at)
 VALUES (
-    '80acf0ba-5a79-4888-b00d-b5aef8fcff02',
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf951',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e2',
     '80acf0ba-5a79-4888-b00d-b5aef8fcf201',
     5, 'Excelente torta de chocolate, súper húmeda y el fudge delicioso.',
     'PUBLISHED', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'
-) ON CONFLICT (id) DO NOTHING;
+) ON CONFLICT (user_id, product_id) DO UPDATE SET
+    rating = EXCLUDED.rating,
+    comment = EXCLUDED.comment,
+    status = EXCLUDED.status,
+    updated_at = EXCLUDED.updated_at;

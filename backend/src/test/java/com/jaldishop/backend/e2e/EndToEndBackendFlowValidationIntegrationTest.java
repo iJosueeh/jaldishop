@@ -8,6 +8,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.testutil.TestPostgresConfig;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,7 +126,16 @@ class EndToEndBackendFlowValidationIntegrationTest {
 
         mockServer.start();
 
-        // Aplicar seed reproducible directamente
+        // Asegurar que las migraciones Flyway estén aplicadas en base de datos aislada
+        Flyway.configure()
+                .dataSource(database.url(), database.username(), database.password())
+                .locations("classpath:db/migration")
+                .validateOnMigrate(database.validateOnMigrate())
+                .load()
+                .migrate();
+
+        // Aplicar seed reproducible directamente (ejecución inicial e idempotencia verificada)
+        applySeedScript();
         applySeedScript();
     }
 
