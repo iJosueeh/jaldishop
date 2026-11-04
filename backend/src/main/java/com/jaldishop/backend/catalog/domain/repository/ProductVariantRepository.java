@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface ProductVariantRepository {
     ProductVariant save(ProductVariant variant);
     Optional<ProductVariant> findById(UUID id);
+    Optional<ProductVariant> findByIdAndStoreId(UUID id, UUID storeId);
     List<ProductVariant> findByProductId(UUID productId);
     List<ProductVariant> findByStoreId(UUID storeId);
     boolean existsBySku(String sku);

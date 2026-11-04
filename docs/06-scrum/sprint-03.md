@@ -321,33 +321,33 @@ Implementar el Hold transaccional de 10 minutos que bloquea un cupo de capacidad
 
 ### 📋 BE-13 | Implementar módulo de Inventario
 
-**Responsable:** Katherine  
-**Estado:** `BLOQUEADA POR BE-12` 🔒  
+**Responsable:** Katherine / Josué  
+**Estado:** `COMPLETADO` ✅  
 **Entregable:** Dominio `Inventory`, control de stock por variante, umbrales de alerta y endpoints REST Merchant.
 
 **Descripción:**  
 Implementar la gestión de inventario asociada a las variantes de productos (`ProductVariant`), permitiendo controlar existencias actuales y umbrales de stock bajo para notificaciones oportunas.
 
 **Checklist:**
-- [ ] Implementar dominio `Inventory`
-- [ ] Asociar `Inventory` con `ProductVariant` (1 a 1 por variante rastreable)
-- [ ] Implementar Repository Port (`InventoryRepository`)
-- [ ] Implementar JPA Entity (`InventoryEntity`)
-- [ ] Implementar `InventoryJpaRepository`
-- [ ] Implementar mapper y adapter de persistencia
-- [ ] Caso de uso Consultar stock de producto/variante
-- [ ] Caso de uso Actualizar stock disponible (ajuste manual)
-- [ ] Caso de uso Configurar umbral de stock bajo (`low_stock_threshold`)
-- [ ] Validar `stock_quantity >= 0`
-- [ ] Respetar bandera `tracks_inventory` de `ProductVariant` (ignorar si es falso)
-- [ ] Impedir operaciones sobre variantes de otra Store
-- [ ] Implementar DTOs de entrada y salida
-- [ ] Implementar endpoints REST Merchant (`/api/v1/inventory/**`)
-- [ ] Tests de dominio
-- [ ] Tests de aplicación
-- [ ] Tests de persistencia
-- [ ] Tests web
-- [ ] *(Nota: Todavía NO incluye descontar stock por compra; eso se conectará en ConfirmPurchase/Checkout).*
+- [x] Implementar dominio `Inventory`
+- [x] Asociar `Inventory` con `ProductVariant` (1 a 1 por variante rastreable)
+- [x] Implementar Repository Port (`InventoryRepository`)
+- [x] Implementar JPA Entity (`InventoryEntity`)
+- [x] Implementar `InventoryJpaRepository`
+- [x] Implementar mapper y adapter de persistencia
+- [x] Caso de uso Consultar stock de producto/variante
+- [x] Caso de uso Actualizar stock disponible (ajuste manual)
+- [x] Caso de uso Configurar umbral de stock bajo (`low_stock_threshold`)
+- [x] Validar `stock_quantity >= 0`
+- [x] Respetar bandera `tracks_inventory` de `ProductVariant` (ignorar si es falso)
+- [x] Impedir operaciones sobre variantes de otra Store
+- [x] Implementar DTOs de entrada y salida
+- [x] Implementar endpoints REST Merchant (`/api/v1/inventory/**`)
+- [x] Tests de dominio
+- [x] Tests de aplicación
+- [x] Tests de persistencia
+- [x] Tests web
+- [x] Documentación técnica y colección Bruno en `docs/04-diseno/api-inventario.md`
 
 ---
 

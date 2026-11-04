@@ -44,6 +44,11 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
     }
 
     @Override
+    public Optional<ProductVariant> findByIdAndStoreId(UUID id, UUID storeId) {
+        return repository.findByIdAndStoreId(id, storeId).map(mapper::toDomain);
+    }
+
+    @Override
     public List<ProductVariant> findByProductId(UUID productId) {
         return repository.findByProductId(productId).stream()
                 .map(mapper::toDomain)

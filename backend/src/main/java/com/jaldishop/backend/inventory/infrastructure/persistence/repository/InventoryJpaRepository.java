@@ -16,13 +16,6 @@ import java.util.UUID;
 @Repository
 public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, UUID> {
 
-    /**
-     * PROTOCOLO DE CONCURRENCIA: ORDEN GLOBAL DE LOCKS
-     * 1. Capacity Anchor (adquirido en CreateCapacityReservationService)
-     * 2. Inventories ordenados canónicamente por variant_id ASC (este método)
-     *
-     * ESTE ORDEN ES OBLIGATORIO Y NUNCA DEBE INVERTIRSE PARA PREVENIR DEADLOCKS.
-     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             SELECT i FROM InventoryEntity i
@@ -30,12 +23,6 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             ORDER BY i.variantId ASC
             """)
     List<InventoryEntity> findByVariantIdInForUpdate(@Param("variantIds") List<UUID> variantIds);
-
-    /**
-     * Calcula la suma de cantidades reservadas activas y vigentes para una variante y tienda dada.
-     * Expresa el aislamiento multitenant reforzado por V13 (ir.storeId = cr.storeId).
-     * La autoridad temporal del hold reside en capacity_reservations.
-     */
     @Query("""
             SELECT COALESCE(SUM(ir.quantity), 0)
             FROM InventoryReservationEntity ir, CapacityReservationEntity cr
@@ -53,12 +40,6 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             @Param("storeId") UUID storeId,
             @Param("variantId") UUID variantId,
             @Param("now") Instant now);
-
-    /**
-     * Suma de cantidades reservadas activas y vigentes de OTROS holds
-     * (excluye la reserva de capacidad own): la base para la guardantía del
-     * decremento atómico de ConfirmPurchase.
-     */
     @Query("""
             SELECT COALESCE(SUM(ir.quantity), 0)
             FROM InventoryReservationEntity ir, CapacityReservationEntity cr
@@ -78,13 +59,6 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             @Param("variantId") UUID variantId,
             @Param("capacityReservationId") UUID capacityReservationId,
             @Param("now") Instant now);
-
-    /**
-     * Decremento atómico condicional de stock (estrategia §16.1).
-     * 1 fila actualizada = stock descontado correctamente.
-     * 0 filas = stock insuficiente o insuficiente para sostener holds ajenos vigentes.
-     * Requiere haber adquirido el lock pesimista previo con findByVariantIdInForUpdate.
-     */
     @Modifying
     @Query("""
             UPDATE InventoryEntity i
@@ -97,4 +71,82 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             @Param("quantity") int quantity,
             @Param("otherActiveReservedQuantity") int otherActiveReservedQuantity,
             @Param("now") Instant now);
+
+    @Modifying
+    @Query(value = """
+            INSERT INTO inventories (variant_id, quantity, low_stock_threshold, updated_at)
+            VALUES (:variantId, :quantity, NULL, :now)
+            ON CONFLICT (variant_id) DO UPDATE
+            SET quantity = EXCLUDED.quantity,
+                updated_at = EXCLUDED.updated_at
+            """, nativeQuery = true)
+    int upsertStock(
+            @Param("variantId") UUID variantId,
+            @Param("quantity") int quantity,
+            @Param("now") Instant now);
+
+    @Query(value = """
+            SELECT
+                pv.id AS variantId,
+                pv.product_id AS productId,
+                p.name AS productName,
+                pv.presentation_name AS presentationName,
+                pv.sku AS sku,
+                pv.tracks_inventory AS tracksInventory,
+                pv.status AS status,
+                i.quantity AS physicalQuantity,
+                i.low_stock_threshold AS lowStockThreshold,
+                i.updated_at AS inventoryUpdatedAt
+            FROM product_variants pv
+            JOIN products p ON pv.product_id = p.id
+            LEFT JOIN inventories i ON pv.id = i.variant_id
+            WHERE pv.store_id = :storeId
+            ORDER BY p.name ASC, pv.presentation_name ASC
+            """, nativeQuery = true)
+    List<StoreVariantInventoryProjection> findAllVariantInventoriesByStoreId(@Param("storeId") UUID storeId);
+
+    @Query(value = """
+            SELECT
+                pv.id AS variantId,
+                pv.product_id AS productId,
+                p.name AS productName,
+                pv.presentation_name AS presentationName,
+                pv.sku AS sku,
+                pv.tracks_inventory AS tracksInventory,
+                pv.status AS status,
+                i.quantity AS physicalQuantity,
+                i.low_stock_threshold AS lowStockThreshold,
+                i.updated_at AS inventoryUpdatedAt
+            FROM product_variants pv
+            JOIN products p ON pv.product_id = p.id
+            LEFT JOIN inventories i ON pv.id = i.variant_id
+            WHERE pv.store_id = :storeId
+              AND pv.id = :variantId
+            """, nativeQuery = true)
+    java.util.Optional<StoreVariantInventoryProjection> findVariantInventoryByStoreIdAndVariantId(
+            @Param("storeId") UUID storeId,
+            @Param("variantId") UUID variantId);
+
+    @Query(value = """
+            SELECT
+                pv.id AS variantId,
+                pv.product_id AS productId,
+                p.name AS productName,
+                pv.presentation_name AS presentationName,
+                pv.sku AS sku,
+                pv.tracks_inventory AS tracksInventory,
+                pv.status AS status,
+                i.quantity AS physicalQuantity,
+                i.low_stock_threshold AS lowStockThreshold,
+                i.updated_at AS inventoryUpdatedAt
+            FROM product_variants pv
+            JOIN products p ON pv.product_id = p.id
+            JOIN inventories i ON pv.id = i.variant_id
+            WHERE pv.store_id = :storeId
+              AND pv.tracks_inventory = true
+              AND i.low_stock_threshold IS NOT NULL
+              AND i.quantity <= i.low_stock_threshold
+            ORDER BY i.quantity ASC, p.name ASC
+            """, nativeQuery = true)
+    List<StoreVariantInventoryProjection> findLowStockVariantsByStoreId(@Param("storeId") UUID storeId);
 }
