@@ -72,7 +72,7 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             @Param("otherActiveReservedQuantity") int otherActiveReservedQuantity,
             @Param("now") Instant now);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
             INSERT INTO inventories (variant_id, quantity, low_stock_threshold, updated_at)
             VALUES (:variantId, :quantity, NULL, :now)
