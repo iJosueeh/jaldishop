@@ -43,6 +43,25 @@ public class MercadoPagoProperties {
     private String backUrlPending = "https://jaldishop.com/checkout/pending";
 
     /**
+     * Modo de integración de checkout de Mercado Pago (PREFERENCES u ORDERS).
+     * Predeterminado: PREFERENCES para compatibilidad garantizada.
+     */
+    private CheckoutIntegrationMode checkoutMode = CheckoutIntegrationMode.PREFERENCES;
+
+    public enum CheckoutIntegrationMode {
+        PREFERENCES,
+        ORDERS
+    }
+
+    public CheckoutIntegrationMode getCheckoutMode() {
+        return checkoutMode;
+    }
+
+    public void setCheckoutMode(CheckoutIntegrationMode checkoutMode) {
+        this.checkoutMode = checkoutMode;
+    }
+
+    /**
      * Clave secreta para validación de la firma criptográfica x-signature del webhook.
      */
     private String webhookSecret = "";

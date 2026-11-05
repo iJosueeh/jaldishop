@@ -19,6 +19,8 @@ public interface PaymentAttemptJpaRepository extends JpaRepository<PaymentAttemp
 
     Optional<PaymentAttemptEntity> findByPreferenceId(String preferenceId);
 
+    Optional<PaymentAttemptEntity> findByProviderOrderId(String providerOrderId);
+
     List<PaymentAttemptEntity> findByPaymentIdOrderByAttemptNumberAsc(UUID paymentId);
 
     @Query("SELECT COALESCE(MAX(a.attemptNumber), 0) + 1 FROM PaymentAttemptEntity a WHERE a.paymentId = :paymentId")

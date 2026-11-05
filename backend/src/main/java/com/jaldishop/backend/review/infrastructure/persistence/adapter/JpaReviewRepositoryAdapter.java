@@ -58,4 +58,9 @@ public class JpaReviewRepositoryAdapter implements ReviewRepository {
     public boolean existsByUserIdAndProductId(UUID userId, UUID productId) {
         return jpaRepository.existsByUserIdAndProductId(userId, productId);
     }
+
+    @Override
+    public void delete(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }

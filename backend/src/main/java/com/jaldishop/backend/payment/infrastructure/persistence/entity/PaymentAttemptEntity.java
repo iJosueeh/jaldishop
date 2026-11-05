@@ -31,8 +31,14 @@ public class PaymentAttemptEntity {
     @Column(name = "idempotency_key", nullable = false, length = 64)
     private String idempotencyKey;
 
+    @Column(name = "checkout_mode", nullable = false, length = 20)
+    private String checkoutMode;
+
     @Column(name = "preference_id", length = 100)
     private String preferenceId;
+
+    @Column(name = "provider_order_id", length = 100)
+    private String providerOrderId;
 
     @Column(name = "init_point")
     private String initPoint;
@@ -86,13 +92,71 @@ public class PaymentAttemptEntity {
             Instant completedAt,
             Instant updatedAt
     ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                preferenceId, null, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                "PREFERENCES", preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         this.id = id;
         this.paymentId = paymentId;
         this.attemptNumber = attemptNumber;
         this.provider = provider;
         this.paymentMethod = paymentMethod;
         this.idempotencyKey = idempotencyKey;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
         this.preferenceId = preferenceId;
+        this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.providerPaymentId = providerPaymentId;
         this.providerStatus = providerStatus;
@@ -117,8 +181,12 @@ public class PaymentAttemptEntity {
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public String getIdempotencyKey() { return idempotencyKey; }
     public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+    public String getCheckoutMode() { return checkoutMode; }
+    public void setCheckoutMode(String checkoutMode) { this.checkoutMode = checkoutMode; }
     public String getPreferenceId() { return preferenceId; }
     public void setPreferenceId(String preferenceId) { this.preferenceId = preferenceId; }
+    public String getProviderOrderId() { return providerOrderId; }
+    public void setProviderOrderId(String providerOrderId) { this.providerOrderId = providerOrderId; }
     public String getInitPoint() { return initPoint; }
     public void setInitPoint(String initPoint) { this.initPoint = initPoint; }
     public String getProviderPaymentId() { return providerPaymentId; }

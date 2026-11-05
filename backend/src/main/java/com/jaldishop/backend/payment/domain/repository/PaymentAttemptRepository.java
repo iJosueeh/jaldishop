@@ -14,6 +14,7 @@ public interface PaymentAttemptRepository {
     Optional<PaymentAttempt> findByProviderAndProviderPaymentId(PaymentProvider provider, String providerPaymentId);
     Optional<PaymentAttempt> findByProviderAndIdempotencyKey(PaymentProvider provider, String idempotencyKey);
     Optional<PaymentAttempt> findByPreferenceId(String preferenceId);
+    Optional<PaymentAttempt> findByProviderOrderId(String providerOrderId);
     List<PaymentAttempt> findByPaymentIdOrderByAttemptNumberAsc(UUID paymentId);
     int findNextAttemptNumber(UUID paymentId);
 }

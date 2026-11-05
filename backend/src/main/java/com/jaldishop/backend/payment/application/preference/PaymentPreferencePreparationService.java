@@ -46,6 +46,30 @@ public class PaymentPreferencePreparationService {
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final ObjectMapper objectMapper;
+    private final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PaymentPreferencePreparationService(
+            CapacityReservationRepository capacityReservationRepository,
+            InventoryReservationRepository inventoryReservationRepository,
+            StoreRepository storeRepository,
+            CartRepository cartRepository,
+            CheckoutItemSnapshotAssembler snapshotAssembler,
+            PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository,
+            ObjectMapper objectMapper,
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties
+    ) {
+        this.capacityReservationRepository = capacityReservationRepository;
+        this.inventoryReservationRepository = inventoryReservationRepository;
+        this.storeRepository = storeRepository;
+        this.cartRepository = cartRepository;
+        this.snapshotAssembler = snapshotAssembler;
+        this.paymentRepository = paymentRepository;
+        this.paymentAttemptRepository = paymentAttemptRepository;
+        this.objectMapper = objectMapper;
+        this.properties = properties;
+    }
 
     public PaymentPreferencePreparationService(
             CapacityReservationRepository capacityReservationRepository,
@@ -57,14 +81,17 @@ public class PaymentPreferencePreparationService {
             PaymentAttemptRepository paymentAttemptRepository,
             ObjectMapper objectMapper
     ) {
-        this.capacityReservationRepository = capacityReservationRepository;
-        this.inventoryReservationRepository = inventoryReservationRepository;
-        this.storeRepository = storeRepository;
-        this.cartRepository = cartRepository;
-        this.snapshotAssembler = snapshotAssembler;
-        this.paymentRepository = paymentRepository;
-        this.paymentAttemptRepository = paymentAttemptRepository;
-        this.objectMapper = objectMapper;
+        this(
+                capacityReservationRepository,
+                inventoryReservationRepository,
+                storeRepository,
+                cartRepository,
+                snapshotAssembler,
+                paymentRepository,
+                paymentAttemptRepository,
+                objectMapper,
+                new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties()
+        );
     }
 
     @Transactional
@@ -122,10 +149,12 @@ public class PaymentPreferencePreparationService {
 
             List<PaymentAttempt> existingAttempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(existingPayment.getId());
 
-            // 1. Idempotencia: Si ya existe un intento previo con preference_id válido, retornarlo directamente
+            // 1. Idempotencia: Si ya existe un intento previo con preference_id u order_id válido, retornarlo directamente
             for (int i = existingAttempts.size() - 1; i >= 0; i--) {
                 PaymentAttempt attempt = existingAttempts.get(i);
-                if (attempt.getPreferenceId() != null && !attempt.getPreferenceId().isBlank()
+                boolean hasValidProviderRef = (attempt.getPreferenceId() != null && !attempt.getPreferenceId().isBlank())
+                        || (attempt.getProviderOrderId() != null && !attempt.getProviderOrderId().isBlank());
+                if (hasValidProviderRef
                         && attempt.getStatus() != PaymentAttemptStatus.ERROR
                         && attempt.getStatus() != PaymentAttemptStatus.REJECTED) {
                     return new PreparationResult(existingPayment, attempt, true, store.getName(), null);
@@ -140,6 +169,7 @@ public class PaymentPreferencePreparationService {
                 boolean isInFlight = (latestAttempt.getStatus() == PaymentAttemptStatus.PROCESSING
                         || latestAttempt.getStatus() == PaymentAttemptStatus.CREATED)
                         && latestAttempt.getPreferenceId() == null
+                        && latestAttempt.getProviderOrderId() == null
                         && latestAttempt.getUpdatedAt().isAfter(inFlightCutoff);
 
                 if (isInFlight) {
@@ -152,7 +182,9 @@ public class PaymentPreferencePreparationService {
                 // existente con su misma idempotencyKey para permitir que Mercado Pago reconozca la operación.
                 boolean isRecoverable = (latestAttempt.getStatus() == PaymentAttemptStatus.ERROR
                         && "MP_TIMEOUT".equals(latestAttempt.getErrorCode()))
-                        || (latestAttempt.getPreferenceId() == null && latestAttempt.getStatus() != PaymentAttemptStatus.REJECTED);
+                        || (latestAttempt.getPreferenceId() == null
+                        && latestAttempt.getProviderOrderId() == null
+                        && latestAttempt.getStatus() != PaymentAttemptStatus.REJECTED);
 
                 if (isRecoverable) {
                     latestAttempt.markProcessing();
@@ -162,13 +194,15 @@ public class PaymentPreferencePreparationService {
             }
 
             // 4. Si el intento previo fue formalmente REJECTED, crear un nuevo intento secuencial
+            String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
             int nextAttemptNumber = paymentAttemptRepository.findNextAttemptNumber(existingPayment.getId());
             PaymentAttempt newAttempt = PaymentAttempt.create(
                     existingPayment.getId(),
                     nextAttemptNumber,
                     PaymentProvider.MERCADO_PAGO,
                     PaymentMethod.CARD,
-                    UUID.randomUUID().toString()
+                    UUID.randomUUID().toString(),
+                    currentMode
             );
             newAttempt.markProcessing();
             PaymentAttempt savedAttempt = paymentAttemptRepository.save(newAttempt);
@@ -224,12 +258,14 @@ public class PaymentPreferencePreparationService {
         );
         Payment savedPayment = paymentRepository.save(payment);
 
+        String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
         PaymentAttempt attempt = PaymentAttempt.create(
                 savedPayment.getId(),
                 1,
                 PaymentProvider.MERCADO_PAGO,
                 PaymentMethod.CARD,
-                UUID.randomUUID().toString()
+                UUID.randomUUID().toString(),
+                currentMode
         );
         attempt.markProcessing();
         PaymentAttempt savedAttempt = paymentAttemptRepository.save(attempt);
@@ -242,6 +278,14 @@ public class PaymentPreferencePreparationService {
         PaymentAttempt attempt = paymentAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
         attempt.recordPreference(preferenceId, initPoint);
+        paymentAttemptRepository.save(attempt);
+    }
+
+    @Transactional
+    public void recordOrderResult(UUID attemptId, String providerOrderId, String initPoint) {
+        PaymentAttempt attempt = paymentAttemptRepository.findById(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
+        attempt.recordOrder(providerOrderId, initPoint);
         paymentAttemptRepository.save(attempt);
     }
 

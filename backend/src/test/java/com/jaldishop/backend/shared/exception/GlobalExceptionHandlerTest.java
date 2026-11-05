@@ -190,7 +190,7 @@ class GlobalExceptionHandlerTest {
                         .content("{\"name\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.message").value("Los datos enviados no son validos"))
+                .andExpect(jsonPath("$.message").value("Los datos enviados no son válidos"))
                 .andExpect(jsonPath("$.errors.name").value("El nombre no puede estar vacío"));
     }
 

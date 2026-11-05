@@ -20,7 +20,9 @@ public class PaymentAttempt {
     private final PaymentProvider provider;
     private PaymentMethod paymentMethod;
     private final String idempotencyKey;
+    private String checkoutMode;
     private String preferenceId;
+    private String providerOrderId;
     private String initPoint;
     private String providerPaymentId;
     private String providerStatus;
@@ -37,7 +39,8 @@ public class PaymentAttempt {
             int attemptNumber,
             PaymentProvider provider,
             PaymentMethod paymentMethod,
-            String idempotencyKey
+            String idempotencyKey,
+            String checkoutMode
     ) {
         Objects.requireNonNull(paymentId, "paymentId no puede ser nulo");
         Objects.requireNonNull(provider, "provider no puede ser nulo");
@@ -55,6 +58,8 @@ public class PaymentAttempt {
                 provider,
                 paymentMethod,
                 idempotencyKey,
+                checkoutMode != null ? checkoutMode : "PREFERENCES",
+                null,
                 null,
                 null,
                 null,
@@ -67,6 +72,16 @@ public class PaymentAttempt {
                 null,
                 now
         );
+    }
+
+    public static PaymentAttempt create(
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey
+    ) {
+        return create(paymentId, attemptNumber, provider, paymentMethod, idempotencyKey, "PREFERENCES");
     }
 
     public static PaymentAttempt rehydrate(
@@ -88,9 +103,66 @@ public class PaymentAttempt {
             Instant completedAt,
             Instant updatedAt
     ) {
+        return rehydrate(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                "PREFERENCES", preferenceId, null, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public static PaymentAttempt rehydrate(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        return rehydrate(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                providerOrderId != null ? "ORDERS" : "PREFERENCES",
+                preferenceId, providerOrderId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public static PaymentAttempt rehydrate(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         return new PaymentAttempt(
                 id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
-                preferenceId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                checkoutMode != null ? checkoutMode : "PREFERENCES",
+                preferenceId, providerOrderId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
                 status, errorCode, errorMessage, createdAt, completedAt, updatedAt
         );
     }
@@ -102,7 +174,9 @@ public class PaymentAttempt {
             PaymentProvider provider,
             PaymentMethod paymentMethod,
             String idempotencyKey,
+            String checkoutMode,
             String preferenceId,
+            String providerOrderId,
             String initPoint,
             String providerPaymentId,
             String providerStatus,
@@ -120,7 +194,9 @@ public class PaymentAttempt {
         this.provider = provider;
         this.paymentMethod = paymentMethod;
         this.idempotencyKey = idempotencyKey;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
         this.preferenceId = preferenceId;
+        this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.providerPaymentId = providerPaymentId;
         this.providerStatus = providerStatus;
@@ -135,6 +211,16 @@ public class PaymentAttempt {
 
     public void recordPreference(String preferenceId, String initPoint) {
         this.preferenceId = preferenceId;
+        this.initPoint = initPoint;
+        this.updatedAt = Instant.now();
+    }
+
+    public void recordOrder(String providerOrderId, String initPoint) {
+        Objects.requireNonNull(providerOrderId, "providerOrderId no puede ser nulo");
+        if (providerOrderId.isBlank()) {
+            throw new IllegalArgumentException("providerOrderId no puede estar en blanco");
+        }
+        this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.updatedAt = Instant.now();
     }
@@ -218,7 +304,9 @@ public class PaymentAttempt {
     public PaymentProvider getProvider() { return provider; }
     public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public String getIdempotencyKey() { return idempotencyKey; }
+    public String getCheckoutMode() { return checkoutMode; }
     public String getPreferenceId() { return preferenceId; }
+    public String getProviderOrderId() { return providerOrderId; }
     public String getInitPoint() { return initPoint; }
     public String getProviderPaymentId() { return providerPaymentId; }
     public String getProviderStatus() { return providerStatus; }

@@ -37,13 +37,17 @@ public class GetCustomerReviewsService {
         }
 
         List<CustomerReviewResponse> result = new ArrayList<>();
+        Map<UUID, Optional<Store>> storeCache = new HashMap<>();
         for (Review review : reviews) {
             Optional<Product> productOpt = productRepository.findById(review.getProductId());
             if (productOpt.isEmpty()) {
                 continue;
             }
             Product product = productOpt.get();
-            Optional<Store> storeOpt = storeRepository.findById(product.getStoreId());
+            Optional<Store> storeOpt = storeCache.computeIfAbsent(
+                    product.getStoreId(),
+                    storeRepository::findById
+            );
 
             result.add(new CustomerReviewResponse(
                     review.getId(),

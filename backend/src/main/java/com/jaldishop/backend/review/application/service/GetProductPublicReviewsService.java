@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,9 +56,13 @@ public class GetProductPublicReviewsService {
         averageRating = Math.round(averageRating * 10.0) / 10.0;
 
         List<PublicReviewResponse> publicReviews = new ArrayList<>();
+        Map<UUID, Optional<User>> userCache = new HashMap<>();
         for (Review r : reviews) {
             String customerName = "Cliente verificado";
-            Optional<User> userOpt = userRepository.findById(r.getUserId());
+            Optional<User> userOpt = userCache.computeIfAbsent(
+                    r.getUserId(),
+                    userRepository::findById
+            );
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
                 String first = u.getFirstName() != null ? u.getFirstName().trim() : "";

@@ -53,6 +53,11 @@ public class JpaPaymentAttemptRepositoryAdapter implements PaymentAttemptReposit
     }
 
     @Override
+    public Optional<PaymentAttempt> findByProviderOrderId(String providerOrderId) {
+        return jpaRepository.findByProviderOrderId(providerOrderId).map(mapper::toDomain);
+    }
+
+    @Override
     public List<PaymentAttempt> findByPaymentIdOrderByAttemptNumberAsc(UUID paymentId) {
         return jpaRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)
                 .stream()

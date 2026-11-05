@@ -40,6 +40,15 @@ public class PaymentWebhookPersistenceService {
 
     @Transactional
     public ProcessMercadoPagoWebhookResult applyQueryResultToPayment(UUID paymentId, PaymentQueryResult queryResult) {
+        return applyPaymentQueryResult(paymentId, queryResult, null);
+    }
+
+    @Transactional
+    public ProcessMercadoPagoWebhookResult applyPaymentQueryResult(
+            UUID paymentId,
+            PaymentQueryResult queryResult,
+            String providerOrderId
+    ) {
         // Bloqueo pesimista PESSIMISTIC_WRITE sobre Payment para serializar webhooks concurrentes
         Payment payment = paymentRepository.findByIdForUpdate(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
@@ -63,14 +72,56 @@ public class PaymentWebhookPersistenceService {
 
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         PaymentAttempt targetAttempt = null;
+
+        // Búsqueda de intento objetivo estrictamente inequívoco con evidencia externa:
+        // 1. Coincidencia directa por identificador de transacción financiera de Mercado Pago
         for (PaymentAttempt a : attempts) {
             if (queryResult.providerPaymentId().equals(a.getProviderPaymentId())) {
                 targetAttempt = a;
                 break;
             }
         }
-        if (targetAttempt == null && !attempts.isEmpty()) {
-            targetAttempt = attempts.getLast();
+
+        // 2. Coincidencia directa por identificador de orden externa (Orders API)
+        if (targetAttempt == null && providerOrderId != null && !providerOrderId.isBlank()) {
+            for (PaymentAttempt a : attempts) {
+                if (providerOrderId.equals(a.getProviderOrderId())) {
+                    targetAttempt = a;
+                    break;
+                }
+            }
+        }
+
+        // 3. Flujo Preferences API: Mercado Pago notifica topic=payment con providerPaymentId recién generado.
+        // Si no tenemos providerOrderId pero el intento activo fue registrado bajo modalidad PREFERENCES con preferenceId,
+        // vinculamos el pago a dicho intento.
+        if (targetAttempt == null && (providerOrderId == null || providerOrderId.isBlank())) {
+            for (int i = attempts.size() - 1; i >= 0; i--) {
+                PaymentAttempt a = attempts.get(i);
+                if ("PREFERENCES".equalsIgnoreCase(a.getCheckoutMode())
+                        && a.getPreferenceId() != null && !a.getPreferenceId().isBlank()
+                        && (a.getStatus() == PaymentAttemptStatus.PROCESSING || a.getStatus() == PaymentAttemptStatus.CREATED)
+                        && (a.getProviderPaymentId() == null || a.getProviderPaymentId().equals(queryResult.providerPaymentId()))) {
+                    targetAttempt = a;
+                    break;
+                }
+            }
+        }
+
+        // Si no se pudo identificar inequívocamente el intento con evidencia externa, NO asociar a ciegas ni acreditar
+        if (targetAttempt == null) {
+            log.error("Imposible asociar la transacción financiera {} a ningún intento inequívoco para el pago {}",
+                    queryResult.providerPaymentId(), paymentId);
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH",
+                    "No se encontró un intento de pago inequívoco que corresponda a la transacción informada.");
+        }
+
+        // Si no se pudo identificar inequívocamente el intento, NO asociar a ciegas ni acreditar
+        if (targetAttempt == null) {
+            log.error("Imposible asociar la transacción financiera {} a ningún intento inequívoco para el pago {}",
+                    queryResult.providerPaymentId(), paymentId);
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH",
+                    "No se encontró un intento de pago inequívoco que corresponda a la transacción informada.");
         }
 
         String mpStatus = queryResult.status().toLowerCase(Locale.ROOT);

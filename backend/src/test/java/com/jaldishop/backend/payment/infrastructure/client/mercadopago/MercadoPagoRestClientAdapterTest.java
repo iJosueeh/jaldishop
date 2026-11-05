@@ -1,6 +1,9 @@
 package com.jaldishop.backend.payment.infrastructure.client.mercadopago;
 
+import com.jaldishop.backend.payment.application.gateway.dto.CreateOrderCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -398,6 +401,218 @@ class MercadoPagoRestClientAdapterTest {
             assertThat(ex.getMessage()).doesNotContain(ACCESS_TOKEN);
             assertThat(ex.toString()).doesNotContain(ACCESS_TOKEN);
         }
+    }
+
+    @Test
+    @DisplayName("Crear orden en Checkout Pro mediante Orders API (/v1/orders) exitosamente")
+    void shouldCreateOrderSuccessfully() {
+        String responseJson = """
+                {
+                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "type": "online",
+                  "processing_mode": "manual",
+                  "capture_mode": "automatic",
+                  "total_amount": 120.00,
+                  "external_reference": "ext-order-001",
+                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "status": "created"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer " + ACCESS_TOKEN))
+                .andExpect(header("X-Idempotency-Key", "idemp-order-999"))
+                .andExpect(header("Content-Type", "application/json"))
+                .andExpect(jsonPath("$.type").value("online"))
+                .andExpect(jsonPath("$.processing_mode").value("manual"))
+                .andExpect(jsonPath("$.capture_mode").value("automatic"))
+                .andExpect(jsonPath("$.total_amount").value(120.00))
+                .andExpect(jsonPath("$.external_reference").value("ext-order-001"))
+                .andExpect(jsonPath("$.items[0].title").value("Producto Order Test"))
+                .andExpect(jsonPath("$.items[0].unit_price").value(120.00))
+                .andExpect(jsonPath("$.payer.email").value("juan@example.com"))
+                .andExpect(jsonPath("$.back_urls.success").value("https://jaldishop.com/checkout/success"))
+                .andExpect(jsonPath("$.auto_return").value("approved"))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-order-001",
+                new BigDecimal("120.00"),
+                List.of(new CreateOrderCommand.OrderItem(
+                        "item-1", "Producto Order Test", "Detalle", 1, new BigDecimal("120.00"), "PEN"
+                )),
+                new CreateOrderCommand.PayerInfo("Juan", "Perez", "juan@example.com", "987654321"),
+                "https://api.jaldishop.com/webhooks/mercadopago",
+                "https://jaldishop.com/checkout/success",
+                "https://jaldishop.com/checkout/failure",
+                "https://jaldishop.com/checkout/pending",
+                "JALDI SHOP",
+                "idemp-order-999"
+        );
+
+        OrderResult result = adapter.createOrder(command);
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(result.checkoutUrl()).contains("order_id=ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(result.status()).isEqualTo("created");
+        assertThat(result.totalAmount()).isEqualByComparingTo("120.00");
+    }
+
+    @Test
+    @DisplayName("Crear orden falla cuando Mercado Pago responde con datos incompletos (sin checkout_url)")
+    void shouldFailCreateOrderWhenResponseIncomplete() {
+        String invalidResponseJson = """
+                {
+                  "id": "ORD-ONLY-ID",
+                  "status": "created"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(invalidResponseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-order-002",
+                new BigDecimal("80.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Test", "Desc", 1, new BigDecimal("80.00"), "PEN")),
+                null, null, null, null, null, null, "idemp-002"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command))
+                .isInstanceOf(MercadoPagoException.class)
+                .satisfies(ex -> {
+                    MercadoPagoException mpe = (MercadoPagoException) ex;
+                    assertThat(mpe.getErrorCode()).isEqualTo("MP_INVALID_RESPONSE");
+                });
+    }
+
+    @Test
+    @DisplayName("Crear orden traduce 400 Bad Request de Mercado Pago a MP_BAD_REQUEST")
+    void shouldHandle400BadRequestOnCreateOrder() {
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withBadRequest().body("{\"message\": \"Invalid items or total_amount mismatch\"}"));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-order-003",
+                new BigDecimal("50.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-2", "Test Item", "Desc", 1, new BigDecimal("50.00"), "PEN")),
+                null, null, null, null, null, null, "idemp-003"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command))
+                .isInstanceOf(MercadoPagoException.class)
+                .satisfies(ex -> {
+                    MercadoPagoException mpe = (MercadoPagoException) ex;
+                    assertThat(mpe.getStatusCode()).isEqualTo(400);
+                    assertThat(mpe.getErrorCode()).isEqualTo("MP_BAD_REQUEST");
+                });
+    }
+
+    @Test
+    @DisplayName("Consultar orden por ID (/v1/orders/{id}) con pagos asociados exitosamente")
+    void shouldQueryOrderSuccessfullyWithPayments() {
+        String responseJson = """
+                {
+                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "status": "processed",
+                  "status_detail": "accredited",
+                  "total_amount": 120.00,
+                  "total_paid_amount": 120.00,
+                  "external_reference": "ext-order-001",
+                  "collector_id": 987654321,
+                  "live_mode": false,
+                  "transactions": {
+                    "payments": [
+                      {
+                        "id": "PAY01J67CQQ",
+                        "status": "approved",
+                        "status_detail": "accredited",
+                        "transaction_amount": 120.00,
+                        "currency_id": "PEN",
+                        "payment_method_id": "visa",
+                        "payment_type_id": "credit_card",
+                        "date_approved": "2026-11-05T12:00:00Z"
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD01J67CQQH5904WDBVZEM4JMEP3"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer " + ACCESS_TOKEN))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        OrderQueryResult result = adapter.queryOrder("ORD01J67CQQH5904WDBVZEM4JMEP3");
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(result.status()).isEqualTo("processed");
+        assertThat(result.statusDetail()).isEqualTo("accredited");
+        assertThat(result.totalAmount()).isEqualByComparingTo("120.00");
+        assertThat(result.totalPaidAmount()).isEqualByComparingTo("120.00");
+        assertThat(result.externalReference()).isEqualTo("ext-order-001");
+        assertThat(result.collectorId()).isEqualTo(987654321L);
+        assertThat(result.liveMode()).isFalse();
+        assertThat(result.payments()).hasSize(1);
+
+        OrderQueryResult.OrderPaymentItem paymentItem = result.payments().getFirst();
+        assertThat(paymentItem.providerPaymentId()).isEqualTo("PAY01J67CQQ");
+        assertThat(paymentItem.status()).isEqualTo("approved");
+        assertThat(paymentItem.statusDetail()).isEqualTo("accredited");
+        assertThat(paymentItem.transactionAmount()).isEqualByComparingTo("120.00");
+        assertThat(paymentItem.currency()).isEqualTo("PEN");
+        assertThat(paymentItem.paymentMethodId()).isEqualTo("visa");
+        assertThat(paymentItem.paymentTypeId()).isEqualTo("credit_card");
+        assertThat(paymentItem.dateApproved()).isEqualTo(Instant.parse("2026-11-05T12:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("Consultar orden con transactions nulas o vacías no lanza NullPointerException")
+    void shouldQueryOrderSuccessfullyWithEmptyTransactions() {
+        String responseJson = """
+                {
+                  "id": "ORD-EMPTY-001",
+                  "status": "created",
+                  "total_amount": 50.00,
+                  "external_reference": "ext-order-empty"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD-EMPTY-001"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        OrderQueryResult result = adapter.queryOrder("ORD-EMPTY-001");
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD-EMPTY-001");
+        assertThat(result.status()).isEqualTo("created");
+        assertThat(result.payments()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Consultar orden inexistente traduce 404 a MP_NOT_FOUND")
+    void shouldHandle404NotFoundOnQueryOrder() {
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD-NONEXISTENT"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+        assertThatThrownBy(() -> adapter.queryOrder("ORD-NONEXISTENT"))
+                .isInstanceOf(MercadoPagoException.class)
+                .satisfies(ex -> {
+                    MercadoPagoException mpe = (MercadoPagoException) ex;
+                    assertThat(mpe.getStatusCode()).isEqualTo(404);
+                    assertThat(mpe.getErrorCode()).isEqualTo("MP_NOT_FOUND");
+                });
     }
 
 }

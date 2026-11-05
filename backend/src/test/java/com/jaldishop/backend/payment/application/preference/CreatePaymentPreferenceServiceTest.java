@@ -13,7 +13,9 @@ import com.jaldishop.backend.inventory.domain.model.InventoryReservation;
 import com.jaldishop.backend.inventory.domain.repository.InventoryReservationRepository;
 import com.jaldishop.backend.inventory.domain.enums.InventoryReservationStatus;
 import com.jaldishop.backend.payment.application.gateway.MercadoPagoGateway;
+import com.jaldishop.backend.payment.application.gateway.dto.CreateOrderCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.domain.enums.*;
 import com.jaldishop.backend.payment.domain.model.*;
@@ -469,6 +471,173 @@ class CreatePaymentPreferenceServiceTest {
 
         // Se llamó al gateway
         verify(mercadoPagoGateway, times(1)).createPreference(any());
+    }
+
+    @Test
+    @DisplayName("Modo ORDERS crea orden en Mercado Pago, almacena providerOrderId e initPoint sin tocar Preferences")
+    void shouldCreateOrderWhenCheckoutModeIsOrders() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+
+        CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
+                userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
+        );
+
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.empty());
+
+        Instant now = Instant.now();
+        UUID cartId = UUID.randomUUID();
+        CartItem item = new CartItem(cartId, UUID.randomUUID(), 1, new BigDecimal("12.50"), "PEN", now, now);
+        Cart cart = new Cart(cartId, userId, storeId, List.of(item), now, now);
+        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
+        when(snapshotAssembler.assemble(cart, storeId)).thenReturn(List.of(new CheckoutItemSnapshot(
+                UUID.randomUUID(), UUID.randomUUID(), "Pastel", "Porción", "SKU-PAS", null, 1, new BigDecimal("12.50"), "PEN", new BigDecimal("12.50"), false
+        )));
+
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-key-orders-001", "ORDERS"
+        );
+        when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
+        when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
+
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
+                        "ORD-MP-998877",
+                        "https://mercadopago.com.pe/checkout/orders/ORD-MP-998877",
+                        "opened",
+                        new BigDecimal("12.50")
+                )
+        );
+
+        CreatePaymentPreferenceResult result = service.execute(command);
+
+        assertThat(result.preferenceId()).isEqualTo("ORD-MP-998877");
+        assertThat(result.initPoint()).isEqualTo("https://mercadopago.com.pe/checkout/orders/ORD-MP-998877");
+        assertThat(result.status()).isEqualTo("PENDING");
+
+        // Verificamos que se llamó al gateway de Orders y NO al de Preferences
+        verify(mercadoPagoGateway, times(1)).createOrder(any(CreateOrderCommand.class));
+        verify(mercadoPagoGateway, never()).createPreference(any(CreatePreferenceCommand.class));
+
+        // Verificamos que se persistió providerOrderId en el intento
+        assertThat(attempt.getProviderOrderId()).isEqualTo("ORD-MP-998877");
+        assertThat(attempt.getInitPoint()).isEqualTo("https://mercadopago.com.pe/checkout/orders/ORD-MP-998877");
+        assertThat(attempt.getPreferenceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("Modo ORDERS: si ya existe intento previo con providerOrderId retorna resultado por idempotencia")
+    void shouldReturnExistingOrderWhenAlreadyComplete() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+
+        CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
+                userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
+        );
+
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+
+        Payment existingPayment = Payment.createPending(
+                activeReservation.getId(), new BigDecimal("10.00"), "PEN", FulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null,
+                new BigDecimal("10.00"), BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, null
+        );
+        PaymentAttempt existingAttempt = PaymentAttempt.rehydrate(
+                UUID.randomUUID(), existingPayment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD,
+                "idemp-existing-order", null, "ORD-EXISTING-123", "https://mercadopago.com/init/ord123",
+                null, null, null, PaymentAttemptStatus.CREATED, null, null,
+                Instant.now(), null, Instant.now()
+        );
+
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.of(existingPayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(existingPayment.getId())).thenReturn(List.of(existingAttempt));
+
+        CreatePaymentPreferenceResult result = service.execute(command);
+
+        assertThat(result.paymentId()).isEqualTo(existingPayment.getId());
+        assertThat(result.preferenceId()).isEqualTo("ORD-EXISTING-123");
+        assertThat(result.initPoint()).isEqualTo("https://mercadopago.com/init/ord123");
+
+        verifyNoInteractions(mercadoPagoGateway);
+    }
+
+    @Test
+    @DisplayName("Modo ORDERS: timeout en Mercado Pago marca error en intento y reintento reutiliza la misma idempotencyKey")
+    void shouldHandleTimeoutAndReuseIdempotencyKeyInOrdersMode() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+
+        CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
+                userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
+        );
+
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.empty());
+
+        Instant now = Instant.now();
+        UUID cartId = UUID.randomUUID();
+        CartItem item = new CartItem(cartId, UUID.randomUUID(), 1, new BigDecimal("8.00"), "PEN", now, now);
+        Cart cart = new Cart(cartId, userId, storeId, List.of(item), now, now);
+        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
+        when(snapshotAssembler.assemble(cart, storeId)).thenReturn(List.of(new CheckoutItemSnapshot(
+                UUID.randomUUID(), UUID.randomUUID(), "Jugo", "Botella", "SKU-JUG", null, 1, new BigDecimal("8.00"), "PEN", new BigDecimal("8.00"), false
+        )));
+
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-key-order-timeout", "ORDERS"
+        );
+        when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
+        when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
+
+        // 1. Primer intento falla por timeout
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class)))
+                .thenThrow(new MercadoPagoException(504, "MP_TIMEOUT", "Timeout al invocar Mercado Pago Orders"));
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(MercadoPagoException.class)
+                .hasMessageContaining("Timeout al invocar Mercado Pago Orders");
+
+        assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.ERROR);
+        assertThat(attempt.getErrorCode()).isEqualTo("MP_TIMEOUT");
+        assertThat(attempt.getIdempotencyKey()).isEqualTo("idemp-key-order-timeout");
+
+        // 2. Reintento: debe reutilizar el mismo intento y la MISMA clave de idempotencia
+        String validSnapshot = """
+                [{"variantId":"%s","productId":"%s","productName":"Jugo","presentationName":"Botella","sku":"SKU","imageUrl":null,"quantity":1,"unitPriceAmount":8.00,"currency":"PEN","totalAmount":8.00,"available":false}]
+                """.formatted(UUID.randomUUID(), UUID.randomUUID());
+        Payment pendingPayment = Payment.createPending(
+                activeReservation.getId(), new BigDecimal("8.00"), "PEN", FulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null,
+                new BigDecimal("8.00"), BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, validSnapshot
+        );
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.of(pendingPayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(pendingPayment.getId())).thenReturn(List.of(attempt));
+
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
+                        "ORD-RECOVERED-001",
+                        "https://mercadopago.com.pe/checkout/recovered",
+                        "opened",
+                        new BigDecimal("8.00")
+                )
+        );
+
+        CreatePaymentPreferenceResult retryResult = service.execute(command);
+
+        assertThat(retryResult.preferenceId()).isEqualTo("ORD-RECOVERED-001");
+        assertThat(retryResult.initPoint()).isEqualTo("https://mercadopago.com.pe/checkout/recovered");
+
+        ArgumentCaptor<CreateOrderCommand> orderCaptor = ArgumentCaptor.forClass(CreateOrderCommand.class);
+        verify(mercadoPagoGateway, times(2)).createOrder(orderCaptor.capture());
+        assertThat(orderCaptor.getAllValues().get(1).idempotencyKey()).isEqualTo("idemp-key-order-timeout");
     }
 
 }
