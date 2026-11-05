@@ -17,4 +17,6 @@ public interface PaymentAttemptRepository {
     Optional<PaymentAttempt> findByProviderOrderId(String providerOrderId);
     List<PaymentAttempt> findByPaymentIdOrderByAttemptNumberAsc(UUID paymentId);
     int findNextAttemptNumber(UUID paymentId);
+    Optional<PaymentAttempt> findByIdForUpdate(UUID id);
+    List<UUID> findEligibleOrderReconciliationAttemptIds(java.time.Instant cutoffTime, java.time.Instant now, int batchSize);
 }

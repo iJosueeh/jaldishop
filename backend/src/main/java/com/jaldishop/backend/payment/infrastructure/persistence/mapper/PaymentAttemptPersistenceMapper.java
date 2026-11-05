@@ -32,6 +32,8 @@ public class PaymentAttemptPersistenceMapper {
                 PaymentAttemptStatus.valueOf(entity.getStatus()),
                 entity.getErrorCode(),
                 entity.getErrorMessage(),
+                entity.getReconciliationClaimToken(),
+                entity.getReconciliationLeaseExpiresAt(),
                 entity.getCreatedAt(),
                 entity.getCompletedAt(),
                 entity.getUpdatedAt()
@@ -60,6 +62,8 @@ public class PaymentAttemptPersistenceMapper {
                 domain.getStatus().name(),
                 domain.getErrorCode(),
                 domain.getErrorMessage(),
+                domain.getReconciliationClaimToken(),
+                domain.getReconciliationLeaseExpiresAt(),
                 domain.getCreatedAt(),
                 domain.getCompletedAt(),
                 domain.getUpdatedAt()

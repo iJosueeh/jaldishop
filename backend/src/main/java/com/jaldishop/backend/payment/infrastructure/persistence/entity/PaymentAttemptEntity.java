@@ -61,6 +61,12 @@ public class PaymentAttemptEntity {
     @Column(name = "error_message")
     private String errorMessage;
 
+    @Column(name = "reconciliation_claim_token")
+    private UUID reconciliationClaimToken;
+
+    @Column(name = "reconciliation_lease_expires_at")
+    private Instant reconciliationLeaseExpiresAt;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -148,6 +154,37 @@ public class PaymentAttemptEntity {
             Instant completedAt,
             Instant updatedAt
     ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                checkoutMode, preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                null, null, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         this.id = id;
         this.paymentId = paymentId;
         this.attemptNumber = attemptNumber;
@@ -164,6 +201,8 @@ public class PaymentAttemptEntity {
         this.status = status;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
+        this.reconciliationClaimToken = reconciliationClaimToken;
+        this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt;
         this.createdAt = createdAt;
         this.completedAt = completedAt;
         this.updatedAt = updatedAt;
@@ -207,5 +246,9 @@ public class PaymentAttemptEntity {
     public void setCompletedAt(Instant completedAt) { this.completedAt = completedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public UUID getReconciliationClaimToken() { return reconciliationClaimToken; }
+    public void setReconciliationClaimToken(UUID reconciliationClaimToken) { this.reconciliationClaimToken = reconciliationClaimToken; }
+    public Instant getReconciliationLeaseExpiresAt() { return reconciliationLeaseExpiresAt; }
+    public void setReconciliationLeaseExpiresAt(Instant reconciliationLeaseExpiresAt) { this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt; }
 
 }

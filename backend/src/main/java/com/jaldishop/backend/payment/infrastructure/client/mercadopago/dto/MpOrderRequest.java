@@ -15,9 +15,7 @@ public record MpOrderRequest(
         @JsonProperty("external_reference") String externalReference,
         @JsonProperty("items") List<MpOrderItem> items,
         @JsonProperty("payer") MpOrderPayer payer,
-        @JsonProperty("back_urls") MpOrderBackUrls backUrls,
-        @JsonProperty("auto_return") String autoReturn,
-        @JsonProperty("notification_url") String notificationUrl
+        @JsonProperty("config") MpOrderConfig config
 ) {
 
     public record MpOrderItem(
@@ -41,10 +39,17 @@ public record MpOrderRequest(
             @JsonProperty("number") String number
     ) {}
 
-    public record MpOrderBackUrls(
-            @JsonProperty("success") String success,
-            @JsonProperty("pending") String pending,
-            @JsonProperty("failure") String failure
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record MpOrderConfig(
+            @JsonProperty("online") MpOnlineConfig online
+    ) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record MpOnlineConfig(
+            @JsonProperty("success_url") String successUrl,
+            @JsonProperty("failure_url") String failureUrl,
+            @JsonProperty("pending_url") String pendingUrl,
+            @JsonProperty("auto_return") String autoReturn
     ) {}
 
 }

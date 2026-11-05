@@ -191,17 +191,28 @@ public class ProcessMercadoPagoWebhookService {
         // Verificación de external_reference
         UUID paymentId = parseExternalReference(orderQueryResult.externalReference(), orderId);
 
-        // Si la orden no tiene transacciones de pago todavía (ej. "opened" recién creada por el cliente)
+        // Si la orden no tiene transacciones de pago todavía
         if (orderQueryResult.payments() == null || orderQueryResult.payments().isEmpty()) {
+            String ordStatus = orderQueryResult.status() != null ? orderQueryResult.status().toLowerCase(java.util.Locale.ROOT) : "";
+            if ("canceled".equals(ordStatus) || "expired".equals(ordStatus)) {
+                log.info("Orden {} cancelada o expirada en Mercado Pago sin transacciones de pago.", orderId);
+                return persistenceService.applyOrderCancellation(
+                        paymentId,
+                        orderId,
+                        orderQueryResult.status(),
+                        orderQueryResult.statusDetail()
+                );
+            }
+
             log.info("Orden {} consultada sin transacciones de pago registradas. Estado de la orden: {}.",
                     orderId, orderQueryResult.status());
             return ProcessMercadoPagoWebhookResult.ignored("Orden sin transacciones de pago registradas.");
         }
 
-        // Si existen transacciones, tomamos la más representativa (preferir approved si existe, sino la última)
+        // Si existen transacciones, seleccionamos prioritariamente la transacción acreditada
         com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem selectedPayment = null;
         for (com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem p : orderQueryResult.payments()) {
-            if ("approved".equalsIgnoreCase(p.status())) {
+            if (isPaymentAccredited(p)) {
                 selectedPayment = p;
                 break;
             }
@@ -230,6 +241,21 @@ public class ProcessMercadoPagoWebhookService {
 
         // Confirmación comercial si el pago resultó APPROVED
         return confirmPurchaseIfApproved(paymentId, queryResult.providerPaymentId(), persistenceResult);
+    }
+
+    private boolean isPaymentAccredited(com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem p) {
+        if (p == null || p.providerPaymentId() == null || p.providerPaymentId().isBlank()) {
+            return false;
+        }
+        String s = p.status() != null ? p.status().toLowerCase(java.util.Locale.ROOT) : "";
+        String d = p.statusDetail() != null ? p.statusDetail().toLowerCase(java.util.Locale.ROOT) : "";
+        if ("approved".equals(s)) {
+            return d.isEmpty() || "accredited".equals(d);
+        }
+        if ("processed".equals(s)) {
+            return "accredited".equals(d);
+        }
+        return false;
     }
 
     private void validateCollectorAndLiveMode(String resourceId, Long collectorId, Boolean liveMode) {

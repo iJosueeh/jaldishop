@@ -16,6 +16,8 @@ public final class PaymentRefundPersistenceMapper {
         return PaymentRefundIntent.rehydrate(
                 entity.getId(),
                 entity.getPaymentId(),
+                entity.getCheckoutMode(),
+                entity.getProviderOrderId(),
                 entity.getProviderPaymentId(),
                 entity.getAmount(),
                 entity.getCurrency(),
@@ -36,6 +38,8 @@ public final class PaymentRefundPersistenceMapper {
         return new PaymentRefundIntentEntity(
                 domain.getId(),
                 domain.getPaymentId(),
+                domain.getCheckoutMode(),
+                domain.getProviderOrderId(),
                 domain.getProviderPaymentId(),
                 domain.getAmount(),
                 domain.getCurrency(),

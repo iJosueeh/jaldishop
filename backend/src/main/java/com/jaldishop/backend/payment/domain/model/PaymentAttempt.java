@@ -4,6 +4,7 @@ import com.jaldishop.backend.payment.domain.enums.PaymentAttemptStatus;
 import com.jaldishop.backend.payment.domain.enums.PaymentMethod;
 import com.jaldishop.backend.payment.domain.enums.PaymentProvider;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,6 +31,8 @@ public class PaymentAttempt {
     private PaymentAttemptStatus status;
     private String errorCode;
     private String errorMessage;
+    private UUID reconciliationClaimToken;
+    private Instant reconciliationLeaseExpiresAt;
     private final Instant createdAt;
     private Instant completedAt;
     private Instant updatedAt;
@@ -66,6 +69,8 @@ public class PaymentAttempt {
                 null,
                 null,
                 PaymentAttemptStatus.CREATED,
+                null,
+                null,
                 null,
                 null,
                 now,
@@ -159,11 +164,43 @@ public class PaymentAttempt {
             Instant completedAt,
             Instant updatedAt
     ) {
+        return rehydrate(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                checkoutMode, preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                null, null, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public static PaymentAttempt rehydrate(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         return new PaymentAttempt(
                 id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
                 checkoutMode != null ? checkoutMode : "PREFERENCES",
                 preferenceId, providerOrderId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
-                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+                status, errorCode, errorMessage, reconciliationClaimToken, reconciliationLeaseExpiresAt,
+                createdAt, completedAt, updatedAt
         );
     }
 
@@ -184,6 +221,8 @@ public class PaymentAttempt {
             PaymentAttemptStatus status,
             String errorCode,
             String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
             Instant createdAt,
             Instant completedAt,
             Instant updatedAt
@@ -204,6 +243,8 @@ public class PaymentAttempt {
         this.status = status;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
+        this.reconciliationClaimToken = reconciliationClaimToken;
+        this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt;
         this.createdAt = createdAt;
         this.completedAt = completedAt;
         this.updatedAt = updatedAt;
@@ -317,5 +358,41 @@ public class PaymentAttempt {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getCompletedAt() { return completedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getReconciliationClaimToken() { return reconciliationClaimToken; }
+    public Instant getReconciliationLeaseExpiresAt() { return reconciliationLeaseExpiresAt; }
+
+    public boolean canClaimReconciliation(Instant now) {
+        if (!"ORDERS".equalsIgnoreCase(checkoutMode) || providerOrderId == null || providerOrderId.isBlank()) {
+            return false;
+        }
+        if (status != PaymentAttemptStatus.CREATED && status != PaymentAttemptStatus.PROCESSING) {
+            return false;
+        }
+        Instant effectiveNow = now != null ? now : Instant.now();
+        return reconciliationLeaseExpiresAt == null || reconciliationLeaseExpiresAt.isBefore(effectiveNow);
+    }
+
+    public void acquireReconciliationLease(UUID workerToken, Duration leaseDuration, Instant now) {
+        Objects.requireNonNull(workerToken, "workerToken no puede ser nulo");
+        Objects.requireNonNull(leaseDuration, "leaseDuration no puede ser nulo");
+        Instant effectiveNow = now != null ? now : Instant.now();
+        this.reconciliationClaimToken = workerToken;
+        this.reconciliationLeaseExpiresAt = effectiveNow.plus(leaseDuration);
+        this.updatedAt = effectiveNow;
+    }
+
+    public boolean isReconciliationClaimOwnedBy(UUID workerToken, Instant now) {
+        if (workerToken == null || reconciliationClaimToken == null || !workerToken.equals(reconciliationClaimToken)) {
+            return false;
+        }
+        Instant effectiveNow = now != null ? now : Instant.now();
+        return reconciliationLeaseExpiresAt != null && reconciliationLeaseExpiresAt.isAfter(effectiveNow);
+    }
+
+    public void releaseReconciliationLease(Instant now) {
+        this.reconciliationClaimToken = null;
+        this.reconciliationLeaseExpiresAt = null;
+        this.updatedAt = now != null ? now : Instant.now();
+    }
 
 }

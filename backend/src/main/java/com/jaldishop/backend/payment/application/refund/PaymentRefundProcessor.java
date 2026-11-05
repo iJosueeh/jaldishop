@@ -5,6 +5,7 @@ import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.gateway.MercadoPagoGateway;
 import com.jaldishop.backend.payment.application.gateway.dto.ExecuteRefundCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 import com.jaldishop.backend.payment.application.reconciliation.PaymentIncidenceRecorder;
@@ -114,11 +115,14 @@ public class PaymentRefundProcessor {
 
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         List<PaymentAttempt> successfulAttempts = attempts.stream()
-                .filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED && a.getProviderPaymentId() != null && !a.getProviderPaymentId().isBlank())
+                .filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED && (
+                        (a.getProviderPaymentId() != null && !a.getProviderPaymentId().isBlank()) ||
+                        (a.getProviderOrderId() != null && !a.getProviderOrderId().isBlank())
+                ))
                 .toList();
 
         if (successfulAttempts.isEmpty()) {
-            log.error("Anomalía financiera: Pago {} en APPROVED no tiene ningún PaymentAttempt exitoso con providerPaymentId", paymentId);
+            log.error("Anomalía financiera: Pago {} en APPROVED no tiene ningún PaymentAttempt exitoso con identificador de proveedor", paymentId);
             recordRefundIncidence(paymentId, IncidenceCategory.OPERATIONAL, "NO_SUCCESSFUL_ATTEMPT", "Pago aprobado sin intento exitoso", IncidenceStatus.MANUAL_REVIEW_REQUIRED, now);
             return RefundClaimResult.skipped("Sin intento exitoso para reembolsar");
         }
@@ -131,8 +135,17 @@ public class PaymentRefundProcessor {
         }
 
         PaymentAttempt targetAttempt = successfulAttempts.getFirst();
+        String checkoutMode = targetAttempt.getCheckoutMode() != null && !targetAttempt.getCheckoutMode().isBlank()
+                ? targetAttempt.getCheckoutMode() : "PREFERENCES";
+        String providerOrderId = targetAttempt.getProviderOrderId();
         String providerPaymentId = targetAttempt.getProviderPaymentId();
         BigDecimal refundAmount = payment.getRefundAmount() != null ? payment.getRefundAmount() : payment.getAmount();
+
+        if ("ORDERS".equalsIgnoreCase(checkoutMode) && (providerOrderId == null || providerOrderId.isBlank())) {
+            log.error("Anomalía operativa: Intento exitoso en modo ORDERS para pago {} no posee providerOrderId", paymentId);
+            recordRefundIncidence(paymentId, IncidenceCategory.OPERATIONAL, "MISSING_PROVIDER_ORDER_ID", "Intento ORDERS sin providerOrderId", IncidenceStatus.MANUAL_REVIEW_REQUIRED, now);
+            return RefundClaimResult.skipped("Intento ORDERS sin providerOrderId");
+        }
 
         Optional<PaymentRefundIntent> existingOpt = refundIntentRepository.findByPaymentIdForUpdate(paymentId);
         PaymentRefundIntent intent;
@@ -142,6 +155,8 @@ public class PaymentRefundProcessor {
             String stableIdempotencyKey = "refund-" + paymentId;
             intent = PaymentRefundIntent.create(
                     paymentId,
+                    checkoutMode,
+                    providerOrderId,
                     providerPaymentId,
                     refundAmount,
                     payment.getCurrency(),
@@ -154,7 +169,8 @@ public class PaymentRefundProcessor {
 
             payment.markRefundProcessing();
             paymentRepository.save(payment);
-            log.info("Intención de reembolso creada para el pago {} con clave {}", paymentId, stableIdempotencyKey);
+            log.info("Intención de reembolso creada para el pago {} con clave {} en modo {}",
+                    paymentId, stableIdempotencyKey, checkoutMode);
         } else {
             intent = existingOpt.get();
             previousStatus = intent.getStatus();
@@ -182,11 +198,17 @@ public class PaymentRefundProcessor {
             log.info("Lease de reembolso renovado para el pago {} por worker {}", paymentId, workerToken);
         }
 
+        String effectiveCheckoutMode = intent.getCheckoutMode() != null ? intent.getCheckoutMode() : checkoutMode;
+        String effectiveProviderOrderId = intent.getProviderOrderId() != null ? intent.getProviderOrderId() : providerOrderId;
+        String effectiveProviderPaymentId = intent.getProviderPaymentId() != null ? intent.getProviderPaymentId() : providerPaymentId;
+
         return RefundClaimResult.claimed(
                 paymentId,
                 intent.getId(),
                 workerToken,
-                providerPaymentId,
+                effectiveCheckoutMode,
+                effectiveProviderOrderId,
+                effectiveProviderPaymentId,
                 refundAmount,
                 intent.getIdempotencyKey(),
                 previousStatus
@@ -194,25 +216,57 @@ public class PaymentRefundProcessor {
     }
 
     public RefundExecutionResult executeExternalRefund(RefundClaimResult claim) {
-        log.info("Iniciando llamada externa de reembolso para pago {} (providerPaymentId: {})",
-                claim.paymentId(), claim.providerPaymentId());
+        log.info("Iniciando llamada externa de reembolso para pago {} (mode: {}, providerOrderId: {}, providerPaymentId: {})",
+                claim.paymentId(), claim.checkoutMode(), claim.providerOrderId(), claim.providerPaymentId());
 
         if (claim.previousStatus() == RefundIntentStatus.UNKNOWN || claim.previousStatus() == RefundIntentStatus.PROCESSING) {
             log.info("Consultando al proveedor antes de intentar POST para el pago {}", claim.paymentId());
             try {
-                List<RefundQueryResult> existingRefunds = mercadoPagoGateway.queryPaymentRefunds(claim.providerPaymentId());
-                Optional<RefundQueryResult> approvedRefund = existingRefunds.stream()
-                        .filter(r -> "approved".equalsIgnoreCase(r.status()))
-                        .findFirst();
+                if ("ORDERS".equalsIgnoreCase(claim.checkoutMode())) {
+                    OrderQueryResult orderQuery = mercadoPagoGateway.queryOrder(claim.providerOrderId());
+                    boolean isRefunded = "refunded".equalsIgnoreCase(orderQuery.statusDetail())
+                            || "partially_refunded".equalsIgnoreCase(orderQuery.statusDetail())
+                            || (orderQuery.refunds() != null && orderQuery.refunds().stream().anyMatch(r -> "approved".equalsIgnoreCase(r.status())));
 
-                if (approvedRefund.isPresent()) {
-                    RefundQueryResult existing = approvedRefund.get();
-                    log.info("Reembolso {} ya existente y aprobado en Mercado Pago para pago {}",
-                            existing.providerRefundId(), claim.paymentId());
-                    return RefundExecutionResult.success(
-                            "GET", 200, existing.providerRefundId(), existing.amount(),
-                            "approved", "Reembolso confirmado vía consulta GET previa"
-                    );
+                    if (isRefunded) {
+                        String refundId = orderQuery.refunds() != null
+                                ? orderQuery.refunds().stream()
+                                        .filter(r -> "approved".equalsIgnoreCase(r.status()))
+                                        .map(OrderQueryResult.OrderRefundItem::providerRefundId)
+                                        .findFirst()
+                                        .orElse(orderQuery.orderId())
+                                : orderQuery.orderId();
+                        BigDecimal refAmount = orderQuery.refunds() != null
+                                ? orderQuery.refunds().stream()
+                                        .filter(r -> "approved".equalsIgnoreCase(r.status()))
+                                        .map(OrderQueryResult.OrderRefundItem::amount)
+                                        .filter(java.util.Objects::nonNull)
+                                        .findFirst()
+                                        .orElse(claim.amount())
+                                : claim.amount();
+
+                        log.info("Reembolso {} ya existente en Orders API para orden {} (pago {})",
+                                refundId, claim.providerOrderId(), claim.paymentId());
+                        return RefundExecutionResult.success(
+                                "GET", 200, refundId, refAmount,
+                                orderQuery.statusDetail(), "Reembolso confirmado vía consulta previa de orden"
+                        );
+                    }
+                } else {
+                    List<RefundQueryResult> existingRefunds = mercadoPagoGateway.queryPaymentRefunds(claim.providerPaymentId());
+                    Optional<RefundQueryResult> approvedRefund = existingRefunds.stream()
+                            .filter(r -> "approved".equalsIgnoreCase(r.status()))
+                            .findFirst();
+
+                    if (approvedRefund.isPresent()) {
+                        RefundQueryResult existing = approvedRefund.get();
+                        log.info("Reembolso {} ya existente y aprobado en Mercado Pago para pago {}",
+                                existing.providerRefundId(), claim.paymentId());
+                        return RefundExecutionResult.success(
+                                "GET", 200, existing.providerRefundId(), existing.amount(),
+                                "approved", "Reembolso confirmado vía consulta GET previa"
+                        );
+                    }
                 }
                 log.info("Consulta previa GET no reportó reembolsos para el pago {}. Procediendo al POST con la misma clave.",
                         claim.paymentId());
@@ -224,6 +278,8 @@ public class PaymentRefundProcessor {
 
         try {
             ExecuteRefundCommand command = new ExecuteRefundCommand(
+                    claim.checkoutMode(),
+                    claim.providerOrderId(),
                     claim.providerPaymentId(),
                     claim.amount(),
                     claim.idempotencyKey()
@@ -468,20 +524,34 @@ public class PaymentRefundProcessor {
             UUID paymentId,
             UUID intentId,
             UUID claimToken,
+            String checkoutMode,
+            String providerOrderId,
             String providerPaymentId,
             BigDecimal amount,
             String idempotencyKey,
             RefundIntentStatus previousStatus
     ) {
         public static RefundClaimResult claimed(
+                UUID paymentId, UUID intentId, UUID claimToken, String checkoutMode,
+                String providerOrderId, String providerPaymentId,
+                BigDecimal amount, String idempotencyKey, RefundIntentStatus previousStatus
+        ) {
+            return new RefundClaimResult(
+                    true, null, paymentId, intentId, claimToken,
+                    checkoutMode != null && !checkoutMode.isBlank() ? checkoutMode : "PREFERENCES",
+                    providerOrderId, providerPaymentId, amount, idempotencyKey, previousStatus
+            );
+        }
+
+        public static RefundClaimResult claimed(
                 UUID paymentId, UUID intentId, UUID claimToken, String providerPaymentId,
                 BigDecimal amount, String idempotencyKey, RefundIntentStatus previousStatus
         ) {
-            return new RefundClaimResult(true, null, paymentId, intentId, claimToken, providerPaymentId, amount, idempotencyKey, previousStatus);
+            return claimed(paymentId, intentId, claimToken, "PREFERENCES", null, providerPaymentId, amount, idempotencyKey, previousStatus);
         }
 
         public static RefundClaimResult skipped(String reason) {
-            return new RefundClaimResult(false, reason, null, null, null, null, null, null, null);
+            return new RefundClaimResult(false, reason, null, null, null, "PREFERENCES", null, null, null, null, null);
         }
     }
 

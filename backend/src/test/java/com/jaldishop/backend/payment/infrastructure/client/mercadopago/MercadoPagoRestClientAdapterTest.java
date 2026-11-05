@@ -2,10 +2,12 @@ package com.jaldishop.backend.payment.infrastructure.client.mercadopago;
 
 import com.jaldishop.backend.payment.application.gateway.dto.CreateOrderCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.ExecuteRefundCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
+import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -432,8 +434,12 @@ class MercadoPagoRestClientAdapterTest {
                 .andExpect(jsonPath("$.items[0].title").value("Producto Order Test"))
                 .andExpect(jsonPath("$.items[0].unit_price").value(120.00))
                 .andExpect(jsonPath("$.payer.email").value("juan@example.com"))
-                .andExpect(jsonPath("$.back_urls.success").value("https://jaldishop.com/checkout/success"))
-                .andExpect(jsonPath("$.auto_return").value("approved"))
+                .andExpect(jsonPath("$.config.online.success_url").value("https://jaldishop.com/checkout/success"))
+                .andExpect(jsonPath("$.config.online.failure_url").value("https://jaldishop.com/checkout/failure"))
+                .andExpect(jsonPath("$.config.online.pending_url").value("https://jaldishop.com/checkout/pending"))
+                .andExpect(jsonPath("$.config.online.auto_return").value("approved"))
+                .andExpect(jsonPath("$.back_urls").doesNotExist())
+                .andExpect(jsonPath("$.notification_url").doesNotExist())
                 .andRespond(withStatus(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(responseJson));
@@ -600,19 +606,142 @@ class MercadoPagoRestClientAdapterTest {
     }
 
     @Test
-    @DisplayName("Consultar orden inexistente traduce 404 a MP_NOT_FOUND")
-    void shouldHandle404NotFoundOnQueryOrder() {
-        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD-NONEXISTENT"))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withStatus(HttpStatus.NOT_FOUND));
+    @DisplayName("Ejecutar reembolso exitosamente en modo PREFERENCES envía POST a /v1/payments/{id}/refunds")
+    void shouldExecuteRefundSuccessfullyForPreferencesMode() {
+        String responseJson = """
+                {
+                  "id": 88990011,
+                  "payment_id": 12345678,
+                  "amount": 55.00,
+                  "status": "approved",
+                  "date_created": "2026-11-05T18:00:00.000Z"
+                }
+                """;
 
-        assertThatThrownBy(() -> adapter.queryOrder("ORD-NONEXISTENT"))
-                .isInstanceOf(MercadoPagoException.class)
-                .satisfies(ex -> {
-                    MercadoPagoException mpe = (MercadoPagoException) ex;
-                    assertThat(mpe.getStatusCode()).isEqualTo(404);
-                    assertThat(mpe.getErrorCode()).isEqualTo("MP_NOT_FOUND");
-                });
+        mockServer.expect(requestTo(BASE_URL + "/v1/payments/12345678/refunds"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer " + ACCESS_TOKEN))
+                .andExpect(header("X-Idempotency-Key", "idemp-ref-pref-01"))
+                .andExpect(header("Content-Type", "application/json"))
+                .andExpect(jsonPath("$.amount").value(55.0))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        ExecuteRefundCommand command = new ExecuteRefundCommand(
+                "PREFERENCES",
+                null,
+                "12345678",
+                new BigDecimal("55.00"),
+                "idemp-ref-pref-01"
+        );
+
+        RefundResult result = adapter.executeRefund(command);
+
+        mockServer.verify();
+        assertThat(result.providerRefundId()).isEqualTo("88990011");
+        assertThat(result.providerPaymentId()).isEqualTo("12345678");
+        assertThat(result.amount()).isEqualByComparingTo("55.00");
+        assertThat(result.status()).isEqualTo("approved");
+    }
+
+    @Test
+    @DisplayName("Ejecutar reembolso exitosamente en modo ORDERS envía POST a /v1/orders/{order_id}/refund")
+    void shouldExecuteRefundSuccessfullyForOrdersMode() {
+        String responseJson = """
+                {
+                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "status": "processed",
+                  "status_detail": "refunded",
+                  "transactions": {
+                    "refunds": [
+                      {
+                        "id": 99887766,
+                        "payment_id": 55443322,
+                        "amount": 120.00,
+                        "status": "approved",
+                        "date_created": "2026-11-05T18:30:00.000Z"
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD01J67CQQH5904WDBVZEM4JMEP3/refund"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer " + ACCESS_TOKEN))
+                .andExpect(header("X-Idempotency-Key", "idemp-ref-orders-01"))
+                .andExpect(header("Content-Type", "application/json"))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        ExecuteRefundCommand command = new ExecuteRefundCommand(
+                "ORDERS",
+                "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                null,
+                new BigDecimal("120.00"),
+                "idemp-ref-orders-01"
+        );
+
+        RefundResult result = adapter.executeRefund(command);
+
+        mockServer.verify();
+        assertThat(result.providerRefundId()).isEqualTo("99887766");
+        assertThat(result.providerPaymentId()).isEqualTo("55443322");
+        assertThat(result.amount()).isEqualByComparingTo("120.00");
+        assertThat(result.status()).isEqualTo("approved");
+    }
+
+    @Test
+    @DisplayName("Consultar orden mapea array transactions.refunds a OrderRefundItem")
+    void shouldQueryOrderWithRefundsSuccessfully() {
+        String responseJson = """
+                {
+                  "id": "ORD-WITH-REFUNDS",
+                  "status": "processed",
+                  "status_detail": "refunded",
+                  "total_amount": 100.00,
+                  "total_paid_amount": 100.00,
+                  "external_reference": "ext-order-ref",
+                  "transactions": {
+                    "payments": [
+                      {
+                        "id": 11112222,
+                        "status": "approved",
+                        "status_detail": "accredited",
+                        "transaction_amount": 100.00
+                      }
+                    ],
+                    "refunds": [
+                      {
+                        "id": 33334444,
+                        "payment_id": 11112222,
+                        "amount": 100.00,
+                        "status": "approved",
+                        "date_created": "2026-11-05T18:45:00.000Z"
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD-WITH-REFUNDS"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        OrderQueryResult result = adapter.queryOrder("ORD-WITH-REFUNDS");
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD-WITH-REFUNDS");
+        assertThat(result.status()).isEqualTo("processed");
+        assertThat(result.statusDetail()).isEqualTo("refunded");
+        assertThat(result.payments()).hasSize(1);
+        assertThat(result.refunds()).hasSize(1);
+        assertThat(result.refunds().getFirst().providerRefundId()).isEqualTo("33334444");
+        assertThat(result.refunds().getFirst().providerPaymentId()).isEqualTo("11112222");
+        assertThat(result.refunds().getFirst().amount()).isEqualByComparingTo("100.00");
+        assertThat(result.refunds().getFirst().status()).isEqualTo("approved");
     }
 
 }

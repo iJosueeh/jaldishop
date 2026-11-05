@@ -90,21 +90,39 @@ public class PaymentWebhookPersistenceService {
                     break;
                 }
             }
+            if (targetAttempt == null) {
+                for (int i = attempts.size() - 1; i >= 0; i--) {
+                    PaymentAttempt a = attempts.get(i);
+                    if ("ORDERS".equalsIgnoreCase(a.getCheckoutMode())
+                            && (a.getStatus() == PaymentAttemptStatus.PROCESSING || a.getStatus() == PaymentAttemptStatus.CREATED)
+                            && (a.getProviderOrderId() == null || providerOrderId.equals(a.getProviderOrderId()))) {
+                        targetAttempt = a;
+                        break;
+                    }
+                }
+            }
         }
 
         // 3. Flujo Preferences API: Mercado Pago notifica topic=payment con providerPaymentId recién generado.
-        // Si no tenemos providerOrderId pero el intento activo fue registrado bajo modalidad PREFERENCES con preferenceId,
+        // Si no tenemos providerOrderId pero el intento activo fue registrado bajo modalidad PREFERENCES,
         // vinculamos el pago a dicho intento.
         if (targetAttempt == null && (providerOrderId == null || providerOrderId.isBlank())) {
             for (int i = attempts.size() - 1; i >= 0; i--) {
                 PaymentAttempt a = attempts.get(i);
                 if ("PREFERENCES".equalsIgnoreCase(a.getCheckoutMode())
-                        && a.getPreferenceId() != null && !a.getPreferenceId().isBlank()
                         && (a.getStatus() == PaymentAttemptStatus.PROCESSING || a.getStatus() == PaymentAttemptStatus.CREATED)
                         && (a.getProviderPaymentId() == null || a.getProviderPaymentId().equals(queryResult.providerPaymentId()))) {
                     targetAttempt = a;
                     break;
                 }
+            }
+        }
+
+        // 4. Fallback seguro: Si existe un único intento en progreso para el pago identificado, vincularlo
+        if (targetAttempt == null && attempts.size() == 1) {
+            PaymentAttempt soleAttempt = attempts.get(0);
+            if (soleAttempt.getStatus() == PaymentAttemptStatus.PROCESSING || soleAttempt.getStatus() == PaymentAttemptStatus.CREATED) {
+                targetAttempt = soleAttempt;
             }
         }
 
@@ -116,15 +134,8 @@ public class PaymentWebhookPersistenceService {
                     "No se encontró un intento de pago inequívoco que corresponda a la transacción informada.");
         }
 
-        // Si no se pudo identificar inequívocamente el intento, NO asociar a ciegas ni acreditar
-        if (targetAttempt == null) {
-            log.error("Imposible asociar la transacción financiera {} a ningún intento inequívoco para el pago {}",
-                    queryResult.providerPaymentId(), paymentId);
-            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH",
-                    "No se encontró un intento de pago inequívoco que corresponda a la transacción informada.");
-        }
-
         String mpStatus = queryResult.status().toLowerCase(Locale.ROOT);
+        String mpStatusDetail = queryResult.statusDetail() != null ? queryResult.statusDetail().toLowerCase(Locale.ROOT) : "";
         PaymentMethod resolvedMethod = resolvePaymentMethod(queryResult.paymentTypeId(), queryResult.paymentMethodId());
 
         // 2. Protección de Estados Terminales y Eventos Fuera de Orden:
@@ -139,65 +150,127 @@ public class PaymentWebhookPersistenceService {
             );
         }
 
-        // 3. Transición según estado oficial del proveedor
-        switch (mpStatus) {
-            case "approved" -> {
-                payment.markApproved(queryResult.dateApproved());
-                paymentRepository.save(payment);
+        // 3. Transición según estado financiero y acreditación real de la transacción:
+        // Se considera acreditado financieramente si:
+        // a) El pago individual tiene status="approved", o
+        // b) El pago tiene status="processed" CON status_detail="accredited" estricto.
+        boolean isAccredited = "approved".equals(mpStatus)
+                || ("processed".equals(mpStatus) && "accredited".equals(mpStatusDetail));
 
-                if (targetAttempt != null) {
-                    targetAttempt.markApproved(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            resolvedMethod,
-                            queryResult.dateApproved()
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Pago {} y su intento {} actualizados a APPROVED conforme a Mercado Pago.",
-                        paymentId, targetAttempt != null ? targetAttempt.getId() : "N/A");
+        if (isAccredited) {
+            payment.markApproved(queryResult.dateApproved());
+            paymentRepository.save(payment);
+
+            if (targetAttempt != null) {
+                targetAttempt.markApproved(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        resolvedMethod,
+                        queryResult.dateApproved()
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
-            case "rejected", "cancelled" -> {
-                if (targetAttempt != null) {
-                    targetAttempt.markRejected(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            Instant.now()
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Intento de pago {} actualizado a REJECTED por Mercado Pago. El pago principal se mantiene en {} para reintento.",
-                        targetAttempt != null ? targetAttempt.getId() : "N/A", payment.getStatus());
+            log.info("Pago {} y su intento {} actualizados a APPROVED conforme a Mercado Pago (status={}, detail={}).",
+                    paymentId, targetAttempt != null ? targetAttempt.getId() : "N/A", mpStatus, mpStatusDetail);
+        } else if ("rejected".equals(mpStatus) || "cancelled".equals(mpStatus)) {
+            if (targetAttempt != null) {
+                targetAttempt.markRejected(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        Instant.now()
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
-            case "pending", "in_process", "authorized" -> {
-                if (payment.getStatus() == PaymentStatus.PENDING) {
-                    payment.markProcessing();
-                    paymentRepository.save(payment);
-                }
-                if (targetAttempt != null) {
-                    targetAttempt.markProviderPending(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            resolvedMethod
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Pago {} e intento en estado intermedio: {}.", paymentId, mpStatus);
+            log.info("Intento de pago {} actualizado a REJECTED por Mercado Pago. El pago principal se mantiene en {} para reintento.",
+                    targetAttempt != null ? targetAttempt.getId() : "N/A", payment.getStatus());
+        } else if ("pending".equals(mpStatus) || "in_process".equals(mpStatus) || "authorized".equals(mpStatus) || "processed".equals(mpStatus)) {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                payment.markProcessing();
+                paymentRepository.save(payment);
             }
-            default -> {
-                log.warn("Estado desconocido de Mercado Pago ({}) recibido para pago {}.", mpStatus, paymentId);
+            if (targetAttempt != null) {
+                targetAttempt.markProviderPending(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        resolvedMethod
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
+            log.info("Pago {} e intento en estado intermedio: {} (detail={}).", paymentId, mpStatus, mpStatusDetail);
+        } else {
+            log.warn("Estado desconocido de Mercado Pago ({}, detail={}) recibido para pago {}.", mpStatus, mpStatusDetail, paymentId);
         }
 
         String attemptStatus = targetAttempt != null ? targetAttempt.getStatus().name() : "NONE";
         return ProcessMercadoPagoWebhookResult.success(
                 paymentId, queryResult.providerPaymentId(), payment.getStatus().name(), attemptStatus,
                 "Estado del pago actualizado conforme a consulta con Mercado Pago."
+        );
+    }
+
+    /**
+     * Aplica la cancelación o expiración de una orden de Orders API cuando no contiene transacciones financieras.
+     * Marca el PaymentAttempt correspondiente como REJECTED preservando el Payment principal en PENDING para reintento.
+     */
+    @Transactional
+    public ProcessMercadoPagoWebhookResult applyOrderCancellation(
+            UUID paymentId,
+            String providerOrderId,
+            String orderStatus,
+            String orderStatusDetail
+    ) {
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
+
+        if (payment.getStatus() == PaymentStatus.APPROVED) {
+            log.info("Pago {} ya se encuentra APPROVED. Ignorando cancelación tardía de orden {}.", paymentId, providerOrderId);
+            return ProcessMercadoPagoWebhookResult.success(
+                    paymentId, null, payment.getStatus().name(), "APPROVED",
+                    "Orden cancelada extemporáneamente; estado APPROVED preservado por idempotencia."
+            );
+        }
+
+        List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
+        PaymentAttempt targetAttempt = null;
+
+        if (providerOrderId != null && !providerOrderId.isBlank()) {
+            for (PaymentAttempt a : attempts) {
+                if (providerOrderId.equals(a.getProviderOrderId())) {
+                    targetAttempt = a;
+                    break;
+                }
+            }
+        }
+        if (targetAttempt == null && !attempts.isEmpty()) {
+            PaymentAttempt last = attempts.getLast();
+            if (last.getStatus() == PaymentAttemptStatus.PROCESSING || last.getStatus() == PaymentAttemptStatus.CREATED) {
+                targetAttempt = last;
+            }
+        }
+
+        if (targetAttempt != null) {
+            targetAttempt.markRejected(
+                    null,
+                    orderStatus,
+                    orderStatusDetail,
+                    "ORDER_CANCELED",
+                    "Orden cancelada o expirada en Mercado Pago: " + (orderStatusDetail != null ? orderStatusDetail : orderStatus),
+                    Instant.now()
+            );
+            paymentAttemptRepository.save(targetAttempt);
+            log.info("Intento {} marcado como REJECTED por cancelación de orden {} en Mercado Pago.",
+                    targetAttempt.getId(), providerOrderId);
+        }
+
+        String attemptStatus = targetAttempt != null ? targetAttempt.getStatus().name() : "NONE";
+        return ProcessMercadoPagoWebhookResult.success(
+                paymentId, null, payment.getStatus().name(), attemptStatus,
+                "Orden cancelada o expirada registrada en el intento de pago."
         );
     }
 

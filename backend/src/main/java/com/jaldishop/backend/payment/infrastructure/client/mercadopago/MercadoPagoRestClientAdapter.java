@@ -10,6 +10,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
+import com.jaldishop.backend.payment.infrastructure.client.mercadopago.dto.MpOrderRefundResponse;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.dto.MpOrderRequest;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.dto.MpOrderResponse;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.dto.MpPaymentResponse;
@@ -30,6 +31,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -49,6 +51,7 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     private static final String REFUNDS_PATH = "/v1/payments/{id}/refunds";
     private static final String ORDERS_PATH = "/v1/orders";
     private static final String ORDER_DETAIL_PATH = "/v1/orders/{id}";
+    private static final String ORDER_REFUND_PATH = "/v1/orders/{id}/refund";
 
     private final RestClient restClient;
     private final MercadoPagoProperties properties;
@@ -125,6 +128,10 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
         } catch (MercadoPagoException ex) {
             throw ex;
         } catch (Exception ex) {
+            if (isTimeoutOrConnectionError(ex)) {
+                log.error("Timeout o error de conexión al comunicarse con Mercado Pago: {}", ex.getMessage());
+                throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar Mercado Pago", ex);
+            }
             log.error("Error inesperado al comunicarse con Mercado Pago: {}", ex.getMessage());
             throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al invocar Mercado Pago", ex);
         }
@@ -195,7 +202,14 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     public RefundResult executeRefund(ExecuteRefundCommand command) {
         validateAccessToken();
 
-        log.info("Ejecutando reembolso para providerPaymentId: {} con idempotencyKey: {}",
+        if ("ORDERS".equalsIgnoreCase(command.checkoutMode())) {
+            return executeOrdersRefund(command);
+        }
+        return executePreferencesRefund(command);
+    }
+
+    private RefundResult executePreferencesRefund(ExecuteRefundCommand command) {
+        log.info("Ejecutando reembolso PREFERENCES para providerPaymentId: {} con idempotencyKey: {}",
                 command.providerPaymentId(), command.idempotencyKey());
 
         try {
@@ -248,8 +262,102 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
         } catch (MercadoPagoException ex) {
             throw ex;
         } catch (Exception ex) {
+            if (isTimeoutOrConnectionError(ex)) {
+                log.error("Timeout o error de conexión al ejecutar reembolso en Mercado Pago: {}", ex.getMessage());
+                throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar reembolso en Mercado Pago", ex);
+            }
             log.error("Error inesperado al ejecutar reembolso en Mercado Pago: {}", ex.getMessage());
             throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al invocar reembolso en Mercado Pago", ex);
+        }
+    }
+
+    private RefundResult executeOrdersRefund(ExecuteRefundCommand command) {
+        log.info("Ejecutando reembolso ORDERS para providerOrderId: {} con idempotencyKey: {}",
+                command.providerOrderId(), command.idempotencyKey());
+
+        try {
+            var requestSpec = restClient.post()
+                    .uri(ORDER_REFUND_PATH, command.providerOrderId())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getAccessToken())
+                    .header("X-Idempotency-Key", command.idempotencyKey())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON);
+
+            if (command.amount() != null) {
+                requestSpec.body(new MpRefundRequest(command.amount()));
+            } else {
+                requestSpec.body("{}");
+            }
+
+            MpOrderRefundResponse response = requestSpec
+                    .retrieve()
+                    .body(MpOrderRefundResponse.class);
+
+            if (response == null || response.id() == null) {
+                throw new MercadoPagoException(
+                        200,
+                        "MP_INVALID_RESPONSE",
+                        "Respuesta incompleta de Mercado Pago al crear reembolso de orden: falta id de orden."
+                );
+            }
+
+            String refundId = response.id();
+            String paymentId = command.providerPaymentId();
+            BigDecimal amount = command.amount();
+            String status = response.statusDetail() != null ? response.statusDetail() : response.status();
+            Instant dateCreated = Instant.now();
+
+            if (response.transactions() != null && response.transactions().refunds() != null && !response.transactions().refunds().isEmpty()) {
+                var refundItem = response.transactions().refunds().getFirst();
+                if (refundItem.id() != null) {
+                    refundId = String.valueOf(refundItem.id());
+                }
+                if (refundItem.paymentId() != null) {
+                    paymentId = String.valueOf(refundItem.paymentId());
+                }
+                if (refundItem.amount() != null) {
+                    amount = refundItem.amount();
+                }
+                if (refundItem.status() != null) {
+                    status = refundItem.status();
+                }
+                if (refundItem.dateCreated() != null) {
+                    Instant parsed = parseIsoInstant(refundItem.dateCreated());
+                    if (parsed != null) {
+                        dateCreated = parsed;
+                    }
+                }
+            }
+
+            log.info("Reembolso {} creado/obtenido exitosamente para orden {} (pago {}) con status: {}",
+                    refundId, command.providerOrderId(), paymentId, status);
+
+            return new RefundResult(
+                    refundId,
+                    paymentId,
+                    amount,
+                    status,
+                    dateCreated
+            );
+
+        } catch (HttpClientErrorException ex) {
+            handleClientError(ex, "ejecutar reembolso de orden");
+            throw ex;
+        } catch (HttpServerErrorException ex) {
+            handleServerError(ex, "ejecutar reembolso de orden");
+            throw ex;
+        } catch (ResourceAccessException ex) {
+            log.error("Timeout o error de conexión al ejecutar reembolso de orden en Mercado Pago: {}", ex.getMessage());
+            throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar reembolso de orden en Mercado Pago", ex);
+        } catch (MercadoPagoException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            if (isTimeoutOrConnectionError(ex)) {
+                log.error("Timeout o error de conexión al ejecutar reembolso de orden en Mercado Pago: {}", ex.getMessage());
+                throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar reembolso de orden en Mercado Pago", ex);
+            }
+            log.error("Error inesperado al ejecutar reembolso de orden en Mercado Pago: {}", ex.getMessage());
+            throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al invocar reembolso de orden en Mercado Pago", ex);
         }
     }
 
@@ -349,6 +457,10 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
         } catch (MercadoPagoException ex) {
             throw ex;
         } catch (Exception ex) {
+            if (isTimeoutOrConnectionError(ex)) {
+                log.error("Timeout o error de conexión al comunicarse con Mercado Pago (crear orden): {}", ex.getMessage());
+                throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar Mercado Pago", ex);
+            }
             log.error("Error inesperado al comunicarse con Mercado Pago (crear orden): {}", ex.getMessage());
             throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al invocar Mercado Pago", ex);
         }
@@ -397,8 +509,22 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                         .toList();
             }
 
-            log.info("Orden {} consultada exitosamente con status: {}, total pagos: {}",
-                    response.id(), response.status(), payments.size());
+            List<OrderQueryResult.OrderRefundItem> refunds = List.of();
+            if (response.transactions() != null && response.transactions().refunds() != null) {
+                refunds = response.transactions().refunds().stream()
+                        .filter(r -> r != null && r.id() != null)
+                        .map(r -> new OrderQueryResult.OrderRefundItem(
+                                String.valueOf(r.id()),
+                                r.paymentId() != null ? String.valueOf(r.paymentId()) : null,
+                                r.amount(),
+                                r.status(),
+                                parseIsoInstant(r.dateCreated())
+                        ))
+                        .toList();
+            }
+
+            log.info("Orden {} consultada exitosamente con status: {}, total pagos: {}, total reembolsos: {}",
+                    response.id(), response.status(), payments.size(), refunds.size());
 
             return new OrderQueryResult(
                     response.id(),
@@ -408,6 +534,7 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                     response.totalPaidAmount(),
                     response.externalReference(),
                     payments,
+                    refunds,
                     response.collectorId(),
                     response.liveMode()
             );
@@ -527,12 +654,15 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
             );
         }
 
-        MpOrderRequest.MpOrderBackUrls backUrls = null;
+        MpOrderRequest.MpOrderConfig config = null;
         if (cmd.successBackUrl() != null || cmd.failureBackUrl() != null || cmd.pendingBackUrl() != null) {
-            backUrls = new MpOrderRequest.MpOrderBackUrls(
-                    cmd.successBackUrl(),
-                    cmd.pendingBackUrl(),
-                    cmd.failureBackUrl()
+            config = new MpOrderRequest.MpOrderConfig(
+                    new MpOrderRequest.MpOnlineConfig(
+                            cmd.successBackUrl(),
+                            cmd.failureBackUrl(),
+                            cmd.pendingBackUrl(),
+                            "approved"
+                    )
             );
         }
 
@@ -544,9 +674,7 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                 cmd.externalReference(),
                 mpItems,
                 mpPayer,
-                backUrls,
-                "approved",
-                cmd.notificationUrl()
+                config
         );
     }
 
@@ -577,6 +705,20 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
             return sanitized.substring(0, 300) + "... [truncado]";
         }
         return sanitized;
+    }
+
+    private boolean isTimeoutOrConnectionError(Throwable ex) {
+        Throwable current = ex;
+        while (current != null) {
+            if (current instanceof org.springframework.web.client.ResourceAccessException
+                    || current instanceof java.net.SocketTimeoutException
+                    || current instanceof java.net.ConnectException
+                    || (current.getMessage() != null && current.getMessage().toLowerCase(java.util.Locale.ROOT).contains("timed out"))) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
 }

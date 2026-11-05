@@ -16,6 +16,7 @@ public record OrderQueryResult(
         BigDecimal totalPaidAmount,
         String externalReference,
         List<OrderPaymentItem> payments,
+        List<OrderRefundItem> refunds,
         Long collectorId,
         Boolean liveMode
 ) {
@@ -28,6 +29,23 @@ public record OrderQueryResult(
         if (payments == null) {
             payments = List.of();
         }
+        if (refunds == null) {
+            refunds = List.of();
+        }
+    }
+
+    public OrderQueryResult(
+            String orderId,
+            String status,
+            String statusDetail,
+            BigDecimal totalAmount,
+            BigDecimal totalPaidAmount,
+            String externalReference,
+            List<OrderPaymentItem> payments,
+            Long collectorId,
+            Boolean liveMode
+    ) {
+        this(orderId, status, statusDetail, totalAmount, totalPaidAmount, externalReference, payments, List.of(), collectorId, liveMode);
     }
 
     public record OrderPaymentItem(
@@ -42,6 +60,18 @@ public record OrderQueryResult(
     ) {
         public OrderPaymentItem {
             Objects.requireNonNull(providerPaymentId, "providerPaymentId no puede ser nulo");
+        }
+    }
+
+    public record OrderRefundItem(
+            String providerRefundId,
+            String providerPaymentId,
+            BigDecimal amount,
+            String status,
+            Instant dateCreated
+    ) {
+        public OrderRefundItem {
+            Objects.requireNonNull(providerRefundId, "providerRefundId no puede ser nulo");
         }
     }
 }

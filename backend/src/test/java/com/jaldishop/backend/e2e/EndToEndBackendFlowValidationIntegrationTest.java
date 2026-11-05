@@ -54,6 +54,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
     private static final AtomicReference<String> mpPaymentStatus = new AtomicReference<>("approved");
     private static final AtomicReference<String> mpExternalReference = new AtomicReference<>("");
     private static final AtomicReference<Double> mpTransactionAmount = new AtomicReference<>(52.50);
+    private static final AtomicReference<UUID> test6PaymentId = new AtomicReference<>();
 
     @BeforeAll
     static void startMockServerAndSeed() throws Exception {
@@ -456,6 +457,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
                 """, UUID.randomUUID(), varId, storeId, resId);
 
         UUID paymentId = UUID.randomUUID();
+        test6PaymentId.set(paymentId);
         mpExternalReference.set(paymentId.toString());
 
         jdbcTemplate.update("""
@@ -722,10 +724,14 @@ class EndToEndBackendFlowValidationIntegrationTest {
         mpTransactionAmount.set(52.50);
         String mpPaymentId = String.valueOf(3000000000L + (System.currentTimeMillis() % 100000000));
 
-        // Obtener un pago ya aprobado existente
-        UUID existingPaymentId = jdbcTemplate.queryForObject(
-                "SELECT id FROM payments WHERE status = 'APPROVED' LIMIT 1", UUID.class
-        );
+        // Obtener el pago aprobado en el flujo previo (test6) o el más reciente con intento asociado
+        UUID existingPaymentId = test6PaymentId.get();
+        if (existingPaymentId == null) {
+            existingPaymentId = jdbcTemplate.queryForObject(
+                    "SELECT p.id FROM payments p JOIN payment_attempts pa ON pa.payment_id = p.id WHERE p.status = 'APPROVED' ORDER BY p.created_at DESC LIMIT 1",
+                    UUID.class
+            );
+        }
         assertNotNull(existingPaymentId);
         mpExternalReference.set(existingPaymentId.toString());
 
@@ -792,6 +798,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
                 """, UUID.randomUUID(), varId, storeId, resId);
 
         UUID paymentId = UUID.randomUUID();
+        test6PaymentId.set(paymentId);
         mpExternalReference.set(paymentId.toString());
 
         jdbcTemplate.update("""

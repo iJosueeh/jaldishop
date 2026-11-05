@@ -26,7 +26,17 @@ public record MpOrderResponse(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record MpTransactions(
-            @JsonProperty("payments") List<MpOrderPayment> payments
+            @JsonProperty("payments") List<MpOrderPayment> payments,
+            @JsonProperty("refunds") List<MpOrderRefundItem> refunds
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record MpOrderRefundItem(
+            @JsonProperty("id") Object id,
+            @JsonProperty("payment_id") Object paymentId,
+            @JsonProperty("amount") BigDecimal amount,
+            @JsonProperty("status") String status,
+            @JsonProperty("date_created") String dateCreated
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
