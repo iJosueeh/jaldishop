@@ -132,6 +132,10 @@ class CreatePaymentPreferenceServiceTest {
 
         objectMapper = new ObjectMapper();
 
+        lenient().when(paymentRepository.findByIdForUpdate(any(UUID.class)))
+                .thenReturn(Optional.of(mock(Payment.class)));
+        lenient().when(paymentAttemptRepository.findByIdForUpdate(any(UUID.class)))
+                .thenAnswer(inv -> paymentAttemptRepository.findById(inv.getArgument(0)));
         preparationService = new PaymentPreferencePreparationService(
                 capacityReservationRepository,
                 inventoryReservationRepository,
@@ -174,6 +178,31 @@ class CreatePaymentPreferenceServiceTest {
         activeReservation = CapacityReservation.create(
                 storeId, userId, LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0)
         );
+    }
+
+    @Test
+    void confirmedCreationRejectionIsSeparateFromFinancialStatusAndStoresNoBody() {
+        PaymentAttempt attempt = PaymentAttempt.create(UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "rejection-key", "ORDERS");
+        when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
+        preparationService.recordOrderCreationError(attempt.getPaymentId(), attempt.getId(), true, "MP_ORDER_INVALID_TOTAL_AMOUNT");
+        assertThat(attempt.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.REJECTED_CONFIRMED);
+        assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.ERROR);
+        assertThat(attempt.getErrorMessage()).isEqualTo("Order creation requires review");
+        verify(paymentAttemptRepository).save(attempt);
+    }
+
+    @Test
+    void lateCreationErrorPreservesConcurrentFinancialApproval() {
+        PaymentAttempt attempt = PaymentAttempt.create(UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "late-key", "ORDERS");
+        attempt.markApproved("PAY-1", "approved", "accredited", PaymentMethod.CARD, Instant.now());
+        when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
+        preparationService.recordOrderCreationError(attempt.getPaymentId(), attempt.getId(), false, "MP_TIMEOUT");
+        assertThat(attempt.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.UNKNOWN);
+        assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
+        assertThat(attempt.getProviderPaymentId()).isEqualTo("PAY-1");
+        verify(paymentAttemptRepository).save(attempt);
     }
 
     @Test
@@ -642,6 +671,7 @@ class CreatePaymentPreferenceServiceTest {
 
         assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.ERROR);
         assertThat(attempt.getErrorCode()).isEqualTo("MP_TIMEOUT");
+        assertThat(attempt.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.UNKNOWN);
         assertThat(attempt.getIdempotencyKey()).isEqualTo("idemp-key-order-timeout");
 
         // 2. Resultado incierto: bloquear el reenvío

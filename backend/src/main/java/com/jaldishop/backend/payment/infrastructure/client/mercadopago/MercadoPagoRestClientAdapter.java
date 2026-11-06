@@ -463,6 +463,11 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
             return new OrderResult(response.id(), response.checkoutUrl(), response.status(), response.totalAmount());
 
         } catch (HttpClientErrorException ex) {
+            if (OrderCreationRejection.isInvalidTotalAmount(ex.getStatusCode().value(),
+                    ex.getResponseBodyAsString(), objectMapper)) {
+                throw new MercadoPagoException(400, OrderCreationRejection.INVALID_TOTAL_AMOUNT,
+                        "Order creation rejected: invalid_total_amount");
+            }
             handleClientError(ex, "crear orden");
             throw ex;
         } catch (HttpServerErrorException ex) {

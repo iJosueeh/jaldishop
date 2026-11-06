@@ -7,6 +7,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCom
 import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoException;
+import com.jaldishop.backend.payment.infrastructure.client.mercadopago.OrderCreationRejection;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import org.slf4j.Logger;
@@ -153,17 +154,19 @@ public class CreatePaymentPreferenceService {
             throw ex;
         } catch (MercadoPagoException ex) {
             log.warn("Mercado Pago falló al crear orden para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
-            preparationService.recordAttemptError(prep.attempt().getId(), ex.getErrorCode(), ex.getMessage());
+            preparationService.recordOrderCreationError(prep.attempt().getPaymentId(), prep.attempt().getId(),
+                    OrderCreationRejection.isConfirmed(ex), ex.getErrorCode());
             throw ex;
         } catch (Exception ex) {
             log.error("Error inesperado al invocar gateway de Mercado Pago (Orders): {}", ex.getMessage());
-            preparationService.recordAttemptError(prep.attempt().getId(), "UNEXPECTED_ERROR", ex.getMessage());
+            preparationService.recordOrderCreationError(prep.attempt().getPaymentId(), prep.attempt().getId(), false, "UNEXPECTED_ERROR");
             throw ex;
         }
 
         // 3. Paso DB 2: Transaccional. Almacenar provider_order_id y checkout_url como init_point
         try {
             preparationService.recordOrderResult(
+                    prep.attempt().getPaymentId(),
                     prep.attempt().getId(),
                     orderResult.orderId(),
                     orderResult.checkoutUrl()

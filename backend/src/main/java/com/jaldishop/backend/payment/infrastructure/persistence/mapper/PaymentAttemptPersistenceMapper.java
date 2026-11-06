@@ -1,6 +1,7 @@
 package com.jaldishop.backend.payment.infrastructure.persistence.mapper;
 
 import com.jaldishop.backend.payment.domain.model.PaymentAttempt;
+import com.jaldishop.backend.payment.domain.enums.RemoteOrderCreationState;
 import com.jaldishop.backend.payment.domain.enums.PaymentAttemptStatus;
 import com.jaldishop.backend.payment.domain.enums.PaymentMethod;
 import com.jaldishop.backend.payment.domain.enums.PaymentProvider;
@@ -15,7 +16,7 @@ public class PaymentAttemptPersistenceMapper {
             return null;
         }
 
-        return PaymentAttempt.rehydrate(
+        PaymentAttempt attempt = PaymentAttempt.rehydrate(
                 entity.getId(),
                 entity.getPaymentId(),
                 entity.getAttemptNumber(),
@@ -38,6 +39,9 @@ public class PaymentAttemptPersistenceMapper {
                 entity.getCompletedAt(),
                 entity.getUpdatedAt()
         );
+        attempt.restoreRemoteOrderCreationState(entity.getRemoteOrderCreationState() == null ? null
+                : RemoteOrderCreationState.valueOf(entity.getRemoteOrderCreationState()));
+        return attempt;
     }
 
     public PaymentAttemptEntity toEntity(PaymentAttempt domain) {
@@ -45,7 +49,7 @@ public class PaymentAttemptPersistenceMapper {
             return null;
         }
 
-        return new PaymentAttemptEntity(
+        PaymentAttemptEntity entity = new PaymentAttemptEntity(
                 domain.getId(),
                 domain.getPaymentId(),
                 domain.getAttemptNumber(),
@@ -68,6 +72,9 @@ public class PaymentAttemptPersistenceMapper {
                 domain.getCompletedAt(),
                 domain.getUpdatedAt()
         );
+        entity.setRemoteOrderCreationState(domain.getRemoteOrderCreationState() == null ? null
+                : domain.getRemoteOrderCreationState().name());
+        return entity;
     }
 
 }

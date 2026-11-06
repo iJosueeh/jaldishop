@@ -45,6 +45,23 @@ class MercadoPagoRestClientAdapterTest {
     private MercadoPagoProperties properties;
 
     @Test
+    void documentsConfirmedOrdersValidationRejectionWithoutPersistingResponse() {
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"errors\":[{\"code\":\"invalid_total_amount\",\"message\":\"private data\"}]}"));
+        var command = new CreateOrderCommand("payment-id", new BigDecimal("10.00"),
+                List.of(new CreateOrderCommand.OrderItem("item", "Item", null, 1, new BigDecimal("10.00"), "PEN")),
+                null, null, null, null, null, "JALDI SHOP", "key");
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOfSatisfying(MercadoPagoException.class, ex -> {
+                    assertThat(OrderCreationRejection.isConfirmed(ex)).isTrue();
+                    assertThat(ex.getMessage()).doesNotContain("private data");
+                    assertThat(ex.getCause()).isNull();
+                });
+        mockServer.verify();
+    }
+
+    @Test
     void persistsExactPreferenceBodyBeforeSending() {
         var store = mock(CheckoutCreationRequestStore.class);
         var saved = new AtomicReference<byte[]>();

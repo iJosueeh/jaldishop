@@ -34,6 +34,9 @@ public class PaymentAttemptEntity {
     @Column(name = "checkout_mode", nullable = false, length = 20)
     private String checkoutMode;
 
+    @Column(name = "remote_order_creation_state", length = 30)
+    private String remoteOrderCreationState;
+
     @Column(name = "preference_id", length = 100)
     private String preferenceId;
 
@@ -207,6 +210,9 @@ public class PaymentAttemptEntity {
         this.completedAt = completedAt;
         this.updatedAt = updatedAt;
     }
+
+    public String getRemoteOrderCreationState() { return remoteOrderCreationState; }
+    public void setRemoteOrderCreationState(String state) { remoteOrderCreationState = state; }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

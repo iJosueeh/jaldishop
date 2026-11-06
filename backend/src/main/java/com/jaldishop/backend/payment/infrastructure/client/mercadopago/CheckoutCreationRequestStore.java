@@ -32,6 +32,15 @@ public class CheckoutCreationRequestStore {
         if (inserted != 1) {
             throw new ConflictException("PAYMENT_IN_PROGRESS", "El intento requiere revisión antes de continuar.");
         }
+        if ("ORDERS".equals(mode)) {
+            int changed = jdbc.update("""
+                    UPDATE payment_attempts SET remote_order_creation_state = 'UNKNOWN'
+                    WHERE id = ? AND remote_order_creation_state IN ('PREPARED', 'UNKNOWN')
+                    """, attemptId);
+            if (changed != 1) {
+                throw new ConflictException("PAYMENT_IN_PROGRESS", "El intento requiere revisión antes de continuar.");
+            }
+        }
         String persisted = jdbc.queryForObject(
                 "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?", String.class, attemptId);
         return persisted.getBytes(StandardCharsets.UTF_8);

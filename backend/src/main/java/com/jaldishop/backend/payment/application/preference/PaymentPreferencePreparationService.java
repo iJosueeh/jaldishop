@@ -178,6 +178,16 @@ public class PaymentPreferencePreparationService {
 
             List<PaymentAttempt> existingAttempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(existingPayment.getId());
 
+            // Uncertain creation blocks a new POST even after a financial rejection.
+            for (PaymentAttempt attempt : existingAttempts) {
+                if ("ORDERS".equals(attempt.getCheckoutMode())
+                        && attempt.getProviderOrderId() == null
+                        && (attempt.getRemoteOrderCreationState() == RemoteOrderCreationState.UNKNOWN
+                        || attempt.getRemoteOrderCreationState() == RemoteOrderCreationState.PREPARED)) {
+                    throw new ConflictException("PAYMENT_IN_PROGRESS", "La creación remota requiere revisión.");
+                }
+            }
+
             // 1. Idempotencia: Si ya existe un intento previo con preference_id u order_id válido, retornarlo directamente
             for (int i = existingAttempts.size() - 1; i >= 0; i--) {
                 PaymentAttempt attempt = existingAttempts.get(i);
@@ -308,11 +318,37 @@ public class PaymentPreferencePreparationService {
     }
 
     @Transactional
-    public void recordOrderResult(UUID attemptId, String providerOrderId, String initPoint) {
-        PaymentAttempt attempt = paymentAttemptRepository.findById(attemptId)
-                .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
+    public void recordOrderResult(UUID paymentId, UUID attemptId, String providerOrderId, String initPoint) {
+        PaymentAttempt attempt = lockOrderAttempt(paymentId, attemptId);
         attempt.recordOrder(providerOrderId, initPoint);
         paymentAttemptRepository.save(attempt);
+    }
+
+    @Transactional
+    public void recordOrderCreationError(UUID paymentId, UUID attemptId, boolean confirmedRejection, String safeCode) {
+        PaymentAttempt attempt = lockOrderAttempt(paymentId, attemptId);
+        attempt.recordOrderCreationFailure(confirmedRejection);
+        // Financial evidence from a concurrent webhook must survive a late transport error.
+        if (attempt.getRemoteOrderCreationState() != RemoteOrderCreationState.CREATED
+                && (attempt.getStatus() == PaymentAttemptStatus.CREATED
+                || attempt.getStatus() == PaymentAttemptStatus.PROCESSING)) {
+            if (attempt.getProviderPaymentId() == null) {
+                attempt.markError(safeCode, "Order creation requires review");
+            }
+        }
+        paymentAttemptRepository.save(attempt);
+    }
+
+    private PaymentAttempt lockOrderAttempt(UUID paymentId, UUID attemptId) {
+        // Lock Payment before loading the attempt, avoiding a stale JPA entity while waiting.
+        paymentRepository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado"));
+        PaymentAttempt attempt = paymentAttemptRepository.findByIdForUpdate(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
+        if (!paymentId.equals(attempt.getPaymentId())) {
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "El intento no pertenece al pago.");
+        }
+        return attempt;
     }
 
     @Transactional

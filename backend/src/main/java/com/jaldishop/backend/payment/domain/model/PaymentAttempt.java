@@ -1,6 +1,7 @@
 package com.jaldishop.backend.payment.domain.model;
 
 import com.jaldishop.backend.payment.domain.enums.PaymentAttemptStatus;
+import com.jaldishop.backend.payment.domain.enums.RemoteOrderCreationState;
 import com.jaldishop.backend.payment.domain.enums.PaymentMethod;
 import com.jaldishop.backend.payment.domain.enums.PaymentProvider;
 
@@ -22,6 +23,7 @@ public class PaymentAttempt {
     private PaymentMethod paymentMethod;
     private final String idempotencyKey;
     private String checkoutMode;
+    private RemoteOrderCreationState remoteOrderCreationState;
     private String preferenceId;
     private String providerOrderId;
     private String initPoint;
@@ -54,7 +56,7 @@ public class PaymentAttempt {
         }
 
         Instant now = Instant.now();
-        return new PaymentAttempt(
+        PaymentAttempt attempt = new PaymentAttempt(
                 UUID.randomUUID(),
                 paymentId,
                 attemptNumber,
@@ -77,6 +79,10 @@ public class PaymentAttempt {
                 null,
                 now
         );
+        if ("ORDERS".equals(attempt.checkoutMode)) {
+            attempt.remoteOrderCreationState = RemoteOrderCreationState.PREPARED;
+        }
+        return attempt;
     }
 
     public static PaymentAttempt create(
@@ -234,6 +240,7 @@ public class PaymentAttempt {
         this.paymentMethod = paymentMethod;
         this.idempotencyKey = idempotencyKey;
         this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
+        this.remoteOrderCreationState = "ORDERS".equals(this.checkoutMode) ? RemoteOrderCreationState.UNKNOWN : null;
         this.preferenceId = preferenceId;
         this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
@@ -261,9 +268,42 @@ public class PaymentAttempt {
         if (providerOrderId.isBlank()) {
             throw new IllegalArgumentException("providerOrderId no puede estar en blanco");
         }
+        if (this.providerOrderId != null && !this.providerOrderId.equals(providerOrderId)) {
+            throw new IllegalStateException("Conflicting remote order identity");
+        }
+        if ("ORDERS".equals(checkoutMode)) {
+            if (initPoint == null || initPoint.isBlank()) {
+                throw new IllegalArgumentException("Verified creation requires checkout URL");
+            }
+            if (remoteOrderCreationState == RemoteOrderCreationState.REJECTED_CONFIRMED) {
+                throw new IllegalStateException("Creation already rejected");
+            }
+            remoteOrderCreationState = RemoteOrderCreationState.CREATED;
+        }
         this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.updatedAt = Instant.now();
+    }
+
+    public RemoteOrderCreationState getRemoteOrderCreationState() { return remoteOrderCreationState; }
+
+    /** Persistence reconstruction only: null from an older writer means uncertain. */
+    public void restoreRemoteOrderCreationState(RemoteOrderCreationState state) {
+        remoteOrderCreationState = "ORDERS".equals(checkoutMode)
+                ? (state != null ? state : RemoteOrderCreationState.UNKNOWN) : null;
+    }
+
+    public void recordOrderCreationFailure(boolean confirmedValidationRejection) {
+        if (!"ORDERS".equals(checkoutMode)) {
+            throw new IllegalStateException("Orders creation evidence only");
+        }
+        if (remoteOrderCreationState == RemoteOrderCreationState.CREATED
+                || remoteOrderCreationState == RemoteOrderCreationState.REJECTED_CONFIRMED) {
+            return; // Late errors cannot erase confirmed evidence.
+        }
+        remoteOrderCreationState = confirmedValidationRejection
+                ? RemoteOrderCreationState.REJECTED_CONFIRMED : RemoteOrderCreationState.UNKNOWN;
+        updatedAt = Instant.now();
     }
 
     public void markProcessing() {
