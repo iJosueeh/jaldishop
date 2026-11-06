@@ -198,7 +198,7 @@ public class CreatePaymentPreferenceService {
         String expirationTime = calculateOrderExpirationTime(prep);
 
         return new CreateOrderCommand(
-                prep.payment().getId().toString(),
+                "pa1_" + prep.attempt().getId(),
                 prep.payment().getAmount(),
                 items,
                 payer,

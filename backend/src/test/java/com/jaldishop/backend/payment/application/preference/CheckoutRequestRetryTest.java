@@ -91,6 +91,29 @@ class CheckoutRequestRetryTest {
     }
 
     @Test
+    void ordersUseEachPreparedAttemptIdForTheSamePayment() {
+        prepare("ORDERS");
+        when(payment.getAmount()).thenReturn(BigDecimal.TEN);
+        when(gateway.createOrder(any(), any(UUID.class)))
+                .thenReturn(new OrderResult("order", "https://example.test", "opened", BigDecimal.TEN));
+        UUID firstId = attempt.getId();
+        serviceAt(NOW).execute(command());
+        UUID secondId = UUID.randomUUID();
+        when(attempt.getId()).thenReturn(secondId);
+        when(attempt.getIdempotencyKey()).thenReturn("second-key");
+        serviceAt(NOW).execute(command());
+
+        var captured = ArgumentCaptor.forClass(CreateOrderCommand.class);
+        var ids = ArgumentCaptor.forClass(UUID.class);
+        verify(gateway, times(2)).createOrder(captured.capture(), ids.capture());
+        assertThat(ids.getAllValues()).containsExactly(firstId, secondId);
+        assertThat(captured.getAllValues()).extracting(CreateOrderCommand::externalReference)
+                .containsExactly("pa1_" + firstId, "pa1_" + secondId);
+        assertThat(captured.getAllValues()).extracting(CreateOrderCommand::idempotencyKey)
+                .containsExactly("same-key", "second-key");
+    }
+
+    @Test
     void ordersRetryChangesExpirationWhileKeepingReferenceAndKey() {
         prepare("ORDERS");
         when(payment.getAmount()).thenReturn(new BigDecimal("10.00"));
@@ -104,7 +127,7 @@ class CheckoutRequestRetryTest {
         verify(gateway, times(2)).createOrder(captured.capture(), any(UUID.class));
         var first = captured.getAllValues().get(0);
         var retry = captured.getAllValues().get(1);
-        assertThat(first.externalReference()).isEqualTo(paymentId.toString()).isEqualTo(retry.externalReference());
+        assertThat(first.externalReference()).isEqualTo("pa1_" + attempt.getId()).isEqualTo(retry.externalReference());
         assertThat(first.idempotencyKey()).isEqualTo("same-key").isEqualTo(retry.idempotencyKey());
         assertThat(first.expirationTime()).isEqualTo("PT9M30S");
         assertThat(retry.expirationTime()).isEqualTo("PT9M");

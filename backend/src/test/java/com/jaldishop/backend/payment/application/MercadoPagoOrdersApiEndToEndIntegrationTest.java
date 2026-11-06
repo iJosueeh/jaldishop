@@ -340,6 +340,73 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     }
 
     @Test
+    void twoAttemptsOfSamePaymentEmitDistinctDurableReferences() throws Exception {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        var command = newCheckoutCommand(reservationId);
+
+        AtomicReference<Throwable> observationFailure = new AtomicReference<>();
+        postObserver.set(body -> {
+            try {
+                String reference = new ObjectMapper().readTree(body).path("external_reference").asText();
+                UUID attemptId = UUID.fromString(reference.substring("pa1_".length()));
+                String stored = jdbcTemplate.queryForObject(
+                        "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                        String.class, attemptId);
+                assertThat(stored).isEqualTo(body);
+            } catch (Throwable failure) {
+                observationFailure.set(failure);
+            }
+        });
+        ordersMockResponse.set(new MockResponse(201,
+                "{\"id\":\"ORD-FIRST\",\"checkout_url\":\"https://example.test/first\"}"));
+        createPaymentPreferenceService.execute(command);
+        Payment payment = paymentRepository.findByCapacityReservationId(reservationId).orElseThrow();
+        var first = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId()).get(0);
+        assertThat(first.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.CREATED);
+        assertThat(first.getProviderOrderId()).isEqualTo("ORD-FIRST");
+        // A financial rejection of a created order permits another attempt; a POST validation error does not.
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            var rejected = paymentAttemptRepository.findByIdForUpdate(first.getId()).orElseThrow();
+            rejected.markRejected("PAY-FIRST", "rejected", "cc_rejected_other_reason",
+                    null, null, Instant.now());
+            paymentAttemptRepository.save(rejected);
+        });
+        assertThat(paymentAttemptRepository.findById(first.getId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentAttemptStatus.REJECTED);
+        String originalSnapshot = jdbcTemplate.queryForObject(
+                "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                String.class, first.getId());
+
+        ordersMockResponse.set(new MockResponse(201,
+                "{\"id\":\"ORD-SECOND\",\"checkout_url\":\"https://example.test/second\"}"));
+        var result = createPaymentPreferenceService.execute(command);
+        assertThat(result.paymentId()).isEqualTo(payment.getId());
+        var attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
+        assertThat(attempts).hasSize(2);
+        assertThat(attempts.get(1).getId()).isNotEqualTo(first.getId());
+        assertThat(attempts.get(1).getIdempotencyKey()).isNotEqualTo(first.getIdempotencyKey());
+        assertThat(receivedRequestBodyList).hasSize(2);
+        assertThat(observationFailure.get()).isNull();
+        for (int i = 0; i < attempts.size(); i++) {
+            var attempt = attempts.get(i);
+            String stored = jdbcTemplate.queryForObject(
+                    "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                    String.class, attempt.getId());
+            assertThat(stored).isEqualTo(receivedRequestBodyList.get(i));
+            assertThat(new ObjectMapper().readTree(stored).path("external_reference").asText())
+                    .isEqualTo("pa1_" + attempt.getId()).hasSize(40);
+        }
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                String.class, first.getId())).isEqualTo(originalSnapshot);
+        createPaymentPreferenceService.execute(command);
+        assertThat(receivedRequestBodyList).hasSize(2);
+        assertThat(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId())).hasSize(2);
+    }
+
+    @Test
     void concurrentDifferentBodiesForSameAttemptHaveOnlyOneWinner() throws Exception {
         UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
