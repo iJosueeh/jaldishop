@@ -90,3 +90,24 @@ No hubo llamadas reales a Mercado Pago, migraciones nuevas, cambios financieros,
 recuperación sin providerOrderId, push ni despliegue. Cierre autorizado con commit
 feat(payment): emit attempt-scoped orders references.
 La reversión del emisor para futuros intentos debe mantener lectura dual de los ya creados.
+
+## Evidencia de validación externa posterior al cierre
+
+Resultados confirmados por el usuario para la aplicación jaldishop-saas, entorno
+Prueba, país Perú:
+
+- POST /v1/orders: HTTP 201.
+- GET /v1/orders/{id}: HTTP 200.
+- Orden: `ORDTST01M6SHXXKBCNRRM51PXYM3H1R2`.
+- Referencia: `pa1_a5163b3b-0ccc-4aff-ade3-5b56541ffc0d`.
+- external_reference coincidió literalmente con la referencia enviada tanto en la
+  respuesta del POST como en la del GET.
+
+La prueba se realizó sin abrir el checkout ni completar pagos, sin utilizar
+JaldiShop, Neon ni Render y sin reintentos. No valida webhooks, persistencia de
+JaldiShop ni procesamiento completo de pagos.
+
+Esta evidencia resuelve la validación externa de aceptación y devolución exacta
+indicada como pendiente al cierre; las menciones anteriores a ausencia de llamadas
+reales corresponden a ese cierre. Se conservan las decisiones previas y los demás
+bloqueos para despliegue, incluidos los consumidores externos no verificados.
