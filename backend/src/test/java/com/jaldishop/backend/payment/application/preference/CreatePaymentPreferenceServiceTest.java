@@ -211,7 +211,7 @@ class CreatePaymentPreferenceServiceTest {
         });
         when(paymentAttemptRepository.findById(any())).thenAnswer(inv -> Optional.ofNullable(savedAttemptRef.get()));
 
-        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class), any(UUID.class))).thenReturn(
                 new PreferenceResult("pref-abc-123", "https://mercadopago.com/checkout/abc", "https://sandbox.mercadopago.com/checkout/abc")
         );
 
@@ -239,7 +239,7 @@ class CreatePaymentPreferenceServiceTest {
 
         // Se verifica llamada al gateway fuera de transacción pasando idempotencyKey
         ArgumentCaptor<CreatePreferenceCommand> mpCommandCaptor = ArgumentCaptor.forClass(CreatePreferenceCommand.class);
-        verify(mercadoPagoGateway, times(1)).createPreference(mpCommandCaptor.capture());
+        verify(mercadoPagoGateway, times(1)).createPreference(mpCommandCaptor.capture(), any(UUID.class));
         assertThat(mpCommandCaptor.getValue().idempotencyKey()).isEqualTo(savedAttemptRef.get().getIdempotencyKey());
     }
 
@@ -404,7 +404,7 @@ class CreatePaymentPreferenceServiceTest {
     }
 
     @Test
-    @DisplayName("Timeout ambiguo: no crear nuevo intento ciego, registrar error y reutilizar el mismo intento e idempotencyKey en reintento")
+    @DisplayName("Timeout ambiguo: no reenviar ni crear otro intento")
     void shouldRecordTimeoutAndRecoverSameAttemptOnRetryWithoutDuplicateKey() {
         CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
                 userId, reservationId, CheckoutFulfillmentType.PICKUP,
@@ -433,7 +433,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
         // 1. Primer intento falla por timeout de lectura
-        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class)))
+        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class), any(UUID.class)))
                 .thenThrow(new MercadoPagoException(0, "MP_TIMEOUT", "Timeout al invocar Mercado Pago"));
 
         assertThatThrownBy(() -> service.execute(command))
@@ -445,7 +445,7 @@ class CreatePaymentPreferenceServiceTest {
         assertThat(attempt.getErrorCode()).isEqualTo("MP_TIMEOUT");
         assertThat(attempt.getIdempotencyKey()).isEqualTo("idempotency-key-timeout-001");
 
-        // 2. Reintento tras timeout: debe reutilizar el mismo intento 1 y la MISMA clave de idempotencia
+        // 2. Resultado incierto: bloquear el reenvío
         String validSnapshot = """
                 [{"variantId":"%s","productId":"%s","productName":"Pan","presentationName":"Bolsa","sku":"SKU","imageUrl":null,"quantity":1,"unitPriceAmount":5.00,"currency":"PEN","totalAmount":5.00,"available":false}]
                 """.formatted(UUID.randomUUID(), UUID.randomUUID());
@@ -457,24 +457,15 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.of(pendingPayment));
         when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(pendingPayment.getId())).thenReturn(List.of(attempt));
 
-        // En el reintento Mercado Pago responde exitosamente (idempotente)
-        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class))).thenReturn(
-                new PreferenceResult("pref-recovered-777", "https://mercadopago.com/checkout/777", null)
-        );
-
-        CreatePaymentPreferenceResult retryResult = service.execute(command);
-
-        assertThat(retryResult.preferenceId()).isEqualTo("pref-recovered-777");
-        assertThat(retryResult.initPoint()).isEqualTo("https://mercadopago.com/checkout/777");
-
-        // Verificamos que se envió la MISMA idempotency-key a Mercado Pago
-        ArgumentCaptor<CreatePreferenceCommand> cmdCaptor = ArgumentCaptor.forClass(CreatePreferenceCommand.class);
-        verify(mercadoPagoGateway, times(2)).createPreference(cmdCaptor.capture());
-        assertThat(cmdCaptor.getAllValues().get(1).idempotencyKey()).isEqualTo("idempotency-key-timeout-001");
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ConflictException.class)
+                .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("PAYMENT_IN_PROGRESS"));
+        verify(mercadoPagoGateway, times(1)).createPreference(any(CreatePreferenceCommand.class), any(UUID.class));
+        assertThat(attempt.getIdempotencyKey()).isEqualTo("idempotency-key-timeout-001");
     }
 
     @Test
-    @DisplayName("Fallo de persistencia posterior a respuesta exitosa de Mercado Pago propaga excepción y permite reintento idempotente")
+    @DisplayName("Fallo de persistencia posterior a respuesta exitosa de Mercado Pago propaga excepción")
     void shouldHandleDatabaseFailureAfterGatewaySuccessAndAllowIdempotentRecovery() {
         CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
                 userId, reservationId, CheckoutFulfillmentType.PICKUP,
@@ -502,7 +493,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
 
         // Mercado Pago responde 200 OK con la preferencia
-        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class), any(UUID.class))).thenReturn(
                 new PreferenceResult("pref-gateway-ok", "https://mercadopago.com/init/ok", null)
         );
 
@@ -514,7 +505,7 @@ class CreatePaymentPreferenceServiceTest {
                 .hasMessageContaining("Simulated DB Connection Failure");
 
         // Se llamó al gateway
-        verify(mercadoPagoGateway, times(1)).createPreference(any());
+        verify(mercadoPagoGateway, times(1)).createPreference(any(), any(UUID.class));
     }
 
     @Test
@@ -548,7 +539,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
-        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class), any(UUID.class))).thenReturn(
                 new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
                         "ORD-MP-998877",
                         "https://mercadopago.com.pe/checkout/orders/ORD-MP-998877",
@@ -564,8 +555,8 @@ class CreatePaymentPreferenceServiceTest {
         assertThat(result.status()).isEqualTo("PENDING");
 
         // Verificamos que se llamó al gateway de Orders y NO al de Preferences
-        verify(mercadoPagoGateway, times(1)).createOrder(any(CreateOrderCommand.class));
-        verify(mercadoPagoGateway, never()).createPreference(any(CreatePreferenceCommand.class));
+        verify(mercadoPagoGateway, times(1)).createOrder(any(CreateOrderCommand.class), any(UUID.class));
+        verify(mercadoPagoGateway, never()).createPreference(any(CreatePreferenceCommand.class), any(UUID.class));
 
         // Verificamos que se persistió providerOrderId en el intento
         assertThat(attempt.getProviderOrderId()).isEqualTo("ORD-MP-998877");
@@ -642,7 +633,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
         // 1. Primer intento falla por timeout
-        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class)))
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class), any(UUID.class)))
                 .thenThrow(new MercadoPagoException(504, "MP_TIMEOUT", "Timeout al invocar Mercado Pago Orders"));
 
         assertThatThrownBy(() -> service.execute(command))
@@ -653,7 +644,7 @@ class CreatePaymentPreferenceServiceTest {
         assertThat(attempt.getErrorCode()).isEqualTo("MP_TIMEOUT");
         assertThat(attempt.getIdempotencyKey()).isEqualTo("idemp-key-order-timeout");
 
-        // 2. Reintento: debe reutilizar el mismo intento y la MISMA clave de idempotencia
+        // 2. Resultado incierto: bloquear el reenvío
         String validSnapshot = """
                 [{"variantId":"%s","productId":"%s","productName":"Jugo","presentationName":"Botella","sku":"SKU","imageUrl":null,"quantity":1,"unitPriceAmount":8.00,"currency":"PEN","totalAmount":8.00,"available":false}]
                 """.formatted(UUID.randomUUID(), UUID.randomUUID());
@@ -665,23 +656,11 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.of(pendingPayment));
         when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(pendingPayment.getId())).thenReturn(List.of(attempt));
 
-        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
-                new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
-                        "ORD-RECOVERED-001",
-                        "https://mercadopago.com.pe/checkout/recovered",
-                        "opened",
-                        new BigDecimal("8.00")
-                )
-        );
-
-        CreatePaymentPreferenceResult retryResult = service.execute(command);
-
-        assertThat(retryResult.preferenceId()).isEqualTo("ORD-RECOVERED-001");
-        assertThat(retryResult.initPoint()).isEqualTo("https://mercadopago.com.pe/checkout/recovered");
-
-        ArgumentCaptor<CreateOrderCommand> orderCaptor = ArgumentCaptor.forClass(CreateOrderCommand.class);
-        verify(mercadoPagoGateway, times(2)).createOrder(orderCaptor.capture());
-        assertThat(orderCaptor.getAllValues().get(1).idempotencyKey()).isEqualTo("idemp-key-order-timeout");
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ConflictException.class)
+                .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("PAYMENT_IN_PROGRESS"));
+        verify(mercadoPagoGateway, times(1)).createOrder(any(CreateOrderCommand.class), any(UUID.class));
+        assertThat(attempt.getIdempotencyKey()).isEqualTo("idemp-key-order-timeout");
     }
 
     @Test
@@ -714,7 +693,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
-        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class), any(UUID.class))).thenReturn(
                 new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
                         "ORD-EXP-OK-01",
                         "https://mercadopago.com.pe/checkout/orders/ORD-EXP-OK-01",
@@ -726,7 +705,7 @@ class CreatePaymentPreferenceServiceTest {
         service.execute(command);
 
         ArgumentCaptor<CreateOrderCommand> orderCaptor = ArgumentCaptor.forClass(CreateOrderCommand.class);
-        verify(mercadoPagoGateway).createOrder(orderCaptor.capture());
+        verify(mercadoPagoGateway).createOrder(orderCaptor.capture(), any(UUID.class));
         assertThat(orderCaptor.getValue().expirationTime()).isEqualTo("PT9M30S");
     }
 
@@ -769,7 +748,7 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
-        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class), any(UUID.class))).thenReturn(
                 new com.jaldishop.backend.payment.application.gateway.dto.OrderResult(
                         "ORD-EXP-OK-02",
                         "https://mercadopago.com.pe/checkout/orders/ORD-EXP-OK-02",
@@ -781,7 +760,7 @@ class CreatePaymentPreferenceServiceTest {
         service.execute(command);
 
         ArgumentCaptor<CreateOrderCommand> orderCaptor = ArgumentCaptor.forClass(CreateOrderCommand.class);
-        verify(mercadoPagoGateway).createOrder(orderCaptor.capture());
+        verify(mercadoPagoGateway).createOrder(orderCaptor.capture(), any(UUID.class));
         assertThat(orderCaptor.getValue().expirationTime()).isEqualTo("PT5M30S");
     }
 
@@ -829,7 +808,7 @@ class CreatePaymentPreferenceServiceTest {
                 .hasMessageContaining("insuficiente")
                 .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("PAYMENT_PROTECTION_EXPIRING"));
 
-        verify(mercadoPagoGateway, never()).createOrder(any());
+        verify(mercadoPagoGateway, never()).createOrder(any(), any(UUID.class));
     }
 
     @Test
@@ -857,7 +836,7 @@ class CreatePaymentPreferenceServiceTest {
                 .isInstanceOf(ConflictException.class)
                 .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("RESERVATION_EXPIRED"));
 
-        verify(mercadoPagoGateway, never()).createOrder(any());
+        verify(mercadoPagoGateway, never()).createOrder(any(), any(UUID.class));
     }
 
     @Test
@@ -907,7 +886,7 @@ class CreatePaymentPreferenceServiceTest {
                 .isInstanceOf(ConflictException.class)
                 .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("PAYMENT_PROTECTION_EXPIRING"));
 
-        verify(mercadoPagoGateway, never()).createOrder(any());
+        verify(mercadoPagoGateway, never()).createOrder(any(), any(UUID.class));
     }
 
     @Test
@@ -940,15 +919,15 @@ class CreatePaymentPreferenceServiceTest {
         when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
         when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
 
-        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class))).thenReturn(
+        when(mercadoPagoGateway.createPreference(any(CreatePreferenceCommand.class), any(UUID.class))).thenReturn(
                 new PreferenceResult("pref-exp-compat", "https://mercadopago.com/init/compat", null)
         );
 
         CreatePaymentPreferenceResult result = service.execute(command);
 
         assertThat(result.preferenceId()).isEqualTo("pref-exp-compat");
-        verify(mercadoPagoGateway, times(1)).createPreference(any(CreatePreferenceCommand.class));
-        verify(mercadoPagoGateway, never()).createOrder(any());
+        verify(mercadoPagoGateway, times(1)).createPreference(any(CreatePreferenceCommand.class), any(UUID.class));
+        verify(mercadoPagoGateway, never()).createOrder(any(), any(UUID.class));
     }
 
 }

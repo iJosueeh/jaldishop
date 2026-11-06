@@ -1,5 +1,7 @@
 package com.jaldishop.backend.payment.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -170,6 +172,7 @@ class PaymentFlowEndToEndIntegrationTest {
     @Autowired private PaymentIncidenceRepository incidenceRepository;
     @Autowired private OrderRepository orderRepository;
     @Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired private org.flywaydb.core.Flyway flyway;
 
     private static final UUID STORE_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e5");
     private static final UUID USER_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e3");
@@ -178,6 +181,9 @@ class PaymentFlowEndToEndIntegrationTest {
 
     @BeforeEach
     void cleanData() {
+        assertThat(jdbcTemplate.queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_integration_test");
+        assertThat(new JdbcTemplate(flyway.getConfiguration().getDataSource())
+                .queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_integration_test");
         simulateTimeout.set(false);
         receivedIdempotencyKeys.clear();
         paymentMockResponse.set(new MockResponse(200, "{}"));

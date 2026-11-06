@@ -4,12 +4,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
 
 /** Connection settings for the dedicated local PostgreSQL test database. */
 public final class TestPostgresConfig {
 
     private static final Pattern TEST_URL = Pattern.compile(
-            "^jdbc:postgresql://(localhost|127\\.0\\.0\\.1|\\[::1\\]):([1-9][0-9]{0,4})/jaldishop_integration_test$");
+            "^jdbc:postgresql://(localhost|127\\.0\\.0\\.1|\\[::1\\]):([1-9][0-9]{0,4})/(jaldishop_integration_test|jaldishop_fase2a_test)$");
 
     private final String url;
     private final String username;
@@ -24,11 +25,21 @@ public final class TestPostgresConfig {
     }
 
     public static TestPostgresConfig fromEnvironment() {
-        return fromValues(
-                System.getenv("DB_URL"),
-                System.getenv("DB_USERNAME"),
-                System.getenv("DB_PASSWORD"),
-                System.getenv("FLYWAY_VALIDATE_ON_MIGRATE"));
+        return fromEnvironment(System.getenv(), false);
+    }
+
+    public static TestPostgresConfig fromEnvironmentForPhase2a() {
+        return fromEnvironment(System.getenv(), true);
+    }
+
+    static TestPostgresConfig fromEnvironment(Map<String, String> environment, boolean phase2a) {
+        String urlVariable = phase2a ? "PHASE2A_DB_URL" : "DB_URL";
+        return fromValuesFor(
+                environment.get(urlVariable),
+                environment.get("DB_USERNAME"),
+                environment.get("DB_PASSWORD"),
+                environment.get("FLYWAY_VALIDATE_ON_MIGRATE"),
+                phase2a ? "jaldishop_fase2a_test" : "jaldishop_integration_test", urlVariable);
     }
 
     static TestPostgresConfig fromValues(String url, String username, String password) {
@@ -36,13 +47,22 @@ public final class TestPostgresConfig {
     }
 
     static TestPostgresConfig fromValues(String url, String username, String password, String flywayValidateOnMigrate) {
+        return fromValuesFor(url, username, password, flywayValidateOnMigrate, "jaldishop_integration_test", "DB_URL");
+    }
+
+    static TestPostgresConfig fromValuesForPhase2a(String url, String username, String password) {
+        return fromValuesFor(url, username, password, null, "jaldishop_fase2a_test", "PHASE2A_DB_URL");
+    }
+
+    private static TestPostgresConfig fromValuesFor(String url, String username, String password,
+                                                    String flywayValidateOnMigrate, String expectedDatabase, String urlVariable) {
         if (url == null || username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new IllegalStateException("DB_URL, DB_USERNAME and DB_PASSWORD must be set in the process environment for integration tests.");
+            throw new IllegalStateException(urlVariable + ", DB_USERNAME and DB_PASSWORD must be set in the process environment for integration tests.");
         }
 
         Matcher match = TEST_URL.matcher(url);
-        if (!match.matches() || Integer.parseInt(match.group(2)) > 65535) {
-            throw new IllegalStateException("Integration tests require a loopback PostgreSQL URL with an explicit port and database jaldishop_integration_test, without parameters.");
+        if (!match.matches() || Integer.parseInt(match.group(2)) > 65535 || !expectedDatabase.equals(match.group(3))) {
+            throw new IllegalStateException("Integration tests require a loopback PostgreSQL URL with an explicit port and database " + expectedDatabase + ", without parameters.");
         }
 
         if (match.group(1).equals("localhost")) {

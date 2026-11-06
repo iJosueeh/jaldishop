@@ -206,9 +206,7 @@ public class PaymentPreferencePreparationService {
                             "Ya existe una solicitud de pago o creación de preferencia en curso para esta reserva.");
                 }
 
-                // 3. Timeout ambiguo / Resultado desconocido:
-                // No asumir rechazo ni crear un intento con nueva clave. Reutilizar el intento
-                // existente con su misma idempotencyKey para permitir que Mercado Pago reconozca la operación.
+                // 3. Un resultado desconocido requiere revisión; no reenviar ni crear otro intento.
                 boolean isRecoverable = (latestAttempt.getStatus() == PaymentAttemptStatus.ERROR
                         && "MP_TIMEOUT".equals(latestAttempt.getErrorCode()))
                         || (latestAttempt.getPreferenceId() == null
@@ -216,9 +214,8 @@ public class PaymentPreferencePreparationService {
                         && latestAttempt.getStatus() != PaymentAttemptStatus.REJECTED);
 
                 if (isRecoverable) {
-                    latestAttempt.markProcessing();
-                    PaymentAttempt savedAttempt = paymentAttemptRepository.save(latestAttempt);
-                    return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
+                    throw new ConflictException("PAYMENT_IN_PROGRESS",
+                            "El resultado de la solicitud de pago es incierto y requiere revisión.");
                 }
             }
 

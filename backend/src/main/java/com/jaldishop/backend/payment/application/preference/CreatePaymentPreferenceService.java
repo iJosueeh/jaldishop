@@ -108,7 +108,9 @@ public class CreatePaymentPreferenceService {
         PreferenceResult preferenceResult;
         try {
             CreatePreferenceCommand mpCommand = buildGatewayPreferenceCommand(prep);
-            preferenceResult = mercadoPagoGateway.createPreference(mpCommand);
+            preferenceResult = mercadoPagoGateway.createPreference(mpCommand, prep.attempt().getId());
+        } catch (ConflictException ex) {
+            throw ex;
         } catch (MercadoPagoException ex) {
             log.warn("Mercado Pago falló al crear preferencia para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
             // Registrar error de intento en DB sin reintentar automáticamente
@@ -146,7 +148,9 @@ public class CreatePaymentPreferenceService {
         OrderResult orderResult;
         try {
             CreateOrderCommand orderCommand = buildGatewayOrderCommand(prep);
-            orderResult = mercadoPagoGateway.createOrder(orderCommand);
+            orderResult = mercadoPagoGateway.createOrder(orderCommand, prep.attempt().getId());
+        } catch (ConflictException ex) {
+            throw ex;
         } catch (MercadoPagoException ex) {
             log.warn("Mercado Pago falló al crear orden para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
             preparationService.recordAttemptError(prep.attempt().getId(), ex.getErrorCode(), ex.getMessage());

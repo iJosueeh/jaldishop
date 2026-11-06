@@ -37,6 +37,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.UUID;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
@@ -52,8 +54,15 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
 
     private final RestClient restClient;
     private final MercadoPagoProperties properties;
+    private final CheckoutCreationRequestStore creationRequestStore;
+    private final ObjectMapper objectMapper;
 
     @org.springframework.beans.factory.annotation.Autowired
+    public MercadoPagoRestClientAdapter(MercadoPagoProperties properties, CheckoutCreationRequestStore creationRequestStore,
+                                        ObjectMapper objectMapper) {
+        this(buildDefaultRestClient(RestClient.builder(), properties), properties, creationRequestStore, objectMapper);
+    }
+
     public MercadoPagoRestClientAdapter(MercadoPagoProperties properties) {
         this(RestClient.builder(), properties);
     }
@@ -63,8 +72,15 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     }
 
     public MercadoPagoRestClientAdapter(RestClient restClient, MercadoPagoProperties properties) {
+        this(restClient, properties, null, new ObjectMapper());
+    }
+
+    public MercadoPagoRestClientAdapter(RestClient restClient, MercadoPagoProperties properties,
+                                       CheckoutCreationRequestStore creationRequestStore, ObjectMapper objectMapper) {
         this.restClient = restClient;
         this.properties = properties;
+        this.creationRequestStore = creationRequestStore;
+        this.objectMapper = objectMapper;
     }
 
     private static RestClient buildDefaultRestClient(RestClient.Builder builder, MercadoPagoProperties properties) {
@@ -79,10 +95,12 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     }
 
     @Override
-    public PreferenceResult createPreference(CreatePreferenceCommand command) {
+    public PreferenceResult createPreference(CreatePreferenceCommand command, UUID attemptId) {
         validateAccessToken();
 
-        MpPreferenceRequest requestBody = toPreferenceRequest(command);
+        Object requestBody = toPreferenceRequest(command);
+        requestBody = creationRequestStore.saveBeforeSend(attemptId, "PREFERENCES", command.idempotencyKey(),
+                objectMapper.writeValueAsBytes(requestBody));
         log.info("Creando preferencia de Checkout Pro para externalReference: {}", command.externalReference());
 
         try {
@@ -408,10 +426,12 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     }
 
     @Override
-    public OrderResult createOrder(CreateOrderCommand command) {
+    public OrderResult createOrder(CreateOrderCommand command, UUID attemptId) {
         validateAccessToken();
 
-        MpOrderRequest requestBody = toOrderRequest(command);
+        Object requestBody = toOrderRequest(command);
+        requestBody = creationRequestStore.saveBeforeSend(attemptId, "ORDERS", command.idempotencyKey(),
+                objectMapper.writeValueAsBytes(requestBody));
         log.info("Creando orden de Checkout Pro mediante Orders API para externalReference: {}", command.externalReference());
 
         try {

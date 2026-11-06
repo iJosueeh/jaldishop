@@ -23,6 +23,12 @@ import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import tools.jackson.databind.ObjectMapper;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,6 +44,68 @@ class MercadoPagoRestClientAdapterTest {
     private MercadoPagoRestClientAdapter adapter;
     private MercadoPagoProperties properties;
 
+    @Test
+    void persistsExactPreferenceBodyBeforeSending() {
+        var store = mock(CheckoutCreationRequestStore.class);
+        var saved = new AtomicReference<byte[]>();
+        var attemptId = UUID.randomUUID();
+        when(store.saveBeforeSend(eq(attemptId), eq("PREFERENCES"), eq("key"), any(byte[].class)))
+                .thenAnswer(inv -> { byte[] bytes = inv.getArgument(3); saved.set(bytes); return bytes; });
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var tested = new MercadoPagoRestClientAdapter(builder.build(), properties, store, new ObjectMapper());
+        server.expect(requestTo(BASE_URL + "/checkout/preferences"))
+                .andExpect(request -> assertThat(((org.springframework.mock.http.client.MockClientHttpRequest) request).getBodyAsBytes())
+                        .isEqualTo(saved.get()))
+                .andExpect(jsonPath("$.external_reference").value("payment-id"))
+                .andRespond(withSuccess("{\"id\":\"pref\",\"init_point\":\"https://example.test\"}", MediaType.APPLICATION_JSON));
+        var cmd = new CreatePreferenceCommand("payment-id", "title", List.of(
+                new CreatePreferenceCommand.PreferenceItem("id", "item", null, 1, BigDecimal.TEN, "PEN")),
+                null, null, null, null, null, null, "key");
+        tested.createPreference(cmd, attemptId);
+        server.verify();
+        verify(store).saveBeforeSend(eq(attemptId), eq("PREFERENCES"), eq("key"), any(byte[].class));
+    }
+
+    @Test
+    void persistsExactOrderBodyBeforeSending() {
+        var store = mock(CheckoutCreationRequestStore.class);
+        var saved = new AtomicReference<byte[]>();
+        var attemptId = UUID.randomUUID();
+        when(store.saveBeforeSend(eq(attemptId), eq("ORDERS"), eq("key"), any(byte[].class)))
+                .thenAnswer(inv -> { byte[] bytes = inv.getArgument(3); saved.set(bytes); return bytes; });
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var tested = new MercadoPagoRestClientAdapter(builder.build(), properties, store, new ObjectMapper());
+        server.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(request -> assertThat(((org.springframework.mock.http.client.MockClientHttpRequest) request).getBodyAsBytes())
+                        .isEqualTo(saved.get()))
+                .andExpect(jsonPath("$.expiration_time").value("PT9M30S"))
+                .andRespond(withSuccess("{\"id\":\"order\",\"checkout_url\":\"https://example.test\"}", MediaType.APPLICATION_JSON));
+        var cmd = new CreateOrderCommand("payment-id", BigDecimal.TEN, List.of(
+                new CreateOrderCommand.OrderItem("id", "item", null, 1, BigDecimal.TEN, "PEN")),
+                null, null, null, null, null, null, "key", "PT9M30S");
+        tested.createOrder(cmd, attemptId);
+        server.verify();
+        verify(store).saveBeforeSend(eq(attemptId), eq("ORDERS"), eq("key"), any(byte[].class));
+    }
+
+    @Test
+    void doesNotSendWhenPersistenceRejectsDuplicate() {
+        var store = mock(CheckoutCreationRequestStore.class);
+        when(store.saveBeforeSend(any(), any(), any(), any())).thenThrow(
+                new com.jaldishop.backend.shared.exception.ConflictException("PAYMENT_IN_PROGRESS", "Revisión"));
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var tested = new MercadoPagoRestClientAdapter(builder.build(), properties, store, new ObjectMapper());
+        var cmd = new CreatePreferenceCommand("payment-id", "title", List.of(
+                new CreatePreferenceCommand.PreferenceItem("id", "item", null, 1, BigDecimal.TEN, "PEN")),
+                null, null, null, null, null, null, "key");
+        assertThatThrownBy(() -> tested.createPreference(cmd, UUID.randomUUID()))
+                .isInstanceOf(com.jaldishop.backend.shared.exception.ConflictException.class);
+        server.verify();
+    }
+
     @BeforeEach
     void setUp() {
         properties = new MercadoPagoProperties();
@@ -50,7 +118,9 @@ class MercadoPagoRestClientAdapterTest {
         mockServer = MockRestServiceServer.bindTo(builder).build();
         RestClient restClient = builder.build();
 
-        adapter = new MercadoPagoRestClientAdapter(restClient, properties);
+        var store = mock(CheckoutCreationRequestStore.class);
+        lenient().when(store.saveBeforeSend(any(), any(), any(), any())).thenAnswer(inv -> inv.getArgument(3));
+        adapter = new MercadoPagoRestClientAdapter(restClient, properties, store, new ObjectMapper());
     }
 
     @Test
@@ -90,7 +160,7 @@ class MercadoPagoRestClientAdapterTest {
                 "JALDI SHOP"
         );
 
-        PreferenceResult result = adapter.createPreference(command);
+        PreferenceResult result = adapter.createPreference(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.preferenceId()).isEqualTo("pref-123456789");
@@ -133,7 +203,7 @@ class MercadoPagoRestClientAdapterTest {
                 "idemp-key-test-123"
         );
 
-        PreferenceResult result = adapter.createPreference(command);
+        PreferenceResult result = adapter.createPreference(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.preferenceId()).isEqualTo("pref-idemp-001");
@@ -239,7 +309,7 @@ class MercadoPagoRestClientAdapterTest {
                 null, null, null, null, null, null
         );
 
-        assertThatThrownBy(() -> adapter.createPreference(command))
+        assertThatThrownBy(() -> adapter.createPreference(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoException.class)
                 .satisfies(ex -> {
                     MercadoPagoException mpe = (MercadoPagoException) ex;
@@ -315,7 +385,7 @@ class MercadoPagoRestClientAdapterTest {
                 null, null, null, null, null, null
         );
 
-        assertThatThrownBy(() -> adapter.createPreference(command))
+        assertThatThrownBy(() -> adapter.createPreference(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoException.class)
                 .satisfies(ex -> {
                     MercadoPagoException mpe = (MercadoPagoException) ex;
@@ -349,7 +419,7 @@ class MercadoPagoRestClientAdapterTest {
                 null, null, null, null, null, null
         );
 
-        assertThatThrownBy(() -> adapter.createPreference(command))
+        assertThatThrownBy(() -> adapter.createPreference(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoException.class)
                 .satisfies(ex -> {
                     MercadoPagoException mpe = (MercadoPagoException) ex;
@@ -460,7 +530,7 @@ class MercadoPagoRestClientAdapterTest {
                 "idemp-order-999"
         );
 
-        OrderResult result = adapter.createOrder(command);
+        OrderResult result = adapter.createOrder(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.orderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
@@ -492,7 +562,7 @@ class MercadoPagoRestClientAdapterTest {
                 null, null, null, null, null, null, "idemp-002"
         );
 
-        assertThatThrownBy(() -> adapter.createOrder(command))
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoException.class)
                 .satisfies(ex -> {
                     MercadoPagoException mpe = (MercadoPagoException) ex;
@@ -514,7 +584,7 @@ class MercadoPagoRestClientAdapterTest {
                 null, null, null, null, null, null, "idemp-003"
         );
 
-        assertThatThrownBy(() -> adapter.createOrder(command))
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoException.class)
                 .satisfies(ex -> {
                     MercadoPagoException mpe = (MercadoPagoException) ex;
@@ -783,7 +853,7 @@ class MercadoPagoRestClientAdapterTest {
                 "PT9M30S"
         );
 
-        OrderResult result = adapter.createOrder(command);
+        OrderResult result = adapter.createOrder(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.orderId()).isEqualTo("ORD-EXP-001");
@@ -825,7 +895,7 @@ class MercadoPagoRestClientAdapterTest {
                 null
         );
 
-        OrderResult result = adapter.createOrder(command);
+        OrderResult result = adapter.createOrder(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.orderId()).isEqualTo("ORD-EXP-NULL");
@@ -862,7 +932,7 @@ class MercadoPagoRestClientAdapterTest {
                 "JALDI SHOP"
         );
 
-        PreferenceResult result = adapter.createPreference(command);
+        PreferenceResult result = adapter.createPreference(command, UUID.randomUUID());
 
         mockServer.verify();
         assertThat(result.preferenceId()).isEqualTo("pref-no-exp");

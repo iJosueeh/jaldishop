@@ -11,6 +11,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.RefundQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Puerto de integración con la pasarela de Mercado Pago.
@@ -24,7 +25,7 @@ public interface MercadoPagoGateway {
      * @param command datos estructurados de la orden y el comprador
      * @return resultado con preferenceId e initPoint
      */
-    PreferenceResult createPreference(CreatePreferenceCommand command);
+    PreferenceResult createPreference(CreatePreferenceCommand command, UUID attemptId);
 
     /**
      * Consulta el estado financiero de un pago en Mercado Pago a partir de su ID de transacción.
@@ -56,7 +57,7 @@ public interface MercadoPagoGateway {
      * @param command datos estructurados de la orden y el comprador
      * @return resultado con orderId y checkoutUrl
      */
-    OrderResult createOrder(CreateOrderCommand command);
+    OrderResult createOrder(CreateOrderCommand command, UUID attemptId);
 
     /**
      * Consulta el estado financiero de una orden en Orders API (/v1/orders/{orderId}).

@@ -11,6 +11,11 @@ import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.preference.CreatePaymentPreferenceCommand;
 import com.jaldishop.backend.payment.application.preference.CreatePaymentPreferenceResult;
 import com.jaldishop.backend.payment.application.preference.CreatePaymentPreferenceService;
+import com.jaldishop.backend.payment.application.preference.PaymentPreferencePreparationService;
+import com.jaldishop.backend.payment.infrastructure.client.mercadopago.CheckoutCreationRequestStore;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import java.util.function.Consumer;
 import com.jaldishop.backend.payment.application.refund.PaymentRefundService;
 import com.jaldishop.backend.payment.application.webhook.ProcessMercadoPagoWebhookCommand;
 import com.jaldishop.backend.payment.application.webhook.ProcessMercadoPagoWebhookResult;
@@ -26,6 +31,7 @@ import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPa
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.testutil.TestPostgresConfig;
+import com.jaldishop.backend.testutil.PostgresTriggerAssertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,6 +78,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     private static final AtomicBoolean simulateTimeout = new AtomicBoolean(false);
     private static final List<String> receivedRequestBodyList = new CopyOnWriteArrayList<>();
 
+    private static final AtomicReference<Consumer<String>> postObserver = new AtomicReference<>();
     record MockResponse(int statusCode, String body) {}
 
     @BeforeAll
@@ -93,6 +100,8 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
                 String path = exchange.getRequestURI().getPath();
                 String method = exchange.getRequestMethod().toUpperCase(Locale.ROOT);
+                Consumer<String> observer = postObserver.get();
+                if (observer != null && "POST".equals(method)) observer.accept(reqBody);
 
                 if (simulateTimeout.get()) {
                     try {
@@ -149,7 +158,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         }
     }
 
-    private static final TestPostgresConfig database = TestPostgresConfig.fromEnvironment();
+    private static final TestPostgresConfig database = TestPostgresConfig.fromEnvironmentForPhase2a();
 
     @DynamicPropertySource
     static void configureIsolatedProperties(DynamicPropertyRegistry registry) {
@@ -182,6 +191,10 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     @Autowired private OrderRepository orderRepository;
     @Autowired private MercadoPagoProperties properties;
     @Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired private org.flywaydb.core.Flyway flyway;
+    @Autowired private CheckoutCreationRequestStore creationRequestStore;
+    @Autowired private PaymentPreferencePreparationService preparationService;
+    @Autowired private PlatformTransactionManager transactionManager;
 
     private static final UUID STORE_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e5");
     private static final UUID USER_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e3");
@@ -190,9 +203,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
     @BeforeEach
     void setupAndClean() {
+        assertThat(jdbcTemplate.queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_fase2a_test");
+        assertThat(new JdbcTemplate(flyway.getConfiguration().getDataSource())
+                .queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_fase2a_test");
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.PREFERENCES);
         simulateTimeout.set(false);
         receivedRequestBodyList.clear();
+        postObserver.set(null);
         ordersMockResponse.set(null);
         preferencesMockResponse.set(null);
         paymentsMockResponse.set(null);
@@ -281,6 +298,178 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         return String.format(Locale.ROOT, """
                 [{"variantId":"%s","productId":"%s","productName":"Pastel","presentationName":"Familiar","sku":"PASTEL-FAM-01","imageUrl":null,"quantity":1,"unitPriceAmount":%.2f,"currency":"PEN","subtotalAmount":%.2f,"tracksInventory":true}]
                 """, VARIANT_ID, PRODUCT_ID, amount, amount);
+    }
+
+    private CreatePaymentPreferenceCommand newCheckoutCommand(UUID reservationId) {
+        return new CreatePaymentPreferenceCommand(USER_ID, reservationId, CheckoutFulfillmentType.DELIVERY,
+                "Cliente Prueba", "987654321", "test@example.com", "Calle 1", "Ref", null, null);
+    }
+
+    @Test
+    void creationIsCommittedAndRowsAreUnlockedDuringPost() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        AtomicReference<Throwable> observationFailure = new AtomicReference<>();
+        AtomicBoolean observed = new AtomicBoolean();
+        postObserver.set(body -> {
+            try {
+                new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                    jdbcTemplate.execute("SET LOCAL lock_timeout = '300ms'");
+                    UUID attemptId = jdbcTemplate.queryForObject("""
+                            SELECT a.id FROM payment_attempts a JOIN payments p ON p.id = a.payment_id
+                            WHERE p.capacity_reservation_id = ? FOR UPDATE OF a NOWAIT
+                            """, UUID.class, reservationId);
+                    jdbcTemplate.queryForObject("SELECT id FROM capacity_reservations WHERE id = ? FOR UPDATE NOWAIT",
+                            UUID.class, reservationId);
+                    String stored = jdbcTemplate.queryForObject(
+                            "SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                            String.class, attemptId);
+                    assertThat(stored).isEqualTo(body);
+                });
+                observed.set(true);
+            } catch (Throwable t) {
+                observationFailure.set(t);
+            }
+        });
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-COMMIT\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        createPaymentPreferenceService.execute(newCheckoutCommand(reservationId));
+        assertThat(observationFailure.get()).isNull();
+        assertThat(observed.get()).isTrue();
+        assertThat(receivedRequestBodyList).hasSize(1);
+    }
+
+    @Test
+    void concurrentDifferentBodiesForSameAttemptHaveOnlyOneWinner() throws Exception {
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        PaymentAttempt attempt = preparationService.prepareOrGetExistingPayment(newCheckoutCommand(reservationId)).attempt();
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            List<Future<String>> futures = new ArrayList<>();
+            for (String body : List.of("{\"variant\":1}", "{\"variant\":2}")) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    if (!start.await(5, TimeUnit.SECONDS)) throw new AssertionError("start timeout");
+                    try {
+                        return new String(creationRequestStore.saveBeforeSend(attempt.getId(), "PREFERENCES",
+                                attempt.getIdempotencyKey(), body.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+                    } catch (ConflictException ex) {
+                        return "conflict";
+                    }
+                }));
+            }
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+            start.countDown();
+            List<String> outcomes = List.of(futures.get(0).get(10, TimeUnit.SECONDS), futures.get(1).get(10, TimeUnit.SECONDS));
+            assertThat(outcomes.stream().filter("conflict"::equals).count()).isEqualTo(1);
+            String stored = jdbcTemplate.queryForObject("SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                    String.class, attempt.getId());
+            assertThat(outcomes).contains(stored);
+            assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                    Integer.class, attempt.getId())).isEqualTo(1);
+            assertThat(receivedRequestBodyList).isEmpty();
+        } finally {
+            start.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void concurrentCheckoutRequestsSendOnlyOnePost() throws Exception {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        CreatePaymentPreferenceCommand command = newCheckoutCommand(reservationId);
+        CountDownLatch enteredPost = new CountDownLatch(1);
+        CountDownLatch releasePost = new CountDownLatch(1);
+        postObserver.set(body -> {
+            enteredPost.countDown();
+            try { releasePost.await(2, TimeUnit.SECONDS); }
+            catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+        });
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-CONCURRENT\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<CreatePaymentPreferenceResult> first = executor.submit(() -> createPaymentPreferenceService.execute(command));
+            assertThat(enteredPost.await(10, TimeUnit.SECONDS)).isTrue();
+            assertThrows(ConflictException.class, () -> createPaymentPreferenceService.execute(command));
+            releasePost.countDown();
+            assertThat(first.get(10, TimeUnit.SECONDS).preferenceId()).isEqualTo("ORD-CONCURRENT");
+            assertThat(receivedRequestBodyList).hasSize(1);
+        } finally {
+            releasePost.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void failureSavingRemoteSuccessDoesNotAuthorizeAnotherPost() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        CreatePaymentPreferenceCommand command = newCheckoutCommand(reservationId);
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-REMOTE-SUCCESS\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        jdbcTemplate.execute("""
+                CREATE FUNCTION test_fail_order_result() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN IF NEW.provider_order_id IS NOT NULL THEN RAISE EXCEPTION 'simulated result failure' USING ERRCODE = 'P4202'; END IF;
+                RETURN NEW; END $$
+                """);
+        try {
+            jdbcTemplate.execute("""
+                    CREATE TRIGGER test_fail_order_result BEFORE UPDATE ON payment_attempts
+                    FOR EACH ROW EXECUTE FUNCTION test_fail_order_result()
+                    """);
+            Exception failure = assertThrows(Exception.class, () -> createPaymentPreferenceService.execute(command));
+            PostgresTriggerAssertions.assertFailure(failure, "P4202", "simulated result failure");
+        } finally {
+            jdbcTemplate.execute("DROP TRIGGER IF EXISTS test_fail_order_result ON payment_attempts");
+            jdbcTemplate.execute("DROP FUNCTION IF EXISTS test_fail_order_result()");
+        }
+        assertThat(receivedRequestBodyList).hasSize(1);
+        assertThrows(ConflictException.class, () -> createPaymentPreferenceService.execute(command));
+        assertThat(receivedRequestBodyList).hasSize(1);
+        Payment payment = paymentRepository.findByCapacityReservationId(reservationId).orElseThrow();
+        List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
+        assertThat(attempts).hasSize(1);
+        PaymentAttempt attempt = attempts.get(0);
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
+        assertThat(attempt.getProviderOrderId()).isNull();
+        assertThat(attempt.getInitPoint()).isNull();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                Integer.class, attempt.getId())).isEqualTo(1);
+    }
+
+    @Test
+    void deferredCommitFailurePreventsPostAndRollsBackRequest() {
+        UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        jdbcTemplate.execute("""
+                CREATE FUNCTION test_fail_checkout_commit() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN RAISE EXCEPTION 'simulated commit failure' USING ERRCODE = 'P4201'; END $$
+                """);
+        try {
+            jdbcTemplate.execute("""
+                    CREATE CONSTRAINT TRIGGER test_fail_checkout_commit AFTER INSERT ON checkout_creation_requests
+                    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION test_fail_checkout_commit()
+                    """);
+            Exception failure = assertThrows(Exception.class, () -> createPaymentPreferenceService.execute(newCheckoutCommand(reservationId)));
+            PostgresTriggerAssertions.assertFailure(failure, "P4201", "simulated commit failure");
+            assertThat(receivedRequestBodyList).isEmpty();
+            assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests", Integer.class)).isZero();
+            Payment payment = paymentRepository.findByCapacityReservationId(reservationId).orElseThrow();
+            List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
+            assertThat(attempts).hasSize(1);
+            assertThat(attempts.get(0).getStatus()).isEqualTo(PaymentAttemptStatus.ERROR);
+            assertThat(attempts.get(0).getProviderOrderId()).isNull();
+            assertThat(attempts.get(0).getPreferenceId()).isNull();
+        } finally {
+            jdbcTemplate.execute("DROP TRIGGER IF EXISTS test_fail_checkout_commit ON checkout_creation_requests");
+            jdbcTemplate.execute("DROP FUNCTION IF EXISTS test_fail_checkout_commit()");
+        }
     }
 
     // =========================================================================
@@ -893,8 +1082,8 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     // E2E-13: Timeout durante la creación de una orden remota
     // =========================================================================
     @Test
-    @DisplayName("E2E-13: Timeout durante POST /v1/orders traduce a MP_TIMEOUT, registra ERROR en intento y permite reintento")
-    void testE2E13_timeoutDuringOrderCreation_recordsErrorAndPermitsRecovery() {
+    @DisplayName("E2E-13: Timeout durante POST /v1/orders traduce a MP_TIMEOUT, registra ERROR y no reenvía")
+    void testE2E13_timeoutDuringOrderCreation_doesNotResend() {
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
 
         UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
@@ -920,25 +1109,15 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.ERROR);
         assertThat(attempt.getErrorCode()).isEqualTo("MP_TIMEOUT");
 
-        // Recuperación: Se apaga el timeout y el cliente reintenta
         simulateTimeout.set(false);
-        ordersMockResponse.set(new MockResponse(201, """
-                {
-                  "id": "ORD-RECOVERED-13",
-                  "status": "created",
-                  "checkout_url": "https://mp.com/checkout?order_id=ORD-RECOVERED-13",
-                  "total_amount": 25.00
-                }
-                """));
-
-        CreatePaymentPreferenceResult retryResult = createPaymentPreferenceService.execute(command);
-        assertThat(retryResult.preferenceId()).isEqualTo("ORD-RECOVERED-13");
-
-        List<PaymentAttempt> attemptsAfter = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
-        assertThat(attemptsAfter).hasSize(1);
-        PaymentAttempt recoveredAttempt = attemptsAfter.get(0);
-        assertThat(recoveredAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
-        assertThat(recoveredAttempt.getProviderOrderId()).isEqualTo("ORD-RECOVERED-13");
+        int postsBeforeRetry = receivedRequestBodyList.size();
+        assertThat(postsBeforeRetry).isEqualTo(1);
+        assertThrows(ConflictException.class, () -> createPaymentPreferenceService.execute(command));
+        assertThat(receivedRequestBodyList).hasSize(postsBeforeRetry);
+        assertThat(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId())).hasSize(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM checkout_creation_requests WHERE payment_attempt_id = ?", Integer.class, attempt.getId()))
+                .isEqualTo(1);
     }
 
     // =========================================================================
