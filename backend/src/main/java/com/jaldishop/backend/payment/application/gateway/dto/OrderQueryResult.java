@@ -18,8 +18,16 @@ public record OrderQueryResult(
         List<OrderPaymentItem> payments,
         List<OrderRefundItem> refunds,
         Long collectorId,
-        Boolean liveMode
+        Boolean liveMode,
+        String checkoutUrl
 ) {
+    public OrderQueryResult(String orderId, String status, String statusDetail, BigDecimal totalAmount,
+            BigDecimal totalPaidAmount, String externalReference, List<OrderPaymentItem> payments,
+            List<OrderRefundItem> refunds, Long collectorId, Boolean liveMode) {
+        this(orderId, status, statusDetail, totalAmount, totalPaidAmount, externalReference,
+                payments, refunds, collectorId, liveMode, null);
+    }
+
     public OrderQueryResult {
         Objects.requireNonNull(orderId, "orderId no puede ser nulo");
         Objects.requireNonNull(status, "status no puede ser nulo");

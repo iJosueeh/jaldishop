@@ -558,7 +558,8 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                     payments,
                     refunds,
                     response.collectorId(),
-                    response.liveMode()
+                    response.liveMode(),
+                    response.checkoutUrl()
             );
 
         } catch (HttpClientErrorException ex) {
