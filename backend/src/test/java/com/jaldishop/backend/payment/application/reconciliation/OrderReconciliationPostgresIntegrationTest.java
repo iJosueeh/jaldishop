@@ -392,6 +392,84 @@ class OrderReconciliationPostgresIntegrationTest {
         assertThat(summary.totalCandidates()).isEqualTo(1);
         PaymentAttempt reloadedAttempt = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
         assertThat(reloadedAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.REJECTED);
+        assertThat(reloadedAttempt.getErrorCode()).isEqualTo("ORDER_CANCELED");
+    }
+
+    // =========================================================================
+    // 4B. ORDEN 'CANCELED' (MERCADO PAGO PERÚ) SIN TRANSACCIONES
+    // =========================================================================
+    @Test
+    @DisplayName("Escenario 4B: Orden 'canceled' sin transacciones marca intento REJECTED (ORDER_CANCELED), Payment PENDING y sin pedido")
+    void shouldMarkAttemptRejectedOnCanceledOrderWithoutTransactions() {
+        BigDecimal amount = BigDecimal.valueOf(50.00);
+        UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
+        Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
+        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-004B", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+
+        orderMockResponse.set(new MockHttpResponse(200, """
+                {
+                  "id": "ORD-RECON-004B",
+                  "status": "canceled",
+                  "status_detail": "expired",
+                  "transactions": {
+                    "payments": []
+                  }
+                }
+                """));
+
+        reconciliationService.setOrdersReconciliationEnabled(true);
+        OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
+
+        assertThat(summary.totalCandidates()).isEqualTo(1);
+        assertThat(summary.successCount()).isEqualTo(1);
+
+        PaymentAttempt reloadedAttempt = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(reloadedAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.REJECTED);
+        assertThat(reloadedAttempt.getErrorCode()).isEqualTo("ORDER_CANCELED");
+        assertThat(reloadedAttempt.getReconciliationClaimToken()).isNull();
+
+        Payment reloadedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertThat(reloadedPayment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+
+        assertThat(orderRepository.findByPaymentId(payment.getId())).isEmpty();
+
+        // Idempotencia: segundo ciclo no encuentra candidatos elegibles y no altera el intento
+        OrderReconciliationBatchSummary secondSummary = reconciliationService.reconcileOrphanOrders();
+        assertThat(secondSummary.totalCandidates()).isZero();
+
+        PaymentAttempt reloadedAgain = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(reloadedAgain.getStatus()).isEqualTo(PaymentAttemptStatus.REJECTED);
+        assertThat(reloadedAgain.getErrorCode()).isEqualTo("ORDER_CANCELED");
+    }
+
+    @Test
+    @DisplayName("Escenario 4C: Orden 'canceled' remota no degrada un Payment que ya se encuentra en APPROVED")
+    void shouldNotDegradeAlreadyApprovedPaymentWhenOrderCanceledRemote() {
+        BigDecimal amount = BigDecimal.valueOf(50.00);
+        UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
+        Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
+        payment.markApproved(Instant.now());
+        paymentRepository.save(payment);
+
+        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-004C", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+
+        orderMockResponse.set(new MockHttpResponse(200, """
+                {
+                  "id": "ORD-RECON-004C",
+                  "status": "canceled",
+                  "transactions": {
+                    "payments": []
+                  }
+                }
+                """));
+
+        reconciliationService.setOrdersReconciliationEnabled(true);
+        OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
+
+        assertThat(summary.totalCandidates()).isZero(); // Payment ya en APPROVED es excluido de la búsqueda
+
+        Payment reloadedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertThat(reloadedPayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
     }
 
     // =========================================================================

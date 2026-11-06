@@ -11,6 +11,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -742,6 +743,129 @@ class MercadoPagoRestClientAdapterTest {
         assertThat(result.refunds().getFirst().providerPaymentId()).isEqualTo("11112222");
         assertThat(result.refunds().getFirst().amount()).isEqualByComparingTo("100.00");
         assertThat(result.refunds().getFirst().status()).isEqualTo("approved");
+    }
+
+    @Test
+    @DisplayName("Crear orden incluye expiration_time en el JSON de solicitud cuando está configurado")
+    void shouldIncludeExpirationTimeInOrderRequestWhenPresent() {
+        String responseJson = """
+                {
+                  "id": "ORD-EXP-001",
+                  "status": "created",
+                  "total_amount": 50.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-001"
+                }
+                """;
+
+        mockServer.expect(requestTo("https://api.mercadopago.com/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_TOKEN))
+                .andExpect(jsonPath("$.expiration_time").value("PT9M30S"))
+                .andExpect(jsonPath("$.type").value("online"))
+                .andExpect(jsonPath("$.processing_mode").value("manual"))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-order-exp",
+                new BigDecimal("50.00"),
+                List.of(new CreateOrderCommand.OrderItem(
+                        "item-exp", "Item Expirable", "Detalle", 1, new BigDecimal("50.00"), "PEN"
+                )),
+                new CreateOrderCommand.PayerInfo("Ana", "Gomez", "ana@example.com", "987111222"),
+                "https://api.jaldishop.com/webhooks/mercadopago",
+                "https://jaldishop.com/checkout/success",
+                "https://jaldishop.com/checkout/failure",
+                "https://jaldishop.com/checkout/pending",
+                "JALDI SHOP",
+                "idemp-exp-001",
+                "PT9M30S"
+        );
+
+        OrderResult result = adapter.createOrder(command);
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD-EXP-001");
+        assertThat(result.status()).isEqualTo("created");
+    }
+
+    @Test
+    @DisplayName("Crear orden omite expiration_time en el JSON cuando es nulo")
+    void shouldOmitExpirationTimeWhenNull() {
+        String responseJson = """
+                {
+                  "id": "ORD-EXP-NULL",
+                  "status": "created",
+                  "total_amount": 30.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-NULL"
+                }
+                """;
+
+        mockServer.expect(requestTo("https://api.mercadopago.com/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.expiration_time").doesNotExist())
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-order-no-exp",
+                new BigDecimal("30.00"),
+                List.of(new CreateOrderCommand.OrderItem(
+                        "item-no-exp", "Item Sin Exp", "Detalle", 1, new BigDecimal("30.00"), "PEN"
+                )),
+                null,
+                null,
+                null,
+                null,
+                null,
+                "JALDI SHOP",
+                "idemp-no-exp",
+                null
+        );
+
+        OrderResult result = adapter.createOrder(command);
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD-EXP-NULL");
+    }
+
+    @Test
+    @DisplayName("Crear preferencia no incluye expiration_time en el JSON de Preferences")
+    void shouldNotIncludeExpirationTimeInPreferenceRequest() {
+        String responseJson = """
+                {
+                  "id": "pref-no-exp",
+                  "init_point": "https://mercadopago.com.pe/checkout/pref-no-exp"
+                }
+                """;
+
+        mockServer.expect(requestTo("https://api.mercadopago.com/checkout/preferences"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.expiration_time").doesNotExist())
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseJson));
+
+        CreatePreferenceCommand command = new CreatePreferenceCommand(
+                "ext-pref-check",
+                "JALDI SHOP",
+                List.of(new CreatePreferenceCommand.PreferenceItem(
+                        "item-1", "Prod", "Desc", 1, new BigDecimal("25.00"), "PEN"
+                )),
+                null,
+                null,
+                null,
+                null,
+                null,
+                "JALDI SHOP"
+        );
+
+        PreferenceResult result = adapter.createPreference(command);
+
+        mockServer.verify();
+        assertThat(result.preferenceId()).isEqualTo("pref-no-exp");
     }
 
 }

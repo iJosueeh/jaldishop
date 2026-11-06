@@ -47,6 +47,7 @@ public class PaymentPreferencePreparationService {
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final ObjectMapper objectMapper;
     private final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties;
+    private final java.time.Clock clock;
 
     @org.springframework.beans.factory.annotation.Autowired
     public PaymentPreferencePreparationService(
@@ -58,7 +59,8 @@ public class PaymentPreferencePreparationService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository,
             ObjectMapper objectMapper,
-            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties,
+            java.time.Clock clock
     ) {
         this.capacityReservationRepository = capacityReservationRepository;
         this.inventoryReservationRepository = inventoryReservationRepository;
@@ -69,6 +71,32 @@ public class PaymentPreferencePreparationService {
         this.paymentAttemptRepository = paymentAttemptRepository;
         this.objectMapper = objectMapper;
         this.properties = properties;
+        this.clock = clock != null ? clock : java.time.Clock.systemUTC();
+    }
+
+    public PaymentPreferencePreparationService(
+            CapacityReservationRepository capacityReservationRepository,
+            InventoryReservationRepository inventoryReservationRepository,
+            StoreRepository storeRepository,
+            CartRepository cartRepository,
+            CheckoutItemSnapshotAssembler snapshotAssembler,
+            PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository,
+            ObjectMapper objectMapper,
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties
+    ) {
+        this(
+                capacityReservationRepository,
+                inventoryReservationRepository,
+                storeRepository,
+                cartRepository,
+                snapshotAssembler,
+                paymentRepository,
+                paymentAttemptRepository,
+                objectMapper,
+                properties,
+                java.time.Clock.systemUTC()
+        );
     }
 
     public PaymentPreferencePreparationService(
@@ -96,6 +124,8 @@ public class PaymentPreferencePreparationService {
 
     @Transactional
     public PreparationResult prepareOrGetExistingPayment(CreatePaymentPreferenceCommand command) {
+        Instant now = clock.instant();
+
         // Bloqueo pesimista PESSIMISTIC_WRITE sobre la reserva de capacidad para serializar accesos concurrentes
         CapacityReservation reservation = capacityReservationRepository.findByIdForUpdate(command.capacityReservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva de capacidad no encontrada: " + command.capacityReservationId()));
@@ -110,14 +140,13 @@ public class PaymentPreferencePreparationService {
         if (reservation.getStatus() == CapacityReservationStatus.RELEASED) {
             throw new ConflictException("RESERVATION_RELEASED", "La reserva de capacidad fue cancelada.");
         }
-        if (reservation.getStatus() == CapacityReservationStatus.EXPIRED || reservation.isExpired(Instant.now())) {
+        if (reservation.getStatus() == CapacityReservationStatus.EXPIRED || reservation.isExpired(now)) {
             throw new ConflictException("RESERVATION_EXPIRED", "La reserva de capacidad se encuentra expirada.");
         }
 
         // Validar reservas de inventario vinculadas a la reserva de capacidad
         List<InventoryReservation> inventoryReservations = inventoryReservationRepository.findByCapacityReservationId(reservation.getId());
         if (inventoryReservations != null && !inventoryReservations.isEmpty()) {
-            Instant now = Instant.now();
             for (InventoryReservation ir : inventoryReservations) {
                 if (ir.getStatus() == InventoryReservationStatus.EXPIRED || ir.isExpired(now)) {
                     throw new ConflictException("INVENTORY_RESERVATION_EXPIRED", "La reserva de inventario para los productos ha expirado.");
@@ -157,14 +186,14 @@ public class PaymentPreferencePreparationService {
                 if (hasValidProviderRef
                         && attempt.getStatus() != PaymentAttemptStatus.ERROR
                         && attempt.getStatus() != PaymentAttemptStatus.REJECTED) {
-                    return new PreparationResult(existingPayment, attempt, true, store.getName(), null);
+                    return new PreparationResult(existingPayment, attempt, true, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
                 }
             }
 
             // 2. Control de Concurrencia: Si existe una operación en curso (PROCESSING reciente), rechazar con respuesta controlada
             if (!existingAttempts.isEmpty()) {
                 PaymentAttempt latestAttempt = existingAttempts.get(existingAttempts.size() - 1);
-                Instant inFlightCutoff = Instant.now().minusSeconds(45);
+                Instant inFlightCutoff = now.minusSeconds(45);
 
                 boolean isInFlight = (latestAttempt.getStatus() == PaymentAttemptStatus.PROCESSING
                         || latestAttempt.getStatus() == PaymentAttemptStatus.CREATED)
@@ -189,7 +218,7 @@ public class PaymentPreferencePreparationService {
                 if (isRecoverable) {
                     latestAttempt.markProcessing();
                     PaymentAttempt savedAttempt = paymentAttemptRepository.save(latestAttempt);
-                    return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null);
+                    return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
                 }
             }
 
@@ -207,12 +236,12 @@ public class PaymentPreferencePreparationService {
             newAttempt.markProcessing();
             PaymentAttempt savedAttempt = paymentAttemptRepository.save(newAttempt);
 
-            return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null);
+            return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
         }
 
         // Si no existe Payment, protegemos la reserva si está activa
         if (reservation.getStatus() == CapacityReservationStatus.ACTIVE) {
-            reservation.protectPayment();
+            reservation.protectPayment(now);
             capacityReservationRepository.save(reservation);
         }
 
@@ -270,7 +299,7 @@ public class PaymentPreferencePreparationService {
         attempt.markProcessing();
         PaymentAttempt savedAttempt = paymentAttemptRepository.save(attempt);
 
-        return new PreparationResult(savedPayment, savedAttempt, false, store.getName(), itemSnapshots);
+        return new PreparationResult(savedPayment, savedAttempt, false, store.getName(), itemSnapshots, reservation.getPaymentProtectionExpiresAt());
     }
 
     @Transactional

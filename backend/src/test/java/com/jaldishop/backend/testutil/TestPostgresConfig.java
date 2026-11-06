@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public final class TestPostgresConfig {
 
     private static final Pattern TEST_URL = Pattern.compile(
-            "^jdbc:postgresql://(localhost|127\\.0\\.0\\.1|\\[::1\\]):([1-9][0-9]{0,4})/jaldishop_test$");
+            "^jdbc:postgresql://(localhost|127\\.0\\.0\\.1|\\[::1\\]):([1-9][0-9]{0,4})/jaldishop_integration_test$");
 
     private final String url;
     private final String username;
@@ -42,7 +42,7 @@ public final class TestPostgresConfig {
 
         Matcher match = TEST_URL.matcher(url);
         if (!match.matches() || Integer.parseInt(match.group(2)) > 65535) {
-            throw new IllegalStateException("Integration tests require a loopback PostgreSQL URL with an explicit port and database jaldishop_test, without parameters.");
+            throw new IllegalStateException("Integration tests require a loopback PostgreSQL URL with an explicit port and database jaldishop_integration_test, without parameters.");
         }
 
         if (match.group(1).equals("localhost")) {

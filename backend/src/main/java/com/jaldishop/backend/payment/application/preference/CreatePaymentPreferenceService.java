@@ -8,6 +8,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoException;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
+import com.jaldishop.backend.shared.exception.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +34,29 @@ public class CreatePaymentPreferenceService {
 
     private static final Logger log = LoggerFactory.getLogger(CreatePaymentPreferenceService.class);
 
+    public static final Duration SAFETY_MARGIN = Duration.ofSeconds(30);
+    public static final Duration MIN_ORDER_VALIDITY = Duration.ofMinutes(1);
+
     private final PaymentPreferencePreparationService preparationService;
     private final MercadoPagoGateway mercadoPagoGateway;
     private final MercadoPagoProperties properties;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public CreatePaymentPreferenceService(
+            PaymentPreferencePreparationService preparationService,
+            MercadoPagoGateway mercadoPagoGateway,
+            MercadoPagoProperties properties,
+            ObjectMapper objectMapper,
+            Clock clock
+    ) {
+        this.preparationService = preparationService;
+        this.mercadoPagoGateway = mercadoPagoGateway;
+        this.properties = properties;
+        this.objectMapper = objectMapper;
+        this.clock = clock != null ? clock : Clock.systemUTC();
+    }
 
     public CreatePaymentPreferenceService(
             PaymentPreferencePreparationService preparationService,
@@ -41,10 +64,7 @@ public class CreatePaymentPreferenceService {
             MercadoPagoProperties properties,
             ObjectMapper objectMapper
     ) {
-        this.preparationService = preparationService;
-        this.mercadoPagoGateway = mercadoPagoGateway;
-        this.properties = properties;
-        this.objectMapper = objectMapper;
+        this(preparationService, mercadoPagoGateway, properties, objectMapper, Clock.systemUTC());
     }
 
     public CreatePaymentPreferenceResult execute(CreatePaymentPreferenceCommand command) {
@@ -168,6 +188,8 @@ public class CreatePaymentPreferenceService {
                 prep.payment().getCustomerPhone()
         );
 
+        String expirationTime = calculateOrderExpirationTime(prep);
+
         return new CreateOrderCommand(
                 prep.payment().getId().toString(),
                 prep.payment().getAmount(),
@@ -178,8 +200,41 @@ public class CreatePaymentPreferenceService {
                 properties.getBackUrlFailure(),
                 properties.getBackUrlPending(),
                 "JALDI SHOP",
-                prep.attempt().getIdempotencyKey()
+                prep.attempt().getIdempotencyKey(),
+                expirationTime
         );
+    }
+
+    private String calculateOrderExpirationTime(PreparationResult prep) {
+        Instant expiresAt = prep.paymentProtectionExpiresAt();
+        if (expiresAt == null) {
+            log.warn("paymentProtectionExpiresAt es nulo para el intento {}. No se enviará expiration_time.", prep.attempt().getId());
+            return null;
+        }
+
+        Instant now = clock.instant();
+        Duration remaining = Duration.between(now, expiresAt);
+
+        if (remaining.isNegative() || remaining.isZero()) {
+            throw new ConflictException("RESERVATION_EXPIRED", "La reserva de capacidad se encuentra expirada.");
+        }
+
+        Duration orderValidity = remaining.minus(SAFETY_MARGIN);
+        if (orderValidity.compareTo(MIN_ORDER_VALIDITY) < 0) {
+            throw new ConflictException(
+                    "PAYMENT_PROTECTION_EXPIRING",
+                    "El tiempo restante de la reserva (" + remaining.toSeconds() + "s) es insuficiente para completar el pago de forma segura."
+            );
+        }
+
+        if (orderValidity.compareTo(remaining) > 0) {
+            orderValidity = remaining;
+        }
+
+        String isoDuration = Duration.ofSeconds(orderValidity.toSeconds()).toString();
+        log.info("Calculado expiration_time para orden Checkout Pro: {} (restante reserva: {}s, margen: {}s)",
+                isoDuration, remaining.toSeconds(), SAFETY_MARGIN.toSeconds());
+        return isoDuration;
     }
 
     private List<CreateOrderCommand.OrderItem> extractOrderItems(PreparationResult prep) {

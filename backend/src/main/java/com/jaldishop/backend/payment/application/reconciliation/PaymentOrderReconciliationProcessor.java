@@ -228,7 +228,7 @@ public class PaymentOrderReconciliationProcessor {
         // Caso A: Orden remota sin transacciones de pago
         if (remoteOrder.payments().isEmpty()) {
             String remoteStatus = remoteOrder.status() != null ? remoteOrder.status().toLowerCase(Locale.ROOT) : "";
-            if ("cancelled".equals(remoteStatus) || "expired".equals(remoteStatus)) {
+            if ("canceled".equals(remoteStatus) || "cancelled".equals(remoteStatus) || "expired".equals(remoteStatus)) {
                 attempt.releaseReconciliationLease(now);
                 paymentAttemptRepository.save(attempt);
                 persistenceService.applyOrderCancellation(payment.getId(), claim.providerOrderId(), remoteOrder.status(), remoteOrder.statusDetail());

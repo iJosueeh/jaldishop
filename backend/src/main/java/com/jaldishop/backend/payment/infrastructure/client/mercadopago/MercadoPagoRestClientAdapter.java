@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -37,10 +38,6 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-/**
- * Adaptador HTTP para la API de Mercado Pago Checkout Pro.
- * No utiliza transacciones de base de datos ni expone secretos en logs.
- */
 @Component
 public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
 
@@ -635,32 +632,45 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
     private MpOrderRequest toOrderRequest(CreateOrderCommand cmd) {
         List<MpOrderRequest.MpOrderItem> mpItems = cmd.items().stream()
                 .map(item -> new MpOrderRequest.MpOrderItem(
-                        item.id(),
                         item.title(),
-                        item.description(),
+                        StringUtils.hasText(item.description()) ? item.description().trim() : null,
                         item.quantity(),
-                        item.unitPrice(),
-                        item.currency() != null ? item.currency() : "PEN"
+                        item.unitPrice()
                 ))
                 .toList();
 
         MpOrderRequest.MpOrderPayer mpPayer = null;
         if (cmd.payer() != null) {
-            mpPayer = new MpOrderRequest.MpOrderPayer(
-                    cmd.payer().name(),
-                    cmd.payer().surname(),
-                    cmd.payer().email(),
-                    cmd.payer().phone() != null ? new MpOrderRequest.MpOrderPhone("", cmd.payer().phone()) : null
-            );
+            String firstName = StringUtils.hasText(cmd.payer().name()) ? cmd.payer().name().trim() : null;
+            String lastName = StringUtils.hasText(cmd.payer().surname()) ? cmd.payer().surname().trim() : null;
+            String email = StringUtils.hasText(cmd.payer().email()) ? cmd.payer().email().trim() : null;
+
+            MpOrderRequest.MpOrderPhone phone = null;
+            if (StringUtils.hasText(cmd.payer().phone())) {
+                phone = new MpOrderRequest.MpOrderPhone(null, cmd.payer().phone().trim());
+            }
+
+            if (firstName != null || lastName != null || email != null || phone != null) {
+                mpPayer = new MpOrderRequest.MpOrderPayer(
+                        firstName,
+                        lastName,
+                        email,
+                        phone
+                );
+            }
         }
 
+        String successUrl = StringUtils.hasText(cmd.successBackUrl()) ? cmd.successBackUrl().trim() : null;
+        String failureUrl = StringUtils.hasText(cmd.failureBackUrl()) ? cmd.failureBackUrl().trim() : null;
+        String pendingUrl = StringUtils.hasText(cmd.pendingBackUrl()) ? cmd.pendingBackUrl().trim() : null;
+
         MpOrderRequest.MpOrderConfig config = null;
-        if (cmd.successBackUrl() != null || cmd.failureBackUrl() != null || cmd.pendingBackUrl() != null) {
+        if (successUrl != null || failureUrl != null || pendingUrl != null) {
             config = new MpOrderRequest.MpOrderConfig(
                     new MpOrderRequest.MpOnlineConfig(
-                            cmd.successBackUrl(),
-                            cmd.failureBackUrl(),
-                            cmd.pendingBackUrl(),
+                            successUrl,
+                            failureUrl,
+                            pendingUrl,
                             "approved"
                     )
             );
@@ -674,7 +684,8 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                 cmd.externalReference(),
                 mpItems,
                 mpPayer,
-                config
+                config,
+                cmd.expirationTime()
         );
     }
 

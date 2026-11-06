@@ -18,8 +18,25 @@ public record CreateOrderCommand(
         String failureBackUrl,
         String pendingBackUrl,
         String statementDescriptor,
-        String idempotencyKey
+        String idempotencyKey,
+        String expirationTime
 ) {
+
+    public CreateOrderCommand(
+            String externalReference,
+            BigDecimal totalAmount,
+            List<OrderItem> items,
+            PayerInfo payer,
+            String notificationUrl,
+            String successBackUrl,
+            String failureBackUrl,
+            String pendingBackUrl,
+            String statementDescriptor,
+            String idempotencyKey
+    ) {
+        this(externalReference, totalAmount, items, payer, notificationUrl, successBackUrl,
+                failureBackUrl, pendingBackUrl, statementDescriptor, idempotencyKey, null);
+    }
 
     public CreateOrderCommand {
         Objects.requireNonNull(externalReference, "externalReference no puede ser nulo");

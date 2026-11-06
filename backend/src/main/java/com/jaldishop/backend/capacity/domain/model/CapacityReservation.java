@@ -127,15 +127,19 @@ public class CapacityReservation {
     }
 
     public void protectPayment() {
+        protectPayment(Instant.now());
+    }
+
+    public void protectPayment(Instant now) {
         if (status != CapacityReservationStatus.ACTIVE) {
             throw new IllegalStateException("Solo una reserva activa puede protegerse por pago.");
         }
-        if (isExpired(Instant.now())) {
+        if (isExpired(now)) {
             throw new IllegalStateException("La reserva venció y no puede protegerse por pago.");
         }
         this.status = CapacityReservationStatus.PAYMENT_PROTECTED;
-        this.paymentProtectionExpiresAt = Instant.now().plus(RESERVATION_TTL);
-        this.updatedAt = Instant.now();
+        this.paymentProtectionExpiresAt = now.plus(RESERVATION_TTL);
+        this.updatedAt = now;
     }
 
     public void commit() {
