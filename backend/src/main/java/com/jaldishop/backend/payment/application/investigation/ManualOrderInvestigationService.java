@@ -108,7 +108,10 @@ public class ManualOrderInvestigationService {
         try { snapshot = mapper.readTree(bodies.getFirst()); }
         catch (RuntimeException ex) { return new Result(Outcome.TECHNICAL_ERROR, "INVALID_SNAPSHOT"); }
         String reference = snapshot.path("external_reference").asText("");
-        if (!reference.equals(payment.getId().toString()) || !reference.equals(remote.externalReference()))
+        var parsed = com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference.parse(reference);
+        if (parsed.isEmpty() || !(parsed.get().kind() == com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference.Kind.PAYMENT
+                ? parsed.get().id().equals(payment.getId()) : parsed.get().id().equals(current.getId()))
+                || !reference.equals(remote.externalReference()))
             return new Result(Outcome.CONTRADICTION, "REFERENCE_MISMATCH");
         java.math.BigDecimal sent;
         try { sent = new java.math.BigDecimal(snapshot.path("total_amount").asText()); }

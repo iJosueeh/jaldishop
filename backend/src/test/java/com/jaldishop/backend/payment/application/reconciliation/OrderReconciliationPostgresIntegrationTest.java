@@ -3,6 +3,7 @@ package com.jaldishop.backend.payment.application.reconciliation;
 import com.jaldishop.backend.BackendApplication;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.refund.PaymentRefundService;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
 import com.jaldishop.backend.payment.domain.enums.*;
 import com.jaldishop.backend.payment.domain.model.Payment;
 import com.jaldishop.backend.payment.domain.model.PaymentAttempt;
@@ -312,11 +313,12 @@ class OrderReconciliationPostgresIntegrationTest {
                   "id": "ORD-RECON-002",
                   "status": "created",
                   "total_amount": 50.00,
+                  "external_reference": "%s",
                   "transactions": {
                     "payments": []
                   }
                 }
-                """));
+                """.formatted(payment.getId().toString())));
 
         reconciliationService.setOrdersReconciliationEnabled(true);
         OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
@@ -348,11 +350,12 @@ class OrderReconciliationPostgresIntegrationTest {
                   "id": "ORD-RECON-003",
                   "status": "cancelled",
                   "status_detail": "cancelled_by_user",
+                  "external_reference": "%s",
                   "transactions": {
                     "payments": []
                   }
                 }
-                """));
+                """.formatted("pa1_" + attempt.getId())));
 
         reconciliationService.setOrdersReconciliationEnabled(true);
         OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
@@ -380,11 +383,12 @@ class OrderReconciliationPostgresIntegrationTest {
                 {
                   "id": "ORD-RECON-004",
                   "status": "expired",
+                  "external_reference": "%s",
                   "transactions": {
                     "payments": []
                   }
                 }
-                """));
+                """.formatted(payment.getId().toString())));
 
         reconciliationService.setOrdersReconciliationEnabled(true);
         OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
@@ -411,11 +415,12 @@ class OrderReconciliationPostgresIntegrationTest {
                   "id": "ORD-RECON-004B",
                   "status": "canceled",
                   "status_detail": "expired",
+                  "external_reference": "%s",
                   "transactions": {
                     "payments": []
                   }
                 }
-                """));
+                """.formatted("pa1_" + attempt.getId())));
 
         reconciliationService.setOrdersReconciliationEnabled(true);
         OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
@@ -540,7 +545,8 @@ class OrderReconciliationPostgresIntegrationTest {
         paymentRepository.save(payment);
 
         OrderReconciliationCandidateResult result = orderProcessor.consolidateOrderReconciliation(
-                claim, null, workerToken, Instant.now()
+                claim, new OrderQueryResult("ORD-RECON-006", "created", null, amount, BigDecimal.ZERO,
+                        "pa1_" + attempt.getId(), java.util.List.of(), null, null), workerToken, Instant.now()
         );
 
         assertThat(result.status()).isEqualTo(OrderReconciliationCandidateResult.Status.SUCCESS_ALREADY_APPROVED);
@@ -652,11 +658,11 @@ class OrderReconciliationPostgresIntegrationTest {
     }
 
     // =========================================================================
-    // 11. RESPUESTA REMOTA CON MÚLTIPLES TRANSACCIONES
+    // 11. RESPUESTA AMBIGUA CON MÚLTIPLES TRANSACCIONES
     // =========================================================================
     @Test
-    @DisplayName("Escenario 11: Respuesta con múltiples transacciones selecciona la acreditada y confirma pedido")
-    void shouldSelectAccreditedTransactionWhenMultipleTransactionsReturned() {
+    @DisplayName("Escenario 11: Múltiples transacciones se rechazan sin elegir automáticamente la acreditada")
+    void shouldRejectAmbiguousOrderWhenMultipleTransactionsReturned() {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
@@ -696,10 +702,20 @@ class OrderReconciliationPostgresIntegrationTest {
         reconciliationService.setOrdersReconciliationEnabled(true);
         OrderReconciliationBatchSummary summary = reconciliationService.reconcileOrphanOrders();
 
-        assertThat(summary.successCount()).isEqualTo(1);
+        assertThat(summary.totalCandidates()).isEqualTo(1);
+        assertThat(summary.successCount()).isZero();
+        assertThat(summary.failureCount()).isEqualTo(1);
+        assertThat(summary.results().getFirst().status())
+                .isEqualTo(OrderReconciliationCandidateResult.Status.TECHNICAL_FAILURE);
+        assertThat(summary.results().getFirst().detail()).isEqualTo("IDENTIFIER_CONTRADICTION");
+        assertThat(paymentRepository.findById(payment.getId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentStatus.PENDING);
+        assertThat(orderRepository.findByPaymentId(payment.getId())).isEmpty();
         PaymentAttempt reloadedAttempt = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(reloadedAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
-        assertThat(reloadedAttempt.getProviderPaymentId()).isEqualTo("22222");
+        assertThat(reloadedAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
+        assertThat(reloadedAttempt.getProviderPaymentId()).isNull();
+        assertThat(reloadedAttempt.getErrorCode()).isNull();
+        assertThat(reloadedAttempt.getReconciliationClaimToken()).isNotNull();
     }
 
     // =========================================================================

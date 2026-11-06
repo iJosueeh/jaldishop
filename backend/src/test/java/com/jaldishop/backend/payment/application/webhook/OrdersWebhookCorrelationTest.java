@@ -70,4 +70,59 @@ class OrdersWebhookCorrelationTest {
   when(ps.findByIdForUpdate(id)).thenReturn(Optional.of(p)); when(p.getStatus()).thenReturn(PaymentStatus.APPROVED);
   when(p.getRefundStatus()).thenReturn(RefundStatus.COMPLETED); s.recordApprovalIncidence(id,"late"); verify(ps,never()).save(any());
  }
+
+ PaymentQueryResult reference(String value) {
+  return new PaymentQueryResult("pay1","approved","accredited",BigDecimal.TEN,"PEN","visa","credit_card",value,null,null,null);
+ }
+ @Test void explicitAttemptIsExclusiveAndLocksPaymentFirst() {
+  var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
+  when(as.findById(a.getId())).thenReturn(Optional.of(a));
+  s.applyPaymentQueryResult(id,reference("pa1_"+a.getId()),"one");
+  assertEquals(PaymentAttemptStatus.APPROVED,a.getStatus());
+  assertEquals(PaymentAttemptStatus.CREATED,b.getStatus());
+  var locks=inOrder(ps,as); locks.verify(ps).findByIdForUpdate(id); locks.verify(as).findByIdForUpdate(a.getId());
+ }
+ @Test void explicitAttemptCannotFallBackToOrderOwner() {
+  var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
+  when(as.findById(b.getId())).thenReturn(Optional.of(b));
+  assertThrows(ConflictException.class,()->s.applyPaymentQueryResult(id,reference("pa1_"+b.getId()),"one"));
+  verify(ps,never()).save(any()); verify(as,never()).save(any());
+ }
+ @Test void missingExplicitAttemptCannotFallBack() {
+  setup(attempt(1,"one"));
+  assertThrows(com.jaldishop.backend.shared.exception.ResourceNotFoundException.class,
+   ()->s.applyPaymentQueryResult(id,reference("pa1_"+UUID.randomUUID()),"one"));
+  verify(ps,never()).save(any()); verify(as,never()).save(any());
+ }
+ @Test void crossedAttemptAndMalformedReferencesDoNotMutate() {
+  setup(attempt(1,"one"));
+  var foreign=PaymentAttempt.create(UUID.randomUUID(),1,PaymentProvider.MERCADO_PAGO,PaymentMethod.CARD,"foreign","ORDERS");
+  when(as.findById(foreign.getId())).thenReturn(Optional.of(foreign));
+  for(String ref:List.of("pa1_"+foreign.getId(),"pa1_bad",UUID.randomUUID().toString()))
+   assertThrows(ConflictException.class,()->s.applyPaymentQueryResult(id,reference(ref),"one"));
+  verify(ps,never()).save(any()); verify(as,never()).save(any());
+ }
+ @Test void cancellationValidatesExplicitReferenceBeforeTerminalShortcut() {
+  var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
+  when(p.getStatus()).thenReturn(PaymentStatus.APPROVED);
+  assertThrows(ConflictException.class,()->s.applyOrderCancellation(id,"one","expired",null,"pa1_"+b.getId()));
+  verify(ps,never()).save(any()); verify(as,never()).save(any());
+ }
+
+ @Test void explicitCancellationAndPaymentNotificationAreSupported() {
+  var a=attempt(1,"one"); setup(a);
+  when(as.findById(a.getId())).thenReturn(Optional.of(a));
+  assertEquals(id,s.resolvePaymentId(com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference.parse("pa1_"+a.getId()).orElseThrow()));
+  s.applyOrderCancellation(id,"one","expired",null,"pa1_"+a.getId());
+  assertEquals(PaymentAttemptStatus.REJECTED,a.getStatus());
+  s.applyPaymentQueryResult(id,reference("pa1_"+a.getId()),null);
+  assertEquals(PaymentAttemptStatus.APPROVED,a.getStatus());
+ }
+ @Test void explicitAttemptRejectsRemotePaymentBelongingToSibling() {
+  var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
+  when(as.findById(a.getId())).thenReturn(Optional.of(a));
+  when(as.findByProviderAndProviderPaymentId(PaymentProvider.MERCADO_PAGO,"pay1")).thenReturn(Optional.of(b));
+  assertThrows(ConflictException.class,()->s.applyPaymentQueryResult(id,reference("pa1_"+a.getId()),"one"));
+  verify(ps,never()).save(any()); verify(as,never()).save(any());
+ }
 }

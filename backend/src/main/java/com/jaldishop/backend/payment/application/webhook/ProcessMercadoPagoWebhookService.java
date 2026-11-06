@@ -169,6 +169,9 @@ public class ProcessMercadoPagoWebhookService {
         log.info("Consultando estado real del pago {} en Mercado Pago...", dataId);
         PaymentQueryResult queryResult = mercadoPagoGateway.queryPayment(dataId);
 
+        if (!dataId.equals(queryResult.providerPaymentId()))
+            throw new ConflictException("PAYMENT_ID_MISMATCH", "La respuesta corresponde a otro pago remoto.");
+
         // H-04: Verificación de Cuenta Receptora (collector_id) si está configurada
         validateCollectorAndLiveMode(dataId, queryResult.collectorId(), queryResult.liveMode());
 
@@ -206,7 +209,8 @@ public class ProcessMercadoPagoWebhookService {
                         paymentId,
                         orderId,
                         orderQueryResult.status(),
-                        orderQueryResult.statusDetail()
+                        orderQueryResult.statusDetail(),
+                        orderQueryResult.externalReference()
                 );
             }
 
@@ -289,13 +293,12 @@ public class ProcessMercadoPagoWebhookService {
                     "El recurso consultado no posee external_reference válida vinculada a un pago local.");
         }
 
-        try {
-            return UUID.fromString(externalReference);
-        } catch (IllegalArgumentException e) {
-            log.error("external_reference '{}' del recurso {} no es un UUID válido.", externalReference, resourceId);
-            throw new ConflictException("INVALID_EXTERNAL_REFERENCE",
-                    "external_reference no posee un formato de UUID válido.");
-        }
+        var reference = com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference.parse(externalReference)
+                .orElseThrow(() -> new ConflictException("INVALID_EXTERNAL_REFERENCE",
+                        "external_reference no posee un formato de UUID válido."));
+        if (reference.kind() == com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference.Kind.PAYMENT)
+            return reference.id();
+        return persistenceService.resolvePaymentId(reference);
     }
 
     private ProcessMercadoPagoWebhookResult confirmPurchaseIfApproved(

@@ -193,6 +193,7 @@ public class PaymentOrderReconciliationProcessor {
             UUID workerToken,
             Instant now
     ) {
+        Payment payment = paymentRepository.findByIdForUpdate(claim.paymentId()).orElse(null);
         PaymentAttempt attempt = paymentAttemptRepository.findByIdForUpdate(claim.attemptId()).orElse(null);
         if (attempt == null) {
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.CLAIM_LOST, null, null, "Intento no encontrado en BD");
@@ -204,12 +205,18 @@ public class PaymentOrderReconciliationProcessor {
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.CLAIM_LOST, null, null, "Lease expirado o reclamado por otro worker");
         }
 
-        Payment payment = paymentRepository.findByIdForUpdate(claim.paymentId()).orElse(null);
         if (payment == null) {
             attempt.releaseReconciliationLease(now);
             paymentAttemptRepository.save(attempt);
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.TECHNICAL_FAILURE, null, null, "Pago no encontrado");
         }
+
+        if (!claim.paymentId().equals(attempt.getPaymentId()) || remoteOrder == null
+                || !claim.providerOrderId().equals(remoteOrder.orderId())
+                || !claim.providerOrderId().equals(attempt.getProviderOrderId())
+                || remoteOrder.payments().size() > 1)
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "IDENTIFIER_CONTRADICTION");
+        persistenceService.validateReference(remoteOrder.externalReference(), payment.getId(), attempt);
 
         // Si el pago ya fue aprobado concurrentemente (ej. por webhook tardío), no degradar
         if (payment.getStatus() == PaymentStatus.APPROVED) {
@@ -231,7 +238,7 @@ public class PaymentOrderReconciliationProcessor {
             if ("canceled".equals(remoteStatus) || "cancelled".equals(remoteStatus) || "expired".equals(remoteStatus)) {
                 attempt.releaseReconciliationLease(now);
                 paymentAttemptRepository.save(attempt);
-                persistenceService.applyOrderCancellation(payment.getId(), claim.providerOrderId(), remoteOrder.status(), remoteOrder.statusDetail());
+                persistenceService.applyOrderCancellation(payment.getId(), claim.providerOrderId(), remoteOrder.status(), remoteOrder.statusDetail(), remoteOrder.externalReference());
                 log.info("Orden {} cancelada/expirada remotamente sin transacciones. Intento marcado como REJECTED.", claim.providerOrderId());
                 return new FinancialReconciliationOutcome(FinancialReconciliationStatus.CANCELLED_OR_EXPIRED, remoteOrder.status(), null, "Orden cancelada/expirada");
             }

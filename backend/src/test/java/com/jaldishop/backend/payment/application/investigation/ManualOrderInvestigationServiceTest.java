@@ -60,6 +60,19 @@ class ManualOrderInvestigationServiceTest {
                         "PEN", null, null, null)), null, null);
     }
 
+    @Test void explicitReferenceRequiresMatchingSnapshotAndAttempt() {
+        knownId();
+        String ref = "pa1_" + attempt.getId();
+        when(jdbc.queryForList(anyString(), eq(String.class), eq(attempt.getId()), eq("key")))
+                .thenReturn(List.of("{\"external_reference\":\"" + ref + "\",\"total_amount\":\"10.00\"}"));
+        when(gateway.queryOrder("ORD1")).thenReturn(remote(ref));
+        assertEquals(ManualOrderInvestigationService.Outcome.VERIFIED, service.investigate(attempt.getId()).outcome());
+        when(gateway.queryOrder("ORD1")).thenReturn(remote("pa1_" + UUID.randomUUID()));
+        attempt.restoreRemoteOrderCreationState(RemoteOrderCreationState.UNKNOWN);
+        assertEquals(ManualOrderInvestigationService.Outcome.CONTRADICTION, service.investigate(attempt.getId()).outcome());
+        verify(payments, never()).save(any());
+    }
+
     @Test void noIdDoesNotSearchOrRetry() {
         assertEquals(ManualOrderInvestigationService.Outcome.INCONCLUSIVE, service.investigate(attempt.getId()).outcome());
         verifyNoInteractions(gateway);

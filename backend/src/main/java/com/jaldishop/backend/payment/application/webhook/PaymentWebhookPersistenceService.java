@@ -1,6 +1,7 @@
 package com.jaldishop.backend.payment.application.webhook;
 
 import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
+import com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference;
 import com.jaldishop.backend.payment.domain.enums.*;
 import com.jaldishop.backend.payment.domain.model.*;
 import com.jaldishop.backend.payment.domain.repository.*;
@@ -45,6 +46,25 @@ public class PaymentWebhookPersistenceService {
         this.jdbc = jdbc;
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
+    }
+
+    /** Non-locking routing read; ownership is revalidated under Payment → PaymentAttempt locks. */
+    public UUID resolvePaymentId(ExternalPaymentReference reference) {
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT) return reference.id();
+        return paymentAttemptRepository.findById(reference.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Intento no encontrado: " + reference.id()))
+                .getPaymentId();
+    }
+
+    public void validateReference(String value, UUID paymentId, PaymentAttempt attempt) {
+        var reference = ExternalPaymentReference.parse(value).orElseThrow(() ->
+                new ConflictException("INVALID_EXTERNAL_REFERENCE", "Referencia inválida."));
+        boolean valid = reference.kind() == ExternalPaymentReference.Kind.PAYMENT
+                ? reference.id().equals(paymentId)
+                : reference.id().equals(attempt.getId()) && "ORDERS".equals(attempt.getCheckoutMode());
+        if (!valid || !paymentId.equals(attempt.getPaymentId())
+                || attempt.getProvider() != PaymentProvider.MERCADO_PAGO)
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "REFERENCE_MISMATCH");
     }
 
     @Transactional(noRollbackFor = ConflictException.class)
@@ -96,6 +116,19 @@ public class PaymentWebhookPersistenceService {
         if (byPayment != null && byOrder != null && !byPayment.getId().equals(byOrder.getId()))
             throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
         targetAttempt = byOrder != null ? byOrder : byPayment;
+        var reference = ExternalPaymentReference.parse(queryResult.externalReference()).orElseThrow(() ->
+                new ConflictException("INVALID_EXTERNAL_REFERENCE", "Referencia inválida."));
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT_ATTEMPT) {
+            PaymentAttempt explicit = paymentAttemptRepository.findById(reference.id()).orElseThrow(() ->
+                    new ResourceNotFoundException("Intento no encontrado: " + reference.id()));
+            validateReference(queryResult.externalReference(), paymentId, explicit);
+            if ((targetAttempt != null && !targetAttempt.getId().equals(explicit.getId()))
+                    || remoteOwner.filter(a -> !a.getId().equals(explicit.getId())).isPresent()
+                    || orderOwner.filter(a -> !a.getId().equals(explicit.getId())).isPresent())
+                throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+            targetAttempt = explicit;
+        }
+
         if (targetAttempt == null && providerOrderId == null) {
             // Keep the historical Preferences selection policy.
             for (int i = attempts.size() - 1; i >= 0; i--) {
@@ -117,6 +150,11 @@ public class PaymentWebhookPersistenceService {
                 || (targetAttempt.getProviderPaymentId() != null
                 && !targetAttempt.getProviderPaymentId().equals(queryResult.providerPaymentId())))
             throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+
+        validateReference(queryResult.externalReference(), paymentId, targetAttempt);
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT_ATTEMPT
+                && (queryResult.providerPaymentId() == null || queryResult.providerPaymentId().isBlank()))
+            throw correlationConflict(attempts, "MISSING_REMOTE_PAYMENT_ID");
 
         String mpStatus = queryResult.status().toLowerCase(Locale.ROOT);
         String mpStatusDetail = queryResult.statusDetail() != null ? queryResult.statusDetail().toLowerCase(Locale.ROOT) : "";
@@ -216,16 +254,14 @@ public class PaymentWebhookPersistenceService {
             String orderStatus,
             String orderStatusDetail
     ) {
+        return applyOrderCancellation(paymentId, providerOrderId, orderStatus, orderStatusDetail, paymentId.toString());
+    }
+
+    @Transactional(noRollbackFor = ConflictException.class)
+    public ProcessMercadoPagoWebhookResult applyOrderCancellation(UUID paymentId, String providerOrderId,
+            String orderStatus, String orderStatusDetail, String externalReference) {
         Payment payment = paymentRepository.findByIdForUpdate(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
-
-        if (payment.getStatus() == PaymentStatus.APPROVED) {
-            log.info("Pago {} ya se encuentra APPROVED. Ignorando cancelación tardía de orden {}.", paymentId, providerOrderId);
-            return ProcessMercadoPagoWebhookResult.success(
-                    paymentId, null, payment.getStatus().name(), "APPROVED",
-                    "Orden cancelada extemporáneamente; estado APPROVED preservado por idempotencia."
-            );
-        }
 
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         PaymentAttempt targetAttempt = null;
@@ -234,6 +270,18 @@ public class PaymentWebhookPersistenceService {
                 && providerOrderId.equals(a.getProviderOrderId()));
         if (targetAttempt == null) throw correlationConflict(attempts, "UNRESOLVED_CANCELLATION");
         targetAttempt = paymentAttemptRepository.findByIdForUpdate(targetAttempt.getId()).orElseThrow();
+        validateReference(externalReference, paymentId, targetAttempt);
+        if (!"ORDERS".equals(targetAttempt.getCheckoutMode())
+                || !providerOrderId.equals(targetAttempt.getProviderOrderId()))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        if (payment.getStatus() == PaymentStatus.APPROVED) {
+            log.info("Pago {} ya se encuentra APPROVED. Ignorando cancelación tardía de orden {}.", paymentId, providerOrderId);
+            return ProcessMercadoPagoWebhookResult.success(
+                    paymentId, null, payment.getStatus().name(), "APPROVED",
+                    "Orden cancelada extemporáneamente; estado APPROVED preservado por idempotencia."
+            );
+        }
+
         if (targetAttempt.getStatus() == PaymentAttemptStatus.APPROVED
                 || targetAttempt.getStatus() == PaymentAttemptStatus.REJECTED)
             return ProcessMercadoPagoWebhookResult.success(paymentId, null, payment.getStatus().name(),
