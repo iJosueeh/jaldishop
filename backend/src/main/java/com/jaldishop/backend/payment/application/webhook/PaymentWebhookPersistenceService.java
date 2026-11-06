@@ -27,6 +27,8 @@ public class PaymentWebhookPersistenceService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentWebhookPersistenceService.class);
 
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
 
@@ -34,16 +36,23 @@ public class PaymentWebhookPersistenceService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository
     ) {
+        this(paymentRepository, paymentAttemptRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PaymentWebhookPersistenceService(PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ConflictException.class)
     public ProcessMercadoPagoWebhookResult applyQueryResultToPayment(UUID paymentId, PaymentQueryResult queryResult) {
         return applyPaymentQueryResult(paymentId, queryResult, null);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ConflictException.class)
     public ProcessMercadoPagoWebhookResult applyPaymentQueryResult(
             UUID paymentId,
             PaymentQueryResult queryResult,
@@ -73,66 +82,41 @@ public class PaymentWebhookPersistenceService {
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         PaymentAttempt targetAttempt = null;
 
-        // Búsqueda de intento objetivo estrictamente inequívoco con evidencia externa:
-        // 1. Coincidencia directa por identificador de transacción financiera de Mercado Pago
-        for (PaymentAttempt a : attempts) {
-            if (queryResult.providerPaymentId().equals(a.getProviderPaymentId())) {
-                targetAttempt = a;
-                break;
-            }
-        }
-
-        // 2. Coincidencia directa por identificador de orden externa (Orders API)
-        if (targetAttempt == null && providerOrderId != null && !providerOrderId.isBlank()) {
-            for (PaymentAttempt a : attempts) {
-                if (providerOrderId.equals(a.getProviderOrderId())) {
-                    targetAttempt = a;
-                    break;
-                }
-            }
-            if (targetAttempt == null) {
-                for (int i = attempts.size() - 1; i >= 0; i--) {
-                    PaymentAttempt a = attempts.get(i);
-                    if ("ORDERS".equalsIgnoreCase(a.getCheckoutMode())
-                            && (a.getStatus() == PaymentAttemptStatus.PROCESSING || a.getStatus() == PaymentAttemptStatus.CREATED)
-                            && (a.getProviderOrderId() == null || providerOrderId.equals(a.getProviderOrderId()))) {
-                        targetAttempt = a;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // 3. Flujo Preferences API: Mercado Pago notifica topic=payment con providerPaymentId recién generado.
-        // Si no tenemos providerOrderId pero el intento activo fue registrado bajo modalidad PREFERENCES,
-        // vinculamos el pago a dicho intento.
-        if (targetAttempt == null && (providerOrderId == null || providerOrderId.isBlank())) {
+        var remoteOwner = paymentAttemptRepository.findByProviderAndProviderPaymentId(
+                PaymentProvider.MERCADO_PAGO, queryResult.providerPaymentId());
+        var orderOwner = providerOrderId == null ? java.util.Optional.<PaymentAttempt>empty()
+                : paymentAttemptRepository.findByProviderOrderId(providerOrderId);
+        if (remoteOwner.filter(a -> !paymentId.equals(a.getPaymentId())).isPresent()
+                || orderOwner.filter(a -> !paymentId.equals(a.getPaymentId())).isPresent())
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        PaymentAttempt byPayment = uniqueMatch(attempts, a -> queryResult.providerPaymentId() != null
+                && queryResult.providerPaymentId().equals(a.getProviderPaymentId()));
+        PaymentAttempt byOrder = uniqueMatch(attempts, a -> providerOrderId != null
+                && providerOrderId.equals(a.getProviderOrderId()));
+        if (byPayment != null && byOrder != null && !byPayment.getId().equals(byOrder.getId()))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        targetAttempt = byOrder != null ? byOrder : byPayment;
+        if (targetAttempt == null && providerOrderId == null) {
+            // Keep the historical Preferences selection policy.
             for (int i = attempts.size() - 1; i >= 0; i--) {
                 PaymentAttempt a = attempts.get(i);
                 if ("PREFERENCES".equalsIgnoreCase(a.getCheckoutMode())
-                        && (a.getStatus() == PaymentAttemptStatus.PROCESSING || a.getStatus() == PaymentAttemptStatus.CREATED)
-                        && (a.getProviderPaymentId() == null || a.getProviderPaymentId().equals(queryResult.providerPaymentId()))) {
+                        && (a.getStatus() == PaymentAttemptStatus.CREATED || a.getStatus() == PaymentAttemptStatus.PROCESSING)
+                        && a.getProviderPaymentId() == null) {
                     targetAttempt = a;
                     break;
                 }
             }
         }
-
-        // 4. Fallback seguro: Si existe un único intento en progreso para el pago identificado, vincularlo
-        if (targetAttempt == null && attempts.size() == 1) {
-            PaymentAttempt soleAttempt = attempts.get(0);
-            if (soleAttempt.getStatus() == PaymentAttemptStatus.PROCESSING || soleAttempt.getStatus() == PaymentAttemptStatus.CREATED) {
-                targetAttempt = soleAttempt;
-            }
-        }
-
-        // Si no se pudo identificar inequívocamente el intento con evidencia externa, NO asociar a ciegas ni acreditar
-        if (targetAttempt == null) {
-            log.error("Imposible asociar la transacción financiera {} a ningún intento inequívoco para el pago {}",
-                    queryResult.providerPaymentId(), paymentId);
-            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH",
-                    "No se encontró un intento de pago inequívoco que corresponda a la transacción informada.");
-        }
+        // A paymentId shared by historical Orders attempts is not attempt identity.
+        if (targetAttempt == null)
+            throw correlationConflict(attempts, "UNRESOLVED_ATTEMPT");
+        targetAttempt = paymentAttemptRepository.findByIdForUpdate(targetAttempt.getId()).orElseThrow();
+        if ((providerOrderId != null && (!"ORDERS".equals(targetAttempt.getCheckoutMode())
+                || !providerOrderId.equals(targetAttempt.getProviderOrderId())))
+                || (targetAttempt.getProviderPaymentId() != null
+                && !targetAttempt.getProviderPaymentId().equals(queryResult.providerPaymentId())))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
 
         String mpStatus = queryResult.status().toLowerCase(Locale.ROOT);
         String mpStatusDetail = queryResult.statusDetail() != null ? queryResult.statusDetail().toLowerCase(Locale.ROOT) : "";
@@ -148,6 +132,14 @@ public class PaymentWebhookPersistenceService {
                     paymentId, queryResult.providerPaymentId(), payment.getStatus().name(), attemptStatus,
                     "Pago previamente aprobado; idempotencia aplicada sin degradación de estado."
             );
+        }
+
+        if (targetAttempt.getStatus() == PaymentAttemptStatus.APPROVED
+                || (targetAttempt.getStatus() == PaymentAttemptStatus.REJECTED
+                    && !"approved".equals(mpStatus)
+                    && !("processed".equals(mpStatus) && "accredited".equals(mpStatusDetail)))) {
+            return ProcessMercadoPagoWebhookResult.success(paymentId, queryResult.providerPaymentId(),
+                    payment.getStatus().name(), targetAttempt.getStatus().name(), "Estado financiero preservado.");
         }
 
         // 3. Transición según estado financiero y acreditación real de la transacción:
@@ -217,7 +209,7 @@ public class PaymentWebhookPersistenceService {
      * Aplica la cancelación o expiración de una orden de Orders API cuando no contiene transacciones financieras.
      * Marca el PaymentAttempt correspondiente como REJECTED preservando el Payment principal en PENDING para reintento.
      */
-    @Transactional
+    @Transactional(noRollbackFor = ConflictException.class)
     public ProcessMercadoPagoWebhookResult applyOrderCancellation(
             UUID paymentId,
             String providerOrderId,
@@ -238,20 +230,14 @@ public class PaymentWebhookPersistenceService {
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         PaymentAttempt targetAttempt = null;
 
-        if (providerOrderId != null && !providerOrderId.isBlank()) {
-            for (PaymentAttempt a : attempts) {
-                if (providerOrderId.equals(a.getProviderOrderId())) {
-                    targetAttempt = a;
-                    break;
-                }
-            }
-        }
-        if (targetAttempt == null && !attempts.isEmpty()) {
-            PaymentAttempt last = attempts.getLast();
-            if (last.getStatus() == PaymentAttemptStatus.PROCESSING || last.getStatus() == PaymentAttemptStatus.CREATED) {
-                targetAttempt = last;
-            }
-        }
+        targetAttempt = uniqueMatch(attempts, a -> providerOrderId != null
+                && providerOrderId.equals(a.getProviderOrderId()));
+        if (targetAttempt == null) throw correlationConflict(attempts, "UNRESOLVED_CANCELLATION");
+        targetAttempt = paymentAttemptRepository.findByIdForUpdate(targetAttempt.getId()).orElseThrow();
+        if (targetAttempt.getStatus() == PaymentAttemptStatus.APPROVED
+                || targetAttempt.getStatus() == PaymentAttemptStatus.REJECTED)
+            return ProcessMercadoPagoWebhookResult.success(paymentId, null, payment.getStatus().name(),
+                    targetAttempt.getStatus().name(), "Estado financiero preservado.");
 
         if (targetAttempt != null) {
             targetAttempt.markRejected(
@@ -288,13 +274,17 @@ public class PaymentWebhookPersistenceService {
                 return;
             }
 
+            if (payment.getStatus() != PaymentStatus.APPROVED
+                    || payment.getRefundStatus() != RefundStatus.NOT_REQUIRED) return;
+
             String truncatedReason = reason != null && reason.length() > 80 ? reason.substring(0, 80) : (reason != null ? reason : "INCIDENCE");
             payment.requestRefund(payment.getAmount(), "INCIDENCE:" + truncatedReason);
             paymentRepository.save(payment);
 
             List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
-            if (!attempts.isEmpty()) {
-                PaymentAttempt targetAttempt = attempts.getLast();
+            var approved = attempts.stream().filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED).toList();
+            if (approved.size() == 1) {
+                PaymentAttempt targetAttempt = paymentAttemptRepository.findByIdForUpdate(approved.getFirst().getId()).orElseThrow();
                 targetAttempt.recordIncidence("COMMERCIAL_CONFIRMATION_FAILED", reason);
                 paymentAttemptRepository.save(targetAttempt);
             }
@@ -303,6 +293,28 @@ public class PaymentWebhookPersistenceService {
         } catch (Exception e) {
             log.error("Error al registrar incidencia para pago {}: {}", paymentId, e.getMessage(), e);
         }
+    }
+
+    private PaymentAttempt uniqueMatch(List<PaymentAttempt> attempts,
+            java.util.function.Predicate<PaymentAttempt> predicate) {
+        var matches = attempts.stream().filter(predicate).toList();
+        if (matches.size() > 1) throw correlationConflict(attempts, "AMBIGUOUS_ATTEMPT");
+        return matches.isEmpty() ? null : matches.getFirst();
+    }
+
+    private ConflictException correlationConflict(List<PaymentAttempt> attempts, String reason) {
+        if (jdbc != null) {
+            for (PaymentAttempt attempt : attempts) {
+                if (!"ORDERS".equals(attempt.getCheckoutMode())) continue;
+                jdbc.update("""
+                        INSERT INTO remote_order_creation_events
+                        (payment_attempt_id, previous_state, new_state, evidence_code)
+                        VALUES (?, ?, ?, ?)
+                        """, attempt.getId(), attempt.getRemoteOrderCreationState().name(),
+                        attempt.getRemoteOrderCreationState().name(), "WEBHOOK_" + reason);
+            }
+        }
+        return new ConflictException("PAYMENT_ATTEMPT_MISMATCH", reason);
     }
 
     private PaymentMethod resolvePaymentMethod(String paymentTypeId, String paymentMethodId) {

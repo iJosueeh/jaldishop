@@ -96,8 +96,6 @@ public class ManualOrderInvestigationService {
                 || !Objects.equals(initial.getProviderOrderId(), current.getProviderOrderId())
                 || remote == null || !Objects.equals(current.getProviderOrderId(), remote.orderId()))
             return new Result(Outcome.CONTRADICTION, "IDENTITY_CHANGED");
-        if (current.getRemoteOrderCreationState() != RemoteOrderCreationState.UNKNOWN)
-            return new Result(Outcome.INCONCLUSIVE, "CONCURRENT_CREATION_EVIDENCE");
         var owner = attempts.findByProviderOrderId(remote.orderId());
         if (owner.isPresent() && !owner.get().getId().equals(current.getId()))
             return new Result(Outcome.CONTRADICTION, "ORDER_ALREADY_OWNED");
@@ -140,6 +138,8 @@ public class ManualOrderInvestigationService {
         if (properties.getExpectedCollectorId() != null && remote.collectorId() == null
                 || properties.getExpectedLiveMode() != null && remote.liveMode() == null)
             return new Result(Outcome.INCONCLUSIVE, "ACCOUNT_OR_ENVIRONMENT_UNAVAILABLE");
+        if (current.getRemoteOrderCreationState() != RemoteOrderCreationState.UNKNOWN)
+            return new Result(Outcome.INCONCLUSIVE, "CONCURRENT_CREATION_EVIDENCE");
         return new Result(Outcome.VERIFIED, "IDENTITY_VERIFIED");
     }
 

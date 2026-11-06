@@ -295,6 +295,8 @@ class ManualOrderInvestigationPostgresIntegrationTest {
                 current.completeRefund("manual-test-refund", refundedAt);
                 payments.save(current);
             });
+            webhook.applyPaymentQueryResult(payment.getId(), webhookResult("pending"), orderId);
+            webhook.recordApprovalIncidence(payment.getId(), "late commercial failure");
             releaseGet.countDown();
             assertEquals(VERIFIED, investigation.get(15, TimeUnit.SECONDS).outcome());
             assertCreated();
@@ -309,6 +311,32 @@ class ManualOrderInvestigationPostgresIntegrationTest {
         } finally {
             releaseGet.countDown();
         }
+    }
+
+    @Test
+    void duplicateAndLateWebhookPreserveFinancialEvidence() {
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved"), orderId);
+        Instant completed = reloadAttempt().getCompletedAt();
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved"), orderId);
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("pending"), orderId);
+        assertEquals(PaymentAttemptStatus.APPROVED, reloadAttempt().getStatus());
+        assertEquals(completed, reloadAttempt().getCompletedAt());
+    }
+
+    @Test
+    void contradictoryWebhookCommitsAuditWithoutFinancialMutation() {
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("pending"), orderId);
+        Payment paymentBeforeConflict = reloadPayment();
+        PaymentAttempt attemptBeforeConflict = reloadAttempt();
+        assertEquals(PaymentStatus.PROCESSING, paymentBeforeConflict.getStatus());
+        assertEquals(PaymentAttemptStatus.PROCESSING, attemptBeforeConflict.getStatus());
+        assertEquals(0, events("WEBHOOK_IDENTIFIER_CONTRADICTION"));
+
+        assertThrows(com.jaldishop.backend.shared.exception.ConflictException.class,
+                () -> webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved"), "another-order"));
+        assertThat(reloadPayment()).usingRecursiveComparison().isEqualTo(paymentBeforeConflict);
+        assertThat(reloadAttempt()).usingRecursiveComparison().isEqualTo(attemptBeforeConflict);
+        assertEquals(1, events("WEBHOOK_IDENTIFIER_CONTRADICTION"));
     }
 
     @Test

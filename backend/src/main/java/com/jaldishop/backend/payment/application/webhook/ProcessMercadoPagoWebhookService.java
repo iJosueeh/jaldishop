@@ -81,6 +81,7 @@ public class ProcessMercadoPagoWebhookService {
         this(signatureValidator, mercadoPagoGateway, persistenceService, properties, objectMapper, null, null);
     }
 
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public ProcessMercadoPagoWebhookResult execute(ProcessMercadoPagoWebhookCommand command) {
         // 1. Extracción y Validación de Identificador de Evento (data.id o id)
         Map<String, String> queryParams = command.queryParams() != null ? command.queryParams() : Map.of();
@@ -184,6 +185,11 @@ public class ProcessMercadoPagoWebhookService {
     private ProcessMercadoPagoWebhookResult processOrderWebhook(String orderId) {
         log.info("Consultando estado real de la orden {} en Mercado Pago...", orderId);
         com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderQueryResult = mercadoPagoGateway.queryOrder(orderId);
+
+        if (!orderId.equals(orderQueryResult.orderId()))
+            throw new ConflictException("ORDER_ID_MISMATCH", "La respuesta corresponde a otra orden remota.");
+        if (orderQueryResult.payments() != null && orderQueryResult.payments().size() > 1)
+            throw new ConflictException("AMBIGUOUS_ORDER_PAYMENTS", "La orden contiene varias transacciones; requiere revisión.");
 
         // Verificación de Cuenta Receptora y Entorno
         validateCollectorAndLiveMode(orderId, orderQueryResult.collectorId(), orderQueryResult.liveMode());

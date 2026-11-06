@@ -112,6 +112,9 @@ class ProcessMercadoPagoWebhookServiceTest {
                 "idemp-webhook-001"
         );
         activeAttempt.markProcessing();
+        lenient().when(paymentAttemptRepository.findByIdForUpdate(any())).thenAnswer(inv ->
+                paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId).stream()
+                        .filter(a -> a.getId().equals(inv.getArgument(0))).findFirst());
     }
 
     @Test
@@ -925,6 +928,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Procesa exitosamente webhook de tipo order con pago aprobado y asocia providerOrderId y providerPaymentId")
     void shouldProcessOrderWebhookSuccessfullyWhenPaymentApproved() {
         String orderId = "ORD-MP-123456";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-01";
 
@@ -965,6 +972,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Ignora de forma segura orden sin transacciones de pago")
     void shouldIgnoreOrderWithoutTransactions() {
         String orderId = "ORD-EMPTY-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-02";
 
@@ -993,6 +1004,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Rechaza webhook con discrepancia de monto frente a pago registrado")
     void shouldRejectOrderWebhookOnAmountMismatch() {
         String orderId = "ORD-MISMATCH-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-03";
 
@@ -1026,6 +1041,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Rechaza webhook con external_reference inválido o no correspondiente a UUID")
     void shouldRejectOrderWebhookOnInvalidExternalReference() {
         String orderId = "ORD-BAD-REF";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-04";
 
@@ -1058,6 +1077,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     void shouldRejectOrderWebhookOnCollectorMismatch() {
         properties.setExpectedCollectorId(999888777L);
         String orderId = "ORD-COLLECTOR-MISMATCH";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-05";
 
@@ -1084,6 +1107,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Orden con estado in_process no aprueba pago y actualiza intento a PENDING")
     void shouldProcessOrderPendingPaymentWithoutApproving() {
         String orderId = "ORD-PENDING-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-06";
 
@@ -1122,6 +1149,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Confirmación comercial con reserva vencida genera incidencia duradera y conserva APPROVED")
     void shouldRecordIncidenceWhenOrderConfirmedWithExpiredReservation() {
         String orderId = "ORD-EXPIRED-RESERVATION";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-07";
 
@@ -1170,6 +1201,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Pago con status processed y status_detail accredited se aprueba y confirma comercialmente")
     void shouldProcessOrderWebhookWhenPaymentProcessedAndAccredited() {
         String orderId = "ORD-PROCESSED-ACCREDITED";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-08";
 
@@ -1207,6 +1242,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Pago con status processed pero status_detail no acreditado (waiting_capture) NO se aprueba")
     void shouldNotApproveOrderWebhookWhenPaymentProcessedWithoutAccreditation() {
         String orderId = "ORD-PROCESSED-WAITING";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-09";
 
@@ -1244,6 +1283,10 @@ class ProcessMercadoPagoWebhookServiceTest {
     @DisplayName("Orders API: Orden cancelada sin transacciones actualiza intento a REJECTED y conserva Payment en PENDING")
     void shouldRejectAttemptWhenOrderCanceledWithoutTransactions() {
         String orderId = "ORD-CANCELED-EMPTY";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-orders-10";
 
