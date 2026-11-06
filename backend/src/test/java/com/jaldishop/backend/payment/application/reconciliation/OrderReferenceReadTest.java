@@ -78,6 +78,14 @@ class OrderReferenceReadTest {
         f.assertRejected(f.remote("ORD1", "processed", reference, List.of(rejected, accredited)));
     }
 
+    @Test void siblingAttemptReferenceCannotConsolidateClaimedOrder() {
+        var f = new Fixture(PaymentStatus.PENDING);
+        var sibling = PaymentAttempt.create(f.paymentId, 2, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "sibling", "ORDERS");
+        when(f.attempts.findByPaymentIdOrderByAttemptNumberAsc(f.paymentId)).thenReturn(List.of(f.attempt, sibling));
+        f.assertRejected(f.remote("ORD1", "created", "pa1_" + sibling.getId(), List.of()));
+    }
+
     @Test void missingRemoteResponseCannotBypassCorrelationForApprovedPayment() {
         new Fixture(PaymentStatus.APPROVED).assertRejected(null);
     }

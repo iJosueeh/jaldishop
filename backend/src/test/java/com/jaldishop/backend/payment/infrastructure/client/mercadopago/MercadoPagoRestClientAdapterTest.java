@@ -84,22 +84,27 @@ class MercadoPagoRestClientAdapterTest {
         verify(store).saveBeforeSend(eq(attemptId), eq("PREFERENCES"), eq("key"), any(byte[].class));
     }
 
-    @Test
-    void persistsExactOrderBodyBeforeSending() {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void persistsExactOrderBodyBeforeSending(boolean explicitAttempt) {
         var store = mock(CheckoutCreationRequestStore.class);
         var saved = new AtomicReference<byte[]>();
         var attemptId = UUID.randomUUID();
+        var reference = explicitAttempt ? "pa1_" + attemptId : UUID.randomUUID().toString();
         when(store.saveBeforeSend(eq(attemptId), eq("ORDERS"), eq("key"), any(byte[].class)))
-                .thenAnswer(inv -> { byte[] bytes = inv.getArgument(3); saved.set(bytes); return bytes; });
+                .thenAnswer(inv -> { byte[] original = inv.getArgument(3);
+                    byte[] persisted = (" " + new String(original, java.nio.charset.StandardCharsets.UTF_8)).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                    saved.set(persisted); return persisted; });
         RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
         var server = MockRestServiceServer.bindTo(builder).build();
         var tested = new MercadoPagoRestClientAdapter(builder.build(), properties, store, new ObjectMapper());
         server.expect(requestTo(BASE_URL + "/v1/orders"))
                 .andExpect(request -> assertThat(((org.springframework.mock.http.client.MockClientHttpRequest) request).getBodyAsBytes())
                         .isEqualTo(saved.get()))
+                .andExpect(jsonPath("$.external_reference").value(reference))
                 .andExpect(jsonPath("$.expiration_time").value("PT9M30S"))
                 .andRespond(withSuccess("{\"id\":\"order\",\"checkout_url\":\"https://example.test\"}", MediaType.APPLICATION_JSON));
-        var cmd = new CreateOrderCommand("payment-id", BigDecimal.TEN, List.of(
+        var cmd = new CreateOrderCommand(reference, BigDecimal.TEN, List.of(
                 new CreateOrderCommand.OrderItem("id", "item", null, 1, BigDecimal.TEN, "PEN")),
                 null, null, null, null, null, null, "key", "PT9M30S");
         tested.createOrder(cmd, attemptId);

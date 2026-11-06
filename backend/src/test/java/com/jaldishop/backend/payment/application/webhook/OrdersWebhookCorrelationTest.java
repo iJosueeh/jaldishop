@@ -82,6 +82,17 @@ class OrdersWebhookCorrelationTest {
   assertEquals(PaymentAttemptStatus.CREATED,b.getStatus());
   var locks=inOrder(ps,as); locks.verify(ps).findByIdForUpdate(id); locks.verify(as).findByIdForUpdate(a.getId());
  }
+ @org.junit.jupiter.params.ParameterizedTest
+ @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+ void eitherSiblingReferenceSelectsExactlyItsAttempt(boolean latest) {
+  var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
+  var selected=latest?b:a; var untouched=latest?a:b;
+  when(as.findById(selected.getId())).thenReturn(Optional.of(selected));
+  s.applyPaymentQueryResult(id,reference("pa1_"+selected.getId()),selected.getProviderOrderId());
+  assertEquals(PaymentAttemptStatus.APPROVED,selected.getStatus());
+  assertEquals(PaymentAttemptStatus.CREATED,untouched.getStatus());
+  verify(as,never()).save(untouched);
+ }
  @Test void explicitAttemptCannotFallBackToOrderOwner() {
   var a=attempt(1,"one"); var b=attempt(2,"two"); setup(a,b);
   when(as.findById(b.getId())).thenReturn(Optional.of(b));

@@ -163,6 +163,65 @@ class ManualOrderInvestigationPostgresIntegrationTest {
         }
     }
 
+    @Autowired com.jaldishop.backend.payment.infrastructure.client.mercadopago.CheckoutCreationRequestStore requestStore;
+
+    @Test
+    void concurrentAttemptReferenceSnapshotsHaveOneWinnerAndStayDurable() throws Exception {
+        var first = attempts.save(PaymentAttempt.create(payment.getId(), 2, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "snapshot-" + UUID.randomUUID(), "ORDERS"));
+        var second = attempts.save(PaymentAttempt.create(payment.getId(), 3, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "snapshot-" + UUID.randomUUID(), "ORDERS"));
+        try {
+            var ready = new CountDownLatch(2);
+            var start = new CountDownLatch(1);
+            Callable<Boolean> save = () -> {
+                ready.countDown();
+                assertTrue(start.await(10, TimeUnit.SECONDS));
+                try {
+                    requestStore.saveBeforeSend(first.getId(), "ORDERS", first.getIdempotencyKey(), snapshotBody(first));
+                    return true;
+                } catch (com.jaldishop.backend.shared.exception.ConflictException duplicate) {
+                    return false;
+                }
+            };
+            var one = workers.submit(save);
+            var two = workers.submit(save);
+            assertTrue(ready.await(10, TimeUnit.SECONDS));
+            start.countDown();
+            assertNotEquals(one.get(15, TimeUnit.SECONDS), two.get(15, TimeUnit.SECONDS));
+            requestStore.saveBeforeSend(second.getId(), "ORDERS", second.getIdempotencyKey(), snapshotBody(second));
+            for (var current : java.util.List.of(first, second)) {
+                String stored = jdbc.queryForObject("SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                        String.class, current.getId());
+                assertEquals(new String(snapshotBody(current), java.nio.charset.StandardCharsets.UTF_8), stored);
+                assertEquals("UNKNOWN", jdbc.queryForObject("SELECT remote_order_creation_state FROM payment_attempts WHERE id = ?",
+                        String.class, current.getId()));
+                assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM remote_order_creation_events WHERE payment_attempt_id = ? AND new_state = 'UNKNOWN'",
+                        Integer.class, current.getId()));
+                assertThrows(org.springframework.dao.DataAccessException.class, () -> jdbc.update(
+                        "UPDATE checkout_creation_requests SET request_body = '{}' WHERE payment_attempt_id = ?", current.getId()));
+                assertEquals(stored, jdbc.queryForObject("SELECT request_body FROM checkout_creation_requests WHERE payment_attempt_id = ?",
+                        String.class, current.getId()));
+            }
+            assertEquals(PaymentStatus.PENDING, reloadPayment().getStatus());
+        } finally {
+            jdbc.update("DELETE FROM payment_attempts WHERE id IN (?, ?)", first.getId(), second.getId());
+        }
+    }
+
+    private com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult webhookResult(String status, boolean explicitReference) {
+        var original = webhookResult(status);
+        return new com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult(
+                original.providerPaymentId(), original.status(), original.statusDetail(), original.transactionAmount(),
+                original.currency(), original.paymentMethodId(), original.paymentTypeId(),
+                explicitReference ? "pa1_" + attempt.getId() : payment.getId().toString(), original.dateApproved(), null, null);
+    }
+
+    private byte[] snapshotBody(PaymentAttempt current) {
+        return ("{\"external_reference\":\"pa1_" + current.getId() + "\",\"total_amount\":\"10.00\"}")
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     @Test
     void verifiesHistoricalReferenceAndCommitsAssociationWithBothAudits() {
         expectValidGet(1, () -> {});
@@ -313,12 +372,13 @@ class ManualOrderInvestigationPostgresIntegrationTest {
         }
     }
 
-    @Test
-    void duplicateAndLateWebhookPreserveFinancialEvidence() {
-        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved"), orderId);
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void duplicateAndLateWebhookPreserveFinancialEvidence(boolean explicitReference) {
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved", explicitReference), orderId);
         Instant completed = reloadAttempt().getCompletedAt();
-        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved"), orderId);
-        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("pending"), orderId);
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("approved", explicitReference), orderId);
+        webhook.applyPaymentQueryResult(payment.getId(), webhookResult("pending", explicitReference), orderId);
         assertEquals(PaymentAttemptStatus.APPROVED, reloadAttempt().getStatus());
         assertEquals(completed, reloadAttempt().getCompletedAt());
     }
