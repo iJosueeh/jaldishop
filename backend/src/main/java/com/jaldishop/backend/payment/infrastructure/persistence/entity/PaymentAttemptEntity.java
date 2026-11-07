@@ -31,8 +31,17 @@ public class PaymentAttemptEntity {
     @Column(name = "idempotency_key", nullable = false, length = 64)
     private String idempotencyKey;
 
+    @Column(name = "checkout_mode", nullable = false, length = 20)
+    private String checkoutMode;
+
+    @Column(name = "remote_order_creation_state", length = 30)
+    private String remoteOrderCreationState;
+
     @Column(name = "preference_id", length = 100)
     private String preferenceId;
+
+    @Column(name = "provider_order_id", length = 100)
+    private String providerOrderId;
 
     @Column(name = "init_point")
     private String initPoint;
@@ -54,6 +63,12 @@ public class PaymentAttemptEntity {
 
     @Column(name = "error_message")
     private String errorMessage;
+
+    @Column(name = "reconciliation_claim_token")
+    private UUID reconciliationClaimToken;
+
+    @Column(name = "reconciliation_lease_expires_at")
+    private Instant reconciliationLeaseExpiresAt;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -86,13 +101,102 @@ public class PaymentAttemptEntity {
             Instant completedAt,
             Instant updatedAt
     ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                preferenceId, null, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                "PREFERENCES", preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        this(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                checkoutMode, preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                null, null, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public PaymentAttemptEntity(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            String provider,
+            String paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            String status,
+            String errorCode,
+            String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         this.id = id;
         this.paymentId = paymentId;
         this.attemptNumber = attemptNumber;
         this.provider = provider;
         this.paymentMethod = paymentMethod;
         this.idempotencyKey = idempotencyKey;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
         this.preferenceId = preferenceId;
+        this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.providerPaymentId = providerPaymentId;
         this.providerStatus = providerStatus;
@@ -100,10 +204,15 @@ public class PaymentAttemptEntity {
         this.status = status;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
+        this.reconciliationClaimToken = reconciliationClaimToken;
+        this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt;
         this.createdAt = createdAt;
         this.completedAt = completedAt;
         this.updatedAt = updatedAt;
     }
+
+    public String getRemoteOrderCreationState() { return remoteOrderCreationState; }
+    public void setRemoteOrderCreationState(String state) { remoteOrderCreationState = state; }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -117,8 +226,12 @@ public class PaymentAttemptEntity {
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public String getIdempotencyKey() { return idempotencyKey; }
     public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+    public String getCheckoutMode() { return checkoutMode; }
+    public void setCheckoutMode(String checkoutMode) { this.checkoutMode = checkoutMode; }
     public String getPreferenceId() { return preferenceId; }
     public void setPreferenceId(String preferenceId) { this.preferenceId = preferenceId; }
+    public String getProviderOrderId() { return providerOrderId; }
+    public void setProviderOrderId(String providerOrderId) { this.providerOrderId = providerOrderId; }
     public String getInitPoint() { return initPoint; }
     public void setInitPoint(String initPoint) { this.initPoint = initPoint; }
     public String getProviderPaymentId() { return providerPaymentId; }
@@ -139,5 +252,9 @@ public class PaymentAttemptEntity {
     public void setCompletedAt(Instant completedAt) { this.completedAt = completedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public UUID getReconciliationClaimToken() { return reconciliationClaimToken; }
+    public void setReconciliationClaimToken(UUID reconciliationClaimToken) { this.reconciliationClaimToken = reconciliationClaimToken; }
+    public Instant getReconciliationLeaseExpiresAt() { return reconciliationLeaseExpiresAt; }
+    public void setReconciliationLeaseExpiresAt(Instant reconciliationLeaseExpiresAt) { this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt; }
 
 }

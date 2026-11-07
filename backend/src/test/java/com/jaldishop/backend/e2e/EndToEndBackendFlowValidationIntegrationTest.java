@@ -54,6 +54,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
     private static final AtomicReference<String> mpPaymentStatus = new AtomicReference<>("approved");
     private static final AtomicReference<String> mpExternalReference = new AtomicReference<>("");
     private static final AtomicReference<Double> mpTransactionAmount = new AtomicReference<>(52.50);
+    private static final AtomicReference<UUID> test6PaymentId = new AtomicReference<>();
 
     @BeforeAll
     static void startMockServerAndSeed() throws Exception {
@@ -169,6 +170,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
         registry.add("spring.flyway.user", database::username);
         registry.add("spring.flyway.password", database::password);
         registry.add("mercadopago.base-url", () -> "http://127.0.0.1:" + mockPort);
+        registry.add("mercadopago.checkout-mode", () -> "PREFERENCES");
         registry.add("mercadopago.access-token", () -> "TEST-E2E-TOKEN");
         registry.add("mercadopago.webhook-secret", () -> WEBHOOK_SECRET);
         registry.add("mercadopago.expected-collector-id", () -> String.valueOf(EXPECTED_COLLECTOR_ID));
@@ -360,7 +362,9 @@ class EndToEndBackendFlowValidationIntegrationTest {
         HttpResponse<String> addCartResp = httpClient.send(addCartReq, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, addCartResp.statusCode(), "Agregar ítem al carrito debe retornar 201 Created");
 
-        LocalDate serviceDate = LocalDate.now().plusWeeks(2).with(java.time.DayOfWeek.MONDAY);
+        // Seed closures use database CURRENT_DATE + 10/+15 days; keep this hold beyond them.
+        LocalDate serviceDate = jdbcTemplate.queryForObject("SELECT CURRENT_DATE", LocalDate.class)
+                .plusWeeks(3).with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.MONDAY));
         String holdBody = String.format("""
                 {
                     "storeId": "80acf0ba-5a79-4888-b00d-b5aef8fcf9e5",
@@ -456,6 +460,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
                 """, UUID.randomUUID(), varId, storeId, resId);
 
         UUID paymentId = UUID.randomUUID();
+        test6PaymentId.set(paymentId);
         mpExternalReference.set(paymentId.toString());
 
         jdbcTemplate.update("""
@@ -631,7 +636,24 @@ class EndToEndBackendFlowValidationIntegrationTest {
         jdbcTemplate.update("UPDATE inventories SET quantity = 1 WHERE variant_id = ?", varId);
 
         try {
-            LocalDate serviceDate = LocalDate.now().plusWeeks(2).with(java.time.DayOfWeek.TUESDAY);
+            LocalDate serviceDate = jdbcTemplate.queryForObject("""
+                    SELECT MIN(CURRENT_DATE + days_ahead)
+                    FROM generate_series(21, 83) AS candidates(days_ahead)
+                    WHERE EXTRACT(ISODOW FROM CURRENT_DATE + days_ahead) = 2
+                      AND EXISTS (
+                          SELECT 1 FROM capacity_configurations c
+                          WHERE c.store_id = ? AND c.day_of_week = 2
+                            AND c.status = 'ACTIVE' AND c.max_capacity > 0
+                            AND ((c.start_time IS NULL AND c.end_time IS NULL)
+                                 OR (c.start_time <= TIME '09:00:00' AND c.end_time >= TIME '13:00:00'))
+                      )
+                      AND NOT EXISTS (
+                          SELECT 1 FROM capacity_exceptions e
+                          WHERE e.store_id = ? AND e.service_date = CURRENT_DATE + days_ahead
+                            AND e.status = 'ACTIVE'
+                      )
+                    """, LocalDate.class, storeId, storeId);
+            assertNotNull(serviceDate, "Debe existir un martes con capacidad semanal positiva y sin excepciones activas");
             String holdBody = String.format("""
                     {
                         "storeId": "%s",
@@ -671,47 +693,64 @@ class EndToEndBackendFlowValidationIntegrationTest {
     @DisplayName("9. Escenario Negativo: Capacidad agotada (franja con capacidad 0) debe rechazar la reserva")
     void test9_negativeCapacityExhausted() throws Exception {
         UUID storeId = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e5");
-        LocalDate fullDate = LocalDate.now().plusDays(25);
-
-        // Limpiar excepciones previas en esa fecha
-        jdbcTemplate.update("DELETE FROM capacity_exceptions WHERE store_id = ? AND service_date = ?", storeId, java.sql.Date.valueOf(fullDate));
+        LocalDate fullDate = jdbcTemplate.queryForObject("""
+                SELECT MIN(CURRENT_DATE + days_ahead)
+                FROM generate_series(21, 83) AS candidates(days_ahead)
+                WHERE EXTRACT(ISODOW FROM CURRENT_DATE + days_ahead) = 2
+                  AND EXISTS (
+                      SELECT 1 FROM capacity_configurations c
+                      WHERE c.store_id = ? AND c.day_of_week = 2
+                        AND c.status = 'ACTIVE' AND c.max_capacity > 0
+                        AND ((c.start_time IS NULL AND c.end_time IS NULL)
+                             OR (c.start_time <= TIME '09:00:00' AND c.end_time >= TIME '13:00:00'))
+                  )
+                  AND NOT EXISTS (
+                      SELECT 1 FROM capacity_exceptions e
+                      WHERE e.store_id = ? AND e.service_date = CURRENT_DATE + days_ahead
+                        AND e.status = 'ACTIVE'
+                  )
+                """, LocalDate.class, storeId, storeId);
+        assertNotNull(fullDate, "Debe existir un martes con capacidad semanal positiva y sin excepciones activas");
 
         // Crear excepción de capacidad con exception_capacity = 0 para simular franja agotada
         UUID exceptionId = UUID.randomUUID();
-        jdbcTemplate.update("""
-                INSERT INTO capacity_exceptions (id, store_id, service_date, start_time, end_time, exception_capacity, reason, status, created_at, updated_at)
-                VALUES (?, ?, ?, '09:00:00', '13:00:00', 0, 'Mantenimiento preventivo', 'ACTIVE', NOW(), NOW())
-                ON CONFLICT (id) DO NOTHING
-                """, exceptionId, storeId, java.sql.Date.valueOf(fullDate));
+        try {
+            jdbcTemplate.update("""
+                    INSERT INTO capacity_exceptions (id, store_id, service_date, start_time, end_time, exception_capacity, reason, status, created_at, updated_at)
+                    VALUES (?, ?, ?, '09:00:00', '13:00:00', 0, 'Mantenimiento preventivo', 'ACTIVE', NOW(), NOW())
+                    """, exceptionId, storeId, java.sql.Date.valueOf(fullDate));
 
-        String holdBody = String.format("""
-                {
-                    "storeId": "%s",
-                    "fulfillmentType": "PICKUP",
-                    "serviceDate": "%s",
-                    "startTime": "09:00:00",
-                    "endTime": "13:00:00",
-                    "customerName": "Valeria Ríos",
-                    "customerPhone": "+51965432109",
-                    "customerEmail": "cliente.demo@jaldishop.com",
-                    "deliveryAddress": null,
-                    "deliveryReference": null,
-                    "deliveryLatitude": null,
-                    "deliveryLongitude": null,
-                    "discountCode": null
-                }
-                """, storeId, fullDate);
+            String holdBody = String.format("""
+                    {
+                        "storeId": "%s",
+                        "fulfillmentType": "PICKUP",
+                        "serviceDate": "%s",
+                        "startTime": "09:00:00",
+                        "endTime": "13:00:00",
+                        "customerName": "Valeria Ríos",
+                        "customerPhone": "+51965432109",
+                        "customerEmail": "cliente.demo@jaldishop.com",
+                        "deliveryAddress": null,
+                        "deliveryReference": null,
+                        "deliveryLatitude": null,
+                        "deliveryLongitude": null,
+                        "discountCode": null
+                    }
+                    """, storeId, fullDate);
 
-        HttpRequest checkoutReq = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl("/api/v1/checkout")))
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + customerToken)
-                .POST(HttpRequest.BodyPublishers.ofString(holdBody))
-                .build();
+            HttpRequest checkoutReq = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl("/api/v1/checkout")))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + customerToken)
+                    .POST(HttpRequest.BodyPublishers.ofString(holdBody))
+                    .build();
 
-        HttpResponse<String> checkoutResp = httpClient.send(checkoutReq, HttpResponse.BodyHandlers.ofString());
-        assertTrue(checkoutResp.statusCode() == 400 || checkoutResp.statusCode() == 409,
-                "Reserva en franja sin capacidad disponible debe ser rechazada, código: " + checkoutResp.statusCode());
+            HttpResponse<String> checkoutResp = httpClient.send(checkoutReq, HttpResponse.BodyHandlers.ofString());
+            assertEquals(409, checkoutResp.statusCode(), "Reserva en franja sin capacidad debe responder 409: " + checkoutResp.body());
+            assertEquals("CAPACITY_UNAVAILABLE", objectMapper.readTree(checkoutResp.body()).path("code").asText());
+        } finally {
+            jdbcTemplate.update("DELETE FROM capacity_exceptions WHERE id = ? AND store_id = ?", exceptionId, storeId);
+        }
     }
 
     @Test
@@ -722,10 +761,14 @@ class EndToEndBackendFlowValidationIntegrationTest {
         mpTransactionAmount.set(52.50);
         String mpPaymentId = String.valueOf(3000000000L + (System.currentTimeMillis() % 100000000));
 
-        // Obtener un pago ya aprobado existente
-        UUID existingPaymentId = jdbcTemplate.queryForObject(
-                "SELECT id FROM payments WHERE status = 'APPROVED' LIMIT 1", UUID.class
-        );
+        // Obtener el pago aprobado en el flujo previo (test6) o el más reciente con intento asociado
+        UUID existingPaymentId = test6PaymentId.get();
+        if (existingPaymentId == null) {
+            existingPaymentId = jdbcTemplate.queryForObject(
+                    "SELECT p.id FROM payments p JOIN payment_attempts pa ON pa.payment_id = p.id WHERE p.status = 'APPROVED' ORDER BY p.created_at DESC LIMIT 1",
+                    UUID.class
+            );
+        }
         assertNotNull(existingPaymentId);
         mpExternalReference.set(existingPaymentId.toString());
 
@@ -792,6 +835,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
                 """, UUID.randomUUID(), varId, storeId, resId);
 
         UUID paymentId = UUID.randomUUID();
+        test6PaymentId.set(paymentId);
         mpExternalReference.set(paymentId.toString());
 
         jdbcTemplate.update("""

@@ -20,7 +20,13 @@ public class PaymentRefundIntentEntity {
     @Column(name = "payment_id", nullable = false, unique = true)
     private UUID paymentId;
 
-    @Column(name = "provider_payment_id", nullable = false, length = 100)
+    @Column(name = "checkout_mode", nullable = false, length = 20)
+    private String checkoutMode = "PREFERENCES";
+
+    @Column(name = "provider_order_id", length = 100)
+    private String providerOrderId;
+
+    @Column(name = "provider_payment_id", length = 100)
     private String providerPaymentId;
 
     @Column(name = "amount", nullable = false, precision = 12, scale = 2)
@@ -75,8 +81,32 @@ public class PaymentRefundIntentEntity {
             Instant updatedAt,
             Instant completedAt
     ) {
+        this(id, paymentId, "PREFERENCES", null, providerPaymentId, amount, currency, idempotencyKey,
+                status, claimToken, leaseExpiresAt, providerRefundId, failureReason, createdAt, updatedAt, completedAt);
+    }
+
+    public PaymentRefundIntentEntity(
+            UUID id,
+            UUID paymentId,
+            String checkoutMode,
+            String providerOrderId,
+            String providerPaymentId,
+            BigDecimal amount,
+            String currency,
+            String idempotencyKey,
+            String status,
+            UUID claimToken,
+            Instant leaseExpiresAt,
+            String providerRefundId,
+            String failureReason,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant completedAt
+    ) {
         this.id = id;
         this.paymentId = paymentId;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
+        this.providerOrderId = providerOrderId;
         this.providerPaymentId = providerPaymentId;
         this.amount = amount;
         this.currency = currency;
@@ -96,6 +126,12 @@ public class PaymentRefundIntentEntity {
 
     public UUID getPaymentId() { return paymentId; }
     public void setPaymentId(UUID paymentId) { this.paymentId = paymentId; }
+
+    public String getCheckoutMode() { return checkoutMode; }
+    public void setCheckoutMode(String checkoutMode) { this.checkoutMode = checkoutMode; }
+
+    public String getProviderOrderId() { return providerOrderId; }
+    public void setProviderOrderId(String providerOrderId) { this.providerOrderId = providerOrderId; }
 
     public String getProviderPaymentId() { return providerPaymentId; }
     public void setProviderPaymentId(String providerPaymentId) { this.providerPaymentId = providerPaymentId; }

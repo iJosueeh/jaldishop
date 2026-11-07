@@ -31,7 +31,13 @@ public class PaymentReconciliationScheduler {
         try {
             reconciliationService.reconcileOrphanApprovedPayments();
         } catch (Exception e) {
-            log.error("Fallo inesperado durante la ejecución programada de conciliación: {}", e.getMessage(), e);
+            log.error("Fallo inesperado durante la ejecución programada de conciliación de pagos: {}", e.getMessage(), e);
+        }
+
+        try {
+            reconciliationService.reconcileOrphanOrders();
+        } catch (Exception e) {
+            log.error("Fallo inesperado durante la ejecución programada de conciliación de órdenes: {}", e.getMessage(), e);
         }
     }
 }

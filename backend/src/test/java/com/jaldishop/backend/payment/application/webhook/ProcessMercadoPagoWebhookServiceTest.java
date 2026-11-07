@@ -112,6 +112,9 @@ class ProcessMercadoPagoWebhookServiceTest {
                 "idemp-webhook-001"
         );
         activeAttempt.markProcessing();
+        lenient().when(paymentAttemptRepository.findByIdForUpdate(any())).thenAnswer(inv ->
+                paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId).stream()
+                        .filter(a -> a.getId().equals(inv.getArgument(0))).findFirst());
     }
 
     @Test
@@ -919,6 +922,397 @@ class ProcessMercadoPagoWebhookServiceTest {
         assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
         assertThat(activePayment.getRefundReference()).contains("INCIDENCE:Stock agotado para variante");
+    }
+
+    @Test
+    @DisplayName("Orders API: Procesa exitosamente webhook de tipo order con pago aprobado y asocia providerOrderId y providerPaymentId")
+    void shouldProcessOrderWebhookSuccessfullyWhenPaymentApproved() {
+        String orderId = "ORD-MP-123456";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-01";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-TRANS-999", "approved", "accredited", new BigDecimal("50.00"), "PEN",
+                        "visa", "credit_card", Instant.now()
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "closed", "paid", new BigDecimal("50.00"), new BigDecimal("50.00"),
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.paymentStatus()).isEqualTo("APPROVED");
+        assertThat(result.providerPaymentId()).isEqualTo("PAY-TRANS-999");
+
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
+        assertThat(activeAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
+        assertThat(activeAttempt.getProviderPaymentId()).isEqualTo("PAY-TRANS-999");
+    }
+
+    @Test
+    @DisplayName("Orders API: Ignora de forma segura orden sin transacciones de pago")
+    void shouldIgnoreOrderWithoutTransactions() {
+        String orderId = "ORD-EMPTY-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-02";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "opened", null, new BigDecimal("50.00"), BigDecimal.ZERO,
+                        paymentId.toString(), List.of(), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "orders_v2"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isFalse();
+        assertThat(result.message()).contains("sin transacciones de pago");
+        verifyNoInteractions(paymentRepository);
+    }
+
+    @Test
+    @DisplayName("Orders API: Rechaza webhook con discrepancia de monto frente a pago registrado")
+    void shouldRejectOrderWebhookOnAmountMismatch() {
+        String orderId = "ORD-MISMATCH-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-03";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-TRANS-111", "approved", "accredited", new BigDecimal("30.00"), "PEN",
+                        "visa", "credit_card", Instant.now()
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "closed", null, new BigDecimal("30.00"), new BigDecimal("30.00"),
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("El monto notificado (30.00) no coincide con el monto esperado (50.00)");
+    }
+
+    @Test
+    @DisplayName("Orders API: Rechaza webhook con external_reference inválido o no correspondiente a UUID")
+    void shouldRejectOrderWebhookOnInvalidExternalReference() {
+        String orderId = "ORD-BAD-REF";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-04";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-1", "approved", "accredited", new BigDecimal("50.00"), "PEN", "visa", "credit_card", Instant.now()
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "closed", null, new BigDecimal("50.00"), new BigDecimal("50.00"),
+                        "not-a-valid-uuid", List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("external_reference no posee un formato de UUID válido");
+    }
+
+    @Test
+    @DisplayName("Orders API: Rechaza webhook si collector_id no coincide con el esperado")
+    void shouldRejectOrderWebhookOnCollectorMismatch() {
+        properties.setExpectedCollectorId(999888777L);
+        String orderId = "ORD-COLLECTOR-MISMATCH";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-05";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "closed", null, new BigDecimal("50.00"), new BigDecimal("50.00"),
+                        paymentId.toString(), List.of(), 111222333L, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(SecurityException.class)
+                .hasMessageContaining("collector_id=111222333");
+    }
+
+    @Test
+    @DisplayName("Orders API: Orden con estado in_process no aprueba pago y actualiza intento a PENDING")
+    void shouldProcessOrderPendingPaymentWithoutApproving() {
+        String orderId = "ORD-PENDING-001";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-06";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-PEND-123", "in_process", "pending_review_manual", new BigDecimal("50.00"), "PEN",
+                        "visa", "credit_card", null
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "opened", null, new BigDecimal("50.00"), BigDecimal.ZERO,
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.paymentStatus()).isEqualTo("PROCESSING");
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.PROCESSING);
+        assertThat(activeAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
+        assertThat(activeAttempt.getProviderPaymentId()).isEqualTo("PAY-PEND-123");
+    }
+
+    @Test
+    @DisplayName("Orders API: Confirmación comercial con reserva vencida genera incidencia duradera y conserva APPROVED")
+    void shouldRecordIncidenceWhenOrderConfirmedWithExpiredReservation() {
+        String orderId = "ORD-EXPIRED-RESERVATION";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-07";
+
+        ConfirmPurchaseService confirmPurchaseService = mock(ConfirmPurchaseService.class);
+        ProcessMercadoPagoWebhookService fullService = new ProcessMercadoPagoWebhookService(
+                signatureValidator, mercadoPagoGateway, persistenceService, properties, objectMapper, confirmPurchaseService
+        );
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-APPR-999", "approved", "accredited", new BigDecimal("50.00"), "PEN",
+                        "visa", "credit_card", Instant.now()
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "closed", null, new BigDecimal("50.00"), new BigDecimal("50.00"),
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        when(confirmPurchaseService.execute(any(ConfirmPurchaseCommand.class)))
+                .thenThrow(new ConflictException("RESERVATION_EXPIRED", "La reserva de capacidad se encuentra expirada."));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = fullService.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.paymentStatus()).isEqualTo("APPROVED");
+        assertThat(result.message()).contains("La reserva de capacidad se encuentra expirada.");
+
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
+        assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
+        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:La reserva de capacidad se encuentra expirada.");
+    }
+
+    @Test
+    @DisplayName("Orders API: Pago con status processed y status_detail accredited se aprueba y confirma comercialmente")
+    void shouldProcessOrderWebhookWhenPaymentProcessedAndAccredited() {
+        String orderId = "ORD-PROCESSED-ACCREDITED";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-08";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-PROC-123", "processed", "accredited", new BigDecimal("50.00"), "PEN",
+                        "visa", "credit_card", Instant.now()
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "processed", "accredited", new BigDecimal("50.00"), new BigDecimal("50.00"),
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.paymentStatus()).isEqualTo("APPROVED");
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
+        assertThat(activeAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
+    }
+
+    @Test
+    @DisplayName("Orders API: Pago con status processed pero status_detail no acreditado (waiting_capture) NO se aprueba")
+    void shouldNotApproveOrderWebhookWhenPaymentProcessedWithoutAccreditation() {
+        String orderId = "ORD-PROCESSED-WAITING";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-09";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
+                        "PAY-PROC-WAIT", "processed", "waiting_capture", new BigDecimal("50.00"), "PEN",
+                        "visa", "credit_card", null
+                );
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "processing", null, new BigDecimal("50.00"), BigDecimal.ZERO,
+                        paymentId.toString(), List.of(paymentItem), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.paymentStatus()).isEqualTo("PROCESSING");
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.PROCESSING);
+        assertThat(activeAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
+    }
+
+    @Test
+    @DisplayName("Orders API: Orden cancelada sin transacciones actualiza intento a REJECTED y conserva Payment en PENDING")
+    void shouldRejectAttemptWhenOrderCanceledWithoutTransactions() {
+        String orderId = "ORD-CANCELED-EMPTY";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "idemp-orders", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test/orders");
+        activeAttempt.markProcessing();
+        String xSignature = "ts=1700000000,v1=validhash";
+        String xRequestId = "req-orders-10";
+
+        when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
+
+        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
+                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
+                        orderId, "canceled", "expired", new BigDecimal("50.00"), BigDecimal.ZERO,
+                        paymentId.toString(), List.of(), null, null
+                );
+
+        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+
+        ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
+                xSignature, xRequestId, Map.of("data.id", orderId, "type", "order"), null
+        );
+
+        ProcessMercadoPagoWebhookResult result = service.execute(command);
+
+        assertThat(result.processed()).isTrue();
+        assertThat(result.attemptStatus()).isEqualTo("REJECTED");
+        assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(activeAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.REJECTED);
+        assertThat(activeAttempt.getErrorCode()).isEqualTo("ORDER_CANCELED");
     }
 
 }

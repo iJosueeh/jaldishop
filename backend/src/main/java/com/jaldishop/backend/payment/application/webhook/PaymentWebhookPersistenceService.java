@@ -1,6 +1,7 @@
 package com.jaldishop.backend.payment.application.webhook;
 
 import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
+import com.jaldishop.backend.payment.application.gateway.ExternalPaymentReference;
 import com.jaldishop.backend.payment.domain.enums.*;
 import com.jaldishop.backend.payment.domain.model.*;
 import com.jaldishop.backend.payment.domain.repository.*;
@@ -27,6 +28,8 @@ public class PaymentWebhookPersistenceService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentWebhookPersistenceService.class);
 
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
 
@@ -34,12 +37,47 @@ public class PaymentWebhookPersistenceService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository
     ) {
+        this(paymentRepository, paymentAttemptRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PaymentWebhookPersistenceService(PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
     }
 
-    @Transactional
+    /** Non-locking routing read; ownership is revalidated under Payment → PaymentAttempt locks. */
+    public UUID resolvePaymentId(ExternalPaymentReference reference) {
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT) return reference.id();
+        return paymentAttemptRepository.findById(reference.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Intento no encontrado: " + reference.id()))
+                .getPaymentId();
+    }
+
+    public void validateReference(String value, UUID paymentId, PaymentAttempt attempt) {
+        var reference = ExternalPaymentReference.parse(value).orElseThrow(() ->
+                new ConflictException("INVALID_EXTERNAL_REFERENCE", "Referencia inválida."));
+        boolean valid = reference.kind() == ExternalPaymentReference.Kind.PAYMENT
+                ? reference.id().equals(paymentId)
+                : reference.id().equals(attempt.getId()) && "ORDERS".equals(attempt.getCheckoutMode());
+        if (!valid || !paymentId.equals(attempt.getPaymentId())
+                || attempt.getProvider() != PaymentProvider.MERCADO_PAGO)
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "REFERENCE_MISMATCH");
+    }
+
+    @Transactional(noRollbackFor = ConflictException.class)
     public ProcessMercadoPagoWebhookResult applyQueryResultToPayment(UUID paymentId, PaymentQueryResult queryResult) {
+        return applyPaymentQueryResult(paymentId, queryResult, null);
+    }
+
+    @Transactional(noRollbackFor = ConflictException.class)
+    public ProcessMercadoPagoWebhookResult applyPaymentQueryResult(
+            UUID paymentId,
+            PaymentQueryResult queryResult,
+            String providerOrderId
+    ) {
         // Bloqueo pesimista PESSIMISTIC_WRITE sobre Payment para serializar webhooks concurrentes
         Payment payment = paymentRepository.findByIdForUpdate(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
@@ -63,17 +101,63 @@ public class PaymentWebhookPersistenceService {
 
         List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
         PaymentAttempt targetAttempt = null;
-        for (PaymentAttempt a : attempts) {
-            if (queryResult.providerPaymentId().equals(a.getProviderPaymentId())) {
-                targetAttempt = a;
-                break;
-            }
-        }
-        if (targetAttempt == null && !attempts.isEmpty()) {
-            targetAttempt = attempts.getLast();
+
+        var remoteOwner = paymentAttemptRepository.findByProviderAndProviderPaymentId(
+                PaymentProvider.MERCADO_PAGO, queryResult.providerPaymentId());
+        var orderOwner = providerOrderId == null ? java.util.Optional.<PaymentAttempt>empty()
+                : paymentAttemptRepository.findByProviderOrderId(providerOrderId);
+        if (remoteOwner.filter(a -> !paymentId.equals(a.getPaymentId())).isPresent()
+                || orderOwner.filter(a -> !paymentId.equals(a.getPaymentId())).isPresent())
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        PaymentAttempt byPayment = uniqueMatch(attempts, a -> queryResult.providerPaymentId() != null
+                && queryResult.providerPaymentId().equals(a.getProviderPaymentId()));
+        PaymentAttempt byOrder = uniqueMatch(attempts, a -> providerOrderId != null
+                && providerOrderId.equals(a.getProviderOrderId()));
+        if (byPayment != null && byOrder != null && !byPayment.getId().equals(byOrder.getId()))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        targetAttempt = byOrder != null ? byOrder : byPayment;
+        var reference = ExternalPaymentReference.parse(queryResult.externalReference()).orElseThrow(() ->
+                new ConflictException("INVALID_EXTERNAL_REFERENCE", "Referencia inválida."));
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT_ATTEMPT) {
+            PaymentAttempt explicit = paymentAttemptRepository.findById(reference.id()).orElseThrow(() ->
+                    new ResourceNotFoundException("Intento no encontrado: " + reference.id()));
+            validateReference(queryResult.externalReference(), paymentId, explicit);
+            if ((targetAttempt != null && !targetAttempt.getId().equals(explicit.getId()))
+                    || remoteOwner.filter(a -> !a.getId().equals(explicit.getId())).isPresent()
+                    || orderOwner.filter(a -> !a.getId().equals(explicit.getId())).isPresent())
+                throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+            targetAttempt = explicit;
         }
 
+        if (targetAttempt == null && providerOrderId == null) {
+            // Keep the historical Preferences selection policy.
+            for (int i = attempts.size() - 1; i >= 0; i--) {
+                PaymentAttempt a = attempts.get(i);
+                if ("PREFERENCES".equalsIgnoreCase(a.getCheckoutMode())
+                        && (a.getStatus() == PaymentAttemptStatus.CREATED || a.getStatus() == PaymentAttemptStatus.PROCESSING)
+                        && a.getProviderPaymentId() == null) {
+                    targetAttempt = a;
+                    break;
+                }
+            }
+        }
+        // A paymentId shared by historical Orders attempts is not attempt identity.
+        if (targetAttempt == null)
+            throw correlationConflict(attempts, "UNRESOLVED_ATTEMPT");
+        targetAttempt = paymentAttemptRepository.findByIdForUpdate(targetAttempt.getId()).orElseThrow();
+        if ((providerOrderId != null && (!"ORDERS".equals(targetAttempt.getCheckoutMode())
+                || !providerOrderId.equals(targetAttempt.getProviderOrderId())))
+                || (targetAttempt.getProviderPaymentId() != null
+                && !targetAttempt.getProviderPaymentId().equals(queryResult.providerPaymentId())))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+
+        validateReference(queryResult.externalReference(), paymentId, targetAttempt);
+        if (reference.kind() == ExternalPaymentReference.Kind.PAYMENT_ATTEMPT
+                && (queryResult.providerPaymentId() == null || queryResult.providerPaymentId().isBlank()))
+            throw correlationConflict(attempts, "MISSING_REMOTE_PAYMENT_ID");
+
         String mpStatus = queryResult.status().toLowerCase(Locale.ROOT);
+        String mpStatusDetail = queryResult.statusDetail() != null ? queryResult.statusDetail().toLowerCase(Locale.ROOT) : "";
         PaymentMethod resolvedMethod = resolvePaymentMethod(queryResult.paymentTypeId(), queryResult.paymentMethodId());
 
         // 2. Protección de Estados Terminales y Eventos Fuera de Orden:
@@ -88,65 +172,139 @@ public class PaymentWebhookPersistenceService {
             );
         }
 
-        // 3. Transición según estado oficial del proveedor
-        switch (mpStatus) {
-            case "approved" -> {
-                payment.markApproved(queryResult.dateApproved());
-                paymentRepository.save(payment);
+        if (targetAttempt.getStatus() == PaymentAttemptStatus.APPROVED
+                || (targetAttempt.getStatus() == PaymentAttemptStatus.REJECTED
+                    && !"approved".equals(mpStatus)
+                    && !("processed".equals(mpStatus) && "accredited".equals(mpStatusDetail)))) {
+            return ProcessMercadoPagoWebhookResult.success(paymentId, queryResult.providerPaymentId(),
+                    payment.getStatus().name(), targetAttempt.getStatus().name(), "Estado financiero preservado.");
+        }
 
-                if (targetAttempt != null) {
-                    targetAttempt.markApproved(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            resolvedMethod,
-                            queryResult.dateApproved()
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Pago {} y su intento {} actualizados a APPROVED conforme a Mercado Pago.",
-                        paymentId, targetAttempt != null ? targetAttempt.getId() : "N/A");
+        // 3. Transición según estado financiero y acreditación real de la transacción:
+        // Se considera acreditado financieramente si:
+        // a) El pago individual tiene status="approved", o
+        // b) El pago tiene status="processed" CON status_detail="accredited" estricto.
+        boolean isAccredited = "approved".equals(mpStatus)
+                || ("processed".equals(mpStatus) && "accredited".equals(mpStatusDetail));
+
+        if (isAccredited) {
+            payment.markApproved(queryResult.dateApproved());
+            paymentRepository.save(payment);
+
+            if (targetAttempt != null) {
+                targetAttempt.markApproved(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        resolvedMethod,
+                        queryResult.dateApproved()
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
-            case "rejected", "cancelled" -> {
-                if (targetAttempt != null) {
-                    targetAttempt.markRejected(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            Instant.now()
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Intento de pago {} actualizado a REJECTED por Mercado Pago. El pago principal se mantiene en {} para reintento.",
-                        targetAttempt != null ? targetAttempt.getId() : "N/A", payment.getStatus());
+            log.info("Pago {} y su intento {} actualizados a APPROVED conforme a Mercado Pago (status={}, detail={}).",
+                    paymentId, targetAttempt != null ? targetAttempt.getId() : "N/A", mpStatus, mpStatusDetail);
+        } else if ("rejected".equals(mpStatus) || "cancelled".equals(mpStatus)) {
+            if (targetAttempt != null) {
+                targetAttempt.markRejected(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        Instant.now()
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
-            case "pending", "in_process", "authorized" -> {
-                if (payment.getStatus() == PaymentStatus.PENDING) {
-                    payment.markProcessing();
-                    paymentRepository.save(payment);
-                }
-                if (targetAttempt != null) {
-                    targetAttempt.markProviderPending(
-                            queryResult.providerPaymentId(),
-                            queryResult.status(),
-                            queryResult.statusDetail(),
-                            resolvedMethod
-                    );
-                    paymentAttemptRepository.save(targetAttempt);
-                }
-                log.info("Pago {} e intento en estado intermedio: {}.", paymentId, mpStatus);
+            log.info("Intento de pago {} actualizado a REJECTED por Mercado Pago. El pago principal se mantiene en {} para reintento.",
+                    targetAttempt != null ? targetAttempt.getId() : "N/A", payment.getStatus());
+        } else if ("pending".equals(mpStatus) || "in_process".equals(mpStatus) || "authorized".equals(mpStatus) || "processed".equals(mpStatus)) {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                payment.markProcessing();
+                paymentRepository.save(payment);
             }
-            default -> {
-                log.warn("Estado desconocido de Mercado Pago ({}) recibido para pago {}.", mpStatus, paymentId);
+            if (targetAttempt != null) {
+                targetAttempt.markProviderPending(
+                        queryResult.providerPaymentId(),
+                        queryResult.status(),
+                        queryResult.statusDetail(),
+                        resolvedMethod
+                );
+                paymentAttemptRepository.save(targetAttempt);
             }
+            log.info("Pago {} e intento en estado intermedio: {} (detail={}).", paymentId, mpStatus, mpStatusDetail);
+        } else {
+            log.warn("Estado desconocido de Mercado Pago ({}, detail={}) recibido para pago {}.", mpStatus, mpStatusDetail, paymentId);
         }
 
         String attemptStatus = targetAttempt != null ? targetAttempt.getStatus().name() : "NONE";
         return ProcessMercadoPagoWebhookResult.success(
                 paymentId, queryResult.providerPaymentId(), payment.getStatus().name(), attemptStatus,
                 "Estado del pago actualizado conforme a consulta con Mercado Pago."
+        );
+    }
+
+    /**
+     * Aplica la cancelación o expiración de una orden de Orders API cuando no contiene transacciones financieras.
+     * Marca el PaymentAttempt correspondiente como REJECTED preservando el Payment principal en PENDING para reintento.
+     */
+    @Transactional(noRollbackFor = ConflictException.class)
+    public ProcessMercadoPagoWebhookResult applyOrderCancellation(
+            UUID paymentId,
+            String providerOrderId,
+            String orderStatus,
+            String orderStatusDetail
+    ) {
+        return applyOrderCancellation(paymentId, providerOrderId, orderStatus, orderStatusDetail, paymentId.toString());
+    }
+
+    @Transactional(noRollbackFor = ConflictException.class)
+    public ProcessMercadoPagoWebhookResult applyOrderCancellation(UUID paymentId, String providerOrderId,
+            String orderStatus, String orderStatusDetail, String externalReference) {
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
+
+        List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
+        PaymentAttempt targetAttempt = null;
+
+        targetAttempt = uniqueMatch(attempts, a -> providerOrderId != null
+                && providerOrderId.equals(a.getProviderOrderId()));
+        if (targetAttempt == null) throw correlationConflict(attempts, "UNRESOLVED_CANCELLATION");
+        targetAttempt = paymentAttemptRepository.findByIdForUpdate(targetAttempt.getId()).orElseThrow();
+        validateReference(externalReference, paymentId, targetAttempt);
+        if (!"ORDERS".equals(targetAttempt.getCheckoutMode())
+                || !providerOrderId.equals(targetAttempt.getProviderOrderId()))
+            throw correlationConflict(attempts, "IDENTIFIER_CONTRADICTION");
+        if (payment.getStatus() == PaymentStatus.APPROVED) {
+            log.info("Pago {} ya se encuentra APPROVED. Ignorando cancelación tardía de orden {}.", paymentId, providerOrderId);
+            return ProcessMercadoPagoWebhookResult.success(
+                    paymentId, null, payment.getStatus().name(), "APPROVED",
+                    "Orden cancelada extemporáneamente; estado APPROVED preservado por idempotencia."
+            );
+        }
+
+        if (targetAttempt.getStatus() == PaymentAttemptStatus.APPROVED
+                || targetAttempt.getStatus() == PaymentAttemptStatus.REJECTED)
+            return ProcessMercadoPagoWebhookResult.success(paymentId, null, payment.getStatus().name(),
+                    targetAttempt.getStatus().name(), "Estado financiero preservado.");
+
+        if (targetAttempt != null) {
+            targetAttempt.markRejected(
+                    null,
+                    orderStatus,
+                    orderStatusDetail,
+                    "ORDER_CANCELED",
+                    "Orden cancelada o expirada en Mercado Pago: " + (orderStatusDetail != null ? orderStatusDetail : orderStatus),
+                    Instant.now()
+            );
+            paymentAttemptRepository.save(targetAttempt);
+            log.info("Intento {} marcado como REJECTED por cancelación de orden {} en Mercado Pago.",
+                    targetAttempt.getId(), providerOrderId);
+        }
+
+        String attemptStatus = targetAttempt != null ? targetAttempt.getStatus().name() : "NONE";
+        return ProcessMercadoPagoWebhookResult.success(
+                paymentId, null, payment.getStatus().name(), attemptStatus,
+                "Orden cancelada o expirada registrada en el intento de pago."
         );
     }
 
@@ -164,13 +322,17 @@ public class PaymentWebhookPersistenceService {
                 return;
             }
 
+            if (payment.getStatus() != PaymentStatus.APPROVED
+                    || payment.getRefundStatus() != RefundStatus.NOT_REQUIRED) return;
+
             String truncatedReason = reason != null && reason.length() > 80 ? reason.substring(0, 80) : (reason != null ? reason : "INCIDENCE");
             payment.requestRefund(payment.getAmount(), "INCIDENCE:" + truncatedReason);
             paymentRepository.save(payment);
 
             List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
-            if (!attempts.isEmpty()) {
-                PaymentAttempt targetAttempt = attempts.getLast();
+            var approved = attempts.stream().filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED).toList();
+            if (approved.size() == 1) {
+                PaymentAttempt targetAttempt = paymentAttemptRepository.findByIdForUpdate(approved.getFirst().getId()).orElseThrow();
                 targetAttempt.recordIncidence("COMMERCIAL_CONFIRMATION_FAILED", reason);
                 paymentAttemptRepository.save(targetAttempt);
             }
@@ -179,6 +341,28 @@ public class PaymentWebhookPersistenceService {
         } catch (Exception e) {
             log.error("Error al registrar incidencia para pago {}: {}", paymentId, e.getMessage(), e);
         }
+    }
+
+    private PaymentAttempt uniqueMatch(List<PaymentAttempt> attempts,
+            java.util.function.Predicate<PaymentAttempt> predicate) {
+        var matches = attempts.stream().filter(predicate).toList();
+        if (matches.size() > 1) throw correlationConflict(attempts, "AMBIGUOUS_ATTEMPT");
+        return matches.isEmpty() ? null : matches.getFirst();
+    }
+
+    private ConflictException correlationConflict(List<PaymentAttempt> attempts, String reason) {
+        if (jdbc != null) {
+            for (PaymentAttempt attempt : attempts) {
+                if (!"ORDERS".equals(attempt.getCheckoutMode())) continue;
+                jdbc.update("""
+                        INSERT INTO remote_order_creation_events
+                        (payment_attempt_id, previous_state, new_state, evidence_code)
+                        VALUES (?, ?, ?, ?)
+                        """, attempt.getId(), attempt.getRemoteOrderCreationState().name(),
+                        attempt.getRemoteOrderCreationState().name(), "WEBHOOK_" + reason);
+            }
+        }
+        return new ConflictException("PAYMENT_ATTEMPT_MISMATCH", reason);
     }
 
     private PaymentMethod resolvePaymentMethod(String paymentTypeId, String paymentMethodId) {

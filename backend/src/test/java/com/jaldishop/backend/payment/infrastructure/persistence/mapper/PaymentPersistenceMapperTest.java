@@ -116,6 +116,7 @@ class PaymentPersistenceMapperTest {
         assertThat(entity.getPaymentMethod()).isEqualTo("YAPE");
         assertThat(entity.getIdempotencyKey()).isEqualTo("idempotency-key-xyz");
         assertThat(entity.getPreferenceId()).isEqualTo("pref-xyz");
+        assertThat(entity.getProviderOrderId()).isNull();
         assertThat(entity.getInitPoint()).isEqualTo("https://mercadopago.com/checkout/xyz");
         assertThat(entity.getProviderPaymentId()).isEqualTo("MP-999");
         assertThat(entity.getProviderStatus()).isEqualTo("approved");
@@ -127,8 +128,58 @@ class PaymentPersistenceMapperTest {
         assertThat(rehydrated.getId()).isEqualTo(attempt.getId());
         assertThat(rehydrated.getPaymentMethod()).isEqualTo(PaymentMethod.YAPE);
         assertThat(rehydrated.getPreferenceId()).isEqualTo("pref-xyz");
+        assertThat(rehydrated.getProviderOrderId()).isNull();
         assertThat(rehydrated.getProviderPaymentId()).isEqualTo("MP-999");
         assertThat(rehydrated.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
+    }
+
+    @Test
+    @DisplayName("PaymentAttemptPersistenceMapper mapea correctamente providerOrderId en ambos sentidos")
+    void shouldMapPaymentAttemptWithProviderOrderIdRoundtrip() {
+        PaymentAttempt attempt = PaymentAttempt.create(
+                UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-orders-001"
+        );
+        attempt.recordOrder("ORD01J67CQQH5904WDBVZEM4JMEP3", "https://mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J");
+        attempt.markApproved("PAY-TRX-555", "approved", "accredited", PaymentMethod.CARD, Instant.now());
+
+        // Domain -> Entity
+        PaymentAttemptEntity entity = attemptMapper.toEntity(attempt);
+        assertThat(entity).isNotNull();
+        assertThat(entity.getProviderOrderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(entity.getPreferenceId()).isNull();
+        assertThat(entity.getProviderPaymentId()).isEqualTo("PAY-TRX-555");
+        assertThat(entity.getInitPoint()).isEqualTo("https://mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J");
+
+        // Entity -> Domain
+        PaymentAttempt rehydrated = attemptMapper.toDomain(entity);
+        assertThat(rehydrated).isNotNull();
+        assertThat(rehydrated.getProviderOrderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(rehydrated.getPreferenceId()).isNull();
+        assertThat(rehydrated.getProviderPaymentId()).isEqualTo("PAY-TRX-555");
+        assertThat(rehydrated.getInitPoint()).isEqualTo("https://mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J");
+    }
+
+    @Test
+    @DisplayName("PaymentAttemptPersistenceMapper mantiene compatibilidad con entidad histórica de BD con providerOrderId nulo")
+    void shouldHandleLegacyEntityWithNullProviderOrderId() {
+        UUID id = UUID.randomUUID();
+        UUID paymentId = UUID.randomUUID();
+        Instant now = Instant.now();
+
+        // Entidad simulada tal como existe en BD antes de V20 (providerOrderId es null)
+        PaymentAttemptEntity legacyEntity = new PaymentAttemptEntity(
+                id, paymentId, 1, "MERCADO_PAGO", "CARD", "key-legacy-db",
+                "pref-db-123", "https://mp.com/pref/123", "PAY-DB-456", "approved", "accredited",
+                "APPROVED", null, null, now, now, now
+        );
+
+        PaymentAttempt domain = attemptMapper.toDomain(legacyEntity);
+        assertThat(domain).isNotNull();
+        assertThat(domain.getId()).isEqualTo(id);
+        assertThat(domain.getPreferenceId()).isEqualTo("pref-db-123");
+        assertThat(domain.getProviderOrderId()).isNull();
+        assertThat(domain.getProviderPaymentId()).isEqualTo("PAY-DB-456");
+        assertThat(domain.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
     }
 
 }

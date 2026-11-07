@@ -2,6 +2,7 @@ package com.jaldishop.backend.review.web.controller;
 
 import com.jaldishop.backend.review.application.service.CheckReviewEligibilityService;
 import com.jaldishop.backend.review.application.service.CreateProductReviewService;
+import com.jaldishop.backend.review.application.service.DeleteProductReviewService;
 import com.jaldishop.backend.review.application.service.GetCustomerReviewsService;
 import com.jaldishop.backend.review.application.service.UpdateProductReviewService;
 import com.jaldishop.backend.review.web.dto.CreateReviewRequest;
@@ -27,15 +28,18 @@ public class CustomerReviewController {
     private final CheckReviewEligibilityService checkReviewEligibilityService;
     private final CreateProductReviewService createProductReviewService;
     private final UpdateProductReviewService updateProductReviewService;
+    private final DeleteProductReviewService deleteProductReviewService;
     private final GetCustomerReviewsService getCustomerReviewsService;
 
     public CustomerReviewController(CheckReviewEligibilityService checkReviewEligibilityService,
                                     CreateProductReviewService createProductReviewService,
                                     UpdateProductReviewService updateProductReviewService,
+                                    DeleteProductReviewService deleteProductReviewService,
                                     GetCustomerReviewsService getCustomerReviewsService) {
         this.checkReviewEligibilityService = checkReviewEligibilityService;
         this.createProductReviewService = createProductReviewService;
         this.updateProductReviewService = updateProductReviewService;
+        this.deleteProductReviewService = deleteProductReviewService;
         this.getCustomerReviewsService = getCustomerReviewsService;
     }
 
@@ -63,6 +67,14 @@ public class CustomerReviewController {
             @AuthenticationPrincipal JwtPrincipal principal) {
         CustomerReviewResponse response = updateProductReviewService.execute(principal.userId(), productId, request);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/products/{productId}/reviews")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable("productId") UUID productId,
+            @AuthenticationPrincipal JwtPrincipal principal) {
+        deleteProductReviewService.execute(principal.userId(), productId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reviews")

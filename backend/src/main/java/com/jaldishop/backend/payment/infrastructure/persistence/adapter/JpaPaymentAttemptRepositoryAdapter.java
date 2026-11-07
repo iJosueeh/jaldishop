@@ -53,6 +53,11 @@ public class JpaPaymentAttemptRepositoryAdapter implements PaymentAttemptReposit
     }
 
     @Override
+    public Optional<PaymentAttempt> findByProviderOrderId(String providerOrderId) {
+        return jpaRepository.findByProviderOrderId(providerOrderId).map(mapper::toDomain);
+    }
+
+    @Override
     public List<PaymentAttempt> findByPaymentIdOrderByAttemptNumberAsc(UUID paymentId) {
         return jpaRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)
                 .stream()
@@ -63,6 +68,17 @@ public class JpaPaymentAttemptRepositoryAdapter implements PaymentAttemptReposit
     @Override
     public int findNextAttemptNumber(UUID paymentId) {
         return jpaRepository.findNextAttemptNumber(paymentId);
+    }
+
+    @Override
+    public Optional<PaymentAttempt> findByIdForUpdate(UUID id) {
+        return jpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<UUID> findEligibleOrderReconciliationAttemptIds(java.time.Instant cutoffTime, java.time.Instant now, int batchSize) {
+        int limit = Math.max(1, Math.min(batchSize, 100));
+        return jpaRepository.findEligibleOrderReconciliationAttemptIds(cutoffTime, now, org.springframework.data.domain.PageRequest.of(0, limit));
     }
 
 }

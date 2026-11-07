@@ -3,6 +3,7 @@ package com.jaldishop.backend.review.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaldishop.backend.review.application.service.CheckReviewEligibilityService;
 import com.jaldishop.backend.review.application.service.CreateProductReviewService;
+import com.jaldishop.backend.review.application.service.DeleteProductReviewService;
 import com.jaldishop.backend.review.application.service.GetCustomerReviewsService;
 import com.jaldishop.backend.review.application.service.UpdateProductReviewService;
 import com.jaldishop.backend.review.web.dto.CreateReviewRequest;
@@ -35,7 +36,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,6 +51,9 @@ class CustomerReviewControllerTest {
 
     @Mock
     private UpdateProductReviewService updateProductReviewService;
+
+    @Mock
+    private DeleteProductReviewService deleteProductReviewService;
 
     @Mock
     private GetCustomerReviewsService getCustomerReviewsService;
@@ -85,6 +89,7 @@ class CustomerReviewControllerTest {
                 checkReviewEligibilityService,
                 createProductReviewService,
                 updateProductReviewService,
+                deleteProductReviewService,
                 getCustomerReviewsService
         );
 
@@ -187,5 +192,31 @@ class CustomerReviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].productName").value("Mueble de madera"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/customer/products/{productId}/reviews elimina reseña y retorna 204 No Content")
+    void shouldDeleteReviewSuccessfully() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        doNothing().when(deleteProductReviewService).execute(customerUserId, productId);
+
+        mockMvc.perform(delete("/api/v1/customer/products/{productId}/reviews", productId))
+                .andExpect(status().isNoContent());
+
+        verify(deleteProductReviewService).execute(customerUserId, productId);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/customer/products/{productId}/reviews retorna 404 cuando la reseña no existe")
+    void shouldReturn404WhenDeletingNonExistentReview() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        doThrow(new com.jaldishop.backend.shared.exception.ResourceNotFoundException("Reseña", productId))
+                .when(deleteProductReviewService).execute(customerUserId, productId);
+
+        mockMvc.perform(delete("/api/v1/customer/products/{productId}/reviews", productId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 }

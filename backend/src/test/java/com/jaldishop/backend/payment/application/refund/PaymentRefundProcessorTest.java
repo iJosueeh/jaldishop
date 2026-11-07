@@ -2,6 +2,8 @@ package com.jaldishop.backend.payment.application.refund;
 
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.gateway.MercadoPagoGateway;
+import com.jaldishop.backend.payment.application.gateway.dto.ExecuteRefundCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 import com.jaldishop.backend.payment.application.reconciliation.PaymentIncidenceRecorder;
@@ -476,5 +478,115 @@ class PaymentRefundProcessorTest {
 
         assertFalse(result.claimed());
         assertEquals("El pago ya tiene pedido confirmado activo asociado", result.skipReason());
+    }
+
+    @Test
+    @DisplayName("Fase 1: Debe reclamar pago con intento en modo ORDERS y capturar providerOrderId")
+    void shouldClaimAndCreateRefundIntentForOrdersMode() {
+        UUID paymentId = UUID.randomUUID();
+        UUID workerToken = UUID.randomUUID();
+
+        Payment payment = Payment.createPending(
+                UUID.randomUUID(), BigDecimal.valueOf(150.00), "PEN",
+                FulfillmentType.DELIVERY, "Cliente", "999", "c@test.com",
+                "Av Test", null, null, null, BigDecimal.valueOf(150.00),
+                BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO, "{}"
+        );
+        payment.markApproved(Instant.now());
+        payment.requestRefund(BigDecimal.valueOf(150.00), "RESERVATION_EXPIRED");
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                paymentId, 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.WALLET_PURCHASE, "idemp-orders-01", "ORDERS"
+        );
+        attempt.recordOrder("ORD01J67CQQH5904WDBVZEM4JMEP3", "https://checkout.url");
+        attempt.markApproved("mp-pay-99999", "approved", "accredited", PaymentMethod.WALLET_PURCHASE, Instant.now());
+
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(payment));
+        when(orderRepository.findByPaymentId(paymentId)).thenReturn(Optional.empty());
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(attempt));
+        when(refundIntentRepository.findByPaymentIdForUpdate(paymentId)).thenReturn(Optional.empty());
+        when(refundIntentRepository.save(any(PaymentRefundIntent.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        RefundClaimResult claim = processor.claimOrCreateRefundIntent(paymentId, workerToken);
+
+        assertTrue(claim.claimed());
+        assertEquals(paymentId, claim.paymentId());
+        assertEquals("ORDERS", claim.checkoutMode());
+        assertEquals("ORD01J67CQQH5904WDBVZEM4JMEP3", claim.providerOrderId());
+        assertEquals("mp-pay-99999", claim.providerPaymentId());
+        assertEquals(BigDecimal.valueOf(150.00), claim.amount());
+        assertEquals(RefundStatus.PROCESSING, payment.getRefundStatus());
+    }
+
+    @Test
+    @DisplayName("Fase 2: Reconciliación previa vía GET order antes de POST en modo ORDERS ante estado UNKNOWN")
+    void shouldReconcileViaGetOrderBeforePostWhenPreviousStatusIsUnknownForOrdersMode() {
+        UUID paymentId = UUID.randomUUID();
+        RefundClaimResult claim = RefundClaimResult.claimed(
+                paymentId,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "ORDERS",
+                "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                "mp-pay-99999",
+                BigDecimal.valueOf(150.00),
+                "refund-" + paymentId,
+                RefundIntentStatus.UNKNOWN
+        );
+
+        OrderQueryResult orderResult = new OrderQueryResult(
+                "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                "processed",
+                "refunded",
+                BigDecimal.valueOf(150.00),
+                BigDecimal.valueOf(150.00),
+                "ext-order",
+                List.of(),
+                List.of(new OrderQueryResult.OrderRefundItem(
+                        "ref-order-99", "mp-pay-99999", BigDecimal.valueOf(150.00), "approved", Instant.now()
+                )),
+                123456L,
+                false
+        );
+        when(mercadoPagoGateway.queryOrder("ORD01J67CQQH5904WDBVZEM4JMEP3")).thenReturn(orderResult);
+
+        RefundExecutionResult execResult = processor.executeExternalRefund(claim);
+
+        verify(mercadoPagoGateway, times(1)).queryOrder("ORD01J67CQQH5904WDBVZEM4JMEP3");
+        verify(mercadoPagoGateway, never()).executeRefund(any());
+
+        assertEquals(RefundExecutionResult.ExecutionStatus.SUCCESSFUL, execResult.status());
+        assertEquals("ref-order-99", execResult.providerRefundId());
+        assertEquals("GET", execResult.requestMethod());
+    }
+
+    @Test
+    @DisplayName("Fase 2: Ejecuta reembolso en modo ORDERS enviando providerOrderId")
+    void shouldExecuteRefundPassingOrdersModeAndOrderId() {
+        UUID paymentId = UUID.randomUUID();
+        RefundClaimResult claim = RefundClaimResult.claimed(
+                paymentId,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "ORDERS",
+                "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                "mp-pay-99999",
+                BigDecimal.valueOf(150.00),
+                "refund-" + paymentId,
+                RefundIntentStatus.PENDING
+        );
+
+        when(mercadoPagoGateway.executeRefund(argThat(cmd ->
+                "ORDERS".equals(cmd.checkoutMode()) &&
+                "ORD01J67CQQH5904WDBVZEM4JMEP3".equals(cmd.providerOrderId()) &&
+                BigDecimal.valueOf(150.00).compareTo(cmd.amount()) == 0
+        ))).thenReturn(new RefundResult("ref-mp-new-1", "mp-pay-99999", BigDecimal.valueOf(150.00), "approved", Instant.now()));
+
+        RefundExecutionResult execResult = processor.executeExternalRefund(claim);
+
+        verify(mercadoPagoGateway, times(1)).executeRefund(any());
+        assertEquals(RefundExecutionResult.ExecutionStatus.SUCCESSFUL, execResult.status());
+        assertEquals("ref-mp-new-1", execResult.providerRefundId());
+        assertEquals("POST", execResult.requestMethod());
     }
 }

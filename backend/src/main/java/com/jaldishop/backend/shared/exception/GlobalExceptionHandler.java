@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
                 ));
 
         return ResponseEntity.badRequest().body(
-                new ApiError(SharedErrorCodes.VALIDATION_ERROR, "Los datos enviados no son validos", errors)
+                new ApiError(SharedErrorCodes.VALIDATION_ERROR, "Los datos enviados no son válidos", errors)
         );
     }
 

@@ -1,9 +1,11 @@
 package com.jaldishop.backend.payment.domain.model;
 
 import com.jaldishop.backend.payment.domain.enums.PaymentAttemptStatus;
+import com.jaldishop.backend.payment.domain.enums.RemoteOrderCreationState;
 import com.jaldishop.backend.payment.domain.enums.PaymentMethod;
 import com.jaldishop.backend.payment.domain.enums.PaymentProvider;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,7 +22,10 @@ public class PaymentAttempt {
     private final PaymentProvider provider;
     private PaymentMethod paymentMethod;
     private final String idempotencyKey;
+    private String checkoutMode;
+    private RemoteOrderCreationState remoteOrderCreationState;
     private String preferenceId;
+    private String providerOrderId;
     private String initPoint;
     private String providerPaymentId;
     private String providerStatus;
@@ -28,6 +33,8 @@ public class PaymentAttempt {
     private PaymentAttemptStatus status;
     private String errorCode;
     private String errorMessage;
+    private UUID reconciliationClaimToken;
+    private Instant reconciliationLeaseExpiresAt;
     private final Instant createdAt;
     private Instant completedAt;
     private Instant updatedAt;
@@ -37,7 +44,8 @@ public class PaymentAttempt {
             int attemptNumber,
             PaymentProvider provider,
             PaymentMethod paymentMethod,
-            String idempotencyKey
+            String idempotencyKey,
+            String checkoutMode
     ) {
         Objects.requireNonNull(paymentId, "paymentId no puede ser nulo");
         Objects.requireNonNull(provider, "provider no puede ser nulo");
@@ -48,13 +56,15 @@ public class PaymentAttempt {
         }
 
         Instant now = Instant.now();
-        return new PaymentAttempt(
+        PaymentAttempt attempt = new PaymentAttempt(
                 UUID.randomUUID(),
                 paymentId,
                 attemptNumber,
                 provider,
                 paymentMethod,
                 idempotencyKey,
+                checkoutMode != null ? checkoutMode : "PREFERENCES",
+                null,
                 null,
                 null,
                 null,
@@ -63,10 +73,26 @@ public class PaymentAttempt {
                 PaymentAttemptStatus.CREATED,
                 null,
                 null,
+                null,
+                null,
                 now,
                 null,
                 now
         );
+        if ("ORDERS".equals(attempt.checkoutMode)) {
+            attempt.remoteOrderCreationState = RemoteOrderCreationState.PREPARED;
+        }
+        return attempt;
+    }
+
+    public static PaymentAttempt create(
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey
+    ) {
+        return create(paymentId, attemptNumber, provider, paymentMethod, idempotencyKey, "PREFERENCES");
     }
 
     public static PaymentAttempt rehydrate(
@@ -88,14 +114,14 @@ public class PaymentAttempt {
             Instant completedAt,
             Instant updatedAt
     ) {
-        return new PaymentAttempt(
+        return rehydrate(
                 id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
-                preferenceId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                "PREFERENCES", preferenceId, null, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
                 status, errorCode, errorMessage, createdAt, completedAt, updatedAt
         );
     }
 
-    private PaymentAttempt(
+    public static PaymentAttempt rehydrate(
             UUID id,
             UUID paymentId,
             int attemptNumber,
@@ -103,6 +129,7 @@ public class PaymentAttempt {
             PaymentMethod paymentMethod,
             String idempotencyKey,
             String preferenceId,
+            String providerOrderId,
             String initPoint,
             String providerPaymentId,
             String providerStatus,
@@ -114,13 +141,108 @@ public class PaymentAttempt {
             Instant completedAt,
             Instant updatedAt
     ) {
+        return rehydrate(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                providerOrderId != null ? "ORDERS" : "PREFERENCES",
+                preferenceId, providerOrderId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public static PaymentAttempt rehydrate(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        return rehydrate(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                checkoutMode, preferenceId, providerOrderId, initPoint, providerPaymentId,
+                providerStatus, providerStatusDetail, status, errorCode, errorMessage,
+                null, null, createdAt, completedAt, updatedAt
+        );
+    }
+
+    public static PaymentAttempt rehydrate(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
+        return new PaymentAttempt(
+                id, paymentId, attemptNumber, provider, paymentMethod, idempotencyKey,
+                checkoutMode != null ? checkoutMode : "PREFERENCES",
+                preferenceId, providerOrderId, initPoint, providerPaymentId, providerStatus, providerStatusDetail,
+                status, errorCode, errorMessage, reconciliationClaimToken, reconciliationLeaseExpiresAt,
+                createdAt, completedAt, updatedAt
+        );
+    }
+
+    private PaymentAttempt(
+            UUID id,
+            UUID paymentId,
+            int attemptNumber,
+            PaymentProvider provider,
+            PaymentMethod paymentMethod,
+            String idempotencyKey,
+            String checkoutMode,
+            String preferenceId,
+            String providerOrderId,
+            String initPoint,
+            String providerPaymentId,
+            String providerStatus,
+            String providerStatusDetail,
+            PaymentAttemptStatus status,
+            String errorCode,
+            String errorMessage,
+            UUID reconciliationClaimToken,
+            Instant reconciliationLeaseExpiresAt,
+            Instant createdAt,
+            Instant completedAt,
+            Instant updatedAt
+    ) {
         this.id = id;
         this.paymentId = paymentId;
         this.attemptNumber = attemptNumber;
         this.provider = provider;
         this.paymentMethod = paymentMethod;
         this.idempotencyKey = idempotencyKey;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
+        this.remoteOrderCreationState = "ORDERS".equals(this.checkoutMode) ? RemoteOrderCreationState.UNKNOWN : null;
         this.preferenceId = preferenceId;
+        this.providerOrderId = providerOrderId;
         this.initPoint = initPoint;
         this.providerPaymentId = providerPaymentId;
         this.providerStatus = providerStatus;
@@ -128,6 +250,8 @@ public class PaymentAttempt {
         this.status = status;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
+        this.reconciliationClaimToken = reconciliationClaimToken;
+        this.reconciliationLeaseExpiresAt = reconciliationLeaseExpiresAt;
         this.createdAt = createdAt;
         this.completedAt = completedAt;
         this.updatedAt = updatedAt;
@@ -137,6 +261,49 @@ public class PaymentAttempt {
         this.preferenceId = preferenceId;
         this.initPoint = initPoint;
         this.updatedAt = Instant.now();
+    }
+
+    public void recordOrder(String providerOrderId, String initPoint) {
+        Objects.requireNonNull(providerOrderId, "providerOrderId no puede ser nulo");
+        if (providerOrderId.isBlank()) {
+            throw new IllegalArgumentException("providerOrderId no puede estar en blanco");
+        }
+        if (this.providerOrderId != null && !this.providerOrderId.equals(providerOrderId)) {
+            throw new IllegalStateException("Conflicting remote order identity");
+        }
+        if ("ORDERS".equals(checkoutMode)) {
+            if (initPoint == null || initPoint.isBlank()) {
+                throw new IllegalArgumentException("Verified creation requires checkout URL");
+            }
+            if (remoteOrderCreationState == RemoteOrderCreationState.REJECTED_CONFIRMED) {
+                throw new IllegalStateException("Creation already rejected");
+            }
+            remoteOrderCreationState = RemoteOrderCreationState.CREATED;
+        }
+        this.providerOrderId = providerOrderId;
+        this.initPoint = initPoint;
+        this.updatedAt = Instant.now();
+    }
+
+    public RemoteOrderCreationState getRemoteOrderCreationState() { return remoteOrderCreationState; }
+
+    /** Persistence reconstruction only: null from an older writer means uncertain. */
+    public void restoreRemoteOrderCreationState(RemoteOrderCreationState state) {
+        remoteOrderCreationState = "ORDERS".equals(checkoutMode)
+                ? (state != null ? state : RemoteOrderCreationState.UNKNOWN) : null;
+    }
+
+    public void recordOrderCreationFailure(boolean confirmedValidationRejection) {
+        if (!"ORDERS".equals(checkoutMode)) {
+            throw new IllegalStateException("Orders creation evidence only");
+        }
+        if (remoteOrderCreationState == RemoteOrderCreationState.CREATED
+                || remoteOrderCreationState == RemoteOrderCreationState.REJECTED_CONFIRMED) {
+            return; // Late errors cannot erase confirmed evidence.
+        }
+        remoteOrderCreationState = confirmedValidationRejection
+                ? RemoteOrderCreationState.REJECTED_CONFIRMED : RemoteOrderCreationState.UNKNOWN;
+        updatedAt = Instant.now();
     }
 
     public void markProcessing() {
@@ -218,7 +385,9 @@ public class PaymentAttempt {
     public PaymentProvider getProvider() { return provider; }
     public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public String getIdempotencyKey() { return idempotencyKey; }
+    public String getCheckoutMode() { return checkoutMode; }
     public String getPreferenceId() { return preferenceId; }
+    public String getProviderOrderId() { return providerOrderId; }
     public String getInitPoint() { return initPoint; }
     public String getProviderPaymentId() { return providerPaymentId; }
     public String getProviderStatus() { return providerStatus; }
@@ -229,5 +398,41 @@ public class PaymentAttempt {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getCompletedAt() { return completedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getReconciliationClaimToken() { return reconciliationClaimToken; }
+    public Instant getReconciliationLeaseExpiresAt() { return reconciliationLeaseExpiresAt; }
+
+    public boolean canClaimReconciliation(Instant now) {
+        if (!"ORDERS".equalsIgnoreCase(checkoutMode) || providerOrderId == null || providerOrderId.isBlank()) {
+            return false;
+        }
+        if (status != PaymentAttemptStatus.CREATED && status != PaymentAttemptStatus.PROCESSING) {
+            return false;
+        }
+        Instant effectiveNow = now != null ? now : Instant.now();
+        return reconciliationLeaseExpiresAt == null || reconciliationLeaseExpiresAt.isBefore(effectiveNow);
+    }
+
+    public void acquireReconciliationLease(UUID workerToken, Duration leaseDuration, Instant now) {
+        Objects.requireNonNull(workerToken, "workerToken no puede ser nulo");
+        Objects.requireNonNull(leaseDuration, "leaseDuration no puede ser nulo");
+        Instant effectiveNow = now != null ? now : Instant.now();
+        this.reconciliationClaimToken = workerToken;
+        this.reconciliationLeaseExpiresAt = effectiveNow.plus(leaseDuration);
+        this.updatedAt = effectiveNow;
+    }
+
+    public boolean isReconciliationClaimOwnedBy(UUID workerToken, Instant now) {
+        if (workerToken == null || reconciliationClaimToken == null || !workerToken.equals(reconciliationClaimToken)) {
+            return false;
+        }
+        Instant effectiveNow = now != null ? now : Instant.now();
+        return reconciliationLeaseExpiresAt != null && reconciliationLeaseExpiresAt.isAfter(effectiveNow);
+    }
+
+    public void releaseReconciliationLease(Instant now) {
+        this.reconciliationClaimToken = null;
+        this.reconciliationLeaseExpiresAt = null;
+        this.updatedAt = now != null ? now : Instant.now();
+    }
 
 }

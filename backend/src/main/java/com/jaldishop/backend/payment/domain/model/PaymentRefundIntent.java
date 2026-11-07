@@ -1,7 +1,6 @@
 package com.jaldishop.backend.payment.domain.model;
 
 import com.jaldishop.backend.payment.domain.enums.RefundIntentStatus;
-import com.jaldishop.backend.payment.domain.enums.RefundStatus;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -18,6 +17,8 @@ public class PaymentRefundIntent {
 
     private final UUID id;
     private final UUID paymentId;
+    private final String checkoutMode;
+    private final String providerOrderId;
     private final String providerPaymentId;
     private final BigDecimal amount;
     private final String currency;
@@ -41,10 +42,32 @@ public class PaymentRefundIntent {
             Duration initialLease,
             Instant now
     ) {
+        return create(paymentId, "PREFERENCES", null, providerPaymentId, amount, currency, idempotencyKey, initialClaimToken, initialLease, now);
+    }
+
+    public static PaymentRefundIntent create(
+            UUID paymentId,
+            String checkoutMode,
+            String providerOrderId,
+            String providerPaymentId,
+            BigDecimal amount,
+            String currency,
+            String idempotencyKey,
+            UUID initialClaimToken,
+            Duration initialLease,
+            Instant now
+    ) {
         Objects.requireNonNull(paymentId, "paymentId no puede ser nulo");
-        Objects.requireNonNull(providerPaymentId, "providerPaymentId no puede ser nulo");
         Objects.requireNonNull(amount, "amount no puede ser nulo");
         Objects.requireNonNull(idempotencyKey, "idempotencyKey no puede ser nulo");
+
+        String mode = checkoutMode != null && !checkoutMode.isBlank() ? checkoutMode : "PREFERENCES";
+        if ("ORDERS".equalsIgnoreCase(mode)) {
+            Objects.requireNonNull(providerOrderId, "providerOrderId no puede ser nulo para reembolsos en modo ORDERS");
+        } else {
+            Objects.requireNonNull(providerPaymentId, "providerPaymentId no puede ser nulo para reembolsos en modo PREFERENCES");
+        }
+
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El monto a reembolsar debe ser mayor a cero");
         }
@@ -55,6 +78,8 @@ public class PaymentRefundIntent {
         return new PaymentRefundIntent(
                 UUID.randomUUID(),
                 paymentId,
+                mode,
+                providerOrderId,
                 providerPaymentId,
                 amount,
                 currency != null ? currency : "PEN",
@@ -86,8 +111,34 @@ public class PaymentRefundIntent {
             Instant updatedAt,
             Instant completedAt
     ) {
+        return rehydrate(
+                id, paymentId, "PREFERENCES", null, providerPaymentId, amount, currency, idempotencyKey,
+                status, claimToken, leaseExpiresAt, providerRefundId, failureReason,
+                createdAt, updatedAt, completedAt
+        );
+    }
+
+    public static PaymentRefundIntent rehydrate(
+            UUID id,
+            UUID paymentId,
+            String checkoutMode,
+            String providerOrderId,
+            String providerPaymentId,
+            BigDecimal amount,
+            String currency,
+            String idempotencyKey,
+            RefundIntentStatus status,
+            UUID claimToken,
+            Instant leaseExpiresAt,
+            String providerRefundId,
+            String failureReason,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant completedAt
+    ) {
         return new PaymentRefundIntent(
-                id, paymentId, providerPaymentId, amount, currency, idempotencyKey,
+                id, paymentId, checkoutMode != null ? checkoutMode : "PREFERENCES",
+                providerOrderId, providerPaymentId, amount, currency, idempotencyKey,
                 status, claimToken, leaseExpiresAt, providerRefundId, failureReason,
                 createdAt, updatedAt, completedAt
         );
@@ -96,6 +147,8 @@ public class PaymentRefundIntent {
     private PaymentRefundIntent(
             UUID id,
             UUID paymentId,
+            String checkoutMode,
+            String providerOrderId,
             String providerPaymentId,
             BigDecimal amount,
             String currency,
@@ -111,6 +164,8 @@ public class PaymentRefundIntent {
     ) {
         this.id = id;
         this.paymentId = paymentId;
+        this.checkoutMode = checkoutMode != null ? checkoutMode : "PREFERENCES";
+        this.providerOrderId = providerOrderId;
         this.providerPaymentId = providerPaymentId;
         this.amount = amount;
         this.currency = currency;
@@ -177,6 +232,8 @@ public class PaymentRefundIntent {
 
     public UUID getId() { return id; }
     public UUID getPaymentId() { return paymentId; }
+    public String getCheckoutMode() { return checkoutMode; }
+    public String getProviderOrderId() { return providerOrderId; }
     public String getProviderPaymentId() { return providerPaymentId; }
     public BigDecimal getAmount() { return amount; }
     public String getCurrency() { return currency; }

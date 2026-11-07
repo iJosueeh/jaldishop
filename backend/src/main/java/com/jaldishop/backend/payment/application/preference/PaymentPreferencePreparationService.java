@@ -46,6 +46,58 @@ public class PaymentPreferencePreparationService {
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final ObjectMapper objectMapper;
+    private final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties;
+    private final java.time.Clock clock;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PaymentPreferencePreparationService(
+            CapacityReservationRepository capacityReservationRepository,
+            InventoryReservationRepository inventoryReservationRepository,
+            StoreRepository storeRepository,
+            CartRepository cartRepository,
+            CheckoutItemSnapshotAssembler snapshotAssembler,
+            PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository,
+            ObjectMapper objectMapper,
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties,
+            java.time.Clock clock
+    ) {
+        this.capacityReservationRepository = capacityReservationRepository;
+        this.inventoryReservationRepository = inventoryReservationRepository;
+        this.storeRepository = storeRepository;
+        this.cartRepository = cartRepository;
+        this.snapshotAssembler = snapshotAssembler;
+        this.paymentRepository = paymentRepository;
+        this.paymentAttemptRepository = paymentAttemptRepository;
+        this.objectMapper = objectMapper;
+        this.properties = properties;
+        this.clock = clock != null ? clock : java.time.Clock.systemUTC();
+    }
+
+    public PaymentPreferencePreparationService(
+            CapacityReservationRepository capacityReservationRepository,
+            InventoryReservationRepository inventoryReservationRepository,
+            StoreRepository storeRepository,
+            CartRepository cartRepository,
+            CheckoutItemSnapshotAssembler snapshotAssembler,
+            PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository,
+            ObjectMapper objectMapper,
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties
+    ) {
+        this(
+                capacityReservationRepository,
+                inventoryReservationRepository,
+                storeRepository,
+                cartRepository,
+                snapshotAssembler,
+                paymentRepository,
+                paymentAttemptRepository,
+                objectMapper,
+                properties,
+                java.time.Clock.systemUTC()
+        );
+    }
 
     public PaymentPreferencePreparationService(
             CapacityReservationRepository capacityReservationRepository,
@@ -57,18 +109,23 @@ public class PaymentPreferencePreparationService {
             PaymentAttemptRepository paymentAttemptRepository,
             ObjectMapper objectMapper
     ) {
-        this.capacityReservationRepository = capacityReservationRepository;
-        this.inventoryReservationRepository = inventoryReservationRepository;
-        this.storeRepository = storeRepository;
-        this.cartRepository = cartRepository;
-        this.snapshotAssembler = snapshotAssembler;
-        this.paymentRepository = paymentRepository;
-        this.paymentAttemptRepository = paymentAttemptRepository;
-        this.objectMapper = objectMapper;
+        this(
+                capacityReservationRepository,
+                inventoryReservationRepository,
+                storeRepository,
+                cartRepository,
+                snapshotAssembler,
+                paymentRepository,
+                paymentAttemptRepository,
+                objectMapper,
+                new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties()
+        );
     }
 
     @Transactional
     public PreparationResult prepareOrGetExistingPayment(CreatePaymentPreferenceCommand command) {
+        Instant now = clock.instant();
+
         // Bloqueo pesimista PESSIMISTIC_WRITE sobre la reserva de capacidad para serializar accesos concurrentes
         CapacityReservation reservation = capacityReservationRepository.findByIdForUpdate(command.capacityReservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva de capacidad no encontrada: " + command.capacityReservationId()));
@@ -83,14 +140,13 @@ public class PaymentPreferencePreparationService {
         if (reservation.getStatus() == CapacityReservationStatus.RELEASED) {
             throw new ConflictException("RESERVATION_RELEASED", "La reserva de capacidad fue cancelada.");
         }
-        if (reservation.getStatus() == CapacityReservationStatus.EXPIRED || reservation.isExpired(Instant.now())) {
+        if (reservation.getStatus() == CapacityReservationStatus.EXPIRED || reservation.isExpired(now)) {
             throw new ConflictException("RESERVATION_EXPIRED", "La reserva de capacidad se encuentra expirada.");
         }
 
         // Validar reservas de inventario vinculadas a la reserva de capacidad
         List<InventoryReservation> inventoryReservations = inventoryReservationRepository.findByCapacityReservationId(reservation.getId());
         if (inventoryReservations != null && !inventoryReservations.isEmpty()) {
-            Instant now = Instant.now();
             for (InventoryReservation ir : inventoryReservations) {
                 if (ir.getStatus() == InventoryReservationStatus.EXPIRED || ir.isExpired(now)) {
                     throw new ConflictException("INVENTORY_RESERVATION_EXPIRED", "La reserva de inventario para los productos ha expirado.");
@@ -122,24 +178,37 @@ public class PaymentPreferencePreparationService {
 
             List<PaymentAttempt> existingAttempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(existingPayment.getId());
 
-            // 1. Idempotencia: Si ya existe un intento previo con preference_id válido, retornarlo directamente
+            // Uncertain creation blocks a new POST even after a financial rejection.
+            for (PaymentAttempt attempt : existingAttempts) {
+                if ("ORDERS".equals(attempt.getCheckoutMode())
+                        && attempt.getProviderOrderId() == null
+                        && (attempt.getRemoteOrderCreationState() == RemoteOrderCreationState.UNKNOWN
+                        || attempt.getRemoteOrderCreationState() == RemoteOrderCreationState.PREPARED)) {
+                    throw new ConflictException("PAYMENT_IN_PROGRESS", "La creación remota requiere revisión.");
+                }
+            }
+
+            // 1. Idempotencia: Si ya existe un intento previo con preference_id u order_id válido, retornarlo directamente
             for (int i = existingAttempts.size() - 1; i >= 0; i--) {
                 PaymentAttempt attempt = existingAttempts.get(i);
-                if (attempt.getPreferenceId() != null && !attempt.getPreferenceId().isBlank()
+                boolean hasValidProviderRef = (attempt.getPreferenceId() != null && !attempt.getPreferenceId().isBlank())
+                        || (attempt.getProviderOrderId() != null && !attempt.getProviderOrderId().isBlank());
+                if (hasValidProviderRef
                         && attempt.getStatus() != PaymentAttemptStatus.ERROR
                         && attempt.getStatus() != PaymentAttemptStatus.REJECTED) {
-                    return new PreparationResult(existingPayment, attempt, true, store.getName(), null);
+                    return new PreparationResult(existingPayment, attempt, true, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
                 }
             }
 
             // 2. Control de Concurrencia: Si existe una operación en curso (PROCESSING reciente), rechazar con respuesta controlada
             if (!existingAttempts.isEmpty()) {
                 PaymentAttempt latestAttempt = existingAttempts.get(existingAttempts.size() - 1);
-                Instant inFlightCutoff = Instant.now().minusSeconds(45);
+                Instant inFlightCutoff = now.minusSeconds(45);
 
                 boolean isInFlight = (latestAttempt.getStatus() == PaymentAttemptStatus.PROCESSING
                         || latestAttempt.getStatus() == PaymentAttemptStatus.CREATED)
                         && latestAttempt.getPreferenceId() == null
+                        && latestAttempt.getProviderOrderId() == null
                         && latestAttempt.getUpdatedAt().isAfter(inFlightCutoff);
 
                 if (isInFlight) {
@@ -147,38 +216,39 @@ public class PaymentPreferencePreparationService {
                             "Ya existe una solicitud de pago o creación de preferencia en curso para esta reserva.");
                 }
 
-                // 3. Timeout ambiguo / Resultado desconocido:
-                // No asumir rechazo ni crear un intento con nueva clave. Reutilizar el intento
-                // existente con su misma idempotencyKey para permitir que Mercado Pago reconozca la operación.
+                // 3. Un resultado desconocido requiere revisión; no reenviar ni crear otro intento.
                 boolean isRecoverable = (latestAttempt.getStatus() == PaymentAttemptStatus.ERROR
                         && "MP_TIMEOUT".equals(latestAttempt.getErrorCode()))
-                        || (latestAttempt.getPreferenceId() == null && latestAttempt.getStatus() != PaymentAttemptStatus.REJECTED);
+                        || (latestAttempt.getPreferenceId() == null
+                        && latestAttempt.getProviderOrderId() == null
+                        && latestAttempt.getStatus() != PaymentAttemptStatus.REJECTED);
 
                 if (isRecoverable) {
-                    latestAttempt.markProcessing();
-                    PaymentAttempt savedAttempt = paymentAttemptRepository.save(latestAttempt);
-                    return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null);
+                    throw new ConflictException("PAYMENT_IN_PROGRESS",
+                            "El resultado de la solicitud de pago es incierto y requiere revisión.");
                 }
             }
 
             // 4. Si el intento previo fue formalmente REJECTED, crear un nuevo intento secuencial
+            String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
             int nextAttemptNumber = paymentAttemptRepository.findNextAttemptNumber(existingPayment.getId());
             PaymentAttempt newAttempt = PaymentAttempt.create(
                     existingPayment.getId(),
                     nextAttemptNumber,
                     PaymentProvider.MERCADO_PAGO,
                     PaymentMethod.CARD,
-                    UUID.randomUUID().toString()
+                    UUID.randomUUID().toString(),
+                    currentMode
             );
             newAttempt.markProcessing();
             PaymentAttempt savedAttempt = paymentAttemptRepository.save(newAttempt);
 
-            return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null);
+            return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
         }
 
         // Si no existe Payment, protegemos la reserva si está activa
         if (reservation.getStatus() == CapacityReservationStatus.ACTIVE) {
-            reservation.protectPayment();
+            reservation.protectPayment(now);
             capacityReservationRepository.save(reservation);
         }
 
@@ -224,17 +294,19 @@ public class PaymentPreferencePreparationService {
         );
         Payment savedPayment = paymentRepository.save(payment);
 
+        String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
         PaymentAttempt attempt = PaymentAttempt.create(
                 savedPayment.getId(),
                 1,
                 PaymentProvider.MERCADO_PAGO,
                 PaymentMethod.CARD,
-                UUID.randomUUID().toString()
+                UUID.randomUUID().toString(),
+                currentMode
         );
         attempt.markProcessing();
         PaymentAttempt savedAttempt = paymentAttemptRepository.save(attempt);
 
-        return new PreparationResult(savedPayment, savedAttempt, false, store.getName(), itemSnapshots);
+        return new PreparationResult(savedPayment, savedAttempt, false, store.getName(), itemSnapshots, reservation.getPaymentProtectionExpiresAt());
     }
 
     @Transactional
@@ -243,6 +315,40 @@ public class PaymentPreferencePreparationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
         attempt.recordPreference(preferenceId, initPoint);
         paymentAttemptRepository.save(attempt);
+    }
+
+    @Transactional
+    public void recordOrderResult(UUID paymentId, UUID attemptId, String providerOrderId, String initPoint) {
+        PaymentAttempt attempt = lockOrderAttempt(paymentId, attemptId);
+        attempt.recordOrder(providerOrderId, initPoint);
+        paymentAttemptRepository.save(attempt);
+    }
+
+    @Transactional
+    public void recordOrderCreationError(UUID paymentId, UUID attemptId, boolean confirmedRejection, String safeCode) {
+        PaymentAttempt attempt = lockOrderAttempt(paymentId, attemptId);
+        attempt.recordOrderCreationFailure(confirmedRejection);
+        // Financial evidence from a concurrent webhook must survive a late transport error.
+        if (attempt.getRemoteOrderCreationState() != RemoteOrderCreationState.CREATED
+                && (attempt.getStatus() == PaymentAttemptStatus.CREATED
+                || attempt.getStatus() == PaymentAttemptStatus.PROCESSING)) {
+            if (attempt.getProviderPaymentId() == null) {
+                attempt.markError(safeCode, "Order creation requires review");
+            }
+        }
+        paymentAttemptRepository.save(attempt);
+    }
+
+    private PaymentAttempt lockOrderAttempt(UUID paymentId, UUID attemptId) {
+        // Lock Payment before loading the attempt, avoiding a stale JPA entity while waiting.
+        paymentRepository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado"));
+        PaymentAttempt attempt = paymentAttemptRepository.findByIdForUpdate(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Intento de pago no encontrado: " + attemptId));
+        if (!paymentId.equals(attempt.getPaymentId())) {
+            throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "El intento no pertenece al pago.");
+        }
+        return attempt;
     }
 
     @Transactional

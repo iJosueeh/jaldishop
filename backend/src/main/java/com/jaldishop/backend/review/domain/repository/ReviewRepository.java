@@ -14,4 +14,5 @@ public interface ReviewRepository {
     List<Review> findByUserId(UUID userId);
     List<Review> findByProductIdAndStatus(UUID productId, ReviewStatus status);
     boolean existsByUserIdAndProductId(UUID userId, UUID productId);
+    void delete(UUID id);
 }

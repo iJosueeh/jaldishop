@@ -1,13 +1,17 @@
 package com.jaldishop.backend.payment.application.gateway;
 
+import com.jaldishop.backend.payment.application.gateway.dto.CreateOrderCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCommand;
 import com.jaldishop.backend.payment.application.gateway.dto.ExecuteRefundCommand;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
+import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PaymentQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundQueryResult;
 import com.jaldishop.backend.payment.application.gateway.dto.RefundResult;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Puerto de integración con la pasarela de Mercado Pago.
@@ -21,7 +25,7 @@ public interface MercadoPagoGateway {
      * @param command datos estructurados de la orden y el comprador
      * @return resultado con preferenceId e initPoint
      */
-    PreferenceResult createPreference(CreatePreferenceCommand command);
+    PreferenceResult createPreference(CreatePreferenceCommand command, UUID attemptId);
 
     /**
      * Consulta el estado financiero de un pago en Mercado Pago a partir de su ID de transacción.
@@ -46,5 +50,21 @@ public interface MercadoPagoGateway {
      * @return lista de reembolsos existentes
      */
     List<RefundQueryResult> queryPaymentRefunds(String providerPaymentId);
+
+    /**
+     * Crea una orden en Checkout Pro mediante Orders API (/v1/orders) para redireccionar al comprador.
+     *
+     * @param command datos estructurados de la orden y el comprador
+     * @return resultado con orderId y checkoutUrl
+     */
+    OrderResult createOrder(CreateOrderCommand command, UUID attemptId);
+
+    /**
+     * Consulta el estado financiero de una orden en Orders API (/v1/orders/{orderId}).
+     *
+     * @param orderId identificador devuelto por Mercado Pago al crear la orden
+     * @return resultado estructurado de la orden y sus pagos
+     */
+    OrderQueryResult queryOrder(String orderId);
 
 }

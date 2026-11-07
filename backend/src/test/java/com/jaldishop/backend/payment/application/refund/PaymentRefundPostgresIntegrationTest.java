@@ -103,6 +103,40 @@ class PaymentRefundPostgresIntegrationTest {
             }
         });
 
+        HttpHandler ordersHandler = new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                exchange.getRequestBody().readAllBytes();
+
+                String idempotencyKey = exchange.getRequestHeaders().getFirst("X-Idempotency-Key");
+                if (idempotencyKey != null) {
+                    receivedIdempotencyKeys.add(idempotencyKey);
+                }
+
+                String method = exchange.getRequestMethod().toUpperCase(Locale.ROOT);
+                MockHttpResponse resp;
+                if ("GET".equals(method)) {
+                    resp = getMockResponse.get();
+                    if (resp == null) {
+                        resp = new MockHttpResponse(200, "{}");
+                    }
+                } else {
+                    resp = postMockResponse.get();
+                    if (resp == null) {
+                        resp = new MockHttpResponse(201, "{}");
+                    }
+                }
+
+                byte[] bytes = resp.responseBody().getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(resp.statusCode(), bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            }
+        };
+        mockServer.createContext("/v1/orders/", ordersHandler);
+
         mockServer.start();
     }
 
@@ -828,5 +862,82 @@ class PaymentRefundPostgresIntegrationTest {
 
         PaymentRefundIntent intent = refundIntentRepository.findByPaymentId(payment.getId()).orElseThrow();
         assertEquals(RefundIntentStatus.UNKNOWN, intent.getStatus());
+    }
+
+    private Payment createApprovedPaymentWithOrdersAttempt(String orderId, String mpPaymentId, BigDecimal amount) {
+        UUID reservationId = createTestReservation();
+        Payment payment = Payment.createPending(
+                reservationId, amount, "PEN",
+                FulfillmentType.DELIVERY, "Cliente Test Orders", "999888777", "cliente@test.com",
+                "Av Aislada 123", null, null, null, amount, BigDecimal.ZERO, null,
+                BigDecimal.ZERO, BigDecimal.ZERO, "[]"
+        );
+        payment.markApproved(Instant.now());
+        payment.requestRefund(amount, "RESERVATION_EXPIRED");
+        payment = paymentRepository.save(payment);
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.WALLET_PURCHASE, "idemp-" + payment.getId(), "ORDERS"
+        );
+        attempt.recordOrder(orderId, "https://checkout.url");
+        attempt.markApproved(mpPaymentId, "approved", "accredited", PaymentMethod.WALLET_PURCHASE, Instant.now());
+        paymentAttemptRepository.save(attempt);
+
+        return payment;
+    }
+
+    // =========================================================================
+    // 17. REEMBOLSO EN MODO ORDERS VÍA POST /v1/orders/{order_id}/refund
+    // =========================================================================
+    @Test
+    @DisplayName("Escenario 17: Reembolso exitoso en modo ORDERS vía POST /v1/orders/{order_id}/refund con PostgreSQL y mock HTTP")
+    void shouldExecuteSuccessfulRefundInOrdersModeWithPostgresAndMockHttp() {
+        String orderId = "ORD01J67CQQH5904WDBVZEM4JMEP3";
+        Payment payment = createApprovedPaymentWithOrdersAttempt(orderId, "1017", BigDecimal.valueOf(175.00));
+        simulateTimeout.set(false);
+
+        String ordersRefundJson = """
+                {
+                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "status": "processed",
+                  "status_detail": "refunded",
+                  "transactions": {
+                    "refunds": [
+                      {
+                        "id": 99001017,
+                        "payment_id": 1017,
+                        "amount": 175.00,
+                        "status": "approved",
+                        "date_created": "2026-11-05T19:00:00.000Z"
+                      }
+                    ]
+                  }
+                }
+                """;
+        postMockResponse.set(new MockHttpResponse(201, ordersRefundJson));
+
+        UUID worker = UUID.randomUUID();
+        RefundClaimResult claim = refundProcessor.claimOrCreateRefundIntent(payment.getId(), worker);
+
+        assertTrue(claim.claimed());
+        assertEquals("ORDERS", claim.checkoutMode());
+        assertEquals(orderId, claim.providerOrderId());
+
+        RefundExecutionResult execResult = refundProcessor.executeExternalRefund(claim);
+        assertEquals(RefundExecutionResult.ExecutionStatus.SUCCESSFUL, execResult.status());
+        assertEquals("99001017", execResult.providerRefundId());
+
+        RefundConsolidationResult consResult = refundProcessor.consolidateRefundResult(claim, execResult);
+        assertEquals(RefundConsolidationResult.ConsolidationStatus.COMPLETED, consResult.status());
+
+        Payment reloaded = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertEquals(RefundStatus.COMPLETED, reloaded.getRefundStatus());
+        assertEquals("99001017", reloaded.getRefundReference());
+
+        PaymentRefundIntent intent = refundIntentRepository.findByPaymentId(payment.getId()).orElseThrow();
+        assertEquals(RefundIntentStatus.COMPLETED, intent.getStatus());
+        assertEquals("ORDERS", intent.getCheckoutMode());
+        assertEquals(orderId, intent.getProviderOrderId());
+        assertEquals("99001017", intent.getProviderRefundId());
     }
 }
