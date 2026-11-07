@@ -170,6 +170,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
         registry.add("spring.flyway.user", database::username);
         registry.add("spring.flyway.password", database::password);
         registry.add("mercadopago.base-url", () -> "http://127.0.0.1:" + mockPort);
+        registry.add("mercadopago.checkout-mode", () -> "PREFERENCES");
         registry.add("mercadopago.access-token", () -> "TEST-E2E-TOKEN");
         registry.add("mercadopago.webhook-secret", () -> WEBHOOK_SECRET);
         registry.add("mercadopago.expected-collector-id", () -> String.valueOf(EXPECTED_COLLECTOR_ID));
@@ -361,7 +362,9 @@ class EndToEndBackendFlowValidationIntegrationTest {
         HttpResponse<String> addCartResp = httpClient.send(addCartReq, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, addCartResp.statusCode(), "Agregar ítem al carrito debe retornar 201 Created");
 
-        LocalDate serviceDate = LocalDate.now().plusWeeks(2).with(java.time.DayOfWeek.MONDAY);
+        // Seed closures use database CURRENT_DATE + 10/+15 days; keep this hold beyond them.
+        LocalDate serviceDate = jdbcTemplate.queryForObject("SELECT CURRENT_DATE", LocalDate.class)
+                .plusWeeks(3).with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.MONDAY));
         String holdBody = String.format("""
                 {
                     "storeId": "80acf0ba-5a79-4888-b00d-b5aef8fcf9e5",

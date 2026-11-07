@@ -276,7 +276,7 @@ class PaymentFlowEndToEndIntegrationTest {
         );
         paymentAttemptRepository.save(initialAttempt);
 
-        String mpPaymentId = "mp-pay-9001";
+        String mpPaymentId = "9001";
         paymentMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
                   "id": 9001,
@@ -351,7 +351,7 @@ class PaymentFlowEndToEndIntegrationTest {
         );
         paymentAttemptRepository.save(initialAttempt);
 
-        String mpPaymentId = "mp-pay-9002";
+        String mpPaymentId = "9002";
         paymentMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
                   "id": 9002,
@@ -633,7 +633,7 @@ class PaymentFlowEndToEndIntegrationTest {
         Payment payment = createPendingPayment(reservationId, amount, "[]");
         UUID paymentId = payment.getId();
 
-        String mpPaymentId = "mp-sec-2";
+        String mpPaymentId = "9992";
         // Collector ID no autorizado: 999999999 en vez de 123456789
         paymentMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {

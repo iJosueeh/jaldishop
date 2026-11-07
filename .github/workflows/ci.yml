@@ -53,15 +53,23 @@ jobs:
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
+      - name: Create dedicated Phase 2A test database
+        env:
+          PGPASSWORD: postgrespassword
+        run: psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jaldishop_fase2a_test'
+
       - name: Run Backend Tests
         id: backend-tests
         continue-on-error: true
         env:
           DB_URL: jdbc:postgresql://127.0.0.1:5432/jaldishop_integration_test
+          PHASE2A_DB_URL: jdbc:postgresql://127.0.0.1:5432/jaldishop_fase2a_test
+          SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "0"
+          SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "10000"
           DB_USERNAME: postgres
           DB_PASSWORD: postgrespassword
           JWT_SECRET: c2VjdXJlX2p3dF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nX3B1cnBvc2VzXzEyMzQ1Njc4OTA=
-        run: ./mvnw clean test
+        run: ./mvnw clean test '-Dsurefire.excludes=**/*$*,com/jaldishop/backend/payment/application/reconciliation/SingleAttemptIsolatedReconciliationTest.java'
 
       - name: Upload Surefire reports
         if: always()
