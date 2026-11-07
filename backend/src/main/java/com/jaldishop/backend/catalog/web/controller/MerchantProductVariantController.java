@@ -10,6 +10,7 @@ import com.jaldishop.backend.catalog.domain.model.VariantAttribute;
 import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
+import com.jaldishop.backend.catalog.web.dto.VariantAttributeDto;
 import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.service.StoreContextService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
 import java.util.UUID;
 
 @RestController
@@ -57,11 +59,7 @@ public class MerchantProductVariantController {
             @Valid @RequestBody CreateProductVariantRequest request
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        List<VariantAttribute> attributes = request.attributes() != null
-                ? request.attributes().stream()
-                .map(attr -> new VariantAttribute(attr.name(), attr.value()))
-                .toList()
-                : Collections.emptyList();
+        List<VariantAttribute> attributes = toAttributes(request.attributes());
 
         var command = new CreateProductVariantCommand(
                 storeId,
@@ -113,11 +111,7 @@ public class MerchantProductVariantController {
             @Valid @RequestBody UpdateProductVariantRequest request
     ) {
         storeContextService.validateStoreOwnership(storeId, principal);
-        List<VariantAttribute> attributes = request.attributes() != null
-                ? request.attributes().stream()
-                .map(attr -> new VariantAttribute(attr.name(), attr.value()))
-                .toList()
-                : Collections.emptyList();
+        List<VariantAttribute> attributes = toAttributes(request.attributes());
 
         var command = new UpdateProductVariantCommand(
                 variantId,
@@ -134,5 +128,19 @@ public class MerchantProductVariantController {
 
         ProductVariant updated = updateVariantService.execute(command);
         return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    private List<VariantAttribute> toAttributes(List<VariantAttributeDto> attributes) {
+        if (attributes == null) {
+            return Collections.emptyList();
+        }
+        var names = new HashSet<String>();
+        return attributes.stream().map(attribute -> {
+            var result = new VariantAttribute(attribute.name(), attribute.value());
+            if (!names.add(result.getName())) {
+                throw new IllegalArgumentException("Los nombres de atributos no pueden repetirse");
+            }
+            return result;
+        }).toList();
     }
 }

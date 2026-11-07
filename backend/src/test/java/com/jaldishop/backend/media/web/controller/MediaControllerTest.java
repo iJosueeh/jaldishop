@@ -6,6 +6,9 @@ import com.jaldishop.backend.media.application.command.GenerateUploadSignatureCo
 import com.jaldishop.backend.media.application.service.GenerateUploadSignatureService;
 import com.jaldishop.backend.media.domain.enums.MediaTargetType;
 import com.jaldishop.backend.media.domain.model.UploadSignature;
+import com.jaldishop.backend.media.domain.repository.MediaStorageService;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import com.jaldishop.backend.media.web.dto.GenerateSignatureRequest;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +28,13 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,13 +48,14 @@ class MediaControllerTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private JwtPrincipal currentPrincipal;
+    private HandlerMethodArgumentResolver authPrincipalResolver;
 
     @BeforeEach
     void setUp() {
         currentPrincipal = new JwtPrincipal(UUID.randomUUID(), Set.of("MERCHANT"));
         MediaController controller = new MediaController(signatureService);
 
-        HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
+        authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
                 return parameter.hasParameterAnnotation(AuthenticationPrincipal.class)
@@ -105,6 +112,35 @@ class MediaControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+        verifyNoInteractions(signatureService);
+    }
+
+    @Test
+    void foreignStoreAndAnonymousExplicitStoreReturn404WithoutSigning() throws Exception {
+        StoreRepository stores = mock(StoreRepository.class);
+        MediaStorageService storage = mock(MediaStorageService.class);
+        Store ownStore = mock(Store.class);
+        UUID foreignStoreId = UUID.randomUUID();
+        when(ownStore.getId()).thenReturn(UUID.randomUUID());
+        when(stores.findByMerchantUserId(currentPrincipal.userId())).thenReturn(Optional.of(ownStore));
+        MockMvc realController = MockMvcBuilders.standaloneSetup(
+                        new MediaController(new GenerateUploadSignatureService(storage, stores)))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(authPrincipalResolver)
+                .build();
+
+        realController.perform(post("/api/v1/media/upload-signature")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new GenerateSignatureRequest(MediaTargetType.PRODUCT_IMAGE, foreignStoreId))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        currentPrincipal = null;
+        realController.perform(post("/api/v1/media/upload-signature")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new GenerateSignatureRequest(MediaTargetType.STORE_LOGO, foreignStoreId))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+        verifyNoInteractions(storage);
     }
 
     @Test

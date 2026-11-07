@@ -1,6 +1,8 @@
 package com.jaldishop.backend.identity.infrastructure.security;
 
 import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.application.service.RefreshTokenService;
+import com.jaldishop.backend.identity.application.result.AuthResult;
 import com.jaldishop.backend.identity.domain.enums.RoleName;
 import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
@@ -27,6 +29,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -40,6 +43,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,6 +73,11 @@ class SecurityUserStatusWebTest {
         }
 
         @Bean
+        public RefreshTokenService refreshTokenService(UserRepository users, JwtService jwt) {
+            return new RefreshTokenService(users, jwt);
+        }
+
+        @Bean
         public UserRepository userRepository() {
             return mock(UserRepository.class);
         }
@@ -76,10 +85,20 @@ class SecurityUserStatusWebTest {
 
     @RestController
     static class TestController {
+        private final RefreshTokenService refresh;
+
+        TestController(RefreshTokenService refresh) { this.refresh = refresh; }
+
+        @PostMapping("/api/v1/auth/refresh")
+        public AuthResult refresh(@AuthenticationPrincipal JwtPrincipal principal) {
+            return refresh.execute(principal.userId());
+        }
+
         @GetMapping("/api/v1/users/me")
         public ResponseEntity<Map<String, Object>> getProfile(@AuthenticationPrincipal JwtPrincipal principal) {
             return ResponseEntity.ok(Map.of(
                     "status", "ok",
+                    "roles", principal != null ? principal.roles() : Set.of(),
                     "userId", principal != null ? principal.userId().toString() : "anonymous"
             ));
         }
@@ -342,5 +361,27 @@ class SecurityUserStatusWebTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                 .andExpect(jsonPath("$.message").value("No tienes permisos para realizar esta operación"));
+    }
+    @Test
+    void revokedAdminRoleIsRemovedFromAuthoritiesPrincipalAndRefreshedToken() throws Exception {
+        JwtPrincipal oldToken = new JwtPrincipal(testUserId, Set.of("ADMIN", "CUSTOMER"));
+        User admin = buildUser(testUserId, UserStatus.ACTIVE, Set.of(RoleName.ADMIN, RoleName.CUSTOMER));
+        User customer = buildUser(testUserId, UserStatus.ACTIVE, Set.of(RoleName.CUSTOMER));
+        when(jwtService.getPrincipal(token)).thenReturn(oldToken);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(admin), Optional.of(customer));
+
+        mockMvc.perform(get("/api/v1/admin/users").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/admin/users").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/v1/users/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles[0]").value("CUSTOMER"));
+        when(jwtService.generateToken(testUserId, Set.of("CUSTOMER"))).thenReturn("refreshed-customer-token");
+        mockMvc.perform(post("/api/v1/auth/refresh").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("refreshed-customer-token"))
+                .andExpect(jsonPath("$.roles[0]").value("CUSTOMER"));
+        verify(jwtService).generateToken(testUserId, Set.of("CUSTOMER"));
     }
 }

@@ -26,12 +26,21 @@ public class GenerateUploadSignatureService {
     }
 
     public UploadSignature execute(GenerateUploadSignatureCommand command) {
-        UUID effectiveStoreId = command.explicitStoreId();
-
-        if (effectiveStoreId == null && command.userId() != null) {
+        UUID effectiveStoreId = null;
+        if (command.userId() != null && command.roles().contains("MERCHANT")) {
             effectiveStoreId = storeRepository.findByMerchantUserId(command.userId())
                     .map(Store::getId)
                     .orElse(null);
+        }
+
+        if (command.explicitStoreId() != null) {
+            if (command.userId() != null && command.roles().contains("ADMIN")) {
+                effectiveStoreId = storeRepository.findById(command.explicitStoreId())
+                        .map(Store::getId)
+                        .orElseThrow(() -> new ResourceNotFoundException("STORE_NOT_FOUND", "Tienda no encontrada."));
+            } else if (!command.explicitStoreId().equals(effectiveStoreId)) {
+                throw new ResourceNotFoundException("STORE_NOT_FOUND", "Tienda no encontrada.");
+            }
         }
 
         if (effectiveStoreId == null && command.targetType() == MediaTargetType.PRODUCT_IMAGE) {

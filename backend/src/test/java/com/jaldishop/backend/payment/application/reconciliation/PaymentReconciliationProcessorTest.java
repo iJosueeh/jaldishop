@@ -21,6 +21,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PaymentReconciliationProcessor — Pruebas unitarias de orquestación de fallos y rollback")
 class PaymentReconciliationProcessorTest {
+    @Test void suppressedIncidenceIsNeverReportedAsRecordedCommercialFailure() {
+        var conflict = new ConflictException("RESERVATION_EXPIRED", "Expired");
+        when(confirmationRunner.confirmUnderLock(paymentId)).thenThrow(conflict);
+        when(incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, conflict)).thenReturn(false);
+        assertEquals(ReconciliationCandidateResult.Status.SKIPPED, processor.processCandidate(paymentId).status());
+    }
+
 
     @Mock
     private PaymentConfirmationRunner confirmationRunner;
@@ -58,6 +65,7 @@ class PaymentReconciliationProcessorTest {
     void shouldHandleDefinitiveCommercialFailure() {
         ConflictException ex = new ConflictException("INSUFFICIENT_STOCK", "Stock agotado");
         when(confirmationRunner.confirmUnderLock(paymentId)).thenThrow(ex);
+        when(incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, ex)).thenReturn(true);
 
         ReconciliationCandidateResult result = processor.processCandidate(paymentId);
 
@@ -71,6 +79,7 @@ class PaymentReconciliationProcessorTest {
     void shouldHandleIndeterminateConflict() {
         ConflictException ex = new ConflictException("RESERVATION_NOT_PAYMENT_PROTECTED", "Reserva no protegida");
         when(confirmationRunner.confirmUnderLock(paymentId)).thenThrow(ex);
+        when(incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, ex)).thenReturn(true);
 
         ReconciliationCandidateResult result = processor.processCandidate(paymentId);
 

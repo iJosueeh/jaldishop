@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -163,5 +164,37 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("refreshed-jwt-token"))
                 .andExpect(jsonPath("$.roles").isArray());
+    }
+
+    @Test
+    void rejectsNamesAndEmailOverDatabaseLimitsBeforeRegistration() throws Exception {
+        String validEmail = "a@b.com";
+        String longEmail = "a".repeat(64) + "@" + "b".repeat(63) + "." + "c".repeat(63) + "." + "d".repeat(62);
+        String[][] cases = {{"n".repeat(101), "Apellido", validEmail, "firstName"},
+                {"Nombre", "a".repeat(101), validEmail, "lastName"},
+                {"Nombre", "Apellido", longEmail, "email"}};
+        for (String[] c : cases) {
+            mockMvc.perform(post("/api/v1/auth/register/merchant").contentType(MediaType.APPLICATION_JSON)
+                            .content(merchantRequest(c[0], c[1], c[2])))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.errors." + c[3]).exists());
+        }
+        verifyNoInteractions(registerMerchantService);
+    }
+
+    @Test
+    void acceptsNamesAndEmailAtDatabaseLimits() throws Exception {
+        String email = "a".repeat(64) + "@" + "b".repeat(63) + "." + "c".repeat(63) + "." + "d".repeat(61);
+        when(registerMerchantService.execute(any())).thenReturn(new AuthResult("token", UUID.randomUUID(), email, "Nombre", Set.of("MERCHANT")));
+        mockMvc.perform(post("/api/v1/auth/register/merchant").contentType(MediaType.APPLICATION_JSON)
+                        .content(merchantRequest("n".repeat(100), "a".repeat(100), email)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.email").value(email));
+    }
+
+    private String merchantRequest(String firstName, String lastName, String email) {
+        return "{\"email\":\"" + email + "\",\"password\":\"password123\",\"firstName\":\"" + firstName
+                + "\",\"lastName\":\"" + lastName + "\",\"storeName\":\"Mi tienda\",\"pickupEnabled\":true,\"deliveryEnabled\":false}";
     }
 }

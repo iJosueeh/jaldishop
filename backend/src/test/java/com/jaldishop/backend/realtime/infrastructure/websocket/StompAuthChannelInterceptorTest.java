@@ -1,6 +1,11 @@
 package com.jaldishop.backend.realtime.infrastructure.websocket;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
+import com.jaldishop.backend.identity.domain.repository.UserRepository;
+import com.jaldishop.backend.identity.domain.model.User;
+import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
+import com.jaldishop.backend.identity.domain.enums.UserStatus;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +25,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.util.Set;
+import java.util.Optional;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,13 +43,16 @@ class StompAuthChannelInterceptorTest {
     private StoreContextService storeContextService;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private MessageChannel messageChannel;
 
     private StompAuthChannelInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        interceptor = new StompAuthChannelInterceptor(jwtService, storeContextService);
+        interceptor = new StompAuthChannelInterceptor(jwtService, storeContextService, userRepository);
     }
 
     @Test
@@ -51,6 +61,7 @@ class StompAuthChannelInterceptorTest {
         UUID userId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
         when(jwtService.getPrincipal("valid-token")).thenReturn(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
         accessor.setNativeHeader("Authorization", "Bearer valid-token");
@@ -75,6 +86,7 @@ class StompAuthChannelInterceptorTest {
         UUID userId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("CUSTOMER"));
         when(jwtService.getPrincipal("passcode-token")).thenReturn(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
         accessor.setPasscode("Bearer passcode-token");
@@ -105,6 +117,7 @@ class StompAuthChannelInterceptorTest {
         UUID storeId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -125,6 +138,7 @@ class StompAuthChannelInterceptorTest {
         UUID storeId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -146,6 +160,7 @@ class StompAuthChannelInterceptorTest {
         UUID storeId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("CUSTOMER"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -164,6 +179,7 @@ class StompAuthChannelInterceptorTest {
         UUID userId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("CUSTOMER"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -180,6 +196,7 @@ class StompAuthChannelInterceptorTest {
         UUID userId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("MERCHANT"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -197,6 +214,7 @@ class StompAuthChannelInterceptorTest {
         UUID userId = UUID.randomUUID();
         JwtPrincipal principal = new JwtPrincipal(userId, Set.of("ADMIN"));
         Authentication auth = createAuthentication(principal);
+        allow(principal);
 
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setUser(auth);
@@ -223,6 +241,35 @@ class StompAuthChannelInterceptorTest {
         assertThrows(AccessDeniedException.class, () ->
                 interceptor.preSend(message, messageChannel)
         );
+    }
+
+    @Test
+    void revokedMerchantCannotConnectOrSubscribeWithOldRoles() {
+        UUID userId = UUID.randomUUID();
+        JwtPrincipal oldPrincipal = new JwtPrincipal(userId, Set.of("MERCHANT"));
+        JwtPrincipal currentPrincipal = new JwtPrincipal(userId, Set.of("CUSTOMER"));
+        when(jwtService.getPrincipal("old-token")).thenReturn(oldPrincipal);
+        allow(currentPrincipal);
+        StompHeaderAccessor connect = StompHeaderAccessor.create(StompCommand.CONNECT);
+        connect.setNativeHeader("Authorization", "Bearer old-token");
+        Message<?> result = interceptor.preSend(MessageBuilder.createMessage(new byte[0], connect.getMessageHeaders()), messageChannel);
+        Authentication connected = (Authentication) StompHeaderAccessor.wrap(result).getUser();
+        assertEquals(Set.of("CUSTOMER"), ((StompPrincipal) connected.getPrincipal()).jwtPrincipal().roles());
+
+        StompHeaderAccessor subscribe = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        subscribe.setUser(createAuthentication(oldPrincipal));
+        subscribe.setDestination("/topic/stores/" + UUID.randomUUID() + "/orders");
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], subscribe.getMessageHeaders());
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(message, messageChannel));
+        verifyNoInteractions(storeContextService);
+    }
+
+    private void allow(JwtPrincipal principal) {
+        var roles = principal.roles().stream().map(role -> new Role((short) 1, RoleName.valueOf(role)))
+                .collect(java.util.stream.Collectors.toSet());
+        User user = User.reconstitute(principal.userId(), "test@example.com", "hash", "Test", "User", null,
+                UserStatus.ACTIVE, roles, Instant.now(), Instant.now());
+        when(userRepository.findById(principal.userId())).thenReturn(Optional.of(user));
     }
 
     private Authentication createAuthentication(JwtPrincipal principal) {

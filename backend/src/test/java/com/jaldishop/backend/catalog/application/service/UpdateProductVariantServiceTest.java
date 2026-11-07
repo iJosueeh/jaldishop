@@ -111,6 +111,53 @@ class UpdateProductVariantServiceTest {
     }
 
     @Test
+    void rejectsVariantFromAnotherStoreWithoutPersistingChanges() {
+        UUID foreignStoreId = UUID.randomUUID();
+        Product foreignProduct = Product.create(foreignStoreId, UUID.randomUUID(), "Ajeno", "ajeno", null, null);
+        ProductVariant foreignVariant = ProductVariant.create(foreignProduct.getId(), "Original", "FOREIGN",
+                new BigDecimal("15.00"), "PEN", true, Collections.emptyList());
+        var command = new UpdateProductVariantCommand(
+                foreignVariant.getId(), storeId, foreignProduct.getId(), "Cambio no autorizado", "CHANGED",
+                new BigDecimal("25.00"), "PEN", false, "INACTIVE", Collections.emptyList());
+        when(productRepository.findByIdAndStoreId(foreignProduct.getId(), storeId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> updateVariantService.execute(command));
+
+        verify(productRepository).findByIdAndStoreId(foreignProduct.getId(), storeId);
+        verifyNoInteractions(variantRepository);
+        assertEquals("Original", foreignVariant.getPresentationName());
+        assertEquals("FOREIGN", foreignVariant.getSku());
+        assertEquals(new BigDecimal("15.00"), foreignVariant.getPriceAmount());
+        assertTrue(foreignVariant.isTracksInventory());
+        assertEquals(VariantStatus.ACTIVE, foreignVariant.getStatus());
+    }
+
+    @Test
+    void rejectsVariantFromAnotherProductWithoutPersistingChanges() {
+        Product otherProduct = Product.create(storeId, UUID.randomUUID(), "Otro", "otro", null, null);
+        ProductVariant otherVariant = ProductVariant.create(otherProduct.getId(), "Original", "OTHER",
+                new BigDecimal("15.00"), "PEN", true, Collections.emptyList());
+        var command = new UpdateProductVariantCommand(
+                otherVariant.getId(), storeId, productId, "Cambio no autorizado", "CHANGED",
+                new BigDecimal("25.00"), "PEN", false, "INACTIVE", Collections.emptyList());
+        when(productRepository.findByIdAndStoreId(productId, storeId)).thenReturn(Optional.of(product));
+        when(variantRepository.findById(otherVariant.getId())).thenReturn(Optional.of(otherVariant));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> updateVariantService.execute(command));
+
+        assertEquals("La variante no pertenece al producto especificado", exception.getMessage());
+        verify(variantRepository).findById(otherVariant.getId());
+        verify(variantRepository, never()).save(any(ProductVariant.class));
+        verifyNoMoreInteractions(variantRepository);
+        assertEquals("Original", otherVariant.getPresentationName());
+        assertEquals("OTHER", otherVariant.getSku());
+        assertEquals(new BigDecimal("15.00"), otherVariant.getPriceAmount());
+        assertTrue(otherVariant.isTracksInventory());
+        assertEquals(VariantStatus.ACTIVE, otherVariant.getStatus());
+    }
+
+    @Test
     @DisplayName("Should throw ConflictException when duplicate SKU exists in the same store")
     void shouldThrowWhenSkuExists() {
         var command = new UpdateProductVariantCommand(

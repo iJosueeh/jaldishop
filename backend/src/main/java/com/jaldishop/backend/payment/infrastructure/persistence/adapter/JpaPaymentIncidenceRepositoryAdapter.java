@@ -26,6 +26,11 @@ public class JpaPaymentIncidenceRepositoryAdapter implements PaymentIncidenceRep
     }
 
     @Override
+    public Optional<PaymentIncidence> findLatestByPaymentIdAndProcessType(UUID paymentId, IncidenceProcessType processType) {
+        return jpaRepository.findFirstByPaymentIdAndProcessTypeOrderByCreatedAtDesc(paymentId, processType.name()).map(mapper::toDomain);
+    }
+
+    @Override
     public PaymentIncidence save(PaymentIncidence incidence) {
         PaymentIncidenceEntity entity = mapper.toEntity(incidence);
         PaymentIncidenceEntity saved = jpaRepository.save(entity);

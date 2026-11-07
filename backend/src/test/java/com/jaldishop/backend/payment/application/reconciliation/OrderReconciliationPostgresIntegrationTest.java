@@ -47,7 +47,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = BackendApplication.class)
+@SpringBootTest(classes = BackendApplication.class, properties = {
+        "spring.config.import=",
+        "app.security.jwt.secret=isolated-integration-tests-only-0123456789012345678901234567890123456789"
+})
 @DisplayName("OrderReconciliationPostgresIntegrationTest — Pruebas de integración real con PostgreSQL aislado para conciliación 4B.2")
 class OrderReconciliationPostgresIntegrationTest {
 
@@ -136,11 +139,73 @@ class OrderReconciliationPostgresIntegrationTest {
     @Autowired private PaymentRepository paymentRepository;
     @Autowired private PaymentAttemptRepository paymentAttemptRepository;
     @Autowired private OrderRepository orderRepository;
-    @Autowired private PaymentIncidenceRepository incidenceRepository;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+    private PaymentIncidenceRepository incidenceRepository;
     @Autowired private PaymentOrderReconciliationProcessor orderProcessor;
     @Autowired private PaymentReconciliationService reconciliationService;
     @Autowired private PaymentRefundService refundService;
     @Autowired private JdbcTemplate jdbcTemplate;
+
+    @Test
+    void manualApprovalAndDuplicateAffectOnlyTheSelectedAttemptWithSchedulersDisabled() {
+        reconciliationService.setOrdersReconciliationEnabled(false);
+        BigDecimal amount = new BigDecimal("95.00");
+        UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(reservationId, 1);
+        Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
+        PaymentAttempt target = createAttempt(payment, "ORD-MANUAL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        PaymentAttempt unrelated = createAttempt(payment, "ORD-UNRELATED", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORD-MANUAL", payment.getId(), "95.00")));
+
+        var result = reconciliationService.reconcileOrderAttempt(target.getId());
+        assertThat(result.financialStatus()).isEqualTo("APPROVED");
+        assertThat(result.commercialStatus()).isEqualTo(OrderReconciliationCandidateResult.CommercialStatus.CONFIRMED);
+        assertThat(reconciliationService.reconcileOrderAttempt(target.getId()).commercialStatus())
+                .isEqualTo(OrderReconciliationCandidateResult.CommercialStatus.CONFIRMED);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM orders WHERE payment_id = ?", Integer.class, payment.getId()))
+                .isEqualTo(1);
+        PaymentAttempt untouched = paymentAttemptRepository.findById(unrelated.getId()).orElseThrow();
+        assertThat(untouched.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
+        assertThat(untouched.getUpdatedAt()).isEqualTo(unrelated.getUpdatedAt());
+        assertThat(untouched.getReconciliationClaimToken()).isNull();
+        assertThat(reconciliationService.isOrdersReconciliationEnabled()).isFalse();
+    }
+
+    @Test
+    void failedIncidenceTransactionRollsBackRefundAndCanBeRetriedWithoutAnotherRemoteRead() {
+        reconciliationService.setOrdersReconciliationEnabled(false);
+        BigDecimal amount = new BigDecimal("95.00");
+        UUID reservationId = createCapacityReservation("EXPIRED", Instant.now().minusSeconds(600));
+        createActiveInventoryReservation(reservationId, 1);
+        Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
+        PaymentAttempt target = createAttempt(payment, "ORD-INCIDENCE-FAIL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORD-INCIDENCE-FAIL", payment.getId(), "95.00")));
+        org.mockito.Mockito.doThrow(new org.springframework.dao.DataAccessResourceFailureException("injected storage failure"))
+                .when(incidenceRepository).save(org.mockito.ArgumentMatchers.any());
+
+        var result = reconciliationService.reconcileOrderAttempt(target.getId());
+        assertThat(result.status()).isEqualTo(OrderReconciliationCandidateResult.Status.TECHNICAL_FAILURE);
+        assertThat(result.financialStatus()).isEqualTo("APPROVED");
+        assertThat(result.commercialStatus()).isEqualTo(OrderReconciliationCandidateResult.CommercialStatus.PENDING);
+        assertThat(paymentRepository.findById(payment.getId()).orElseThrow().getRefundStatus()).isEqualTo(RefundStatus.NOT_REQUIRED);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payment_incidences WHERE payment_id = ?", Integer.class, payment.getId()))
+                .isZero();
+
+        org.mockito.Mockito.doCallRealMethod().when(incidenceRepository).save(org.mockito.ArgumentMatchers.any());
+        orderMockResponse.set(new MockHttpResponse(500, "{}"));
+        var retried = reconciliationService.reconcileOrderAttempt(target.getId());
+        assertThat(retried.commercialStatus()).isEqualTo(OrderReconciliationCandidateResult.CommercialStatus.INCIDENCE_RECORDED);
+        assertThat(paymentRepository.findById(payment.getId()).orElseThrow().getRefundStatus()).isEqualTo(RefundStatus.PENDING);
+    }
+
+    private static String accreditedOrder(String orderId, UUID paymentId, String amount) {
+        return """
+                {"id":"%s","status":"processed","status_detail":"accredited","total_amount":%s,
+                 "external_reference":"%s","transactions":{"payments":[
+                 {"id":"99119911","status":"approved","status_detail":"accredited",
+                  "transaction_amount":%s,"currency_id":"PEN","date_approved":"2026-11-05T19:00:00Z"}]}}
+                """.formatted(orderId, amount, paymentId, amount);
+    }
 
     private static final UUID STORE_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e5");
     private static final UUID USER_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e3");
@@ -149,6 +214,8 @@ class OrderReconciliationPostgresIntegrationTest {
 
     @BeforeEach
     void cleanTestData() {
+        TestPostgresConfig.requireDestructiveIntegrationDatabase(
+                jdbcTemplate.queryForObject("SELECT current_database()", String.class));
         simulateTimeout.set(false);
         orderMockResponse.set(new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\"}"));
         jdbcTemplate.update("DELETE FROM payment_refund_execution_attempts");
@@ -226,8 +293,10 @@ class OrderReconciliationPostgresIntegrationTest {
     }
 
     private PaymentAttempt createAttempt(Payment payment, String orderId, String checkoutMode, PaymentAttemptStatus status, Instant createdAt) {
+        int attemptNumber = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId()).size() + 1;
         PaymentAttempt attempt = PaymentAttempt.create(
-                payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.WALLET_PURCHASE, "idemp-" + payment.getId(), checkoutMode
+                payment.getId(), attemptNumber, PaymentProvider.MERCADO_PAGO, PaymentMethod.WALLET_PURCHASE,
+                "idemp-" + payment.getId() + "-" + attemptNumber, checkoutMode
         );
         if (orderId != null) {
             attempt.recordOrder(orderId, "https://mp.com/init?order_id=" + orderId);
@@ -522,6 +591,13 @@ class OrderReconciliationPostgresIntegrationTest {
         assertThat(reloadedPayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(reloadedPayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
         assertThat(orderRepository.findByPaymentId(payment.getId())).isEmpty();
+        assertThat(incidenceRepository.findLatestByPaymentIdAndProcessType(payment.getId(), IncidenceProcessType.ORDER_CONFIRMATION))
+                .isPresent().get().extracting(com.jaldishop.backend.payment.domain.model.PaymentIncidence::getCode)
+                .isEqualTo("RESERVATION_EXPIRED");
+        assertThat(reconciliationService.reconcileOrderAttempt(attempt.getId()).status())
+                .isEqualTo(OrderReconciliationCandidateResult.Status.COMMERCIAL_INCIDENCE);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payment_incidences WHERE payment_id = ?", Integer.class, payment.getId()))
+                .isEqualTo(1);
     }
 
     // =========================================================================
@@ -549,7 +625,7 @@ class OrderReconciliationPostgresIntegrationTest {
                         "pa1_" + attempt.getId(), java.util.List.of(), null, null), workerToken, Instant.now()
         );
 
-        assertThat(result.status()).isEqualTo(OrderReconciliationCandidateResult.Status.SUCCESS_ALREADY_APPROVED);
+        assertThat(result.status()).isEqualTo(OrderReconciliationCandidateResult.Status.SUCCESS_CONFIRMED);
         PaymentAttempt reloadedAttempt = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
         assertThat(reloadedAttempt.getReconciliationClaimToken()).isNull();
     }
@@ -559,7 +635,7 @@ class OrderReconciliationPostgresIntegrationTest {
     // =========================================================================
     @Test
     @DisplayName("Escenario 7: Dos workers intentando reclamar el mismo intento serializan y solo uno adquiere lease")
-    void shouldAllowOnlyOneWorkerToClaimAttemptConcurrently() {
+    void shouldAllowOnlyOneWorkerToClaimAttemptConcurrently() throws Exception {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
@@ -568,12 +644,22 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID worker1 = UUID.randomUUID();
         UUID worker2 = UUID.randomUUID();
 
-        OrderReconciliationClaimResult claim1 = orderProcessor.claimAttempt(attempt.getId(), worker1, Duration.ofMinutes(5), Instant.now());
-        OrderReconciliationClaimResult claim2 = orderProcessor.claimAttempt(attempt.getId(), worker2, Duration.ofMinutes(5), Instant.now());
-
-        assertThat(claim1.claimed()).isTrue();
-        assertThat(claim2.claimed()).isFalse();
-        assertThat(claim2.skipReason()).contains("lease activo");
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var workers = Executors.newFixedThreadPool(2)) {
+            var first = workers.submit(() -> {
+                start.await();
+                return orderProcessor.claimAttempt(attempt.getId(), worker1, Duration.ofMinutes(5), Instant.now());
+            });
+            var second = workers.submit(() -> {
+                start.await();
+                return orderProcessor.claimAttempt(attempt.getId(), worker2, Duration.ofMinutes(5), Instant.now());
+            });
+            start.countDown();
+            var claim1 = first.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            var claim2 = second.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            assertThat(claim1.claimed() ^ claim2.claimed()).isTrue();
+            assertThat(claim1.claimed() ? claim2.skipReason() : claim1.skipReason()).contains("lease activo");
+        }
     }
 
     // =========================================================================
@@ -707,15 +793,19 @@ class OrderReconciliationPostgresIntegrationTest {
         assertThat(summary.failureCount()).isEqualTo(1);
         assertThat(summary.results().getFirst().status())
                 .isEqualTo(OrderReconciliationCandidateResult.Status.TECHNICAL_FAILURE);
-        assertThat(summary.results().getFirst().detail()).isEqualTo("IDENTIFIER_CONTRADICTION");
-        assertThat(paymentRepository.findById(payment.getId()).orElseThrow().getStatus())
-                .isEqualTo(PaymentStatus.PENDING);
+        assertThat(summary.results().getFirst().detail()).isEqualTo("Validación rechazada: AMBIGUOUS_ORDER_PAYMENTS");
+        Payment reloadedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertThat(reloadedPayment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(reloadedPayment.getRefundStatus()).isEqualTo(RefundStatus.NOT_REQUIRED);
         assertThat(orderRepository.findByPaymentId(payment.getId())).isEmpty();
+        assertThat(incidenceRepository.findLatestByPaymentIdAndProcessType(payment.getId(), IncidenceProcessType.ORDER_CONFIRMATION))
+                .isEmpty();
         PaymentAttempt reloadedAttempt = paymentAttemptRepository.findById(attempt.getId()).orElseThrow();
         assertThat(reloadedAttempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
         assertThat(reloadedAttempt.getProviderPaymentId()).isNull();
         assertThat(reloadedAttempt.getErrorCode()).isNull();
-        assertThat(reloadedAttempt.getReconciliationClaimToken()).isNotNull();
+        assertThat(reloadedAttempt.getReconciliationClaimToken()).isNull();
+        assertThat(reloadedAttempt.getReconciliationLeaseExpiresAt()).isNull();
     }
 
     // =========================================================================

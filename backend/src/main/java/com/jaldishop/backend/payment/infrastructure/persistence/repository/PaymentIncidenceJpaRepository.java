@@ -14,6 +14,8 @@ import java.util.UUID;
 @Repository
 public interface PaymentIncidenceJpaRepository extends JpaRepository<PaymentIncidenceEntity, UUID> {
 
+    Optional<PaymentIncidenceEntity> findFirstByPaymentIdAndProcessTypeOrderByCreatedAtDesc(UUID paymentId, String processType);
+
     @Query("SELECT pi FROM PaymentIncidenceEntity pi WHERE pi.paymentId = :paymentId " +
             "AND pi.processType = :processType AND pi.status IN ('OPEN', 'MANUAL_REVIEW_REQUIRED')")
     Optional<PaymentIncidenceEntity> findActiveByPaymentIdAndProcessType(

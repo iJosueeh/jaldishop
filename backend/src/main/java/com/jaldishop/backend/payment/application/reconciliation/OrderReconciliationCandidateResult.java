@@ -7,11 +7,29 @@ public record OrderReconciliationCandidateResult(
         UUID paymentId,
         String providerOrderId,
         Status status,
-        String detail
+        String detail,
+        String financialStatus,
+        CommercialStatus commercialStatus
 ) {
+    public enum CommercialStatus { CONFIRMED, INCIDENCE_RECORDED, PENDING, NOT_ATTEMPTED }
+
+    public OrderReconciliationCandidateResult(UUID attemptId, UUID paymentId, String providerOrderId, Status status, String detail) {
+        this(attemptId, paymentId, providerOrderId, status, detail, null, switch (status) {
+            case SUCCESS_CONFIRMED -> CommercialStatus.CONFIRMED;
+            case COMMERCIAL_INCIDENCE -> CommercialStatus.INCIDENCE_RECORDED;
+            case APPROVED_COMMERCIAL_PENDING -> CommercialStatus.PENDING;
+            default -> CommercialStatus.NOT_ATTEMPTED;
+        });
+    }
+
+    public static OrderReconciliationCandidateResult commercialPending(UUID attemptId, UUID paymentId, String orderId) {
+        return new OrderReconciliationCandidateResult(attemptId, paymentId, orderId, Status.APPROVED_COMMERCIAL_PENDING,
+                "Pago aprobado; confirmación comercial pendiente o requiere revisión");
+    }
+
     public enum Status {
+        APPROVED_COMMERCIAL_PENDING,
         SUCCESS_CONFIRMED,
-        SUCCESS_ALREADY_APPROVED,
         SUCCESS_ORDER_OPEN,
         SUCCESS_CANCELLED_OR_EXPIRED,
         COMMERCIAL_INCIDENCE,
@@ -23,10 +41,6 @@ public record OrderReconciliationCandidateResult(
 
     public static OrderReconciliationCandidateResult successConfirmed(UUID attemptId, UUID paymentId, String orderId, String orderNumber) {
         return new OrderReconciliationCandidateResult(attemptId, paymentId, orderId, Status.SUCCESS_CONFIRMED, "Pedido confirmado: " + orderNumber);
-    }
-
-    public static OrderReconciliationCandidateResult alreadyApproved(UUID attemptId, UUID paymentId, String orderId) {
-        return new OrderReconciliationCandidateResult(attemptId, paymentId, orderId, Status.SUCCESS_ALREADY_APPROVED, "Pago ya aprobado previamente");
     }
 
     public static OrderReconciliationCandidateResult orderOpen(UUID attemptId, UUID paymentId, String orderId) {

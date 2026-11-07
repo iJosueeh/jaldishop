@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/media")
@@ -40,7 +41,8 @@ public class MediaController {
             GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
                     userId,
                     request.targetType(),
-                    explicitStoreId
+                    explicitStoreId,
+                    principal != null ? principal.roles() : Set.of()
             );
             UploadSignature signature = generateUploadSignatureService.execute(command);
             return ResponseEntity.ok(UploadSignatureResponse.fromDomain(signature));
@@ -63,7 +65,8 @@ public class MediaController {
         GenerateUploadSignatureCommand command = new GenerateUploadSignatureCommand(
                 principal.userId(),
                 request.targetType(),
-                explicitStoreId
+                explicitStoreId,
+                principal.roles()
         );
 
         UploadSignature signature = generateUploadSignatureService.execute(command);

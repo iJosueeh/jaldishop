@@ -1,6 +1,5 @@
 package com.jaldishop.backend.payment.application.reconciliation;
 
-import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
 import com.jaldishop.backend.payment.domain.repository.PaymentAttemptRepository;
 import com.jaldishop.backend.payment.domain.repository.PaymentRepository;
 import org.slf4j.Logger;
@@ -8,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.jaldishop.backend.payment.domain.enums.PaymentStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -108,7 +110,6 @@ public class PaymentReconciliationService {
 
         Instant now = Instant.now();
         Instant cutoffTime = now.minusSeconds(ordersGracePeriodSeconds);
-        Duration leaseDuration = Duration.ofSeconds(ordersLeaseDurationSeconds);
 
         List<UUID> candidateAttemptIds = paymentAttemptRepository.findEligibleOrderReconciliationAttemptIds(
                 cutoffTime, now, ordersBatchSize
@@ -121,39 +122,14 @@ public class PaymentReconciliationService {
         log.info("Iniciando lote de conciliación de órdenes para {} candidatos (antigüedad > {}s)",
                 candidateAttemptIds.size(), ordersGracePeriodSeconds);
 
-        UUID workerToken = UUID.randomUUID();
         List<OrderReconciliationCandidateResult> results = new ArrayList<>();
-
         for (UUID attemptId : candidateAttemptIds) {
             try {
-                // Fase 1: Claim transaccional corto
-                OrderReconciliationClaimResult claim = orderProcessor.claimAttempt(attemptId, workerToken, leaseDuration, now);
-                if (!claim.claimed()) {
-                    results.add(OrderReconciliationCandidateResult.skipped(attemptId, claim.skipReason()));
-                    continue;
-                }
-
-                // Fase 2: Consulta HTTP sin transacción de BD
-                OrderQueryResult remoteOrder;
-                try {
-                    remoteOrder = orderProcessor.queryRemoteOrder(claim.providerOrderId());
-                } catch (Exception ex) {
-                    log.warn("Fallo en consulta remota para orden {} (intento {}): {}",
-                            claim.providerOrderId(), attemptId, ex.getMessage());
-                    orderProcessor.releaseLeaseOnError(attemptId, workerToken, now);
-                    results.add(OrderReconciliationCandidateResult.technicalFailure(attemptId, claim.paymentId(), claim.providerOrderId(), ex.getMessage()));
-                    continue;
-                }
-
-                // Fase 3: Consolidación transaccional
-                OrderReconciliationCandidateResult consResult = orderProcessor.consolidateOrderReconciliation(
-                        claim, remoteOrder, workerToken, now
-                );
-                results.add(consResult);
-
-            } catch (Exception e) {
-                log.error("Excepción inesperada al conciliar orden para intento {}: {}", attemptId, e.getMessage(), e);
-                results.add(OrderReconciliationCandidateResult.technicalFailure(attemptId, null, null, e.getMessage()));
+                results.add(reconcileOrderAttempt(attemptId));
+            } catch (RuntimeException ex) {
+                log.error("Fallo al finalizar conciliación de intento {} ({})", attemptId, ex.getClass().getSimpleName());
+                results.add(OrderReconciliationCandidateResult.technicalFailure(attemptId, null, null,
+                        "No se pudo finalizar la conciliación o recuperar su estado persistido"));
             }
         }
 
@@ -162,6 +138,45 @@ public class PaymentReconciliationService {
                 summary.totalCandidates(), summary.successCount(), summary.skippedCount(),
                 summary.commercialIncidenceCount(), summary.failureCount());
         return summary;
+    }
+
+    /** Manual entry point; deliberately independent of the scheduled batch feature flag. */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public OrderReconciliationCandidateResult reconcileOrderAttempt(UUID attemptId) {
+        UUID workerToken = UUID.randomUUID();
+        OrderReconciliationCandidateResult result;
+        try {
+            result = orderProcessor.reconcileApprovedAttempt(attemptId);
+            if (result == null) {
+                var claim = orderProcessor.claimAttempt(attemptId, workerToken,
+                        Duration.ofSeconds(ordersLeaseDurationSeconds), Instant.now());
+                if (!claim.claimed()) {
+                    result = OrderReconciliationCandidateResult.skipped(attemptId, claim.skipReason());
+                } else {
+                    // HTTP outside a transaction; evaluate lease ownership with the post-HTTP time.
+                    var remote = orderProcessor.queryRemoteOrder(claim.providerOrderId());
+                    result = orderProcessor.consolidateOrderReconciliation(claim, remote, workerToken, Instant.now());
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Fallo al conciliar intento {} ({})", attemptId, ex.getClass().getSimpleName());
+            result = OrderReconciliationCandidateResult.technicalFailure(attemptId, null, null,
+                    ex instanceof com.jaldishop.backend.shared.exception.ConflictException conflict
+                            ? "Validación rechazada: " + conflict.getCode()
+                            : ex instanceof SecurityException ? "Cuenta o entorno remoto no autorizado"
+                            : "No se completó la conciliación; consultar estado financiero y comercial persistido");
+        } finally {
+            // Only this token may release the claim, including on validation/consolidation failures.
+            orderProcessor.releaseLeaseOnError(attemptId, workerToken, Instant.now());
+        }
+        var attempt = paymentAttemptRepository.findById(attemptId).orElse(null);
+        if (attempt == null) return result;
+        var payment = paymentRepository.findById(attempt.getPaymentId()).orElse(null);
+        return new OrderReconciliationCandidateResult(attemptId, attempt.getPaymentId(), attempt.getProviderOrderId(),
+                result.status(), result.detail(), payment == null ? null : payment.getStatus().name(),
+                payment != null && payment.getStatus() == PaymentStatus.APPROVED
+                        && result.commercialStatus() == OrderReconciliationCandidateResult.CommercialStatus.NOT_ATTEMPTED
+                        ? OrderReconciliationCandidateResult.CommercialStatus.PENDING : result.commercialStatus());
     }
 
     public void setOrdersReconciliationEnabled(boolean enabled) {

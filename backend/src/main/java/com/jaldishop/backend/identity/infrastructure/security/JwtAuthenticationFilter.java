@@ -25,6 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -72,6 +73,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (userOpt.isPresent() && userOpt.get().canAuthenticate()) {
+            var currentRoles = userOpt.get().getRoles().stream()
+                    .map(role -> role.getName().name())
+                    .collect(Collectors.toSet());
+            principal = new JwtPrincipal(principal.userId(), currentRoles);
             var authorities = principal.roles().stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
 

@@ -21,9 +21,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     };
 
     private final StompAuthChannelInterceptor stompAuthChannelInterceptor;
+    private final StompDeliveryAuthorizationInterceptor deliveryAuthorizationInterceptor;
 
-    public WebSocketConfig(StompAuthChannelInterceptor stompAuthChannelInterceptor) {
+    public WebSocketConfig(StompAuthChannelInterceptor stompAuthChannelInterceptor,
+                           StompDeliveryAuthorizationInterceptor deliveryAuthorizationInterceptor) {
         this.stompAuthChannelInterceptor = stompAuthChannelInterceptor;
+        this.deliveryAuthorizationInterceptor = deliveryAuthorizationInterceptor;
     }
 
     @Override
@@ -42,6 +45,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompAuthChannelInterceptor);
+    }
+
+    @Override
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        registration.interceptors(deliveryAuthorizationInterceptor);
     }
 
 }

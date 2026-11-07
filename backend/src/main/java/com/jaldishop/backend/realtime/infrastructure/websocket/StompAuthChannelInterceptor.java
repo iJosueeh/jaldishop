@@ -1,6 +1,7 @@
 package com.jaldishop.backend.realtime.infrastructure.websocket;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
+import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import org.springframework.messaging.Message;
@@ -31,10 +32,12 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtService jwtService;
     private final StoreContextService storeContextService;
+    private final UserRepository userRepository;
 
-    public StompAuthChannelInterceptor(JwtService jwtService, StoreContextService storeContextService) {
+    public StompAuthChannelInterceptor(JwtService jwtService, StoreContextService storeContextService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.storeContextService = storeContextService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -73,7 +76,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         }
 
         String token = authHeader.substring(7).trim();
-        JwtPrincipal jwtPrincipal = jwtService.getPrincipal(token);
+        JwtPrincipal jwtPrincipal = currentPrincipal(jwtService.getPrincipal(token).userId());
 
         var authorities = jwtPrincipal.roles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -100,7 +103,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             throw new AccessDeniedException("Sesión no autenticada para realizar suscripción STOMP.");
         }
 
-        JwtPrincipal jwtPrincipal = stompPrincipal.jwtPrincipal();
+        authorize(stompPrincipal.jwtPrincipal().userId(), destination);
+    }
+
+    void authorize(UUID userId, String destination) {
+        JwtPrincipal jwtPrincipal = currentPrincipal(userId);
 
         if (destination == null || destination.isBlank()) {
             throw new AccessDeniedException("Destino de suscripción no proporcionado.");
@@ -143,6 +150,16 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
 
     private void handleSend(StompHeaderAccessor accessor) {
         throw new AccessDeniedException("No se permiten comandos de negocio mediante WebSocket. Utilice los endpoints HTTP REST oficiales.");
+    }
+
+    private JwtPrincipal currentPrincipal(UUID userId) {
+        var user = userRepository.findById(userId)
+                .filter(u -> u.canAuthenticate())
+                .orElseThrow(() -> new AccessDeniedException("Usuario no autorizado."));
+        var roles = user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(java.util.stream.Collectors.toSet());
+        return new JwtPrincipal(userId, roles);
     }
 
 }
