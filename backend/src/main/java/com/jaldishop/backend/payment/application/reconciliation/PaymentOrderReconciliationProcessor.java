@@ -1,9 +1,5 @@
 package com.jaldishop.backend.payment.application.reconciliation;
 
-import com.jaldishop.backend.checkout.application.command.ConfirmPurchaseCommand;
-import com.jaldishop.backend.checkout.application.result.OrderConfirmation;
-import com.jaldishop.backend.checkout.application.service.ConfirmPurchaseService;
-import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.payment.application.gateway.MercadoPagoGateway;
 import com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult;
@@ -19,16 +15,19 @@ import com.jaldishop.backend.shared.exception.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator;
+import com.jaldishop.backend.payment.domain.enums.IncidenceProcessType;
+import com.jaldishop.backend.payment.domain.enums.PaymentProvider;
+import com.jaldishop.backend.payment.domain.enums.RefundStatus;
+import com.jaldishop.backend.payment.domain.repository.PaymentIncidenceRepository;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -37,7 +36,7 @@ import java.util.UUID;
  * 2. queryRemoteOrder: consulta HTTP fuera de transacción de BD (sin bloqueos pesimistas).
  * 3. consolidateOrderReconciliation:
  *    - 3A. applyFinancialReconciliationUnderLock: validación de lease, aplicación financiera y liberación de lease bajo transacción corta (REQUIRES_NEW).
- *    - 3B. confirmPurchaseIfApproved: confirmación comercial fuera de bloqueos de pagos, registrando incidencias si la reserva expiró.
+ *    - 3B. confirmCommercial: reutiliza la confirmación comercial y sus incidencias en transacciones independientes.
  */
 @Component
 public class PaymentOrderReconciliationProcessor {
@@ -48,7 +47,9 @@ public class PaymentOrderReconciliationProcessor {
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final MercadoPagoGateway mercadoPagoGateway;
     private final PaymentWebhookPersistenceService persistenceService;
-    private final ConfirmPurchaseService confirmPurchaseService;
+    private final PaymentReconciliationProcessor commercialProcessor;
+    private final MercadoPagoResourceValidator resourceValidator;
+    private final PaymentIncidenceRepository incidenceRepository;
     private final OrderRepository orderRepository;
     private final TransactionTemplate requiresNewTransactionTemplate;
 
@@ -58,15 +59,19 @@ public class PaymentOrderReconciliationProcessor {
             PaymentAttemptRepository paymentAttemptRepository,
             MercadoPagoGateway mercadoPagoGateway,
             PaymentWebhookPersistenceService persistenceService,
-            ConfirmPurchaseService confirmPurchaseService,
+            PaymentReconciliationProcessor commercialProcessor,
             OrderRepository orderRepository,
-            PlatformTransactionManager transactionManager
+            PlatformTransactionManager transactionManager,
+            MercadoPagoResourceValidator resourceValidator,
+            PaymentIncidenceRepository incidenceRepository
     ) {
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
         this.mercadoPagoGateway = mercadoPagoGateway;
         this.persistenceService = persistenceService;
-        this.confirmPurchaseService = confirmPurchaseService;
+        this.commercialProcessor = commercialProcessor;
+        this.resourceValidator = resourceValidator;
+        this.incidenceRepository = incidenceRepository;
         this.orderRepository = orderRepository;
         this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
         this.requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -81,17 +86,23 @@ public class PaymentOrderReconciliationProcessor {
             Duration leaseDuration,
             Instant now
     ) {
+        // Route before REQUIRES_NEW so its persistence context reloads the attempt only under lock.
+        PaymentAttempt initial = paymentAttemptRepository.findById(attemptId).orElse(null);
+        if (initial == null) return OrderReconciliationClaimResult.skipped("Intento inexistente");
         return requiresNewTransactionTemplate.execute(status -> {
+            Payment payment = paymentRepository.findByIdForUpdate(initial.getPaymentId()).orElse(null);
             PaymentAttempt attempt = paymentAttemptRepository.findByIdForUpdate(attemptId).orElse(null);
-            if (attempt == null) {
+            if (attempt == null || !initial.getPaymentId().equals(attempt.getPaymentId())) {
                 return OrderReconciliationClaimResult.skipped("Intento inexistente: " + attemptId);
             }
 
-            if (!attempt.canClaimReconciliation(now)) {
+            Instant claimTime = Instant.now();
+            if (attempt.getProvider() != PaymentProvider.MERCADO_PAGO
+                    || leaseDuration == null || leaseDuration.isNegative() || leaseDuration.isZero()
+                    || !attempt.canClaimReconciliation(claimTime)) {
                 return OrderReconciliationClaimResult.skipped("Intento no elegible o con lease activo de otro worker");
             }
 
-            Payment payment = paymentRepository.findById(attempt.getPaymentId()).orElse(null);
             if (payment == null) {
                 return OrderReconciliationClaimResult.skipped("Pago inexistente para intento: " + attemptId);
             }
@@ -100,7 +111,7 @@ public class PaymentOrderReconciliationProcessor {
                 return OrderReconciliationClaimResult.skipped("El pago ya se encuentra en APPROVED");
             }
 
-            attempt.acquireReconciliationLease(workerToken, leaseDuration, now);
+            attempt.acquireReconciliationLease(workerToken, leaseDuration, claimTime);
             paymentAttemptRepository.save(attempt);
 
             log.info("Lease de conciliación adquirido para intento {} (pago {}) por worker {} hasta {}",
@@ -134,7 +145,7 @@ public class PaymentOrderReconciliationProcessor {
             Instant now
     ) {
         FinancialReconciliationOutcome outcome = requiresNewTransactionTemplate.execute(status ->
-                applyFinancialReconciliationUnderLock(claim, remoteOrder, workerToken, now)
+                applyFinancialReconciliationUnderLock(claim, remoteOrder, workerToken)
         );
 
         if (outcome == null) {
@@ -145,42 +156,16 @@ public class PaymentOrderReconciliationProcessor {
         return switch (outcome.status()) {
             case CLAIM_LOST -> OrderReconciliationCandidateResult.claimLost(
                     claim.attemptId(), claim.paymentId(), outcome.message());
-            case ALREADY_APPROVED -> OrderReconciliationCandidateResult.alreadyApproved(
-                    claim.attemptId(), claim.paymentId(), claim.providerOrderId());
+            case ALREADY_APPROVED -> confirmCommercial(claim.attemptId(), claim.paymentId(), claim.providerOrderId());
             case TECHNICAL_FAILURE -> OrderReconciliationCandidateResult.technicalFailure(
                     claim.attemptId(), claim.paymentId(), claim.providerOrderId(), outcome.message());
             case ORDER_OPEN -> OrderReconciliationCandidateResult.orderOpen(
                     claim.attemptId(), claim.paymentId(), claim.providerOrderId());
             case CANCELLED_OR_EXPIRED -> OrderReconciliationCandidateResult.cancelledOrExpired(
                     claim.attemptId(), claim.paymentId(), claim.providerOrderId(), outcome.paymentStatus());
-            case FINANCIAL_APPLIED -> {
-                if ("APPROVED".equalsIgnoreCase(outcome.paymentStatus()) && confirmPurchaseService != null) {
-                    try {
-                        OrderConfirmation conf = confirmPurchaseService.execute(new ConfirmPurchaseCommand(claim.paymentId()));
-                        log.info("Conciliación exitosa: pedido {} confirmado comercialmente para pago {}", conf.orderNumber(), claim.paymentId());
-                        yield OrderReconciliationCandidateResult.successConfirmed(
-                                claim.attemptId(), claim.paymentId(), claim.providerOrderId(), conf.orderNumber());
-                    } catch (ConflictException ex) {
-                        log.warn("Fallo comercial definitivo en confirmación durante conciliación para pago APPROVED {}: [{}] {}",
-                                claim.paymentId(), ex.getCode(), ex.getMessage());
-                        persistenceService.recordApprovalIncidence(claim.paymentId(), ex.getMessage());
-                        yield OrderReconciliationCandidateResult.commercialIncidence(
-                                claim.attemptId(), claim.paymentId(), claim.providerOrderId(), ex.getMessage());
-                    } catch (DataIntegrityViolationException ex) {
-                        log.warn("Violación de integridad al confirmar pedido para pago {} en conciliación. Verificando ganador...", claim.paymentId());
-                        if (orderRepository != null) {
-                            Optional<Order> existingOrder = orderRepository.findByPaymentId(claim.paymentId());
-                            if (existingOrder.isPresent()) {
-                                yield OrderReconciliationCandidateResult.successConfirmed(
-                                        claim.attemptId(), claim.paymentId(), claim.providerOrderId(), existingOrder.get().getOrderNumber());
-                            }
-                        }
-                        throw ex;
-                    }
-                }
-                yield OrderReconciliationCandidateResult.cancelledOrExpired(
-                        claim.attemptId(), claim.paymentId(), claim.providerOrderId(), outcome.paymentStatus());
-            }
+            case FINANCIAL_APPLIED -> "APPROVED".equalsIgnoreCase(outcome.paymentStatus())
+                    ? confirmCommercial(claim.attemptId(), claim.paymentId(), claim.providerOrderId())
+                    : OrderReconciliationCandidateResult.orderOpen(claim.attemptId(), claim.paymentId(), claim.providerOrderId());
         };
     }
 
@@ -190,11 +175,11 @@ public class PaymentOrderReconciliationProcessor {
     private FinancialReconciliationOutcome applyFinancialReconciliationUnderLock(
             OrderReconciliationClaimResult claim,
             OrderQueryResult remoteOrder,
-            UUID workerToken,
-            Instant now
+            UUID workerToken
     ) {
         Payment payment = paymentRepository.findByIdForUpdate(claim.paymentId()).orElse(null);
         PaymentAttempt attempt = paymentAttemptRepository.findByIdForUpdate(claim.attemptId()).orElse(null);
+        Instant now = Instant.now();
         if (attempt == null) {
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.CLAIM_LOST, null, null, "Intento no encontrado en BD");
         }
@@ -211,25 +196,18 @@ public class PaymentOrderReconciliationProcessor {
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.TECHNICAL_FAILURE, null, null, "Pago no encontrado");
         }
 
-        if (!claim.paymentId().equals(attempt.getPaymentId()) || remoteOrder == null
-                || !claim.providerOrderId().equals(remoteOrder.orderId())
-                || !claim.providerOrderId().equals(attempt.getProviderOrderId())
-                || remoteOrder.payments().size() > 1)
+        resourceValidator.validateOrder(claim.providerOrderId(), remoteOrder);
+        if (!claim.paymentId().equals(attempt.getPaymentId())
+                || !claim.providerOrderId().equals(attempt.getProviderOrderId()))
             throw new ConflictException("PAYMENT_ATTEMPT_MISMATCH", "IDENTIFIER_CONTRADICTION");
         persistenceService.validateReference(remoteOrder.externalReference(), payment.getId(), attempt);
 
         // Si el pago ya fue aprobado concurrentemente (ej. por webhook tardío), no degradar
-        if (payment.getStatus() == PaymentStatus.APPROVED) {
+        if (payment.getStatus() == PaymentStatus.APPROVED && remoteOrder.payments().isEmpty()) {
             log.info("Pago {} ya se encuentra en APPROVED (notificación concurrente). Liberando lease.", payment.getId());
             attempt.releaseReconciliationLease(now);
             paymentAttemptRepository.save(attempt);
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.ALREADY_APPROVED, "APPROVED", null, "Ya aprobado");
-        }
-
-        if (remoteOrder == null) {
-            attempt.releaseReconciliationLease(now);
-            paymentAttemptRepository.save(attempt);
-            return new FinancialReconciliationOutcome(FinancialReconciliationStatus.TECHNICAL_FAILURE, null, null, "Respuesta remota nula");
         }
 
         // Caso A: Orden remota sin transacciones de pago
@@ -250,17 +228,8 @@ public class PaymentOrderReconciliationProcessor {
             return new FinancialReconciliationOutcome(FinancialReconciliationStatus.ORDER_OPEN, remoteOrder.status(), null, "Orden abierta sin pagos");
         }
 
-        // Caso B: Orden remota contiene transacciones
-        OrderQueryResult.OrderPaymentItem selectedPayment = null;
-        for (OrderQueryResult.OrderPaymentItem p : remoteOrder.payments()) {
-            if (isPaymentAccredited(p)) {
-                selectedPayment = p;
-                break;
-            }
-        }
-        if (selectedPayment == null) {
-            selectedPayment = remoteOrder.payments().getLast();
-        }
+        // Single transaction identity was checked by the shared validator.
+        var selectedPayment = remoteOrder.payments().getFirst();
 
         PaymentQueryResult pqr = new PaymentQueryResult(
                 selectedPayment.providerPaymentId(),
@@ -280,6 +249,13 @@ public class PaymentOrderReconciliationProcessor {
         paymentAttemptRepository.save(attempt);
         ProcessMercadoPagoWebhookResult persistResult = persistenceService.applyPaymentQueryResult(payment.getId(), pqr, claim.providerOrderId());
 
+        if (!"APPROVED".equalsIgnoreCase(persistResult.paymentStatus())
+                && "REJECTED".equals(persistResult.attemptStatus())) {
+            return new FinancialReconciliationOutcome(
+                    FinancialReconciliationStatus.CANCELLED_OR_EXPIRED,
+                    selectedPayment.status(), selectedPayment.providerPaymentId(), "Intento rechazado o cancelado");
+        }
+
         return new FinancialReconciliationOutcome(
                 FinancialReconciliationStatus.FINANCIAL_APPLIED,
                 persistResult.paymentStatus(),
@@ -292,34 +268,50 @@ public class PaymentOrderReconciliationProcessor {
      * Libera el lease en caso de error técnico en la Fase 2 (timeout, fallo HTTP) sin degradar estado.
      */
     public void releaseLeaseOnError(UUID attemptId, UUID workerToken, Instant now) {
-        requiresNewTransactionTemplate.executeWithoutResult(status -> {
-            try {
+        requiresNewTransactionTemplate.executeWithoutResult(status ->
                 paymentAttemptRepository.findByIdForUpdate(attemptId).ifPresent(attempt -> {
-                    if (attempt.isReconciliationClaimOwnedBy(workerToken, now)) {
-                        attempt.releaseReconciliationLease(now);
+                    if (workerToken.equals(attempt.getReconciliationClaimToken())) {
+                        attempt.releaseReconciliationLease(Instant.now());
                         paymentAttemptRepository.save(attempt);
-                        log.info("Lease liberado tras error técnico para intento {}", attemptId);
                     }
-                });
-            } catch (Exception e) {
-                log.error("Error liberando lease para intento {}: {}", attemptId, e.getMessage());
-            }
-        });
+                }));
     }
 
-    private boolean isPaymentAccredited(OrderQueryResult.OrderPaymentItem p) {
-        if (p == null || p.providerPaymentId() == null || p.providerPaymentId().isBlank()) {
-            return false;
+    /** Returns null only when a remote financial reconciliation is still needed. */
+    public OrderReconciliationCandidateResult reconcileApprovedAttempt(UUID attemptId) {
+        PaymentAttempt attempt = paymentAttemptRepository.findById(attemptId).orElse(null);
+        if (attempt == null) return OrderReconciliationCandidateResult.skipped(attemptId, "Intento inexistente");
+        if (attempt.getProvider() != PaymentProvider.MERCADO_PAGO
+                || !"ORDERS".equals(attempt.getCheckoutMode()) || attempt.getProviderOrderId() == null
+                || attempt.getProviderOrderId().isBlank())
+            return OrderReconciliationCandidateResult.skipped(attemptId, "Se requiere un intento Mercado Pago Orders");
+        Payment payment = paymentRepository.findById(attempt.getPaymentId()).orElseThrow();
+        return payment.getStatus() == PaymentStatus.APPROVED
+                ? confirmCommercial(attemptId, payment.getId(), attempt.getProviderOrderId()) : null;
+    }
+
+    private OrderReconciliationCandidateResult confirmCommercial(UUID attemptId, UUID paymentId, String orderId) {
+        var existing = orderRepository.findByPaymentId(paymentId);
+        if (existing.isPresent()) {
+            return OrderReconciliationCandidateResult.successConfirmed(attemptId, paymentId, orderId,
+                    existing.get().getOrderNumber());
         }
-        String s = p.status() != null ? p.status().toLowerCase(Locale.ROOT) : "";
-        String d = p.statusDetail() != null ? p.statusDetail().toLowerCase(Locale.ROOT) : "";
-        if ("approved".equals(s)) {
-            return d.isEmpty() || "accredited".equals(d);
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow();
+        if (payment.getRefundStatus() != RefundStatus.NOT_REQUIRED) {
+            var incidence = incidenceRepository.findLatestByPaymentIdAndProcessType(paymentId,
+                    IncidenceProcessType.ORDER_CONFIRMATION);
+            return incidence.filter(i -> i.getCategory() == com.jaldishop.backend.payment.domain.enums.IncidenceCategory.COMMERCIAL).isPresent()
+                    ? OrderReconciliationCandidateResult.commercialIncidence(attemptId, paymentId, orderId, incidence.get().getCode())
+                    : OrderReconciliationCandidateResult.commercialPending(attemptId, paymentId, orderId);
         }
-        if ("processed".equals(s)) {
-            return "accredited".equals(d);
-        }
-        return false;
+        ReconciliationCandidateResult result = commercialProcessor.processCandidate(paymentId);
+        return switch (result.status()) {
+            case SUCCESS -> OrderReconciliationCandidateResult.successConfirmed(attemptId, paymentId, orderId, result.orderNumber());
+            case COMMERCIAL_FAILURE -> OrderReconciliationCandidateResult.commercialIncidence(attemptId, paymentId, orderId, result.detail());
+            case SKIPPED, INDETERMINATE_CONFLICT -> OrderReconciliationCandidateResult.commercialPending(attemptId, paymentId, orderId);
+            case TRANSIENT_FAILURE, UNEXPECTED_FAILURE -> OrderReconciliationCandidateResult.technicalFailure(attemptId, paymentId, orderId,
+                    "Fallo técnico en confirmación comercial; aprobación financiera preservada");
+        };
     }
 
     public enum FinancialReconciliationStatus {

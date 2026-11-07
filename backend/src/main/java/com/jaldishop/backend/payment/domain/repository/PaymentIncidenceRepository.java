@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PaymentIncidenceRepository {
+    Optional<PaymentIncidence> findLatestByPaymentIdAndProcessType(UUID paymentId, IncidenceProcessType processType);
     PaymentIncidence save(PaymentIncidence incidence);
     Optional<PaymentIncidence> findById(UUID id);
     Optional<PaymentIncidence> findActiveByPaymentIdAndProcessType(UUID paymentId, IncidenceProcessType processType);

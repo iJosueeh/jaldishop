@@ -1,6 +1,7 @@
 package com.jaldishop.backend.identity.infrastructure.security;
 
 import com.jaldishop.backend.identity.domain.model.Role;
+import com.jaldishop.backend.identity.application.service.RefreshTokenService;
 import com.jaldishop.backend.identity.domain.enums.RoleName;
 import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
@@ -91,6 +92,26 @@ class JwtAuthenticationFilterTest {
                 Instant.now(),
                 Instant.now()
         );
+    }
+
+    @Test
+    void signedTokenAndRefreshUseCurrentRolesAfterRevocation() throws Exception {
+        JwtService realJwt = new JwtService("test-only-signing-key-at-least-32-bytes-long", 600_000);
+        String oldToken = realJwt.generateToken(userId, Set.of("ADMIN", "CUSTOMER"));
+        User customer = buildUser(userId, UserStatus.ACTIVE, Set.of(RoleName.CUSTOMER));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(customer));
+        var realFilter = new JwtAuthenticationFilter(realJwt, userRepository, objectMapper);
+        request.addHeader("Authorization", "Bearer " + oldToken);
+
+        realFilter.doFilter(request, response, filterChain);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(((JwtPrincipal) authentication.getPrincipal()).roles()).containsExactly("CUSTOMER");
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority))
+                .containsExactly("ROLE_CUSTOMER");
+        String refreshed = new RefreshTokenService(userRepository, realJwt).execute(userId).token();
+        assertThat(realJwt.getPrincipal(refreshed).roles()).containsExactly("CUSTOMER");
+        assertThat(realJwt.getPrincipal(oldToken).roles()).contains("ADMIN");
     }
 
     @Test

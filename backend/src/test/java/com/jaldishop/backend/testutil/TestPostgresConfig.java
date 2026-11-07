@@ -99,6 +99,11 @@ public final class TestPostgresConfig {
         throw new IllegalStateException("FLYWAY_VALIDATE_ON_MIGRATE must be either 'true' or 'false' (case-insensitive) if set, but was: " + rawValue);
     }
 
+    public static void requireDestructiveIntegrationDatabase(String actualDatabase) {
+        if (!"jaldishop_integration_test".equals(actualDatabase))
+            throw new IllegalStateException("FAIL-CLOSED: destructive fixtures require jaldishop_integration_test");
+    }
+
     public String url() {
         return url;
     }

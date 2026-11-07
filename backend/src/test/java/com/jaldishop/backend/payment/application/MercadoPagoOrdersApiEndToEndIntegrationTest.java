@@ -1048,7 +1048,12 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         Payment paymentDb = paymentRepository.findById(payment.getId()).orElseThrow();
         assertThat(paymentDb.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(paymentDb.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
-        assertThat(paymentDb.getRefundReference()).contains("INCIDENCE:La reserva de capacidad expiró");
+        assertThat(paymentDb.getRefundReference()).isEqualTo("INCIDENCE:RESERVATION_EXPIRED");
+        var incidence = incidenceRepository.findLatestByPaymentIdAndProcessType(
+                payment.getId(), IncidenceProcessType.ORDER_CONFIRMATION).orElseThrow();
+        assertThat(incidence.getCode()).isEqualTo("RESERVATION_EXPIRED");
+        assertThat(incidence.getCategory()).isEqualTo(IncidenceCategory.COMMERCIAL);
+        assertThat(incidence.getStatus()).isEqualTo(IncidenceStatus.RESOLVED);
 
         // Sin pedido comercial confirmado
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM orders", Integer.class)).isZero();

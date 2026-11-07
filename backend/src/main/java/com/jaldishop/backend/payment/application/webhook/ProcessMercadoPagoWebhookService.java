@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.stereotype.Service;
+import com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +40,7 @@ public class ProcessMercadoPagoWebhookService {
     private final MercadoPagoGateway mercadoPagoGateway;
     private final PaymentWebhookPersistenceService persistenceService;
     private final MercadoPagoProperties properties;
+    private final MercadoPagoResourceValidator resourceValidator;
     private final ObjectMapper objectMapper;
     private final ConfirmPurchaseService confirmPurchaseService;
     private final OrderRepository orderRepository;
@@ -55,6 +59,7 @@ public class ProcessMercadoPagoWebhookService {
         this.mercadoPagoGateway = mercadoPagoGateway;
         this.persistenceService = persistenceService;
         this.properties = properties;
+        this.resourceValidator = new MercadoPagoResourceValidator(properties);
         this.objectMapper = objectMapper;
         this.confirmPurchaseService = confirmPurchaseService;
         this.orderRepository = orderRepository;
@@ -81,7 +86,7 @@ public class ProcessMercadoPagoWebhookService {
         this(signatureValidator, mercadoPagoGateway, persistenceService, properties, objectMapper, null, null);
     }
 
-    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public ProcessMercadoPagoWebhookResult execute(ProcessMercadoPagoWebhookCommand command) {
         // 1. Extracción y Validación de Identificador de Evento (data.id o id)
         Map<String, String> queryParams = command.queryParams() != null ? command.queryParams() : Map.of();
@@ -173,7 +178,7 @@ public class ProcessMercadoPagoWebhookService {
             throw new ConflictException("PAYMENT_ID_MISMATCH", "La respuesta corresponde a otro pago remoto.");
 
         // H-04: Verificación de Cuenta Receptora (collector_id) si está configurada
-        validateCollectorAndLiveMode(dataId, queryResult.collectorId(), queryResult.liveMode());
+        resourceValidator.validateAccount(queryResult.collectorId(), queryResult.liveMode());
 
         // 5. Verificación de external_reference
         UUID paymentId = parseExternalReference(queryResult.externalReference(), dataId);
@@ -189,13 +194,7 @@ public class ProcessMercadoPagoWebhookService {
         log.info("Consultando estado real de la orden {} en Mercado Pago...", orderId);
         com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderQueryResult = mercadoPagoGateway.queryOrder(orderId);
 
-        if (!orderId.equals(orderQueryResult.orderId()))
-            throw new ConflictException("ORDER_ID_MISMATCH", "La respuesta corresponde a otra orden remota.");
-        if (orderQueryResult.payments() != null && orderQueryResult.payments().size() > 1)
-            throw new ConflictException("AMBIGUOUS_ORDER_PAYMENTS", "La orden contiene varias transacciones; requiere revisión.");
-
-        // Verificación de Cuenta Receptora y Entorno
-        validateCollectorAndLiveMode(orderId, orderQueryResult.collectorId(), orderQueryResult.liveMode());
+        resourceValidator.validateOrder(orderId, orderQueryResult);
 
         // Verificación de external_reference
         UUID paymentId = parseExternalReference(orderQueryResult.externalReference(), orderId);
@@ -219,17 +218,7 @@ public class ProcessMercadoPagoWebhookService {
             return ProcessMercadoPagoWebhookResult.ignored("Orden sin transacciones de pago registradas.");
         }
 
-        // Si existen transacciones, seleccionamos prioritariamente la transacción acreditada
-        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem selectedPayment = null;
-        for (com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem p : orderQueryResult.payments()) {
-            if (isPaymentAccredited(p)) {
-                selectedPayment = p;
-                break;
-            }
-        }
-        if (selectedPayment == null) {
-            selectedPayment = orderQueryResult.payments().getLast();
-        }
+        var selectedPayment = orderQueryResult.payments().getFirst();
 
         // Adaptamos el OrderPaymentItem a PaymentQueryResult para persistencia uniforme y segura
         PaymentQueryResult queryResult = new PaymentQueryResult(
@@ -251,39 +240,6 @@ public class ProcessMercadoPagoWebhookService {
 
         // Confirmación comercial si el pago resultó APPROVED
         return confirmPurchaseIfApproved(paymentId, queryResult.providerPaymentId(), persistenceResult);
-    }
-
-    private boolean isPaymentAccredited(com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem p) {
-        if (p == null || p.providerPaymentId() == null || p.providerPaymentId().isBlank()) {
-            return false;
-        }
-        String s = p.status() != null ? p.status().toLowerCase(java.util.Locale.ROOT) : "";
-        String d = p.statusDetail() != null ? p.statusDetail().toLowerCase(java.util.Locale.ROOT) : "";
-        if ("approved".equals(s)) {
-            return d.isEmpty() || "accredited".equals(d);
-        }
-        if ("processed".equals(s)) {
-            return "accredited".equals(d);
-        }
-        return false;
-    }
-
-    private void validateCollectorAndLiveMode(String resourceId, Long collectorId, Boolean liveMode) {
-        if (properties.getExpectedCollectorId() != null && properties.getExpectedCollectorId() > 0) {
-            if (collectorId == null || !properties.getExpectedCollectorId().equals(collectorId)) {
-                log.error("Rechazando recurso {}: collector_id recibido ({}) no coincide con el comercio esperado ({})",
-                        resourceId, collectorId, properties.getExpectedCollectorId());
-                throw new SecurityException("El recurso pertenece a una cuenta receptora no autorizada (collector_id=" + collectorId + ").");
-            }
-        }
-
-        if (properties.getExpectedLiveMode() != null) {
-            if (liveMode == null || !properties.getExpectedLiveMode().equals(liveMode)) {
-                log.error("Rechazando recurso {}: live_mode recibido ({}) no coincide con el entorno esperado ({})",
-                        resourceId, liveMode, properties.getExpectedLiveMode());
-                throw new SecurityException("El entorno del recurso (live_mode=" + liveMode + ") no coincide con el entorno esperado.");
-            }
-        }
     }
 
     private UUID parseExternalReference(String externalReference, String resourceId) {
@@ -322,13 +278,14 @@ public class ProcessMercadoPagoWebhookService {
                 // Se registra incidencia recuperable y refundStatus=PENDING; se responde 200 para evitar reintentos fútiles de MP.
                 log.warn("Fallo comercial definitivo en confirmación para pago APPROVED {}: [{}] {}",
                         paymentId, ex.getCode(), ex.getMessage());
-                persistenceService.recordApprovalIncidence(paymentId, ex.getMessage());
+                boolean recorded = persistenceService.recordApprovalIncidence(paymentId, ex);
                 return ProcessMercadoPagoWebhookResult.success(
                         paymentId,
                         providerPaymentId,
                         "APPROVED",
                         persistenceResult.attemptStatus(),
-                        "Pago aprobado financieramente, pero la confirmación comercial falló (" + ex.getMessage() + "). Incidencia registrada para conciliación."
+                        "Pago aprobado financieramente, pero la confirmación comercial falló (" + ex.getMessage() + "). "
+                                + (recorded ? "Incidencia registrada para conciliación." : "Confirmación pendiente de revisión; no se registró una incidencia nueva.")
                 );
             } catch (DataIntegrityViolationException ex) {
                 // C. Carrera de concurrencia: colisión de unicidad (uq_orders_payment_id o uq_orders_capacity_reservation_id)

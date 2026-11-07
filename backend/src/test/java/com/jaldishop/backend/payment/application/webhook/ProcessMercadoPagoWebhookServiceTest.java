@@ -53,6 +53,8 @@ class ProcessMercadoPagoWebhookServiceTest {
     @Mock
     private PaymentAttemptRepository paymentAttemptRepository;
 
+    @Mock
+    private com.jaldishop.backend.payment.domain.repository.PaymentIncidenceRepository incidenceRepository;
     private MercadoPagoProperties properties;
     private ObjectMapper objectMapper;
     private PaymentWebhookPersistenceService persistenceService;
@@ -73,7 +75,8 @@ class ProcessMercadoPagoWebhookServiceTest {
 
         persistenceService = new PaymentWebhookPersistenceService(
                 paymentRepository,
-                paymentAttemptRepository
+                paymentAttemptRepository, null,
+                new com.jaldishop.backend.payment.application.reconciliation.PaymentIncidenceRecorder(paymentRepository, incidenceRepository)
         );
 
         service = new ProcessMercadoPagoWebhookService(
@@ -679,10 +682,10 @@ class ProcessMercadoPagoWebhookServiceTest {
         // Se registró la solicitud de reembolso/incidencia
         assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
         assertThat(activePayment.getRefundAmount()).isEqualByComparingTo(new BigDecimal("50.00"));
-        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:Protección de pago vencida");
+        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:RESERVATION_PROTECTION_EXPIRED");
 
         // En el intento se registró la incidencia
-        assertThat(activeAttempt.getErrorCode()).isEqualTo("COMMERCIAL_CONFIRMATION_FAILED");
+        verify(incidenceRepository).save(argThat(i -> "RESERVATION_PROTECTION_EXPIRED".equals(i.getCode())));
     }
 
     @Test
@@ -921,7 +924,7 @@ class ProcessMercadoPagoWebhookServiceTest {
 
         assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
-        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:Stock agotado para variante");
+        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:INSUFFICIENT_STOCK");
     }
 
     @Test
@@ -1194,7 +1197,7 @@ class ProcessMercadoPagoWebhookServiceTest {
 
         assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
-        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:La reserva de capacidad se encuentra expirada.");
+        assertThat(activePayment.getRefundReference()).contains("INCIDENCE:RESERVATION_EXPIRED");
     }
 
     @Test

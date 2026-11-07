@@ -40,7 +40,9 @@ public class PaymentReconciliationProcessor {
             return ReconciliationCandidateResult.skipped(paymentId, "Omitido por revalidación o ya confirmado");
         } catch (ConflictException ex) {
             log.warn("Fallo por conflicto al conciliar pago {}: [{}] {}", paymentId, ex.getCode(), ex.getMessage());
-            incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, ex);
+            if (!incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, ex)) {
+                return ReconciliationCandidateResult.skipped(paymentId, "Confirmación comercial pendiente de revisión; no se registró una incidencia nueva");
+            }
             return ReconciliationCandidateResult.conflict(paymentId, ex.getCode(), ex.getMessage());
         } catch (TransientDataAccessException ex) {
             log.warn("Fallo transitorio de base de datos al conciliar pago {}: {}", paymentId, ex.getMessage());

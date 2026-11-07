@@ -12,9 +12,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.*;
+
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -59,7 +61,7 @@ class OrderReferenceReadTest {
         var f = new Fixture(PaymentStatus.APPROVED);
         var reference = explicitReference ? "pa1_" + f.attempt.getId() : f.paymentId.toString();
         var result = f.consolidate(f.remote("ORD1", "created", reference, List.of()));
-        assertEquals(OrderReconciliationCandidateResult.Status.SUCCESS_ALREADY_APPROVED, result.status());
+        assertEquals(OrderReconciliationCandidateResult.Status.APPROVED_COMMERCIAL_PENDING, result.status());
         assertNull(f.attempt.getReconciliationClaimToken());
         assertEquals(PaymentAttemptStatus.PROCESSING, f.attempt.getStatus());
         verify(f.payments, never()).save(any());
@@ -90,8 +92,118 @@ class OrderReferenceReadTest {
         new Fixture(PaymentStatus.APPROVED).assertRejected(null);
     }
 
+    @Test void expiredLeaseCannotBeRevivedByPassingTheOldRequestTime() {
+        var f = new Fixture(PaymentStatus.PENDING);
+        f.attempt.acquireReconciliationLease(f.worker, Duration.ofSeconds(1), Instant.now().minusSeconds(60));
+        var result = f.processor.consolidateOrderReconciliation(f.claim,
+                f.remote("ORD1", "created", f.paymentId.toString(), List.of()), f.worker, Instant.now().minusSeconds(60));
+        assertEquals(OrderReconciliationCandidateResult.Status.CLAIM_LOST, result.status());
+        verify(f.payments, never()).save(any());
+        verify(f.attempts, never()).save(any());
+    }
+
+    @Test void cleanupReleasesExpiredOwnLeaseButNeverASuccessorsLease() {
+        var f = new Fixture(PaymentStatus.PENDING);
+        f.attempt.acquireReconciliationLease(f.worker, Duration.ofSeconds(1), Instant.now().minusSeconds(60));
+        f.processor.releaseLeaseOnError(f.attempt.getId(), f.worker, Instant.now());
+        assertNull(f.attempt.getReconciliationClaimToken());
+        var successor = UUID.randomUUID();
+        f.attempt.acquireReconciliationLease(successor, Duration.ofMinutes(5), Instant.now());
+        f.processor.releaseLeaseOnError(f.attempt.getId(), f.worker, Instant.now());
+        assertEquals(successor, f.attempt.getReconciliationClaimToken());
+    }
+
+    @Test void claimRoutesFirstThenReloadsUnderCanonicalPaymentAndAttemptLocks() {
+        var f = new Fixture(PaymentStatus.PENDING);
+        f.attempt.releaseReconciliationLease(Instant.now());
+        when(f.attempts.findById(f.attempt.getId())).thenReturn(Optional.of(f.attempt));
+        assertTrue(f.processor.claimAttempt(f.attempt.getId(), f.worker, Duration.ofMinutes(5), Instant.now()).claimed());
+        var calls = inOrder(f.payments, f.attempts);
+        calls.verify(f.attempts).findById(f.attempt.getId());
+        calls.verify(f.payments).findByIdForUpdate(f.paymentId);
+        calls.verify(f.attempts).findByIdForUpdate(f.attempt.getId());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"pending", "in_process", "authorized", "processed"})
+    void pendingTransactionIsReportedAsOpenRatherThanCancelledOrExpired(String status) {
+        var f = new Fixture(PaymentStatus.PENDING);
+        when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
+        when(f.payment.getCurrency()).thenReturn("PEN");
+        when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+        var item = new OrderQueryResult.OrderPaymentItem("remote-pending", status, null,
+                BigDecimal.TEN, "PEN", null, null, null);
+        var result = f.consolidate(f.remote("ORD1", "created", f.paymentId.toString(), List.of(item)));
+        assertEquals(OrderReconciliationCandidateResult.Status.SUCCESS_ORDER_OPEN, result.status());
+        verify(f.payment, never()).markApproved(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"rejected", "cancelled"})
+    void rejectedTransactionIsNotReportedAsOpen(String status) {
+        var f = new Fixture(PaymentStatus.PENDING);
+        when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
+        when(f.payment.getCurrency()).thenReturn("PEN");
+        when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+        var item = new OrderQueryResult.OrderPaymentItem("remote-rejected", status, null,
+                BigDecimal.TEN, "PEN", null, null, null);
+
+        var result = f.consolidate(f.remote("ORD1", "processed", f.paymentId.toString(), List.of(item)));
+
+        assertEquals(OrderReconciliationCandidateResult.Status.SUCCESS_CANCELLED_OR_EXPIRED, result.status());
+        assertEquals(PaymentAttemptStatus.REJECTED, f.attempt.getStatus());
+        assertEquals(PaymentStatus.PENDING, f.payment.getStatus());
+        assertNull(f.attempt.getReconciliationClaimToken());
+        verify(f.payment, never()).markApproved(any());
+        verify(f.payments, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"rejected", "cancelled"})
+    void lateRejectionDoesNotOverrideAnApprovedPayment(String status) {
+        var f = new Fixture(PaymentStatus.APPROVED);
+        when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
+        when(f.payment.getCurrency()).thenReturn("PEN");
+        when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+        var item = new OrderQueryResult.OrderPaymentItem("remote-rejected", status, null,
+                BigDecimal.TEN, "PEN", null, null, null);
+
+        var result = f.consolidate(f.remote("ORD1", "processed", f.paymentId.toString(), List.of(item)));
+
+        assertEquals(OrderReconciliationCandidateResult.Status.APPROVED_COMMERCIAL_PENDING, result.status());
+        assertEquals(PaymentStatus.APPROVED, f.payment.getStatus());
+        assertEquals(PaymentAttemptStatus.PROCESSING, f.attempt.getStatus());
+        verify(f.payments, never()).save(any());
+    }
+
+    @Test void reconciliationUsesTheSameAccountAndEnvironmentValidatorAsWebhook() {
+        var f = new Fixture(PaymentStatus.PENDING);
+        f.properties.setExpectedCollectorId(123L);
+        assertThrows(SecurityException.class, () -> f.consolidate(
+                f.remote("ORD1", "created", f.paymentId.toString(), List.of())));
+        verify(f.payments, never()).save(any());
+        verify(f.attempts, never()).save(any());
+    }
+
+    @Test void approvedRemoteTransactionStillRequiresMatchingAmountAndCurrency() {
+        for (boolean wrongAmount : new boolean[]{true, false}) {
+            var f = new Fixture(PaymentStatus.PENDING);
+            when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
+            when(f.payment.getCurrency()).thenReturn("PEN");
+            when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+            var item = new OrderQueryResult.OrderPaymentItem("remote-approved", "approved", "accredited",
+                    wrongAmount ? BigDecimal.ONE : BigDecimal.TEN, wrongAmount ? "PEN" : "USD", null, null, null);
+            assertThrows(ConflictException.class, () -> f.consolidate(
+                    f.remote("ORD1", "processed", f.paymentId.toString(), List.of(item))));
+            verify(f.payments, never()).save(any());
+            verify(f.payment, never()).markApproved(any());
+        }
+    }
+
     private static class Fixture {
         final PaymentRepository payments = mock(PaymentRepository.class);
+        final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties =
+                new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties();
         final PaymentAttemptRepository attempts = mock(PaymentAttemptRepository.class);
         final UUID paymentId = UUID.randomUUID(), worker = UUID.randomUUID();
         final Instant now = Instant.now();
@@ -107,6 +219,7 @@ class OrderReferenceReadTest {
             attempt.acquireReconciliationLease(worker, Duration.ofMinutes(5), now);
             when(payment.getId()).thenReturn(paymentId);
             when(payment.getStatus()).thenReturn(status);
+            when(payments.findById(paymentId)).thenReturn(Optional.of(payment));
             when(payments.findByIdForUpdate(paymentId)).thenReturn(Optional.of(payment));
             when(attempts.findByIdForUpdate(attempt.getId())).thenReturn(Optional.of(attempt));
             when(attempts.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(attempt));
@@ -117,7 +230,10 @@ class OrderReferenceReadTest {
                 protected void doRollback(DefaultTransactionStatus s) {}
             };
             processor = new PaymentOrderReconciliationProcessor(payments, attempts, null,
-                    new PaymentWebhookPersistenceService(payments, attempts), null, null, tx);
+                    new PaymentWebhookPersistenceService(payments, attempts), mock(PaymentReconciliationProcessor.class), mock(com.jaldishop.backend.ordering.domain.repository.OrderRepository.class), tx,
+                    new com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator(
+                            properties),
+                    mock(PaymentIncidenceRepository.class));
             claim = OrderReconciliationClaimResult.claimed(attempt.getId(), paymentId, worker, "ORD1");
         }
 
@@ -164,7 +280,10 @@ class OrderReferenceReadTest {
             protected void doCommit(DefaultTransactionStatus s) {}
             protected void doRollback(DefaultTransactionStatus s) {}
         };
-        var processor = new PaymentOrderReconciliationProcessor(payments, attempts, null, persistence, null, null, tx);
+        var processor = new PaymentOrderReconciliationProcessor(payments, attempts, null, persistence, mock(PaymentReconciliationProcessor.class), mock(com.jaldishop.backend.ordering.domain.repository.OrderRepository.class), tx,
+                    new com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator(
+                            new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties()),
+                    mock(PaymentIncidenceRepository.class));
         var claim = OrderReconciliationClaimResult.claimed(attempt.getId(), paymentId, worker, "ORD1");
         var wrong = new OrderQueryResult("ORD1", "created", null, BigDecimal.TEN, BigDecimal.ZERO,
                 "pa1_" + UUID.randomUUID(), List.of(), null, null);

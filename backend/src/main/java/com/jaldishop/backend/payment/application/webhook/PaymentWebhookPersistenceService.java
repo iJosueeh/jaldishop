@@ -10,8 +10,10 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import com.jaldishop.backend.payment.application.reconciliation.PaymentIncidenceRecorder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,8 +30,9 @@ public class PaymentWebhookPersistenceService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentWebhookPersistenceService.class);
 
-    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final JdbcTemplate jdbc;
 
+    private final PaymentIncidenceRecorder incidenceRecorder;
     private final PaymentRepository paymentRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
 
@@ -37,12 +40,14 @@ public class PaymentWebhookPersistenceService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository
     ) {
-        this(paymentRepository, paymentAttemptRepository, null);
+        this(paymentRepository, paymentAttemptRepository, null, null);
     }
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public PaymentWebhookPersistenceService(PaymentRepository paymentRepository,
-            PaymentAttemptRepository paymentAttemptRepository, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+            PaymentAttemptRepository paymentAttemptRepository, JdbcTemplate jdbc,
+            PaymentIncidenceRecorder incidenceRecorder) {
+        this.incidenceRecorder = incidenceRecorder;
         this.jdbc = jdbc;
         this.paymentRepository = paymentRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
@@ -83,7 +88,7 @@ public class PaymentWebhookPersistenceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado para ID: " + paymentId));
 
         // 1. Verificación de Invariantes Financieras: Monto y Moneda
-        if (payment.getAmount().compareTo(queryResult.transactionAmount()) != 0) {
+        if (queryResult.transactionAmount() == null || payment.getAmount().compareTo(queryResult.transactionAmount()) != 0) {
             log.error("Discrepancia financiera: el monto pagado ({}) difiere del monto registrado ({}) para el pago {}",
                     queryResult.transactionAmount(), payment.getAmount(), paymentId);
             throw new ConflictException("PAYMENT_AMOUNT_MISMATCH",
@@ -311,36 +316,18 @@ public class PaymentWebhookPersistenceService {
     /**
      * Registra una incidencia cuando un pago fue aprobado por Mercado Pago pero la orden comercial
      * no pudo ser confirmada (ej. expiración extemporánea de la reserva de capacidad o inventario insuficiente).
-     * Mantiene el Payment en estado APPROVED y marca refundStatus = PENDING para futura conciliación/reembolso,
-     * ejecutándose en una transacción independiente REQUIRES_NEW.
+     * Conserva APPROVED. El registrador clasifica el conflicto, persiste evidencia y solicita
+     * reembolso local solo para fallos comerciales definitivos, en una transacción REQUIRES_NEW.
+     * Retorna false si no hay evidencia comercial persistida para una operación ya reembolsable.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void recordApprovalIncidence(UUID paymentId, String reason) {
-        try {
-            Payment payment = paymentRepository.findByIdForUpdate(paymentId).orElse(null);
-            if (payment == null) {
-                return;
-            }
+    public boolean recordApprovalIncidence(UUID paymentId, String reason) {
+        return recordApprovalIncidence(paymentId, new ConflictException("COMMERCIAL_CONFIRMATION_FAILED", reason));
+    }
 
-            if (payment.getStatus() != PaymentStatus.APPROVED
-                    || payment.getRefundStatus() != RefundStatus.NOT_REQUIRED) return;
-
-            String truncatedReason = reason != null && reason.length() > 80 ? reason.substring(0, 80) : (reason != null ? reason : "INCIDENCE");
-            payment.requestRefund(payment.getAmount(), "INCIDENCE:" + truncatedReason);
-            paymentRepository.save(payment);
-
-            List<PaymentAttempt> attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId);
-            var approved = attempts.stream().filter(a -> a.getStatus() == PaymentAttemptStatus.APPROVED).toList();
-            if (approved.size() == 1) {
-                PaymentAttempt targetAttempt = paymentAttemptRepository.findByIdForUpdate(approved.getFirst().getId()).orElseThrow();
-                targetAttempt.recordIncidence("COMMERCIAL_CONFIRMATION_FAILED", reason);
-                paymentAttemptRepository.save(targetAttempt);
-            }
-
-            log.info("Incidencia comercial registrada para pago APPROVED {}: {}", paymentId, reason);
-        } catch (Exception e) {
-            log.error("Error al registrar incidencia para pago {}: {}", paymentId, e.getMessage(), e);
-        }
+    public boolean recordApprovalIncidence(UUID paymentId, ConflictException conflict) {
+        // The recorder commits independently. Propagate failure rather than claiming persistence.
+        if (incidenceRecorder == null) throw new IllegalStateException("Registrador de incidencias no disponible");
+        return incidenceRecorder.recordCommercialOrIndeterminateConflict(paymentId, conflict);
     }
 
     private PaymentAttempt uniqueMatch(List<PaymentAttempt> attempts,

@@ -41,8 +41,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -262,5 +264,62 @@ class MerchantProductVariantControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Variante no encontrada"));
+    }
+
+    @Test
+    void rejectsInvalidAttributesBeforeEitherServiceIsCalled() throws Exception {
+        String[] invalidAttributes = {
+                "[null]", "[{\"name\":null,\"value\":\"v\"}]",
+                "[{\"name\":\"  \",\"value\":\"v\"}]",
+                "[{\"name\":\"n\",\"value\":null}]",
+                "[{\"name\":\"n\",\"value\":\"  \"}]",
+                "[{\"name\":\"" + "n".repeat(121) + "\",\"value\":\"v\"}]"
+        };
+        String base = "/api/v1/merchants/stores/" + UUID.randomUUID() + "/products/" + UUID.randomUUID() + "/variants";
+        for (String attributes : invalidAttributes) {
+            String body = variantRequest(attributes);
+            mockMvc.perform(post(base).contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.errors").isMap());
+            mockMvc.perform(put(base + "/" + UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.errors").isMap());
+        }
+        verifyNoInteractions(createVariantService, updateVariantService, storeContextService);
+    }
+
+    @Test
+    void rejectsDuplicateNormalizedAttributeNamesBeforePersistence() throws Exception {
+        String base = "/api/v1/merchants/stores/" + UUID.randomUUID() + "/products/" + UUID.randomUUID() + "/variants";
+        String body = variantRequest("[{\"name\":\"Color\",\"value\":\"azul\"},{\"name\":\" Color \",\"value\":\"rojo\"}]");
+        mockMvc.perform(post(base).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"));
+        mockMvc.perform(put(base + "/" + UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"));
+        verifyNoInteractions(createVariantService, updateVariantService);
+    }
+
+    @Test
+    void acceptsAttributeNameAtLimitAndEmptyOrNullListsForCreateAndUpdate() throws Exception {
+        UUID productId = UUID.randomUUID();
+        String base = "/api/v1/merchants/stores/" + UUID.randomUUID() + "/products/" + productId + "/variants";
+        ProductVariant variant = ProductVariant.create(productId, "Normal", null, new BigDecimal("1.00"), "PEN", false, List.of());
+        when(createVariantService.execute(any())).thenReturn(variant);
+        when(updateVariantService.execute(any())).thenReturn(variant);
+        when(responseMapper.toResponse(variant)).thenReturn(new ProductVariantResponse(
+                variant.getId(), productId, "Normal", null, new BigDecimal("1.00"), "PEN", false,
+                "ACTIVE", List.of(), Instant.now(), Instant.now()));
+        for (String attributes : List.of("[]", "null", "[{\"name\":\"" + "n".repeat(120) + "\",\"value\":\"" + "v".repeat(300) + "\"}]")) {
+            String body = variantRequest(attributes);
+            mockMvc.perform(post(base).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated());
+            mockMvc.perform(put(base + "/" + UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
+        }
+    }
+
+    private String variantRequest(String attributes) {
+        return "{\"presentationName\":\"Normal\",\"priceAmount\":1,\"priceCurrency\":\"PEN\",\"tracksInventory\":false,\"attributes\":" + attributes + "}";
     }
 }

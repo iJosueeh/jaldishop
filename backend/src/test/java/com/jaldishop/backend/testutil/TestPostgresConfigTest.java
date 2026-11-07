@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -87,4 +88,11 @@ class TestPostgresConfigTest {
                 TestPostgresConfig.fromValues("jdbc:postgresql://127.0.0.1:5433/jaldishop_integration_test", "postgres", "")
         );
     }
+    @Test void destructiveFixturesRequireExactIntegrationCatalog() {
+        assertDoesNotThrow(() -> TestPostgresConfig.requireDestructiveIntegrationDatabase("jaldishop_integration_test"));
+        for (String name : new String[]{null, "jaldishop_test", "jaldishop_fase2a_test", "postgres", "neon", "jaldishop_integration_test_copy"}) {
+            assertThrows(IllegalStateException.class, () -> TestPostgresConfig.requireDestructiveIntegrationDatabase(name));
+        }
+    }
+
 }

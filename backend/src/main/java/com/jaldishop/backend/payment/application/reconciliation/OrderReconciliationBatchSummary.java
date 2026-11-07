@@ -19,10 +19,10 @@ public record OrderReconciliationBatchSummary(
 
         for (OrderReconciliationCandidateResult r : results) {
             switch (r.status()) {
-                case SUCCESS_CONFIRMED, SUCCESS_ALREADY_APPROVED, SUCCESS_ORDER_OPEN, SUCCESS_CANCELLED_OR_EXPIRED -> success++;
+                case SUCCESS_CONFIRMED, SUCCESS_ORDER_OPEN, SUCCESS_CANCELLED_OR_EXPIRED -> success++;
                 case SKIPPED_ACTIVE_LEASE, SKIPPED_NOT_ELIGIBLE -> skipped++;
                 case COMMERCIAL_INCIDENCE -> incidence++;
-                case CLAIM_LOST, TECHNICAL_FAILURE -> failures++;
+                case APPROVED_COMMERCIAL_PENDING, CLAIM_LOST, TECHNICAL_FAILURE -> failures++;
             }
         }
 

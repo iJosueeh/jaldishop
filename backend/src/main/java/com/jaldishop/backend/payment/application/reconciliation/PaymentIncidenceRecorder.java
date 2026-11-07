@@ -9,10 +9,11 @@ import com.jaldishop.backend.payment.domain.repository.PaymentRepository;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import com.jaldishop.backend.payment.domain.enums.PaymentStatus;
+import com.jaldishop.backend.payment.domain.enums.RefundStatus;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -41,7 +42,7 @@ public class PaymentIncidenceRecorder {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void recordCommercialOrIndeterminateConflict(UUID paymentId, ConflictException ex) {
+    public boolean recordCommercialOrIndeterminateConflict(UUID paymentId, ConflictException ex) {
         String code = ex.getCode() != null ? ex.getCode() : "CONFLICT";
         String message = ex.getMessage();
         Instant now = Instant.now();
@@ -49,8 +50,15 @@ public class PaymentIncidenceRecorder {
         // 1. Serializar mediante bloqueo pesimista en Payment (orden canónico)
         Payment payment = paymentRepository.findByIdForUpdate(paymentId).orElse(null);
         if (payment == null) {
-            log.warn("No se pudo bloquear el pago {} para registrar conflicto: pago inexistente", paymentId);
-            return;
+            throw new IllegalStateException("Pago inexistente al registrar incidencia");
+        }
+
+        if (payment.getStatus() != PaymentStatus.APPROVED)
+            throw new IllegalStateException("La incidencia requiere un pago aprobado");
+        // Payment lock serializes duplicate notifications; refund and incidence commit atomically.
+        if (payment.getRefundStatus() != RefundStatus.NOT_REQUIRED) {
+            return incidenceRepository.findLatestByPaymentIdAndProcessType(paymentId, IncidenceProcessType.ORDER_CONFIRMATION)
+                    .filter(i -> i.getCategory() == IncidenceCategory.COMMERCIAL).isPresent();
         }
 
         if (isDefinitiveCommercialFailure(code)) {
@@ -66,25 +74,15 @@ public class PaymentIncidenceRecorder {
                 PaymentIncidence incidence = activeOpt.get();
                 incidence.markResolved(now);
                 incidenceRepository.save(incidence);
-            } else {
-                try {
-                    PaymentIncidence incidence = PaymentIncidence.createCommercialTerminal(
-                            paymentId, IncidenceProcessType.ORDER_CONFIRMATION, code, message, now
-                    );
-                    incidenceRepository.save(incidence);
-                } catch (DataIntegrityViolationException dive) {
-                    log.info("Carrera concurrente en inserción de incidencia comercial para pago {}. Recuperando fila activa...", paymentId);
-                    incidenceRepository.findActiveByPaymentIdAndProcessTypeForUpdate(paymentId, IncidenceProcessType.ORDER_CONFIRMATION)
-                            .ifPresent(existing -> {
-                                existing.markResolved(now);
-                                incidenceRepository.save(existing);
-                            });
-                }
             }
+            // Payment lock prevents duplicate terminal records; errors must abort refund + incidence together.
+            incidenceRepository.save(PaymentIncidence.createCommercialTerminal(
+                    paymentId, IncidenceProcessType.ORDER_CONFIRMATION, code, message, now));
         } else {
             log.warn("Registrando conflicto indeterminado/operativo para el pago {}: [{}] {}", paymentId, code, message);
             recordRetryUnderLock(paymentId, IncidenceCategory.OPERATIONAL, code, message, now);
         }
+        return true;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -133,28 +131,10 @@ public class PaymentIncidenceRecorder {
             incidenceRepository.save(incidence);
             checkManualReview(paymentId, incidence, code, message);
         } else {
-            try {
-                Duration backoff = calculateBackoff(1);
-                PaymentIncidence incidence = PaymentIncidence.createNew(
-                        paymentId,
-                        IncidenceProcessType.ORDER_CONFIRMATION,
-                        category,
-                        code,
-                        message,
-                        backoff,
-                        now
-                );
-                incidenceRepository.save(incidence);
-            } catch (DataIntegrityViolationException dive) {
-                log.info("Carrera concurrente en inserción de incidencia para pago {}. Actualizando fila existente...", paymentId);
-                incidenceRepository.findActiveByPaymentIdAndProcessTypeForUpdate(paymentId, IncidenceProcessType.ORDER_CONFIRMATION)
-                        .ifPresent(existing -> {
-                            int nextAttempt = existing.getAttemptsCount() + 1;
-                            existing.recordRetry(calculateBackoff(nextAttempt), code, message, now);
-                            incidenceRepository.save(existing);
-                            checkManualReview(paymentId, existing, code, message);
-                        });
-            }
+            PaymentIncidence incidence = PaymentIncidence.createNew(
+                    paymentId, IncidenceProcessType.ORDER_CONFIRMATION, category, code, message,
+                    calculateBackoff(1), now);
+            incidenceRepository.save(incidence);
         }
     }
 

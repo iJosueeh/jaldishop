@@ -12,10 +12,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public record RegisterMerchantRequest(
-   @Email @NotBlank String email,
+   @Email @NotBlank @Size(max = 254, message = "El correo no debe exceder 254 caracteres") String email,
    @NotBlank @Size(min = 6) String password,
-   @NotBlank String firstName,
-   @NotBlank String lastName,
+   @NotBlank @Size(max = 100, message = "El nombre no debe exceder 100 caracteres") String firstName,
+   @NotBlank @Size(max = 100, message = "El apellido no debe exceder 100 caracteres") String lastName,
    @ValidPhone String phone,
    @NotBlank @Size(min = 2, max = 160) String storeName,
    String businessType,

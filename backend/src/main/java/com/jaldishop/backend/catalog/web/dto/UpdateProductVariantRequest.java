@@ -31,5 +31,5 @@ public record UpdateProductVariantRequest(
         String status,
 
         @Valid
-        List<VariantAttributeDto> attributes
+        List<@NotNull(message = "El atributo no puede ser nulo") VariantAttributeDto> attributes
 ) {}

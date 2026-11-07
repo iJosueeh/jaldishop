@@ -5,8 +5,10 @@ import com.jaldishop.backend.payment.domain.model.*;
 import com.jaldishop.backend.payment.domain.repository.*;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 class OrdersWebhookCorrelationTest {
@@ -14,7 +16,7 @@ class OrdersWebhookCorrelationTest {
  final Payment p=mock(Payment.class);
  final PaymentRepository ps=mock(PaymentRepository.class);
  final PaymentAttemptRepository as=mock(PaymentAttemptRepository.class);
- final PaymentWebhookPersistenceService s=new PaymentWebhookPersistenceService(ps,as);
+ final PaymentWebhookPersistenceService s=new PaymentWebhookPersistenceService(ps,as,null,new com.jaldishop.backend.payment.application.reconciliation.PaymentIncidenceRecorder(ps,mock(PaymentIncidenceRepository.class)));
  PaymentAttempt attempt(int n,String order) {
   var a=PaymentAttempt.create(id,n,PaymentProvider.MERCADO_PAGO,PaymentMethod.CARD,"key"+n,"ORDERS");
   a.recordOrder(order,"https://checkout.test");

@@ -92,6 +92,35 @@ class PaymentIncidenceRecorderTest {
         assertEquals(IncidenceStatus.RESOLVED, saved.getStatus());
     }
 
+    @Test void duplicateCommercialFailureDoesNotCreateAnotherIncidenceOrRefund() {
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(testPayment));
+        var conflict = new ConflictException("RESERVATION_EXPIRED", "Expired reservation");
+        assertTrue(recorder.recordCommercialOrIndeterminateConflict(paymentId, conflict));
+        when(incidenceRepository.findLatestByPaymentIdAndProcessType(paymentId, IncidenceProcessType.ORDER_CONFIRMATION))
+                .thenReturn(Optional.of(PaymentIncidence.createCommercialTerminal(paymentId,
+                        IncidenceProcessType.ORDER_CONFIRMATION, "RESERVATION_EXPIRED", "Expired", Instant.now())));
+        assertTrue(recorder.recordCommercialOrIndeterminateConflict(paymentId, conflict));
+        verify(paymentRepository, times(1)).save(testPayment);
+        verify(incidenceRepository, times(1)).save(any(PaymentIncidence.class));
+        assertEquals(RefundStatus.PENDING, testPayment.getRefundStatus());
+    }
+
+    @Test void incidenceStorageFailureMustPropagate() {
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(testPayment));
+        when(incidenceRepository.save(any())).thenThrow(new IllegalStateException("database unavailable"));
+        assertThrows(IllegalStateException.class, () -> recorder.recordCommercialOrIndeterminateConflict(
+                paymentId, new ConflictException("RESERVATION_EXPIRED", "Expired reservation")));
+    }
+
+    @Test void pendingRefundWithoutDurableCommercialEvidenceIsNotReportedAsRecorded() {
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(testPayment));
+        testPayment.requestRefund(testPayment.getAmount(), "previous-operation");
+        assertFalse(recorder.recordCommercialOrIndeterminateConflict(paymentId,
+                new ConflictException("RESERVATION_EXPIRED", "Expired")));
+        verify(incidenceRepository, never()).save(any());
+        verify(paymentRepository, never()).save(any());
+    }
+
     @Test
     @DisplayName("Conflicto indeterminado debe bloquear Payment pero NO marcar reembolso, aplicando backoff operativo")
     void shouldRecordIndeterminateConflictWithoutRequestingRefund() {
@@ -172,34 +201,11 @@ class PaymentIncidenceRecorderTest {
     }
 
     @Test
-    @DisplayName("Debe recuperarse transparentemente si ocurre colisión de concurrencia al insertar incidencia")
-    void shouldRecoverFromDataIntegrityViolationOnConcurrentInsert() {
+    void integrityFailureMustAbortInsteadOfClaimingARecordedRetry() {
         when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(testPayment));
-
-        PaymentIncidence existingIncidence = PaymentIncidence.createNew(
-                paymentId,
-                IncidenceProcessType.ORDER_CONFIRMATION,
-                IncidenceCategory.TECHNICAL,
-                "LOCK_TIMEOUT",
-                "Error 1",
-                PaymentIncidenceRecorder.calculateBackoff(1),
-                Instant.now()
-        );
-
-        // Primera consulta: no ve incidencia
-        when(incidenceRepository.findActiveByPaymentIdAndProcessTypeForUpdate(paymentId, IncidenceProcessType.ORDER_CONFIRMATION))
-                .thenReturn(Optional.empty()) // primer intento
-                .thenReturn(Optional.of(existingIncidence)); // tras colisión
-
-        // Al intentar guardar, otro hilo ya insertó
-        when(incidenceRepository.save(any(PaymentIncidence.class)))
-                .thenThrow(new DataIntegrityViolationException("duplicate key value violates unique constraint uq_payment_incidences_active"))
-                .thenReturn(existingIncidence);
-
-        assertDoesNotThrow(() -> recorder.recordTechnicalRetry(paymentId, new CannotAcquireLockException("Lock error")));
-
-        // Se verifica que re-consultó e incrementó los intentos sobre la fila ganadora
-        assertEquals(2, existingIncidence.getAttemptsCount());
+        when(incidenceRepository.save(any())).thenThrow(new DataIntegrityViolationException("injected constraint failure"));
+        assertThrows(DataIntegrityViolationException.class,
+                () -> recorder.recordTechnicalRetry(paymentId, new CannotAcquireLockException("Lock error")));
     }
 
     @Test

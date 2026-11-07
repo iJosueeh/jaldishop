@@ -29,5 +29,5 @@ public record CreateProductVariantRequest(
         boolean tracksInventory,
 
         @Valid
-        List<VariantAttributeDto> attributes
+        List<@NotNull(message = "El atributo no puede ser nulo") VariantAttributeDto> attributes
 ) {}
