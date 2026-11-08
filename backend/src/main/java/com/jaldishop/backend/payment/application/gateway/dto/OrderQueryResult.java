@@ -64,8 +64,17 @@ public record OrderQueryResult(
             String currency,
             String paymentMethodId,
             String paymentTypeId,
-            Instant dateApproved
+            Instant dateApproved,
+            BigDecimal paidAmount
     ) {
+        // Compatibility for existing callers; absence of paid_amount is not zero or amount.
+        public OrderPaymentItem(String providerPaymentId, String status, String statusDetail,
+                BigDecimal transactionAmount, String currency, String paymentMethodId,
+                String paymentTypeId, Instant dateApproved) {
+            this(providerPaymentId, status, statusDetail, transactionAmount, currency,
+                    paymentMethodId, paymentTypeId, dateApproved, null);
+        }
+
         public OrderPaymentItem {
             Objects.requireNonNull(providerPaymentId, "providerPaymentId no puede ser nulo");
         }
