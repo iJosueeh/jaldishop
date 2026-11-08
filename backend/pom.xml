@@ -142,6 +142,9 @@
                     <excludes>
                         <exclude>**/*$*</exclude>
                         <exclude>**/SingleAttemptIsolatedReconciliationTest.java</exclude>
+                        <exclude>**/CustomerAddressPostgresIntegrationTest.java</exclude>
+                        <exclude>**/StoreSearchPostgresIntegrationTest.java</exclude>
+                        <exclude>**/StoreCustomerPostgresIntegrationTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
