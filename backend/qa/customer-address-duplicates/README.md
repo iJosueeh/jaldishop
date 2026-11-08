@@ -76,12 +76,11 @@ Desde `backend/`:
 
 ```bash
 ./mvnw -q \
-  -DargLine=-javaagent:/home/ijosueeh/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar \
   -Dtest=CreateCustomerAddressServiceTest,UpdateCustomerAddressServiceTest,DeleteCustomerAddressServiceTest,SetDefaultCustomerAddressServiceTest,CustomerAddressControllerTest,CustomerAddressTest,GlobalExceptionHandlerTest \
   test
 ```
 
-El agente de Mockito evita el autoattach restringido de este entorno; no se cambió el POM. Log de esta ejecución: `/tmp/jaldi-address-final-tests.log`.
+La ejecución histórica usó un agente Mockito por restricciones del entorno; no es un requisito del equipo. No se cambió el POM. Log de aquella ejecución: `/tmp/jaldi-address-final-tests.log`.
 
 **PostgreSQL real:** se inicializó un clúster nuevo en `/tmp/jaldi-address-pgdata`, usando binarios locales PostgreSQL 18.6. En modo monousuario se ejecutó V15 sin cambios, una tabla mínima `users(id)` y datos sintéticos. Resultado: dos domicilios iguales aceptados, una sola predeterminada y rechazo por unique de una segunda predeterminada. SQL y evidencia: `/tmp/jaldi-address-v15.sql`, `/tmp/jaldi-address-v15.log`. No se aplicó el resto de migraciones ni se accedió a una base persistente.
 

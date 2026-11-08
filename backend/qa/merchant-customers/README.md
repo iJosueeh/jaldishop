@@ -58,11 +58,10 @@ Requiere `initdb` y `postgres` de la misma instalación, con bibliotecas disponi
 
 En este sandbox se inicializó un clúster PostgreSQL 18.6 nuevo en `/tmp/jaldi-customers-pg-probe/data`. Al arrancarlo en loopback, PostgreSQL terminó con `could not create IPv4 socket ... Operation not permitted` y `FATAL: could not create any TCP/IP sockets`. **La validación JDBC/JPA sobre PostgreSQL real queda pendiente.** No se conectó a Neon ni Render ni se alteraron datos persistentes.
 
-El entorno también impide el autoattach de Mockito. Para ejecutar tests se usó el agente instalado, sin modificar POM ni configuración del proyecto:
+La ejecución histórica en un entorno restringido necesitó un agente Mockito local. Ese ajuste no forma parte del flujo del equipo. Comando equivalente para un JDK 21 normal:
 
 ```bash
 ./mvnw -o \
-  -DargLine=-javaagent:/home/ijosueeh/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar \
   -Dtest='*Test,!*IntegrationTest,!InventoryJpaRepositorySpringDataTest' verify
 ```
 
@@ -116,6 +115,5 @@ Comando focalizado final:
 
 ```bash
 ./mvnw -o \
-  -DargLine=-javaagent:/home/ijosueeh/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar \
   -Dtest='StoreCustomerRepositoryAdapterTest,MerchantCustomerProjectionHttpTest,MerchantCustomerControllerTest,GetStoreCustomersServiceTest,StoreCustomerResponseMapperTest,StoreContextServiceTest,StoreCustomerPostgresIntegrationTest,GlobalExceptionHandlerTest,SecurityUserStatusWebTest,JwtAuthenticationFilterTest,RestAuthenticationEntryPointTest,PaymentSchedulerConditionsIntegrationTest' test
 ```

@@ -51,10 +51,10 @@ STORE_SEARCH_TEST_PG_BIN=/ruta/a/postgresql/bin mvn -Dtest=StoreSearchPostgresIn
 mvn -Dtest=StoreControllerTest,GetAdminStoresServiceTest,StoreSearchQueryTest test
 ```
 
-No usar DB_URL, perfiles de aplicación ni bases existentes. El test crea su propio directorio, puerto y clúster. Para los tests Mockito en este sandbox fue necesario cargar su agente al arrancar:
+No usar DB_URL, perfiles de aplicación ni bases existentes. El test crea su propio directorio, puerto y clúster. La ejecución histórica necesitó un agente Mockito por restricciones del sandbox. Ese detalle no es un requisito del equipo; en un JDK 21 normal usar:
 
 ```bash
-mvn -DargLine=-javaagent:/home/ijosueeh/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar \
+./mvnw \
   -Dtest=StoreControllerTest,GetAdminStoresServiceTest,StoreSearchQueryTest,StoreSearchPostgresIntegrationTest test
 ```
 
