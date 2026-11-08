@@ -357,6 +357,9 @@ class StoreControllerTest {
         mockMvc.perform(get("/api/v1/stores/search").param("limit", "0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        mockMvc.perform(get("/api/v1/stores/search").param("limit", "51"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         mockMvc.perform(get("/api/v1/stores/search").param("q", "x".repeat(101)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
@@ -372,6 +375,20 @@ class StoreControllerTest {
         when(searchPublicStoresService.execute("")).thenReturn(List.of());
         mockMvc.perform(get("/api/v1/stores/search").param("limit", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void searchRestrictsResultsToRequestedLimit() throws Exception {
+        Store store = Store.reconstitute(
+                UUID.randomUUID(), testMerchantId, "Pastelería", "pasteleria", null,
+                null, null, null, null, null, true, false, null, "PEN", null,
+                StoreStatus.ACTIVE, Instant.now(), Instant.now());
+        when(searchPublicStoresService.execute("pasteleria")).thenReturn(List.of(store, store));
+        mockMvc.perform(get("/api/v1/stores/search").param("q", "pasteleria").param("limit", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].slug").value("pasteleria"));
     }
 }

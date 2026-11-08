@@ -1,7 +1,7 @@
 package com.jaldishop.backend.store.infrastructure.persistence.projection;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
 
 public interface StoreCustomerProjection {
@@ -10,8 +10,8 @@ public interface StoreCustomerProjection {
     String getLastName();
     String getEmail();
     String getPhone();
-    Timestamp getCustomerSince();
+    Instant getCustomerSince();
     Long getOrdersCount();
     BigDecimal getTotalSpent();
-    Timestamp getLastOrderAt();
+    Instant getLastOrderAt();
 }
