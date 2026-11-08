@@ -103,4 +103,59 @@ class CreateCustomerAddressServiceTest {
 
         verify(addressRepository, never()).save(any(CustomerAddress.class));
     }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"Av. Larco 123", "  AV.  LARCO 123  ", "av.\tlarco 123"})
+    void shouldRejectEquivalentAddressBeforeChangingDefault(String street) {
+        var existing = CustomerAddress.create(userId, "Casa", "Juan", "987654321",
+                "Av. Larco 123", "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        var request = new CreateCustomerAddressRequest("Otro alias", "Ana", "912345678", street,
+                "Lima", "Lima", "Miraflores", "150122", "Otra referencia", null, null, true);
+        when(addressRepository.countByUserId(userId)).thenReturn(1L);
+        when(addressRepository.findByUserId(userId)).thenReturn(java.util.List.of(existing));
+        when(ubigeoCatalogService.isValidHierarchy("150122", "Lima", "Lima", "Miraflores")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.execute(userId, request))
+                .isInstanceOfSatisfying(BusinessRuleException.class,
+                        ex -> assertThat(ex.getCode()).isEqualTo("ADDRESS_ALREADY_EXISTS"));
+        var order = inOrder(addressRepository);
+        order.verify(addressRepository).lockUserForUpdate(userId);
+        order.verify(addressRepository).countByUserId(userId);
+        order.verify(addressRepository).findByUserId(userId);
+        verify(addressRepository, never()).clearDefaultForUser(any());
+        verify(addressRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldAllowDifferentInteriorAndKeepDefaultBehavior() {
+        var existing = CustomerAddress.create(userId, "Casa", "Juan", "987654321",
+                "Av. Larco 123 Dpto. 201", "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        var request = new CreateCustomerAddressRequest("Casa 2", "Juan", "987654321",
+                "Av. Larco 123 Dpto. 202", "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        when(addressRepository.countByUserId(userId)).thenReturn(1L);
+        when(addressRepository.findByUserId(userId)).thenReturn(java.util.List.of(existing));
+        when(ubigeoCatalogService.isValidHierarchy("150122", "Lima", "Lima", "Miraflores")).thenReturn(true);
+        when(addressRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        assertThat(service.execute(userId, request).streetAddress()).endsWith("202");
+        verify(addressRepository).clearDefaultForUser(userId);
+    }
+
+    @Test
+    void shouldAllowSameLocationForAnotherUser() {
+        UUID otherUser = UUID.randomUUID();
+        var request = new CreateCustomerAddressRequest("Casa", "Juan", "987654321", "Av. Larco 123",
+                "Lima", "Lima", "Miraflores", "150122", null, null, null, false);
+        var existing = CustomerAddress.create(userId, "Casa", "Juan", "987654321", "Av. Larco 123",
+                "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        when(addressRepository.countByUserId(otherUser)).thenReturn(0L);
+        when(addressRepository.findByUserId(otherUser)).thenReturn(java.util.List.of());
+        when(ubigeoCatalogService.isValidHierarchy("150122", "Lima", "Lima", "Miraflores")).thenReturn(true);
+        when(addressRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        var saved = service.execute(otherUser, request);
+        assertThat(saved.streetAddress()).isEqualTo(existing.getStreetAddress());
+        verify(addressRepository).lockUserForUpdate(otherUser);
+        verify(addressRepository, never()).findByUserId(userId);
+    }
 }

@@ -1,0 +1,10 @@
+[
+  "mvn",
+  "-o",
+  "-B",
+  "-DargLine=-javaagent:/home/ijosueeh/.m2/repository/net/bytebuddy/byte-buddy-agent/1.18.11/byte-buddy-agent-1.18.11.jar",
+  "-Dspring.config.import=",
+  "-Dmercadopago.base-url=http://127.0.0.1:9",
+  "-Dmercadopago.access-token=",
+  "test"
+]

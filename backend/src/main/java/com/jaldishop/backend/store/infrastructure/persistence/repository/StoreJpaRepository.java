@@ -36,10 +36,17 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
     }
 
     @EntityGraph(attributePaths = "categories")
-    @Query("SELECT s FROM StoreEntity s WHERE " +
-            "(:status IS NULL OR s.status = :status) AND " +
-            "(:query IS NULL OR :query = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(s.slug) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "ORDER BY s.createdAt DESC")
+    // LOCATE keeps %, _ and backslash literal, without a second escaping convention.
+    @Query("""
+            SELECT s FROM StoreEntity s
+            WHERE (:status IS NULL OR s.status = :status)
+              AND (:query IS NULL OR :query = ''
+                OR LOCATE(LOWER(CAST(FUNCTION('public.unaccent', :query) AS String)),
+                          LOWER(CAST(FUNCTION('public.unaccent', s.name) AS String))) > 0
+                OR LOCATE(LOWER(CAST(FUNCTION('public.unaccent', :query) AS String)),
+                          LOWER(CAST(FUNCTION('public.unaccent', s.slug) AS String))) > 0)
+            ORDER BY s.createdAt DESC
+            """)
     List<StoreEntity> searchStores(
             @Param("query") String query,
             @Param("status") StoreStatus status

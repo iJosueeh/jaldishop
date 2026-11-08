@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "server.address=127.0.0.1")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("EndToEndBackendFlowValidationIntegrationTest — Validación integral de flujos E2E con seed reproducible")
 class EndToEndBackendFlowValidationIntegrationTest {
@@ -58,7 +59,7 @@ class EndToEndBackendFlowValidationIntegrationTest {
 
     @BeforeAll
     static void startMockServerAndSeed() throws Exception {
-        mockServer = HttpServer.create(new InetSocketAddress(0), 0);
+        mockServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         mockPort = mockServer.getAddress().getPort();
 
         // Mock endpoints for Mercado Pago

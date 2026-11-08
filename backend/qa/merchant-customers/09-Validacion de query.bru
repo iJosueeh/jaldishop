@@ -1,0 +1,20 @@
+meta {
+  name: Validacion de query
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 400", function () { expect(res.getStatus()).to.equal(400); });
+  test("Error estable", function () { expect(res.getBody().code).to.equal("VALIDATION_ERROR"); });
+}

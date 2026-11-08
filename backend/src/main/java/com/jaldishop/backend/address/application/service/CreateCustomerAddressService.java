@@ -58,6 +58,11 @@ public class CreateCustomerAddressService {
             );
         }
 
+        if (addressRepository.findByUserId(userId).stream()
+                .anyMatch(existing -> existing.hasSameLocation(request.ubigeoCode(), request.streetAddress()))) {
+            throw new BusinessRuleException("ADDRESS_ALREADY_EXISTS", "Ya tienes guardada esta dirección.");
+        }
+
         // Si es la primera dirección del usuario, debe ser predeterminada
         boolean makeDefault = currentCount == 0 || request.isDefault();
 

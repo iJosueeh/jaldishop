@@ -1150,7 +1150,7 @@ class ProcessMercadoPagoWebhookServiceTest {
 
     @Test
     @DisplayName("Orders API: Confirmación comercial con reserva vencida genera incidencia duradera y conserva APPROVED")
-    void shouldRecordIncidenceWhenOrderConfirmedWithExpiredReservation() {
+    void shouldRecordIncidenceWhenOrderConfirmedWithExpiredReservation() throws Exception {
         String orderId = "ORD-EXPIRED-RESERVATION";
         activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
                 PaymentMethod.CARD, "idemp-orders", "ORDERS");
@@ -1166,19 +1166,7 @@ class ProcessMercadoPagoWebhookServiceTest {
 
         when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(orderId), eq(secretKey))).thenReturn(true);
 
-        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem paymentItem =
-                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult.OrderPaymentItem(
-                        "PAY-APPR-999", "approved", "accredited", new BigDecimal("50.00"), "PEN",
-                        "visa", "credit_card", Instant.now()
-                );
-
-        com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult orderResult =
-                new com.jaldishop.backend.payment.application.gateway.dto.OrderQueryResult(
-                        orderId, "closed", null, new BigDecimal("50.00"), new BigDecimal("50.00"),
-                        paymentId.toString(), List.of(paymentItem), null, null
-                );
-
-        when(mercadoPagoGateway.queryOrder(orderId)).thenReturn(orderResult);
+        var server = mappedOrderHttp(orderId, "50.00", "PEN", "accredited", 1);
         when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
         when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
 
@@ -1198,6 +1186,62 @@ class ProcessMercadoPagoWebhookServiceTest {
         assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.APPROVED);
         assertThat(activePayment.getRefundStatus()).isEqualTo(RefundStatus.PENDING);
         assertThat(activePayment.getRefundReference()).contains("INCIDENCE:RESERVATION_EXPIRED");
+        server.verify();
+    }
+
+    private org.springframework.test.web.client.MockRestServiceServer mappedOrderHttp(
+            String orderId, String amount, String currency, String detail, int reads) throws Exception {
+        tools.jackson.databind.node.ObjectNode root;
+        try (var input = getClass().getResourceAsStream("/mercadopago/orders/get-order-accredited.json")) {
+            root = (tools.jackson.databind.node.ObjectNode) objectMapper.readTree(input);
+        }
+        root.put("id", orderId).put("external_reference", paymentId.toString()).put("currency", currency)
+                .put("total_amount", amount).put("total_paid_amount", amount);
+        var item = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        item.put("amount", amount).put("paid_amount", amount).put("status_detail", detail);
+        properties.setAccessToken("synthetic-token");
+        var builder = org.springframework.web.client.RestClient.builder().baseUrl("https://mp.test");
+        var server = org.springframework.test.web.client.MockRestServiceServer.bindTo(builder).build();
+        var adapter = new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoRestClientAdapter(builder.build(), properties);
+        server.expect(org.springframework.test.web.client.ExpectedCount.times(reads),
+                        org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo("https://mp.test/v1/orders/" + orderId))
+                .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess(
+                        root.toString(), org.springframework.http.MediaType.APPLICATION_JSON));
+        when(mercadoPagoGateway.queryOrder(orderId)).thenAnswer(inv -> adapter.queryOrder(orderId));
+        return server;
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "50.00,PEN,accredited,APPROVED", "50.00,PEN,waiting_capture,PROCESSING",
+            "49.00,PEN,accredited,PAYMENT_AMOUNT_MISMATCH", "50.00,USD,accredited,PAYMENT_CURRENCY_MISMATCH"})
+    void ordersWireResponsePreservesFinancialValidationAndDuplicateIdempotency(
+            String amount, String currency, String detail, String expected) throws Exception {
+        String orderId = "ORD-WIRE";
+        activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
+                PaymentMethod.CARD, "wire-key", "ORDERS");
+        activeAttempt.recordOrder(orderId, "https://checkout.test");
+        activeAttempt.markProcessing();
+        properties.setExpectedCollectorId(1234L);
+        properties.setExpectedLiveMode(false);
+        when(signatureValidator.isValid("signature", "request", orderId, secretKey)).thenReturn(true);
+        when(paymentRepository.findByIdForUpdate(paymentId)).thenReturn(Optional.of(activePayment));
+        int reads = expected.equals("APPROVED") ? 2 : 1;
+        var server = mappedOrderHttp(orderId, amount, currency, detail, reads);
+        var command = new ProcessMercadoPagoWebhookCommand("signature", "request",
+                Map.of("data.id", orderId, "type", "order"), null);
+        if (expected.startsWith("PAYMENT_")) {
+            assertThatThrownBy(() -> service.execute(command)).isInstanceOfSatisfying(ConflictException.class,
+                    ex -> assertThat(ex.getCode()).isEqualTo(expected));
+            assertThat(activePayment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+            verify(paymentRepository, never()).save(any());
+        } else {
+            when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(activeAttempt));
+            for (int i = 0; i < reads; i++) assertThat(service.execute(command).paymentStatus()).isEqualTo(expected);
+            assertThat(activeAttempt.getProviderPaymentId()).isEqualTo("PAY-MAPPING");
+            verify(paymentRepository).save(activePayment); // Repeated accreditation does not save/approve twice.
+        }
+        server.verify();
     }
 
     @Test

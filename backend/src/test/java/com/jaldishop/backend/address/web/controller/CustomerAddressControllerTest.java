@@ -186,4 +186,22 @@ class CustomerAddressControllerTest {
         mockMvc.perform(delete("/api/v1/customer/addresses/{id}", addressId))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void shouldReturn409WithExistingErrorFormatForPostAndPut() throws Exception {
+        var request = new CreateCustomerAddressRequest("Casa", "Juan", "987654321", "Av. Larco 123",
+                "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        var duplicate = new BusinessRuleException("ADDRESS_ALREADY_EXISTS", "Ya tienes guardada esta dirección.");
+        when(createCustomerAddressService.execute(eq(customerUserId), any())).thenThrow(duplicate);
+        when(updateCustomerAddressService.execute(eq(customerUserId), any(), any())).thenThrow(duplicate);
+        for (var builder : List.of(post("/api/v1/customer/addresses"),
+                put("/api/v1/customer/addresses/{id}", UUID.randomUUID()))) {
+            mockMvc.perform(builder.contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("ADDRESS_ALREADY_EXISTS"))
+                    .andExpect(jsonPath("$.message").value("Ya tienes guardada esta dirección."))
+                    .andExpect(jsonPath("$.errors").doesNotExist());
+        }
+    }
 }

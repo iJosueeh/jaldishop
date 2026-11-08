@@ -623,21 +623,21 @@ class MercadoPagoRestClientAdapterTest {
                   "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
                   "status": "processed",
                   "status_detail": "accredited",
-                  "total_amount": 120.00,
-                  "total_paid_amount": 120.00,
+                  "total_amount": "120.00",
+                  "total_paid_amount": "120.00",
                   "external_reference": "ext-order-001",
-                  "collector_id": 987654321,
+                  "currency": "PEN",
+                  "user_id": "987654321",
                   "live_mode": false,
                   "transactions": {
                     "payments": [
                       {
                         "id": "PAY01J67CQQ",
-                        "status": "approved",
+                        "status": "processed",
                         "status_detail": "accredited",
-                        "transaction_amount": 120.00,
-                        "currency_id": "PEN",
-                        "payment_method_id": "visa",
-                        "payment_type_id": "credit_card",
+                        "amount": "120.00",
+                        "paid_amount": "120.00",
+                        "payment_method": {"id": "visa", "type": "credit_card"},
                         "date_approved": "2026-11-05T12:00:00Z"
                       }
                     ]
@@ -665,9 +665,10 @@ class MercadoPagoRestClientAdapterTest {
 
         OrderQueryResult.OrderPaymentItem paymentItem = result.payments().getFirst();
         assertThat(paymentItem.providerPaymentId()).isEqualTo("PAY01J67CQQ");
-        assertThat(paymentItem.status()).isEqualTo("approved");
+        assertThat(paymentItem.status()).isEqualTo("processed");
         assertThat(paymentItem.statusDetail()).isEqualTo("accredited");
         assertThat(paymentItem.transactionAmount()).isEqualByComparingTo("120.00");
+        assertThat(paymentItem.paidAmount()).isEqualByComparingTo("120.00");
         assertThat(paymentItem.currency()).isEqualTo("PEN");
         assertThat(paymentItem.paymentMethodId()).isEqualTo("visa");
         assertThat(paymentItem.paymentTypeId()).isEqualTo("credit_card");
@@ -696,6 +697,124 @@ class MercadoPagoRestClientAdapterTest {
         assertThat(result.orderId()).isEqualTo("ORD-EMPTY-001");
         assertThat(result.status()).isEqualTo("created");
         assertThat(result.payments()).isEmpty();
+    }
+
+    private tools.jackson.databind.node.ObjectNode orderFixture() throws Exception {
+        try (var input = getClass().getResourceAsStream("/mercadopago/orders/get-order-accredited.json")) {
+            return (tools.jackson.databind.node.ObjectNode) new ObjectMapper().readTree(input);
+        }
+    }
+
+    private OrderQueryResult queryFixture(tools.jackson.databind.node.ObjectNode response) {
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders/ORD-MAPPING"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(response.toString(), MediaType.APPLICATION_JSON));
+        return adapter.queryOrder("ORD-MAPPING");
+    }
+
+    @Test void ordersMappingKeepsAllFourAmountsSeparateAndDoesNotInventApprovalDate() throws Exception {
+        var root = orderFixture();
+        var payment = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        root.put("total_amount", "70.00").put("total_paid_amount", "74.00");
+        payment.put("paid_amount", "41.00");
+        var result = queryFixture(root);
+        assertThat(result.totalAmount()).isEqualByComparingTo("70.00");
+        assertThat(result.totalPaidAmount()).isEqualByComparingTo("74.00");
+        assertThat(result.collectorId()).isEqualTo(1234L);
+        var item = result.payments().getFirst();
+        assertThat(item.transactionAmount()).isEqualByComparingTo("39.00");
+        assertThat(item.paidAmount()).isEqualByComparingTo("41.00");
+        assertThat(item.providerPaymentId()).isEqualTo("PAY-MAPPING");
+        assertThat(item.currency()).isEqualTo("PEN");
+        assertThat(item.paymentMethodId()).isEqualTo("visa");
+        assertThat(item.paymentTypeId()).isEqualTo("credit_card");
+        assertThat(item.dateApproved()).isNull();
+        mockServer.verify();
+    }
+
+    @Test void explicitHistoricalOrdersFieldsRemainCompatibleWithoutInventingPaidAmount() throws Exception {
+        var root = orderFixture();
+        var payment = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        root.remove("currency");
+        root.remove("user_id");
+        root.put("collector_id", 1234);
+        payment.remove("amount");
+        payment.remove("paid_amount");
+        payment.remove("payment_method");
+        payment.put("transaction_amount", 39).put("currency_id", "PEN")
+                .put("payment_method_id", "visa").put("payment_type_id", "credit_card");
+        var result = queryFixture(root);
+        assertThat(result.collectorId()).isEqualTo(1234L);
+        assertThat(result.payments().getFirst().transactionAmount()).isEqualByComparingTo("39.00");
+        assertThat(result.payments().getFirst().paidAmount()).isNull();
+        mockServer.verify();
+    }
+
+    @Test void matchingCanonicalAndHistoricalFieldsAreAccepted() throws Exception {
+        var root = orderFixture();
+        root.put("collector_id", 1234);
+        var payment = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        payment.put("transaction_amount", 39).put("currency_id", "PEN")
+                .put("payment_method_id", "visa").put("payment_type_id", "credit_card");
+        assertThat(queryFixture(root).payments().getFirst().transactionAmount()).isEqualByComparingTo("39.00");
+        mockServer.verify();
+    }
+
+    @Test void absentOptionalPaidAmountAndTrustMetadataAreNeverInferred() throws Exception {
+        var root = orderFixture();
+        root.remove("user_id");
+        root.remove("live_mode");
+        var payment = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        payment.remove("paid_amount");
+        properties.setExpectedCollectorId(1234L);
+        properties.setExpectedLiveMode(false);
+        var result = queryFixture(root);
+        assertThat(result.payments().getFirst().paidAmount()).isNull();
+        assertThat(result.collectorId()).isNull();
+        assertThat(result.liveMode()).isNull();
+        assertThatThrownBy(() -> new com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator(properties)
+                .validateOrder("ORD-MAPPING", result)).isInstanceOf(SecurityException.class);
+        mockServer.verify();
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"missing_amount", "zero_amount", "negative_amount",
+            "conflicting_amount", "missing_currency", "conflicting_currency", "conflicting_method", "conflicting_type",
+            "conflicting_seller", "invalid_seller", "missing_id", "blank_id", "object_id", "missing_order_id",
+            "other_order_id", "missing_status", "null_payment", "duplicate_id", "negative_paid", "malformed_amount"})
+    void invalidOrdersAreRejectedWithoutDiscardingPaymentsOrExposingResponse(String scenario) throws Exception {
+        var root = orderFixture();
+        var payments = (tools.jackson.databind.node.ArrayNode) root.path("transactions").path("payments");
+        var payment = (tools.jackson.databind.node.ObjectNode) payments.get(0);
+        switch (scenario) {
+            case "missing_amount" -> payment.remove("amount"); // paid_amount/total_amount must not substitute it.
+            case "zero_amount" -> payment.put("amount", "0");
+            case "negative_amount" -> payment.put("amount", "-39");
+            case "conflicting_amount" -> payment.put("transaction_amount", "38.00");
+            case "missing_currency" -> root.remove("currency");
+            case "conflicting_currency" -> payment.put("currency_id", "USD");
+            case "conflicting_method" -> payment.put("payment_method_id", "master");
+            case "conflicting_type" -> payment.put("payment_type_id", "account_money");
+            case "conflicting_seller" -> root.put("collector_id", 5678);
+            case "invalid_seller" -> root.put("user_id", "not-a-seller");
+            case "missing_id" -> payment.remove("id");
+            case "blank_id" -> payment.put("id", " ");
+            case "object_id" -> payment.putObject("id").put("private", "synthetic-private-value");
+            case "missing_order_id" -> root.remove("id");
+            case "other_order_id" -> root.put("id", "OTHER-ORDER");
+            case "missing_status" -> payment.remove("status");
+            case "null_payment" -> payments.addNull(); // One valid transaction must not hide an invalid second one.
+            case "duplicate_id" -> payments.add(payment.deepCopy());
+            case "negative_paid" -> payment.put("paid_amount", "-1");
+            case "malformed_amount" -> payment.put("amount", "synthetic-private-value");
+            default -> throw new AssertionError(scenario);
+        }
+        assertThatThrownBy(() -> queryFixture(root)).isInstanceOfSatisfying(MercadoPagoException.class, ex -> {
+            assertThat(ex.getErrorCode()).isEqualTo("MP_INVALID_RESPONSE");
+            assertThat(ex.getCause()).isNull();
+            assertThat(ex.getMessage()).doesNotContain("synthetic-private-value", "legacy-payment-reference");
+        });
+        mockServer.verify();
     }
 
     @Test
@@ -792,6 +911,7 @@ class MercadoPagoRestClientAdapterTest {
         String responseJson = """
                 {
                   "id": "ORD-WITH-REFUNDS",
+                  "currency": "PEN",
                   "status": "processed",
                   "status_detail": "refunded",
                   "total_amount": 100.00,

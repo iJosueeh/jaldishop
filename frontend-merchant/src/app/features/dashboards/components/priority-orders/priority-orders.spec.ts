@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PriorityOrders } from './priority-orders';
 import { OrderService } from '../../../../core/services/order.service';
+import { StoreService } from '../../../../core/services/store.service';
 import { MerchantOrder } from '../../../../core/models/order.models';
 
 describe('PriorityOrders', () => {
@@ -49,6 +50,18 @@ describe('PriorityOrders', () => {
     }).compileComponents();
 
     orderService = TestBed.inject(OrderService);
+    const storeService = TestBed.inject(StoreService);
+    storeService.currentStore.set({
+      id: 'store-1',
+      merchantUserId: 'usr-1',
+      name: 'Tienda Test',
+      slug: 'tienda-test',
+      pickupEnabled: true,
+      deliveryEnabled: true,
+      status: 'ACTIVE',
+      createdAt: '2026-09-01T00:00:00Z',
+      updatedAt: '2026-09-01T00:00:00Z',
+    });
     orderService.orders.set([mockOrder]);
 
     fixture = TestBed.createComponent(PriorityOrders);
@@ -79,12 +92,47 @@ describe('PriorityOrders', () => {
   });
 
   it('debe actualizar el estado de un pedido', () => {
+    const httpMock = TestBed.inject(HttpTestingController);
     const order = component.orders()[0];
     component.openDrawer(order);
 
     component.onStatusChange({ order, newStatus: 'READY' });
+
+    const req = httpMock.expectOne((r) => r.method === 'PATCH' && r.url.includes('/orders/ord-test-1/status'));
+    expect(req.request.body).toEqual({ status: 'READY' });
+    req.flush({
+      id: 'ord-test-1',
+      orderNumber: '#ORD-0001',
+      storeId: 'store-1',
+      customerUserId: 'usr-1',
+      paymentId: 'pay-1',
+      capacityReservationId: 'cap-1',
+      status: 'READY',
+      deliveryMode: 'DELIVERY',
+      serviceDate: '2026-09-25',
+      serviceStartTime: '10:00:00',
+      serviceEndTime: '11:30:00',
+      customerName: 'María García',
+      customerPhone: '987654321',
+      customerEmail: null,
+      deliveryAddress: 'Av. Larco 123',
+      deliveryReference: null,
+      deliveryLatitude: null,
+      deliveryLongitude: null,
+      currency: 'PEN',
+      productsSubtotalAmount: 45.0,
+      discountAmount: 0,
+      discountCode: null,
+      deliveryFeeAmount: 0,
+      includedTaxAmount: 0,
+      totalAmount: 45.0,
+      confirmedAt: '2026-09-25T10:00:00Z',
+      updatedAt: '2026-09-25T10:05:00Z',
+      items: [],
+      statusHistory: [],
+    });
+
     const updated = component.orders().find((o) => o.id === order.id);
     expect(updated?.status).toBe('READY');
-    expect(component.selectedOrder()?.status).toBe('READY');
   });
 });

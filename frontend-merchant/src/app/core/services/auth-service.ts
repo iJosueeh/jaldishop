@@ -11,6 +11,8 @@ import { ProfileService } from './profile.service';
 import { ProductService } from './product.service';
 import { CustomerService } from './customer.service';
 import { OrderService } from './order.service';
+import { StompService } from './stomp.service';
+import { NotificationService } from './notification.service';
 
 @Service()
 export class AuthService {
@@ -23,6 +25,8 @@ export class AuthService {
   private readonly productService = inject(ProductService);
   private readonly customerService = inject(CustomerService);
   private readonly orderService = inject(OrderService);
+  private readonly stompService = inject(StompService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly token = signal<string | null>(this.tokenService.getToken());
   readonly currentUser = signal<AuthResult | null>(null);
@@ -79,6 +83,8 @@ export class AuthService {
     this.productService.clearCache();
     this.customerService.clearCache();
     this.orderService.clearOrders();
+    this.stompService.disconnect();
+    this.notificationService.clearCache();
 
     this.router.navigate(['/login']);
   }

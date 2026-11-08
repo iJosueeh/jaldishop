@@ -21,7 +21,9 @@ public record MpOrderResponse(
         @JsonProperty("transactions") MpTransactions transactions,
         @JsonProperty("collector_id") Long collectorId,
         @JsonProperty("live_mode") Boolean liveMode,
-        @JsonProperty("date_created") String dateCreated
+        @JsonProperty("date_created") String dateCreated,
+        @JsonProperty("currency") String currency,
+        @JsonProperty("user_id") String userId
 ) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,7 +50,16 @@ public record MpOrderResponse(
             @JsonProperty("currency_id") String currencyId,
             @JsonProperty("payment_method_id") String paymentMethodId,
             @JsonProperty("payment_type_id") String paymentTypeId,
-            @JsonProperty("date_approved") String dateApproved
+            @JsonProperty("date_approved") String dateApproved,
+            @JsonProperty("amount") BigDecimal amount,
+            @JsonProperty("paid_amount") BigDecimal paidAmount,
+            @JsonProperty("payment_method") MpOrderPaymentMethod paymentMethod
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record MpOrderPaymentMethod(
+            @JsonProperty("id") String id,
+            @JsonProperty("type") String type
     ) {}
 
 }

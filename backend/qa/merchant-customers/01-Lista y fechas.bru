@@ -1,0 +1,29 @@
+meta {
+  name: Lista y fechas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Clientes asociados a A y contrato temporal", function () {
+    const rows = res.getBody();
+    expect(rows.map(c => c.userId)).to.deep.equal([bru.getEnvVar("customerWithoutOrdersId"), bru.getEnvVar("customerWithOrdersId")]);
+    const c = rows[1];
+    expect(Object.keys(c).sort()).to.deep.equal(["userId","firstName","lastName","email","phone","customerSince","ordersCount","totalSpentAmount","lastOrderAt"].sort());
+    expect(c.customerSince).to.equal("2026-09-01T10:00:00.123456Z");
+    expect(c.lastOrderAt).to.equal("2026-09-15T15:30:00.654321Z");
+    expect(c.ordersCount).to.equal(3);
+    expect(c.totalSpentAmount).to.equal(30.75);
+  });
+}

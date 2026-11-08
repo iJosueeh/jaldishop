@@ -1,0 +1,41 @@
+meta {
+  name: PUT a domicilio duplicado
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{secondAddressId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "alias": "Casa",
+    "recipientName": "Juan Pérez",
+    "recipientPhone": "987654321",
+    "streetAddress": "Av. Larco 123 Dpto. 201",
+    "department": "Lima",
+    "province": "Lima",
+    "district": "Miraflores",
+    "ubigeoCode": "150122",
+    "reference": "Portón verde",
+    "latitude": null,
+    "longitude": null,
+    "isDefault": true
+  }
+}
+
+tests {
+  test("HTTP 409", function () { expect(res.getStatus()).to.equal(409); });
+  test("Código de conflicto", function () { expect(res.getBody().code).to.equal("ADDRESS_ALREADY_EXISTS"); });
+}

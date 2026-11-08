@@ -172,8 +172,9 @@ class ManualOrderInvestigationServiceTest {
                 .andExpect(request -> assertFalse(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()))
                 .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess(
                         "{\"id\":\"ORD1\",\"status\":\"processed\",\"external_reference\":\"" + paymentId
-                        + "\",\"total_amount\":\"10.00\",\"checkout_url\":\"https://checkout.test\","
-                        + "\"transactions\":{\"payments\":[{\"id\":\"123\",\"currency_id\":\"PEN\"}]}}",
+                        + "\",\"total_amount\":\"10.00\",\"currency\":\"PEN\",\"checkout_url\":\"https://checkout.test\","
+                        + "\"transactions\":{\"payments\":[{\"id\":\"123\",\"amount\":\"10.00\","
+                        + "\"paid_amount\":\"10.00\",\"status\":\"processed\",\"status_detail\":\"accredited\"}]}}",
                         org.springframework.http.MediaType.APPLICATION_JSON));
         when(gateway.queryOrder("ORD1")).thenAnswer(inv -> adapter.queryOrder("ORD1"));
         assertEquals(ManualOrderInvestigationService.Outcome.VERIFIED, service.investigate(attempt.getId()).outcome());

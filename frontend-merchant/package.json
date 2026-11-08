@@ -19,6 +19,7 @@
     "@angular/router": "^22.2.3",
     "@ng-icons/core": "^36.0.0",
     "@ng-icons/material-symbols": "^36.0.0",
+    "@stomp/stompjs": "^7.5.0",
     "@tailwindcss/postcss": "^4.3.3",
     "leaflet": "^1.9.4",
     "postcss": "^8.5.28",

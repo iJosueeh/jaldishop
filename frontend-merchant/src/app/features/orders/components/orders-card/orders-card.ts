@@ -21,7 +21,7 @@ import {
   matSendOutline,
   matInventory2Outline,
 } from '@ng-icons/material-symbols/outline';
-import { MerchantOrder, OrderStatus } from '../../../../core/models/order.models';
+import { DeliveryMode, MerchantOrder, OrderStatus } from '../../../../core/models/order.models';
 
 @Component({
   imports: [NgIcon],
@@ -54,32 +54,39 @@ import { MerchantOrder, OrderStatus } from '../../../../core/models/order.models
 })
 export class OrdersCard {
   readonly order = input.required<MerchantOrder>();
+  readonly isUpdating = input<boolean>(false);
+  readonly isPendingVerification = input<boolean>(false);
 
   readonly statusAdvance = output<MerchantOrder>();
   readonly whatsAppClick = output<MerchantOrder>();
   readonly openDetails = output<MerchantOrder>();
+  readonly verifyStatus = output<MerchantOrder>();
 
-  getNextActionLabel(status: OrderStatus): string {
+  getNextActionLabel(status: OrderStatus, deliveryMode?: DeliveryMode): string {
     switch (status) {
       case 'CONFIRMED':
         return 'Aceptar';
       case 'IN_PREPARATION':
         return 'Listo';
       case 'READY':
+        return deliveryMode === 'DELIVERY' ? 'Despachar' : 'Entregar';
+      case 'OUT_FOR_DELIVERY':
         return 'Entregar';
       default:
         return 'Detalle';
     }
   }
 
-  getNextActionIcon(status: OrderStatus): string {
+  getNextActionIcon(status: OrderStatus, deliveryMode?: DeliveryMode): string {
     switch (status) {
       case 'CONFIRMED':
         return 'matCheckCircleOutline';
       case 'IN_PREPARATION':
-        return 'matCheckOutline';
-      case 'READY':
         return 'matDoneAllOutline';
+      case 'READY':
+        return deliveryMode === 'DELIVERY' ? 'matTwoWheelerOutline' : 'matCheckCircleOutline';
+      case 'OUT_FOR_DELIVERY':
+        return 'matCheckCircleOutline';
       default:
         return 'matCheckOutline';
     }

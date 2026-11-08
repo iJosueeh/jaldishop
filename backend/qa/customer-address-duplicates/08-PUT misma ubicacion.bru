@@ -1,0 +1,41 @@
+meta {
+  name: PUT misma ubicacion
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{firstAddressId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "alias": "Casa actualizada",
+    "recipientName": "Juan Pérez",
+    "recipientPhone": "987654321",
+    "streetAddress": " AV.  LARCO 123 DPTO. 201 ",
+    "department": "Lima",
+    "province": "Lima",
+    "district": "Miraflores",
+    "ubigeoCode": "150122",
+    "reference": "Portón verde",
+    "latitude": null,
+    "longitude": null,
+    "isDefault": true
+  }
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Metadatos actualizados", function () { expect(res.getBody().alias).to.equal("Casa actualizada"); });
+}

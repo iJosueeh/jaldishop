@@ -1,0 +1,23 @@
+{
+  "id": "ORD-MAPPING",
+  "type": "online",
+  "status": "processed",
+  "status_detail": "accredited",
+  "total_amount": "39.00",
+  "total_paid_amount": "39.00",
+  "currency": "PEN",
+  "user_id": "1234",
+  "live_mode": false,
+  "external_reference": "00000000-0000-4000-8000-000000000039",
+  "transactions": {
+    "payments": [{
+      "id": "PAY-MAPPING",
+      "amount": "39.00",
+      "paid_amount": "39.00",
+      "status": "processed",
+      "status_detail": "accredited",
+      "payment_method": {"id": "visa", "type": "credit_card"},
+      "reference": {"id": "legacy-payment-reference"}
+    }]
+  }
+}

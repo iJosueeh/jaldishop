@@ -1,0 +1,25 @@
+meta {
+  name: Sin pedidos
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=ana@example.test
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Sin pedidos conserva fecha y null", function () {
+    const rows = res.getBody(); expect(rows).to.have.length(1); const c = rows[0];
+    expect(c.userId).to.equal(bru.getEnvVar("customerWithoutOrdersId"));
+    expect(c.customerSince).to.equal("2026-09-02T10:00:00.123456Z");
+    expect(c.lastOrderAt).to.equal(null); expect(c.ordersCount).to.equal(0); expect(c.totalSpentAmount).to.equal(0);
+  });
+}

@@ -74,4 +74,57 @@ describe('OrdersCard', () => {
 
     expect(emitted).toEqual(mockOrder);
   });
+
+  it('no debe renderizar badge de pago ni badge de canal cuando no están disponibles', () => {
+    const orderWithoutPaymentOrChannel: MerchantOrder = {
+      ...mockOrder,
+      channel: undefined,
+      channelLabel: undefined,
+      paymentMethod: undefined,
+      paymentLabel: undefined,
+    };
+
+    fixture.componentRef.setInput('order', orderWithoutPaymentOrChannel);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).not.toContain('WhatsApp');
+    expect(compiled.textContent).not.toContain('Yape');
+    expect(compiled.querySelector('ng-icon[name="matVerifiedOutline"]')).toBeNull();
+  });
+
+  it('debe adaptar la acción rápida a la modalidad PICKUP y DELIVERY', () => {
+    expect(component.getNextActionLabel('CONFIRMED', 'DELIVERY')).toBe('Aceptar');
+    expect(component.getNextActionLabel('IN_PREPARATION', 'DELIVERY')).toBe('Listo');
+    expect(component.getNextActionLabel('READY', 'DELIVERY')).toBe('Despachar');
+    expect(component.getNextActionLabel('READY', 'PICKUP')).toBe('Entregar');
+    expect(component.getNextActionLabel('OUT_FOR_DELIVERY', 'DELIVERY')).toBe('Entregar');
+  });
+
+  it('debe deshabilitar el botón de avance cuando isUpdating es true', () => {
+    fixture.componentRef.setInput('isUpdating', true);
+    fixture.detectChanges();
+
+    const advanceBtn = fixture.nativeElement.querySelectorAll('button')[2] as HTMLButtonElement;
+    expect(advanceBtn.disabled).toBe(true);
+    expect(advanceBtn.classList.contains('disabled:opacity-50')).toBe(true);
+  });
+
+  it('debe mostrar el botón Verificar y emitir verifyStatus cuando isPendingVerification es true', () => {
+    fixture.componentRef.setInput('isPendingVerification', true);
+    fixture.detectChanges();
+
+    let emitted: MerchantOrder | null = null;
+    component.verifyStatus.subscribe((order) => {
+      emitted = order;
+    });
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Verificar');
+
+    const verifyBtn = fixture.nativeElement.querySelectorAll('button')[2] as HTMLButtonElement;
+    verifyBtn.click();
+
+    expect(emitted).toEqual(mockOrder);
+  });
 });

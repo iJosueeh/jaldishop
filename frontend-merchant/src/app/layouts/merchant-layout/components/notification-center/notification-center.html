@@ -1,0 +1,208 @@
+<div class="relative inline-block text-left font-sans">
+  <!-- Botón Discreto de Campana en Cabecera -->
+  <button
+    type="button"
+    (click)="togglePanel()"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="dialog"
+    aria-label="Abrir centro de notificaciones"
+    class="relative p-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-white bg-[#faf7f2] border border-[#e7e0d6] shadow-2xs transition-all cursor-pointer flex items-center justify-center shrink-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#005141]/20"
+  >
+    <ng-icon name="matNotificationsOutline" class="text-[20px]" />
+
+    <!-- Badge numérico de no leídas -->
+    @if (notificationService.hasUnread()) {
+      <span
+        class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-700 text-white text-[10px] font-bold flex items-center justify-center shadow-xs border-2 border-white animate-in fade-in zoom-in duration-150"
+      >
+        {{ notificationService.unreadBadgeText() }}
+      </span>
+    }
+  </button>
+
+  <!-- Panel Desplegable (Popover) -->
+  @if (isOpen()) {
+    <div
+      role="dialog"
+      aria-modal="false"
+      aria-label="Centro de notificaciones"
+      class="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-[#e7e0d6] z-50 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+    >
+      <!-- Cabecera del Panel -->
+      <div class="flex items-center justify-between px-4 py-3 bg-[#faf7f2] border-b border-[#e7e0d6]">
+        <div class="flex items-center gap-2">
+          <h3 class="text-xs sm:text-sm font-bold text-stone-900 tracking-tight">Notificaciones</h3>
+          @if (notificationService.hasUnread()) {
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+              {{ notificationService.unreadCount() }} sin leer
+            </span>
+          }
+        </div>
+
+        <div class="flex items-center gap-1">
+          <!-- Botón de Refresco Manual -->
+          <button
+            type="button"
+            (click)="loadNotifications()"
+            title="Refrescar notificaciones"
+            aria-label="Refrescar notificaciones"
+            [disabled]="notificationService.isLoading()"
+            class="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 transition-colors cursor-pointer disabled:opacity-40"
+          >
+            <ng-icon
+              name="matRefreshOutline"
+              class="text-[16px]"
+              [class.animate-spin]="notificationService.isLoading()"
+            />
+          </button>
+
+          <!-- Botón de Cerrar -->
+          <button
+            type="button"
+            (click)="close()"
+            title="Cerrar panel"
+            aria-label="Cerrar panel de notificaciones"
+            class="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 transition-colors cursor-pointer"
+          >
+            <ng-icon name="matCloseOutline" class="text-[16px]" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuerpo del Panel -->
+      <div class="max-h-[380px] overflow-y-auto divide-y divide-[#e7e0d6]/60">
+        <!-- 1. Estado de Carga (Skeletons) -->
+        @if (notificationService.isLoading() && notificationService.notifications().length === 0) {
+          <div class="p-4 space-y-3">
+            @for (item of [1, 2, 3]; track item) {
+              <div class="flex items-start gap-3 animate-pulse">
+                <div class="w-8 h-8 rounded-xl bg-stone-200 shrink-0"></div>
+                <div class="flex-1 space-y-1.5 py-0.5">
+                  <div class="h-3 bg-stone-200 rounded w-1/3"></div>
+                  <div class="h-3.5 bg-stone-200 rounded w-4/5"></div>
+                  <div class="h-2.5 bg-stone-100 rounded w-1/2"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- 2. Estado de Error con Reintento -->
+        @else if (notificationService.error()) {
+          <div class="p-6 text-center flex flex-col items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-lg">
+              <ng-icon name="matWarningOutline" class="text-[20px]" />
+            </div>
+            <p class="text-xs text-stone-700 font-medium max-w-[240px]">
+              {{ notificationService.error() }}
+            </p>
+            <button
+              type="button"
+              (click)="loadNotifications()"
+              class="mt-1 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Reintentar
+            </button>
+          </div>
+        }
+
+        <!-- 3. Estado Vacío -->
+        @else if (notificationService.notifications().length === 0) {
+          <div class="p-8 text-center flex flex-col items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center text-lg">
+              <ng-icon name="matNotificationsOutline" class="text-[22px]" />
+            </div>
+            <h4 class="text-xs font-bold text-stone-800 mt-1">Bandeja al día</h4>
+            <p class="text-[11px] text-stone-500 max-w-[220px]">
+              No tienes notificaciones pendientes en este momento.
+            </p>
+          </div>
+        }
+
+        <!-- 4. Lista Real de Notificaciones -->
+        @else {
+          @for (item of notificationService.notifications(); track item.id) {
+            <article
+              class="p-3.5 flex items-start gap-3 transition-colors relative"
+              [class.bg-emerald-50/25]="item.status === 'UNREAD'"
+              [class.hover:bg-stone-50]="item.status === 'READ'"
+              [class.hover:bg-emerald-50/40]="item.status === 'UNREAD'"
+            >
+              <!-- Indicador visual de no leída -->
+              @if (item.status === 'UNREAD') {
+                <span
+                  class="absolute left-1.5 top-4 w-1.5 h-1.5 rounded-full bg-emerald-600"
+                  aria-hidden="true"
+                ></span>
+              }
+
+              <!-- Icono por tipo de notificación -->
+              <div
+                class="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 text-[16px]"
+                [class]="getIconClasses(item.type)"
+              >
+                <ng-icon [name]="getIconName(item.type)" />
+              </div>
+
+              <!-- Contenido Textual -->
+              <div class="flex-1 min-w-0 pr-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 truncate">
+                    {{ getTypeLabel(item.type) }}
+                  </span>
+                  <time class="text-[10px] text-stone-400 shrink-0 font-mono">
+                    {{ item.createdAt | date:'dd/MM/yy HH:mm' }}
+                  </time>
+                </div>
+
+                <h4
+                  class="text-xs font-bold text-stone-900 mt-0.5 leading-snug line-clamp-2"
+                  [class.font-extrabold]="item.status === 'UNREAD'"
+                >
+                  {{ item.title }}
+                </h4>
+
+                <p class="text-[11px] text-stone-600 mt-0.5 leading-relaxed line-clamp-3">
+                  {{ item.message }}
+                </p>
+
+                <!-- Fecha de lectura si aplica -->
+                @if (item.status === 'READ' && item.readAt) {
+                  <span class="inline-flex items-center gap-1 text-[10px] text-stone-400 mt-1">
+                    <ng-icon name="matCheckCircleOutline" class="text-[12px] text-emerald-600" />
+                    Leída
+                  </span>
+                }
+              </div>
+
+              <!-- Acción: Marcar como leída -->
+              @if (item.status === 'UNREAD') {
+                <button
+                  type="button"
+                  (click)="onMarkAsRead(item, $event)"
+                  [disabled]="notificationService.isMarkingRead(item.id)"
+                  title="Marcar como leída"
+                  aria-label="Marcar notificación como leída"
+                  class="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-emerald-100/60 transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+                >
+                  <ng-icon
+                    name="matCheckCircleOutline"
+                    class="text-[18px]"
+                    [class.animate-pulse]="notificationService.isMarkingRead(item.id)"
+                  />
+                </button>
+              }
+            </article>
+          }
+        }
+      </div>
+
+      <!-- Pie del Panel -->
+      <div class="px-4 py-2 bg-[#faf7f2] border-t border-[#e7e0d6] text-center">
+        <span class="text-[10px] text-stone-400 font-medium">
+          Mostrando las últimas 20 notificaciones del sistema
+        </span>
+      </div>
+    </div>
+  }
+</div>

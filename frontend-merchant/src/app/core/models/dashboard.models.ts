@@ -17,9 +17,9 @@ export interface DashboardPriorityOrder {
   id: string;
   orderNumber: string;
   customerName: string;
-  channel: OrderChannel;
-  channelLabel: string;
-  channelIcon: string;
+  channel?: OrderChannel;
+  channelLabel?: string;
+  channelIcon?: string;
   icon: string;
   itemSummary: string;
   itemDetails?: string;

@@ -24,11 +24,11 @@ import { OrderFilterTab } from '../../../../core/models/order.models';
 })
 export class OrdersFilterBar {
   readonly activeTab = input<OrderFilterTab>('ALL');
-  readonly totalCount = input<number>(0);
-  readonly confirmedCount = input<number>(0);
-  readonly inPrepCount = input<number>(0);
-  readonly readyCount = input<number>(0);
-  readonly completedCount = input<number>(0);
+  readonly totalCount = input<number | string>(0);
+  readonly confirmedCount = input<number | string>(0);
+  readonly inPrepCount = input<number | string>(0);
+  readonly readyCount = input<number | string>(0);
+  readonly completedCount = input<number | string>(0);
   readonly searchQuery = input<string>('');
   readonly selectedChannel = input<string>('ALL');
 

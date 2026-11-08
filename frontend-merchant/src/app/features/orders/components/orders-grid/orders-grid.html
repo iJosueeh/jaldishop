@@ -24,7 +24,7 @@
     }
   </section>
 } @else if (isEmptyOrders()) {
-  <!-- Estado Vacío: Sin pedidos en el turno -->
+  <!-- Estado Vacío: Sin pedidos en la tienda -->
   <div
     class="w-full p-12 sm:p-16 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center flex flex-col items-center justify-center gap-3 shadow-2xs"
   >
@@ -34,7 +34,7 @@
       <ng-icon name="matReceiptLongOutline" class="text-3xl text-primary" />
     </div>
     <div>
-      <h4 class="text-base sm:text-lg font-bold text-on-surface">No hay pedidos en este turno</h4>
+      <h4 class="text-base sm:text-lg font-bold text-on-surface">No hay pedidos registrados</h4>
       <p class="text-xs sm:text-sm text-on-surface-variant max-w-md mt-1">
         Aún no has registrado comandas para hoy. Puedes ingresar un nuevo pedido manualmente o
         recibirlos automáticamente desde tu catálogo web y WhatsApp.
@@ -49,8 +49,8 @@
       <span>Registrar Primer Pedido</span>
     </button>
   </div>
-} @else if (isFilterEmpty() || orders().length === 0) {
-  <!-- Estado Vacío: Filtros o Búsqueda sin coincidencias -->
+} @else if (isSearchEmpty()) {
+  <!-- Estado Vacío: Búsqueda local sin coincidencias en esta página -->
   <div
     class="w-full p-10 sm:p-14 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center flex flex-col items-center justify-center gap-3 shadow-2xs"
   >
@@ -60,9 +60,33 @@
       <ng-icon name="matFilterAltOffOutline" class="text-2xl" />
     </div>
     <div>
-      <h4 class="text-base font-bold text-on-surface">No se encontraron pedidos</h4>
+      <h4 class="text-base font-bold text-on-surface">Sin coincidencias en esta página</h4>
       <p class="text-xs text-on-surface-variant max-w-sm mt-1">
-        No hay pedidos que coincidan con los filtros seleccionados o la búsqueda actual.
+        No hay pedidos en la página actual que coincidan con la búsqueda.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="resetFilter.emit()"
+      class="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors text-xs font-semibold shadow-2xs cursor-pointer active:scale-98"
+    >
+      <span>Limpiar filtros</span>
+    </button>
+  </div>
+} @else if (isFilterEmpty() || orders().length === 0) {
+  <!-- Estado Vacío: Filtros de estado sin pedidos -->
+  <div
+    class="w-full p-10 sm:p-14 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center flex flex-col items-center justify-center gap-3 shadow-2xs"
+  >
+    <div
+      class="w-12 h-12 rounded-2xl bg-surface-container-low text-on-surface-variant flex items-center justify-center mb-1"
+    >
+      <ng-icon name="matFilterAltOffOutline" class="text-2xl" />
+    </div>
+    <div>
+      <h4 class="text-base font-bold text-on-surface">Sin pedidos en este filtro</h4>
+      <p class="text-xs text-on-surface-variant max-w-sm mt-1">
+        No hay pedidos con el estado seleccionado en tu tienda.
       </p>
     </div>
     <button
@@ -79,9 +103,12 @@
     @for (order of orders(); track order.id) {
       <app-orders-card
         [order]="order"
+        [isUpdating]="updatingOrderIds().has(order.id)"
+        [isPendingVerification]="pendingVerificationOrderIds().has(order.id)"
         (statusAdvance)="statusAdvance.emit($event)"
         (whatsAppClick)="whatsAppClick.emit($event)"
         (openDetails)="openDetails.emit($event)"
+        (verifyStatus)="verifyStatus.emit($event)"
       />
     }
   </section>

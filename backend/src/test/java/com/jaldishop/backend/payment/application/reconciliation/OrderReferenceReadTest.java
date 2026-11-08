@@ -200,6 +200,52 @@ class OrderReferenceReadTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({"10.00,PEN,accredited,true", "10.00,PEN,waiting_capture,false",
+            "9.00,PEN,accredited,false", "10.00,USD,accredited,false"})
+    void reconciliationConsumesCanonicalOrdersResponseWithoutRelaxingFinancialChecks(
+            String amount, String currency, String detail, boolean approved) throws Exception {
+        var f = new Fixture(PaymentStatus.PENDING);
+        when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
+        when(f.payment.getCurrency()).thenReturn("PEN");
+        when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+        when(f.attempts.findById(f.attempt.getId())).thenReturn(Optional.of(f.attempt));
+        var status = new java.util.concurrent.atomic.AtomicReference<>(PaymentStatus.PENDING);
+        when(f.payment.getStatus()).thenAnswer(inv -> status.get());
+        doAnswer(inv -> { status.set(PaymentStatus.APPROVED); return null; }).when(f.payment).markApproved(any());
+        f.properties.setExpectedCollectorId(1234L);
+        f.properties.setExpectedLiveMode(false);
+        f.properties.setAccessToken("synthetic-token");
+        var mapper = new tools.jackson.databind.ObjectMapper();
+        tools.jackson.databind.node.ObjectNode root;
+        try (var input = getClass().getResourceAsStream("/mercadopago/orders/get-order-accredited.json")) {
+            root = (tools.jackson.databind.node.ObjectNode) mapper.readTree(input);
+        }
+        root.put("id", "ORD1").put("external_reference", "pa1_" + f.attempt.getId())
+                .put("currency", currency).put("total_amount", amount).put("total_paid_amount", amount);
+        var item = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
+        item.put("amount", amount).put("paid_amount", amount).put("status_detail", detail);
+        var builder = org.springframework.web.client.RestClient.builder().baseUrl("https://mp.test");
+        var server = org.springframework.test.web.client.MockRestServiceServer.bindTo(builder).build();
+        server.expect(org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo("https://mp.test/v1/orders/ORD1"))
+                .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess(
+                        root.toString(), org.springframework.http.MediaType.APPLICATION_JSON));
+        var adapter = new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoRestClientAdapter(
+                builder.build(), f.properties);
+        var remote = adapter.queryOrder("ORD1");
+        if (!amount.equals("10.00") || !currency.equals("PEN")) {
+            assertThrows(ConflictException.class, () -> f.consolidate(remote));
+            verify(f.payments, never()).save(any());
+        } else {
+            f.consolidate(remote);
+            assertEquals(approved ? PaymentAttemptStatus.APPROVED : PaymentAttemptStatus.PROCESSING, f.attempt.getStatus());
+            assertEquals("PAY-MAPPING", f.attempt.getProviderPaymentId());
+        }
+        if (approved) verify(f.payment).markApproved(any());
+        else verify(f.payment, never()).markApproved(any());
+        server.verify();
+    }
+
     private static class Fixture {
         final PaymentRepository payments = mock(PaymentRepository.class);
         final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties =

@@ -43,4 +43,16 @@ describe('OrdersFilterBar', () => {
 
     expect(query).toBe('Brownie');
   });
+
+  it('debe admitir conteos en formato string como "—" para pestañas inactivas', () => {
+    fixture.componentRef.setInput('activeTab', 'ALL');
+    fixture.componentRef.setInput('totalCount', 15);
+    fixture.componentRef.setInput('confirmedCount', '—');
+    fixture.componentRef.setInput('inPrepCount', '—');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('15');
+    expect(compiled.textContent).toContain('—');
+  });
 });

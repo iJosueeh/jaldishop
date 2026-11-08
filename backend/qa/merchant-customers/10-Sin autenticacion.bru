@@ -1,0 +1,16 @@
+meta {
+  name: Sin autenticacion
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 401", function () { expect(res.getStatus()).to.equal(401); });
+  
+}

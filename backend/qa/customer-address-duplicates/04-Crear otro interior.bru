@@ -1,0 +1,41 @@
+meta {
+  name: Crear otro interior
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "alias": "Casa",
+    "recipientName": "Juan Pérez",
+    "recipientPhone": "987654321",
+    "streetAddress": "Av. Larco 123 Dpto. 202",
+    "department": "Lima",
+    "province": "Lima",
+    "district": "Miraflores",
+    "ubigeoCode": "150122",
+    "reference": "Portón verde",
+    "latitude": null,
+    "longitude": null,
+    "isDefault": true
+  }
+}
+
+tests {
+  test("HTTP 201", function () { expect(res.getStatus()).to.equal(201); });
+  if (res.getStatus() === 201) bru.setVar("secondAddressId", res.getBody().id);
+}
