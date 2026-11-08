@@ -8,7 +8,6 @@ import com.jaldishop.backend.payment.application.refund.PaymentRefundScheduler;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoException;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoRestClientAdapter;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
@@ -18,6 +17,8 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.support.ResourcePropertySource;
 
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -29,9 +30,13 @@ class LocalDevelopmentConfigurationTest {
 
     @Test
     void templateBuildsLocalConfigurationWithoutDatabaseOrExternalCalls() throws Exception {
+        Path templatePath = Files.exists(Path.of(".env.template"))
+                ? Path.of(".env.template")
+                : Path.of("backend/.env.template");
         Properties template = new Properties();
-        Dotenv.configure().directory(".").filename(".env.template").load().entries()
-                .forEach(entry -> template.setProperty(entry.getKey(), entry.getValue()));
+        try (var stream = Files.newInputStream(templatePath)) {
+            template.load(stream);
+        }
         var application = new ResourcePropertySource("classpath:application.properties");
 
         new ApplicationContextRunner()
