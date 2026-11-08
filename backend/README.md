@@ -1,173 +1,219 @@
-# ☕ JaldiShop Backend API — Guía de Instalación y Ejecución Local
+# JaldiShop Backend: desarrollo local
 
-**Entregable 1 — Modelado de Datos + Backend API (Núcleo Transaccional)**
+El backend usa **Java 21**, **Spring Boot 4.1.1** (`pom.xml`), **Maven Wrapper
+3.9.16**, **PostgreSQL 16** y **Flyway**. El flujo es igual para los tres integrantes:
+crear una base local, copiar `.env.template` a `.env` y ejecutar Maven Wrapper.
+No requiere un perfil Spring adicional, Fedora, Podman ni credenciales de proveedores.
 
-API RESTful desarrollada en **Java 21** con **Spring Boot 3.4**, **Spring Security 6 (JWT)**, **PostgreSQL 16+** y **Flyway** para versionamiento de esquema.
+## 1. Requisitos
 
----
+- JDK 21 y `JAVA_HOME` apuntando a esa instalación; comprobar `java -version`.
+- PostgreSQL 16, cliente `psql` y extensiones `btree_gist` y `unaccent` disponibles.
+  En algunas distribuciones Linux las extensiones requieren el paquete contrib de PostgreSQL 16.
+- Git. No hace falta instalar Maven globalmente: usar `mvnw` o `mvnw.cmd`.
+- Internet en el primer uso del Wrapper para descargar Maven y las dependencias no cacheadas.
 
-## 1. Requisitos Previos
+Ejecutar los comandos siguientes desde `backend/`, dentro del repositorio clonado.
 
-* **Java Development Kit (JDK):** Versión 21 o superior (`java -version`).
-* **Apache Maven:** Versión 3.9+ o el wrapper incluido (`./mvnw` o `mvnw.cmd`).
-* **PostgreSQL:** Versión 16 o superior (o Docker instalado).
-* **Cliente REST:** Postman o Insomnia para importar la colección oficial.
+## 2. PostgreSQL local
 
----
+Elegir **una** de estas opciones. La aplicación utiliza por defecto
+`127.0.0.1:5433`, base `jaldishop_dev`, usuario `jaldishop`.
 
-## 2. Configuración de Base de Datos & Variables de Entorno
+### Opción A: PostgreSQL 16 instalado en el equipo
 
-Puedes configurar las credenciales mediante variables de entorno en tu sistema o en el archivo [`src/main/resources/application.properties`](./src/main/resources/application.properties):
+Iniciar el servicio PostgreSQL instalado (en Servicios de Windows o mediante el
+gestor de servicios de Linux). No hay un nombre de servicio universal entre instaladores.
+Conectar con una cuenta administradora local usando el puerto de esa instalación:
 
-```properties
-# Configuración del Servidor
-server.port=8080
-
-# Conexión a Base de Datos PostgreSQL
-spring.datasource.url=jdbc:postgresql://localhost:5432/jaldishop
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# Control de Migraciones con Flyway
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration
-spring.flyway.baseline-on-migrate=true
-
-# Seguridad & JWT
-jwt.secret=9a78b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6
-jwt.expiration-hours=24
-
-# Logs y Debugging
-logging.level.com.jaldishop.backend=DEBUG
+```text
+psql -h 127.0.0.1 -p 5432 -U postgres -d postgres
 ```
 
----
+Solo para una **base nueva** y un usuario que todavía no existan:
 
-## 3. Despliegue Rápido de PostgreSQL con Docker (Opcional)
-
-Si cuentas con Docker instalado, puedes iniciar una instancia de PostgreSQL lista para usar:
-
-```bash
-docker run --name jaldishop-postgres \
-  -e POSTGRES_DB=jaldishop \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -d postgres:16-alpine
+```sql
+CREATE USER jaldishop WITH PASSWORD 'solo_desarrollo_local';
+CREATE DATABASE jaldishop_dev OWNER jaldishop;
 ```
 
----
+Salir con `\q`. Ajustar `DB_URL` en `.env` al puerto real, por ejemplo 5432.
+Si los nombres ya existen, revisar su uso antes de hacer cambios: no borrar,
+reutilizar ni ejecutar pruebas destructivas sobre una base compartida.
 
-## 4. Migraciones de Base de Datos y Seed Data
+Flyway crea `btree_gist` en V14 y `unaccent` en V26. El usuario local debe ser
+propietario de la base y tener permiso para crear estas extensiones. Si el instalador
+lo restringe, el administrador local puede habilitarlas en **esa base nueva**:
 
-El esquema se versiona y aplica automáticamente al iniciar la aplicación mediante **Flyway** (migraciones `V1` a `V14`):
-
-1. **`V1__initial_schema.sql`:** Creación del esquema relacional base (3FN), claves foráneas con políticas `ON DELETE RESTRICT/CASCADE`, restricciones `CHECK` e índices únicos parciales.
-2. **`V2__seed_roles.sql`:** Catálogo de roles base (`CUSTOMER`, `MERCHANT`, `ADMIN`).
-3. **`V3__add_store_customers.sql`:** Registro histórico de relación cliente-tienda (migrado posteriormente en V12).
-4. **`V4__seed_complete_demo_data.sql`:** Semillas completas de demostración (usuarios, tiendas, catálogo y configuración de capacidad).
-5. **`V5__remove_tax_applies_from_stores.sql`:** Limpieza y simplificación de configuración tributaria en tiendas.
-6. **`V6__set_default_currency_and_normalize_phones.sql`:** Moneda por defecto `PEN` y normalización de teléfonos de contacto.
-7. **`V7__strengthen_relational_integrity_and_multitenancy.sql`:** Índices únicos parciales para roles globales (`store_id IS NULL`) y contextuales (`store_id IS NOT NULL`).
-8. **`V8__seed_store_categories_and_branding.sql`:** Catálogo de rubros comerciales y soporte de branding de tiendas.
-9. **`V10__fix_user_roles_id_default_and_store_sync.sql`:** Soporte de `DEFAULT gen_random_uuid()` para claves surrogate en `user_roles`.
-10. **`V11__refine_store_ownership.sql`:** Fortalecimiento de la propiedad de tiendas (`owner_user_id` NOT NULL con FK `ON DELETE RESTRICT`).
-11. **`V12__migrate_store_customers_to_user_roles_and_check_scope.sql`:** Unificación de clientes de tienda dentro de `user_roles` (`CUSTOMER` contextual), eliminación segura de `store_customers` y validación estricta de alcance vía `CHECK (ck_user_roles_role_scope)`.
-12. **`V13__strengthen_inventory_reservations_multitenancy.sql`:** Aislamiento multitenant de reservas de inventario (`store_id` obligatorio, FK compuesta `(capacity_reservation_id, store_id)` y clave candidata en `capacity_reservations`).
-13. **`V14__prevent_capacity_slot_overlaps.sql`:** Extensión `btree_gist` y restricción de exclusión física `EXCLUDE USING gist` para evitar solapamientos de franjas horarias de capacidad activas.
-
-Para verificar el estado de las migraciones sin levantar el servidor:
-```bash
-./mvnw flyway:info
+```text
+psql -h 127.0.0.1 -p 5432 -U postgres -d jaldishop_dev
 ```
 
-### Seed Reproducible para Desarrollo y Pruebas E2E
-
-Para sembrar un conjunto coherente, determinista y seguro de datos para demostración y validación end-to-end, se dispone del script reproducible [`seed-e2e.sh`](./seed-e2e.sh) y su archivo SQL canónico [`seed_e2e_demo_data.sql`](./src/main/resources/db/seed/seed_e2e_demo_data.sql).
-
-**Características del Seed E2E:**
-- **Idempotente y Seguro:** Emplea cláusulas `ON CONFLICT DO UPDATE / NOTHING` con UUIDs deterministas. Rechaza ejecución automática fuera de `localhost` o `127.0.0.1`.
-- **Cero Secretos Reales:** Mocks locales exclusivamente; no contiene credenciales reales ni activa cobros externos.
-- **Entidades sembradas:**
-  - Usuarios: Cliente (`cliente.demo@jaldishop.com`), Comerciante (`merchant.demo@jaldishop.com`), Admin (`admin.demo@jaldishop.com`) con password común `Password123!`.
-  - Tienda y Catálogo: Tienda `dulce-deleite` (Pastelería Dulce Deleite) con horarios, configuración de capacidad (10 cupos/franja), categorías y productos con variantes (`Torta de Chocolate Artesanal`, `Cheesecake de Frutos Rojos`, etc.) e inventarios sincronizados.
-  - Libreta de Direcciones: Direcciones con códigos UBIGEO oficiales de Lima (`150122`, `150119`).
-  - Carrito, Reservas y Pagos: Reservas de capacidad e inventario, pagos simulados (`APPROVED`, `REFUNDED`) e historial de auditoría de órdenes (`JAL-2026-000001`, `JAL-2026-000002`).
-
-**Ejecución:**
-```bash
-# Parámetros explícitos obligatorios (restringido a bases de datos locales de prueba autorizadas)
-DB_HOST=127.0.0.1 DB_PORT=5434 DB_NAME=jaldishop_test DB_USER=test_user PGPASSWORD=test_pass ./seed-e2e.sh
-# o alternativamente con DB_URL:
-DB_URL="jdbc:postgresql://127.0.0.1:5434/jaldishop_test" DB_USERNAME=test_user DB_PASSWORD=test_pass ./seed-e2e.sh
+```sql
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
 ```
 
-### Núcleo Transaccional & Pruebas de Concurrencia
-El checkout integra de forma atómica:
-* **Capacidad + Inventario en un Hold Atómico:** Bloqueos pesimistas `PESSIMISTIC_WRITE` (`FOR UPDATE`) sobre `capacity_configurations` e `inventories` con orden canónico determinista por variante para evitar deadlocks.
-* **Suite de pruebas de concurrencia:** Verificada en [`CheckoutHoldConcurrencyIntegrationTest`](src/test/java/com/jaldishop/backend/checkout/application/CheckoutHoldConcurrencyIntegrationTest.java), con bootstrap automático de Flyway para CI y limpieza (`teardown`) garantizada antes y después de su ejecución.
+La aplicación no necesita ejecutarse con el superusuario `postgres`.
 
----
+### Opción B: Docker, si ya está disponible
 
-## 5. Compilación y Ejecución del Servidor
+El mismo comando funciona en PowerShell y Bash. Crea un contenedor y volumen
+nuevos exclusivos para desarrollo; comprobar que esos nombres no estén en uso:
 
-### En Windows (PowerShell / CMD):
+```text
+docker run --name jaldishop-dev-db -e POSTGRES_DB=jaldishop_dev -e POSTGRES_USER=jaldishop -e POSTGRES_PASSWORD=solo_desarrollo_local -p 127.0.0.1:5433:5432 -v jaldishop-dev-data:/var/lib/postgresql/data -d postgres:16
+```
+
+En siguientes sesiones basta con:
+
+```text
+docker start jaldishop-dev-db
+```
+
+Esta alternativa usa la cuenta inicial de una instancia aislada. La contraseña
+mostrada es pública y solo sirve como ejemplo local. No publicar el puerto en la red.
+Cambiarla tanto en la base como en `.env` si se elige otra contraseña.
+
+## 3. Crear `.env` e iniciar
+
+La copia es **solo para un clon nuevo sin `.env`**. Si ya existe, conservarlo y
+revisar manualmente sus valores: no sobrescribirlo ni asumir que apunta a localhost.
+El archivo es privado y está ignorado por Git.
+
+### Windows PowerShell
+
+Desde la raíz del repositorio:
+
 ```powershell
-# Compilar y ejecutar pruebas unitarias
-.\mvnw.cmd clean test
-
-# Iniciar la aplicación
+cd backend
+java -version
+if (-not (Test-Path .env)) { Copy-Item .env.template .env }
+notepad .env
+.\mvnw.cmd --version
 .\mvnw.cmd spring-boot:run
 ```
 
-### En Linux / macOS:
-```bash
-# Compilar y ejecutar pruebas
-./mvnw clean test
+### Linux
 
-# Iniciar la aplicación
+Desde la raíz del repositorio:
+
+```bash
+cd backend
+java -version
+if [ ! -e .env ]; then cp .env.template .env; fi
+nano .env
+./mvnw --version
 ./mvnw spring-boot:run
 ```
 
-El servidor estará escuchando en `http://localhost:8080`.
+Revisar DB_URL, DB_USERNAME y DB_PASSWORD. Reemplazar JWT_SECRET por un secreto
+aleatorio propio; JwtService usa sus bytes UTF-8 y necesita al menos 32 bytes.
+Recomendamos 64 caracteres hexadecimales. Generarlo con:
 
----
+PowerShell:
 
-## 6. Verificación de Salud del API
+```powershell
+([guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N'))
+```
 
-Ejecuta en tu terminal o navegador:
+Linux:
+
 ```bash
-curl -X GET http://localhost:8080/api/v1/health
+od -An -N32 -tx1 /dev/urandom | tr -d ' \n'
 ```
 
-**Respuesta esperada (HTTP 200 OK):**
-```json
-{
-  "status": "UP",
-  "timestamp": "2026-09-23T09:30:00Z"
-}
+Pegar el resultado en JWT_SECRET. La clave de la plantilla es un ejemplo público
+que permite iniciar localmente, no un secreto para compartir sesiones.
+La duración JWT ya está fijada en el código de configuración a una hora; no hace
+falta inventar otra variable para autenticación.
+
+Usar líneas simples `CLAVE=valor`, sin `export` ni comillas; el archivo también se
+importa como Java properties. Para contraseñas locales evitar barras inversas y
+escapes que puedan interpretarse de forma diferente por ambos lectores.
+`BackendApplication` carga `.env`; las variables ya definidas en el proceso tienen
+prioridad sobre los valores dotenv. Revisar/eliminar de la terminal cualquier
+configuración heredada de base, proveedor o perfil antes de iniciar.
+No activar `SPRING_PROFILES_ACTIVE=qa`.
+
+La API escucha en `http://127.0.0.1:8080`; comprobar
+`http://127.0.0.1:8080/actuator/health`. Detener con Ctrl+C.
+Para acceder a los frontends locales desde el navegador, usar `localhost`, que está
+permitido en CORS. El backend requiere PostgreSQL activo antes de iniciar.
+
+## 4. Migraciones
+
+Flyway aplica automáticamente los **25 scripts existentes hasta V26** al iniciar.
+No hay V9 en el árbol actual; no renumerar ni crear una migración para llenar el hueco.
+Se conserva `ddl-auto=none`: Hibernate no crea ni actualiza el esquema.
+La plantilla activa validación de checksums. Ante un error de checksum, investigar
+la diferencia; no editar migraciones aplicadas ni usar `repair` para ocultarla.
+Las migraciones incluyen datos iniciales, pero no todos los fixtures de Bruno/E2E.
+No ejecutar seeds adicionales para el arranque normal.
+
+## 5. Pruebas opcionales
+
+Para compilar sin ejecutar pruebas:
+
+```text
+# PowerShell
+.\mvnw.cmd -DskipTests compile
+# Linux
+./mvnw -DskipTests compile
 ```
 
----
+Estas unitarias focalizadas no requieren JDBC ni servicios externos:
 
-## 7. Pruebas con Colección Postman
+```powershell
+.\mvnw.cmd "-Dtest=LocalDevelopmentConfigurationTest,CustomerAddressTest,CreateCustomerAddressServiceTest,UpdateCustomerAddressServiceTest,TestPostgresConfigTest" test
+```
 
-1. Importa en Postman o Bruno los 2 archivos unificados:
-   - [`postman/jaldishop.postman_collection.json`](../postman/jaldishop.postman_collection.json)
-   - [`postman/jaldishop.postman_environment.json`](../postman/jaldishop.postman_environment.json)
-2. La colección incluye scripts automáticos para almacenar el JWT al hacer login:
-   - `01. Identity > Register Merchant` -> Crea comerciante y tienda.
-   - `02. Identity > Auth > Iniciar Sesión — Merchant` -> Auto-captura el `authToken` en el entorno.
-   - Carpetas completas de `Stores`, `Catalog`, `Capacity`, `Cart`, `Checkout`, `Ordering` y `Notifications`.
+```bash
+./mvnw '-Dtest=LocalDevelopmentConfigurationTest,CustomerAddressTest,CreateCustomerAddressServiceTest,UpdateCustomerAddressServiceTest,TestPostgresConfigTest' test
+```
 
-Consulta la guía detallada en [`postman/README.md`](../postman/README.md).
+Es un subconjunto, no toda la suite. **`mvn test` y `verify` también ejecutan
+integraciones**, incluidas pruebas con fixtures destructivos; no usarlos como
+sinónimo de unitarias.
+Las integraciones generales necesitan variables del proceso (no basta `.env`):
+DB_URL hacia `jaldishop_integration_test`, PHASE2A_DB_URL hacia
+`jaldishop_fase2a_test`, DB_USERNAME y DB_PASSWORD. Ambas bases deben ser locales,
+separadas de desarrollo y creadas expresamente para pruebas.
+Se conserva `TestPostgresConfig` para impedir conexiones a otras bases.
 
----
+Tres integraciones crean clústeres temporales con `initdb` y `postgres` mediante
+ADDRESS_TEST_PG_BIN, STORE_CUSTOMERS_TEST_PG_BIN y STORE_SEARCH_TEST_PG_BIN.
+Sin esas variables se omiten; su ejecución en Windows no está verificada.
+El runner manual `SingleAttemptIsolatedReconciliationTest` usa configuración de
+sandbox y requiere revisión independiente: no forma parte del desarrollo habitual.
+No se ha eliminado ni habilitado automáticamente ninguna integración de negocio.
 
-## 8. Criterios de Evaluación y Seguridad
+Si Mockito no puede adjuntarse a la JVM en un entorno restringido, eso es una
+limitación de ese entorno; no requiere incorporar rutas personales de javaagent
+al flujo del equipo. Usar un JDK 21 completo y revisar el mensaje del fallo.
 
-* **Normalización (3FN):** Estricta segregación de entidades, claves foráneas indexadas y snapshots históricos inmutables en pedidos (`orders`).
-* **Seguridad de Passwords:** Hasheadas con algoritmo **BCrypt** de 10 rondas antes de persistirse.
-* **Validación de Inputs:** Integración con **Jakarta Validation** (`@NotBlank`, `@NotNull`, `@Min`, `@Pattern`, `@Size`) y manejador centralizado `GlobalExceptionHandler`.
-* **Control de Acceso:** Filtro `JwtAuthenticationFilter` sin estado con verificación de roles en cada endpoint (`@PreAuthorize` / `SecurityFilterChain`).
+## 6. Funciones externas opcionales
+
+- **Mercado Pago:** token y secreto webhook vacíos son válidos para iniciar.
+  La plantilla dirige el cliente a loopback y desactiva conciliación y reembolsos
+  automáticos. Crear/consultar pagos y reembolsar requiere credenciales y no estará
+  disponible con esta configuración. No existe un interruptor general ficticio
+  `MERCADOPAGO_ENABLED`; no se están simulando cobros exitosos.
+- **Cloudinary:** `demo` permite construir el bean. Subida y borrado de imágenes
+  necesitan credenciales válidas y no deben invocarse con este entorno local.
+- **Bruno/Postman:** se conservan las colecciones funcionales. Seleccionar un entorno
+  local, configurar tokens/IDs privados y preparar los fixtures específicos por
+  separado. No ejecutar colecciones contra una base compartida sin revisar sus escrituras.
+
+## 7. Retiro de QA extraordinario
+
+El arranque usa Maven Wrapper y `.env`. Se retiraron el componente `shared/config/qa`,
+sus pruebas exclusivas, `application-qa.properties`, los SQL `db/qa`, los ejemplos de
+allowlist y los dos lanzadores antiguos. Las colecciones de negocio bajo `qa/` siguen
+[disponibles](qa/README.md). Los informes de auditoría existentes son históricos y no
+son instrucciones vigentes para desarrollar.
+
+El candidato aislado y su respaldo externo se conservan. En su directorio padre,
+`plan-fedora-podman/`, `pg16-local/` y `fedora-it-*` quedan identificados como artefactos
+para limpieza posterior; no son dependencias del proyecto. No ejecutar sus scripts
+de preparación o limpieza como parte de este flujo.

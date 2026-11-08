@@ -17,7 +17,7 @@ concurrency:
 jobs:
   backend-ci:
     name: Backend CI (Spring Boot / Maven)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
@@ -50,6 +50,15 @@ jobs:
           cache: 'maven'
           cache-dependency-path: backend/pom.xml
 
+      - name: Install PostgreSQL 16 binaries and extensions for integration tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends postgresql-16 postgresql-contrib
+          /usr/lib/postgresql/16/bin/postgres --version
+          test -x /usr/lib/postgresql/16/bin/initdb
+          test -r /usr/share/postgresql/16/extension/btree_gist.control
+          test -r /usr/share/postgresql/16/extension/unaccent.control
+
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
@@ -64,6 +73,9 @@ jobs:
         env:
           DB_URL: jdbc:postgresql://127.0.0.1:5432/jaldishop_integration_test
           PHASE2A_DB_URL: jdbc:postgresql://127.0.0.1:5432/jaldishop_fase2a_test
+          ADDRESS_TEST_PG_BIN: /usr/lib/postgresql/16/bin
+          STORE_CUSTOMERS_TEST_PG_BIN: /usr/lib/postgresql/16/bin
+          STORE_SEARCH_TEST_PG_BIN: /usr/lib/postgresql/16/bin
           SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "0"
           SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "10000"
           DB_USERNAME: postgres
