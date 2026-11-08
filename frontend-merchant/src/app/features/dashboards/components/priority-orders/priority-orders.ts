@@ -42,6 +42,27 @@ export class PriorityOrders implements OnInit {
   readonly selectedOrder = signal<DashboardPriorityOrder | null>(null);
   readonly isDrawerOpen = signal<boolean>(false);
 
+  readonly isDrawerUpdating = computed(() =>
+    this.selectedOrder() ? this.orderService.isUpdating(this.selectedOrder()!.id) : false,
+  );
+  readonly isDrawerPendingVerification = computed(() =>
+    this.selectedOrder()
+      ? this.orderService.isPendingVerification(this.selectedOrder()!.id)
+      : false,
+  );
+
+  isOrderUpdating(orderId: string): boolean {
+    return this.orderService.isUpdating(orderId);
+  }
+
+  isOrderPendingVerification(orderId: string): boolean {
+    return this.orderService.isPendingVerification(orderId);
+  }
+
+  onVerifyStatus(order: DashboardPriorityOrder): void {
+    this.orderService.verifyOrderStatus(order.id).subscribe();
+  }
+
   readonly orders = computed<DashboardPriorityOrder[]>(() => {
     return this.orderService
       .orders()
@@ -67,11 +88,7 @@ export class PriorityOrders implements OnInit {
   }
 
   onStatusChange(event: { order: DashboardPriorityOrder; newStatus: OrderStatus }): void {
-    this.orderService.updateOrderStatus(event.order.id, event.newStatus);
-
-    if (this.selectedOrder()?.id === event.order.id) {
-      this.selectedOrder.update((o) => (o ? { ...o, status: event.newStatus } : null));
-    }
+    this.orderService.updateOrderStatus(event.order.id, event.newStatus).subscribe();
   }
 
   onMarkAsReady(order: DashboardPriorityOrder, event?: Event): void {

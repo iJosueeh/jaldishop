@@ -102,7 +102,7 @@ class StoreCustomerPostgresIntegrationTest {
     void materializesTimestamptzAsInstantThroughHibernateAndSpringData() {
         var factory = context.getBean(jakarta.persistence.EntityManagerFactory.class);
         try (var em = factory.createEntityManager()) {
-            Object[] raw = (Object[]) em.createNativeQuery("SELECT created_at, (SELECT MAX(confirmed_at) FROM orders WHERE store_id = :store) FROM users WHERE id = :id")
+            Object[] raw = (Object[]) em.createNativeQuery("SELECT created_at, (SELECT MAX(confirmed_at) FROM orders WHERE store_id = :store AND user_id = :id) FROM users WHERE id = :id")
                     .setParameter("store", storeA).setParameter("id", customer).getSingleResult();
             assertThat(raw[0]).isInstanceOf(Instant.class).isEqualTo(Instant.parse("2026-09-01T10:00:00.123456Z"));
             assertThat(raw[1]).isInstanceOf(Instant.class).isEqualTo(Instant.parse("2026-09-15T15:30:00.654321Z"));

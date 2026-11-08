@@ -14,6 +14,7 @@ import {
   matLocationOnOutline,
   matPersonOutline,
   matContentCopyOutline,
+  matTwoWheelerOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -31,6 +32,7 @@ import {
       matLocationOnOutline,
       matPersonOutline,
       matContentCopyOutline,
+      matTwoWheelerOutline,
     }),
   ],
   selector: 'app-order-details-drawer',
@@ -42,10 +44,15 @@ export class OrderDetailsDrawer {
 
   readonly order = input<DashboardPriorityOrder | null>(null);
   readonly isOpen = input<boolean>(false);
+  readonly isLoading = input<boolean>(false);
+  readonly errorMessage = input<string | null>(null);
+  readonly isUpdating = input<boolean>(false);
+  readonly isPendingVerification = input<boolean>(false);
 
   readonly closeDrawer = output<void>();
   readonly statusChange = output<{ order: DashboardPriorityOrder; newStatus: OrderStatus }>();
   readonly notifyCustomer = output<DashboardPriorityOrder>();
+  readonly verifyStatus = output<DashboardPriorityOrder>();
 
   readonly isClosing = signal<boolean>(false);
 
@@ -92,19 +99,24 @@ export class OrderDetailsDrawer {
   });
 
   onAdvanceStatus(): void {
+    if (this.isUpdating() || this.isPendingVerification()) return;
     const currentOrder = this.order();
     if (!currentOrder) return;
 
-    let nextStatus: OrderStatus = 'IN_PREPARATION';
+    let nextStatus: OrderStatus | null = null;
     if (currentOrder.status === 'CONFIRMED') {
       nextStatus = 'IN_PREPARATION';
     } else if (currentOrder.status === 'IN_PREPARATION') {
       nextStatus = 'READY';
     } else if (currentOrder.status === 'READY') {
+      nextStatus = currentOrder.deliveryMode === 'DELIVERY' ? 'OUT_FOR_DELIVERY' : 'COMPLETED';
+    } else if (currentOrder.status === 'OUT_FOR_DELIVERY') {
       nextStatus = 'COMPLETED';
     }
 
-    this.statusChange.emit({ order: currentOrder, newStatus: nextStatus });
+    if (nextStatus) {
+      this.statusChange.emit({ order: currentOrder, newStatus: nextStatus });
+    }
   }
 
   openWhatsApp(): void {

@@ -7,7 +7,7 @@
   />
 
   <!-- 2. Alerta / Banner Consolidado Unificado (solo si hay órdenes activas) -->
-  @if (orderService.totalOrdersCount() > 0) {
+  @if (orderService.totalElements() > 0) {
     <app-orders-alert-banner
       [urgentOrder]="urgentOrder()"
       [readyCount]="orderService.readyCount()"
@@ -28,11 +28,11 @@
   <!-- 4. Filtros Unificados y Búsqueda Compacta -->
   <app-orders-filter-bar
     [activeTab]="activeTab()"
-    [totalCount]="orderService.totalOrdersCount()"
-    [confirmedCount]="orderService.confirmedCount()"
-    [inPrepCount]="orderService.inPrepCount()"
-    [readyCount]="orderService.readyCount()"
-    [completedCount]="orderService.completedCount()"
+    [totalCount]="activeTab() === 'ALL' ? orderService.totalElements() : '—'"
+    [confirmedCount]="activeTab() === 'CONFIRMED' ? orderService.totalElements() : '—'"
+    [inPrepCount]="activeTab() === 'IN_PREPARATION' ? orderService.totalElements() : '—'"
+    [readyCount]="activeTab() === 'READY' ? orderService.totalElements() : '—'"
+    [completedCount]="activeTab() === 'COMPLETED' ? orderService.totalElements() : '—'"
     [searchQuery]="orderService.searchQuery()"
     [selectedChannel]="orderService.channelFilter()"
     (tabChange)="onTabChange($event)"
@@ -46,19 +46,23 @@
     [isLoading]="orderService.isLoading()"
     [isEmptyOrders]="orderService.isEmptyOrders()"
     [isFilterEmpty]="orderService.isFilterEmpty()"
+    [isSearchEmpty]="orderService.isSearchEmpty()"
+    [updatingOrderIds]="orderService.updatingOrderIds()"
+    [pendingVerificationOrderIds]="orderService.pendingVerificationOrderIds()"
     (statusAdvance)="onStatusAdvance($event)"
     (whatsAppClick)="onWhatsAppClick($event)"
     (openDetails)="onOpenDetails($event)"
+    (verifyStatus)="onVerifyStatus($event)"
     (resetFilter)="onTabChange('ALL')"
     (createNewOrder)="onNewOrder()"
   />
 
-  <!-- 6. Paginación / Resumen de Turno -->
-  @if (!orderService.isLoading() && orders().length > pageSize()) {
+  <!-- 6. Paginación del Servidor / Resumen de Turno -->
+  @if (!orderService.isLoading() && orderService.totalElements() > orderService.pageSize()) {
     <app-pagination
-      [currentPage]="currentPage()"
-      [totalItems]="orders().length"
-      [pageSize]="pageSize()"
+      [currentPage]="currentPageUI()"
+      [totalItems]="orderService.totalElements()"
+      [pageSize]="orderService.pageSize()"
       itemLabel="pedidos del turno"
       (pageChange)="onPageChange($event)"
     />
@@ -68,7 +72,12 @@
   <app-order-details-drawer
     [isOpen]="orderService.isDrawerOpen()"
     [order]="drawerOrder()"
+    [isLoading]="orderService.isDetailLoading()"
+    [errorMessage]="orderService.detailError()"
+    [isUpdating]="orderService.isUpdating(drawerOrder()?.id ?? '')"
+    [isPendingVerification]="orderService.isPendingVerification(drawerOrder()?.id ?? '')"
     (closeDrawer)="onCloseDrawer()"
     (statusChange)="onDrawerStatusChange($event)"
+    (verifyStatus)="onVerifyStatus($event)"
   />
 </div>

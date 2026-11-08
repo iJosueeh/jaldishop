@@ -126,5 +126,97 @@ describe('OrderDetailsDrawer', () => {
 
     expect(spy).toHaveBeenCalled();
   });
+
+  it('no debe renderizar la etiqueta de canal cuando channelLabel es indefinido', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', {
+      ...mockOrder,
+      channel: undefined,
+      channelLabel: undefined,
+      channelIcon: undefined,
+    });
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).not.toContain('Canal:');
+  });
+
+  it('debe mostrar estado de carga cuando isLoading es true y order es null', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', null);
+    fixture.componentRef.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Cargando detalle del pedido...');
+  });
+
+  it('debe mostrar mensaje de error cuando errorMessage está presente', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', null);
+    fixture.componentRef.setInput('errorMessage', 'Pedido no encontrado en esta tienda');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Pedido no encontrado en esta tienda');
+  });
+
+  it('debe avanzar a OUT_FOR_DELIVERY cuando READY es DELIVERY', () => {
+    fixture.componentRef.setInput('order', { ...mockOrder, status: 'READY', deliveryMode: 'DELIVERY' });
+    fixture.detectChanges();
+
+    let emitted: any = null;
+    component.statusChange.subscribe((res) => {
+      emitted = res;
+    });
+
+    component.onAdvanceStatus();
+    expect(emitted?.newStatus).toBe('OUT_FOR_DELIVERY');
+  });
+
+  it('debe avanzar a COMPLETED cuando READY es PICKUP', () => {
+    fixture.componentRef.setInput('order', { ...mockOrder, status: 'READY', deliveryMode: 'PICKUP' });
+    fixture.detectChanges();
+
+    let emitted: any = null;
+    component.statusChange.subscribe((res) => {
+      emitted = res;
+    });
+
+    component.onAdvanceStatus();
+    expect(emitted?.newStatus).toBe('COMPLETED');
+  });
+
+  it('debe deshabilitar botones de acción cuando isUpdating es true', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', mockOrder);
+    fixture.componentRef.setInput('isUpdating', true);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('aside button[disabled]') as HTMLButtonElement;
+    expect(button).toBeTruthy();
+    expect(button.disabled).toBe(true);
+  });
+
+  it('debe mostrar banner de verificación pendiente y emitir verifyStatus al hacer clic', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', mockOrder);
+    fixture.componentRef.setInput('isPendingVerification', true);
+    fixture.detectChanges();
+
+    let emitted: DashboardPriorityOrder | null = null;
+    component.verifyStatus.subscribe((order) => {
+      emitted = order;
+    });
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Estado pendiente de verificación con el servidor');
+
+    const verifyBtn = compiled.querySelector('aside button.bg-amber-600') as HTMLButtonElement;
+    expect(verifyBtn).toBeTruthy();
+    verifyBtn.click();
+
+    expect(emitted).toEqual(mockOrder);
+  });
 });
 

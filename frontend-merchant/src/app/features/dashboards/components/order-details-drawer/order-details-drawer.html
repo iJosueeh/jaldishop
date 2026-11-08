@@ -1,4 +1,4 @@
-@if (isOpen() && order()) {
+@if (isOpen() && (order() || isLoading() || errorMessage())) {
   <!-- Backdrop oscuro con desenfoque suave -->
   <div
     (click)="handleClose()"
@@ -41,9 +41,11 @@
               <ng-icon name="matContentCopyOutline" class="text-[14px]" />
             </button>
           </div>
-          <span class="text-xs text-stone-500 font-medium">
-            Canal: {{ order()?.channelLabel }}
-          </span>
+          @if (order()?.channelLabel) {
+            <span class="text-xs text-stone-500 font-medium">
+              Canal: {{ order()?.channelLabel }}
+            </span>
+          }
         </div>
       </div>
 
@@ -59,6 +61,20 @@
 
     <!-- Contenido con Scroll Independiente -->
     <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 bg-[#faf7f2]/30">
+      @if (errorMessage()) {
+        <div class="p-8 text-center flex flex-col items-center justify-center gap-3 my-8">
+          <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+            <ng-icon name="matCloseOutline" class="text-2xl" />
+          </div>
+          <h3 class="text-sm font-bold text-stone-900">No se pudo cargar el pedido</h3>
+          <p class="text-xs text-rose-700 font-medium max-w-xs">{{ errorMessage() }}</p>
+        </div>
+      } @else if (isLoading() && !order()) {
+        <div class="p-8 flex flex-col items-center justify-center gap-3 text-stone-500 py-20 animate-pulse">
+          <div class="w-8 h-8 border-2 border-[#005141] border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs font-semibold">Cargando detalle del pedido...</span>
+        </div>
+      } @else if (order()) {
       <!-- Badge de Estado del Pedido -->
       <div
         class="p-4 rounded-2xl bg-white border border-[#e7e0d6] shadow-2xs flex items-center justify-between"
@@ -248,40 +264,115 @@
           </div>
         }
       </div>
+      }
     </div>
 
     <!-- Pie de Acciones Operativas -->
-    <div
-      class="p-4 sm:p-5 border-t border-[#e7e0d6] bg-[#faf7f2]/80 backdrop-blur-xs flex flex-col sm:flex-row items-center gap-2.5 shrink-0"
-    >
-      @if (order()?.status === 'CONFIRMED') {
-        <button
-          type="button"
-          (click)="onAdvanceStatus()"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-        >
-          <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
-          <span>Comenzar Preparación</span>
-        </button>
-      } @else if (order()?.status === 'IN_PREPARATION') {
-        <button
-          type="button"
-          (click)="onAdvanceStatus()"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-        >
-          <ng-icon name="matDoneAllOutline" class="text-[18px]" />
-          <span>Marcar como Listo</span>
-        </button>
-      } @else if (order()?.status === 'READY') {
-        <button
-          type="button"
-          (click)="notifyCustomer.emit(order()!)"
-          class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-        >
-          <ng-icon name="matSendOutline" class="text-[18px]" />
-          <span>Avisar al Cliente (Listo)</span>
-        </button>
-      }
-    </div>
+    @if (order()) {
+      <div
+        class="p-4 sm:p-5 border-t border-[#e7e0d6] bg-[#faf7f2]/80 backdrop-blur-xs flex flex-col sm:flex-row items-center gap-2.5 shrink-0"
+      >
+        @if (isPendingVerification()) {
+          <div
+            class="w-full flex items-center justify-between gap-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-800 text-xs"
+          >
+            <span class="font-medium">Estado pendiente de verificación con el servidor.</span>
+            <button
+              type="button"
+              (click)="verifyStatus.emit(order()!)"
+              class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold cursor-pointer transition-colors active:scale-95 shrink-0"
+            >
+              Verificar
+            </button>
+          </div>
+        } @else if (order()?.status === 'CONFIRMED') {
+          <button
+            type="button"
+            [disabled]="isUpdating() || isPendingVerification()"
+            (click)="onAdvanceStatus()"
+            class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (isUpdating()) {
+              <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Actualizando...</span>
+            } @else {
+              <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
+              <span>Comenzar Preparación</span>
+            }
+          </button>
+        } @else if (order()?.status === 'IN_PREPARATION') {
+          <button
+            type="button"
+            [disabled]="isUpdating() || isPendingVerification()"
+            (click)="onAdvanceStatus()"
+            class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (isUpdating()) {
+              <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Actualizando...</span>
+            } @else {
+              <ng-icon name="matDoneAllOutline" class="text-[18px]" />
+              <span>Marcar como Listo</span>
+            }
+          </button>
+        } @else if (order()?.status === 'READY') {
+          @if (order()?.deliveryMode === 'DELIVERY') {
+            <button
+              type="button"
+              [disabled]="isUpdating() || isPendingVerification()"
+              (click)="onAdvanceStatus()"
+              class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (isUpdating()) {
+                <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Actualizando...</span>
+              } @else {
+                <ng-icon name="matTwoWheelerOutline" class="text-[18px]" />
+                <span>Despachar Pedido</span>
+              }
+            </button>
+          } @else {
+            <button
+              type="button"
+              [disabled]="isUpdating() || isPendingVerification()"
+              (click)="onAdvanceStatus()"
+              class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (isUpdating()) {
+                <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Actualizando...</span>
+              } @else {
+                <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
+                <span>Entregar Pedido</span>
+              }
+            </button>
+          }
+          <button
+            type="button"
+            (click)="notifyCustomer.emit(order()!)"
+            class="w-full sm:w-auto min-h-[44px] py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 shrink-0"
+            title="Avisar por WhatsApp"
+          >
+            <ng-icon name="matSendOutline" class="text-[18px]" />
+            <span>Avisar</span>
+          </button>
+        } @else if (order()?.status === 'OUT_FOR_DELIVERY') {
+          <button
+            type="button"
+            [disabled]="isUpdating() || isPendingVerification()"
+            (click)="onAdvanceStatus()"
+            class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#005141] hover:bg-[#003d31] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (isUpdating()) {
+              <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Actualizando...</span>
+            } @else {
+              <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
+              <span>Marcar como Entregado</span>
+            }
+          </button>
+        }
+      </div>
+    }
   </aside>
 }

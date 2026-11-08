@@ -103,10 +103,15 @@
             </span>
             <button
               type="button"
+              [disabled]="isOrderUpdating(order.id) || isOrderPendingVerification(order.id)"
               (click)="onMarkAsReady(order, $event)"
-              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#005141] text-white hover:bg-[#003d31] transition-all text-xs font-bold shadow-2xs cursor-pointer active:scale-98 shadow-emerald-950/20"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#005141] text-white hover:bg-[#003d31] transition-all text-xs font-bold shadow-2xs cursor-pointer active:scale-98 shadow-emerald-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+              @if (isOrderUpdating(order.id)) {
+                <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              } @else {
+                <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+              }
               <span>Listo</span>
             </button>
           } @else if (order.status === 'READY') {
@@ -165,9 +170,12 @@
   <app-order-details-drawer
     [order]="selectedOrder()"
     [isOpen]="isDrawerOpen()"
+    [isUpdating]="isDrawerUpdating()"
+    [isPendingVerification]="isDrawerPendingVerification()"
     (closeDrawer)="closeDrawer()"
     (statusChange)="onStatusChange($event)"
     (notifyCustomer)="onNotifyCustomer($event)"
+    (verifyStatus)="onVerifyStatus($event)"
   />
 </div>
 

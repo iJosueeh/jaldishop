@@ -28,10 +28,14 @@ export class OrdersGrid {
   isLoading = input<boolean>(false);
   isEmptyOrders = input<boolean>(false);
   isFilterEmpty = input<boolean>(false);
+  isSearchEmpty = input<boolean>(false);
+  updatingOrderIds = input<Set<string>>(new Set<string>());
+  pendingVerificationOrderIds = input<Set<string>>(new Set<string>());
 
   statusAdvance = output<MerchantOrder>();
   whatsAppClick = output<MerchantOrder>();
   openDetails = output<MerchantOrder>();
+  verifyStatus = output<MerchantOrder>();
   resetFilter = output<void>();
   createNewOrder = output<void>();
 }
