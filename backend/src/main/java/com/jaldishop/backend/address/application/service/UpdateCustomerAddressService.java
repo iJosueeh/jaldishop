@@ -51,6 +51,14 @@ public class UpdateCustomerAddressService {
             );
         }
 
+        // Permite editar metadatos de duplicados históricos sin crear una nueva colisión.
+        if (!address.hasSameLocation(request.ubigeoCode(), request.streetAddress())
+                && addressRepository.findByUserId(userId).stream()
+                .filter(existing -> !existing.getId().equals(addressId))
+                .anyMatch(existing -> existing.hasSameLocation(request.ubigeoCode(), request.streetAddress()))) {
+            throw new BusinessRuleException("ADDRESS_ALREADY_EXISTS", "Ya tienes guardada esta dirección.");
+        }
+
         long count = addressRepository.countByUserId(userId);
 
         // Si es la única dirección, debe permanecer como predeterminada

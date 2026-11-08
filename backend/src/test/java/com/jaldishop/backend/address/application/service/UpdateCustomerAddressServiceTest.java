@@ -88,4 +88,35 @@ class UpdateCustomerAddressServiceTest {
 
         verify(addressRepository, never()).save(any(CustomerAddress.class));
     }
+
+    @Test
+    void shouldRejectMovingToAnotherSavedLocationWithoutSideEffects() {
+        var other = CustomerAddress.create(userId, "Oficina", "Juan", "987654321",
+                "Av. Larco 123", "Lima", "Lima", "Miraflores", "150122", null, null, null, false);
+        var request = new UpdateCustomerAddressRequest("Casa", "Juan", "987654321", " AV.  LARCO 123 ",
+                "Lima", "Lima", "Miraflores", "150122", null, null, null, true);
+        when(addressRepository.findByIdAndUserId(addressId, userId)).thenReturn(Optional.of(existingAddress));
+        when(addressRepository.findByUserId(userId)).thenReturn(java.util.List.of(existingAddress, other));
+        when(ubigeoCatalogService.isValidHierarchy("150122", "Lima", "Lima", "Miraflores")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.execute(userId, addressId, request))
+                .isInstanceOfSatisfying(com.jaldishop.backend.shared.exception.BusinessRuleException.class,
+                        ex -> assertThat(ex.getCode()).isEqualTo("ADDRESS_ALREADY_EXISTS"));
+        assertThat(existingAddress.getStreetAddress()).isEqualTo("Av. Pardo 100");
+        verify(addressRepository, never()).save(any());
+        verify(addressRepository, never()).clearDefaultForUser(any());
+    }
+
+    @Test
+    void shouldAllowSameLocationWithHistoricalDuplicates() {
+        var request = new UpdateCustomerAddressRequest("Nuevo alias", "Ana", "912345678", " AV.  PARDO 100 ",
+                "Lima", "Lima", "Miraflores", "150122", "Nueva referencia", null, null, true);
+        when(addressRepository.findByIdAndUserId(addressId, userId)).thenReturn(Optional.of(existingAddress));
+        when(ubigeoCatalogService.isValidHierarchy("150122", "Lima", "Lima", "Miraflores")).thenReturn(true);
+        when(addressRepository.countByUserId(userId)).thenReturn(2L);
+        when(addressRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        assertThat(service.execute(userId, addressId, request).alias()).isEqualTo("Nuevo alias");
+        verify(addressRepository, never()).findByUserId(any());
+    }
 }

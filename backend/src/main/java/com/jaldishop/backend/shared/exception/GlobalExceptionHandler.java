@@ -81,7 +81,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiError> handleBusinessRule(BusinessRuleException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(
+        HttpStatus status = "ADDRESS_ALREADY_EXISTS".equals(ex.getCode())
+                ? HttpStatus.CONFLICT : HttpStatus.UNPROCESSABLE_CONTENT;
+        return ResponseEntity.status(status).body(
                 new ApiError(ex.getCode(), ex.getMessage())
         );
     }
