@@ -1,0 +1,24 @@
+meta {
+  name: Aislamiento B
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=Carlos
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantBToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Solo pedidos de B", function () {
+    const rows = res.getBody(); expect(rows).to.have.length(1);
+    expect(rows[0].ordersCount).to.equal(1); expect(rows[0].totalSpentAmount).to.equal(900);
+    expect(rows[0].lastOrderAt).to.equal("2026-10-01T10:00:00Z");
+  });
+}

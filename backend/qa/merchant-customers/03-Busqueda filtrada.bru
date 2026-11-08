@@ -1,0 +1,20 @@
+meta {
+  name: Busqueda filtrada
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=%20%20CARLOS%20%20
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cliente con pedidos", function () { expect(res.getBody().map(c => c.userId)).to.deep.equal([bru.getEnvVar("customerWithOrdersId")]); });
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Ignora tienda ajena
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?storeId={{storeBId}}&query=Foreign
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Tienda procede del principal", function () { expect(res.getBody()).to.deep.equal([]); });
+}

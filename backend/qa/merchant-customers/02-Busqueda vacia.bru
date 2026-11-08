@@ -1,0 +1,20 @@
+meta {
+  name: Busqueda vacia
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Lista completa", function () { expect(res.getBody()).to.have.length(2); });
+}

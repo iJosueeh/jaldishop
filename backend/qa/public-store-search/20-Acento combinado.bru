@@ -1,0 +1,18 @@
+meta {
+  name: Acento combinado
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=Pasteleri%CC%81a&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Coincidencias exactas; estados ocultos excluidos", function () {
+    expect(res.getBody().map(s => s.slug).sort()).to.deep.equal(["dulce-deleite", "pasteleria-delicia"]);
+  });
+}

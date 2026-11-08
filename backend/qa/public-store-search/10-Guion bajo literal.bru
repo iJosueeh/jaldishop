@@ -1,0 +1,18 @@
+meta {
+  name: Guion bajo literal
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=_&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Coincidencias exactas; estados ocultos excluidos", function () {
+    expect(res.getBody().map(s => s.slug).sort()).to.deep.equal(["guion-bajo"]);
+  });
+}
