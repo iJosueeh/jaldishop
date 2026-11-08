@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.sql.SQLException;
@@ -115,7 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
         String message = String.format("El método HTTP '%s' no está soportado para esta ruta", ex.getMethod());
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).headers(ex.getHeaders()).body(
                 new ApiError(SharedErrorCodes.METHOD_NOT_ALLOWED, message)
         );
     }
@@ -137,6 +138,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiError> handleNoResourceFound(NoResourceFoundException ex) {
         String message = String.format("El recurso solicitado '%s' no fue encontrado", ex.getResourcePath());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ApiError(SharedErrorCodes.RESOURCE_NOT_FOUND, message)
+        );
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiError> handleNoHandlerFound(NoHandlerFoundException ex) {
+        String message = String.format("El recurso solicitado '%s' no fue encontrado", ex.getRequestURL());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 new ApiError(SharedErrorCodes.RESOURCE_NOT_FOUND, message)
         );
