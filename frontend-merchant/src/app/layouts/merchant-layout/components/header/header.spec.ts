@@ -46,4 +46,9 @@ describe('Header', () => {
     component.toggleSidebar.emit();
     expect(toggleSpy).toHaveBeenCalled();
   });
+
+  it('debe incluir el componente del centro de notificaciones', () => {
+    const notifCenterEl = fixture.nativeElement.querySelector('app-notification-center');
+    expect(notifCenterEl).toBeTruthy();
+  });
 });

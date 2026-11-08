@@ -157,6 +157,7 @@ class GlobalExceptionHandlerTest {
     void shouldReturn405MethodNotAllowed() throws Exception {
         mockMvc.perform(post("/test/handler/only-get"))
                 .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", org.hamcrest.Matchers.containsString("GET")))
                 .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
                 .andExpect(jsonPath("$.message").value("El método HTTP 'POST' no está soportado para esta ruta"))
                 .andExpect(jsonPath("$.errors").value(nullValue()));
@@ -180,6 +181,16 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("El recurso solicitado 'api/v1/no-existe' no fue encontrado"))
                 .andExpect(jsonPath("$.errors").value(nullValue()));
+    }
+
+    @Test
+    void shouldReturn404WhenNoHandlerMatches() throws Exception {
+        mockMvc.perform(get("/test/handler/does-not-exist"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("El recurso solicitado '/test/handler/does-not-exist' no fue encontrado"))
+                .andExpect(jsonPath("$.errors").value(nullValue()))
+                .andExpect(jsonPath("$.trace").doesNotExist());
     }
 
     @Test

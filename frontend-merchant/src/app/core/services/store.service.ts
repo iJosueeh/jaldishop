@@ -9,10 +9,12 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
+import { StompService } from './stomp.service';
 
 @Service()
 export class StoreService {
   private readonly http = inject(HttpClient);
+  private readonly stompService = inject(StompService);
   private readonly baseUrl = `${environment.apiUrl}/stores`;
   private readonly categoriesUrl = `${environment.apiUrl}/store-categories`;
 
@@ -125,5 +127,6 @@ export class StoreService {
   clearStore(): void {
     this.currentStore.set(null);
     this.isLoaded.set(false);
+    this.stompService.unsubscribe();
   }
 }

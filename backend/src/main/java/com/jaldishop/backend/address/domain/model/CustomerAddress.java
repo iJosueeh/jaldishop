@@ -2,6 +2,7 @@ package com.jaldishop.backend.address.domain.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -69,6 +70,16 @@ public class CustomerAddress {
                 now,
                 now
         );
+    }
+
+    /** Interior/departamento debe formar parte de streetAddress; no se interpretan abreviaturas. */
+    public boolean hasSameLocation(String ubigeoCode, String streetAddress) {
+        return this.ubigeoCode.equals(ubigeoCode.trim())
+                && normalizeStreet(this.streetAddress).equals(normalizeStreet(streetAddress));
+    }
+
+    private static String normalizeStreet(String streetAddress) {
+        return streetAddress.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
     public void update(String alias, String recipientName, String recipientPhone,

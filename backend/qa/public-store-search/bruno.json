@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Busqueda publica de tiendas (solo desechable)",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

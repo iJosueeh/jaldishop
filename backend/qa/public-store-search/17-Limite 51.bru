@@ -1,0 +1,16 @@
+meta {
+  name: Limite 51
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=pasteleria&limit=51
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 400", function () { expect(res.getStatus()).to.equal(400); });
+  test("Error de validacion", function () { expect(res.getBody().code).to.equal("VALIDATION_ERROR"); });
+}

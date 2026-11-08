@@ -2,9 +2,13 @@ package com.jaldishop.backend.identity.infrastructure.security;
 
 import com.jaldishop.backend.shared.exception.RestAccessDeniedHandler;
 import com.jaldishop.backend.shared.exception.RestAuthenticationEntryPoint;
+import com.jaldishop.backend.shared.exception.ApiError;
+import com.jaldishop.backend.shared.exception.SharedErrorCodes;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +37,16 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
+    }
+
+    @Bean
+    public RequestRejectedHandler requestRejectedHandler(ObjectMapper objectMapper) {
+        return (request, response, exception) -> {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(response.getOutputStream(),
+                    new ApiError(SharedErrorCodes.INVALID_PARAMETER, "Parámetros de consulta o ruta no válidos"));
+        };
     }
 
     @Bean

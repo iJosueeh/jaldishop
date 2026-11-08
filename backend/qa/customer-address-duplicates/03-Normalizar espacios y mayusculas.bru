@@ -1,0 +1,41 @@
+meta {
+  name: Normalizar espacios y mayusculas
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "alias": "Otro alias",
+    "recipientName": "Ana",
+    "recipientPhone": "912345678",
+    "streetAddress": "  AV.  LARCO 123 DPTO. 201  ",
+    "department": "Lima",
+    "province": "Lima",
+    "district": "Miraflores",
+    "ubigeoCode": "150122",
+    "reference": "Otra referencia",
+    "latitude": null,
+    "longitude": null,
+    "isDefault": false
+  }
+}
+
+tests {
+  test("HTTP 409", function () { expect(res.getStatus()).to.equal(409); });
+  test("Código de conflicto", function () { expect(res.getBody().code).to.equal("ADDRESS_ALREADY_EXISTS"); });
+}

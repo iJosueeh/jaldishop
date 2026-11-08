@@ -10,21 +10,23 @@
         </span>
 
         <!-- Badge de Canal -->
-        <span
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-container/10 text-primary-container font-bold text-[10px] uppercase tracking-wider"
-        >
-          <ng-icon
-            [name]="
-              order().channel === 'WHATSAPP'
-                ? 'matChatOutline'
-                : order().channel === 'COUNTER'
-                  ? 'matStorefrontOutline'
-                  : 'matPhotoCameraOutline'
-            "
-            class="text-[12px]"
-          />
-          {{ order().channelLabel }}
-        </span>
+        @if (order().channelLabel) {
+          <span
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-container/10 text-primary-container font-bold text-[10px] uppercase tracking-wider"
+          >
+            <ng-icon
+              [name]="
+                order().channel === 'WHATSAPP'
+                  ? 'matChatOutline'
+                  : order().channel === 'COUNTER'
+                    ? 'matStorefrontOutline'
+                    : 'matPhotoCameraOutline'
+              "
+              class="text-[12px]"
+            />
+            {{ order().channelLabel }}
+          </span>
+        }
 
         <!-- Badge de Horario o Urgencia -->
         @if (order().isUrgent) {
@@ -136,12 +138,14 @@
       <span class="text-base font-extrabold text-on-surface tracking-tight">
         S/ {{ order().totalAmount.toFixed(2) }}
       </span>
-      <span
-        class="inline-flex items-center text-primary-container text-[11px] font-bold gap-0.5 ml-1"
-      >
-        <ng-icon name="matVerifiedOutline" class="text-[13px]" />
-        {{ order().paymentLabel || order().paymentMethod }}
-      </span>
+      @if (order().paymentLabel || order().paymentMethod) {
+        <span
+          class="inline-flex items-center text-primary-container text-[11px] font-bold gap-0.5 ml-1"
+        >
+          <ng-icon name="matVerifiedOutline" class="text-[13px]" />
+          {{ order().paymentLabel || order().paymentMethod }}
+        </span>
+      }
     </div>
 
     <!-- Acciones rápidas -->
@@ -166,16 +170,31 @@
         <ng-icon name="matReceiptOutline" class="text-[16px] text-on-surface-variant" />
       </button>
 
-      <!-- Botón de Avance de Estado -->
-      @if (order().status !== 'COMPLETED' && order().status !== 'CANCELLED') {
+      <!-- Botón de Avance de Estado o Verificación Pendiente -->
+      @if (isPendingVerification()) {
         <button
           type="button"
-          (click)="statusAdvance.emit(order())"
-          class="flex items-center gap-1 px-3 h-8 rounded-xl bg-primary-container text-white text-xs font-bold hover:bg-primary transition-colors cursor-pointer active:scale-95 shadow-2xs"
-          [title]="'Avanzar estado a ' + getNextActionLabel(order().status)"
+          (click)="verifyStatus.emit(order())"
+          class="flex items-center gap-1 px-3 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/25 transition-colors cursor-pointer active:scale-95 shadow-2xs"
+          title="Verificación pendiente con el servidor. Haga clic para verificar el estado real"
         >
-          <ng-icon [name]="getNextActionIcon(order().status)" class="text-[16px]" />
-          <span>{{ getNextActionLabel(order().status) }}</span>
+          <ng-icon name="matPendingOutline" class="text-[16px]" />
+          <span>Verificar</span>
+        </button>
+      } @else if (order().status !== 'COMPLETED' && order().status !== 'CANCELLED') {
+        <button
+          type="button"
+          [disabled]="isUpdating()"
+          (click)="statusAdvance.emit(order())"
+          class="flex items-center gap-1 px-3 h-8 rounded-xl bg-primary-container text-white text-xs font-bold hover:bg-primary transition-colors cursor-pointer active:scale-95 shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+          [title]="'Avanzar estado a ' + getNextActionLabel(order().status, order().deliveryMode)"
+        >
+          @if (isUpdating()) {
+            <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          } @else {
+            <ng-icon [name]="getNextActionIcon(order().status, order().deliveryMode)" class="text-[16px]" />
+          }
+          <span>{{ getNextActionLabel(order().status, order().deliveryMode) }}</span>
         </button>
       }
     </div>

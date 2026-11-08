@@ -84,4 +84,42 @@ describe('OrdersGrid', () => {
 
     expect(resetSpy).toHaveBeenCalled();
   });
+
+  it('debe mostrar mensaje correspondiente cuando isSearchEmpty es true', () => {
+    componentRef.setInput('orders', []);
+    componentRef.setInput('isSearchEmpty', true);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Sin coincidencias en esta página');
+    expect(compiled.textContent).toContain('No hay pedidos en la página actual que coincidan con la búsqueda');
+  });
+
+  it('debe mostrar mensaje de no hay pedidos registrados cuando isEmptyOrders es true', () => {
+    componentRef.setInput('orders', []);
+    componentRef.setInput('isEmptyOrders', true);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('No hay pedidos registrados');
+  });
+
+  it('debe mostrar mensaje de sin pedidos en este filtro cuando isFilterEmpty es true', () => {
+    componentRef.setInput('orders', []);
+    componentRef.setInput('isFilterEmpty', true);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Sin pedidos en este filtro');
+  });
+
+  it('debe propagar updatingOrderIds a las tarjetas de pedidos', () => {
+    componentRef.setInput('orders', [mockOrder]);
+    componentRef.setInput('updatingOrderIds', new Set([mockOrder.id]));
+    fixture.detectChanges();
+
+    const advanceBtn = fixture.nativeElement.querySelector('app-orders-card button[disabled]') as HTMLButtonElement;
+    expect(advanceBtn).toBeTruthy();
+    expect(advanceBtn.disabled).toBe(true);
+  });
 });

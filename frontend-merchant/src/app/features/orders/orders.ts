@@ -1,6 +1,8 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { OrderService } from '../../core/services/order.service';
 import { CapacityService } from '../../core/services/capacity.service';
+import { StoreService } from '../../core/services/store.service';
+import { StompService } from '../../core/services/stomp.service';
 import { ToastService } from '../../core/services/toast.service';
 import { MerchantOrder, OrderFilterTab, OrderStatus } from '../../core/models/order.models';
 import { OrdersHeader } from './components/orders-header/orders-header';
@@ -28,23 +30,26 @@ import { OrderDetailsDrawer } from '../dashboards/components/order-details-drawe
 export class Orders implements OnInit {
   readonly orderService = inject(OrderService);
   readonly capacityService = inject(CapacityService);
+  readonly storeService = inject(StoreService);
+  readonly stompService = inject(StompService);
   private readonly toastService = inject(ToastService);
 
   readonly orders = computed(() => this.orderService.filteredOrders());
   readonly activeTab = computed(() => this.orderService.activeTab());
   readonly urgentOrder = computed(() => this.orderService.urgentOrder());
 
-  readonly currentPage = signal<number>(1);
-  readonly pageSize = signal<number>(10);
+  readonly currentPageUI = computed(() => this.orderService.currentPage() + 1);
+  readonly currentPage = computed(() => this.currentPageUI());
+  readonly pageSize = computed(() => this.orderService.pageSize());
 
-  readonly paginatedOrders = computed(() => {
-    const all = this.orders();
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return all.slice(start, start + this.pageSize());
-  });
+  // Eliminada segunda paginación mediante slice(): el backend provee la página exacta
+  readonly paginatedOrders = computed(() => this.orders());
 
-  // Adaptador para el Drawer existente
+  // Adaptador para el Drawer existente (soporta detalle cargado o fallback del resumen)
   readonly drawerOrder = computed(() => {
+    const detail = this.orderService.selectedOrderDetail();
+    if (detail) return detail;
+
     const selected = this.orderService.selectedOrder();
     if (!selected) return null;
     return {
@@ -60,7 +65,7 @@ export class Orders implements OnInit {
       deliveryMode: selected.deliveryMode,
       deliveryAddress: selected.deliveryAddress,
       deliveryReference: selected.deliveryReference,
-      scheduledTime: selected.scheduledTime || '16:00:00',
+      scheduledTime: selected.scheduledTime || '00:00',
       deliveryTimeLabel: selected.deliveryTimeLabel,
       isUrgent: selected.isUrgent,
       status: selected.status,
@@ -77,38 +82,60 @@ export class Orders implements OnInit {
   });
 
   ngOnInit(): void {
-    this.orderService.loadOrders().subscribe();
+    const store = this.storeService.currentStore();
+    if (store?.id) {
+      this.stompService.connect(store.id);
+      this.orderService
+        .loadOrders(0, this.pageSize(), this.activeTab(), store.id)
+        .subscribe();
+    } else {
+      this.storeService.getMyStore().subscribe({
+        next: (s) => {
+          if (s?.id) {
+            this.stompService.connect(s.id);
+            this.orderService
+              .loadOrders(0, this.pageSize(), this.activeTab(), s.id)
+              .subscribe();
+          }
+        },
+      });
+    }
+  }
+
+  onVerifyStatus(order: { id: string }): void {
+    this.orderService.verifyOrderStatus(order.id).subscribe();
   }
 
   onTabChange(tab: OrderFilterTab): void {
     this.orderService.setActiveTab(tab);
-    this.currentPage.set(1);
   }
 
   onSearchChange(query: string): void {
     this.orderService.setSearchQuery(query);
-    this.currentPage.set(1);
   }
 
   onChannelChange(channel: string): void {
     this.orderService.setChannelFilter(channel);
-    this.currentPage.set(1);
   }
 
   onPageChange(page: number): void {
-    this.currentPage.set(page);
+    this.orderService.setPage(page - 1);
   }
 
   onStatusAdvance(order: MerchantOrder): void {
-    const nextStatusMap: Partial<Record<OrderStatus, OrderStatus>> = {
-      CONFIRMED: 'IN_PREPARATION',
-      IN_PREPARATION: 'READY',
-      READY: 'COMPLETED',
-    };
+    let nextStatus: OrderStatus | null = null;
+    if (order.status === 'CONFIRMED') {
+      nextStatus = 'IN_PREPARATION';
+    } else if (order.status === 'IN_PREPARATION') {
+      nextStatus = 'READY';
+    } else if (order.status === 'READY') {
+      nextStatus = order.deliveryMode === 'DELIVERY' ? 'OUT_FOR_DELIVERY' : 'COMPLETED';
+    } else if (order.status === 'OUT_FOR_DELIVERY') {
+      nextStatus = 'COMPLETED';
+    }
 
-    const next = nextStatusMap[order.status];
-    if (next) {
-      this.orderService.updateOrderStatus(order.id, next);
+    if (nextStatus) {
+      this.orderService.updateOrderStatus(order.id, nextStatus).subscribe();
     }
   }
 
@@ -125,7 +152,7 @@ export class Orders implements OnInit {
   }
 
   onDrawerStatusChange(event: { order: any; newStatus: OrderStatus }): void {
-    this.orderService.updateOrderStatus(event.order.id, event.newStatus);
+    this.orderService.updateOrderStatus(event.order.id, event.newStatus).subscribe();
   }
 
   onNewOrder(): void {

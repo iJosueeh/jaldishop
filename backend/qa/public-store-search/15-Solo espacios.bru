@@ -1,0 +1,16 @@
+meta {
+  name: Solo espacios
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=+++&limit=50
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cantidad", function () { expect(res.getBody()).to.have.length(7); });
+}

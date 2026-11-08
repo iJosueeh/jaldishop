@@ -3,6 +3,7 @@ import { ProfileService } from '../../../../core/services/profile.service';
 import { OrderService } from '../../../../core/services/order.service';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { NotificationCenter } from '../notification-center/notification-center';
 import {
   matMenuOutline,
   matSearchOutline,
@@ -11,7 +12,7 @@ import {
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [RouterLink, NgIcon],
+  imports: [RouterLink, NgIcon, NotificationCenter],
   providers: [
     provideIcons({
       matMenuOutline,

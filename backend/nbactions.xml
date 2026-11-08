@@ -23,7 +23,7 @@
                 
                 
                 
-                <exec.workingdir>/home/ijosueeh/Documentos/Proyectos/jaldishop/backend</exec.workingdir>
+                <exec.workingdir>${project.basedir}</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -42,7 +42,7 @@
                 <exec.mainClass>com.jaldishop.backend.BackendApplication</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>/home/ijosueeh/Documentos/Proyectos/jaldishop/backend</exec.workingdir>
+                <exec.workingdir>${project.basedir}</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -60,7 +60,7 @@
                 <exec.mainClass>com.jaldishop.backend.BackendApplication</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <exec.appArgs></exec.appArgs>
-                <exec.workingdir>/home/ijosueeh/Documentos/Proyectos/jaldishop/backend</exec.workingdir>
+                <exec.workingdir>${project.basedir}</exec.workingdir>
             </properties>
         </action>
         <action>

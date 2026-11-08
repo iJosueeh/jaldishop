@@ -58,6 +58,8 @@ flowchart LR
 
 ---
 
+El arranque local del backend está en [backend/README.md](backend/README.md): Java 21, Maven Wrapper, PostgreSQL 16 y `.env`.
+
 ## 🛠️ Stack Tecnológico
 
 | Capa | Tecnologías | Propósito |

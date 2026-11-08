@@ -1,0 +1,16 @@
+meta {
+  name: Sin q
+  type: http
+  seq: 19
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cantidad", function () { expect(res.getBody()).to.have.length(5); });
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Aislamiento A
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=Foreign
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantAToken}}
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cliente exclusivo de B excluido", function () { expect(res.getBody()).to.deep.equal([]); });
+}

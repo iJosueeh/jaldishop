@@ -1,0 +1,18 @@
+meta {
+  name: Descripcion excluida
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=busquedasecreta&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("HTTP 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Coincidencias exactas; estados ocultos excluidos", function () {
+    expect(res.getBody().map(s => s.slug).sort()).to.deep.equal([]);
+  });
+}

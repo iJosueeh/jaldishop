@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Customer Address duplicados (solo desechable)",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

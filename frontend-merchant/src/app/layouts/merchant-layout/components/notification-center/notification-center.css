@@ -1,0 +1,4 @@
+/* notification-center styles */
+:host {
+  display: inline-block;
+}

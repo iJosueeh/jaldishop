@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
+                "server.address=127.0.0.1",
                 "logging.level.org.springframework.messaging=TRACE",
                 "logging.level.org.springframework.web.socket=TRACE"
         })

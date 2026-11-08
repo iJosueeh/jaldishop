@@ -1,0 +1,28 @@
+362e903 fix(backend): harden payment reconciliation and tenant authorization
+ae89fef test: isolate capacity fixtures in checkout E2E
+3eb736f test: stabilize payment E2E and PostgreSQL CI connections
+c53c74c Merge remote-tracking branch 'origin/feature/mercadopago-orders-api' into feature/mercadopago-orders-api
+568bf13 fix(ci): align PostgreSQL test database with integration guard
+db1433d Merge branch 'main' into feature/mercadopago-orders-api
+6021dc2 docs(payment): record Mercado Pago Orders API verification
+446d3a8 feat(payment): emit attempt-scoped orders references
+1320dab test(payment): prepare attempt-scoped order references
+0171504 feat(payment): support attempt-scoped reference reading
+98bb62b feat(payment): harden orders webhook correlation and concurrency
+1c57e68 feat(payment): add safe manual order investigation and concurrency tests
+6ed4e41 feat(payment): track remote order creation states and evidence
+af9dc63 feat(payment): persist checkout requests and strengthen Mercado Pago integration tests
+efd5b0b feat(payment): add versioned external payment reference parser
+fee7934 feat(payments): improve Mercado Pago Orders integration and reconciliation
+9460128 feat(payment): complete orders api refunds and reconciliation
+74ba12b feat(payment): implement Mercado Pago Orders API integration
+4fbfc6b Merge pull request #75 from iJosueeh/feature/BE-13-inventory-module
+be043ff test(inventory): cover concurrent stock adjustments with reserve commit and restock
+92aa017 fix(inventory): synchronize JPA persistence context on native upsert and add real concurrency integration tests
+15bceac feat(inventory): implement merchant stock management and low-stock alerts
+9483b1e Merge pull request #74 from iJosueeh/test/backend-e2e-validation-seed
+a3a4e24 Merge branch 'main' into test/backend-e2e-validation-seed
+59e6edb feat(ordering): implement order cancellation with transactional compensation and safe scheduling
+3b769cc Merge pull request #73 from iJosueeh/test/backend-e2e-validation-seed
+e5e6874 fix(seed): resolve duplicate review conflict and harden e2e seed script
+147ef5a test(backend): validate E2E flows and refresh development seed

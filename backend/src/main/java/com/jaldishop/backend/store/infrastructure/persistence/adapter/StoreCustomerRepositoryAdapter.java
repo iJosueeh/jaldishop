@@ -42,10 +42,10 @@ public class StoreCustomerRepositoryAdapter implements StoreCustomerRepository {
                         p.getLastName(),
                         p.getEmail(),
                         p.getPhone(),
-                        p.getCustomerSince() != null ? p.getCustomerSince().toInstant() : null,
+                        p.getCustomerSince(),
                         p.getOrdersCount() != null ? p.getOrdersCount() : 0L,
                         p.getTotalSpent() != null ? p.getTotalSpent() : BigDecimal.ZERO,
-                        p.getLastOrderAt() != null ? p.getLastOrderAt().toInstant() : null
+                        p.getLastOrderAt()
                 ))
                 .collect(Collectors.toList());
     }

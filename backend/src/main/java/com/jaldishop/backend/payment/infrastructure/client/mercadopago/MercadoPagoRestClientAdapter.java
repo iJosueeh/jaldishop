@@ -30,6 +30,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.math.BigDecimal;
@@ -513,22 +514,17 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                         "Respuesta incompleta de Mercado Pago al consultar orden: faltan id o status."
                 );
             }
+            if (!orderId.equals(response.id())) throw invalidOrderField("id");
 
             List<OrderQueryResult.OrderPaymentItem> payments = List.of();
             if (response.transactions() != null && response.transactions().payments() != null) {
                 payments = response.transactions().payments().stream()
-                        .filter(p -> p != null && p.id() != null)
-                        .map(p -> new OrderQueryResult.OrderPaymentItem(
-                                String.valueOf(p.id()),
-                                p.status(),
-                                p.statusDetail(),
-                                p.transactionAmount(),
-                                p.currencyId(),
-                                p.paymentMethodId(),
-                                p.paymentTypeId(),
-                                parseIsoInstant(p.dateApproved())
-                        ))
+                        .map(p -> normalizeOrderPayment(response, p))
                         .toList();
+                var identities = new java.util.HashSet<String>();
+                for (var payment : payments) {
+                    if (!identities.add(payment.providerPaymentId())) throw invalidOrderField("payments.id");
+                }
             }
 
             List<OrderQueryResult.OrderRefundItem> refunds = List.of();
@@ -557,7 +553,7 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                     response.externalReference(),
                     payments,
                     refunds,
-                    response.collectorId(),
+                    normalizeOrderCollector(response),
                     response.liveMode(),
                     response.checkoutUrl()
             );
@@ -573,10 +569,69 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
             throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar Mercado Pago", ex);
         } catch (MercadoPagoException ex) {
             throw ex;
+        } catch (RestClientException ex) {
+            // Decoding failures may contain response fragments, so neither log nor attach them.
+            log.error("Respuesta de Orders no interpretable al consultar orden en Mercado Pago");
+            throw invalidOrderField("response");
         } catch (Exception ex) {
-            log.error("Error inesperado al consultar orden en Mercado Pago: {}", ex.getMessage());
-            throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al consultar orden en Mercado Pago", ex);
+            log.error("Error inesperado al consultar orden en Mercado Pago");
+            throw new MercadoPagoException(500, "MP_UNEXPECTED_ERROR", "Error inesperado al consultar orden en Mercado Pago");
         }
+    }
+
+    private OrderQueryResult.OrderPaymentItem normalizeOrderPayment(
+            MpOrderResponse order, MpOrderResponse.MpOrderPayment payment) {
+        if (payment == null) throw invalidOrderField("payments");
+        Object rawId = payment.id();
+        if (!(rawId instanceof String || rawId instanceof Integer || rawId instanceof Long
+                || rawId instanceof java.math.BigInteger)) throw invalidOrderField("payments.id");
+        String id = String.valueOf(rawId);
+        if (id.isBlank() || (rawId instanceof Number && new BigDecimal(id).signum() <= 0))
+            throw invalidOrderField("payments.id");
+        if (payment.status() == null || payment.status().isBlank()) throw invalidOrderField("payments.status");
+        // Same semantic amount under two wire names; never substitute paid_amount or order totals.
+        BigDecimal amount = payment.amount();
+        if (amount != null && payment.transactionAmount() != null
+                && amount.compareTo(payment.transactionAmount()) != 0) throw invalidOrderField("payments.amount");
+        if (amount == null) amount = payment.transactionAmount();
+        if (amount == null || amount.signum() <= 0) throw invalidOrderField("payments.amount");
+        if (payment.paidAmount() != null && payment.paidAmount().signum() < 0)
+            throw invalidOrderField("payments.paid_amount");
+        String currency = compatibleOrderText(order.currency(), payment.currencyId(), "currency", true);
+        if (currency == null) throw invalidOrderField("currency");
+        var method = payment.paymentMethod();
+        return new OrderQueryResult.OrderPaymentItem(id, payment.status(), payment.statusDetail(), amount,
+                currency,
+                compatibleOrderText(method == null ? null : method.id(), payment.paymentMethodId(), "payment_method.id", false),
+                compatibleOrderText(method == null ? null : method.type(), payment.paymentTypeId(), "payment_method.type", false),
+                parseIsoInstant(payment.dateApproved()), payment.paidAmount());
+    }
+
+    private Long normalizeOrderCollector(MpOrderResponse order) {
+        Long seller = null;
+        if (order.userId() != null) {
+            if (!order.userId().matches("[0-9]+")) throw invalidOrderField("user_id");
+            try { seller = Long.valueOf(order.userId()); }
+            catch (NumberFormatException invalid) { throw invalidOrderField("user_id"); }
+            if (seller <= 0) throw invalidOrderField("user_id");
+        }
+        if (order.collectorId() != null && (order.collectorId() <= 0
+                || (seller != null && !seller.equals(order.collectorId())))) throw invalidOrderField("collector_id");
+        return seller != null ? seller : order.collectorId();
+    }
+
+    private String compatibleOrderText(String canonical, String historical, String field, boolean ignoreCase) {
+        if ((canonical != null && canonical.isBlank()) || (historical != null && historical.isBlank()))
+            throw invalidOrderField(field);
+        if (canonical != null && historical != null
+                && !(ignoreCase ? canonical.equalsIgnoreCase(historical) : canonical.equals(historical)))
+            throw invalidOrderField(field);
+        return canonical != null ? canonical : historical;
+    }
+
+    private MercadoPagoException invalidOrderField(String field) {
+        return new MercadoPagoException(200, "MP_INVALID_RESPONSE",
+                "Respuesta de Orders incompleta o contradictoria: " + field);
     }
 
     private void validateAccessToken() {

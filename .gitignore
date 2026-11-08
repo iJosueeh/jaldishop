@@ -21,6 +21,9 @@ target/
 
 ### Env
 .env
+backend/.env.sandbox.local
+backend/.env.sandbox.test
+backend/.env.sandbox.token_fingerprint
 
 ### Node (monorepo root — los subproyectos tienen su propio ignore)
 node_modules/
