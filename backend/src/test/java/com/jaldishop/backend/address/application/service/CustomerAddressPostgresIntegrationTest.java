@@ -8,34 +8,29 @@ import com.jaldishop.backend.address.infrastructure.ubigeo.UbigeoCatalogService;
 import com.jaldishop.backend.address.web.dto.CreateCustomerAddressRequest;
 import com.jaldishop.backend.address.web.dto.UpdateCustomerAddressRequest;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
+import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.annotation.*;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.jpa.*;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tools.jackson.databind.ObjectMapper;
 
 import javax.sql.DataSource;
-import java.net.ServerSocket;
-import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.*;
 
-/** Owns a fresh cluster, never reads application profiles, .env or DB_URL. */
-@EnabledIfEnvironmentVariable(named = "ADDRESS_TEST_PG_BIN", matches = ".+")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CustomerAddressPostgresIntegrationTest {
-    @TempDir static Path temporary;
-    private Process postgres;
+
+    private final String schema = "it_addr_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     private AnnotationConfigApplicationContext context;
     private JdbcTemplate jdbc;
     private CreateCustomerAddressService create;
@@ -43,40 +38,19 @@ class CustomerAddressPostgresIntegrationTest {
     private GetCustomerAddressesService get;
 
     @BeforeAll
-    void startDisposablePostgres() throws Exception {
-        Path bin = Path.of(System.getenv("ADDRESS_TEST_PG_BIN"));
-        Path data = temporary.resolve("data");
-        Path initLog = temporary.resolve("init.log");
-        Process init = new ProcessBuilder(bin.resolve("initdb").toString(), "-D", data.toString(),
-                "-U", "address_test", "-A", "trust", "--no-locale", "--encoding=UTF8")
-                .redirectErrorStream(true).redirectOutput(initLog.toFile()).start();
-        assertThat(init.waitFor(30, TimeUnit.SECONDS)).isTrue();
-        assertThat(init.exitValue()).withFailMessage(Files.readString(initLog)).isZero();
-        int port;
-        try (ServerSocket available = new ServerSocket(0, 0, java.net.InetAddress.getLoopbackAddress())) {
-            port = available.getLocalPort();
-        }
-        Path serverLog = temporary.resolve("postgres.log");
-        postgres = new ProcessBuilder(bin.resolve("postgres").toString(), "-D", data.toString(),
-                "-h", "127.0.0.1", "-p", Integer.toString(port), "-k", temporary.toString())
-                .redirectErrorStream(true).redirectOutput(serverLog.toFile()).start();
-        var ds = new DriverManagerDataSource("jdbc:postgresql://127.0.0.1:" + port + "/postgres", "address_test", "");
+    void startDatabase() {
+        TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+        DriverManagerDataSource adminDs = new DriverManagerDataSource(config.url(), config.username(), config.password());
+        new JdbcTemplate(adminDs).execute("CREATE SCHEMA " + schema);
+
+        String schemaUrl = config.url() + "?currentSchema=" + schema + ",public";
+        DriverManagerDataSource ds = new DriverManagerDataSource(schemaUrl, config.username(), config.password());
         jdbc = new JdbcTemplate(ds);
-        boolean ready = false;
-        for (int attempt = 0; attempt < 100 && postgres.isAlive(); attempt++) {
-            try {
-                jdbc.queryForObject("SELECT 1", Integer.class);
-                ready = true;
-                break;
-            } catch (org.springframework.dao.DataAccessException unavailable) {
-                TimeUnit.MILLISECONDS.sleep(100);
-            }
-        }
-        assertThat(ready).withFailMessage(Files.readString(serverLog)).isTrue();
-        // V15 only requires the user's primary key. No unrelated modules are booted.
+
         jdbc.execute("CREATE TABLE users (id UUID PRIMARY KEY)");
         new ResourceDatabasePopulator(new ClassPathResource(
                 "db/migration/V15__create_customer_addresses_table.sql")).execute(ds);
+
         context = new AnnotationConfigApplicationContext();
         context.registerBean(DataSource.class, () -> ds);
         context.register(Persistence.class, CustomerAddressPersistenceMapper.class,
@@ -85,17 +59,22 @@ class CustomerAddressPostgresIntegrationTest {
                 UbigeoCatalogService.class);
         context.registerBean(ObjectMapper.class, () -> new ObjectMapper());
         context.refresh();
+
         create = context.getBean(CreateCustomerAddressService.class);
         update = context.getBean(UpdateCustomerAddressService.class);
         get = context.getBean(GetCustomerAddressesService.class);
     }
 
     @AfterAll
-    void stopDisposablePostgres() throws Exception {
-        if (context != null) context.close();
-        if (postgres != null) {
-            postgres.destroy();
-            if (!postgres.waitFor(10, TimeUnit.SECONDS)) postgres.destroyForcibly().waitFor();
+    void tearDown() {
+        if (context != null) {
+            context.close();
+        }
+        try {
+            TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+            DriverManagerDataSource adminDs = new DriverManagerDataSource(config.url(), config.username(), config.password());
+            new JdbcTemplate(adminDs).execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
+        } catch (Exception ignored) {
         }
     }
 

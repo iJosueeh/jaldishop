@@ -8,9 +8,8 @@ import com.jaldishop.backend.store.infrastructure.persistence.adapter.StoreRepos
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
 import com.jaldishop.backend.store.infrastructure.persistence.mapper.StorePersistenceMapper;
 import com.jaldishop.backend.store.web.controller.StoreController;
+import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.annotation.*;
@@ -26,69 +25,46 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.net.ServerSocket;
-import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/** Owns a fresh cluster. Never reads .env, application profiles or external DB URLs. */
-@EnabledIfEnvironmentVariable(named = "STORE_SEARCH_TEST_PG_BIN", matches = ".+")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StoreSearchPostgresIntegrationTest {
-    @TempDir static Path temporary;
-    private Process postgres;
+
+    private final String schema = "it_store_srch_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     private AnnotationConfigApplicationContext context;
     private JdbcTemplate jdbc;
     private MockMvc mvc;
 
     @BeforeAll
-    void startDisposablePostgres() throws Exception {
-        Path bin = Path.of(System.getenv("STORE_SEARCH_TEST_PG_BIN"));
-        Path data = temporary.resolve("data");
-        Path initLog = temporary.resolve("init.log");
-        Process init = new ProcessBuilder(bin.resolve("initdb").toString(), "-D", data.toString(),
-                "-U", "store_search_test", "-A", "trust", "--no-locale", "--encoding=UTF8")
-                .redirectErrorStream(true).redirectOutput(initLog.toFile()).start();
-        assertThat(init.waitFor(30, TimeUnit.SECONDS)).isTrue();
-        assertThat(init.exitValue()).withFailMessage(Files.readString(initLog)).isZero();
-        int port;
-        try (ServerSocket available = new ServerSocket(0, 0, java.net.InetAddress.getLoopbackAddress())) {
-            port = available.getLocalPort();
-        }
-        Path serverLog = temporary.resolve("postgres.log");
-        postgres = new ProcessBuilder(bin.resolve("postgres").toString(), "-D", data.toString(),
-                "-h", "127.0.0.1", "-p", Integer.toString(port), "-k", temporary.toString())
-                .redirectErrorStream(true).redirectOutput(serverLog.toFile()).start();
-        var ds = new DriverManagerDataSource("jdbc:postgresql://127.0.0.1:" + port + "/postgres", "store_search_test", "");
+    void setupDatabase() {
+        TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+        DriverManagerDataSource adminDs = new DriverManagerDataSource(config.url(), config.username(), config.password());
+        new JdbcTemplate(adminDs).execute("CREATE SCHEMA " + schema);
+
+        String schemaUrl = config.url() + "?currentSchema=" + schema + ",public";
+        DriverManagerDataSource ds = new DriverManagerDataSource(schemaUrl, config.username(), config.password());
         jdbc = new JdbcTemplate(ds);
-        boolean ready = false;
-        for (int attempt = 0; attempt < 100 && postgres.isAlive(); attempt++) {
-            try {
-                jdbc.queryForObject("SELECT 1", Integer.class);
-                ready = true;
-                break;
-            } catch (org.springframework.dao.DataAccessException unavailable) {
-                TimeUnit.MILLISECONDS.sleep(100);
-            }
-        }
-        assertThat(ready).withFailMessage(Files.readString(serverLog)).isTrue();
+
         context = new AnnotationConfigApplicationContext();
         context.registerBean(DataSource.class, () -> ds);
         context.register(Persistence.class, SearchPublicStoresService.class);
         context.registerBean(StoreRepositoryAdapter.class, () -> new StoreRepositoryAdapter(
                 context.getBean(StoreJpaRepository.class), null, null, new StorePersistenceMapper()));
         context.refresh();
+
         new ResourceDatabasePopulator(new ClassPathResource(
                 "db/migration/V26__enable_unaccent_for_store_search.sql")).execute(ds);
+
         var controller = new StoreController(null, null, null, null,
                 context.getBean(SearchPublicStoresService.class), null);
         mvc = MockMvcBuilders.standaloneSetup(MethodValidationTestSupport.withParameterValidation(controller))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
+
         store("Pastelería Delicia", "pasteleria-delicia", "ACTIVE", 1);
         store("Pastelería Dulce Deleite", "dulce-deleite", "ACTIVE", 2);
         store("Panadería Norte", "pan-del-norte", "ACTIVE", 3);
@@ -102,11 +78,15 @@ class StoreSearchPostgresIntegrationTest {
     }
 
     @AfterAll
-    void stopDisposablePostgres() throws Exception {
-        if (context != null) context.close();
-        if (postgres != null) {
-            postgres.destroy();
-            if (!postgres.waitFor(10, TimeUnit.SECONDS)) postgres.destroyForcibly().waitFor();
+    void tearDown() {
+        if (context != null) {
+            context.close();
+        }
+        try {
+            TestPostgresConfig config = TestPostgresConfig.fromEnvironment();
+            DriverManagerDataSource adminDs = new DriverManagerDataSource(config.url(), config.username(), config.password());
+            new JdbcTemplate(adminDs).execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
+        } catch (Exception ignored) {
         }
     }
 
