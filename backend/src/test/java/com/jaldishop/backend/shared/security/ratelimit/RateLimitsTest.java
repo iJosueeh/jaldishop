@@ -51,7 +51,7 @@ class RateLimitsTest {
     @Test void spoofedForwardingHeadersDoNotChangePeerLimit() throws Exception {
         var limits = new RateLimits(new MockEnvironment().withProperty("app.security.rate-limit.search-ip.limit", "1"));
         var mvc = MockMvcBuilders.standaloneSetup(new Endpoints())
-                .addInterceptors(new RateLimitWebConfiguration(limits).interceptor())
+                .addInterceptors(new RateLimitWebConfiguration(limits, new MockEnvironment()).interceptor())
                 .setControllerAdvice(new LoginRateLimitAdvice(limits)).build();
         mvc.perform(get("/api/v1/stores/search").header("X-Forwarded-For", "1.1.1.1")).andExpect(status().isOk());
         mvc.perform(get("/api/v1/stores/search").header("X-Forwarded-For", "2.2.2.2").header("Forwarded", "for=2.2.2.2"))
@@ -64,7 +64,7 @@ class RateLimitsTest {
     @Test void registrationPathsShareLimitAndLoginHasAdditionalIpLimit() throws Exception {
         var limits = new RateLimits(new MockEnvironment());
         var mvc = MockMvcBuilders.standaloneSetup(new Endpoints())
-                .addInterceptors(new RateLimitWebConfiguration(limits).interceptor())
+                .addInterceptors(new RateLimitWebConfiguration(limits, new MockEnvironment()).interceptor())
                 .setControllerAdvice(new LoginRateLimitAdvice(limits)).build();
         for (int i = 0; i < 3; i++) mvc.perform(post("/api/v1/auth/register")).andExpect(status().isOk());
         mvc.perform(post("/api/v1/auth/register/merchant")).andExpect(status().isTooManyRequests())

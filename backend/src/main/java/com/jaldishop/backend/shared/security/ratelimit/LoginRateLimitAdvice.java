@@ -33,6 +33,12 @@ public class LoginRateLimitAdvice extends RequestBodyAdviceAdapter {
         return body;
     }
 
+    @ExceptionHandler(ClientIpResolver.Unavailable.class)
+    public ResponseEntity<ApiError> ipUnavailable() {
+        return ResponseEntity.status(503).body(new ApiError("CLIENT_IP_UNAVAILABLE",
+                "No se pudo identificar la IP del cliente"));
+    }
+
     @ExceptionHandler(RateLimitExceeded.class)
     public ResponseEntity<ApiError> exceeded(RateLimitExceeded exception) {
         return ResponseEntity.status(429).header("Retry-After", Long.toString(exception.retryAfter()))
