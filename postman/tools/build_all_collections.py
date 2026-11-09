@@ -192,6 +192,13 @@ def walk_collection(items):
             yield it
 
 def extract_case_id(name):
+    # Soporta formatos "M001 | VALIDO | ..." y "... (M001)"
+    m = re.search(r'\(([KMJR]\d{3})\)', name)
+    if m:
+        return m.group(1)
+    m = re.search(r'^([KMJR]\d{3})\b', name)
+    if m:
+        return m.group(1)
     return name.split(' | ')[0].strip()
 
 def build_postman_prerequest(case_id):
@@ -770,8 +777,19 @@ def sanitize_filename(name):
 
 def main():
     source_path = POSTMAN_DIR / 'jaldishop.postman_collection.json'
+    reg_path = POSTMAN_DIR / 'jaldishop.regressions.postman_collection.json'
+    
     col_data = json.loads(source_path.read_text())
-    all_items = {extract_case_id(it['name']): it for it in walk_collection(col_data['item'])}
+    items_to_index = list(walk_collection(col_data['item']))
+    if reg_path.exists():
+        reg_data = json.loads(reg_path.read_text())
+        items_to_index.extend(walk_collection(reg_data['item']))
+
+    all_items = {}
+    for it in items_to_index:
+        cid = extract_case_id(it['name'])
+        if cid not in all_items or 'VALIDO' in it['name']:
+            all_items[cid] = it
 
     # 1. Armar Colección Principal Postman
     main_collection_items = []
@@ -828,9 +846,9 @@ def main():
     negative_items = [it for cid, it in sorted(all_items.items()) if cid not in used_ids]
     print(f"Items principales: {len(used_ids)}, Items negativos restantes: {len(negative_items)}")
 
-    # Variables de entorno unificadas
+    # Variables de entorno completas y unificadas para toda la suite
     all_keys = set()
-    for it in walk_collection(main_collection_items):
+    for it in list(walk_collection(main_collection_items)) + negative_items:
         content = json.dumps(it, ensure_ascii=False)
         all_keys.update(re.findall(r'\{\{(\w+)\}\}', content))
         for ev in it.get('event', []):
@@ -838,11 +856,68 @@ def main():
             all_keys.update(re.findall(r'pm\.environment\.(?:get|set)\(["\x27](\w+)["\x27]', code))
             all_keys.update(re.findall(r'bru\.(?:getEnvVar|setEnvVar)\(["\x27](\w+)["\x27]', code))
 
-    all_keys.add('baseUrl')
-    all_keys.add('allowDestructiveOperations')
-    all_keys.add('customerUserId')
-    all_keys.add('merchantUserId')
-    all_keys.add('cartId')
+    all_keys.update([
+        'baseUrl',
+        'allowDestructiveOperations',
+        'customerUserId',
+        'merchantUserId',
+        'cartId',
+        'runCase',
+        'disposableFixturesReady',
+        'financialFakeReady',
+        'revokedAdminToken',
+        'invalidShortPassword',
+        'existingMerchantEmail',
+        'otherStoreId',
+        'merchantOnlyToken',
+        'otherAddressId',
+        'missingAddressId',
+        'checkoutReferenceId',
+        'paymentId',
+        'preferenceId',
+    ])
+
+    # Valores por defecto para desarrollo local reproducible
+    default_values = {
+        'baseUrl': BASE_URL,
+        'adminEmail': 'admin.demo@jaldishop.com',
+        'adminPassword': 'Password123!',
+        'merchantEmail': 'merchant.demo@jaldishop.com',
+        'merchantPassword': 'Password123!',
+        'customerEmail': 'cliente.demo@jaldishop.com',
+        'customerPassword': 'Password123!',
+        'fixtureEmail': 'nuevo.cliente@example.test',
+        'fixturePassword': 'Password123!',
+        'fixtureFirstName': 'Valeria',
+        'fixtureLastName': 'Ríos',
+        'fixturePhone': '+51965432109',
+        'fixtureAddress': 'Av. José Larco 345',
+        'fixtureAddressReference': 'Frente al Parque Kennedy',
+        'fixtureStreetAddress': 'Av. José Larco 345',
+        'fixtureDeliveryAddress': 'Av. José Larco 345, Dpto 402',
+        'fixtureDeliveryReference': 'Cerca al Parque Kennedy',
+        'fixtureCustomerName': 'Valeria Ríos',
+        'fixtureCustomerPhone': '+51965432109',
+        'fixtureRecipientName': 'Valeria Ríos',
+        'fixtureRecipientPhone': '+51965432109',
+        'fixtureReference': 'Portón verde',
+        'fixtureImageUrl': 'https://images.example.test/producto.jpg',
+        'storeSearchQuery': 'pasteleria',
+        'serviceDate': '2026-11-20',
+        'startTime': '10:00:00',
+        'endTime': '12:00:00',
+        'duplicateStreetAddress': 'Av. José Larco 345',
+        'duplicateUbigeoCode': '150122',
+        'existingStreetAddress': 'Av. José Larco 345',
+        'existingUbigeoCode': '150122',
+        'existingMerchantEmail': 'merchant.demo@jaldishop.com',
+        'newRegistrationEmail': 'nuevo.usuario@example.test',
+        'invalidShortPassword': 'short',
+        'allowDestructiveOperations': 'false',
+        'financialFakeReady': 'false',
+        'disposableFixturesReady': 'true',
+        'runCase': 'R001',
+    }
 
     # Guardar jaldishop.postman_collection.json
     main_col = {
@@ -853,7 +928,7 @@ def main():
                            'Organizada en 8 módulos funcionales. Automatización de tokens por rol y flujos ordenados.'
         },
         'auth': {'type': 'noauth'},
-        'variable': [{'key': k, 'value': BASE_URL if k == 'baseUrl' else '', 'type': 'string'} for k in sorted(all_keys)],
+        'variable': [{'key': k, 'value': default_values.get(k, ''), 'type': 'string'} for k in sorted(all_keys)],
         'item': main_collection_items
     }
     (POSTMAN_DIR / 'jaldishop.postman_collection.json').write_text(json.dumps(main_col, ensure_ascii=False, indent=2) + '\n')
@@ -867,7 +942,7 @@ def main():
             'description': 'Colección secundaria de regresiones, validaciones de campo y casos negativos de JaldiShop API.'
         },
         'auth': {'type': 'noauth'},
-        'variable': [{'key': k, 'value': BASE_URL if k == 'baseUrl' else '', 'type': 'string'} for k in sorted(all_keys)],
+        'variable': [{'key': k, 'value': default_values.get(k, ''), 'type': 'string'} for k in sorted(all_keys)],
         'item': [
             regressions_folder,
             {'name': 'Escenarios Negativos y Validaciones', 'item': negative_items}
@@ -881,15 +956,7 @@ def main():
         'values': [
             {
                 'key': k,
-                'value': BASE_URL if k == 'baseUrl' else (
-                    'pasteleria' if k == 'storeSearchQuery' else (
-                        '2026-11-20' if k == 'serviceDate' else (
-                            '10:00:00' if k == 'startTime' else (
-                                '12:00:00' if k == 'endTime' else ''
-                            )
-                        )
-                    )
-                ),
+                'value': default_values.get(k, ''),
                 'type': 'secret' if re.search(r'token|password|signature', k, re.I) else 'default',
                 'enabled': True
             }
@@ -899,6 +966,23 @@ def main():
     }
     (POSTMAN_DIR / 'jaldishop.local.env.json').write_text(json.dumps(env_data, ensure_ascii=False, indent=2) + '\n')
     (POSTMAN_DIR / 'jaldishop.postman_environment.json').write_text(json.dumps(env_data, ensure_ascii=False, indent=2) + '\n')
+
+    # Guardar jaldishop.render.env.json limpio y sincronizado (sin claves duplicadas ni obsoletas)
+    render_env = {
+        'id': 'f2a3b4c5-d6e7-8f9a-0b1c-2d3e4f5a6b7c',
+        'name': 'JaldiShop Render (Producción)',
+        'values': [
+            {
+                'key': k,
+                'value': 'https://jaldishop-api.onrender.com' if k == 'baseUrl' else '',
+                'type': 'secret' if re.search(r'token|password|signature', k, re.I) else 'default',
+                'enabled': True
+            }
+            for k in sorted(all_keys)
+        ],
+        '_postman_variable_scope': 'environment'
+    }
+    (POSTMAN_DIR / 'jaldishop.render.env.json').write_text(json.dumps(render_env, ensure_ascii=False, indent=2) + '\n')
 
     # 2. Generar colecciones nativas Bruno (.bru)
     target_bruno_main = BRUNO_DIR / 'jaldishop'
@@ -929,8 +1013,19 @@ def main():
     for tdir in [target_bruno_main, target_bruno_exhaustive]:
         env_dir = tdir / 'environments'
         env_dir.mkdir(parents=True, exist_ok=True)
-        env_lines = ['vars {', f'  baseUrl: {BASE_URL}', '  storeSearchQuery: pasteleria', '  serviceDate: 2026-11-20', '  startTime: 10:00:00', '  endTime: 12:00:00', '}', 'vars:secret [', '  customerToken,', '  merchantToken,', '  adminToken,', '  customerPassword,', '  merchantPassword,', '  adminPassword,', '  fixturePassword', ']']
-        (env_dir / 'Local.bru').write_text('\n'.join(env_lines) + '\n')
+        var_lines = ['vars {']
+        for k in sorted(all_keys):
+            if not re.search(r'token|password|signature', k, re.I):
+                val = default_values.get(k, '')
+                var_lines.append(f'  {k}: {val}')
+        var_lines.append('}')
+        var_lines.append('vars:secret [')
+        secret_keys = [k for k in sorted(all_keys) if re.search(r'token|password|signature', k, re.I)]
+        for i, sk in enumerate(secret_keys):
+            comma = ',' if i < len(secret_keys) - 1 else ''
+            var_lines.append(f'  {sk}{comma}')
+        var_lines.append(']')
+        (env_dir / 'Local.bru').write_text('\n'.join(var_lines) + '\n')
 
     # Escribir requests .bru de la colección principal
     for folder_name, contents in FOLDER_MAPPING:

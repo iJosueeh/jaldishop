@@ -15,12 +15,12 @@
     },
     {
       "key": "adminEmail",
-      "value": "",
+      "value": "admin.demo@jaldishop.com",
       "type": "string"
     },
     {
       "key": "adminPassword",
-      "value": "",
+      "value": "Password123!",
       "type": "string"
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "key": "allowDestructiveOperations",
-      "value": "",
+      "value": "false",
       "type": "string"
     },
     {
@@ -64,13 +64,18 @@
       "type": "string"
     },
     {
-      "key": "customerEmail",
+      "key": "checkoutReferenceId",
       "value": "",
       "type": "string"
     },
     {
+      "key": "customerEmail",
+      "value": "cliente.demo@jaldishop.com",
+      "type": "string"
+    },
+    {
       "key": "customerPassword",
-      "value": "",
+      "value": "Password123!",
       "type": "string"
     },
     {
@@ -84,123 +89,143 @@
       "type": "string"
     },
     {
+      "key": "disposableFixturesReady",
+      "value": "true",
+      "type": "string"
+    },
+    {
       "key": "duplicateStreetAddress",
-      "value": "",
+      "value": "Av. José Larco 345",
       "type": "string"
     },
     {
       "key": "duplicateUbigeoCode",
-      "value": "",
+      "value": "150122",
       "type": "string"
     },
     {
       "key": "endTime",
-      "value": "",
+      "value": "12:00:00",
+      "type": "string"
+    },
+    {
+      "key": "existingMerchantEmail",
+      "value": "merchant.demo@jaldishop.com",
       "type": "string"
     },
     {
       "key": "existingStreetAddress",
-      "value": "",
+      "value": "Av. José Larco 345",
       "type": "string"
     },
     {
       "key": "existingUbigeoCode",
-      "value": "",
+      "value": "150122",
       "type": "string"
     },
     {
       "key": "financialFakeReady",
-      "value": "",
+      "value": "false",
       "type": "string"
     },
     {
       "key": "fixtureAddress",
-      "value": "",
+      "value": "Av. José Larco 345",
       "type": "string"
     },
     {
       "key": "fixtureAddressReference",
-      "value": "",
+      "value": "Frente al Parque Kennedy",
       "type": "string"
     },
     {
       "key": "fixtureCustomerName",
-      "value": "",
+      "value": "Valeria Ríos",
       "type": "string"
     },
     {
       "key": "fixtureCustomerPhone",
-      "value": "",
+      "value": "+51965432109",
       "type": "string"
     },
     {
       "key": "fixtureDeliveryAddress",
-      "value": "",
+      "value": "Av. José Larco 345, Dpto 402",
       "type": "string"
     },
     {
       "key": "fixtureDeliveryReference",
-      "value": "",
+      "value": "Cerca al Parque Kennedy",
       "type": "string"
     },
     {
       "key": "fixtureEmail",
-      "value": "",
+      "value": "nuevo.cliente@example.test",
       "type": "string"
     },
     {
       "key": "fixtureFirstName",
-      "value": "",
+      "value": "Valeria",
       "type": "string"
     },
     {
       "key": "fixtureImageUrl",
-      "value": "",
+      "value": "https://images.example.test/producto.jpg",
       "type": "string"
     },
     {
       "key": "fixtureLastName",
-      "value": "",
+      "value": "Ríos",
       "type": "string"
     },
     {
       "key": "fixturePassword",
-      "value": "",
+      "value": "Password123!",
       "type": "string"
     },
     {
       "key": "fixturePhone",
-      "value": "",
+      "value": "+51965432109",
       "type": "string"
     },
     {
       "key": "fixtureRecipientName",
-      "value": "",
+      "value": "Valeria Ríos",
       "type": "string"
     },
     {
       "key": "fixtureRecipientPhone",
-      "value": "",
+      "value": "+51965432109",
       "type": "string"
     },
     {
       "key": "fixtureReference",
-      "value": "",
+      "value": "Portón verde",
       "type": "string"
     },
     {
       "key": "fixtureStreetAddress",
-      "value": "",
+      "value": "Av. José Larco 345",
+      "type": "string"
+    },
+    {
+      "key": "invalidShortPassword",
+      "value": "short",
       "type": "string"
     },
     {
       "key": "merchantEmail",
+      "value": "merchant.demo@jaldishop.com",
+      "type": "string"
+    },
+    {
+      "key": "merchantOnlyToken",
       "value": "",
       "type": "string"
     },
     {
       "key": "merchantPassword",
-      "value": "",
+      "value": "Password123!",
       "type": "string"
     },
     {
@@ -214,8 +239,13 @@
       "type": "string"
     },
     {
-      "key": "newRegistrationEmail",
+      "key": "missingAddressId",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newRegistrationEmail",
+      "value": "nuevo.usuario@example.test",
       "type": "string"
     },
     {
@@ -230,6 +260,26 @@
     },
     {
       "key": "orderNumber",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherAddressId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherStoreId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "preferenceId",
       "value": "",
       "type": "string"
     },
@@ -259,13 +309,23 @@
       "type": "string"
     },
     {
-      "key": "serviceDate",
+      "key": "revokedAdminToken",
       "value": "",
       "type": "string"
     },
     {
+      "key": "runCase",
+      "value": "R001",
+      "type": "string"
+    },
+    {
+      "key": "serviceDate",
+      "value": "2026-11-20",
+      "type": "string"
+    },
+    {
       "key": "startTime",
-      "value": "",
+      "value": "10:00:00",
       "type": "string"
     },
     {
@@ -275,7 +335,7 @@
     },
     {
       "key": "storeSearchQuery",
-      "value": "",
+      "value": "pasteleria",
       "type": "string"
     },
     {
