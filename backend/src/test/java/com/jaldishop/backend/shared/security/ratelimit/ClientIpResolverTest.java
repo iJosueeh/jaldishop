@@ -13,7 +13,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClientIpResolverTest {
     private MockEnvironment render() {
         return new MockEnvironment().withProperty("RENDER", "true")
+                .withProperty("RENDER_EXTERNAL_HOSTNAME", "jaldishop-api.onrender.com")
+                .withProperty("app.security.rate-limit.render-ip-verified", "true");
+    }
+
+    @Test void renderIpModeIsPendingByDefaultAndHeadersCannotEnableIt() throws Exception {
+        var env = new MockEnvironment().withProperty("RENDER", "true")
                 .withProperty("RENDER_EXTERNAL_HOSTNAME", "jaldishop-api.onrender.com");
+        var resolver = new ClientIpResolver(env);
+        assertThat(resolver.enabled()).isFalse();
+        var limits = new RateLimits(env);
+        var mvc = MockMvcBuilders.standaloneSetup(new RateLimitsTest.Endpoints())
+                .addInterceptors(new RateLimitWebConfiguration(limits, env).interceptor())
+                .setControllerAdvice(new LoginRateLimitAdvice(limits)).build();
+        mvc.perform(get("/api/v1/stores/search")).andExpect(status().isOk());
+        for (int i = 0; i < 61; i++) mvc.perform(get("/api/v1/stores/search")
+                .header("RATE_LIMIT_RENDER_IP_VERIFIED", "true").header("CF-Connecting-IP", "192.0.2.1"))
+                .andExpect(status().isOk());
+        for (int i = 0; i < 4; i++) mvc.perform(post("/api/v1/auth/register"))
+                .andExpect(status().isOk());
+        assertThat(limits.size()).isZero();
+        for (int i = 0; i < 5; i++) mvc.perform(post("/api/v1/auth/login").contentType("application/json")
+                .content("{\"email\":\"a@example.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/auth/login").contentType("application/json")
+                .content("{\"email\":\"a@example.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test void localIpPoliciesRemainEnabledAndUnreviewedRenderHostCannotOptIn() {
+        assertThat(new ClientIpResolver(new MockEnvironment()).enabled()).isTrue();
+        assertThatThrownBy(() -> new ClientIpResolver(render().withProperty("RENDER_EXTERNAL_HOSTNAME", "other.onrender.com")))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test void directConnectionsIgnoreAllIpHeadersAndHost() {
@@ -48,7 +79,7 @@ class ClientIpResolverTest {
         assertThatThrownBy(() -> resolver.resolve(request)).isInstanceOf(ClientIpResolver.Unavailable.class);
     }
 
-    @Test void renderUsersShareProxyButNotCountersAndForgedXffCannotEvadeLimit() throws Exception {
+    @Test void optedInParserSeparatesCountersAndIgnoresXffWithoutProvingEdgeAuthenticity() throws Exception {
         var env = render().withProperty("app.security.rate-limit.search-ip.limit", "1");
         var limits = new RateLimits(env);
         var mvc = MockMvcBuilders.standaloneSetup(new RateLimitsTest.Endpoints())
@@ -64,6 +95,9 @@ class ClientIpResolverTest {
                 .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"));
         mvc.perform(get("/api/v1/stores/search")).andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("CLIENT_IP_UNAVAILABLE"));
+        for (String path : new String[]{"/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/register/merchant"})
+            mvc.perform(post(path)).andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.code").value("CLIENT_IP_UNAVAILABLE"));
         mvc.perform(post("/api/v1/checkout/mercado-pago/webhook")).andExpect(status().isOk());
     }
 }

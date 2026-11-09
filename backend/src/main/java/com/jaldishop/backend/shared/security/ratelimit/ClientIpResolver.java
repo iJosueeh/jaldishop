@@ -9,18 +9,26 @@ import org.springframework.core.env.Environment;
 /** Only for the public-only Render Free deployment; re-evaluate before enabling private ingress. */
 final class ClientIpResolver {
     private final boolean render;
+    private final boolean enabled;
 
     ClientIpResolver(Environment environment) {
         // Deployment metadata, never the HTTP Host header or a request-supplied flag.
-        render = "true".equals(environment.getProperty("RENDER"))
-                && "jaldishop-api.onrender.com".equals(environment.getProperty("RENDER_EXTERNAL_HOSTNAME"));
+        render = "true".equals(environment.getProperty("RENDER"));
+        boolean verified = environment.getProperty("app.security.rate-limit.render-ip-verified", Boolean.class, false);
+        enabled = !render || verified;
+        if (render && verified && !"jaldishop-api.onrender.com".equals(environment.getProperty("RENDER_EXTERNAL_HOSTNAME"))) {
+            throw new IllegalStateException("Verified Render IP mode is restricted to the reviewed deployment");
+        }
     }
 
     static final class Unavailable extends RuntimeException {}
 
+    boolean enabled() { return enabled; }
+
     String resolve(HttpServletRequest request) {
+        if (!enabled) throw new IllegalStateException("Render IP verification is pending");
         if (!render) return request.getRemoteAddr();
-        // Render public ingress traverses Cloudflare, which generates CF-Connecting-IP.
+        // Enable only after confirming the complete ingress path and header sanitization.
         // XFF can contain attacker-controlled prefixes and the proxy count is not guaranteed.
         var values = Collections.list(request.getHeaders("CF-Connecting-IP"));
         if (values.size() == 1) {

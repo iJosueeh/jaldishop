@@ -27,6 +27,9 @@ public class RateLimitWebConfiguration implements WebMvcConfigurer {
         return new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+                // Pending verification on Render: do not trust headers or aggregate visitors by proxy.
+                // The separate login-account limit remains active.
+                if (!clientIp.enabled()) return true;
                 String path = request.getRequestURI().substring(request.getContextPath().length());
 
                 if ("POST".equals(request.getMethod())) {

@@ -58,43 +58,93 @@ expiración; no se expulsan contadores activos que permitirían evadir límites.
 Cada instancia tiene estado propio; reinicios, despliegues y cold starts lo
 reinician. Antes de escalar a varias instancias reevaluar almacenamiento compartido.
 
-server.forward-headers-strategy=none mantiene intacta la IP del socket.
-Fuera del despliegue Render identificado por las variables de entorno RENDER=true
-Y RENDER_EXTERNAL_HOSTNAME=jaldishop-api.onrender.com se ignoran todas las
-cabeceras de IP, incluido CF-Connecting-IP. Host y cabeceras HTTP no activan el modo.
+### Identificación de IP: pendiente de habilitación en Render
 
-En ese despliegue Free público se usa exclusivamente CF-Connecting-IP, generado
-por Cloudflare; no se interpreta XFF, Forwarded, True-Client-IP ni X-Real-IP.
-Se valida un único literal IPv4/IPv6 sin DNS, puerto, lista ni zona IPv6 y se
-normaliza para impedir contadores distintos por representaciones de una IP.
-Ausencia, duplicados o formato inválido producen 503 CLIENT_IP_UNAVAILABLE sólo
-en las rutas limitadas: nunca se retorna al contador compartido del proxy.
-Webhook y pagos no invocan el resolver.
+**No está lista para producción.** El commit 0998718 activaba automáticamente
+CF-Connecting-IP basándose en variables Render. Esa detección no autentica una
+cabecera ni demuestra su conservación y saneamiento hasta el contenedor.
 
-Fundamento y frontera de confianza (revisión 2026-11-09):
-- [Render: DDoS](https://render.com/articles/how-render-handles-ddos-attacks)
-  indica que todo ingreso público atraviesa Cloudflare y balanceadores Render.
-  Recomienda XFF pero no documenta saneamiento ni cantidad estable de saltos.
-- [Render Free](https://render.com/docs/free) no permite escalar más allá de una
-  instancia ni recibir conexiones privadas. El usuario confirma Free y ausencia
-  de CDN adicional. No se consultó el dashboard.
-- [Cloudflare: cabeceras](https://developers.cloudflare.com/fundamentals/reference/http-headers/)
-  documenta CF-Connecting-IP como IP del visitante generada hacia el origen;
-  XFF puede conservar prefijos aportados por el cliente.
-- [Render: variables](https://render.com/docs/environment-variables) documenta
-  RENDER y RENDER_EXTERNAL_HOSTNAME, también disponibles con Docker.
+| Cabecera | Contrato documentado | Garantía que falta para JaldiShop |
+|---|---|---|
+| X-Forwarded-For | Render la recomienda. Cloudflare agrega la IP de quien conecta si ya había valores; puede conservar prefijos externos. | Cadena de proxies confiables, tratamiento de duplicados y valores aportados por el cliente; no hay cantidad fija de saltos documentada en las fuentes revisadas. |
+| CF-Connecting-IP | Cloudflare entrega un valor al origen; lo recomienda por su formato de una IP. | Render no garantiza expresamente su conservación y saneamiento hasta el contenedor en las fuentes revisadas. No basta que sea un literal válido. |
 
-La selección de CF-Connecting-IP es una inferencia de esos contratos, no una
-validación del despliegue activo: Render no documenta expresamente la conservación
-de esta cabecera hasta el contenedor. Si la elimina, las rutas protegidas devolverán
-503, sin aceptar una identidad insegura. Antes de desplegar comprobar su entrega
-y saneamiento mediante soporte Render o una verificación controlada de staging.
-No se añadió endpoint de diagnóstico ni se hicieron solicitudes al servicio público.
-Cambiar a plan pagado (con ingreso privado), agregar CDN o cambiar la ruta de
-entrada exige revisar esta frontera antes de desplegar. RENDER no autentica por
-sí solo una solicitud; la seguridad depende del ingreso público exclusivo descrito.
+Fuentes oficiales revisadas el 2026-11-09:
+- [Render: DDoS](https://render.com/articles/how-render-handles-ddos-attacks):
+  todo ingreso público atraviesa Cloudflare y balanceadores Render; recomienda
+  XFF. No describe una política completa de confianza para estas cabeceras.
+- [Render Free](https://render.com/docs/free): una instancia, sin ingreso privado.
+  Reduce rutas de entrada pero no autentica una cabecera HTTP.
+- [Cloudflare: cabeceras](https://developers.cloudflare.com/fundamentals/reference/http-headers/):
+  XFF puede conservar valores previos. CF-Connecting-IP tiene excepciones para
+  Workers: misma zona puede reflejar x-real-ip modificado por un Worker; entre
+  zonas usa una IP de Worker fija. Transformaciones pueden retirar cabeceras y
+  Pseudo IPv4 puede sustituir valores. No asumir conocer la configuración de Render.
+
+No se cambia a XFF ni se toma la primera IP. Una futura resolución XFF requerirá
+identificar al peer confiable y recorrer la cadena desde la derecha, descartando
+sólo proxies explícitamente verificados; no confiar en todas las redes privadas,
+ni fijar un número de saltos por observación de una sola solicitud.
+
+### Comportamiento actual
+
+server.forward-headers-strategy=none se mantiene.
+- Local (RENDER distinto de true): límites por IP activos usando getRemoteAddr,
+  ignorando CF-Connecting-IP, XFF, Forwarded y demás cabeceras de IP.
+- Render (RENDER=true): políticas por IP **inactivas por defecto** mientras la
+  verificación esté pendiente. No hay fallback a la IP del proxy, ni 503 por
+  ausencia de cabecera en este modo. El límite login-account sigue activo.
+  Registro y búsqueda quedan sin rate limiting por IP durante esta espera:
+  es una protección incompleta, no un modo aprobado para producción.
+- RATE_LIMIT_RENDER_IP_VERIFIED=false es el valor inicial, enlazado a
+  app.security.rate-limit.render-ip-verified. Sólo después de verificar la frontera
+  completa se podrá activar explícitamente. Esta marca es una declaración del
+  operador, **no una validación automática**. Una cabecera HTTP no puede activarla.
+- El candidato optativo CF-Connecting-IP se restringe al hostname de despliegue
+  jaldishop-api.onrender.com en la variable de entorno, nunca al HTTP Host.
+  Conserva validación de un único literal y normalización IPv4/IPv6, sin DNS.
+  Las pruebas de este parser no demuestran autenticidad en Render.
+
+Con el candidato activado, cabeceras ausentes, duplicadas o inválidas aún dan
+503 CLIENT_IP_UNAVAILABLE sólo en rutas limitadas. Sí: si Render omite la cabecera
+en todas las solicitudes, inutiliza login, ambos registros, búsqueda y destacados.
+No afecta todas las rutas públicas. El modo pendiente evita ese fallo por defecto.
+No se cambian los valores de límites ni se modifica el flujo de pagos.
+
+### Verificación requerida antes de habilitar
+
+1. Obtener confirmación de Render de la ruta completa hacia el contenedor Free,
+   sin acceso alternativo que permita saltarse el saneamiento, y del contrato
+   de sustitución/conservación de CF-Connecting-IP. Confirmar Workers,
+   transformaciones, duplicados y comportamiento IPv6/Pseudo IPv4. Si Render sólo
+   respalda XFF, obtener su cadena de confianza y implementar esa política antes
+   de habilitar nada; esta marca no selecciona XFF.
+2. En staging controlado del mismo plan/dominio de ingreso, comprobar solicitudes
+   desde dos IP conocidas, sin cabeceras y con CF-Connecting-IP, XFF y Forwarded
+   falsificados, duplicados y combinados. Debe observarse la identidad saneada,
+   independiente de lo enviado por el cliente, y contadores separados por origen.
+   Usar observación temporal sin tokens/contraseñas ni endpoint público permanente;
+   retirar la instrumentación. No son pruebas de carga.
+3. Verificar presencia consistente de la cabecera en solicitudes normales antes
+   de aceptar el comportamiento 503 del modo activado. Si no está garantizada,
+   mantener desactivado y resolver el contrato con Render. Unas pruebas puntuales
+   no sustituyen la garantía de rutas y saneamiento del proveedor.
+4. Registrar evidencia y política elegida; revisar de nuevo antes de cambiar
+   plan, dominio, CDN, Workers o ingreso privado. No habilitar por el solo hecho
+   de que RENDER=true o de que una cabecera tenga formato correcto.
+
+No se hicieron solicitudes al servicio desplegado ni se modificó infraestructura.
 
 ## Verificación local
+
+Revisión exclusiva de IP posterior a 0998718: 25 pruebas pasaron, sin fallos,
+errores ni omitidas: ClientIpResolverTest (14), RateLimitsTest (6) y
+AuthControllerTest (5). Incluyen modo Render pendiente por defecto, cabeceras HTTP
+incapaces de habilitarlo, ausencia de 503 en modo pendiente, límite por cuenta
+activo, límites locales activos e impacto 503 del candidato habilitado.
+Se compiló mediante Maven test y git diff --check pasó. No se ejecutaron SQL,
+bases externas ni pruebas contra Render en esta revisión.
+
 
 Compilación y package con skipTests; suite focalizada ClientIpResolverTest, RateLimitsTest,
 AuthControllerTest, JwtAuthenticationFilterTest, SecurityUserStatusWebTest y
@@ -102,7 +152,7 @@ StoreSearchQueryTest. Mockito requiere -javaagent con su jar local en este
 entorno para evitar el bloqueo de auto-adjunción. Las pruebas nuevas cubren
 429, Retry-After, normalización/independencia de cuentas, IP falsificada,
 expiración, capacidad, concurrencia, registro compartido y exclusión del webhook.
-Resultado de esta revisión: 53 pruebas focalizadas pasaron (12 del resolver, 6 de
+Resultado previo (0998718): 53 pruebas focalizadas pasaron (12 del resolver, 6 de
 rate limiting y 35 existentes), sin fallos ni errores; package y diff --check
 pasaron. Se intentó StoreSearchPostgresIntegrationTest con PostgreSQL 18.6 local
 y un clúster temporal: initdb funcionó, pero el sandbox impide abrir el socket
