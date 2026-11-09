@@ -1,0 +1,23 @@
+meta {
+  name: M237 - UUID_INVALIDO_id - 03. Marcar Como Leída
+  type: http
+  seq: 483
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/notifications/invalid-uuid/read
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

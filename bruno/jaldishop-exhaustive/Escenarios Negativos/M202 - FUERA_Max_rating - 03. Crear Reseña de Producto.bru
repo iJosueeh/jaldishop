@@ -1,0 +1,31 @@
+meta {
+  name: M202 - FUERA_Max_rating - 03. Crear Reseña de Producto
+  type: http
+  seq: 456
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/products/{{productId}}/reviews
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "rating": 6.0,
+  "comment": "Excelente producto, 100% recomendado"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

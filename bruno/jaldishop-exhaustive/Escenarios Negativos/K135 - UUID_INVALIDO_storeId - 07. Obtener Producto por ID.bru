@@ -1,0 +1,23 @@
+meta {
+  name: K135 - UUID_INVALIDO_storeId - 07. Obtener Producto por ID
+  type: http
+  seq: 170
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/invalid-uuid/products/{{productId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

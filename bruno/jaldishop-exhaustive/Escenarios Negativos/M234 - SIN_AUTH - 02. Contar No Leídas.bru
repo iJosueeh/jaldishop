@@ -1,0 +1,19 @@
+meta {
+  name: M234 - SIN_AUTH - 02. Contar No Leídas
+  type: http
+  seq: 481
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications/unread/count
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

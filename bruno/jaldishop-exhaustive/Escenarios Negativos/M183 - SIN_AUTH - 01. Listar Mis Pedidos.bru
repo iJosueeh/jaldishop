@@ -1,0 +1,19 @@
+meta {
+  name: M183 - SIN_AUTH - 01. Listar Mis Pedidos
+  type: http
+  seq: 442
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/orders
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

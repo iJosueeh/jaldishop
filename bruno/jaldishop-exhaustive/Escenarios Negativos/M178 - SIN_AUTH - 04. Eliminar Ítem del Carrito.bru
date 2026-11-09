@@ -1,0 +1,19 @@
+meta {
+  name: M178 - SIN_AUTH - 04. Eliminar Ítem del Carrito
+  type: http
+  seq: 439
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/cart/items/{{variantId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

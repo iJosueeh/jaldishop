@@ -1,0 +1,34 @@
+meta {
+  name: 05. Listar Productos de la Tienda
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    const item = Array.isArray(data) ? data[0] : data;
+    if (item && item.id) bru.setEnvVar("productId", String(item.id));
+    if (item && item.variants && item.variants.length > 0 && item.variants[0].id) {
+      bru.setEnvVar("variantId", String(item.variants[0].id));
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

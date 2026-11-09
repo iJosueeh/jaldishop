@@ -1,0 +1,30 @@
+meta {
+  name: K254 - SIN_AUTH - 08. Actualizar Excepción
+  type: http
+  seq: 271
+}
+
+put {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/{{capacityExceptionId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "exceptionCapacity": 0,
+  "reason": "Cerrado por Navidad"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

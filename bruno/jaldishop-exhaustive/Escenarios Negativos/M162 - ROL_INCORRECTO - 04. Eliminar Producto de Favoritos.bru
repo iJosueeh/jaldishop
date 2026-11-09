@@ -1,0 +1,23 @@
+meta {
+  name: M162 - ROL_INCORRECTO - 04. Eliminar Producto de Favoritos
+  type: http
+  seq: 427
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/{{productId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

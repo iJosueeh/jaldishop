@@ -1,0 +1,23 @@
+meta {
+  name: K246 - UUID_INVALIDO_id - 05. Desactivar Configuración
+  type: http
+  seq: 266
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-configurations/invalid-uuid/deactivate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

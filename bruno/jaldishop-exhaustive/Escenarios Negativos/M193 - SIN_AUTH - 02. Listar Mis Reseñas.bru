@@ -1,0 +1,19 @@
+meta {
+  name: M193 - SIN_AUTH - 02. Listar Mis Reseñas
+  type: http
+  seq: 448
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/reviews
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

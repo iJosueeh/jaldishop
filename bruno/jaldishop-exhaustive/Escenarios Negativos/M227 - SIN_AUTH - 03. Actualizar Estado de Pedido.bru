@@ -1,0 +1,26 @@
+meta {
+  name: M227 - SIN_AUTH - 03. Actualizar Estado de Pedido
+  type: http
+  seq: 476
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/{{orderId}}/status
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "status": "IN_PREPARATION"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

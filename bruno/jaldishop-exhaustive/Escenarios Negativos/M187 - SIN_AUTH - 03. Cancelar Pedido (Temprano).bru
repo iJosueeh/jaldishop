@@ -1,0 +1,26 @@
+meta {
+  name: M187 - SIN_AUTH - 03. Cancelar Pedido (Temprano)
+  type: http
+  seq: 444
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/customer/orders/{{orderNumber}}/cancel
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "reason": "Cliente solicitó cancelación por cambio de planes."
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

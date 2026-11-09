@@ -1,0 +1,23 @@
+meta {
+  name: M133 - ROL_INCORRECTO - 04. Marcar Dirección Predeterminada
+  type: http
+  seq: 408
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{addressId}}/default
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

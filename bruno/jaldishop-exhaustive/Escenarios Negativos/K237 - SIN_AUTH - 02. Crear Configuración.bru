@@ -1,0 +1,29 @@
+meta {
+  name: K237 - SIN_AUTH - 02. Crear Configuración
+  type: http
+  seq: 260
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity-configurations
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "dayOfWeek": 1,
+  "startTime": "09:00:00",
+  "endTime": "13:00:00",
+  "maxCapacity": 15
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

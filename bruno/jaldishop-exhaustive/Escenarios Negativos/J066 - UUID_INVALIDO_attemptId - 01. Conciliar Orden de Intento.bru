@@ -1,0 +1,23 @@
+meta {
+  name: J066 - UUID_INVALIDO_attemptId - 01. Conciliar Orden de Intento
+  type: http
+  seq: 53
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/payments/attempts/invalid-uuid/reconcile-order
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

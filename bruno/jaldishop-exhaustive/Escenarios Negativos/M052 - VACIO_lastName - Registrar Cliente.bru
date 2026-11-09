@@ -1,0 +1,30 @@
+meta {
+  name: M052 - VACIO_lastName - Registrar Cliente
+  type: http
+  seq: 331
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "email": "{{newRegistrationEmail}}",
+  "password": "{{fixturePassword}}",
+  "firstName": "{{fixtureFirstName}}",
+  "lastName": "",
+  "phone": "{{fixturePhone}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

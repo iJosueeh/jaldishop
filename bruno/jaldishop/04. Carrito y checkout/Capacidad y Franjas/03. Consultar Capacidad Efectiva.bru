@@ -1,0 +1,23 @@
+meta {
+  name: 03. Consultar Capacidad Efectiva
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity/effective?date={{serviceDate}}&startTime={{startTime}}&endTime={{endTime}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

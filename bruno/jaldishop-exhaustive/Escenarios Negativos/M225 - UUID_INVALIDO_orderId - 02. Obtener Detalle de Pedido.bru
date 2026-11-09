@@ -1,0 +1,23 @@
+meta {
+  name: M225 - UUID_INVALIDO_orderId - 02. Obtener Detalle de Pedido
+  type: http
+  seq: 475
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

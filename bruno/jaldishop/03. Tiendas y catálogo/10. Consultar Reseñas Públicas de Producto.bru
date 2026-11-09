@@ -1,0 +1,19 @@
+meta {
+  name: 10. Consultar Reseñas Públicas de Producto
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/v1/products/{{productId}}/reviews
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

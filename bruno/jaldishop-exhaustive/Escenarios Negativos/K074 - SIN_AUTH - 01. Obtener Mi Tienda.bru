@@ -1,0 +1,19 @@
+meta {
+  name: K074 - SIN_AUTH - 01. Obtener Mi Tienda
+  type: http
+  seq: 118
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

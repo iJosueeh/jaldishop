@@ -1,0 +1,30 @@
+meta {
+  name: 03. Cancelar Pedido
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/customer/orders/{{orderNumber}}/cancel
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "reason": "Cliente solicitó cancelación por cambio de planes."
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

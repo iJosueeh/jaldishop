@@ -1,0 +1,30 @@
+meta {
+  name: K099 - AUSENTE_name - 02. Crear Categoría
+  type: http
+  seq: 139
+}
+
+post {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "description": "Postres artesanales"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: K268 - ROL_INCORRECTO - 01. Listar Clientes de la Tienda
+  type: http
+  seq: 281
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

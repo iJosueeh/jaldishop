@@ -1,0 +1,29 @@
+meta {
+  name: K239 - SIN_AUTH - 03. Actualizar Configuración
+  type: http
+  seq: 261
+}
+
+put {
+  url: {{baseUrl}}/api/v1/capacity-configurations/{{capacityConfigId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "dayOfWeek": 1,
+  "startTime": "09:00:00",
+  "endTime": "14:00:00",
+  "maxCapacity": 20
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

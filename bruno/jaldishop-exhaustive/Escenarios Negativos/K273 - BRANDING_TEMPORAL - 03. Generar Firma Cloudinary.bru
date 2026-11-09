@@ -1,0 +1,26 @@
+meta {
+  name: K273 - BRANDING_TEMPORAL - 03. Generar Firma Cloudinary
+  type: http
+  seq: 285
+}
+
+post {
+  url: {{baseUrl}}/api/v1/media/upload-signature
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "targetType": "STORE_LOGO"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

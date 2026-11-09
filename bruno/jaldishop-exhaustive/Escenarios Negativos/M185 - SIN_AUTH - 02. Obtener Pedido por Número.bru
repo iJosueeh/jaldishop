@@ -1,0 +1,19 @@
+meta {
+  name: M185 - SIN_AUTH - 02. Obtener Pedido por Número
+  type: http
+  seq: 443
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/orders/{{orderNumber}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

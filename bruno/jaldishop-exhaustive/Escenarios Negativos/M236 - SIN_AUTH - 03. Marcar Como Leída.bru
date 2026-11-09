@@ -1,0 +1,19 @@
+meta {
+  name: M236 - SIN_AUTH - 03. Marcar Como Leída
+  type: http
+  seq: 482
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/notifications/{{notificationId}}/read
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

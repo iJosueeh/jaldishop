@@ -1,0 +1,42 @@
+meta {
+  name: K039 - VACIO_lastName - 01. Registrar Comerciante con Tienda
+  type: http
+  seq: 85
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/register/merchant
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "email": "{{newRegistrationEmail}}",
+  "password": "{{fixturePassword}}",
+  "firstName": "{{fixtureFirstName}}",
+  "lastName": "",
+  "phone": "{{fixturePhone}}",
+  "storeName": "Panadería Don Marco",
+  "businessType": "BAKERY",
+  "storeContactPhone": "987654322",
+  "address": "{{fixtureAddress}}",
+  "addressReference": "{{fixtureAddressReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "pickupEnabled": true,
+  "deliveryEnabled": true,
+  "logoUrl": null,
+  "bannerUrl": null,
+  "categoryIds": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

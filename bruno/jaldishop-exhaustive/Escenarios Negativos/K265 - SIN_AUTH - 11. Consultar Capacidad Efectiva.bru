@@ -1,0 +1,19 @@
+meta {
+  name: K265 - SIN_AUTH - 11. Consultar Capacidad Efectiva
+  type: http
+  seq: 279
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity/effective?date={{serviceDate}}&startTime={{startTime}}&endTime={{endTime}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

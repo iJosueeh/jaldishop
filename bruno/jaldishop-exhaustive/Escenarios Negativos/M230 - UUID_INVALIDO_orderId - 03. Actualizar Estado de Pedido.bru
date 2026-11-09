@@ -1,0 +1,30 @@
+meta {
+  name: M230 - UUID_INVALIDO_orderId - 03. Actualizar Estado de Pedido
+  type: http
+  seq: 479
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/invalid-uuid/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "status": "IN_PREPARATION"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

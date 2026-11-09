@@ -1,0 +1,24 @@
+meta {
+  name: 09. Fechas de Clientes Merchant (200)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Clientes no vacíos", function() { expect(res.getBody()).to.be.an("array").that.is.not.empty; });
+}

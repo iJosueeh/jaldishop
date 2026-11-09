@@ -1,0 +1,32 @@
+meta {
+  name: K011 - AUSENTE_storeId - 03. Crear Reserva de Capacidad
+  type: http
+  seq: 60
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity/reservations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

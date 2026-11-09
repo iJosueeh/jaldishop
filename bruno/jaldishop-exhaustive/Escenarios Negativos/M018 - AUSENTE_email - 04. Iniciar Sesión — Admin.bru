@@ -1,0 +1,26 @@
+meta {
+  name: M018 - AUSENTE_email - 04. Iniciar Sesión — Admin
+  type: http
+  seq: 301
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "password": "{{adminPassword}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

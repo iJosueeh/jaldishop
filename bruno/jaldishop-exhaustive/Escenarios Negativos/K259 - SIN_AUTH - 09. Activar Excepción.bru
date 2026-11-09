@@ -1,0 +1,19 @@
+meta {
+  name: K259 - SIN_AUTH - 09. Activar Excepción
+  type: http
+  seq: 275
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/{{capacityExceptionId}}/activate
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

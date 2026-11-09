@@ -1,0 +1,23 @@
+meta {
+  name: K094 - UUID_INVALIDO_storeId - 01. Listar Categorías
+  type: http
+  seq: 135
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/invalid-uuid/categories
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

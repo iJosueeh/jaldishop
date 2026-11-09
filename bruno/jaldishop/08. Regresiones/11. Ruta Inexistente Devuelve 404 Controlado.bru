@@ -1,0 +1,24 @@
+meta {
+  name: 11. Ruta Inexistente Devuelve 404 Controlado
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{addressId}}/missing
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Código RESOURCE_NOT_FOUND", function() { expect(res.getBody().code).to.equal("RESOURCE_NOT_FOUND"); });
+}

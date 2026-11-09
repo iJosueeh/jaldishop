@@ -1,0 +1,30 @@
+meta {
+  name: M199 - AUSENTE_rating - 03. Crear Reseña de Producto
+  type: http
+  seq: 453
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/products/{{productId}}/reviews
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "comment": "Excelente producto, 100% recomendado"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: M228 - ROL_INCORRECTO - 03. Actualizar Estado de Pedido
+  type: http
+  seq: 477
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/{{orderId}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "status": "IN_PREPARATION"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

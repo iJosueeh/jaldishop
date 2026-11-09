@@ -1,0 +1,26 @@
+meta {
+  name: K090 - SIN_AUTH - 03. Eliminar Mi Tienda
+  type: http
+  seq: 132
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "reason": "Cierre solicitado por el comerciante."
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

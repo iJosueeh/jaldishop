@@ -1,0 +1,19 @@
+meta {
+  name: K216 - SIN_AUTH - 02. Consultar Inventario por Variante
+  type: http
+  seq: 244
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory/variants/{{variantId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: K224 - NULO_quantity - 03. Ajustar Stock Físico (PUT)
+  type: http
+  seq: 251
+}
+
+put {
+  url: {{baseUrl}}/api/v1/inventory/variants/{{variantId}}/stock
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "quantity": null
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

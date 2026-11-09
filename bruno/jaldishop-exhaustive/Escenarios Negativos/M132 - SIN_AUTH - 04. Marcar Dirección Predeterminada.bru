@@ -1,0 +1,19 @@
+meta {
+  name: M132 - SIN_AUTH - 04. Marcar Dirección Predeterminada
+  type: http
+  seq: 407
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{addressId}}/default
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

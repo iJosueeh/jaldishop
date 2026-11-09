@@ -1,0 +1,19 @@
+meta {
+  name: K008 - SIN_AUTH - 02. Consultar Disponibilidad de Capacidad
+  type: http
+  seq: 58
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity/availability?storeId={{storeId}}&date={{serviceDate}}&startTime={{startTime}}&endTime={{endTime}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

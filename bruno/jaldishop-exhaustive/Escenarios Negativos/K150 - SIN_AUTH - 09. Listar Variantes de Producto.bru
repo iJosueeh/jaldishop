@@ -1,0 +1,19 @@
+meta {
+  name: K150 - SIN_AUTH - 09. Listar Variantes de Producto
+  type: http
+  seq: 183
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

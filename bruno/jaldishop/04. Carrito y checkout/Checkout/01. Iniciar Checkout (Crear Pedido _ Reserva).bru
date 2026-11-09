@@ -1,0 +1,50 @@
+meta {
+  name: 01. Iniciar Checkout (Crear Pedido / Reserva)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "fulfillmentType": "DELIVERY",
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "customerName": "{{fixtureCustomerName}}",
+  "customerPhone": "{{fixtureCustomerPhone}}",
+  "customerEmail": "{{fixtureEmail}}",
+  "deliveryAddress": "{{fixtureDeliveryAddress}}",
+  "deliveryReference": "{{fixtureDeliveryReference}}",
+  "deliveryLatitude": 0.0,
+  "deliveryLongitude": 0.0,
+  "discountCode": null
+}
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    if (data && data.reservationId) bru.setEnvVar("reservationId", String(data.reservationId));
+    if (data && data.orderNumber) bru.setEnvVar("orderNumber", String(data.orderNumber));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

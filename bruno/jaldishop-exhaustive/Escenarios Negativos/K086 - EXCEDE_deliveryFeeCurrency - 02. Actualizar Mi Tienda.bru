@@ -1,0 +1,47 @@
+meta {
+  name: K086 - EXCEDE_deliveryFeeCurrency - 02. Actualizar Mi Tienda
+  type: http
+  seq: 129
+}
+
+put {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "name": "Pastelería Delicia Actualizada",
+  "description": "Tortas, postres y bocaditos",
+  "contactPhone": "987654321",
+  "address": "{{fixtureAddress}}",
+  "addressReference": "{{fixtureAddressReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "pickupEnabled": true,
+  "deliveryEnabled": true,
+  "deliveryFeeAmount": 6.0,
+  "deliveryFeeCurrency": "xxxx",
+  "taxRate": 18.0,
+  "logoUrl": null,
+  "bannerUrl": null,
+  "instagramUrl": null,
+  "facebookUrl": null,
+  "whatsappNumber": null,
+  "categoryIds": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

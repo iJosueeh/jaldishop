@@ -1,0 +1,19 @@
+meta {
+  name: K213 - SIN_AUTH - 01. Consultar Inventario de Tienda
+  type: http
+  seq: 242
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

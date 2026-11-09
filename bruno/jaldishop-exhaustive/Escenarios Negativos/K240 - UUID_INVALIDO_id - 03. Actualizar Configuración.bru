@@ -1,0 +1,33 @@
+meta {
+  name: K240 - UUID_INVALIDO_id - 03. Actualizar Configuración
+  type: http
+  seq: 262
+}
+
+put {
+  url: {{baseUrl}}/api/v1/capacity-configurations/invalid-uuid
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "dayOfWeek": 1,
+  "startTime": "09:00:00",
+  "endTime": "14:00:00",
+  "maxCapacity": 20
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

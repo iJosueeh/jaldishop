@@ -1,0 +1,23 @@
+meta {
+  name: J058 - UUID_INVALIDO_id - 03. Suspender Tienda
+  type: http
+  seq: 47
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/stores/invalid-uuid/suspend
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

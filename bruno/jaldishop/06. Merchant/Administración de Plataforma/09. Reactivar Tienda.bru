@@ -1,0 +1,23 @@
+meta {
+  name: 09. Reactivar Tienda
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/stores/{{storeId}}/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

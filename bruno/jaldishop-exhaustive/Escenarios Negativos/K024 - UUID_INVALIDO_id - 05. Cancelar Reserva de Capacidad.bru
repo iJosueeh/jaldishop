@@ -1,0 +1,23 @@
+meta {
+  name: K024 - UUID_INVALIDO_id - 05. Cancelar Reserva de Capacidad
+  type: http
+  seq: 71
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/capacity/reservations/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

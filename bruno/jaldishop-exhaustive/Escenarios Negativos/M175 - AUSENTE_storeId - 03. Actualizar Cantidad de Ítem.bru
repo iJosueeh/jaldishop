@@ -1,0 +1,30 @@
+meta {
+  name: M175 - AUSENTE_storeId - 03. Actualizar Cantidad de Ítem
+  type: http
+  seq: 437
+}
+
+put {
+  url: {{baseUrl}}/api/v1/cart/items/{{variantId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "quantity": 3
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

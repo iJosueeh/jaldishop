@@ -1,0 +1,32 @@
+meta {
+  name: K015 - AUSENTE_startTime - 03. Crear Reserva de Capacidad
+  type: http
+  seq: 64
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity/reservations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "serviceDate": "{{serviceDate}}",
+  "endTime": "{{endTime}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

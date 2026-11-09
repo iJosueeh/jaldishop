@@ -1,0 +1,43 @@
+meta {
+  name: 10. Crear Variante de Producto
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": "Porción Individual",
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 18.5,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "attributes": []
+}
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    const item = Array.isArray(data) ? data[0] : data;
+    if (item && item.id) bru.setEnvVar("variantId", String(item.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

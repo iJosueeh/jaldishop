@@ -1,0 +1,19 @@
+meta {
+  name: K242 - SIN_AUTH - 04. Activar Configuración
+  type: http
+  seq: 263
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-configurations/{{capacityConfigId}}/activate
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

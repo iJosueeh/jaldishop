@@ -1,0 +1,31 @@
+meta {
+  name: M197 - ROL_INCORRECTO - 03. Crear Reseña de Producto
+  type: http
+  seq: 451
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/products/{{productId}}/reviews
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "rating": 5,
+  "comment": "Excelente producto, 100% recomendado"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

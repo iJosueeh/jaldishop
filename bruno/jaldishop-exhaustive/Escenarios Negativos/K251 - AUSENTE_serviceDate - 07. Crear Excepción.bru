@@ -1,0 +1,33 @@
+meta {
+  name: K251 - AUSENTE_serviceDate - 07. Crear Excepción
+  type: http
+  seq: 269
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity-exceptions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "exceptionCapacity": 5,
+  "reason": "Feriado Navidad"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

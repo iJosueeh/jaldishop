@@ -1,0 +1,23 @@
+meta {
+  name: K218 - UUID_INVALIDO_variantId - 02. Consultar Inventario por Variante
+  type: http
+  seq: 246
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory/variants/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

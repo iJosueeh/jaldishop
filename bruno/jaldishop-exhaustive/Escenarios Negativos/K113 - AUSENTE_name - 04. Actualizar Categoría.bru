@@ -1,0 +1,31 @@
+meta {
+  name: K113 - AUSENTE_name - 04. Actualizar Categoría
+  type: http
+  seq: 151
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories/{{categoryId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "description": "Nueva descripción",
+  "status": "ACTIVE"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,19 @@
+meta {
+  name: M222 - SIN_AUTH - 02. Obtener Detalle de Pedido
+  type: http
+  seq: 472
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/{{orderId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

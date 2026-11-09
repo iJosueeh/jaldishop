@@ -1,0 +1,19 @@
+meta {
+  name: J056 - SIN_AUTH - 03. Suspender Tienda
+  type: http
+  seq: 45
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/stores/{{storeId}}/suspend
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

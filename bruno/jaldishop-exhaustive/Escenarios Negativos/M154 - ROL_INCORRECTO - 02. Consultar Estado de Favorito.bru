@@ -1,0 +1,23 @@
+meta {
+  name: M154 - ROL_INCORRECTO - 02. Consultar Estado de Favorito
+  type: http
+  seq: 421
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/{{productId}}/status
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,31 @@
+meta {
+  name: 01. Listar Mis Direcciones
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    const item = Array.isArray(data) ? data[0] : data;
+    if (item && item.id) bru.setEnvVar("addressId", String(item.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: J054 - UUID_INVALIDO_id - 02. Obtener Tienda por ID
+  type: http
+  seq: 44
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/stores/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

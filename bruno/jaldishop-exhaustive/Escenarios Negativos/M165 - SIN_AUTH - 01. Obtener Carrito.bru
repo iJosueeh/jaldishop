@@ -1,0 +1,19 @@
+meta {
+  name: M165 - SIN_AUTH - 01. Obtener Carrito
+  type: http
+  seq: 429
+}
+
+get {
+  url: {{baseUrl}}/api/v1/cart
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}
