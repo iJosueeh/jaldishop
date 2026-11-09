@@ -21,20 +21,25 @@ La colección principal `jaldishop.postman_collection.json` está organizada en 
 - **Colección Principal (`jaldishop.postman_collection.json`):** Permite desarrollar y demostrar todos los flujos sin barreras. No impone `runCase` ni bloquea peticiones de lectura cotidianas.
 - **Colección Secundaria (`jaldishop.regressions.postman_collection.json`):** Contiene los más de 480 escenarios negativos (campos ausentes, nulos, vacíos, validaciones de formato, UUIDs inválidos y casos de seguridad) para pruebas exhaustivas.
 
-## Automatización de Variables y Aislamiento por Rol
+## Automatización de Variables y Token Dinámico Unificado
 
-Las peticiones exitosas capturan y actualizan automáticamente las variables del entorno:
-- `customerToken` y `customerUserId`: Capturados al registrar o iniciar sesión como Customer (`M039`, `M001`).
-- `merchantToken` y `merchantUserId`: Capturados al registrar o iniciar sesión como Merchant (`K025`, `M009`).
-- `adminToken`: Capturado al iniciar sesión como Admin (`M017`).
+Todos los endpoints que requieren autenticación consumen la variable unificada `{{authToken}}`.
+
+Al registrarse o iniciar sesión:
+- `M001` (Customer): Captura token en `authToken`, `customerToken`, `merchantToken`, `adminToken` y `userId` / `customerUserId`.
+- `K025` / `M009` (Merchant): Captura token en `authToken`, `merchantToken`, `customerToken`, `adminToken` y `userId` / `merchantUserId`.
+- `M017` (Admin): Captura token en `authToken`, `adminToken`, `merchantToken`, `customerToken` y `userId`.
+- `M025` (Refrescar Token): Actualiza `authToken` con el nuevo JWT.
+
+Esto permite cambiar de usuario o de rol dinámicamente durante el desarrollo o demostración sin errores 401 por variable de token equivocada o vacía.
+
+Identificadores de recursos capturados automáticamente:
 - `storeId` y `storeSlug`: Capturados en endpoints de tienda del comerciante (`K058`, `K073`, `K075`). No se sobrescriben en búsquedas públicas.
 - `categoryId`: Capturado al crear o listar categorías de tienda (`K095`, `K091`).
 - `productId` y `variantId`: Capturados al crear productos o variantes (`K121`, `K154`).
 - `cartId`: Capturado al consultar el carrito (`M164`).
 - `reservationId` y `orderNumber`: Capturados en checkout y pedidos (`J002`, `M182`, `M217`).
 - `addressId`, `capacityConfigId`, `capacityExceptionId`, `notificationId`: Capturados al crear los recursos correspondientes.
-
-Prevención de sesiones obsoletas: Cada login limpia preventivamente el token anterior de su propio rol (`pm.environment.set("<rol>Token", "")`).
 
 ## Flujo Demostrativo Customer
 

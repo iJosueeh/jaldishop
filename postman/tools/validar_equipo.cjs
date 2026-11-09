@@ -186,14 +186,14 @@ console.log('--- 4. Validando Entornos Bruno y Postman ---');
 // Postman environment
 const pmEnv = JSON.parse(fs.readFileSync(path.join(root, 'postman/jaldishop.local.env.json'), 'utf8'));
 assert(Array.isArray(pmEnv.values), 'Postman environment must have values array');
-assert.equal(pmEnv.values.length, 71, 'Postman environment must have 71 variables');
+assert.equal(pmEnv.values.length, 72, 'Postman environment must have 72 variables');
 
 // Bruno JSON importable
 const brunoJsonPath = path.join(root, 'bruno/jaldishop.local.environment.json');
 assert(fs.existsSync(brunoJsonPath), 'Bruno JSON environment must exist');
 const brunoJson = JSON.parse(fs.readFileSync(brunoJsonPath, 'utf8'));
 assert(Array.isArray(brunoJson.variables), 'Invalid environment: missing or invalid variables array');
-assert.equal(brunoJson.variables.length, 71, 'Bruno environment must have 71 variables');
+assert.equal(brunoJson.variables.length, 72, 'Bruno environment must have 72 variables');
 for (const [idx, v] of brunoJson.variables.entries()) {
   assert(v && typeof v === 'object', `Invalid variable at index ${idx}: expected an object`);
   assert(typeof v.name === 'string' && v.name.length > 0, `Invalid variable at index ${idx}: missing or invalid name`);

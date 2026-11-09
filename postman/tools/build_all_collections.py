@@ -204,13 +204,7 @@ def extract_case_id(name):
 
 def build_postman_prerequest(case_id):
     lines = []
-    if case_id in {'M001', 'M039'}:
-        lines.append('pm.environment.set("customerToken", "");')
-    elif case_id in {'M009', 'K025'}:
-        lines.append('pm.environment.set("merchantToken", "");')
-    elif case_id == 'M017':
-        lines.append('pm.environment.set("adminToken", "");')
-    elif case_id in {'J014', 'J071', 'J072'}:
+    if case_id in {'J014', 'J071', 'J072'}:
         lines.extend([
             'if (pm.environment.get("financialFakeReady") !== "true") {',
             '    throw new Error("BLOQUEADO: Operación de pago requiere financialFakeReady=true con gateway fake local verificado.");',
@@ -238,13 +232,16 @@ def build_postman_test(case_id, original_tests=None):
 
     lines = [f'pm.test("HTTP esperado", function () {{ pm.response.to.have.status({expected_status}); }});']
 
-    # Capturas automáticas
+    # Capturas automáticas - unificado en authToken para permitir cambio dinámico de usuario sin 401
     if case_id == 'M039':  # Register Customer
         lines.extend([
             'if (pm.response.code === 201) {',
             '    try {',
             '        var data = pm.response.json();',
-            '        if (data && data.id) pm.environment.set("customerUserId", String(data.id));',
+            '        if (data && data.id) {',
+            '            pm.environment.set("userId", String(data.id));',
+            '            pm.environment.set("customerUserId", String(data.id));',
+            '        }',
             '    } catch (e) {}',
             '}'
         ])
@@ -253,8 +250,16 @@ def build_postman_test(case_id, original_tests=None):
             'if (pm.response.code === 200) {',
             '    try {',
             '        var data = pm.response.json();',
-            '        if (data && data.token) pm.environment.set("customerToken", data.token);',
-            '        if (data && data.userId) pm.environment.set("customerUserId", String(data.userId));',
+            '        if (data && data.token) {',
+            '            pm.environment.set("authToken", data.token);',
+            '            pm.environment.set("customerToken", data.token);',
+            '            pm.environment.set("merchantToken", data.token);',
+            '            pm.environment.set("adminToken", data.token);',
+            '        }',
+            '        if (data && data.userId) {',
+            '            pm.environment.set("userId", String(data.userId));',
+            '            pm.environment.set("customerUserId", String(data.userId));',
+            '        }',
             '    } catch (e) {}',
             '}'
         ])
@@ -263,8 +268,16 @@ def build_postman_test(case_id, original_tests=None):
             'if (pm.response.code === 201) {',
             '    try {',
             '        var data = pm.response.json();',
-            '        if (data && data.token) pm.environment.set("merchantToken", data.token);',
-            '        if (data && data.userId) pm.environment.set("merchantUserId", String(data.userId));',
+            '        if (data && data.token) {',
+            '            pm.environment.set("authToken", data.token);',
+            '            pm.environment.set("merchantToken", data.token);',
+            '            pm.environment.set("customerToken", data.token);',
+            '            pm.environment.set("adminToken", data.token);',
+            '        }',
+            '        if (data && data.userId) {',
+            '            pm.environment.set("userId", String(data.userId));',
+            '            pm.environment.set("merchantUserId", String(data.userId));',
+            '        }',
             '    } catch (e) {}',
             '}'
         ])
@@ -273,8 +286,16 @@ def build_postman_test(case_id, original_tests=None):
             'if (pm.response.code === 200) {',
             '    try {',
             '        var data = pm.response.json();',
-            '        if (data && data.token) pm.environment.set("merchantToken", data.token);',
-            '        if (data && data.userId) pm.environment.set("merchantUserId", String(data.userId));',
+            '        if (data && data.token) {',
+            '            pm.environment.set("authToken", data.token);',
+            '            pm.environment.set("merchantToken", data.token);',
+            '            pm.environment.set("customerToken", data.token);',
+            '            pm.environment.set("adminToken", data.token);',
+            '        }',
+            '        if (data && data.userId) {',
+            '            pm.environment.set("userId", String(data.userId));',
+            '            pm.environment.set("merchantUserId", String(data.userId));',
+            '        }',
             '    } catch (e) {}',
             '}'
         ])
@@ -283,7 +304,29 @@ def build_postman_test(case_id, original_tests=None):
             'if (pm.response.code === 200) {',
             '    try {',
             '        var data = pm.response.json();',
-            '        if (data && data.token) pm.environment.set("adminToken", data.token);',
+            '        if (data && data.token) {',
+            '            pm.environment.set("authToken", data.token);',
+            '            pm.environment.set("adminToken", data.token);',
+            '            pm.environment.set("merchantToken", data.token);',
+            '            pm.environment.set("customerToken", data.token);',
+            '        }',
+            '        if (data && data.userId) {',
+            '            pm.environment.set("userId", String(data.userId));',
+            '        }',
+            '    } catch (e) {}',
+            '}'
+        ])
+    elif case_id == 'M025':  # Refresh Token
+        lines.extend([
+            'if (pm.response.code === 200) {',
+            '    try {',
+            '        var data = pm.response.json();',
+            '        if (data && data.token) {',
+            '            pm.environment.set("authToken", data.token);',
+            '            pm.environment.set("customerToken", data.token);',
+            '            pm.environment.set("merchantToken", data.token);',
+            '            pm.environment.set("adminToken", data.token);',
+            '        }',
             '    } catch (e) {}',
             '}'
         ])
@@ -421,13 +464,7 @@ def build_postman_test(case_id, original_tests=None):
 
 def build_bruno_scripts(case_id, expected_status=200):
     pre_script = []
-    if case_id in {'M001', 'M039'}:
-        pre_script.append('bru.setEnvVar("customerToken", "");')
-    elif case_id in {'M009', 'K025'}:
-        pre_script.append('bru.setEnvVar("merchantToken", "");')
-    elif case_id == 'M017':
-        pre_script.append('bru.setEnvVar("adminToken", "");')
-    elif case_id in {'J014', 'J071', 'J072'}:
+    if case_id in {'J014', 'J071', 'J072'}:
         pre_script.extend([
             'if (bru.getEnvVar("financialFakeReady") !== "true") {',
             '  throw new Error("BLOQUEADO: Operación de pago requiere financialFakeReady=true con gateway fake local verificado.");',
@@ -441,42 +478,89 @@ def build_bruno_scripts(case_id, expected_status=200):
         ])
 
     post_script = []
-    if case_id == 'M039':
+    if case_id == 'M039':  # Register Customer
         post_script.extend([
             'if (res.getStatus() === 201) {',
             '  const data = res.getBody();',
-            '  if (data && data.id) bru.setEnvVar("customerUserId", String(data.id));',
+            '  if (data && data.id) {',
+            '    bru.setEnvVar("userId", String(data.id));',
+            '    bru.setEnvVar("customerUserId", String(data.id));',
+            '  }',
             '}'
         ])
-    elif case_id == 'M001':
+    elif case_id == 'M001':  # Login Customer
         post_script.extend([
             'if (res.getStatus() === 200) {',
             '  const data = res.getBody();',
-            '  if (data && data.token) bru.setEnvVar("customerToken", data.token);',
-            '  if (data && data.userId) bru.setEnvVar("customerUserId", String(data.userId));',
+            '  if (data && data.token) {',
+            '    bru.setEnvVar("authToken", data.token);',
+            '    bru.setEnvVar("customerToken", data.token);',
+            '    bru.setEnvVar("merchantToken", data.token);',
+            '    bru.setEnvVar("adminToken", data.token);',
+            '  }',
+            '  if (data && data.userId) {',
+            '    bru.setEnvVar("userId", String(data.userId));',
+            '    bru.setEnvVar("customerUserId", String(data.userId));',
+            '  }',
             '}'
         ])
-    elif case_id == 'K025':
+    elif case_id == 'K025':  # Register Merchant
         post_script.extend([
             'if (res.getStatus() === 201) {',
             '  const data = res.getBody();',
-            '  if (data && data.token) bru.setEnvVar("merchantToken", data.token);',
-            '  if (data && data.userId) bru.setEnvVar("merchantUserId", String(data.userId));',
+            '  if (data && data.token) {',
+            '    bru.setEnvVar("authToken", data.token);',
+            '    bru.setEnvVar("merchantToken", data.token);',
+            '    bru.setEnvVar("customerToken", data.token);',
+            '    bru.setEnvVar("adminToken", data.token);',
+            '  }',
+            '  if (data && data.userId) {',
+            '    bru.setEnvVar("userId", String(data.userId));',
+            '    bru.setEnvVar("merchantUserId", String(data.userId));',
+            '  }',
             '}'
         ])
-    elif case_id == 'M009':
+    elif case_id == 'M009':  # Login Merchant
         post_script.extend([
             'if (res.getStatus() === 200) {',
             '  const data = res.getBody();',
-            '  if (data && data.token) bru.setEnvVar("merchantToken", data.token);',
-            '  if (data && data.userId) bru.setEnvVar("merchantUserId", String(data.userId));',
+            '  if (data && data.token) {',
+            '    bru.setEnvVar("authToken", data.token);',
+            '    bru.setEnvVar("merchantToken", data.token);',
+            '    bru.setEnvVar("customerToken", data.token);',
+            '    bru.setEnvVar("adminToken", data.token);',
+            '  }',
+            '  if (data && data.userId) {',
+            '    bru.setEnvVar("userId", String(data.userId));',
+            '    bru.setEnvVar("merchantUserId", String(data.userId));',
+            '  }',
             '}'
         ])
-    elif case_id == 'M017':
+    elif case_id == 'M017':  # Login Admin
         post_script.extend([
             'if (res.getStatus() === 200) {',
             '  const data = res.getBody();',
-            '  if (data && data.token) bru.setEnvVar("adminToken", data.token);',
+            '  if (data && data.token) {',
+            '    bru.setEnvVar("authToken", data.token);',
+            '    bru.setEnvVar("adminToken", data.token);',
+            '    bru.setEnvVar("merchantToken", data.token);',
+            '    bru.setEnvVar("customerToken", data.token);',
+            '  }',
+            '  if (data && data.userId) {',
+            '    bru.setEnvVar("userId", String(data.userId));',
+            '  }',
+            '}'
+        ])
+    elif case_id == 'M025':  # Refresh Token
+        post_script.extend([
+            'if (res.getStatus() === 200) {',
+            '  const data = res.getBody();',
+            '  if (data && data.token) {',
+            '    bru.setEnvVar("authToken", data.token);',
+            '    bru.setEnvVar("customerToken", data.token);',
+            '    bru.setEnvVar("merchantToken", data.token);',
+            '    bru.setEnvVar("adminToken", data.token);',
+            '  }',
             '}'
         ])
     elif case_id in {'K058', 'K073', 'K075'}:
@@ -608,13 +692,15 @@ def item_to_bru(item, name, seq):
     body_data = req.get('body', {}).get('raw')
     case_id = extract_case_id(item['name'])
 
-    # Auth
+    # Auth - unificado en {{authToken}} para requests que usan tokens dinámicos
     auth_type = req.get('auth', {}).get('type', 'none')
     auth_token = ''
     if auth_type == 'bearer':
         for b in req['auth'].get('bearer', []):
             if b.get('key') == 'token':
                 auth_token = b.get('value', '')
+                if auth_token in {'{{customerToken}}', '{{merchantToken}}', '{{adminToken}}', '{{authToken}}'}:
+                    auth_token = '{{authToken}}'
     
     # Scripts
     pre_script, post_script, test_script = build_bruno_scripts(case_id)
@@ -651,7 +737,10 @@ def item_to_bru(item, name, seq):
     # Regresión R010 o headers específicos
     for h in req.get('header', []):
         if h.get('key') not in {'Accept', 'Content-Type'}:
-            lines.append(f'  {h["key"]}: {h["value"]}')
+            val = h['value']
+            if h.get('key', '').lower() == 'authorization' and any(t in val for t in ['{{customerToken}}', '{{merchantToken}}', '{{adminToken}}']):
+                val = 'Bearer {{authToken}}'
+            lines.append(f'  {h["key"]}: {val}')
     lines.extend(['}', ''])
 
     if body_data:
@@ -806,6 +895,17 @@ def main():
     main_collection_items = []
     used_ids = set()
 
+    def unify_item_auth(it):
+        auth = it.get('request', {}).get('auth', {})
+        if auth.get('type') == 'bearer':
+            for b in auth.get('bearer', []):
+                if b.get('key') == 'token' and b.get('value') in {'{{customerToken}}', '{{merchantToken}}', '{{adminToken}}', '{{authToken}}'}:
+                    b['value'] = '{{authToken}}'
+        for h in it.get('request', {}).get('header', []):
+            val = h.get('value', '')
+            if h.get('key', '').lower() == 'authorization' and any(t in val for t in ['{{customerToken}}', '{{merchantToken}}', '{{adminToken}}']):
+                h['value'] = 'Bearer {{authToken}}'
+
     for folder_name, contents in FOLDER_MAPPING:
         folder_item = {'name': folder_name, 'item': []}
         
@@ -819,6 +919,7 @@ def main():
                         raise ValueError(f"ID faltante en items: {cid}")
                     it = copy.deepcopy(all_items[cid])
                     used_ids.add(cid)
+                    unify_item_auth(it)
                     it['name'] = f'{label} ({cid})'
                     it['request']['description'] = f'Caso {cid}: {label}. Flujo funcional para desarrollo local y demo.'
                     # Actualizar scripts Postman
@@ -839,6 +940,7 @@ def main():
                     raise ValueError(f"ID faltante en items: {cid}")
                 it = copy.deepcopy(all_items[cid])
                 used_ids.add(cid)
+                unify_item_auth(it)
                 it['name'] = f'{label} ({cid})'
                 it['request']['description'] = f'Caso {cid}: {label}. Flujo funcional para desarrollo local y demo.'
                 pre = build_postman_prerequest(cid)

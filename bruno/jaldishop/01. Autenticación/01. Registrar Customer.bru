@@ -25,14 +25,13 @@ body:json {
 }
 }
 
-script:pre-request {
-  bru.setEnvVar("customerToken", "");
-}
-
 script:post-response {
   if (res.getStatus() === 201) {
     const data = res.getBody();
-    if (data && data.id) bru.setEnvVar("customerUserId", String(data.id));
+    if (data && data.id) {
+      bru.setEnvVar("userId", String(data.id));
+      bru.setEnvVar("customerUserId", String(data.id));
+    }
   }
 }
 

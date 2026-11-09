@@ -39,6 +39,11 @@
       "type": "string"
     },
     {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "baseUrl",
       "value": "http://127.0.0.1:8080",
       "type": "string"
@@ -411,7 +416,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{customerToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]
@@ -491,7 +496,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{customerToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]
@@ -571,7 +576,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{customerToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]
@@ -851,7 +856,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{merchantToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]
@@ -928,7 +933,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{customerToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]
@@ -976,7 +981,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{customerToken}}",
+                  "value": "{{authToken}}",
                   "type": "string"
                 }
               ]

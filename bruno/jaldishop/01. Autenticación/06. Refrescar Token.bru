@@ -11,11 +11,23 @@ post {
 }
 
 auth:bearer {
-  token: {{customerToken}}
+  token: {{authToken}}
 }
 
 headers {
   Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const data = res.getBody();
+    if (data && data.token) {
+      bru.setEnvVar("authToken", data.token);
+      bru.setEnvVar("customerToken", data.token);
+      bru.setEnvVar("merchantToken", data.token);
+      bru.setEnvVar("adminToken", data.token);
+    }
+  }
 }
 
 tests {

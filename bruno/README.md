@@ -8,11 +8,11 @@ Colecciones nativas en formato `.bru` para Bruno 4.3.0+, organizadas para desarr
 2. **Sin Errores en Ejecución:** Soluciona el error `ReferenceError: 'pm' is not defined`.
 3. **Flujos Libres:** No exige `runCase` ni bloquea peticiones de lectura cotidianas.
 4. **Flexibilidad de Entorno:** Permite ejecutar contra cualquier host configurado en `baseUrl` (local o producción/Render) sin bloqueos artificiales de URL, manteniendo únicamente los controles explícitos para pagos (`financialFakeReady`) y operaciones destructivas (`allowDestructiveOperations`).
-5. **Captura Automática de Tokens e IDs:**
-   - `customerToken` y `customerUserId` en login/registro de cliente.
-   - `merchantToken`, `merchantUserId`, `storeId`, `storeSlug` en login/registro y tienda del comerciante.
-   - `adminToken` en login de administrador.
-   - `categoryId`, `productId`, `variantId`, `cartId`, `orderNumber`, `reservationId` en los endpoints correspondientes.
+5. **Token Unificado Dinámico (`authToken`):**
+   - Todos los endpoints autenticados consumen directamente `{{authToken}}`.
+   - Al registrarse o iniciar sesión (Customer, Merchant o Admin), el token emitido se captura automáticamente en `authToken` (y se replica en `customerToken`, `merchantToken` y `adminToken`).
+   - Evita errores 401 por tokens cruzados o sesiones obsoletas al cambiar de usuario o rol en medio de una prueba.
+   - Captura automática de `userId`, `storeId`, `storeSlug`, `categoryId`, `productId`, `variantId`, `cartId`, `orderNumber` y `reservationId`.
 
 ## Organización de Carpetas (Colección Principal)
 

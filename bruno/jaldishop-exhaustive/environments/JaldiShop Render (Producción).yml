@@ -14,6 +14,9 @@ variables:
   value: ''
 - name: attemptId
   value: ''
+- name: authToken
+  value: ''
+  secret: true
 - name: baseUrl
   value: https://jaldishop-api.onrender.com
 - name: capacityConfigId
