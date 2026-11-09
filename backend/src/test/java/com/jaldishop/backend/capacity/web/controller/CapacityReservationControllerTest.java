@@ -75,7 +75,9 @@ class CapacityReservationControllerTest {
         currentPrincipal = new JwtPrincipal(testCustomerId, Set.of("CUSTOMER"));
 
         CapacityReservationController controller = new CapacityReservationController(
-                availabilityService, createService, getService, releaseService);
+                availabilityService, createService, getService, releaseService,
+                new com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits(
+                        new com.jaldishop.backend.shared.security.ratelimit.RateLimits(new org.springframework.mock.env.MockEnvironment())));
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override

@@ -30,15 +30,25 @@ import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPa
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits;
+import com.jaldishop.backend.shared.security.ratelimit.RateLimitExceeded;
+import com.jaldishop.backend.shared.security.ratelimit.RateLimits;
+import com.jaldishop.backend.identity.infrastructure.security.JwtService;
 import com.jaldishop.backend.testutil.TestPostgresConfig;
 import com.jaldishop.backend.testutil.PostgresTriggerAssertions;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -50,6 +60,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.Instant;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -59,9 +70,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "app.security.rate-limit.payment-create-user.limit=6",
+        "app.security.rate-limit.payment-create-user.window-seconds=60"
+})
 @DisplayName("MercadoPagoOrdersApiEndToEndIntegrationTest — 15 Escenarios E2E Simulados")
+@Execution(ExecutionMode.SAME_THREAD)
 class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
     private static HttpServer mockServer;
@@ -195,6 +217,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     @Autowired private CheckoutCreationRequestStore creationRequestStore;
     @Autowired private PaymentPreferencePreparationService preparationService;
     @Autowired private PlatformTransactionManager transactionManager;
+    @Autowired private Environment environment;
+    @Autowired private AuthenticatedRateLimits authenticatedRateLimits;
+    @Autowired private WebApplicationContext webContext;
+    @Autowired private JwtService jwtService;
+    @MockitoBean private RateLimits rateLimits;
 
     private static final UUID STORE_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e5");
     private static final UUID USER_ID = UUID.fromString("80acf0ba-5a79-4888-b00d-b5aef8fcf9e3");
@@ -203,6 +230,15 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
     @BeforeEach
     void setupAndClean() {
+        // SQL cleanup cannot reset the singleton JVM counters. Keep the real policies,
+        // but share a fresh engine among all threads of each independent scenario.
+        reset(rateLimits);
+        RateLimits isolated = new RateLimits(environment);
+        doAnswer(delegatesTo(isolated)).when(rateLimits)
+                .checkAuthenticated(anyString(), any(UUID.class), anyInt(), any(Duration.class));
+        doAnswer(delegatesTo(isolated)).when(rateLimits)
+                .check(anyString(), anyString(), anyInt(), any(Duration.class));
+
         assertThat(jdbcTemplate.queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_fase2a_test");
         assertThat(new JdbcTemplate(flyway.getConfiguration().getDataSource())
                 .queryForObject("SELECT current_database()", String.class)).isEqualTo("jaldishop_fase2a_test");
@@ -490,6 +526,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                     FOR EACH ROW EXECUTE FUNCTION test_fail_order_result()
                     """);
             Exception failure = assertThrows(Exception.class, () -> createPaymentPreferenceService.execute(command));
+            assertThat(failure).isNotInstanceOf(RateLimitExceeded.class);
             PostgresTriggerAssertions.assertFailure(failure, "P4202", "simulated result failure");
         } finally {
             jdbcTemplate.execute("DROP TRIGGER IF EXISTS test_fail_order_result ON payment_attempts");
@@ -511,6 +548,60 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     }
 
     @Test
+    void exhaustedPaymentBudgetPreservesExistingSessionAndRejectsNewPaymentBeforeWrites() throws Exception {
+        var mvc = MockMvcBuilders.webAppContextSetup(webContext).apply(springSecurity()).build();
+        String authorization = "Bearer " + jwtService.generateToken(USER_ID, Set.of("CUSTOMER"));
+        UUID firstReservation = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(firstReservation, 1);
+        preferencesMockResponse.set(new MockResponse(201,
+                "{\"id\":\"PREF-QUOTA\",\"init_point\":\"https://example.test/quota\"}"));
+        var firstCommand = newCheckoutCommand(firstReservation);
+        var existingSession = createPaymentPreferenceService.execute(firstCommand);
+        for (int i = 1; i < 6; i++) authenticatedRateLimits.paymentCreation(USER_ID);
+
+        UUID secondReservation = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
+        createActiveInventoryReservation(secondReservation, 1);
+        long paymentsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM payments", Long.class);
+        long attemptsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM payment_attempts", Long.class);
+        long snapshotsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests", Long.class);
+        var response = mvc.perform(post("/api/v1/checkout/mercado-pago/preference")
+                        .header("Authorization", authorization).contentType("application/json")
+                        .content(paymentRequestBody(secondReservation)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(header().exists("Retry-After"))
+                .andReturn().getResponse();
+        assertThat(Long.parseLong(response.getHeader("Retry-After"))).isBetween(1L, 60L);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payments", Long.class)).isEqualTo(paymentsBefore);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payment_attempts", Long.class)).isEqualTo(attemptsBefore);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests", Long.class))
+                .isEqualTo(snapshotsBefore);
+        assertThat(jdbcTemplate.queryForObject("SELECT status FROM capacity_reservations WHERE id = ?",
+                String.class, secondReservation)).isEqualTo("ACTIVE");
+        assertThat(jdbcTemplate.queryForObject("SELECT payment_protection_expires_at FROM capacity_reservations WHERE id = ?",
+                java.sql.Timestamp.class, secondReservation)).isNull();
+        mvc.perform(post("/api/v1/checkout/mercado-pago/preference")
+                        .header("Authorization", authorization).contentType("application/json")
+                        .content(paymentRequestBody(firstReservation)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.paymentId").value(existingSession.paymentId().toString()))
+                .andExpect(jsonPath("$.preferenceId").value(existingSession.preferenceId()))
+                .andExpect(jsonPath("$.initPoint").value(existingSession.initPoint()));
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payments", Long.class)).isEqualTo(paymentsBefore);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payment_attempts", Long.class)).isEqualTo(attemptsBefore);
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests", Long.class))
+                .isEqualTo(snapshotsBefore);
+        assertThat(receivedRequestBodyList).hasSize(1);
+    }
+
+    private String paymentRequestBody(UUID reservationId) {
+        return """
+                {"capacityReservationId":"%s","fulfillmentType":"PICKUP",
+                 "customerName":"Cliente E2E","customerPhone":"987654321","customerEmail":"e2e@test.com"}
+                """.formatted(reservationId);
+    }
+
+    @Test
     void deferredCommitFailurePreventsPostAndRollsBackRequest() {
         UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
@@ -524,6 +615,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION test_fail_checkout_commit()
                     """);
             Exception failure = assertThrows(Exception.class, () -> createPaymentPreferenceService.execute(newCheckoutCommand(reservationId)));
+            assertThat(failure).isNotInstanceOf(RateLimitExceeded.class);
             PostgresTriggerAssertions.assertFailure(failure, "P4201", "simulated commit failure");
             assertThat(receivedRequestBodyList).isEmpty();
             assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM checkout_creation_requests", Integer.class)).isZero();

@@ -12,6 +12,7 @@ import com.jaldishop.backend.capacity.web.dto.CapacityAvailabilityResponse;
 import com.jaldishop.backend.capacity.web.dto.CapacityReservationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityReservationRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -32,15 +33,18 @@ public class CapacityReservationController {
     private final CreateCapacityReservationService createService;
     private final GetCapacityReservationService getService;
     private final ReleaseCapacityReservationService releaseService;
+    private final AuthenticatedRateLimits rateLimits;
 
     public CapacityReservationController(GetCapacityAvailabilityService availabilityService,
                                          CreateCapacityReservationService createService,
                                          GetCapacityReservationService getService,
-                                         ReleaseCapacityReservationService releaseService) {
+                                         ReleaseCapacityReservationService releaseService,
+                                         AuthenticatedRateLimits rateLimits) {
         this.availabilityService = availabilityService;
         this.createService = createService;
         this.getService = getService;
         this.releaseService = releaseService;
+        this.rateLimits = rateLimits;
     }
 
     @GetMapping("/availability")
@@ -67,6 +71,7 @@ public class CapacityReservationController {
             throw new AccessDeniedException("Solo los usuarios con el rol CUSTOMER pueden reservar capacidad.");
         }
 
+        rateLimits.reservationCreation(principal.userId());
         CreateCapacityReservationCommand command = new CreateCapacityReservationCommand(
                 request.storeId(), principal.userId(), request.serviceDate(),
                 request.startTime(), request.endTime());

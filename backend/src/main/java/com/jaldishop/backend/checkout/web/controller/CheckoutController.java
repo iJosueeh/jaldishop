@@ -7,6 +7,7 @@ import com.jaldishop.backend.checkout.web.dto.CheckoutResponse;
 import com.jaldishop.backend.checkout.web.dto.InitiateCheckoutRequest;
 import com.jaldishop.backend.checkout.web.mapper.CheckoutResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,13 @@ public class CheckoutController {
 
     private final InitiateCheckoutService initiateCheckoutService;
     private final CheckoutResponseMapper responseMapper;
+    private final AuthenticatedRateLimits rateLimits;
 
-    public CheckoutController(InitiateCheckoutService initiateCheckoutService, CheckoutResponseMapper responseMapper) {
+    public CheckoutController(InitiateCheckoutService initiateCheckoutService, CheckoutResponseMapper responseMapper,
+                              AuthenticatedRateLimits rateLimits) {
         this.initiateCheckoutService = initiateCheckoutService;
         this.responseMapper = responseMapper;
+        this.rateLimits = rateLimits;
     }
 
     @PostMapping
@@ -33,6 +37,8 @@ public class CheckoutController {
             @AuthenticationPrincipal JwtPrincipal principal,
             @Valid @RequestBody InitiateCheckoutRequest request
     ) {
+        // Charge once at the HTTP boundary, not again in the internal reservation service.
+        rateLimits.reservationCreation(principal.userId());
         var command = new InitiateCheckoutCommand(
                 principal.userId(),
                 request.storeId(),

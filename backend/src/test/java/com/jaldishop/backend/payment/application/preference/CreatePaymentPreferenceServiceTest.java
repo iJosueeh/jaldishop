@@ -110,6 +110,7 @@ class CreatePaymentPreferenceServiceTest {
     private CreatePaymentPreferenceService service;
     private MutableClock clock;
     private Instant fixedNow;
+    private com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits rateLimits;
 
     private UUID userId;
     private UUID storeId;
@@ -131,6 +132,8 @@ class CreatePaymentPreferenceServiceTest {
         properties.setBackUrlPending("https://jaldishop.com/checkout/pending");
 
         objectMapper = new ObjectMapper();
+        rateLimits = new com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits(
+                new com.jaldishop.backend.shared.security.ratelimit.RateLimits(new org.springframework.mock.env.MockEnvironment()));
 
         lenient().when(paymentRepository.findByIdForUpdate(any(UUID.class)))
                 .thenReturn(Optional.of(mock(Payment.class)));
@@ -146,7 +149,8 @@ class CreatePaymentPreferenceServiceTest {
                 paymentAttemptRepository,
                 objectMapper,
                 properties,
-                clock
+                clock,
+                rateLimits
         );
 
         service = new CreatePaymentPreferenceService(
@@ -203,6 +207,61 @@ class CreatePaymentPreferenceServiceTest {
         assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.APPROVED);
         assertThat(attempt.getProviderPaymentId()).isEqualTo("PAY-1");
         verify(paymentAttemptRepository).save(attempt);
+    }
+
+    @Test
+    void rateLimitRejectsFirstAttemptBeforeAnyReservationMutationPersistenceOrProviderCall() {
+        for (int i = 0; i < 6; i++) rateLimits.paymentCreation(userId);
+        var command = validNewPayment();
+        Instant expires = activeReservation.getExpiresAt();
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(com.jaldishop.backend.shared.security.ratelimit.RateLimitExceeded.class);
+
+        assertThat(activeReservation.getStatus()).isEqualTo(CapacityReservationStatus.ACTIVE);
+        assertThat(activeReservation.getExpiresAt()).isEqualTo(expires);
+        assertThat(activeReservation.getPaymentProtectionExpiresAt()).isNull();
+        verify(capacityReservationRepository, never()).save(any());
+        verify(paymentRepository, never()).save(any());
+        verify(paymentAttemptRepository, never()).save(any());
+        verifyNoInteractions(mercadoPagoGateway);
+    }
+
+    @Test
+    void rateLimitRejectsNewAttemptAfterRejectionWithoutChangingExistingPayment() {
+        for (int i = 0; i < 6; i++) rateLimits.paymentCreation(userId);
+        var command = new CreatePaymentPreferenceCommand(userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Customer", "123", "customer@example.com", null, null, null, null);
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+        Payment payment = mock(Payment.class);
+        UUID paymentId = UUID.randomUUID();
+        when(payment.getId()).thenReturn(paymentId);
+        when(payment.getStatus()).thenReturn(PaymentStatus.PENDING);
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.of(payment));
+        PaymentAttempt attempt = mock(PaymentAttempt.class);
+        when(attempt.getStatus()).thenReturn(PaymentAttemptStatus.REJECTED);
+        when(paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(paymentId)).thenReturn(List.of(attempt));
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(com.jaldishop.backend.shared.security.ratelimit.RateLimitExceeded.class);
+        verify(capacityReservationRepository, never()).save(any());
+        verify(paymentRepository, never()).save(any());
+        verify(paymentAttemptRepository, never()).save(any());
+        verify(paymentAttemptRepository, never()).findNextAttemptNumber(any());
+        verifyNoInteractions(mercadoPagoGateway);
+    }
+
+    private CreatePaymentPreferenceCommand validNewPayment() {
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.empty());
+        Cart cart = Cart.create(userId, storeId);
+        cart.addItem(UUID.randomUUID(), 1, new BigDecimal("10.00"), "PEN");
+        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
+        when(snapshotAssembler.assemble(cart, storeId)).thenReturn(List.of());
+        return new CreatePaymentPreferenceCommand(userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Customer", "123", "customer@example.com", null, null, null, null);
     }
 
     @Test
@@ -362,6 +421,7 @@ class CreatePaymentPreferenceServiceTest {
     @Test
     @DisplayName("Idempotencia: solicitudes repetidas retornan la preferencia existente sin llamar nuevamente a Mercado Pago")
     void shouldReturnExistingPreferenceOnRepeatedRequestWithoutDuplicateGatewayCall() {
+        for (int i = 0; i < 6; i++) rateLimits.paymentCreation(userId);
         CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
                 userId, reservationId, CheckoutFulfillmentType.PICKUP,
                 "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
@@ -596,6 +656,7 @@ class CreatePaymentPreferenceServiceTest {
     @Test
     @DisplayName("Modo ORDERS: si ya existe intento previo con providerOrderId retorna resultado por idempotencia")
     void shouldReturnExistingOrderWhenAlreadyComplete() {
+        for (int i = 0; i < 6; i++) rateLimits.paymentCreation(userId);
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
 
         CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(

@@ -3,6 +3,7 @@ package com.jaldishop.backend.shared.security.ratelimit;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.LongSupplier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class RateLimits {
     private record Window(long expires, int count) {}
     private final Map<String, Window> windows = new HashMap<>();
+    private final Map<String, Window> authenticatedWindows = new HashMap<>();
     private final LongSupplier time;
     private final Environment environment;
 
@@ -22,10 +24,25 @@ public class RateLimits {
         this.time = time;
     }
 
-    public synchronized void check(String policy, String identity, int defaultLimit, Duration defaultWindow) {
+    public void check(String policy, String identity, int defaultLimit, Duration defaultWindow) {
+        synchronized (windows) {
+            check(windows, "max-entries", policy, identity, defaultLimit, defaultWindow);
+        }
+    }
+
+    /** Call only with the identity established by JWT authentication, never request-supplied IDs. */
+    public void checkAuthenticated(String policy, UUID userId, int defaultLimit, Duration defaultWindow) {
+        synchronized (authenticatedWindows) {
+            check(authenticatedWindows, "authenticated-max-entries", policy,
+                    java.util.Objects.requireNonNull(userId).toString(), defaultLimit, defaultWindow);
+        }
+    }
+
+    private void check(Map<String, Window> windows, String capacityProperty, String policy,
+                       String identity, int defaultLimit, Duration defaultWindow) {
         int limit = environment.getProperty("app.security.rate-limit." + policy + ".limit", Integer.class, defaultLimit);
         Duration duration = Duration.ofSeconds(environment.getProperty("app.security.rate-limit." + policy + ".window-seconds", Long.class, defaultWindow.toSeconds()));
-        int capacity = environment.getProperty("app.security.rate-limit.max-entries", Integer.class, 10000);
+        int capacity = environment.getProperty("app.security.rate-limit." + capacityProperty, Integer.class, 10000);
         if (limit < 1 || duration.isNegative() || duration.isZero() || capacity < 1) {
             throw new IllegalStateException("Invalid rate limit configuration");
         }
@@ -46,5 +63,5 @@ public class RateLimits {
     }
 
     private long seconds(long nanos) { return Math.max(1, (nanos + 999999999L) / 1000000000L); }
-    synchronized int size() { return windows.size(); }
+    int size() { synchronized (windows) { return windows.size(); } }
 }

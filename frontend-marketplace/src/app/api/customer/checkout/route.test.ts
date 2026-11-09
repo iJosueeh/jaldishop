@@ -20,6 +20,28 @@ beforeEach(() => {
 });
 
 describe('Checkout BFF Endpoint: POST /api/customer/checkout', () => {
+  it('preserves 429, RATE_LIMIT_EXCEEDED and Retry-After without deleting the session', async () => {
+    const deleteCookie = vi.fn();
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'valid-jwt' }),
+      delete: deleteCookie,
+    } as unknown as Awaited<ReturnType<typeof cookies>>);
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      code: 'RATE_LIMIT_EXCEEDED', message: 'Espera antes de reintentar.',
+    }), { status: 429, headers: { 'Retry-After': '42' } }));
+
+    const response = await POST(new NextRequest('http://localhost:3000/api/customer/checkout', {
+      method: 'POST', body: JSON.stringify({}),
+    }));
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe('42');
+    expect((await response.json()).code).toBe('RATE_LIMIT_EXCEEDED');
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(deleteCookie).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('returns 401 when customer is not authenticated', async () => {
     vi.mocked(cookies).mockResolvedValue({
       get: vi.fn().mockReturnValue(undefined),
