@@ -1,0 +1,51 @@
+meta {
+  name: K175 - ATTR_DUPLICADO_TRIM - 10. Crear Variante de Producto
+  type: http
+  seq: 207
+}
+
+post {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": "Porción Individual",
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 18.5,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "attributes": [
+    {
+      "name": "Color",
+      "value": "a"
+    },
+    {
+      "name": " Color ",
+      "value": "b"
+    }
+  ]
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

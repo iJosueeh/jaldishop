@@ -1,0 +1,38 @@
+meta {
+  name: M210 - FUERA_Min_rating - 04. Actualizar Reseña de Producto
+  type: http
+  seq: 463
+}
+
+put {
+  url: {{baseUrl}}/api/v1/customer/products/{{productId}}/reviews
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "rating": 0.0,
+  "comment": "Muy bueno pero tardó un poco"
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,37 @@
+meta {
+  name: M049 - VACIO_firstName - Registrar Cliente
+  type: http
+  seq: 328
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "email": "{{newRegistrationEmail}}",
+  "password": "{{fixturePassword}}",
+  "firstName": "",
+  "lastName": "{{fixtureLastName}}",
+  "phone": "{{fixturePhone}}"
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

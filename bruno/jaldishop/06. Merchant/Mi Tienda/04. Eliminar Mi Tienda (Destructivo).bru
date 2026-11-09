@@ -1,0 +1,40 @@
+meta {
+  name: 04. Eliminar Mi Tienda (Destructivo)
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "reason": "Cierre solicitado por el comerciante."
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+  if (bru.getEnvVar("allowDestructiveOperations") !== "true") {
+    throw new Error("BLOQUEADO: Operación destructiva requiere allowDestructiveOperations=true en el entorno.");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

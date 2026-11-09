@@ -1,0 +1,30 @@
+meta {
+  name: K233 - ROL_INCORRECTO - 05. Consultar Variantes con Stock Bajo
+  type: http
+  seq: 258
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory/low-stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

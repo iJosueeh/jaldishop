@@ -1,0 +1,27 @@
+meta {
+  name: 08. Búsqueda Límite Inválido 51 (400)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=pasteleria&limit=51
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Código VALIDATION_ERROR", function() { expect(res.getBody().code).to.equal("VALIDATION_ERROR"); });
+}

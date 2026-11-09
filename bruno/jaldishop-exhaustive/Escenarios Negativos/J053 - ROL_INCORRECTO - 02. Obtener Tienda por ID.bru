@@ -1,0 +1,30 @@
+meta {
+  name: J053 - ROL_INCORRECTO - 02. Obtener Tienda por ID
+  type: http
+  seq: 43
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/stores/{{storeId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

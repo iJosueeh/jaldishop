@@ -1,0 +1,47 @@
+meta {
+  name: 03. Webhook Mercado Pago — Order
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout/mercado-pago/webhook?data.id={{providerOrderId}}&type=order
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+  x-signature: {{webhookSignature}}
+  x-request-id: {{webhookRequestId}}
+}
+
+body:json {
+{
+  "action": "order.updated",
+  "api_version": "v1",
+  "data": {
+    "id": "{{providerOrderId}}"
+  },
+  "date_created": "2026-11-06T12:00:00Z",
+  "id": "{{providerOrderId}}",
+  "live_mode": false,
+  "type": "order",
+  "user_id": "{{providerUserId}}"
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+  if (bru.getEnvVar("financialFakeReady") !== "true") {
+    throw new Error("BLOQUEADO: Operación de pago requiere financialFakeReady=true con gateway fake local verificado.");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,41 @@
+meta {
+  name: 01. Listar Pedidos de Tienda
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const data = res.getBody();
+    const items = Array.isArray(data) ? data : (data && data.content ? data.content : []);
+    if (items.length > 0) {
+      if (items[0].id) bru.setEnvVar("orderId", String(items[0].id));
+      if (items[0].orderNumber) bru.setEnvVar("orderNumber", String(items[0].orderNumber));
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

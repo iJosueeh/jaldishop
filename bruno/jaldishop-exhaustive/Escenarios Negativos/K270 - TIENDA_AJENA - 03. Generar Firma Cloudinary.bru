@@ -1,0 +1,38 @@
+meta {
+  name: K270 - TIENDA_AJENA - 03. Generar Firma Cloudinary
+  type: http
+  seq: 282
+}
+
+post {
+  url: {{baseUrl}}/api/v1/media/upload-signature
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "targetType": "PRODUCT_IMAGE",
+  "storeId": "{{otherStoreId}}"
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

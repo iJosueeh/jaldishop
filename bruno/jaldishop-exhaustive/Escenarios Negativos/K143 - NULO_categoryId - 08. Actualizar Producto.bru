@@ -1,0 +1,42 @@
+meta {
+  name: K143 - NULO_categoryId - 08. Actualizar Producto
+  type: http
+  seq: 177
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "categoryId": null,
+  "name": "Torta Tres Leches Familiar",
+  "slug": "tres-leches-familiar",
+  "description": "Para 10 personas",
+  "imageUrl": null,
+  "status": "ACTIVE"
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

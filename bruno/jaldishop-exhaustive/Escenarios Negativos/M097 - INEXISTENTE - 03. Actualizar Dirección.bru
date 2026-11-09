@@ -1,0 +1,48 @@
+meta {
+  name: M097 - INEXISTENTE - 03. Actualizar Dirección
+  type: http
+  seq: 373
+}
+
+put {
+  url: {{baseUrl}}/api/v1/customer/addresses/{{missingAddressId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "alias": "Casa Principal",
+  "recipientName": "{{fixtureRecipientName}}",
+  "recipientPhone": "{{fixtureRecipientPhone}}",
+  "streetAddress": "{{fixtureStreetAddress}}",
+  "department": "Lima",
+  "province": "Lima",
+  "district": "Miraflores",
+  "ubigeoCode": "150122",
+  "reference": "{{fixtureReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "isDefault": true
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

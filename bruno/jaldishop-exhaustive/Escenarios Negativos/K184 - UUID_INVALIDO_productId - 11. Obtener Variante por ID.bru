@@ -1,0 +1,30 @@
+meta {
+  name: K184 - UUID_INVALIDO_productId - 11. Obtener Variante por ID
+  type: http
+  seq: 215
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/invalid-uuid/variants/{{variantId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

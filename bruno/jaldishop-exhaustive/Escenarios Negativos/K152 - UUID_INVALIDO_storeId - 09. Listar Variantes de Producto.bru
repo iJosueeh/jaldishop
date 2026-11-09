@@ -1,0 +1,30 @@
+meta {
+  name: K152 - UUID_INVALIDO_storeId - 09. Listar Variantes de Producto
+  type: http
+  seq: 185
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/invalid-uuid/products/{{productId}}/variants
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

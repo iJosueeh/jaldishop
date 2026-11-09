@@ -1,0 +1,49 @@
+meta {
+  name: J007 - NULO_serviceDate - 01. Iniciar Checkout
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "fulfillmentType": "DELIVERY",
+  "serviceDate": null,
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "customerName": "{{fixtureCustomerName}}",
+  "customerPhone": "{{fixtureCustomerPhone}}",
+  "customerEmail": "{{fixtureEmail}}",
+  "deliveryAddress": "{{fixtureDeliveryAddress}}",
+  "deliveryReference": "{{fixtureDeliveryReference}}",
+  "deliveryLatitude": 0.0,
+  "deliveryLongitude": 0.0,
+  "discountCode": null
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

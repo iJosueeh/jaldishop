@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "JaldiShop API \u2014 Pruebas Exhaustivas y Negativas",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

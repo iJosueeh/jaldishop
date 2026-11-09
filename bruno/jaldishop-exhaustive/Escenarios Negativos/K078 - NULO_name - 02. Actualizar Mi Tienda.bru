@@ -1,0 +1,54 @@
+meta {
+  name: K078 - NULO_name - 02. Actualizar Mi Tienda
+  type: http
+  seq: 121
+}
+
+put {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "name": null,
+  "description": "Tortas, postres y bocaditos",
+  "contactPhone": "987654321",
+  "address": "{{fixtureAddress}}",
+  "addressReference": "{{fixtureAddressReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "pickupEnabled": true,
+  "deliveryEnabled": true,
+  "deliveryFeeAmount": 6.0,
+  "deliveryFeeCurrency": "PEN",
+  "taxRate": 18.0,
+  "logoUrl": null,
+  "bannerUrl": null,
+  "instagramUrl": null,
+  "facebookUrl": null,
+  "whatsappNumber": null,
+  "categoryIds": []
+}
+}
+
+script:pre-request {
+  const url = req.getUrl();
+  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
+    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}
