@@ -19,6 +19,7 @@ import com.jaldishop.backend.payment.domain.model.*;
 import com.jaldishop.backend.payment.domain.repository.*;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits;
 import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
@@ -48,6 +49,7 @@ public class PaymentPreferencePreparationService {
     private final ObjectMapper objectMapper;
     private final com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties;
     private final java.time.Clock clock;
+    private final AuthenticatedRateLimits rateLimits;
 
     @org.springframework.beans.factory.annotation.Autowired
     public PaymentPreferencePreparationService(
@@ -60,7 +62,8 @@ public class PaymentPreferencePreparationService {
             PaymentAttemptRepository paymentAttemptRepository,
             ObjectMapper objectMapper,
             com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties,
-            java.time.Clock clock
+            java.time.Clock clock,
+            AuthenticatedRateLimits rateLimits
     ) {
         this.capacityReservationRepository = capacityReservationRepository;
         this.inventoryReservationRepository = inventoryReservationRepository;
@@ -72,6 +75,7 @@ public class PaymentPreferencePreparationService {
         this.objectMapper = objectMapper;
         this.properties = properties;
         this.clock = clock != null ? clock : java.time.Clock.systemUTC();
+        this.rateLimits = rateLimits;
     }
 
     public PaymentPreferencePreparationService(
@@ -83,7 +87,8 @@ public class PaymentPreferencePreparationService {
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository,
             ObjectMapper objectMapper,
-            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties
+            com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties properties,
+            AuthenticatedRateLimits rateLimits
     ) {
         this(
                 capacityReservationRepository,
@@ -95,7 +100,8 @@ public class PaymentPreferencePreparationService {
                 paymentAttemptRepository,
                 objectMapper,
                 properties,
-                java.time.Clock.systemUTC()
+                java.time.Clock.systemUTC(),
+                rateLimits
         );
     }
 
@@ -107,7 +113,8 @@ public class PaymentPreferencePreparationService {
             CheckoutItemSnapshotAssembler snapshotAssembler,
             PaymentRepository paymentRepository,
             PaymentAttemptRepository paymentAttemptRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            AuthenticatedRateLimits rateLimits
     ) {
         this(
                 capacityReservationRepository,
@@ -118,7 +125,8 @@ public class PaymentPreferencePreparationService {
                 paymentRepository,
                 paymentAttemptRepository,
                 objectMapper,
-                new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties()
+                new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties(),
+                rateLimits
         );
     }
 
@@ -230,6 +238,7 @@ public class PaymentPreferencePreparationService {
             }
 
             // 4. Si el intento previo fue formalmente REJECTED, crear un nuevo intento secuencial
+            rateLimits.paymentCreation(command.userId());
             String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
             int nextAttemptNumber = paymentAttemptRepository.findNextAttemptNumber(existingPayment.getId());
             PaymentAttempt newAttempt = PaymentAttempt.create(
@@ -244,12 +253,6 @@ public class PaymentPreferencePreparationService {
             PaymentAttempt savedAttempt = paymentAttemptRepository.save(newAttempt);
 
             return new PreparationResult(existingPayment, savedAttempt, false, store.getName(), null, reservation.getPaymentProtectionExpiresAt());
-        }
-
-        // Si no existe Payment, protegemos la reserva si está activa
-        if (reservation.getStatus() == CapacityReservationStatus.ACTIVE) {
-            reservation.protectPayment(now);
-            capacityReservationRepository.save(reservation);
         }
 
         // Obtenemos snapshot de carrito y precios
@@ -271,6 +274,14 @@ public class PaymentPreferencePreparationService {
             itemsSnapshotJson = objectMapper.writeValueAsString(itemSnapshots);
         } catch (JacksonException e) {
             throw new IllegalStateException("Error al serializar el snapshot de ítems de checkout", e);
+        }
+
+        // Reused sessions returned above are free; reject before mutating/persisting payment state.
+        // command.userId comes from the authenticated HTTP principal and owns the locked reservation.
+        rateLimits.paymentCreation(command.userId());
+        if (reservation.getStatus() == CapacityReservationStatus.ACTIVE) {
+            reservation.protectPayment(now);
+            capacityReservationRepository.save(reservation);
         }
 
         Payment payment = Payment.createPending(

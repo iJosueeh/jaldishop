@@ -33,8 +33,8 @@ Ventanas fijas desde la primera solicitud, sincronizadas, en memoria JVM:
 | search-ip | GET /api/v1/stores/search y /featured | 60 / 60 s por IP |
 
 Se cuentan solicitudes, incluso logins exitosos. No hay bloqueo permanente.
-No se aplica límite general autenticado: no hay necesidad demostrada y podría
-interferir con compras. Webhooks, checkout y conciliación quedan fuera.
+No se aplica límite general autenticado. La fase 2 añade únicamente las políticas
+selectivas descritas al final de este documento. Webhooks y procesos internos quedan fuera.
 429 conserva ApiError (code RATE_LIMIT_EXCEEDED, message, errors) y Retry-After
 expresa segundos enteros hasta la expiración. No se añaden logs de credenciales.
 
@@ -51,7 +51,9 @@ RATE_LIMIT_LOGIN_IP_WINDOW_SECONDS, RATE_LIMIT_REGISTER_IP_LIMIT,
 RATE_LIMIT_REGISTER_IP_WINDOW_SECONDS, RATE_LIMIT_SEARCH_IP_LIMIT,
 RATE_LIMIT_SEARCH_IP_WINDOW_SECONDS y RATE_LIMIT_MAX_ENTRIES.
 
-Máximo inicial: 10000 claves entre todas las políticas. Al recibir solicitudes
+Máximo inicial público: 10000 claves. La fase 2 usa otro almacén y otro bloqueo
+para contadores autenticados, con capacidad independiente de 10000 claves,
+configurable mediante RATE_LIMIT_AUTHENTICATED_MAX_ENTRIES. Al recibir solicitudes
 se eliminan ventanas expiradas. En inactividad pueden quedar claves expiradas,
 siempre acotadas. Al llenarse se rechazan nuevas claves hasta la primera
 expiración; no se expulsan contadores activos que permitirían evadir límites.
@@ -166,3 +168,108 @@ c6d6528755118232d40bce4b5b40249fd1f0cfde y está contenido en la rama.
 Los intentos de git fetch origin/main fallaron por resolución DNS de github.com;
 no se puede afirmar sincronización con el main remoto actual ni integrar commits
 remotos desconocidos. No hubo rebase, merge, push ni cambios de infraestructura.
+
+## Fase 2: operaciones autenticadas selectivas
+
+Base revisada: `0cee818`, rama `security/backend-rate-limiting`, árbol limpio.
+La auditoría sigue correspondiendo al código de esa base. Implementación en
+`security/authenticated-rate-limiting-phase2`; sin modificación de .env,
+secretos, configuración de producción ni confianza de proxy.
+
+| Política | Entradas | Inicial | Variable de límite / ventana |
+|---|---|---|---|
+| reservation-create-user | POST /api/v1/checkout y POST /api/v1/capacity/reservations | 12 / 60 s compartidos por userId | RATE_LIMIT_RESERVATION_CREATE_USER_LIMIT / RATE_LIMIT_RESERVATION_CREATE_USER_WINDOW_SECONDS |
+| payment-create-user | Nuevo intento desde POST /api/v1/checkout/mercado-pago/preference | 6 / 60 s por userId | RATE_LIMIT_PAYMENT_CREATE_USER_LIMIT / RATE_LIMIT_PAYMENT_CREATE_USER_WINDOW_SECONDS |
+| payment-admin-remote-user | POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order y /reconcile-order | 10 / 60 s compartidos por administrador | RATE_LIMIT_PAYMENT_ADMIN_REMOTE_USER_LIMIT / RATE_LIMIT_PAYMENT_ADMIN_REMOTE_USER_WINDOW_SECONDS |
+
+Son valores iniciales de admisión, no cifras derivadas de tráfico de producción:
+
+- Reservas duran 10 minutos. Doce solicitudes por minuto dejan margen para
+  cambios de franja/tienda, varias pestañas y reintentos, sin permitir un bucle
+  ilimitado. La espera máxima de esta ventana es un minuto; cerca de expirar,
+  incluso esa espera puede requerir seleccionar otra franja.
+- Pagos ya serializa por reserva, reutiliza sesiones completas y rechaza
+  operaciones en curso/resultados inciertos. Seis intentos nuevos por minuto
+  permiten recuperarse de rechazos explícitos sin fomentar repetición remota.
+  Recuperar sesiones existentes no consume cuota, aun con cuota agotada.
+- Diez operaciones administrativas remotas por minuto admiten revisión manual
+  de varios casos y frenan bucles/dobles clics. Un lease controla concurrencia,
+  pero no sustituye el presupuesto entre distintos intentos. No se limita la
+  suspensión/activación de usuarios o tiendas.
+
+Las políticas leen `app.security.rate-limit.<política>.limit` y `.window-seconds`,
+igual que las públicas. No dependen de la habilitación de IP de Render.
+No hay nueva dependencia ni almacenamiento externo.
+
+Checkout/reservas/admin reciben el `JwtPrincipal` establecido tras validar JWT
+y consultar usuario/roles actuales. El comando de pagos se construye con ese
+principal y se comprueba la propiedad de la reserva bloqueada antes de consultar
+la cuota. No se usa un userId enviado en JSON, query o cabeceras libres, ni el
+token como clave del contador.
+
+Checkout y reserva directa consumen una vez en su controlador; el servicio
+interno de reservas no consume. Se mantienen los roles actuales: checkout exige
+autenticación sin rol adicional; reserva directa exige CUSTOMER. Admin conserva
+ADMIN mediante seguridad HTTP y de método, antes de comprobar la cuota.
+
+En pagos se retorna primero una sesión reutilizable. Para un nuevo pago se
+validan carrito/precios/snapshot, se comprueba cuota y sólo después se protege
+la reserva y se persisten Payment/PaymentAttempt. Tras un rechazo anterior,
+la cuota se comprueba antes de crear/guardar otro intento. Un 429 se produce
+antes de cualquier mutación o llamada remota. La admisión en memoria no se
+revierte si después falla la transacción o el proveedor: se limita el trabajo
+admitido, no sólo los pagos exitosos. Se mantienen bloqueos e idempotencia.
+
+Cancelaciones, liberaciones, webhooks, compensaciones, reembolsos y ejecución
+interna de conciliación no invocan estas políticas. Compartir userId con otra
+política no comparte su cuota. La capacidad de cada almacén sí es global a
+sus políticas: al llenarse, nuevas claves de ese almacén reciben 429.
+
+HTTP conserva `429`, `RATE_LIMIT_EXCEEDED` y `Retry-After`. El BFF de checkout y
+`customerProxy` propagan la cabecera sin cambiar su valor; los clientes directos
+pueden leerla mediante `Access-Control-Expose-Headers: Retry-After`. No existen
+actualmente proxies de marketplace para preferencia o reserva directa que haya
+que añadir para esta fase.
+
+Riesgos pendientes: el presupuesto no es una cuota de reservas activas por
+usuario ni corrige la aceptación de subintervalos con contadores por igualdad
+exacta de franja. No se cambia ese diseño de capacidad. Tampoco se ofrece
+exclusión mutua de toda investigación manual: se limita frecuencia y se
+conservan los controles de concurrencia existentes. Persisten reinicio de
+contadores al reiniciar JVM, ráfagas en bordes de ventanas y coste de limpiar
+mapas en cada admisión. La validación JWT/usuario en BD ocurre antes de limitar;
+esto no protege de toda saturación del backend.
+
+Para calibrar posteriormente: observar 429 por política, tiempo de espera,
+reintentos y expiraciones legítimas sin registrar tokens/datos personales;
+ajustar los valores en un despliegue controlado. No se hicieron pruebas de carga
+contra Render ni operaciones de pago reales.
+
+### Verificación de fase 2
+
+- Suite focalizada: RateLimitsTest, ClientIpResolverTest,
+  AuthenticatedRateLimitWebTest, CheckoutControllerTest,
+  CapacityReservationControllerTest, CreatePaymentPreferenceServiceTest y
+  AdminOrderInvestigationSecurityTest. Sin fallos, errores ni omisiones.
+- Suite ampliada sin los contextos que requieren BD: 1249 pruebas pasaron,
+  cero fallos/errores. Otras 14 pruebas de integración fueron omitidas por sus
+  condiciones existentes. Las integraciones completas PostgreSQL/pagos no se
+  ejecutaron: no se habilitó una BD de prueba dedicada en esta ejecución.
+- Los tests HTTP usan SecurityConfig/filtro reales con JWT/usuario simulados,
+  incluyendo JWT inválido/expirado, roles insuficientes, IDs falsificados,
+  cambio de token, políticas independientes, concurrencia, CORS y 429. Un caso
+  ejecuta checkout y creación de reserva reales sobre repositorios simulados
+  para demostrar que el servicio interno no duplica la admisión.
+- En pagos se comprueba que un 429 no muta la reserva, no llama a save de
+  reserva/pago/intento ni al gateway, para primer intento y tras rechazo.
+  Se recuperan sesiones existentes Preferences y Orders con cuota agotada.
+  Es prueba de rechazo previo a escrituras, no una integración de rollback SQL.
+- Se añadieron pruebas Vitest para ambos proxies. npm ci no pudo completarse:
+  caché incompleta y EAI_AGAIN al resolver registry.npmjs.org. Vitest/build de
+  marketplace quedan pendientes. Una comprobación aislada con Node 24 ejecutó
+  los TS reales con Web Response y adaptadores mínimos de Next: seis casos
+  pasaron (429, código, Retry-After numérico/fecha y ausencia de cabecera en 200).
+  No sustituye una ejecución con Next instalado ni una prueba de navegador.
+- Mockito necesitó su agente explícito en esta JVM, mediante
+  `-DargLine=-javaagent:/ruta/mockito-core-5.23.0.jar`. No se cambió la dependencia.
+- `git diff --check` pasó. No hubo solicitudes al despliegue ni pagos reales.

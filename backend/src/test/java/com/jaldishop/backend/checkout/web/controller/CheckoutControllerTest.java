@@ -64,7 +64,9 @@ class CheckoutControllerTest {
         testStoreId = UUID.randomUUID();
         currentPrincipal = new JwtPrincipal(testUserId, Set.of("CUSTOMER"));
 
-        CheckoutController controller = new CheckoutController(initiateCheckoutService, responseMapper);
+        CheckoutController controller = new CheckoutController(initiateCheckoutService, responseMapper,
+                new com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimits(
+                        new com.jaldishop.backend.shared.security.ratelimit.RateLimits(new org.springframework.mock.env.MockEnvironment())));
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
             @Override

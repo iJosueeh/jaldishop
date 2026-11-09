@@ -12,6 +12,51 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class RateLimitsTest {
+    @Test void authenticatedUsersPoliciesAndExpiryAreIndependent() {
+        var time = new AtomicLong();
+        var limits = new RateLimits(new MockEnvironment(), time::get);
+        var first = java.util.UUID.randomUUID();
+        var second = java.util.UUID.randomUUID();
+        limits.checkAuthenticated("reserve", first, 1, Duration.ofSeconds(30));
+        assertThatThrownBy(() -> limits.checkAuthenticated("reserve", first, 1, Duration.ofSeconds(30)))
+                .isInstanceOf(RateLimitExceeded.class);
+        limits.checkAuthenticated("reserve", second, 1, Duration.ofSeconds(30));
+        limits.checkAuthenticated("payment", first, 1, Duration.ofSeconds(30));
+        time.set(Duration.ofSeconds(30).toNanos());
+        limits.checkAuthenticated("reserve", first, 1, Duration.ofSeconds(30));
+    }
+
+    @Test void publicAndAuthenticatedCapacityCannotBlockEachOtherInEitherDirection() {
+        var env = new MockEnvironment().withProperty("app.security.rate-limit.max-entries", "1")
+                .withProperty("app.security.rate-limit.authenticated-max-entries", "1");
+        var limits = new RateLimits(env);
+        var user = java.util.UUID.randomUUID();
+        limits.check("login-account", "attacker@example.com", 1, Duration.ofMinutes(1));
+        assertThatThrownBy(() -> limits.check("login-account", "other@example.com", 1, Duration.ofMinutes(1)))
+                .isInstanceOf(RateLimitExceeded.class);
+        limits.checkAuthenticated("reserve", user, 2, Duration.ofMinutes(1));
+        assertThatThrownBy(() -> limits.checkAuthenticated("reserve", java.util.UUID.randomUUID(), 2, Duration.ofMinutes(1)))
+                .isInstanceOf(RateLimitExceeded.class);
+        // A full authenticated store must not take the only slot in a fresh public store.
+        var reverse = new RateLimits(env);
+        reverse.checkAuthenticated("reserve", user, 1, Duration.ofMinutes(1));
+        reverse.check("login-account", "new@example.com", 1, Duration.ofMinutes(1));
+        // Existing counters keep working at store capacity.
+        limits.checkAuthenticated("reserve", user, 2, Duration.ofMinutes(1));
+    }
+
+    @Test void authenticatedConcurrentAdmissionsRespectConfiguredLimit() {
+        var limits = new RateLimits(new MockEnvironment()
+                .withProperty("app.security.rate-limit.reserve.limit", "7"));
+        var user = java.util.UUID.randomUUID();
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.stream.IntStream.range(0, 100).parallel().forEach(i -> {
+            try { limits.checkAuthenticated("reserve", user, 12, Duration.ofMinutes(1)); accepted.incrementAndGet(); }
+            catch (RateLimitExceeded expected) { }
+        });
+        assertThat(accepted.get()).isEqualTo(7);
+    }
+
     @Test void independentAccountsAndExpiration() {
         var time = new AtomicLong();
         var limits = new RateLimits(new MockEnvironment(), time::get);
