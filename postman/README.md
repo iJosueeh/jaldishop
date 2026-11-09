@@ -23,9 +23,22 @@ válidos y aislados; esta colección no prepara ni restaura datos automáticamen
 
 La protección exige URL local, variables resueltas en URL/body/auth/headers y el ID
 seleccionado. Se desactivan las redirecciones. Los scripts no envían requests secundarios.
-Los logins capturan los tokens locales por rol; las demás capturas solo se conservan
-para los requests originales exitosos. Los casos negativos/regresiones no sobrescriben
-IDs o tokens. Revisar las capturas antes de encadenar un flujo.
+
+### Aislamiento de tokens por rol y gestión de sesiones
+
+1. **Tokens específicos:** Cada rol utiliza exclusivamente su variable: `customerToken`, `merchantToken` y `adminToken`. Se elimina `authToken` para prevenir colisiones o sesiones compartidas entre roles.
+2. **Prevención de sesiones obsoletas:** Los prerequest scripts de cada login (`M001`, `M009`, `M017`) limpian de forma preventiva el token anterior de su propio rol (`pm.environment.set("<rol>Token", "")`).
+3. **Captura estricta:** Solo respuestas HTTP 200/201 con token válido no vacío en JSON actualizan la variable; los casos negativos nunca sobrescriben tokens válidos.
+4. **Limpieza manual:** Al alternar usuarios o entornos, basta con restablecer las variables `customerToken`, `merchantToken` y `adminToken` a cadena vacía en el entorno privado de Postman.
+5. **Endpoints multi-rol y agnósticos:**
+   - `/api/v1/users/me`: Resuelve el perfil del usuario autenticado; en la suite se ejercita con `customerToken`.
+   - `/api/v1/notifications`: Accesible por cualquier usuario autenticado; en la suite se ejercita con `customerToken`.
+   - `/api/v1/media/upload-signature`: Endpoint público con autenticación opcional; se ejercita con `merchantToken` para subida de logos y productos.
+6. **Diferenciación de tiendas y usuarios:**
+   - `storeId`: UUID de la tienda (capturado al crear o consultar mi tienda).
+   - `merchantUserId`: UUID del comerciante propietario capturado en `StoreResponse` y en login Merchant.
+   - `owner_user_id`: Columna interna del esquema de persistencia (`stores`), respetando el contrato de la API.
+   - `userId`: Fixture sintético para administración de usuarios (`/api/v1/admin/users/{{userId}}`), desacoplado de las credenciales de sesión activa.
 
 ## Variables
 
@@ -46,7 +59,6 @@ si el caso depende de distancias. Se conservan los valores fuera de rango de los
 | `adminPassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
 | `adminToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
 | `attemptId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `authToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
 | `baseUrl` | API local, por defecto `http://127.0.0.1:8080`. |
 | `capacityConfigId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
 | `capacityExceptionId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
@@ -84,6 +96,7 @@ si el caso depende de distancias. Se conservan los valores fuera de rango de los
 | `merchantOnlyToken` | JWT local de un usuario con MERCHANT y sin CUSTOMER para negativos de autorización. |
 | `merchantPassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
 | `merchantToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
+| `merchantUserId` | Identificador del usuario propietario o comerciante; capturado de StoreResponse o login de comerciante. |
 | `missingAddressId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
 | `newRegistrationEmail` | Email sintético aún no registrado para altas; cambiar/restaurar entre casos. |
 | `notificationId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |

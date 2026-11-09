@@ -60,7 +60,7 @@ for (const item of items) {
   function check(url, selected, ready, financial, missing=false) {
     let skipped=false, rejected=false;
     const env={runCase:selected,disposableFixturesReady:ready,financialFakeReady:financial};
-    const pm={request:{url:{toString:()=>url},body:{raw:'{{fixtureId}}'},headers:{signature:'{{headerFixture}}'},auth:{}},variables:{replaceIn:x=>x,get:key=>(missing===true || (missing==='header' && key==='headerFixture'))?'':'fixture'},environment:{get:k=>env[k]},execution:{skipRequest:()=>{skipped=true;}}};
+    const pm={request:{url:{toString:()=>url},body:{raw:'{{fixtureId}}'},headers:{signature:'{{headerFixture}}'},auth:{}},variables:{replaceIn:x=>x,get:key=>(missing===true || (missing==='header' && key==='headerFixture'))?'':'fixture'},environment:{get:k=>env[k],set:(k,v)=>{env[k]=v;}},execution:{skipRequest:()=>{skipped=true;}}};
     try { vm.runInNewContext(guard,{pm},{timeout:1000}); } catch (_) {rejected=true;}
     return {skipped,rejected};
   }

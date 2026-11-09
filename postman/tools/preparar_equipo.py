@@ -15,6 +15,8 @@ PERSONAL_FIELDS = {
 }
 RENAMES = {'newKatherineEmail': 'newRegistrationEmail',
            'newMiaEmail': 'newRegistrationEmail', 'newJosueEmail': 'newRegistrationEmail'}
+CUSTOMER_CAPACITY_IDS = {f'K{i:03d}' for i in range(5, 25)}
+MERCHANT_ORDER_IDS = {f'M{i:03d}' for i in range(217, 231)} - {'M219', 'M223', 'M228'}
 
 
 def walk(items):
@@ -127,6 +129,65 @@ def add_regressions(collection):
     collection['item'].append({'name': REGRESSIONS, 'item': cases})
 
 
+DESTINATIONS = [
+    ('Auth / Identity', [
+        ('auth', lambda cid: cid in {f'M{i:03d}' for i in range(1, 27)} | {f'M{i:03d}' for i in range(39, 53)} | {f'K{i:03d}' for i in range(25, 58)}),
+        ('profile', lambda cid: cid in {f'M{i:03d}' for i in range(27, 39)}),
+    ]),
+    ('Customer', [
+        ('addresses', lambda cid: cid in {f'M{i:03d}' for i in range(53, 141)}),
+        ('cart', lambda cid: cid in {f'M{i:03d}' for i in range(164, 182)}),
+        ('catalog', lambda cid: cid in {f'M{i:03d}' for i in range(141, 147)}),
+        ('capacity', lambda cid: cid in {f'K{i:03d}' for i in range(5, 25)}),
+        ('favorites', lambda cid: cid in {f'M{i:03d}' for i in range(149, 164)}),
+        ('notifications', lambda cid: cid in {f'M{i:03d}' for i in range(231, 238)}),
+        ('orders', lambda cid: cid in {f'M{i:03d}' for i in range(182, 188)}),
+        ('reviews', lambda cid: cid in {'M147', 'M148'} | {f'M{i:03d}' for i in range(188, 217)}),
+    ]),
+    ('Merchant', [
+        ('capacity', lambda cid: cid in {f'K{i:03d}' for i in range(234, 266)}),
+        ('catalog', lambda cid: cid in {f'K{i:03d}' for i in range(91, 212)}),
+        ('inventory', lambda cid: cid in {f'K{i:03d}' for i in range(212, 234)}),
+        ('orders', lambda cid: cid in {f'M{i:03d}' for i in range(217, 231)}),
+        ('stores', lambda cid: cid in {f'K{i:03d}' for i in range(58, 91)} | {f'K{i:03d}' for i in range(266, 269)}),
+    ]),
+    ('Admin', [
+        ('users', lambda cid: cid in {f'J{i:03d}' for i in range(28, 48)}),
+        ('stores', lambda cid: cid in {f'J{i:03d}' for i in range(48, 63)}),
+        ('payments', lambda cid: cid in {f'J{i:03d}' for i in range(63, 71)}),
+    ]),
+    ('Payments', [
+        ('checkout', lambda cid: cid in {f'J{i:03d}' for i in range(2, 14)}),
+        ('preference', lambda cid: cid in {f'J{i:03d}' for i in range(14, 28)}),
+        ('webhook', lambda cid: cid in {'J071', 'J072'}),
+    ]),
+    ('Shared / Public', [
+        ('health', lambda cid: cid == 'J001'),
+        ('media', lambda cid: cid in {f'K{i:03d}' for i in range(269, 275)}),
+        ('stores', lambda cid: cid in {f'K{i:03d}' for i in range(1, 5)}),
+    ]),
+]
+
+
+def organize_collection(items):
+    all_items = {item['name'].split(' | ')[0]: item for item in walk(items)}
+    allocated = set()
+    tree = []
+    for top_name, subfolders in DESTINATIONS:
+        sub_tree = []
+        for sub_name, matcher in subfolders:
+            sub_items = [item for cid, item in sorted(all_items.items()) if matcher(cid)]
+            allocated.update(item['name'].split(' | ')[0] for item in sub_items)
+            if sub_items:
+                sub_tree.append({'name': sub_name, 'item': sub_items})
+        if sub_tree:
+            tree.append({'name': top_name, 'item': sub_tree})
+    remaining = [item for cid, item in sorted(all_items.items()) if cid not in allocated]
+    if remaining:
+        tree.append({'name': 'Otros', 'item': remaining})
+    return tree
+
+
 def prepare(source):
     collection = json.loads(source.read_text())
     collection['item'] = [item for item in collection['item'] if item.get('name') != REGRESSIONS]
@@ -134,8 +195,7 @@ def prepare(source):
     for before, after in RENAMES.items():
         serialized = serialized.replace(before, after)
     collection = json.loads(serialized)
-    for i, folder in enumerate(collection['item'], 1):
-        folder['name'] = f'Grupo {i}'
+    collection['item'] = organize_collection(collection['item'])
     for item in walk(collection['item']):
         case_id, label, *_ = item['name'].split(' | ')
         item.pop('response', None)
@@ -143,6 +203,120 @@ def prepare(source):
         guard = item['event'][0]['script']['exec']
         item['event'][0]['script']['exec'] = [line.replace('JSON.stringify(pm.request.auth || {}))', 'JSON.stringify(pm.request.auth || {}) + JSON.stringify(pm.request.headers || {}))') for line in guard]
         request['description'] = f'Caso {case_id}; {label}. Ejecutar individualmente con datos locales desechables.'
+        if case_id in CUSTOMER_CAPACITY_IDS:
+            if request.get('auth', {}).get('type') == 'bearer':
+                for b in request['auth'].get('bearer', []):
+                    if b.get('key') == 'token':
+                        b['value'] = '{{customerToken}}'
+        elif case_id in MERCHANT_ORDER_IDS:
+            if request.get('auth', {}).get('type') == 'bearer':
+                for b in request['auth'].get('bearer', []):
+                    if b.get('key') == 'token':
+                        b['value'] = '{{merchantToken}}'
+        if case_id == 'M001':
+            clear_line = 'if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("customerToken", "");'
+            if clear_line not in item['event'][0]['script']['exec']:
+                item['event'][0]['script']['exec'].append(clear_line)
+            test_script = [
+                'if (pm.response.code === 200) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData && typeof jsonData.token === "string" && jsonData.token.trim().length > 0) {',
+                '            pm.environment.set("customerToken", jsonData.token);',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(200); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
+        elif case_id == 'M009':
+            clear_line = 'if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("merchantToken", "");'
+            if clear_line not in item['event'][0]['script']['exec']:
+                item['event'][0]['script']['exec'].append(clear_line)
+            test_script = [
+                'if (pm.response.code === 200) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData && typeof jsonData.token === "string" && jsonData.token.trim().length > 0) {',
+                '            pm.environment.set("merchantToken", jsonData.token);',
+                '        }',
+                '        if (jsonData && jsonData.userId) {',
+                '            pm.environment.set("merchantUserId", String(jsonData.userId));',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(200); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
+        elif case_id == 'M017':
+            clear_line = 'if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("adminToken", "");'
+            if clear_line not in item['event'][0]['script']['exec']:
+                item['event'][0]['script']['exec'].append(clear_line)
+            test_script = [
+                'if (pm.response.code === 200) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData && typeof jsonData.token === "string" && jsonData.token.trim().length > 0) {',
+                '            pm.environment.set("adminToken", jsonData.token);',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(200); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
+        elif case_id == 'M025':
+            test_script = [
+                'if (pm.response.code === 200) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData && typeof jsonData.token === "string" && jsonData.token.trim().length > 0) {',
+                '            pm.environment.set("customerToken", jsonData.token);',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(200); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
+        elif case_id == 'K058':
+            test_script = [
+                'if (pm.response.code === 200 || pm.response.code === 201) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData) {',
+                '            if (jsonData.id) {',
+                '                pm.environment.set("storeId", String(jsonData.id));',
+                '            }',
+                '            if (jsonData.slug) {',
+                '                pm.environment.set("storeSlug", String(jsonData.slug));',
+                '            }',
+                '            if (jsonData.merchantUserId) {',
+                '                pm.environment.set("merchantUserId", String(jsonData.merchantUserId));',
+                '            }',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(201); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
+        elif case_id == 'K073':
+            test_script = [
+                'if (pm.response.code === 200) {',
+                '    try {',
+                '        var jsonData = pm.response.json();',
+                '        if (jsonData && jsonData.id) {',
+                '            pm.environment.set("storeId", String(jsonData.id));',
+                '        }',
+                '        if (jsonData && jsonData.slug) {',
+                '            pm.environment.set("storeSlug", String(jsonData.slug));',
+                '        }',
+                '        if (jsonData && jsonData.merchantUserId) {',
+                '            pm.environment.set("merchantUserId", String(jsonData.merchantUserId));',
+                '        }',
+                '    } catch (e) {}',
+                '}',
+                'pm.test("HTTP esperado", function () { pm.response.to.have.status(200); });',
+            ]
+            item['event'] = [item['event'][0], {'listen': 'test', 'script': {'type': 'text/javascript', 'exec': test_script}}]
         raw = request.get('body', {}).get('raw')
         if raw:
             try:
