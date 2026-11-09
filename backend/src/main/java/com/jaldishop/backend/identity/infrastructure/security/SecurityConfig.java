@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/categories").permitAll()
                         .requestMatchers(
                                 "/api/v1/health",
-                                "/actuator/**",
+                                "/actuator/health",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/register/**",
@@ -76,6 +76,7 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/api/v1/checkout/mercado-pago/webhook"
                         ).permitAll()
+                        .requestMatchers("/actuator/**").denyAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
