@@ -119,18 +119,19 @@ for (const item of items) {
     return { skipped, rejected };
   }
 
-  // Debe rechazar URLs externas
-  assert.equal(testGuard('https://external-api.evil.com/api/v1/health').rejected, true, `Debe rechazar host externo en ${item.name}`);
+  // No debe bloquear URLs de producción ni locales por regla de host
+  if (!preScript.includes('financialFakeReady') && !preScript.includes('allowDestructiveOperations')) {
+    assert.equal(testGuard('https://jaldishop-api.onrender.com/api/v1/health').rejected, false, `URL de producción no debe ser bloqueada en ${item.name}`);
+    assert.equal(testGuard('http://127.0.0.1:8080/api/v1/health').rejected, false, `Localhost no debe ser bloqueado en ${item.name}`);
+  }
   
-  // Debe permitir localhost sin exigir runCase
+  // Validaciones operativas financieras y destructivas
   if (preScript.includes('financialFakeReady')) {
     assert.equal(testGuard('http://127.0.0.1:8080/api/v1/checkout/mercado-pago/preference', { financialFakeReady: 'false' }).rejected, true);
     assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/checkout/mercado-pago/preference', { financialFakeReady: 'true' }), { skipped: false, rejected: false });
   } else if (preScript.includes('allowDestructiveOperations')) {
     assert.equal(testGuard('http://127.0.0.1:8080/api/v1/stores/me', { allowDestructiveOperations: 'false' }).rejected, true);
     assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/stores/me', { allowDestructiveOperations: 'true' }), { skipped: false, rejected: false });
-  } else {
-    assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/example'), { skipped: false, rejected: false }, `Localhost bloqueado incorrectamente en ${item.name}`);
   }
 }
 

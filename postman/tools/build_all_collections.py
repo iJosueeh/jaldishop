@@ -203,14 +203,7 @@ def extract_case_id(name):
     return name.split(' | ')[0].strip()
 
 def build_postman_prerequest(case_id):
-    lines = [
-        '// Validación de seguridad local: solo localhost o 127.0.0.1 permitido',
-        'const rawUrl = pm.variables.replaceIn(pm.request.url.toString());',
-        'const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);',
-        'if (!isLocal) {',
-        '    throw new Error("BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)");',
-        '}',
-    ]
+    lines = []
     if case_id in {'M001', 'M039'}:
         lines.append('pm.environment.set("customerToken", "");')
     elif case_id in {'M009', 'K025'}:
@@ -427,12 +420,7 @@ def build_postman_test(case_id, original_tests=None):
 
 
 def build_bruno_scripts(case_id, expected_status=200):
-    pre_script = [
-        'const url = req.getUrl();',
-        'if (!/^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(url)) {',
-        '  throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");',
-        '}',
-    ]
+    pre_script = []
     if case_id in {'M001', 'M039'}:
         pre_script.append('bru.setEnvVar("customerToken", "");')
     elif case_id in {'M009', 'K025'}:
@@ -773,6 +761,27 @@ def sanitize_filename(name):
     return re.sub(r'[\\/*?:"<>|]', '_', name).strip()
 
 
+def clean_prerequest(lines):
+    new_lines = []
+    skip = False
+    for line in lines:
+        if 'BLOQUEADO: Las peticiones solo están permitidas' in line or 'Validación de seguridad local' in line or 'Por seguridad local' in line:
+            continue
+        if 'const rawUrl =' in line and ('replaceIn' in line or 'getUrl' in line):
+            continue
+        if 'const isLocal =' in line or 'const url = req.getUrl()' in line:
+            continue
+        if 'if (!isLocal)' in line or 'if (!/^http' in line:
+            skip = True
+            continue
+        if skip:
+            if '}' in line:
+                skip = False
+            continue
+        new_lines.append(line)
+    return new_lines
+
+
 def main():
     source_path = POSTMAN_DIR / 'jaldishop.postman_collection.json'
     reg_path = POSTMAN_DIR / 'jaldishop.regressions.postman_collection.json'
@@ -785,6 +794,10 @@ def main():
 
     all_items = {}
     for it in items_to_index:
+        for ev in it.get('event', []):
+            if ev.get('listen') == 'prerequest':
+                orig_exec = ev['script'].get('exec', [])
+                ev['script']['exec'] = clean_prerequest(orig_exec)
         cid = extract_case_id(it['name'])
         if cid not in all_items or 'VALIDO' in it['name']:
             all_items[cid] = it
@@ -1131,12 +1144,13 @@ def main():
                         (sub_env / 'JaldiShop Render (Producción).yml').write_text(render_bruno_yaml)
                     print(f"Instalado JaldiShop Local.yml en {sub_env}")
 
-        # También limpiar y corregir JaldiShop API — desarrollo local - 1 para eliminar pm. definitivamente
-        dev_local_1 = USER_BRUNO_DIR / 'JaldiShop API — desarrollo local - 1'
-        if dev_local_1.exists():
-            shutil.rmtree(dev_local_1)
-            shutil.copytree(target_bruno_main, dev_local_1)
-            print(f"Reemplazado {dev_local_1} con versión limpia sin pm.")
+        # También limpiar y corregir JaldiShop API — desarrollo local y JaldiShop API — desarrollo local - 1
+        for dev_dir_name in ['JaldiShop API — desarrollo local', 'JaldiShop API — desarrollo local - 1']:
+            dev_target = USER_BRUNO_DIR / dev_dir_name
+            if dev_target.exists():
+                shutil.rmtree(dev_target)
+                shutil.copytree(target_bruno_main, dev_target)
+                print(f"Reemplazado {dev_target} con versión limpia sin bloqueos ni pm.")
 
         # Actualizar workspace.yml de Bruno manteniendo colecciones activas del usuario (ej. JaldiShop API - 3)
         if BRUNO_WORKSPACE.exists():

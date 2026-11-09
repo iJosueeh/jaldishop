@@ -36,13 +36,6 @@ body:json {
 }
 }
 
-script:pre-request {
-  const url = req.getUrl();
-  if (!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(url)) {
-    throw new Error("Por seguridad local, baseUrl debe apuntar a localhost / 127.0.0.1");
-  }
-}
-
 script:post-response {
   if (res.getStatus() === 201 || res.getStatus() === 200) {
     const data = res.getBody();

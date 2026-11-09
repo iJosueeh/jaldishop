@@ -422,14 +422,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -509,14 +502,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -596,14 +582,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -642,14 +621,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -694,14 +666,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -746,14 +711,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -798,14 +756,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -845,14 +796,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -918,14 +862,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -1002,14 +939,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {
@@ -1057,14 +987,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "// Validación de seguridad local: solo localhost o 127.0.0.1 permitido",
-                  "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
-                  "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
-                  "if (!isLocal) {",
-                  "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
-                  "}"
-                ]
+                "exec": []
               }
             },
             {

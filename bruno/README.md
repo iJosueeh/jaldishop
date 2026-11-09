@@ -7,7 +7,7 @@ Colecciones nativas en formato `.bru` para Bruno 4.3.0+, organizadas para desarr
 1. **APIs Nativas de Bruno:** Usa exclusivamente `bru`, `req`, `res`, `test` y `expect`. Cero referencias o dependencias de Postman (`pm`).
 2. **Sin Errores en Ejecución:** Soluciona el error `ReferenceError: 'pm' is not defined`.
 3. **Flujos Libres:** No exige `runCase` ni bloquea peticiones de lectura cotidianas.
-4. **Seguridad Local:** Valida que las peticiones se dirijan a entornos locales (`localhost` / `127.0.0.1`), impidiendo llamadas accidentales a servicios externos como Mercado Pago o Cloudinary.
+4. **Flexibilidad de Entorno:** Permite ejecutar contra cualquier host configurado en `baseUrl` (local o producción/Render) sin bloqueos artificiales de URL, manteniendo únicamente los controles explícitos para pagos (`financialFakeReady`) y operaciones destructivas (`allowDestructiveOperations`).
 5. **Captura Automática de Tokens e IDs:**
    - `customerToken` y `customerUserId` en login/registro de cliente.
    - `merchantToken`, `merchantUserId`, `storeId`, `storeSlug` en login/registro y tienda del comerciante.
