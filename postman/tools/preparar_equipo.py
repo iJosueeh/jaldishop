@@ -127,6 +127,65 @@ def add_regressions(collection):
     collection['item'].append({'name': REGRESSIONS, 'item': cases})
 
 
+DESTINATIONS = [
+    ('Auth / Identity', [
+        ('auth', lambda cid: cid in {f'M{i:03d}' for i in range(1, 27)} | {f'M{i:03d}' for i in range(39, 53)} | {f'K{i:03d}' for i in range(25, 58)}),
+        ('profile', lambda cid: cid in {f'M{i:03d}' for i in range(27, 39)}),
+    ]),
+    ('Customer', [
+        ('addresses', lambda cid: cid in {f'M{i:03d}' for i in range(53, 141)}),
+        ('cart', lambda cid: cid in {f'M{i:03d}' for i in range(164, 182)}),
+        ('catalog', lambda cid: cid in {f'M{i:03d}' for i in range(141, 147)}),
+        ('capacity', lambda cid: cid in {f'K{i:03d}' for i in range(5, 25)}),
+        ('favorites', lambda cid: cid in {f'M{i:03d}' for i in range(149, 164)}),
+        ('notifications', lambda cid: cid in {f'M{i:03d}' for i in range(231, 238)}),
+        ('orders', lambda cid: cid in {f'M{i:03d}' for i in range(182, 188)}),
+        ('reviews', lambda cid: cid in {'M147', 'M148'} | {f'M{i:03d}' for i in range(188, 217)}),
+    ]),
+    ('Merchant', [
+        ('capacity', lambda cid: cid in {f'K{i:03d}' for i in range(234, 266)}),
+        ('catalog', lambda cid: cid in {f'K{i:03d}' for i in range(91, 212)}),
+        ('inventory', lambda cid: cid in {f'K{i:03d}' for i in range(212, 234)}),
+        ('orders', lambda cid: cid in {f'M{i:03d}' for i in range(217, 231)}),
+        ('stores', lambda cid: cid in {f'K{i:03d}' for i in range(58, 91)} | {f'K{i:03d}' for i in range(266, 269)}),
+    ]),
+    ('Admin', [
+        ('users', lambda cid: cid in {f'J{i:03d}' for i in range(28, 48)}),
+        ('stores', lambda cid: cid in {f'J{i:03d}' for i in range(48, 63)}),
+        ('payments', lambda cid: cid in {f'J{i:03d}' for i in range(63, 71)}),
+    ]),
+    ('Payments', [
+        ('checkout', lambda cid: cid in {f'J{i:03d}' for i in range(2, 14)}),
+        ('preference', lambda cid: cid in {f'J{i:03d}' for i in range(14, 28)}),
+        ('webhook', lambda cid: cid in {'J071', 'J072'}),
+    ]),
+    ('Shared / Public', [
+        ('health', lambda cid: cid == 'J001'),
+        ('media', lambda cid: cid in {f'K{i:03d}' for i in range(269, 275)}),
+        ('stores', lambda cid: cid in {f'K{i:03d}' for i in range(1, 5)}),
+    ]),
+]
+
+
+def organize_collection(items):
+    all_items = {item['name'].split(' | ')[0]: item for item in walk(items)}
+    allocated = set()
+    tree = []
+    for top_name, subfolders in DESTINATIONS:
+        sub_tree = []
+        for sub_name, matcher in subfolders:
+            sub_items = [item for cid, item in sorted(all_items.items()) if matcher(cid)]
+            allocated.update(item['name'].split(' | ')[0] for item in sub_items)
+            if sub_items:
+                sub_tree.append({'name': sub_name, 'item': sub_items})
+        if sub_tree:
+            tree.append({'name': top_name, 'item': sub_tree})
+    remaining = [item for cid, item in sorted(all_items.items()) if cid not in allocated]
+    if remaining:
+        tree.append({'name': 'Otros', 'item': remaining})
+    return tree
+
+
 def prepare(source):
     collection = json.loads(source.read_text())
     collection['item'] = [item for item in collection['item'] if item.get('name') != REGRESSIONS]
@@ -134,8 +193,7 @@ def prepare(source):
     for before, after in RENAMES.items():
         serialized = serialized.replace(before, after)
     collection = json.loads(serialized)
-    for i, folder in enumerate(collection['item'], 1):
-        folder['name'] = f'Grupo {i}'
+    collection['item'] = organize_collection(collection['item'])
     for item in walk(collection['item']):
         case_id, label, *_ = item['name'].split(' | ')
         item.pop('response', None)
