@@ -181,6 +181,31 @@ for (const bfile of bruFiles) {
 }
 console.log(`✓ Colección Bruno validada: ${bruFiles.length} archivos .bru, ${brunoScriptsCount} scripts probados, CERO referencias a pm.`);
 
+console.log('--- 4. Validando Entornos Bruno y Postman ---');
+// Postman environment
+const pmEnv = JSON.parse(fs.readFileSync(path.join(root, 'postman/jaldishop.local.env.json'), 'utf8'));
+assert(Array.isArray(pmEnv.values), 'Postman environment must have values array');
+assert.equal(pmEnv.values.length, 71, 'Postman environment must have 71 variables');
+
+// Bruno JSON importable
+const brunoJsonPath = path.join(root, 'bruno/jaldishop.local.environment.json');
+assert(fs.existsSync(brunoJsonPath), 'Bruno JSON environment must exist');
+const brunoJson = JSON.parse(fs.readFileSync(brunoJsonPath, 'utf8'));
+assert(Array.isArray(brunoJson.variables), 'Invalid environment: missing or invalid variables array');
+assert.equal(brunoJson.variables.length, 71, 'Bruno environment must have 71 variables');
+for (const [idx, v] of brunoJson.variables.entries()) {
+  assert(v && typeof v === 'object', `Invalid variable at index ${idx}: expected an object`);
+  assert(typeof v.name === 'string' && v.name.length > 0, `Invalid variable at index ${idx}: missing or invalid name`);
+}
+
+// Bruno OpenCollection YAML
+const brunoYamlPath = path.join(root, 'bruno/jaldishop/environments/JaldiShop Local.yml');
+assert(fs.existsSync(brunoYamlPath), 'Bruno YAML environment must exist');
+const brunoYamlContent = fs.readFileSync(brunoYamlPath, 'utf8');
+assert(brunoYamlContent.includes('variables:'), 'Bruno YAML must contain variables: section');
+assert(brunoYamlContent.includes('value: http://127.0.0.1:8080'), 'Bruno YAML must have correct baseUrl');
+console.log('✓ Entornos Bruno y Postman validados: 71 variables cada uno, contratos respetados sin conflicto.');
+
 console.log(JSON.stringify({
   status: 'ALL_CHECKS_PASS',
   mainCollectionRequests: items.length,

@@ -1,0 +1,300 @@
+{
+  "name": "JaldiShop Local",
+  "variables": [
+    {
+      "name": "addressId",
+      "value": ""
+    },
+    {
+      "name": "adminEmail",
+      "value": "admin.demo@jaldishop.com"
+    },
+    {
+      "name": "adminPassword",
+      "value": "Password123!",
+      "secret": true
+    },
+    {
+      "name": "adminToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "allowDestructiveOperations",
+      "value": "false"
+    },
+    {
+      "name": "attemptId",
+      "value": ""
+    },
+    {
+      "name": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "name": "capacityConfigId",
+      "value": ""
+    },
+    {
+      "name": "capacityExceptionId",
+      "value": ""
+    },
+    {
+      "name": "cartId",
+      "value": ""
+    },
+    {
+      "name": "categoryId",
+      "value": ""
+    },
+    {
+      "name": "checkoutReferenceId",
+      "value": ""
+    },
+    {
+      "name": "customerEmail",
+      "value": "cliente.demo@jaldishop.com"
+    },
+    {
+      "name": "customerPassword",
+      "value": "Password123!",
+      "secret": true
+    },
+    {
+      "name": "customerToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "customerUserId",
+      "value": ""
+    },
+    {
+      "name": "disposableFixturesReady",
+      "value": "true"
+    },
+    {
+      "name": "duplicateStreetAddress",
+      "value": "Av. Jos\u00e9 Larco 345"
+    },
+    {
+      "name": "duplicateUbigeoCode",
+      "value": "150122"
+    },
+    {
+      "name": "endTime",
+      "value": "12:00:00"
+    },
+    {
+      "name": "existingMerchantEmail",
+      "value": "merchant.demo@jaldishop.com"
+    },
+    {
+      "name": "existingStreetAddress",
+      "value": "Av. Jos\u00e9 Larco 345"
+    },
+    {
+      "name": "existingUbigeoCode",
+      "value": "150122"
+    },
+    {
+      "name": "financialFakeReady",
+      "value": "false"
+    },
+    {
+      "name": "fixtureAddress",
+      "value": "Av. Jos\u00e9 Larco 345"
+    },
+    {
+      "name": "fixtureAddressReference",
+      "value": "Frente al Parque Kennedy"
+    },
+    {
+      "name": "fixtureCustomerName",
+      "value": "Valeria R\u00edos"
+    },
+    {
+      "name": "fixtureCustomerPhone",
+      "value": "+51965432109"
+    },
+    {
+      "name": "fixtureDeliveryAddress",
+      "value": "Av. Jos\u00e9 Larco 345, Dpto 402"
+    },
+    {
+      "name": "fixtureDeliveryReference",
+      "value": "Cerca al Parque Kennedy"
+    },
+    {
+      "name": "fixtureEmail",
+      "value": "nuevo.cliente@example.test"
+    },
+    {
+      "name": "fixtureFirstName",
+      "value": "Valeria"
+    },
+    {
+      "name": "fixtureImageUrl",
+      "value": "https://images.example.test/producto.jpg"
+    },
+    {
+      "name": "fixtureLastName",
+      "value": "R\u00edos"
+    },
+    {
+      "name": "fixturePassword",
+      "value": "Password123!",
+      "secret": true
+    },
+    {
+      "name": "fixturePhone",
+      "value": "+51965432109"
+    },
+    {
+      "name": "fixtureRecipientName",
+      "value": "Valeria R\u00edos"
+    },
+    {
+      "name": "fixtureRecipientPhone",
+      "value": "+51965432109"
+    },
+    {
+      "name": "fixtureReference",
+      "value": "Port\u00f3n verde"
+    },
+    {
+      "name": "fixtureStreetAddress",
+      "value": "Av. Jos\u00e9 Larco 345"
+    },
+    {
+      "name": "invalidShortPassword",
+      "value": "short",
+      "secret": true
+    },
+    {
+      "name": "merchantEmail",
+      "value": "merchant.demo@jaldishop.com"
+    },
+    {
+      "name": "merchantOnlyToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantPassword",
+      "value": "Password123!",
+      "secret": true
+    },
+    {
+      "name": "merchantToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantUserId",
+      "value": ""
+    },
+    {
+      "name": "missingAddressId",
+      "value": ""
+    },
+    {
+      "name": "newRegistrationEmail",
+      "value": "nuevo.usuario@example.test"
+    },
+    {
+      "name": "notificationId",
+      "value": ""
+    },
+    {
+      "name": "orderId",
+      "value": ""
+    },
+    {
+      "name": "orderNumber",
+      "value": ""
+    },
+    {
+      "name": "otherAddressId",
+      "value": ""
+    },
+    {
+      "name": "otherStoreId",
+      "value": ""
+    },
+    {
+      "name": "paymentId",
+      "value": ""
+    },
+    {
+      "name": "preferenceId",
+      "value": ""
+    },
+    {
+      "name": "productId",
+      "value": ""
+    },
+    {
+      "name": "providerOrderId",
+      "value": ""
+    },
+    {
+      "name": "providerPaymentId",
+      "value": ""
+    },
+    {
+      "name": "providerUserId",
+      "value": ""
+    },
+    {
+      "name": "reservationId",
+      "value": ""
+    },
+    {
+      "name": "revokedAdminToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "runCase",
+      "value": "R001"
+    },
+    {
+      "name": "serviceDate",
+      "value": "2026-11-20"
+    },
+    {
+      "name": "startTime",
+      "value": "10:00:00"
+    },
+    {
+      "name": "storeId",
+      "value": ""
+    },
+    {
+      "name": "storeSearchQuery",
+      "value": "pasteleria"
+    },
+    {
+      "name": "storeSlug",
+      "value": ""
+    },
+    {
+      "name": "userId",
+      "value": ""
+    },
+    {
+      "name": "variantId",
+      "value": ""
+    },
+    {
+      "name": "webhookRequestId",
+      "value": ""
+    },
+    {
+      "name": "webhookSignature",
+      "value": "",
+      "secret": true
+    }
+  ]
+}

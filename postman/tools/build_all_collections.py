@@ -13,6 +13,7 @@ import copy
 import json
 import os
 import re
+import yaml
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -1006,7 +1007,49 @@ def main():
         'ignore': ['node_modules', '.git']
     }, indent=2) + '\n')
 
-    # Environments en Bruno (.bru)
+    # Environments en Bruno (.bru, .yml OpenCollection y .json importable)
+    bruno_vars = []
+    for k in sorted(all_keys):
+        is_sec = bool(re.search(r'token|password|signature', k, re.I))
+        val = default_values.get(k, '')
+        var_entry = {'name': k, 'value': str(val)}
+        if is_sec:
+            var_entry['secret'] = True
+        bruno_vars.append(var_entry)
+
+    bruno_env_dict = {
+        'name': 'JaldiShop Local',
+        'variables': bruno_vars
+    }
+    bruno_env_yaml = yaml.dump(bruno_env_dict, sort_keys=False, allow_unicode=True)
+    bruno_env_json = json.dumps(bruno_env_dict, indent=2) + '\n'
+
+    # Guardar JSON importable de Bruno en bruno/ y postman/
+    (REPO_ROOT / 'bruno' / 'jaldishop.local.environment.json').write_text(bruno_env_json)
+    (POSTMAN_DIR / 'jaldishop.local.environment.json').write_text(bruno_env_json)
+
+    # Render environment importable para Bruno
+    render_env_path = POSTMAN_DIR / 'jaldishop.render.env.json'
+    if render_env_path.exists():
+        with open(render_env_path) as rf:
+            render_postman = json.load(rf)
+        render_bruno_vars = []
+        for it in render_postman.get('values', []):
+            entry = {'name': it.get('key'), 'value': it.get('value', '')}
+            if it.get('type') == 'secret':
+                entry['secret'] = True
+            render_bruno_vars.append(entry)
+        render_bruno_dict = {
+            'name': 'JaldiShop Render (Producción)',
+            'variables': render_bruno_vars
+        }
+        render_bruno_json = json.dumps(render_bruno_dict, indent=2) + '\n'
+        render_bruno_yaml = yaml.dump(render_bruno_dict, sort_keys=False, allow_unicode=True)
+        (REPO_ROOT / 'bruno' / 'jaldishop.render.environment.json').write_text(render_bruno_json)
+        (POSTMAN_DIR / 'jaldishop.render.environment.json').write_text(render_bruno_json)
+    else:
+        render_bruno_yaml = None
+
     for tdir in [target_bruno_main, target_bruno_exhaustive]:
         env_dir = tdir / 'environments'
         env_dir.mkdir(parents=True, exist_ok=True)
@@ -1023,6 +1066,9 @@ def main():
             var_lines.append(f'  {sk}{comma}')
         var_lines.append(']')
         (env_dir / 'Local.bru').write_text('\n'.join(var_lines) + '\n')
+        (env_dir / 'JaldiShop Local.yml').write_text(bruno_env_yaml)
+        if render_bruno_yaml:
+            (env_dir / 'JaldiShop Render (Producción).yml').write_text(render_bruno_yaml)
 
     # Escribir requests .bru de la colección principal
     for folder_name, contents in FOLDER_MAPPING:
@@ -1075,6 +1121,16 @@ def main():
         shutil.copytree(target_bruno_exhaustive, user_exh)
         print(f"Sincronizado a {user_main} y {user_exh}")
 
+        # También asegurar que JaldiShop Local.yml exista en todas las carpetas de colecciones con environments
+        for sub in USER_BRUNO_DIR.iterdir():
+            if sub.is_dir():
+                sub_env = sub / 'environments'
+                if sub_env.exists():
+                    (sub_env / 'JaldiShop Local.yml').write_text(bruno_env_yaml)
+                    if render_bruno_yaml:
+                        (sub_env / 'JaldiShop Render (Producción).yml').write_text(render_bruno_yaml)
+                    print(f"Instalado JaldiShop Local.yml en {sub_env}")
+
         # También limpiar y corregir JaldiShop API — desarrollo local - 1 para eliminar pm. definitivamente
         dev_local_1 = USER_BRUNO_DIR / 'JaldiShop API — desarrollo local - 1'
         if dev_local_1.exists():
@@ -1082,31 +1138,24 @@ def main():
             shutil.copytree(target_bruno_main, dev_local_1)
             print(f"Reemplazado {dev_local_1} con versión limpia sin pm.")
 
-        # Actualizar workspace.yml de Bruno
+        # Actualizar workspace.yml de Bruno manteniendo colecciones activas del usuario (ej. JaldiShop API - 3)
         if BRUNO_WORKSPACE.exists():
-            ws_content = f"""opencollection: 1.0.0
-info:
-  name: "My Workspace"
-  type: workspace
+            active_collections = [
+                {"name": "Sample API Collection", "path": "/home/ijosueeh/Documentos/bruno/Sample API Collection"},
+                {"name": "EWro", "path": "/home/ijosueeh/Documentos/bruno/EWro"},
+            ]
+            for candidate in ["JaldiShop API - 3", "JaldiShop API - 2", "JaldiShop API", "JaldiShop API — Pruebas Exhaustivas", "JaldiShop API — desarrollo local - 1"]:
+                cand_path = USER_BRUNO_DIR / candidate
+                if cand_path.exists():
+                    active_collections.append({"name": candidate, "path": str(cand_path)})
 
-collections:
-  - name: "Sample API Collection"
-    path: "/home/ijosueeh/Documentos/bruno/Sample API Collection"
-  - name: "EWro"
-    path: "/home/ijosueeh/Documentos/bruno/EWro"
-  - name: "JaldiShop API"
-    path: "{user_main}"
-  - name: "JaldiShop API — Pruebas Exhaustivas"
-    path: "{user_exh}"
-  - name: "JaldiShop API — desarrollo local - 1"
-    path: "{dev_local_1}"
-
-specs:
-
-docs: ''
-"""
-            BRUNO_WORKSPACE.write_text(ws_content)
-            print(f"Actualizado workspace.yml con colecciones corregidas.")
+            ws_lines = ["opencollection: 1.0.0", "info:", '  name: "My Workspace"', "  type: workspace", "", "collections:"]
+            for col in active_collections:
+                ws_lines.append(f'  - name: "{col["name"]}"')
+                ws_lines.append(f'    path: "{col["path"]}"')
+            ws_lines.extend(["", "specs:", "", "docs: ''", ""])
+            BRUNO_WORKSPACE.write_text("\n".join(ws_lines))
+            print(f"Actualizado workspace.yml con colecciones activas.")
 
 if __name__ == '__main__':
     main()

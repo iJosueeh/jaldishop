@@ -1,0 +1,300 @@
+{
+  "name": "JaldiShop Render (Producci\u00f3n)",
+  "variables": [
+    {
+      "name": "addressId",
+      "value": ""
+    },
+    {
+      "name": "adminEmail",
+      "value": ""
+    },
+    {
+      "name": "adminPassword",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "adminToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "allowDestructiveOperations",
+      "value": ""
+    },
+    {
+      "name": "attemptId",
+      "value": ""
+    },
+    {
+      "name": "baseUrl",
+      "value": "https://jaldishop-api.onrender.com"
+    },
+    {
+      "name": "capacityConfigId",
+      "value": ""
+    },
+    {
+      "name": "capacityExceptionId",
+      "value": ""
+    },
+    {
+      "name": "cartId",
+      "value": ""
+    },
+    {
+      "name": "categoryId",
+      "value": ""
+    },
+    {
+      "name": "checkoutReferenceId",
+      "value": ""
+    },
+    {
+      "name": "customerEmail",
+      "value": ""
+    },
+    {
+      "name": "customerPassword",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "customerToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "customerUserId",
+      "value": ""
+    },
+    {
+      "name": "disposableFixturesReady",
+      "value": ""
+    },
+    {
+      "name": "duplicateStreetAddress",
+      "value": ""
+    },
+    {
+      "name": "duplicateUbigeoCode",
+      "value": ""
+    },
+    {
+      "name": "endTime",
+      "value": ""
+    },
+    {
+      "name": "existingMerchantEmail",
+      "value": ""
+    },
+    {
+      "name": "existingStreetAddress",
+      "value": ""
+    },
+    {
+      "name": "existingUbigeoCode",
+      "value": ""
+    },
+    {
+      "name": "financialFakeReady",
+      "value": ""
+    },
+    {
+      "name": "fixtureAddress",
+      "value": ""
+    },
+    {
+      "name": "fixtureAddressReference",
+      "value": ""
+    },
+    {
+      "name": "fixtureCustomerName",
+      "value": ""
+    },
+    {
+      "name": "fixtureCustomerPhone",
+      "value": ""
+    },
+    {
+      "name": "fixtureDeliveryAddress",
+      "value": ""
+    },
+    {
+      "name": "fixtureDeliveryReference",
+      "value": ""
+    },
+    {
+      "name": "fixtureEmail",
+      "value": ""
+    },
+    {
+      "name": "fixtureFirstName",
+      "value": ""
+    },
+    {
+      "name": "fixtureImageUrl",
+      "value": ""
+    },
+    {
+      "name": "fixtureLastName",
+      "value": ""
+    },
+    {
+      "name": "fixturePassword",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "fixturePhone",
+      "value": ""
+    },
+    {
+      "name": "fixtureRecipientName",
+      "value": ""
+    },
+    {
+      "name": "fixtureRecipientPhone",
+      "value": ""
+    },
+    {
+      "name": "fixtureReference",
+      "value": ""
+    },
+    {
+      "name": "fixtureStreetAddress",
+      "value": ""
+    },
+    {
+      "name": "invalidShortPassword",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantEmail",
+      "value": ""
+    },
+    {
+      "name": "merchantOnlyToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantPassword",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "merchantUserId",
+      "value": ""
+    },
+    {
+      "name": "missingAddressId",
+      "value": ""
+    },
+    {
+      "name": "newRegistrationEmail",
+      "value": ""
+    },
+    {
+      "name": "notificationId",
+      "value": ""
+    },
+    {
+      "name": "orderId",
+      "value": ""
+    },
+    {
+      "name": "orderNumber",
+      "value": ""
+    },
+    {
+      "name": "otherAddressId",
+      "value": ""
+    },
+    {
+      "name": "otherStoreId",
+      "value": ""
+    },
+    {
+      "name": "paymentId",
+      "value": ""
+    },
+    {
+      "name": "preferenceId",
+      "value": ""
+    },
+    {
+      "name": "productId",
+      "value": ""
+    },
+    {
+      "name": "providerOrderId",
+      "value": ""
+    },
+    {
+      "name": "providerPaymentId",
+      "value": ""
+    },
+    {
+      "name": "providerUserId",
+      "value": ""
+    },
+    {
+      "name": "reservationId",
+      "value": ""
+    },
+    {
+      "name": "revokedAdminToken",
+      "value": "",
+      "secret": true
+    },
+    {
+      "name": "runCase",
+      "value": ""
+    },
+    {
+      "name": "serviceDate",
+      "value": ""
+    },
+    {
+      "name": "startTime",
+      "value": ""
+    },
+    {
+      "name": "storeId",
+      "value": ""
+    },
+    {
+      "name": "storeSearchQuery",
+      "value": ""
+    },
+    {
+      "name": "storeSlug",
+      "value": ""
+    },
+    {
+      "name": "userId",
+      "value": ""
+    },
+    {
+      "name": "variantId",
+      "value": ""
+    },
+    {
+      "name": "webhookRequestId",
+      "value": ""
+    },
+    {
+      "name": "webhookSignature",
+      "value": "",
+      "secret": true
+    }
+  ]
+}

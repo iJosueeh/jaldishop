@@ -33,8 +33,11 @@ Ubicada en `bruno/jaldishop-exhaustive`, contiene los más de 480 casos de valid
 
 1. Abre la aplicación **Bruno**.
 2. Selecciona **Open Collection** y navega a:
-   - `Documentos/Proyectos/jaldishop/bruno/jaldishop` (o la carpeta sincronizada en `Documentos/bruno/JaldiShop API`).
-3. Selecciona el entorno `Local` en el selector superior derecho.
-4. Ejecuta las peticiones en orden:
+   - `Documentos/Proyectos/jaldishop/bruno/jaldishop` (o la colección activa en tu workspace de Bruno).
+3. Selecciona el entorno `Local` o `JaldiShop Local` en el selector superior derecho (ya está preinstalado en `environments/`).
+4. Si necesitas importar un entorno manualmente desde archivo:
+   - Selecciona `bruno/jaldishop.local.environment.json` (formato Bruno con `variables`).
+   - **Nota:** No uses `jaldishop.local.env.json` en Bruno, ya que es formato Postman (`values`) y provocará el error `missing or invalid variables array`.
+5. Ejecuta las peticiones en orden:
    - Registrar o Iniciar Sesión para capturar el token del rol deseado.
    - Consumir el catálogo, agregar al carrito y procesar pedidos.

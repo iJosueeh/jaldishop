@@ -69,6 +69,15 @@ Prevención de sesiones obsoletas: Cada login limpia preventivamente el token an
 - **Operaciones Destructivas:** La eliminación de tienda (`DELETE /api/v1/stores/me`) exige `allowDestructiveOperations=true`.
 - **Checkout:** Requiere que la tienda esté activa (`ACTIVE`), que el carrito contenga ítems válidos y que exista disponibilidad de capacidad e inventario.
 
+## Archivos de Entorno
+
+- **Para Postman:**
+  - `jaldishop.local.env.json`: Entorno local con 71 variables (formato Postman con `values: [...]`).
+  - `jaldishop.render.env.json`: Entorno Render.
+- **Para Bruno:**
+  - `jaldishop.local.environment.json`: Entorno importable en Bruno (formato OpenCollection con `variables: [...]`).
+  - En las colecciones Bruno nativas (`bruno/jaldishop`), los entornos ya vienen preinstalados en `environments/Local.bru` y `environments/JaldiShop Local.yml`. No es necesario importar archivo externo.
+
 ## Variables
 
 | Variable | Uso |
