@@ -34,11 +34,6 @@
       "type": "string"
     },
     {
-      "key": "authToken",
-      "value": "",
-      "type": "string"
-    },
-    {
       "key": "baseUrl",
       "value": "http://127.0.0.1:8080",
       "type": "string"
@@ -220,6 +215,11 @@
     },
     {
       "key": "merchantToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "merchantUserId",
       "value": "",
       "type": "string"
     },
@@ -3012,7 +3012,8 @@
                       "if (missing || !allowed || !selected || !fakeReady || !fixturesReady) {",
                       "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                       "    throw new Error(\"BLOQUEADO: localhost, fixtures desechables, runCase exacto y fake financiero cuando corresponda son obligatorios\");",
-                      "}"
+                      "}",
+                      "if (pm.environment && typeof pm.environment.set === \"function\") pm.environment.set(\"customerToken\", \"\");"
                     ]
                   }
                 },
@@ -3021,35 +3022,14 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "if (pm.response.code === 200) {",
                       "    try {",
                       "        var jsonData = pm.response.json();",
-                      "        if (jsonData && jsonData.token) {",
+                      "        if (jsonData && typeof jsonData.token === \"string\" && jsonData.token.trim().length > 0) {",
                       "            pm.environment.set(\"customerToken\", jsonData.token);",
-                      "            pm.environment.set(\"authToken\", jsonData.token);",
-                      "        }",
-                      "        if (jsonData && jsonData.userId) {",
-                      "            pm.environment.set(\"userId\", String(jsonData.userId));",
                       "        }",
                       "    } catch (e) {}",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "if (pm.response.code === 200) pm.environment.set(\"customerToken\", pm.response.json().token);"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(200); });"
                     ]
                   }
@@ -3663,7 +3643,8 @@
                       "if (missing || !allowed || !selected || !fakeReady || !fixturesReady) {",
                       "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                       "    throw new Error(\"BLOQUEADO: localhost, fixtures desechables, runCase exacto y fake financiero cuando corresponda son obligatorios\");",
-                      "}"
+                      "}",
+                      "if (pm.environment && typeof pm.environment.set === \"function\") pm.environment.set(\"merchantToken\", \"\");"
                     ]
                   }
                 },
@@ -3672,35 +3653,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "if (pm.response.code === 200) {",
                       "    try {",
                       "        var jsonData = pm.response.json();",
-                      "        if (jsonData && jsonData.token) {",
+                      "        if (jsonData && typeof jsonData.token === \"string\" && jsonData.token.trim().length > 0) {",
                       "            pm.environment.set(\"merchantToken\", jsonData.token);",
-                      "            pm.environment.set(\"authToken\", jsonData.token);",
                       "        }",
                       "        if (jsonData && jsonData.userId) {",
-                      "            pm.environment.set(\"userId\", String(jsonData.userId));",
+                      "            pm.environment.set(\"merchantUserId\", String(jsonData.userId));",
                       "        }",
                       "    } catch (e) {}",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "if (pm.response.code === 200) pm.environment.set(\"merchantToken\", pm.response.json().token);"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(200); });"
                     ]
                   }
@@ -4314,7 +4277,8 @@
                       "if (missing || !allowed || !selected || !fakeReady || !fixturesReady) {",
                       "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                       "    throw new Error(\"BLOQUEADO: localhost, fixtures desechables, runCase exacto y fake financiero cuando corresponda son obligatorios\");",
-                      "}"
+                      "}",
+                      "if (pm.environment && typeof pm.environment.set === \"function\") pm.environment.set(\"adminToken\", \"\");"
                     ]
                   }
                 },
@@ -4323,35 +4287,14 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "if (pm.response.code === 200) {",
                       "    try {",
                       "        var jsonData = pm.response.json();",
-                      "        if (jsonData && jsonData.token) {",
+                      "        if (jsonData && typeof jsonData.token === \"string\" && jsonData.token.trim().length > 0) {",
                       "            pm.environment.set(\"adminToken\", jsonData.token);",
-                      "            pm.environment.set(\"authToken\", jsonData.token);",
-                      "        }",
-                      "        if (jsonData && jsonData.userId) {",
-                      "            pm.environment.set(\"userId\", String(jsonData.userId));",
                       "        }",
                       "    } catch (e) {}",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "if (pm.response.code === 200) pm.environment.set(\"adminToken\", pm.response.json().token);"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(200); });"
                     ]
                   }
@@ -4967,27 +4910,14 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "if (pm.response.code === 200 || pm.response.code === 201) {",
+                      "if (pm.response.code === 200) {",
                       "    try {",
                       "        var jsonData = pm.response.json();",
-                      "        if (jsonData && typeof jsonData.token === 'string' && jsonData.token.trim().length > 0) {",
-                      "            pm.environment.set('authToken', jsonData.token);",
-                      "            if (typeof jsonData.userId === 'string' && jsonData.userId.trim().length > 0) {",
-                      "                pm.environment.set('userId', jsonData.userId);",
-                      "            }",
+                      "        if (jsonData && typeof jsonData.token === \"string\" && jsonData.token.trim().length > 0) {",
+                      "            pm.environment.set(\"customerToken\", jsonData.token);",
                       "        }",
-                      "    } catch (e) {",
-                      "        // Ignorar de forma no disruptiva si la respuesta no es parseable",
-                      "    }",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "    } catch (e) {}",
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(200); });"
                     ]
                   }
@@ -16824,7 +16754,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17012,7 +16942,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17202,7 +17132,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17381,7 +17311,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17466,7 +17396,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17551,7 +17481,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17636,7 +17566,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17721,7 +17651,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17806,7 +17736,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17891,7 +17821,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -17976,7 +17906,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -18055,7 +17985,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -18214,7 +18144,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -18292,7 +18222,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -18451,7 +18381,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{merchantToken}}",
+                      "value": "{{customerToken}}",
                       "type": "string"
                     }
                   ]
@@ -39358,7 +39288,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -39647,7 +39577,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -39732,7 +39662,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -39979,7 +39909,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -40064,7 +39994,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -40164,7 +40094,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -40456,7 +40386,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -40556,7 +40486,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{customerToken}}",
+                      "value": "{{merchantToken}}",
                       "type": "string"
                     }
                   ]
@@ -40685,19 +40615,12 @@
                       "            if (jsonData.slug) {",
                       "                pm.environment.set(\"storeSlug\", String(jsonData.slug));",
                       "            }",
+                      "            if (jsonData.merchantUserId) {",
+                      "                pm.environment.set(\"merchantUserId\", String(jsonData.merchantUserId));",
+                      "            }",
                       "        }",
-                      "    } catch (e) {",
-                      "        // Ignorar de forma no disruptiva si la respuesta no es parseable",
-                      "    }",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "    } catch (e) {}",
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(201); });"
                     ]
                   }
@@ -41944,16 +41867,11 @@
                       "        if (jsonData && jsonData.slug) {",
                       "            pm.environment.set(\"storeSlug\", String(jsonData.slug));",
                       "        }",
+                      "        if (jsonData && jsonData.merchantUserId) {",
+                      "            pm.environment.set(\"merchantUserId\", String(jsonData.merchantUserId));",
+                      "        }",
                       "    } catch (e) {}",
-                      "}"
-                    ]
-                  }
-                },
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
+                      "}",
                       "pm.test(\"HTTP esperado\", function () { pm.response.to.have.status(200); });"
                     ]
                   }
