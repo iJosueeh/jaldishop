@@ -14,6 +14,7 @@ public final class PostgresTriggerAssertions {
                 && sqlException.getMessage() != null && sqlException.getMessage().contains(message))) {
             cause = cause.getCause();
         }
-        assertThat(cause).as("PostgreSQL trigger error %s: %s", sqlState, message).isNotNull();
+        assertThat(cause).as("PostgreSQL trigger error %s: %s; actual failure: %s",
+                sqlState, message, failure).isNotNull();
     }
 }

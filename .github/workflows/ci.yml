@@ -81,7 +81,7 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgrespassword
           JWT_SECRET: c2VjdXJlX2p3dF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nX3B1cnBvc2VzXzEyMzQ1Njc4OTA=
-        run: ./mvnw clean test '-Dsurefire.excludes=**/*$*,com/jaldishop/backend/payment/application/reconciliation/SingleAttemptIsolatedReconciliationTest.java,com/jaldishop/backend/address/application/service/CustomerAddressPostgresIntegrationTest.java,com/jaldishop/backend/store/infrastructure/persistence/repository/StoreSearchPostgresIntegrationTest.java,com/jaldishop/backend/store/infrastructure/persistence/repository/StoreCustomerPostgresIntegrationTest.java'
+        run: ./mvnw clean test
 
       - name: Upload Surefire reports
         if: always()
