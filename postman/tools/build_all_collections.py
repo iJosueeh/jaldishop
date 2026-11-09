@@ -207,27 +207,24 @@ def build_postman_prerequest(case_id):
         'const rawUrl = pm.variables.replaceIn(pm.request.url.toString());',
         'const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);',
         'if (!isLocal) {',
-        '    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();',
         '    throw new Error("BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)");',
         '}',
     ]
     if case_id in {'M001', 'M039'}:
-        lines.append('if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("customerToken", "");')
+        lines.append('pm.environment.set("customerToken", "");')
     elif case_id in {'M009', 'K025'}:
-        lines.append('if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("merchantToken", "");')
+        lines.append('pm.environment.set("merchantToken", "");')
     elif case_id == 'M017':
-        lines.append('if (pm.environment && typeof pm.environment.set === "function") pm.environment.set("adminToken", "");')
+        lines.append('pm.environment.set("adminToken", "");')
     elif case_id in {'J014', 'J071', 'J072'}:
         lines.extend([
             'if (pm.environment.get("financialFakeReady") !== "true") {',
-            '    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();',
             '    throw new Error("BLOQUEADO: Operación de pago requiere financialFakeReady=true con gateway fake local verificado.");',
             '}'
         ])
     elif case_id == 'K089':
         lines.extend([
             'if (pm.environment.get("allowDestructiveOperations") !== "true") {',
-            '    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();',
             '    throw new Error("BLOQUEADO: Operación destructiva requiere allowDestructiveOperations=true en el entorno.");',
             '}'
         ])

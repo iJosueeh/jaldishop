@@ -120,14 +120,14 @@ for (const item of items) {
   }
 
   // Debe rechazar URLs externas
-  assert.deepEqual(testGuard('https://external-api.evil.com/api/v1/health'), { skipped: true, rejected: true }, `Debe rechazar host externo en ${item.name}`);
+  assert.equal(testGuard('https://external-api.evil.com/api/v1/health').rejected, true, `Debe rechazar host externo en ${item.name}`);
   
   // Debe permitir localhost sin exigir runCase
   if (preScript.includes('financialFakeReady')) {
-    assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/checkout/mercado-pago/preference', { financialFakeReady: 'false' }), { skipped: true, rejected: true });
+    assert.equal(testGuard('http://127.0.0.1:8080/api/v1/checkout/mercado-pago/preference', { financialFakeReady: 'false' }).rejected, true);
     assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/checkout/mercado-pago/preference', { financialFakeReady: 'true' }), { skipped: false, rejected: false });
   } else if (preScript.includes('allowDestructiveOperations')) {
-    assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/stores/me', { allowDestructiveOperations: 'false' }), { skipped: true, rejected: true });
+    assert.equal(testGuard('http://127.0.0.1:8080/api/v1/stores/me', { allowDestructiveOperations: 'false' }).rejected, true);
     assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/stores/me', { allowDestructiveOperations: 'true' }), { skipped: false, rejected: false });
   } else {
     assert.deepEqual(testGuard('http://127.0.0.1:8080/api/v1/example'), { skipped: false, rejected: false }, `Localhost bloqueado incorrectamente en ${item.name}`);

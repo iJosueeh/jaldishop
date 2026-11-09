@@ -427,7 +427,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -515,7 +514,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -603,7 +601,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -650,7 +647,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -703,7 +699,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -756,7 +751,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -809,7 +803,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -857,7 +850,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -931,7 +923,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -1016,7 +1007,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
@@ -1072,7 +1062,6 @@
                   "const rawUrl = pm.variables.replaceIn(pm.request.url.toString());",
                   "const isLocal = /^http:\\/\\/(localhost|127\\.0\\.0\\.1|\\[::1\\])(?::\\d+)?\\//.test(rawUrl);",
                   "if (!isLocal) {",
-                  "    if (pm.execution && pm.execution.skipRequest) pm.execution.skipRequest();",
                   "    throw new Error(\"BLOQUEADO: Las peticiones solo están permitidas contra entornos locales (localhost / 127.0.0.1)\");",
                   "}"
                 ]
