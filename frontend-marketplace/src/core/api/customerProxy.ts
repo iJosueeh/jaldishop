@@ -28,6 +28,8 @@ export async function customerProxy(request: NextRequest, endpoint: string) {
     });
     const data = await upstream.json();
     const response = NextResponse.json(data, { status: upstream.status });
+    const retryAfter = upstream.headers.get('Retry-After');
+    if (retryAfter) response.headers.set('Retry-After', retryAfter);
     if (upstream.status === 401) response.cookies.delete(CUSTOMER_COOKIE);
     return response;
   } catch {

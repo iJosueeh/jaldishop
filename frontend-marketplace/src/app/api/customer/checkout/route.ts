@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
 
     const data = await upstream.json().catch(() => ({}));
     const response = NextResponse.json(data, { status: upstream.status });
+    const retryAfter = upstream.headers.get('Retry-After');
+    if (retryAfter) response.headers.set('Retry-After', retryAfter);
 
     if (upstream.status === 401) {
       response.cookies.delete(CUSTOMER_COOKIE);
