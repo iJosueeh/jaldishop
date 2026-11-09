@@ -1,0 +1,30 @@
+meta {
+  name: K250 - SIN_AUTH - 07. Crear Excepción
+  type: http
+  seq: 268
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity-exceptions
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "exceptionCapacity": 5,
+  "reason": "Feriado Navidad"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

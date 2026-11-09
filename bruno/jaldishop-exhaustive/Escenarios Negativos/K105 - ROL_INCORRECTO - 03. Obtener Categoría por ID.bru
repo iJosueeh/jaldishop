@@ -1,0 +1,23 @@
+meta {
+  name: K105 - ROL_INCORRECTO - 03. Obtener Categoría por ID
+  type: http
+  seq: 144
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories/{{categoryId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

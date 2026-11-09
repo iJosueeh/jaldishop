@@ -1,0 +1,19 @@
+meta {
+  name: M232 - SIN_AUTH - 01. Listar Mis Notificaciones
+  type: http
+  seq: 480
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications?page=0&size=20
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

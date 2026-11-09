@@ -1,0 +1,29 @@
+meta {
+  name: K010 - SIN_AUTH - 03. Crear Reserva de Capacidad
+  type: http
+  seq: 59
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity/reservations
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

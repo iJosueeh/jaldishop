@@ -1,0 +1,23 @@
+meta {
+  name: M179 - UUID_INVALIDO_variantId - 04. Eliminar Ítem del Carrito
+  type: http
+  seq: 440
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/cart/items/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

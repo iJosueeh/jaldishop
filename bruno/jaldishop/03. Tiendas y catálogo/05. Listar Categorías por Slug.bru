@@ -1,0 +1,19 @@
+meta {
+  name: 05. Listar Categorías por Slug
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/slug/{{storeSlug}}/categories
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

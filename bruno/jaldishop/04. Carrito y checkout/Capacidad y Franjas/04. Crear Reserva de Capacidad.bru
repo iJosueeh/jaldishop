@@ -1,0 +1,40 @@
+meta {
+  name: 04. Crear Reserva de Capacidad
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity/reservations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}"
+}
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody();
+    if (data && data.id) bru.setEnvVar("reservationId", String(data.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

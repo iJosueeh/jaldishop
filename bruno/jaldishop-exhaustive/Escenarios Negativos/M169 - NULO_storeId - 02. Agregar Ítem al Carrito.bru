@@ -1,0 +1,32 @@
+meta {
+  name: M169 - NULO_storeId - 02. Agregar Ítem al Carrito
+  type: http
+  seq: 432
+}
+
+post {
+  url: {{baseUrl}}/api/v1/cart/items
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": null,
+  "variantId": "{{variantId}}",
+  "quantity": 2
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

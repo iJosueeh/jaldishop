@@ -1,0 +1,19 @@
+meta {
+  name: M028 - SIN_AUTH - 06. Obtener Mi Perfil
+  type: http
+  seq: 309
+}
+
+get {
+  url: {{baseUrl}}/api/v1/users/me
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

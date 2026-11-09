@@ -1,0 +1,23 @@
+meta {
+  name: M134 - UUID_INVALIDO_id - 04. Marcar Dirección Predeterminada
+  type: http
+  seq: 409
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/customer/addresses/invalid-uuid/default
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

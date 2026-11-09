@@ -1,0 +1,35 @@
+meta {
+  name: K160 - NULO_presentationName - 10. Crear Variante de Producto
+  type: http
+  seq: 192
+}
+
+post {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": null,
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 18.5,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "attributes": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

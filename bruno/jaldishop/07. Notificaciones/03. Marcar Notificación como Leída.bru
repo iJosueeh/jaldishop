@@ -1,0 +1,23 @@
+meta {
+  name: 03. Marcar Notificación como Leída
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/notifications/{{notificationId}}/read
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

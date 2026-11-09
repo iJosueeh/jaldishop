@@ -1,0 +1,31 @@
+meta {
+  name: K270 - TIENDA_AJENA - 03. Generar Firma Cloudinary
+  type: http
+  seq: 282
+}
+
+post {
+  url: {{baseUrl}}/api/v1/media/upload-signature
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "targetType": "PRODUCT_IMAGE",
+  "storeId": "{{otherStoreId}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,45 @@
+meta {
+  name: K208 - ATTR_DUPLICADO_TRIM - 12. Actualizar Variante
+  type: http
+  seq: 238
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants/{{variantId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": "Porción Individual Grande",
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 20.0,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "status": "ACTIVE",
+  "attributes": [
+    {
+      "name": "Color",
+      "value": "a"
+    },
+    {
+      "name": " Color ",
+      "value": "b"
+    }
+  ]
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

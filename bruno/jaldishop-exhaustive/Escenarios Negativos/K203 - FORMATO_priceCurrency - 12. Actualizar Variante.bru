@@ -1,0 +1,36 @@
+meta {
+  name: K203 - FORMATO_priceCurrency - 12. Actualizar Variante
+  type: http
+  seq: 233
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants/{{variantId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": "Porción Individual Grande",
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 20.0,
+  "priceCurrency": "!invalid!",
+  "tracksInventory": true,
+  "status": "ACTIVE",
+  "attributes": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

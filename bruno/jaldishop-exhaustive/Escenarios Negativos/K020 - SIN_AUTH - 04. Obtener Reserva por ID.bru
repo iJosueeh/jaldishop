@@ -1,0 +1,19 @@
+meta {
+  name: K020 - SIN_AUTH - 04. Obtener Reserva por ID
+  type: http
+  seq: 68
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity/reservations/{{reservationId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

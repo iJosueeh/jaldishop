@@ -1,0 +1,23 @@
+meta {
+  name: J057 - ROL_INCORRECTO - 03. Suspender Tienda
+  type: http
+  seq: 46
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/stores/{{storeId}}/suspend
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

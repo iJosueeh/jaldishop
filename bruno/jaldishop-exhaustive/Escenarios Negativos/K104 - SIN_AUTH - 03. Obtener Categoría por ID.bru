@@ -1,0 +1,19 @@
+meta {
+  name: K104 - SIN_AUTH - 03. Obtener Categoría por ID
+  type: http
+  seq: 143
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories/{{categoryId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: M158 - ROL_INCORRECTO - 03. Agregar Producto a Favoritos
+  type: http
+  seq: 424
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/{{productId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

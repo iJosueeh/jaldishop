@@ -1,0 +1,20 @@
+meta {
+  name: 07. Búsqueda Límite Inválido 0 (400)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=pasteleria&limit=0
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Código VALIDATION_ERROR", function() { expect(res.getBody().code).to.equal("VALIDATION_ERROR"); });
+}

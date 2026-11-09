@@ -1,0 +1,36 @@
+meta {
+  name: K199 - FUERA_DecimalMin_priceAmount - 12. Actualizar Variante
+  type: http
+  seq: 229
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants/{{variantId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "presentationName": "Porción Individual Grande",
+  "sku": "CHEESE-IND-01",
+  "priceAmount": -0.99,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "status": "ACTIVE",
+  "attributes": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

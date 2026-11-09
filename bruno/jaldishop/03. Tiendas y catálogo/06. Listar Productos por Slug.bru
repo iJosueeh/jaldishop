@@ -1,0 +1,19 @@
+meta {
+  name: 06. Listar Productos por Slug
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/slug/{{storeSlug}}/products
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

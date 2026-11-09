@@ -1,0 +1,19 @@
+meta {
+  name: 07. Listar Categorías por ID de Tienda
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/{{storeId}}/categories
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

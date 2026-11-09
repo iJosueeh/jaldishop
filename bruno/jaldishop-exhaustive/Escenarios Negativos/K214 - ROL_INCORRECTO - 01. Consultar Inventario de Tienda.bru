@@ -1,0 +1,23 @@
+meta {
+  name: K214 - ROL_INCORRECTO - 01. Consultar Inventario de Tienda
+  type: http
+  seq: 243
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

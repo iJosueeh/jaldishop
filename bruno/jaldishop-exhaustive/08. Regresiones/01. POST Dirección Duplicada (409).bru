@@ -1,0 +1,42 @@
+meta {
+  name: 01. POST Dirección Duplicada (409)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "alias": "Casa",
+  "recipientName": "{{fixtureRecipientName}}",
+  "recipientPhone": "{{fixtureRecipientPhone}}",
+  "streetAddress": "{{duplicateStreetAddress}}",
+  "department": "Lima",
+  "province": "Lima",
+  "district": "Miraflores",
+  "ubigeoCode": "{{duplicateUbigeoCode}}",
+  "reference": "{{fixtureReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "isDefault": true
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Código ADDRESS_ALREADY_EXISTS", function() { expect(res.getBody().code).to.equal("ADDRESS_ALREADY_EXISTS"); });
+}

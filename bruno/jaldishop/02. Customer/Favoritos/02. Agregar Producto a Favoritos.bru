@@ -1,0 +1,23 @@
+meta {
+  name: 02. Agregar Producto a Favoritos
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/{{productId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: 01. Obtener Carrito
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/cart
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const data = res.getBody();
+    if (data && data.id) bru.setEnvVar("cartId", String(data.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,19 @@
+meta {
+  name: K235 - SIN_AUTH - 01. Listar Configuraciones
+  type: http
+  seq: 259
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity-configurations
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

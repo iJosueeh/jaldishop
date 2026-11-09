@@ -1,0 +1,23 @@
+meta {
+  name: K183 - UUID_INVALIDO_storeId - 11. Obtener Variante por ID
+  type: http
+  seq: 214
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/invalid-uuid/products/{{productId}}/variants/{{variantId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

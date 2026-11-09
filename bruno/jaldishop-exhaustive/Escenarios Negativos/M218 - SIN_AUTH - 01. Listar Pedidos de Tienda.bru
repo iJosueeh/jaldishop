@@ -1,0 +1,19 @@
+meta {
+  name: M218 - SIN_AUTH - 01. Listar Pedidos de Tienda
+  type: http
+  seq: 469
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

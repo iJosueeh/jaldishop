@@ -1,0 +1,32 @@
+meta {
+  name: 01. Obtener Mi Tienda
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 200 || res.getStatus() === 201) {
+    const data = res.getBody();
+    if (data && data.id) bru.setEnvVar("storeId", String(data.id));
+    if (data && data.slug) bru.setEnvVar("storeSlug", String(data.slug));
+    if (data && data.merchantUserId) bru.setEnvVar("merchantUserId", String(data.merchantUserId));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

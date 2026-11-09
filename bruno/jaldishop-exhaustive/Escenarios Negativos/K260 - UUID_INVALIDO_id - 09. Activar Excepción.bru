@@ -1,0 +1,23 @@
+meta {
+  name: K260 - UUID_INVALIDO_id - 09. Activar Excepción
+  type: http
+  seq: 276
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/invalid-uuid/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

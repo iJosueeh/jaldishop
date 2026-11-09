@@ -1,0 +1,19 @@
+meta {
+  name: K262 - SIN_AUTH - 10. Desactivar Excepción
+  type: http
+  seq: 277
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/{{capacityExceptionId}}/deactivate
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

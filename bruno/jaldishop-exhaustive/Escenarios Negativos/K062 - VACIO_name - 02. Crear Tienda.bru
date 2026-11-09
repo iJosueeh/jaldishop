@@ -1,0 +1,48 @@
+meta {
+  name: K062 - VACIO_name - 02. Crear Tienda
+  type: http
+  seq: 107
+}
+
+post {
+  url: {{baseUrl}}/api/v1/stores
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "name": "",
+  "slug": "pasteleria-delicia",
+  "description": "Tortas y bocaditos",
+  "contactPhone": "987654321",
+  "address": "{{fixtureAddress}}",
+  "addressReference": "{{fixtureAddressReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "pickupEnabled": true,
+  "deliveryEnabled": true,
+  "deliveryFeeAmount": 5.0,
+  "deliveryFeeCurrency": "PEN",
+  "taxRate": 18.0,
+  "logoUrl": null,
+  "bannerUrl": null,
+  "instagramUrl": null,
+  "facebookUrl": null,
+  "whatsappNumber": null,
+  "categoryIds": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

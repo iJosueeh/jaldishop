@@ -1,0 +1,23 @@
+meta {
+  name: M055 - ROL_INCORRECTO - 01. Listar Mis Direcciones
+  type: http
+  seq: 333
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{merchantOnlyToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

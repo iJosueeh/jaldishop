@@ -1,0 +1,19 @@
+meta {
+  name: K267 - SIN_AUTH - 01. Listar Clientes de la Tienda
+  type: http
+  seq: 280
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchant/customers?query=
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

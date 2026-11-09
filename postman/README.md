@@ -1,183 +1,174 @@
-# JaldiShop API — Postman local
+# JaldiShop API — Colección Postman Local y Demostración
 
-Colección Postman v2.1 para Spring Boot 4.1.1. Incluye **594 escenarios** sobre
-**97 rutas HTTP**: 100 requests originales, sus variantes negativas y 11 regresiones
-explícitas de las correcciones del backend. Los estados esperados presuponen fixtures
-válidos y aislados; esta colección no prepara ni restaura datos automáticamente.
+Colección Postman v2.1 para Spring Boot 4.1.1 simplificada y organizada para el desarrollo local y demostración de JaldiShop.
+Cubre **97 rutas HTTP** con **111 peticiones** en la colección principal y mantiene separados los **494 escenarios negativos y regresiones** en una colección secundaria.
 
-## Inicio
+## Estructura de Navegación Principal
 
-1. Iniciar el backend con [la guía local](../backend/README.md).
-2. Importar [la colección](jaldishop.postman_collection.json) y
-   [el entorno local](jaldishop.local.env.json) en Postman.
-   `jaldishop.postman_environment.json` es un alias idéntico; importar solo uno.
-3. Completar únicamente en el entorno privado los valores necesarios para el caso.
-   No guardar tokens, contraseñas ni datos reales en los JSON compartidos.
-4. Usar una API en localhost con una base **local desechable dedicada a pruebas**;
-   no apuntar a la base personal de trabajo ni ejecutar toda la colección indiscriminadamente.
-5. Asignar `runCase` al ID exacto de la petición, por ejemplo `R004`, y
-   `disposableFixturesReady` a la cadena `true` solo después de preparar sus datos.
-   Ejecutar ese request individualmente. Los flags comienzan vacíos y bloquean el envío.
-6. Restaurar los fixtures entre casos que escriben. Un request válido repetido puede
-   dejar de ser válido por duplicados, límites o cambios de estado.
+La colección principal `jaldishop.postman_collection.json` está organizada en 8 módulos funcionales:
 
-La protección exige URL local, variables resueltas en URL/body/auth/headers y el ID
-seleccionado. Se desactivan las redirecciones. Los scripts no envían requests secundarios.
+1. **`01. Autenticación`**: Registro y login separados por rol (`Customer`, `Merchant`, `Admin`), refresh token y gestión de perfil.
+2. **`02. Customer`**: Gestión de direcciones, lista de favoritos y sistema de reseñas.
+3. **`03. Tiendas y catálogo`**: Health check, tiendas destacadas, búsqueda pública, consulta por slug e ID, y listado de productos/categorías.
+4. **`04. Carrito y checkout`**: Ciclo del carrito (agregar, actualizar, listar, vaciar), consulta de franjas horarias y disponibilidad, y reserva de checkout.
+5. **`05. Pedidos y pagos`**: Consulta y cancelación de pedidos del cliente, integración local de Mercado Pago (fake sandbox) e investigación/reconciliación de pagos administrativos.
+6. **`06. Merchant`**: Gestión de tienda propia, catálogo de productos y variantes, control de inventario y stock físico, configuración de capacidad y excepciones, pedidos de la tienda y clientes. Además incluye la administración de usuarios y tiendas de la plataforma.
+7. **`07. Notificaciones`**: Listado de notificaciones, conteo de no leídas y marcado como leída.
+8. **`08. Regresiones`**: Casos de regresión explícitos (R001 a R011) verificados.
 
-### Aislamiento de tokens por rol y gestión de sesiones
+## Separación de Pruebas Negativas
 
-1. **Tokens específicos:** Cada rol utiliza exclusivamente su variable: `customerToken`, `merchantToken` y `adminToken`. Se elimina `authToken` para prevenir colisiones o sesiones compartidas entre roles.
-2. **Prevención de sesiones obsoletas:** Los prerequest scripts de cada login (`M001`, `M009`, `M017`) limpian de forma preventiva el token anterior de su propio rol (`pm.environment.set("<rol>Token", "")`).
-3. **Captura estricta:** Solo respuestas HTTP 200/201 con token válido no vacío en JSON actualizan la variable; los casos negativos nunca sobrescriben tokens válidos.
-4. **Limpieza manual:** Al alternar usuarios o entornos, basta con restablecer las variables `customerToken`, `merchantToken` y `adminToken` a cadena vacía en el entorno privado de Postman.
-5. **Endpoints multi-rol y agnósticos:**
-   - `/api/v1/users/me`: Resuelve el perfil del usuario autenticado; en la suite se ejercita con `customerToken`.
-   - `/api/v1/notifications`: Accesible por cualquier usuario autenticado; en la suite se ejercita con `customerToken`.
-   - `/api/v1/media/upload-signature`: Endpoint público con autenticación opcional; se ejercita con `merchantToken` para subida de logos y productos.
-6. **Diferenciación de tiendas y usuarios:**
-   - `storeId`: UUID de la tienda (capturado al crear o consultar mi tienda).
-   - `merchantUserId`: UUID del comerciante propietario capturado en `StoreResponse` y en login Merchant.
-   - `owner_user_id`: Columna interna del esquema de persistencia (`stores`), respetando el contrato de la API.
-   - `userId`: Fixture sintético para administración de usuarios (`/api/v1/admin/users/{{userId}}`), desacoplado de las credenciales de sesión activa.
+- **Colección Principal (`jaldishop.postman_collection.json`):** Permite desarrollar y demostrar todos los flujos sin barreras. No impone `runCase` ni bloquea peticiones de lectura cotidianas.
+- **Colección Secundaria (`jaldishop.regressions.postman_collection.json`):** Contiene los más de 480 escenarios negativos (campos ausentes, nulos, vacíos, validaciones de formato, UUIDs inválidos y casos de seguridad) para pruebas exhaustivas.
+
+## Automatización de Variables y Token Dinámico Unificado
+
+Todos los endpoints que requieren autenticación consumen la variable unificada `{{authToken}}`.
+
+Al registrarse o iniciar sesión:
+- `M001` (Customer): Captura token en `authToken`, `customerToken`, `merchantToken`, `adminToken` y `userId` / `customerUserId`.
+- `K025` / `M009` (Merchant): Captura token en `authToken`, `merchantToken`, `customerToken`, `adminToken` y `userId` / `merchantUserId`.
+- `M017` (Admin): Captura token en `authToken`, `adminToken`, `merchantToken`, `customerToken` y `userId`.
+- `M025` (Refrescar Token): Actualiza `authToken` con el nuevo JWT.
+
+Esto permite cambiar de usuario o de rol dinámicamente durante el desarrollo o demostración sin errores 401 por variable de token equivocada o vacía.
+
+Identificadores de recursos capturados automáticamente:
+- `storeId` y `storeSlug`: Capturados en endpoints de tienda del comerciante (`K058`, `K073`, `K075`). No se sobrescriben en búsquedas públicas.
+- `categoryId`: Capturado al crear o listar categorías de tienda (`K095`, `K091`).
+- `productId` y `variantId`: Capturados al crear productos o variantes (`K121`, `K154`).
+- `cartId`: Capturado al consultar el carrito (`M164`).
+- `reservationId` y `orderNumber`: Capturados en checkout y pedidos (`J002`, `M182`, `M217`).
+- `addressId`, `capacityConfigId`, `capacityExceptionId`, `notificationId`: Capturados al crear los recursos correspondientes.
+
+## Flujo Demostrativo Customer
+
+1. **Registrar Customer:** `POST /api/v1/auth/register` (captura `customerUserId`).
+2. **Iniciar Sesión:** `POST /api/v1/auth/login` (captura `customerToken`).
+3. **Consultar Tiendas:** `GET /api/v1/stores/featured` o `GET /api/v1/stores/search?q=pasteleria`.
+4. **Consultar Catálogo:** `GET /api/v1/stores/slug/{{storeSlug}}/products` o `GET /api/v1/stores/{{storeId}}/products`.
+5. **Agregar al Carrito:** `POST /api/v1/cart/items` con `variantId` y cantidad.
+6. **Consultar Carrito:** `GET /api/v1/cart` (captura `cartId`).
+7. **Ejecutar Checkout:** `POST /api/v1/checkout` con dirección de entrega y franja horaria.
+8. **Consultar Pedido:** `GET /api/v1/customer/orders` y `GET /api/v1/customer/orders/{{orderNumber}}`.
+
+## Flujo Demostrativo Merchant
+
+1. **Registrar Merchant y Tienda:** `POST /api/v1/auth/register/merchant` (captura `merchantToken`, `merchantUserId`).
+2. **Iniciar Sesión:** `POST /api/v1/auth/login` con credenciales de comerciante.
+3. **Consultar Mi Tienda:** `GET /api/v1/stores/me` (captura `storeId`, `storeSlug`).
+4. **Crear Catálogo:**
+   - Crear categoría: `POST /api/v1/merchants/stores/{{storeId}}/categories` (captura `categoryId`).
+   - Crear producto: `POST /api/v1/merchants/stores/{{storeId}}/products` (captura `productId`).
+   - Crear variante: `POST /api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants` (captura `variantId`).
+5. **Configurar Stock y Capacidad:**
+   - Actualizar stock: `PUT /api/v1/inventory/variants/{{variantId}}/stock`.
+   - Crear configuración de franjas: `POST /api/v1/capacity-configurations` (captura `capacityConfigId`).
+6. **Consultar Pedidos:** `GET /api/v1/merchants/stores/{{storeId}}/orders`.
+7. **Gestionar Estado:** `PATCH /api/v1/merchants/stores/{{storeId}}/orders/{{orderId}}/status` con `CONFIRMED` o `IN_PREPARATION`.
+
+## Limitaciones Reales: Checkout y Pagos
+
+- **Sin Mercado Pago real en local:** El entorno local de desarrollo no incluye credenciales privadas ni conecta con los servidores externos de Mercado Pago.
+- **Protección de endpoints financieros:** Los endpoints de pagos (`/api/v1/checkout/mercado-pago/*`) exigen `financialFakeReady=true` en el entorno para evitar llamadas accidentales.
+- **Operaciones Destructivas:** La eliminación de tienda (`DELETE /api/v1/stores/me`) exige `allowDestructiveOperations=true`.
+- **Checkout:** Requiere que la tienda esté activa (`ACTIVE`), que el carrito contenga ítems válidos y que exista disponibilidad de capacidad e inventario.
+
+## Archivos de Entorno
+
+- **Para Postman:**
+  - `jaldishop.local.env.json`: Entorno local con 71 variables (formato Postman con `values: [...]`).
+  - `jaldishop.render.env.json`: Entorno Render.
+- **Para Bruno:**
+  - `jaldishop.local.environment.json`: Entorno importable en Bruno (formato OpenCollection con `variables: [...]`).
+  - En las colecciones Bruno nativas (`bruno/jaldishop`), los entornos ya vienen preinstalados en `environments/Local.bru` y `environments/JaldiShop Local.yml`. No es necesario importar archivo externo.
 
 ## Variables
 
-Todos los valores compartidos están vacíos salvo `baseUrl`. Se incluyen las mismas
-variables en ambos entornos y en la colección; Postman resuelve primero los valores
-privados del entorno seleccionado. No es necesario completar variables de otros casos.
-Las variables `fixture*` son datos sintéticos elegidos por cada integrante, no datos
-personales. Usar emails del dominio reservado `example.test` e imágenes de ejemplo
-sin servicios privados. Los cuerpos negativos conservan cadenas inválidas sintéticas
-y tamaños límite; `invalidShortPassword` debe contener menos de ocho caracteres.
-Las coordenadas válidas de ejemplo son sintéticas (0,0); ajustar los fixtures locales
-si el caso depende de distancias. Se conservan los valores fuera de rango de los negativos.
-
 | Variable | Uso |
 |---|---|
-| `addressId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `adminEmail` | Email de la cuenta sintética local del rol indicado. |
-| `adminPassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
-| `adminToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
-| `attemptId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `baseUrl` | API local, por defecto `http://127.0.0.1:8080`. |
-| `capacityConfigId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `capacityExceptionId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `categoryId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `checkoutReferenceId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `customerEmail` | Email de la cuenta sintética local del rol indicado. |
-| `customerPassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
-| `customerToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
-| `disposableFixturesReady` | Cadena `true` cuando los fixtures locales desechables estén preparados. |
-| `duplicateStreetAddress` | Calle de una dirección ya guardada por el mismo usuario; R001/R002. |
-| `duplicateUbigeoCode` | UBIGEO de esa dirección duplicada; R001/R002. |
-| `endTime` | Fin de franja del fixture, HH:mm:ss. |
-| `existingMerchantEmail` | Email sintético ya registrado para el escenario de duplicado. |
-| `existingStreetAddress` | Calle actual de addressId; R003 conserva esa ubicación. |
-| `existingUbigeoCode` | UBIGEO actual de addressId; R003. |
-| `financialFakeReady` | Cadena `true` solo con un gateway fake local verificado; no habilita Mercado Pago por sí sola. |
-| `fixtureAddress` | Valor sintético válido para el campo Address. |
-| `fixtureAddressReference` | Valor sintético válido para el campo AddressReference. |
-| `fixtureCustomerName` | Valor sintético válido para el campo CustomerName. |
-| `fixtureCustomerPhone` | Valor sintético válido para el campo CustomerPhone. |
-| `fixtureDeliveryAddress` | Valor sintético válido para el campo DeliveryAddress. |
-| `fixtureDeliveryReference` | Valor sintético válido para el campo DeliveryReference. |
-| `fixtureEmail` | Email sintético válido, por ejemplo con dominio example.test. |
-| `fixtureFirstName` | Valor sintético válido para el campo FirstName. |
-| `fixtureImageUrl` | URL pública de ejemplo sin credenciales; no apunta a Cloudinary real. |
-| `fixtureLastName` | Valor sintético válido para el campo LastName. |
-| `fixturePassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
-| `fixturePhone` | Valor sintético válido para el campo Phone. |
-| `fixtureRecipientName` | Valor sintético válido para el campo RecipientName. |
-| `fixtureRecipientPhone` | Valor sintético válido para el campo RecipientPhone. |
-| `fixtureReference` | Valor sintético válido para el campo Reference. |
-| `fixtureStreetAddress` | Valor sintético válido para el campo StreetAddress. |
-| `invalidShortPassword` | Valor sintético corto para probar el rechazo de contraseña; completar privadamente. |
-| `merchantEmail` | Email de la cuenta sintética local del rol indicado. |
-| `merchantOnlyToken` | JWT local de un usuario con MERCHANT y sin CUSTOMER para negativos de autorización. |
-| `merchantPassword` | Contraseña de una cuenta sintética local; completar solo en el entorno privado. |
-| `merchantToken` | JWT local privado; completar o capturar mediante el login del rol correspondiente. |
-| `merchantUserId` | Identificador del usuario propietario o comerciante; capturado de StoreResponse o login de comerciante. |
-| `missingAddressId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `newRegistrationEmail` | Email sintético aún no registrado para altas; cambiar/restaurar entre casos. |
-| `notificationId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `orderId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `orderNumber` | Número público de pedido del fixture local. |
-| `otherAddressId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `otherStoreId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `paymentId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `preferenceId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `productId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `providerOrderId` | ID sintético de orden del gateway fake; no usar identificadores reales. |
-| `providerUserId` | Identificador sintético del usuario del gateway fake; no usar IDs reales. |
-| `providerPaymentId` | ID sintético de pago del gateway fake. |
-| `reservationId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `revokedAdminToken` | JWT local de un administrador revocado para el caso específico. |
-| `runCase` | ID exacto del caso seleccionado; vacío impide enviarlo. |
-| `serviceDate` | Fecha futura válida para los fixtures de capacidad, formato YYYY-MM-DD. |
-| `startTime` | Inicio de franja del fixture, HH:mm:ss. |
-| `storeId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `storeSearchQuery` | Consulta para búsqueda pública; el conjunto depende de los fixtures. |
-| `storeSlug` | Slug de una tienda del fixture local. |
-| `userId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `variantId` | Identificador del fixture local correspondiente; respetar propietario y relaciones. |
-| `webhookRequestId` | Identificador sintético de la petición webhook local. |
-| `webhookSignature` | Firma válida solo para el fixture/fake local; nunca un secreto del proveedor. |
+| `addressId` | Identificador de dirección de cliente. |
+| `adminEmail` | Email sintético de administrador. |
+| `adminPassword` | Contraseña de administrador local. |
+| `adminToken` | JWT de administrador local. |
+| `allowDestructiveOperations` | Bandera de seguridad (`true`) para operaciones destructivas como eliminar tienda. |
+| `attemptId` | Identificador de intento de pago para investigación/reconciliación. |
+| `baseUrl` | URL del servidor local, por defecto `http://127.0.0.1:8080`. |
+| `capacityConfigId` | Identificador de configuración de capacidad horaria. |
+| `capacityExceptionId` | Identificador de excepción de capacidad para fechas especiales. |
+| `cartId` | Identificador del carrito del usuario. |
+| `categoryId` | Identificador de categoría de producto. |
+| `checkoutReferenceId` | Identificador de referencia de checkout. |
+| `customerEmail` | Email sintético del cliente local. |
+| `customerPassword` | Contraseña del cliente local. |
+| `customerToken` | JWT del cliente autenticado. |
+| `customerUserId` | Identificador UUID del usuario cliente. |
+| `disposableFixturesReady` | Bandera opcional para suite de regresiones desechables. |
+| `duplicateStreetAddress` | Dirección sintética para pruebas de duplicados (R001/R002). |
+| `duplicateUbigeoCode` | UBIGEO sintético para pruebas de duplicados. |
+| `endTime` | Fin de franja horaria (ej. `12:00:00`). |
+| `existingMerchantEmail` | Email de merchant existente para pruebas de conflicto. |
+| `existingStreetAddress` | Dirección actual para pruebas de actualización (R003). |
+| `existingUbigeoCode` | UBIGEO actual para pruebas de actualización. |
+| `financialFakeReady` | Bandera de seguridad (`true`) para ejecutar pagos contra gateway fake local. |
+| `fixtureAddress` | Dirección sintética de ejemplo. |
+| `fixtureAddressReference` | Referencia de dirección sintética. |
+| `fixtureCustomerName` | Nombre de cliente sintético. |
+| `fixtureCustomerPhone` | Teléfono de cliente sintético. |
+| `fixtureDeliveryAddress` | Dirección de despacho sintética. |
+| `fixtureDeliveryReference` | Referencia de despacho sintética. |
+| `fixtureEmail` | Email de prueba sintético. |
+| `fixtureFirstName` | Nombre de pila sintético. |
+| `fixtureImageUrl` | URL de imagen de prueba sintética. |
+| `fixtureLastName` | Apellido sintético. |
+| `fixturePassword` | Contraseña sintética para pruebas. |
+| `fixturePhone` | Teléfono sintético. |
+| `fixtureRecipientName` | Nombre del destinatario sintético. |
+| `fixtureRecipientPhone` | Teléfono del destinatario sintético. |
+| `fixtureReference` | Referencia sintética. |
+| `fixtureStreetAddress` | Calle y número sintéticos. |
+| `invalidShortPassword` | Contraseña corta para pruebas negativas. |
+| `merchantEmail` | Email sintético del comerciante local. |
+| `merchantOnlyToken` | JWT de comerciante sin rol customer para pruebas de autorización. |
+| `merchantPassword` | Contraseña del comerciante local. |
+| `merchantToken` | JWT del comerciante autenticado. |
+| `merchantUserId` | Identificador UUID del comerciante. |
+| `missingAddressId` | UUID sintético de dirección inexistente. |
+| `newRegistrationEmail` | Email para nuevos registros. |
+| `notificationId` | Identificador de notificación. |
+| `orderId` | Identificador interno de pedido (UUID). |
+| `orderNumber` | Código público de pedido (ej. `ORD-202611-0001`). |
+| `otherAddressId` | Dirección ajena para pruebas de aislamiento. |
+| `otherStoreId` | Tienda ajena para pruebas de aislamiento. |
+| `paymentId` | Identificador de pago local. |
+| `preferenceId` | Identificador de preferencia local. |
+| `productId` | Identificador de producto. |
+| `providerOrderId` | Identificador de orden en proveedor fake. |
+| `providerPaymentId` | Identificador de pago en proveedor fake. |
+| `providerUserId` | Identificador de usuario en proveedor fake. |
+| `reservationId` | Identificador de reserva de capacidad. |
+| `revokedAdminToken` | Token revocado para pruebas de autorización. |
+| `runCase` | Identificador de caso para ejecuciones individuales en la suite exhaustiva. |
+| `serviceDate` | Fecha de servicio en formato YYYY-MM-DD. |
+| `startTime` | Inicio de franja horaria (ej. `10:00:00`). |
+| `storeId` | Identificador UUID de la tienda activa. |
+| `storeSearchQuery` | Texto de búsqueda para tiendas (ej. `pasteleria`). |
+| `storeSlug` | Slug identificador de tienda. |
+| `userId` | Identificador de usuario para endpoints de administración. |
+| `variantId` | Identificador de variante de producto. |
+| `webhookRequestId` | ID de petición para webhooks simulados. |
+| `webhookSignature` | Firma para webhooks simulados. |
 
-## Regresiones explícitas
+## Regresiones Explícitas
 
-- **R001:** POST duplicado devuelve 409 / ADDRESS_ALREADY_EXISTS. El usuario debe tener
-  menos de cinco direcciones y una con la calle/UBIGEO indicados.
-- **R002:** PUT hacia otra dirección del mismo usuario devuelve 409. `addressId` debe
-  señalar una dirección distinta de la pareja duplicateStreetAddress/duplicateUbigeoCode.
-- **R003:** PUT que conserva la ubicación propia devuelve 200. Usar la ubicación actual
-  de addressId en existingStreetAddress/existingUbigeoCode.
-- **R004–R006:** búsquedas `pasteleria`, `%` y `_`. Preparar tiendas activas cuyos nombres
-  o slugs contengan respectivamente esos textos (incluida una con tilde en Pastelería).
-  Las pruebas exigen resultados no vacíos y comprueban coincidencias por nombre/slug.
-- **R007–R008:** límites 0 y 51 devuelven 400 / VALIDATION_ERROR.
-- **R009:** lista de clientes del comerciante con fechas ISO y lastOrderAt nulo permitido.
-  El merchant debe tener tienda y al menos un cliente asociado en el fixture.
-- **R010:** PATCH no soportado en addresses devuelve 405 y cabecera Allow.
-- **R011:** una subruta inexistente devuelve 404 / RESOURCE_NOT_FOUND con JWT válido.
-
-## Pagos e imágenes
-
-La configuración local del backend no habilita pagos ni subida/borrado de imágenes.
-No completar credenciales de Mercado Pago, Cloudinary u otros servicios para ejecutar
-esta colección. Los casos financieros se mantienen bloqueados salvo que se haya
-preparado un gateway fake local de forma independiente. Este repositorio no añade
-infraestructura de fake ni un procedimiento QA avanzado. Para normalización interna
-de Orders y concurrencia, usar las pruebas backend existentes.
-
-## Validación y preparación de ejemplos
-
-Desde la raíz del repositorio, sin servidores ni conexión de red:
-
-```text
-node postman/tools/validar_equipo.cjs
-```
-
-Comprueba JSON, variables/documentación, sintaxis JavaScript, protecciones de envío
-y coincidencia de método/ruta con los controladores Java. **No ejecuta HTTP** ni
-certifica el resultado de los 594 escenarios con una base de datos real.
-
-El preparador es independiente de auditorías, respaldos y rutas personales:
-
-```text
-python3 postman/tools/preparar_equipo.py
-```
-
-En Windows puede usarse `py -3` en lugar de `python3`. El comando sanea la colección
-incluida y reconstruye los dos entornos vacíos. No escribe en docs ni accede a servicios.
-Para procesar otra exportación sin sobrescribir los archivos actuales:
-
-```text
-python3 postman/tools/preparar_equipo.py ruta/exportacion.json --output-dir ruta/salida
-```
-
-La exportación de entrada debe conservar los IDs de los requests originales utilizados
-por las regresiones. El preparador no inventa contratos para una API distinta.
-
-Para Bruno se conservan las [colecciones nativas](../backend/qa/README.md).
-No se garantiza equivalencia automática de estos scripts Postman tras importarlos.
-No se incluyen respaldos ni entornos remotos.
+- **R001:** POST dirección duplicada devuelve 409 / `ADDRESS_ALREADY_EXISTS`.
+- **R002:** PUT hacia otra dirección existente devuelve 409 / `ADDRESS_ALREADY_EXISTS`.
+- **R003:** PUT que conserva ubicación propia devuelve 200 OK.
+- **R004:** Búsqueda sin tilde devuelve resultados coincidentes.
+- **R005:** Búsqueda con porcentaje literal (`%25`) procesada de forma segura.
+- **R006:** Búsqueda con guion bajo literal (`_`) procesada de forma segura.
+- **R007:** Límite inválido 0 devuelve 400 / `VALIDATION_ERROR`.
+- **R008:** Límite inválido 51 devuelve 400 / `VALIDATION_ERROR`.
+- **R009:** Fechas de clientes en formato ISO y nulos permitidos.
+- **R010:** Método no soportado PATCH en direcciones conserva cabecera Allow con 405.
+- **R011:** Ruta inexistente devuelve 404 / `RESOURCE_NOT_FOUND`.

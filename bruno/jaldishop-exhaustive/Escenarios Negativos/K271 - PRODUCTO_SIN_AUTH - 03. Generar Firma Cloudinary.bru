@@ -1,0 +1,27 @@
+meta {
+  name: K271 - PRODUCTO_SIN_AUTH - 03. Generar Firma Cloudinary
+  type: http
+  seq: 283
+}
+
+post {
+  url: {{baseUrl}}/api/v1/media/upload-signature
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "targetType": "PRODUCT_IMAGE",
+  "storeId": "{{storeId}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

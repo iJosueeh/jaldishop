@@ -1,0 +1,33 @@
+meta {
+  name: J039 - UUID_INVALIDO_id - 03. Actualizar Roles
+  type: http
+  seq: 33
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/users/invalid-uuid/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "roles": [
+    "CUSTOMER",
+    "MERCHANT"
+  ]
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

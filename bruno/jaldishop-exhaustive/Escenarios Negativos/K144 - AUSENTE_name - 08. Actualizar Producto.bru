@@ -1,0 +1,34 @@
+meta {
+  name: K144 - AUSENTE_name - 08. Actualizar Producto
+  type: http
+  seq: 178
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "categoryId": "{{categoryId}}",
+  "slug": "tres-leches-familiar",
+  "description": "Para 10 personas",
+  "imageUrl": null,
+  "status": "ACTIVE"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: M163 - UUID_INVALIDO_productId - 04. Eliminar Producto de Favoritos
+  type: http
+  seq: 428
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

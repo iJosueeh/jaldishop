@@ -1,0 +1,31 @@
+meta {
+  name: 03. Actualizar Reseña de Producto
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/customer/products/{{productId}}/reviews
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "rating": 4,
+  "comment": "Muy bueno pero tardó un poco"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

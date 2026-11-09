@@ -1,0 +1,23 @@
+meta {
+  name: J046 - ROL_INCORRECTO - 05. Reactivar Usuario
+  type: http
+  seq: 38
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/users/{{userId}}/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

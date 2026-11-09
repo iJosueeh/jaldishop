@@ -1,0 +1,19 @@
+meta {
+  name: K092 - SIN_AUTH - 01. Listar Categorías
+  type: http
+  seq: 133
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

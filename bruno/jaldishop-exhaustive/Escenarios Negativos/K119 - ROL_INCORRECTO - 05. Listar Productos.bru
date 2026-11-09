@@ -1,0 +1,23 @@
+meta {
+  name: K119 - ROL_INCORRECTO - 05. Listar Productos
+  type: http
+  seq: 156
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,31 @@
+meta {
+  name: 01. Listar Categorías de la Tienda
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    const item = Array.isArray(data) ? data[0] : data;
+    if (item && item.id) bru.setEnvVar("categoryId", String(item.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

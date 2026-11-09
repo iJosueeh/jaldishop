@@ -1,0 +1,19 @@
+meta {
+  name: J052 - SIN_AUTH - 02. Obtener Tienda por ID
+  type: http
+  seq: 42
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/stores/{{storeId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

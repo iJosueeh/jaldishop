@@ -1,0 +1,38 @@
+meta {
+  name: J020 - VACIO_customerName - 02. Generar Preferencia Mercado Pago
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout/mercado-pago/preference
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "capacityReservationId": "{{reservationId}}",
+  "fulfillmentType": "DELIVERY",
+  "customerName": "",
+  "customerPhone": "{{fixtureCustomerPhone}}",
+  "customerEmail": "{{fixtureEmail}}",
+  "deliveryAddress": "{{fixtureDeliveryAddress}}",
+  "deliveryReference": "{{fixtureDeliveryReference}}",
+  "deliveryLatitude": 0.0,
+  "deliveryLongitude": 0.0
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

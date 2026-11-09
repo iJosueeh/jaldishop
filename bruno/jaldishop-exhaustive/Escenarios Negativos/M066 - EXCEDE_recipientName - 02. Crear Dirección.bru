@@ -1,0 +1,41 @@
+meta {
+  name: M066 - EXCEDE_recipientName - 02. Crear Dirección
+  type: http
+  seq: 343
+}
+
+post {
+  url: {{baseUrl}}/api/v1/customer/addresses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "alias": "Casa",
+  "recipientName": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "recipientPhone": "{{fixtureRecipientPhone}}",
+  "streetAddress": "{{fixtureStreetAddress}}",
+  "department": "Lima",
+  "province": "Lima",
+  "district": "Miraflores",
+  "ubigeoCode": "150122",
+  "reference": "{{fixtureReference}}",
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "isDefault": true
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

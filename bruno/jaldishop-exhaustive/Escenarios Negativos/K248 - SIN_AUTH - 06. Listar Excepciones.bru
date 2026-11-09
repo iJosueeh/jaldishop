@@ -1,0 +1,19 @@
+meta {
+  name: K248 - SIN_AUTH - 06. Listar Excepciones
+  type: http
+  seq: 267
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity-exceptions
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

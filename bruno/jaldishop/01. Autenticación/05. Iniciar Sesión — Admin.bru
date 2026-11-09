@@ -1,0 +1,42 @@
+meta {
+  name: 05. Iniciar Sesión — Admin
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const data = res.getBody();
+    if (data && data.token) {
+      bru.setEnvVar("authToken", data.token);
+      bru.setEnvVar("adminToken", data.token);
+      bru.setEnvVar("merchantToken", data.token);
+      bru.setEnvVar("customerToken", data.token);
+    }
+    if (data && data.userId) {
+      bru.setEnvVar("userId", String(data.userId));
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

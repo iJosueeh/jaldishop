@@ -1,0 +1,23 @@
+meta {
+  name: J069 - ROL_INCORRECTO - 02. Investigar Orden de Intento
+  type: http
+  seq: 55
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/payments/attempts/{{attemptId}}/investigate-order
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

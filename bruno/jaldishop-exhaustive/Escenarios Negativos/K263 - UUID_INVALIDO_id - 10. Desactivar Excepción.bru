@@ -1,0 +1,23 @@
+meta {
+  name: K263 - UUID_INVALIDO_id - 10. Desactivar Excepción
+  type: http
+  seq: 278
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/invalid-uuid/deactivate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

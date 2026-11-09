@@ -1,0 +1,19 @@
+meta {
+  name: K006 - SIN_AUTH - 01. Consultar Franjas Horarias (Slots)
+  type: http
+  seq: 57
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity/slots?storeId={{storeId}}&date={{serviceDate}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

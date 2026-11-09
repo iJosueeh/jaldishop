@@ -1,0 +1,20 @@
+meta {
+  name: 04. Búsqueda sin Tilde (200)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q=pasteleria&limit=50
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+  test("Resultados no vacíos", function() { expect(res.getBody()).to.be.an("array").that.is.not.empty; });
+}

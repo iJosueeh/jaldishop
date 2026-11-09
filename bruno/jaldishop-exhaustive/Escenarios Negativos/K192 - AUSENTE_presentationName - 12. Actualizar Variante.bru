@@ -1,0 +1,35 @@
+meta {
+  name: K192 - AUSENTE_presentationName - 12. Actualizar Variante
+  type: http
+  seq: 222
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants/{{variantId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "sku": "CHEESE-IND-01",
+  "priceAmount": 20.0,
+  "priceCurrency": "PEN",
+  "tracksInventory": true,
+  "status": "ACTIVE",
+  "attributes": []
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

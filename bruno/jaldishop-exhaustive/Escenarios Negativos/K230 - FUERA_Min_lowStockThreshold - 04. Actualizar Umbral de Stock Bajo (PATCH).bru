@@ -1,0 +1,30 @@
+meta {
+  name: K230 - FUERA_Min_lowStockThreshold - 04. Actualizar Umbral de Stock Bajo (PATCH)
+  type: http
+  seq: 256
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/inventory/variants/{{variantId}}/threshold
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "lowStockThreshold": -1.0
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

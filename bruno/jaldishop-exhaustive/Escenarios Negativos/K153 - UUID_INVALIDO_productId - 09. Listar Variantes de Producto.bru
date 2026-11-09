@@ -1,0 +1,23 @@
+meta {
+  name: K153 - UUID_INVALIDO_productId - 09. Listar Variantes de Producto
+  type: http
+  seq: 186
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/invalid-uuid/variants
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

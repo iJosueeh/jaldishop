@@ -1,0 +1,42 @@
+meta {
+  name: J010 - EXCEDE_customerEmail - 01. Iniciar Checkout
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "storeId": "{{storeId}}",
+  "fulfillmentType": "DELIVERY",
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "customerName": "{{fixtureCustomerName}}",
+  "customerPhone": "{{fixtureCustomerPhone}}",
+  "customerEmail": "{{fixtureEmail}}",
+  "deliveryAddress": "{{fixtureDeliveryAddress}}",
+  "deliveryReference": "{{fixtureDeliveryReference}}",
+  "deliveryLatitude": 0.0,
+  "deliveryLongitude": 0.0,
+  "discountCode": null
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: K274 - BRANDING_AJENO_ANONIMO - 03. Generar Firma Cloudinary
+  type: http
+  seq: 286
+}
+
+post {
+  url: {{baseUrl}}/api/v1/media/upload-signature
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "targetType": "STORE_LOGO",
+  "storeId": "{{otherStoreId}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

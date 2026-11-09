@@ -1,0 +1,23 @@
+meta {
+  name: M191 - UUID_INVALIDO_productId - 01. Verificar Elegibilidad para Reseña
+  type: http
+  seq: 447
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/products/invalid-uuid/reviews/eligibility
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

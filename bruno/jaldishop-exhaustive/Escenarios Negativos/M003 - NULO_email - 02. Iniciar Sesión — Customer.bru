@@ -1,0 +1,27 @@
+meta {
+  name: M003 - NULO_email - 02. Iniciar Sesión — Customer
+  type: http
+  seq: 288
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "email": null,
+  "password": "{{customerPassword}}"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

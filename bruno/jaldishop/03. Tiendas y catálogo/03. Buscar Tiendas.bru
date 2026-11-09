@@ -1,0 +1,19 @@
+meta {
+  name: 03. Buscar Tiendas
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/search?q={{storeSearchQuery}}&limit=5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

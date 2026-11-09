@@ -1,0 +1,23 @@
+meta {
+  name: K217 - ROL_INCORRECTO - 02. Consultar Inventario por Variante
+  type: http
+  seq: 245
+}
+
+get {
+  url: {{baseUrl}}/api/v1/inventory/variants/{{variantId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

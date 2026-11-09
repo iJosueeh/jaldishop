@@ -1,0 +1,23 @@
+meta {
+  name: M223 - ROL_INCORRECTO - 02. Obtener Detalle de Pedido
+  type: http
+  seq: 473
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/{{orderId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

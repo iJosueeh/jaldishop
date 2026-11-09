@@ -1,0 +1,23 @@
+meta {
+  name: K107 - UUID_INVALIDO_categoryId - 03. Obtener Categoría por ID
+  type: http
+  seq: 146
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories/invalid-uuid
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

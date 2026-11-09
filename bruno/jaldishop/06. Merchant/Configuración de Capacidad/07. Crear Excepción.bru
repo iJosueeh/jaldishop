@@ -1,0 +1,41 @@
+meta {
+  name: 07. Crear Excepción
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/capacity-exceptions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "serviceDate": "{{serviceDate}}",
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "exceptionCapacity": 5,
+  "reason": "Feriado Navidad"
+}
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    const data = res.getBody();
+    if (data && data.id) bru.setEnvVar("capacityExceptionId", String(data.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

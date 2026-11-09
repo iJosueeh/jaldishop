@@ -1,0 +1,44 @@
+meta {
+  name: 01. Crear Preferencia de Pago Mercado Pago
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/checkout/mercado-pago/preference
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "capacityReservationId": "{{reservationId}}",
+  "fulfillmentType": "DELIVERY",
+  "customerName": "{{fixtureCustomerName}}",
+  "customerPhone": "{{fixtureCustomerPhone}}",
+  "customerEmail": "{{fixtureEmail}}",
+  "deliveryAddress": "{{fixtureDeliveryAddress}}",
+  "deliveryReference": "{{fixtureDeliveryReference}}",
+  "deliveryLatitude": 0.0,
+  "deliveryLongitude": 0.0
+}
+}
+
+script:pre-request {
+  if (bru.getEnvVar("financialFakeReady") !== "true") {
+    throw new Error("BLOQUEADO: Operación de pago requiere financialFakeReady=true con gateway fake local verificado.");
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

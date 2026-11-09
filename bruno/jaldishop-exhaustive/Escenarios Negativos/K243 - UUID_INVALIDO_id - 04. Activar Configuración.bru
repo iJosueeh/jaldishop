@@ -1,0 +1,23 @@
+meta {
+  name: K243 - UUID_INVALIDO_id - 04. Activar Configuración
+  type: http
+  seq: 264
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/capacity-configurations/invalid-uuid/activate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

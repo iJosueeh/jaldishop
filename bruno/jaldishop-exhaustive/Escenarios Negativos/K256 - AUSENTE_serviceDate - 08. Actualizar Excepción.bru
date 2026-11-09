@@ -1,0 +1,33 @@
+meta {
+  name: K256 - AUSENTE_serviceDate - 08. Actualizar Excepción
+  type: http
+  seq: 273
+}
+
+put {
+  url: {{baseUrl}}/api/v1/capacity-exceptions/{{capacityExceptionId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "startTime": "{{startTime}}",
+  "endTime": "{{endTime}}",
+  "exceptionCapacity": 0,
+  "reason": "Cerrado por Navidad"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

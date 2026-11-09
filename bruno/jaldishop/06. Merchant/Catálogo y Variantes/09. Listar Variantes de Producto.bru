@@ -1,0 +1,31 @@
+meta {
+  name: 09. Listar Variantes de Producto
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:post-response {
+  if (res.getStatus() === 201 || res.getStatus() === 200) {
+    const data = res.getBody();
+    const item = Array.isArray(data) ? data[0] : data;
+    if (item && item.id) bru.setEnvVar("variantId", String(item.id));
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

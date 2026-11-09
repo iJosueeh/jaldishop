@@ -1,0 +1,23 @@
+meta {
+  name: M155 - UUID_INVALIDO_productId - 02. Consultar Estado de Favorito
+  type: http
+  seq: 422
+}
+
+get {
+  url: {{baseUrl}}/api/v1/customer/favorites/products/invalid-uuid/status
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

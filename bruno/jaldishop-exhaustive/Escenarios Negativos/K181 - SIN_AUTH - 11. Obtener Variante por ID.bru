@@ -1,0 +1,19 @@
+meta {
+  name: K181 - SIN_AUTH - 11. Obtener Variante por ID
+  type: http
+  seq: 212
+}
+
+get {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants/{{variantId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

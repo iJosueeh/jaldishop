@@ -1,0 +1,19 @@
+meta {
+  name: M148 - UUID_INVALIDO_productId - 09. Listar Reseñas Públicas de Producto
+  type: http
+  seq: 417
+}
+
+get {
+  url: {{baseUrl}}/api/v1/products/invalid-uuid/reviews
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

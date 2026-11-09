@@ -1,0 +1,32 @@
+meta {
+  name: K114 - NULO_name - 04. Actualizar Categoría
+  type: http
+  seq: 152
+}
+
+put {
+  url: {{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories/{{categoryId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "name": null,
+  "description": "Nueva descripción",
+  "status": "ACTIVE"
+}
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

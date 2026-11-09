@@ -1,0 +1,19 @@
+meta {
+  name: M146 - UUID_INVALIDO_storeId - 08. Listar Productos por ID de Tienda
+  type: http
+  seq: 416
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stores/invalid-uuid/products?categoryId=
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

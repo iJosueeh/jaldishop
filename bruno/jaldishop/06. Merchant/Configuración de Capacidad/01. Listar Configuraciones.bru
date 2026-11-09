@@ -1,0 +1,23 @@
+meta {
+  name: 01. Listar Configuraciones
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/capacity-configurations
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}
