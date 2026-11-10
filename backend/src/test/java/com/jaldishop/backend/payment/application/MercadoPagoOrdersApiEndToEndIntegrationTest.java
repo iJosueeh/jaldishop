@@ -137,7 +137,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 if (path.startsWith("/v1/orders")) {
                     resp = ordersMockResponse.get();
                     if (resp == null) {
-                        resp = new MockResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}");
+                        resp = new MockResponse(200, "{\"id\": \"ORDTST-DEFAULT\", \"status\": \"created\", \"user_id\": \"123456789\", \"live_mode\": false}");
                     }
                 } else if (path.startsWith("/checkout/preferences")) {
                     resp = preferencesMockResponse.get();
@@ -368,7 +368,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 observationFailure.set(t);
             }
         });
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-COMMIT\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORDTST-COMMIT\",\"checkout_url\":\"https://example.test/checkout\",\"user_id\":\"123456789\",\"live_mode\":false}"));
         createPaymentPreferenceService.execute(newCheckoutCommand(reservationId));
         assertThat(observationFailure.get()).isNull();
         assertThat(observed.get()).isTrue();
@@ -396,12 +396,12 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
             }
         });
         ordersMockResponse.set(new MockResponse(201,
-                "{\"id\":\"ORD-FIRST\",\"checkout_url\":\"https://example.test/first\",\"live_mode\":false}"));
+                "{\"id\":\"ORDTST-FIRST\",\"checkout_url\":\"https://example.test/first\",\"user_id\":\"123456789\",\"live_mode\":false}"));
         createPaymentPreferenceService.execute(command);
         Payment payment = paymentRepository.findByCapacityReservationId(reservationId).orElseThrow();
         var first = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId()).get(0);
         assertThat(first.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.CREATED);
-        assertThat(first.getProviderOrderId()).isEqualTo("ORD-FIRST");
+        assertThat(first.getProviderOrderId()).isEqualTo("ORDTST-FIRST");
         // A financial rejection of a created order permits another attempt; a POST validation error does not.
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             var rejected = paymentAttemptRepository.findByIdForUpdate(first.getId()).orElseThrow();
@@ -416,7 +416,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 String.class, first.getId());
 
         ordersMockResponse.set(new MockResponse(201,
-                "{\"id\":\"ORD-SECOND\",\"checkout_url\":\"https://example.test/second\",\"live_mode\":false}"));
+                "{\"id\":\"ORDTST-SECOND\",\"checkout_url\":\"https://example.test/second\",\"user_id\":\"123456789\",\"live_mode\":false}"));
         var result = createPaymentPreferenceService.execute(command);
         assertThat(result.paymentId()).isEqualTo(payment.getId());
         var attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
@@ -493,14 +493,14 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
             try { releasePost.await(2, TimeUnit.SECONDS); }
             catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
         });
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-CONCURRENT\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORDTST-CONCURRENT\",\"checkout_url\":\"https://example.test/checkout\",\"user_id\":\"123456789\",\"live_mode\":false}"));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             Future<CreatePaymentPreferenceResult> first = executor.submit(() -> createPaymentPreferenceService.execute(command));
             assertThat(enteredPost.await(10, TimeUnit.SECONDS)).isTrue();
             assertThrows(ConflictException.class, () -> createPaymentPreferenceService.execute(command));
             releasePost.countDown();
-            assertThat(first.get(10, TimeUnit.SECONDS).preferenceId()).isEqualTo("ORD-CONCURRENT");
+            assertThat(first.get(10, TimeUnit.SECONDS).preferenceId()).isEqualTo("ORDTST-CONCURRENT");
             assertThat(receivedRequestBodyList).hasSize(1);
         } finally {
             releasePost.countDown();
@@ -514,7 +514,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         CreatePaymentPreferenceCommand command = newCheckoutCommand(reservationId);
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-REMOTE-SUCCESS\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORDTST-REMOTE-SUCCESS\",\"checkout_url\":\"https://example.test/checkout\",\"user_id\":\"123456789\",\"live_mode\":false}"));
         jdbcTemplate.execute("""
                 CREATE FUNCTION test_fail_order_result() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN IF NEW.provider_order_id IS NOT NULL THEN RAISE EXCEPTION 'simulated result failure' USING ERRCODE = 'P4202'; END IF;
@@ -644,10 +644,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         ordersMockResponse.set(new MockResponse(201, """
                 {
-                  "id": "ORD-E2E-001",
+                  "id": "ORDTST-E2E-001",
                   "status": "created",
-                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORD-E2E-001",
+                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORDTST-E2E-001",
                   "total_amount": 25.00,
+                  "user_id": "123456789",
                   "live_mode": false
                 }
                 """));
@@ -660,8 +661,8 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         CreatePaymentPreferenceResult result = createPaymentPreferenceService.execute(command);
 
-        assertThat(result.preferenceId()).isEqualTo("ORD-E2E-001");
-        assertThat(result.initPoint()).contains("order_id=ORD-E2E-001");
+        assertThat(result.preferenceId()).isEqualTo("ORDTST-E2E-001");
+        assertThat(result.initPoint()).contains("order_id=ORDTST-E2E-001");
 
         // Verificación de base de datos
         Payment payment = paymentRepository.findById(result.paymentId()).orElseThrow();
@@ -671,7 +672,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         assertThat(attempts).hasSize(1);
         PaymentAttempt attempt = attempts.get(0);
         assertThat(attempt.getCheckoutMode()).isEqualTo("ORDERS");
-        assertThat(attempt.getProviderOrderId()).isEqualTo("ORD-E2E-001");
+        assertThat(attempt.getProviderOrderId()).isEqualTo("ORDTST-E2E-001");
         assertThat(attempt.getStatus()).isEqualTo(PaymentAttemptStatus.PROCESSING);
 
         // Verificación del request enviado al mock HTTP
@@ -738,13 +739,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-03", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-003", "https://mp.com/checkout?order_id=ORD-E2E-003");
+        attempt.recordOrder("ORDTST-E2E-003", "https://mp.com/checkout?order_id=ORDTST-E2E-003");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-003",
+                  "id": "ORDTST-E2E-003",
                   "status": "created",
                   "total_amount": 30.00,
                   "external_reference": "%s",
@@ -758,11 +759,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String requestId = UUID.randomUUID().toString();
-        String xSignature = calculateHmac("ORD-E2E-003", requestId, ts);
+        String xSignature = calculateHmac("ORDTST-E2E-003", requestId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                xSignature, requestId, Map.of("data.id", "ORD-E2E-003", "type", "order"),
-                "{\"action\": \"order.created\", \"data\": {\"id\": \"ORD-E2E-003\"}}"
+                xSignature, requestId, Map.of("data.id", "ORDTST-E2E-003", "type", "order"),
+                "{\"action\": \"order.created\", \"data\": {\"id\": \"ORDTST-E2E-003\"}}"
         );
 
         ProcessMercadoPagoWebhookResult result = webhookService.execute(command);
@@ -791,13 +792,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-04", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-004", "https://mp.com/checkout?order_id=ORD-E2E-004");
+        attempt.recordOrder("ORDTST-E2E-004", "https://mp.com/checkout?order_id=ORDTST-E2E-004");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-004",
+                  "id": "ORDTST-E2E-004",
                   "status": "processing",
                   "total_amount": 35.00,
                   "external_reference": "%s",
@@ -821,11 +822,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String requestId = UUID.randomUUID().toString();
-        String xSignature = calculateHmac("ORD-E2E-004", requestId, ts);
+        String xSignature = calculateHmac("ORDTST-E2E-004", requestId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                xSignature, requestId, Map.of("data.id", "ORD-E2E-004", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-004\"}}"
+                xSignature, requestId, Map.of("data.id", "ORDTST-E2E-004", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-004\"}}"
         );
 
         ProcessMercadoPagoWebhookResult result = webhookService.execute(command);
@@ -858,13 +859,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-05", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-005", "https://mp.com/checkout?order_id=ORD-E2E-005");
+        attempt.recordOrder("ORDTST-E2E-005", "https://mp.com/checkout?order_id=ORDTST-E2E-005");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-005",
+                  "id": "ORDTST-E2E-005",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 40.00,
@@ -890,11 +891,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String requestId = UUID.randomUUID().toString();
-        String xSignature = calculateHmac("ORD-E2E-005", requestId, ts);
+        String xSignature = calculateHmac("ORDTST-E2E-005", requestId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                xSignature, requestId, Map.of("data.id", "ORD-E2E-005", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-005\"}}"
+                xSignature, requestId, Map.of("data.id", "ORDTST-E2E-005", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-005\"}}"
         );
 
         ProcessMercadoPagoWebhookResult result = webhookService.execute(command);
@@ -934,11 +935,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String secondRequestId = UUID.randomUUID().toString();
-        String xSignature = calculateHmac("ORD-E2E-005", secondRequestId, ts);
+        String xSignature = calculateHmac("ORDTST-E2E-005", secondRequestId, ts);
 
         ProcessMercadoPagoWebhookCommand secondCommand = new ProcessMercadoPagoWebhookCommand(
-                xSignature, secondRequestId, Map.of("data.id", "ORD-E2E-005", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-005\"}}"
+                xSignature, secondRequestId, Map.of("data.id", "ORDTST-E2E-005", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-005\"}}"
         );
 
         ProcessMercadoPagoWebhookResult secondResult = webhookService.execute(secondCommand);
@@ -963,13 +964,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-07", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-007", "https://mp.com/checkout?order_id=ORD-E2E-007");
+        attempt.recordOrder("ORDTST-E2E-007", "https://mp.com/checkout?order_id=ORDTST-E2E-007");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-007",
+                  "id": "ORDTST-E2E-007",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 50.00,
@@ -996,16 +997,16 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         long ts = Instant.now().getEpochSecond();
         String req1 = UUID.randomUUID().toString();
         String req2 = UUID.randomUUID().toString();
-        String sig1 = calculateHmac("ORD-E2E-007", req1, ts);
-        String sig2 = calculateHmac("ORD-E2E-007", req2, ts);
+        String sig1 = calculateHmac("ORDTST-E2E-007", req1, ts);
+        String sig2 = calculateHmac("ORDTST-E2E-007", req2, ts);
 
         ProcessMercadoPagoWebhookCommand cmd1 = new ProcessMercadoPagoWebhookCommand(
-                sig1, req1, Map.of("data.id", "ORD-E2E-007", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-007\"}}"
+                sig1, req1, Map.of("data.id", "ORDTST-E2E-007", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-007\"}}"
         );
         ProcessMercadoPagoWebhookCommand cmd2 = new ProcessMercadoPagoWebhookCommand(
-                sig2, req2, Map.of("data.id", "ORD-E2E-007", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-007\"}}"
+                sig2, req2, Map.of("data.id", "ORDTST-E2E-007", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-007\"}}"
         );
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -1030,8 +1031,8 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
     void testE2E08_invalidHmacSignature_rejectedWithSecurityException() {
         String badSignature = "ts=" + Instant.now().getEpochSecond() + ",v1=invalid_tampered_hash_123456";
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                badSignature, "req-bad-sig", Map.of("data.id", "ORD-TAMPERED", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-TAMPERED\"}}"
+                badSignature, "req-bad-sig", Map.of("data.id", "ORDTST-TAMPERED", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-TAMPERED\"}}"
         );
 
         assertThrows(SecurityException.class, () -> webhookService.execute(command));
@@ -1047,7 +1048,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         UUID nonExistentPaymentId = UUID.randomUUID();
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-MISMATCH-09",
+                  "id": "ORDTST-MISMATCH-09",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 10.00,
@@ -1070,11 +1071,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String reqId = UUID.randomUUID().toString();
-        String sig = calculateHmac("ORD-MISMATCH-09", reqId, ts);
+        String sig = calculateHmac("ORDTST-MISMATCH-09", reqId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                sig, reqId, Map.of("data.id", "ORD-MISMATCH-09", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-MISMATCH-09\"}}"
+                sig, reqId, Map.of("data.id", "ORDTST-MISMATCH-09", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-MISMATCH-09\"}}"
         );
 
         assertThrows(ResourceNotFoundException.class, () -> webhookService.execute(command));
@@ -1095,13 +1096,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-10", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-010", "https://mp.com/checkout?order_id=ORD-E2E-010");
+        attempt.recordOrder("ORDTST-E2E-010", "https://mp.com/checkout?order_id=ORDTST-E2E-010");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-010",
+                  "id": "ORDTST-E2E-010",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 60.00,
@@ -1125,11 +1126,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String reqId = UUID.randomUUID().toString();
-        String sig = calculateHmac("ORD-E2E-010", reqId, ts);
+        String sig = calculateHmac("ORDTST-E2E-010", reqId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                sig, reqId, Map.of("data.id", "ORD-E2E-010", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-010\"}}"
+                sig, reqId, Map.of("data.id", "ORDTST-E2E-010", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-010\"}}"
         );
 
         ProcessMercadoPagoWebhookResult result = webhookService.execute(command);
@@ -1166,13 +1167,13 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         PaymentAttempt attempt = PaymentAttempt.create(
                 payment.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-e2e-11", "ORDERS"
         );
-        attempt.recordOrder("ORD-E2E-011", "https://mp.com/checkout?order_id=ORD-E2E-011");
+        attempt.recordOrder("ORDTST-E2E-011", "https://mp.com/checkout?order_id=ORDTST-E2E-011");
         attempt.markProcessing();
         paymentAttemptRepository.save(attempt);
 
         ordersMockResponse.set(new MockResponse(200, String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-E2E-011",
+                  "id": "ORDTST-E2E-011",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 70.00,
@@ -1195,11 +1196,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
 
         long ts = Instant.now().getEpochSecond();
         String reqId = UUID.randomUUID().toString();
-        String sig = calculateHmac("ORD-E2E-011", reqId, ts);
+        String sig = calculateHmac("ORDTST-E2E-011", reqId, ts);
 
         ProcessMercadoPagoWebhookCommand command = new ProcessMercadoPagoWebhookCommand(
-                sig, reqId, Map.of("data.id", "ORD-E2E-011", "type", "order"),
-                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORD-E2E-011\"}}"
+                sig, reqId, Map.of("data.id", "ORDTST-E2E-011", "type", "order"),
+                "{\"action\": \"order.processed\", \"data\": {\"id\": \"ORDTST-E2E-011\"}}"
         );
 
         ProcessMercadoPagoWebhookResult result = webhookService.execute(command);
@@ -1307,7 +1308,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
         UUID resB = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(resB, 1);
-        ordersMockResponse.set(new MockResponse(201, "{\"id\": \"ORD-B\", \"checkout_url\": \"https://mp.com/B\", \"live_mode\": false}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\": \"ORDTST-B\", \"checkout_url\": \"https://mp.com/B\", \"user_id\":\"123456789\", \"live_mode\": false}"));
 
         CreatePaymentPreferenceCommand cmdB = new CreatePaymentPreferenceCommand(
                 USER_ID, resB, CheckoutFulfillmentType.DELIVERY,
@@ -1322,7 +1323,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         assertThat(attemptA.getPreferenceId()).isEqualTo("PREF-A");
 
         assertThat(attemptB.getCheckoutMode()).isEqualTo("ORDERS");
-        assertThat(attemptB.getProviderOrderId()).isEqualTo("ORD-B");
+        assertThat(attemptB.getProviderOrderId()).isEqualTo("ORDTST-B");
 
         // Restauración a PREFERENCES por defecto
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.PREFERENCES);
@@ -1342,11 +1343,11 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         Payment p2 = createPendingPayment(res2, amount, buildValidSnapshot(amount));
 
         PaymentAttempt a1 = PaymentAttempt.create(p1.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-15-a", "ORDERS");
-        a1.recordOrder("ORD-DUPLICATE-KEY-15", "https://mp.com/1");
+        a1.recordOrder("ORDTST-DUPLICATE-KEY-15", "https://mp.com/1");
         paymentAttemptRepository.save(a1);
 
         PaymentAttempt a2 = PaymentAttempt.create(p2.getId(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-15-b", "ORDERS");
-        a2.recordOrder("ORD-DUPLICATE-KEY-15", "https://mp.com/2");
+        a2.recordOrder("ORDTST-DUPLICATE-KEY-15", "https://mp.com/2");
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             paymentAttemptRepository.save(a2);

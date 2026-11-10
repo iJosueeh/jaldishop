@@ -1217,7 +1217,7 @@ class ProcessMercadoPagoWebhookServiceTest {
             "49.00,PEN,accredited,PAYMENT_AMOUNT_MISMATCH", "50.00,USD,accredited,PAYMENT_CURRENCY_MISMATCH"})
     void ordersWireResponsePreservesFinancialValidationAndDuplicateIdempotency(
             String amount, String currency, String detail, String expected) throws Exception {
-        String orderId = "ORD-WIRE";
+        String orderId = "ORDTST-WIRE";
         activeAttempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
                 PaymentMethod.CARD, "wire-key", "ORDERS");
         activeAttempt.recordOrder(orderId, "https://checkout.test");

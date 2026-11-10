@@ -503,14 +503,13 @@ class MercadoPagoRestClientAdapterTest {
     void shouldCreateOrderSuccessfully() {
         String responseJson = """
                 {
-                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "id": "ORDTST01J67CQQH5904WDBVZEM4JMEP3",
                   "type": "online",
                   "processing_mode": "manual",
                   "capture_mode": "automatic",
                   "total_amount": 120.00,
                   "external_reference": "ext-order-001",
-                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J67CQQH5904WDBVZEM4JMEP3",
-                  "live_mode": false,
+                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORDTST01J67CQQH5904WDBVZEM4JMEP3",
                   "status": "created"
                 }
                 """;
@@ -556,8 +555,8 @@ class MercadoPagoRestClientAdapterTest {
         OrderResult result = adapter.createOrder(command, UUID.randomUUID());
 
         mockServer.verify();
-        assertThat(result.orderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3");
-        assertThat(result.checkoutUrl()).contains("order_id=ORD01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(result.orderId()).isEqualTo("ORDTST01J67CQQH5904WDBVZEM4JMEP3");
+        assertThat(result.checkoutUrl()).contains("order_id=ORDTST01J67CQQH5904WDBVZEM4JMEP3");
         assertThat(result.status()).isEqualTo("created");
         assertThat(result.totalAmount()).isEqualByComparingTo("120.00");
     }
@@ -599,16 +598,18 @@ class MercadoPagoRestClientAdapterTest {
     }
 
     @Test
-    @DisplayName("Crear orden rechaza con SecurityException si expectedLiveMode=false pero Mercado Pago no incluye live_mode (null)")
-    void shouldRejectCreateOrderWhenExpectedLiveModeFalseAndResponseLiveModeNull() {
+    @DisplayName("Crear orden exitosa cuando live_mode está ausente pero orden tiene prefijo ORDTST y user_id esperado")
+    void shouldAllowCreateOrderWhenLiveModeAbsentWithValidSandboxOrder() {
         properties.setExpectedLiveMode(false);
+        properties.setExpectedCollectorId(3819941792L);
 
-        String nullLiveModeResponseJson = """
+        String realSandboxOrderResponseJson = """
                 {
-                  "id": "ORD-NULL-LIVE",
+                  "id": "ORDTST01M71YY0FMNBE787P2QH8JBM60",
                   "status": "created",
-                  "total_amount": 120.00,
-                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-NULL-LIVE"
+                  "total_amount": 39.00,
+                  "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "user_id": "3819941792"
                 }
                 """;
 
@@ -616,19 +617,130 @@ class MercadoPagoRestClientAdapterTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(nullLiveModeResponseJson));
+                        .body(realSandboxOrderResponseJson));
 
         CreateOrderCommand command = new CreateOrderCommand(
-                "ext-null-001",
+                "ext-sandbox-real-001",
+                new BigDecimal("39.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("39.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-real-001"
+        );
+
+        OrderResult result = adapter.createOrder(command, UUID.randomUUID());
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORDTST01M71YY0FMNBE787P2QH8JBM60");
+        assertThat(result.checkoutUrl()).contains("ORDTST01M71YY0FMNBE787P2QH8JBM60");
+        assertThat(result.status()).isEqualTo("created");
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si el ID de orden no es compatible con TEST")
+    void shouldRejectCreateOrderWhenOrderIdIsIncompatibleWithTestEnvironment() {
+        properties.setExpectedLiveMode(false);
+        properties.setExpectedCollectorId(3819941792L);
+
+        // ID de producción ORD01... sin TST
+        String prodOrderResponseJson = """
+                {
+                  "id": "ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "status": "created",
+                  "total_amount": 120.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "user_id": "3819941792"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(prodOrderResponseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-prod-001",
                 new BigDecimal("120.00"),
                 List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("120.00"), "PEN")),
-                null, null, null, null, null, "JALDI", "idemp-null-001"
+                null, null, null, null, null, "JALDI", "idemp-prod-001"
         );
 
         assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
                 .isInstanceOf(MercadoPagoOrderSecurityException.class)
-                .hasMessageContaining("live_mode=null")
-                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORD-NULL-LIVE"));
+                .hasMessageContaining("incompatible con entorno TEST")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORD01J67CQQH5904WDBVZEM4JMEP3"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si user_id no coincide con el collector esperado")
+    void shouldRejectCreateOrderWhenUserIdMismatchesExpectedCollector() {
+        properties.setExpectedLiveMode(false);
+        properties.setExpectedCollectorId(3819941792L);
+
+        String mismatchedCollectorJson = """
+                {
+                  "id": "ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "status": "created",
+                  "total_amount": 39.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "user_id": "999999999"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(mismatchedCollectorJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-mismatch-001",
+                new BigDecimal("39.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("39.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-mismatch-001"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .hasMessageContaining("Cuenta de vendedor ausente o no autorizada")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORDTST01M71YY0FMNBE787P2QH8JBM60"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si user_id está ausente cuando expectedCollectorId está configurado")
+    void shouldRejectCreateOrderWhenUserIdIsMissingWithExpectedCollector() {
+        properties.setExpectedLiveMode(false);
+        properties.setExpectedCollectorId(3819941792L);
+
+        String missingCollectorJson = """
+                {
+                  "id": "ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "status": "created",
+                  "total_amount": 39.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORDTST01M71YY0FMNBE787P2QH8JBM60"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(missingCollectorJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-missing-col-001",
+                new BigDecimal("39.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("39.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-missing-col-001"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .hasMessageContaining("Cuenta de vendedor ausente o no autorizada")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORDTST01M71YY0FMNBE787P2QH8JBM60"));
 
         mockServer.verify();
     }
@@ -640,10 +752,10 @@ class MercadoPagoRestClientAdapterTest {
 
         String sandboxOrderResponseJson = """
                 {
-                  "id": "ORD-SANDBOX-001",
+                  "id": "ORDTST-SANDBOX-001",
                   "status": "created",
                   "total_amount": 120.00,
-                  "checkout_url": "https://sandbox.mercadopago.com.pe/checkout/orders/ORD-SANDBOX-001",
+                  "checkout_url": "https://sandbox.mercadopago.com.pe/checkout/orders/ORDTST-SANDBOX-001",
                   "live_mode": false
                 }
                 """;
@@ -664,8 +776,46 @@ class MercadoPagoRestClientAdapterTest {
         OrderResult result = adapter.createOrder(command, UUID.randomUUID());
 
         mockServer.verify();
-        assertThat(result.orderId()).isEqualTo("ORD-SANDBOX-001");
-        assertThat(result.checkoutUrl()).isEqualTo("https://sandbox.mercadopago.com.pe/checkout/orders/ORD-SANDBOX-001");
+        assertThat(result.orderId()).isEqualTo("ORDTST-SANDBOX-001");
+        assertThat(result.checkoutUrl()).isEqualTo("https://sandbox.mercadopago.com.pe/checkout/orders/ORDTST-SANDBOX-001");
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si user_id y collector_id se contradicen")
+    void shouldRejectCreateOrderWhenCollectorIdAndUserIdContradict() {
+        properties.setExpectedLiveMode(false);
+        properties.setExpectedCollectorId(3819941792L);
+
+        String contradictorySellerJson = """
+                {
+                  "id": "ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "status": "created",
+                  "total_amount": 39.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORDTST01M71YY0FMNBE787P2QH8JBM60",
+                  "collector_id": 11111111,
+                  "user_id": "3819941792"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(contradictorySellerJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-contradict-001",
+                new BigDecimal("39.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("39.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-contradict-001"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .hasMessageContaining("Cuenta de vendedor contradictoria o inválida")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORDTST01M71YY0FMNBE787P2QH8JBM60"));
+
+        mockServer.verify();
     }
 
     @Test

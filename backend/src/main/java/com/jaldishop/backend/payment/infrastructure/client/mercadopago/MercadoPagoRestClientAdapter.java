@@ -462,17 +462,7 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                 );
             }
 
-            if (properties.getExpectedLiveMode() != null) {
-                if (!Boolean.FALSE.equals(response.liveMode())) {
-                    log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} pero con live_mode={} (esperado false). Intento {}. Bloqueando operación.",
-                            response.id(), response.liveMode(), attemptId);
-                    throw new MercadoPagoOrderSecurityException(
-                            "Entorno remoto no autorizado al crear orden (live_mode=" + response.liveMode() + ").",
-                            response.id(),
-                            response.liveMode()
-                    );
-                }
-            }
+            validateCreatedOrderEnvironment(response, attemptId);
 
             log.info("Orden creada exitosamente en Mercado Pago con ID: {}", response.id());
             return new OrderResult(response.id(), response.checkoutUrl(), response.status(), response.totalAmount());
@@ -623,17 +613,64 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                 parseIsoInstant(payment.dateApproved()), payment.paidAmount());
     }
 
-    private Long normalizeOrderCollector(MpOrderResponse order) {
-        Long seller = null;
-        if (order.userId() != null) {
-            if (!order.userId().matches("[0-9]+")) throw invalidOrderField("user_id");
-            try { seller = Long.valueOf(order.userId()); }
-            catch (NumberFormatException invalid) { throw invalidOrderField("user_id"); }
-            if (seller <= 0) throw invalidOrderField("user_id");
+    private void validateCreatedOrderEnvironment(MpOrderResponse response, UUID attemptId) {
+        if (Boolean.FALSE.equals(properties.getExpectedLiveMode())) {
+            // 1. live_mode explícito en true está estrictamente prohibido
+            if (Boolean.TRUE.equals(response.liveMode())) {
+                log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} contiene live_mode=true en entorno TEST. Intento {}. Bloqueando operación.",
+                        response.id(), attemptId);
+                throw new MercadoPagoOrderSecurityException(
+                        "Entorno remoto no autorizado al crear orden: live_mode=true explícito.",
+                        response.id(),
+                        true
+                );
+            }
+
+            // 2. Verificación de la cuenta colectora/vendedora esperada
+            Long sellerId;
+            try {
+                sellerId = response.resolvedCollectorId();
+            } catch (IllegalStateException ex) {
+                log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} presenta inconsistencia de vendedor: {}. Intento {}. Bloqueando operación.",
+                        response.id(), ex.getMessage(), attemptId);
+                throw new MercadoPagoOrderSecurityException(
+                        "Cuenta de vendedor contradictoria o inválida al crear orden: " + ex.getMessage(),
+                        response.id(),
+                        response.liveMode()
+                );
+            }
+
+            if (properties.getExpectedCollectorId() != null && properties.getExpectedCollectorId() > 0) {
+                if (sellerId == null || !properties.getExpectedCollectorId().equals(sellerId)) {
+                    log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} tiene user_id/collector_id={} (esperado {}). Intento {}. Bloqueando operación.",
+                            response.id(), sellerId, properties.getExpectedCollectorId(), attemptId);
+                    throw new MercadoPagoOrderSecurityException(
+                            "Cuenta de vendedor ausente o no autorizada al crear orden (user_id=" + sellerId + ", esperado=" + properties.getExpectedCollectorId() + ").",
+                            response.id(),
+                            response.liveMode()
+                    );
+                }
+            }
+
+            // 3. Compatibilidad del formato de identificador remoto con entorno TEST
+            if (!com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator.isCompatibleTestOrderId(response.id())) {
+                log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} no posee identificador compatible con entorno TEST. Intento {}. Bloqueando operación.",
+                        response.id(), attemptId);
+                throw new MercadoPagoOrderSecurityException(
+                        "Identificador de orden incompatible con entorno TEST (id=" + response.id() + ").",
+                        response.id(),
+                        response.liveMode()
+                );
+            }
         }
-        if (order.collectorId() != null && (order.collectorId() <= 0
-                || (seller != null && !seller.equals(order.collectorId())))) throw invalidOrderField("collector_id");
-        return seller != null ? seller : order.collectorId();
+    }
+
+    private Long normalizeOrderCollector(MpOrderResponse order) {
+        try {
+            return order.resolvedCollectorId();
+        } catch (IllegalStateException ex) {
+            throw invalidOrderField(ex.getMessage().contains("user_id") ? "user_id" : "collector_id");
+        }
     }
 
     private String compatibleOrderText(String canonical, String historical, String field, boolean ignoreCase) {

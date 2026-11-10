@@ -205,10 +205,10 @@ class OrderReferenceReadTest {
             "9.00,PEN,accredited,false", "10.00,USD,accredited,false"})
     void reconciliationConsumesCanonicalOrdersResponseWithoutRelaxingFinancialChecks(
             String amount, String currency, String detail, boolean approved) throws Exception {
-        var f = new Fixture(PaymentStatus.PENDING);
+        var f = new Fixture(PaymentStatus.PENDING, "ORDTST1");
         when(f.payment.getAmount()).thenReturn(BigDecimal.TEN);
         when(f.payment.getCurrency()).thenReturn("PEN");
-        when(f.attempts.findByProviderOrderId("ORD1")).thenReturn(Optional.of(f.attempt));
+        when(f.attempts.findByProviderOrderId("ORDTST1")).thenReturn(Optional.of(f.attempt));
         when(f.attempts.findById(f.attempt.getId())).thenReturn(Optional.of(f.attempt));
         var status = new java.util.concurrent.atomic.AtomicReference<>(PaymentStatus.PENDING);
         when(f.payment.getStatus()).thenAnswer(inv -> status.get());
@@ -221,18 +221,18 @@ class OrderReferenceReadTest {
         try (var input = getClass().getResourceAsStream("/mercadopago/orders/get-order-accredited.json")) {
             root = (tools.jackson.databind.node.ObjectNode) mapper.readTree(input);
         }
-        root.put("id", "ORD1").put("external_reference", "pa1_" + f.attempt.getId())
+        root.put("id", "ORDTST1").put("external_reference", "pa1_" + f.attempt.getId())
                 .put("currency", currency).put("total_amount", amount).put("total_paid_amount", amount);
         var item = (tools.jackson.databind.node.ObjectNode) root.path("transactions").path("payments").get(0);
         item.put("amount", amount).put("paid_amount", amount).put("status_detail", detail);
         var builder = org.springframework.web.client.RestClient.builder().baseUrl("https://mp.test");
         var server = org.springframework.test.web.client.MockRestServiceServer.bindTo(builder).build();
-        server.expect(org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo("https://mp.test/v1/orders/ORD1"))
+        server.expect(org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo("https://mp.test/v1/orders/ORDTST1"))
                 .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess(
                         root.toString(), org.springframework.http.MediaType.APPLICATION_JSON));
         var adapter = new com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoRestClientAdapter(
                 builder.build(), f.properties);
-        var remote = adapter.queryOrder("ORD1");
+        var remote = adapter.queryOrder("ORDTST1");
         if (!amount.equals("10.00") || !currency.equals("PEN")) {
             assertThrows(ConflictException.class, () -> f.consolidate(remote));
             verify(f.payments, never()).save(any());
@@ -257,10 +257,14 @@ class OrderReferenceReadTest {
         final PaymentAttempt attempt = PaymentAttempt.create(paymentId, 1, PaymentProvider.MERCADO_PAGO,
                 PaymentMethod.CARD, "key", "ORDERS");
         final PaymentOrderReconciliationProcessor processor;
-        final OrderReconciliationClaimResult claim;
+        OrderReconciliationClaimResult claim;
 
         Fixture(PaymentStatus status) {
-            attempt.recordOrder("ORD1", "https://checkout.test");
+            this(status, "ORD1");
+        }
+
+        Fixture(PaymentStatus status, String orderId) {
+            attempt.recordOrder(orderId, "https://checkout.test");
             attempt.markProcessing();
             attempt.acquireReconciliationLease(worker, Duration.ofMinutes(5), now);
             when(payment.getId()).thenReturn(paymentId);
@@ -280,7 +284,7 @@ class OrderReferenceReadTest {
                     new com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidator(
                             properties),
                     mock(PaymentIncidenceRepository.class));
-            claim = OrderReconciliationClaimResult.claimed(attempt.getId(), paymentId, worker, "ORD1");
+            claim = OrderReconciliationClaimResult.claimed(attempt.getId(), paymentId, worker, orderId);
         }
 
         OrderQueryResult remote(String orderId, String status, String reference,

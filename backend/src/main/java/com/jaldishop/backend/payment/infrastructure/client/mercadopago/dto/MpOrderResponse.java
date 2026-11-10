@@ -26,6 +26,35 @@ public record MpOrderResponse(
         @JsonProperty("user_id") String userId
 ) {
 
+    public Long resolvedCollectorId() {
+        Long parsedUserId = null;
+        if (userId != null && !userId.isBlank()) {
+            try {
+                long parsed = Long.parseLong(userId.trim());
+                if (parsed > 0) {
+                    parsedUserId = parsed;
+                } else {
+                    throw new IllegalStateException("user_id no positivo en orden: " + userId);
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("user_id no numérico en orden: " + userId, e);
+            }
+        }
+
+        if (collectorId != null && collectorId <= 0) {
+            throw new IllegalStateException("collector_id no positivo en orden: " + collectorId);
+        }
+
+        if (collectorId != null && parsedUserId != null) {
+            if (!collectorId.equals(parsedUserId)) {
+                throw new IllegalStateException("Contradicción en vendedor de orden: collector_id=" + collectorId + " != user_id=" + parsedUserId);
+            }
+            return collectorId;
+        }
+
+        return collectorId != null ? collectorId : parsedUserId;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record MpTransactions(
             @JsonProperty("payments") List<MpOrderPayment> payments,
