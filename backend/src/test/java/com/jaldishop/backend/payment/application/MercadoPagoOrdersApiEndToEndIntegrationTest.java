@@ -137,7 +137,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 if (path.startsWith("/v1/orders")) {
                     resp = ordersMockResponse.get();
                     if (resp == null) {
-                        resp = new MockResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\"}");
+                        resp = new MockResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}");
                     }
                 } else if (path.startsWith("/checkout/preferences")) {
                     resp = preferencesMockResponse.get();
@@ -368,7 +368,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 observationFailure.set(t);
             }
         });
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-COMMIT\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-COMMIT\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
         createPaymentPreferenceService.execute(newCheckoutCommand(reservationId));
         assertThat(observationFailure.get()).isNull();
         assertThat(observed.get()).isTrue();
@@ -396,7 +396,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
             }
         });
         ordersMockResponse.set(new MockResponse(201,
-                "{\"id\":\"ORD-FIRST\",\"checkout_url\":\"https://example.test/first\"}"));
+                "{\"id\":\"ORD-FIRST\",\"checkout_url\":\"https://example.test/first\",\"live_mode\":false}"));
         createPaymentPreferenceService.execute(command);
         Payment payment = paymentRepository.findByCapacityReservationId(reservationId).orElseThrow();
         var first = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId()).get(0);
@@ -416,7 +416,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                 String.class, first.getId());
 
         ordersMockResponse.set(new MockResponse(201,
-                "{\"id\":\"ORD-SECOND\",\"checkout_url\":\"https://example.test/second\"}"));
+                "{\"id\":\"ORD-SECOND\",\"checkout_url\":\"https://example.test/second\",\"live_mode\":false}"));
         var result = createPaymentPreferenceService.execute(command);
         assertThat(result.paymentId()).isEqualTo(payment.getId());
         var attempts = paymentAttemptRepository.findByPaymentIdOrderByAttemptNumberAsc(payment.getId());
@@ -493,7 +493,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
             try { releasePost.await(2, TimeUnit.SECONDS); }
             catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
         });
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-CONCURRENT\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-CONCURRENT\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             Future<CreatePaymentPreferenceResult> first = executor.submit(() -> createPaymentPreferenceService.execute(command));
@@ -514,7 +514,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         UUID reservationId = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         CreatePaymentPreferenceCommand command = newCheckoutCommand(reservationId);
-        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-REMOTE-SUCCESS\",\"checkout_url\":\"https://example.test/checkout\"}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\":\"ORD-REMOTE-SUCCESS\",\"checkout_url\":\"https://example.test/checkout\",\"live_mode\":false}"));
         jdbcTemplate.execute("""
                 CREATE FUNCTION test_fail_order_result() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN IF NEW.provider_order_id IS NOT NULL THEN RAISE EXCEPTION 'simulated result failure' USING ERRCODE = 'P4202'; END IF;
@@ -647,7 +647,8 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
                   "id": "ORD-E2E-001",
                   "status": "created",
                   "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORD-E2E-001",
-                  "total_amount": 25.00
+                  "total_amount": 25.00,
+                  "live_mode": false
                 }
                 """));
 
@@ -1306,7 +1307,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
         UUID resB = createCapacityReservation("ACTIVE", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(resB, 1);
-        ordersMockResponse.set(new MockResponse(201, "{\"id\": \"ORD-B\", \"checkout_url\": \"https://mp.com/B\"}"));
+        ordersMockResponse.set(new MockResponse(201, "{\"id\": \"ORD-B\", \"checkout_url\": \"https://mp.com/B\", \"live_mode\": false}"));
 
         CreatePaymentPreferenceCommand cmdB = new CreatePaymentPreferenceCommand(
                 USER_ID, resB, CheckoutFulfillmentType.DELIVERY,

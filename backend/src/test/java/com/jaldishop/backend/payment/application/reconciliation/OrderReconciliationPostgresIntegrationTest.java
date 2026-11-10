@@ -85,7 +85,7 @@ class OrderReconciliationPostgresIntegrationTest {
 
                 MockHttpResponse resp = orderMockResponse.get();
                 if (resp == null) {
-                    resp = new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\"}");
+                    resp = new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}");
                 }
 
                 byte[] bytes = resp.responseBody().getBytes(StandardCharsets.UTF_8);
@@ -201,7 +201,7 @@ class OrderReconciliationPostgresIntegrationTest {
     private static String accreditedOrder(String orderId, UUID paymentId, String amount) {
         return """
                 {"id":"%s","status":"processed","status_detail":"accredited","total_amount":%s,
-                 "external_reference":"%s","transactions":{"payments":[
+                 "external_reference":"%s","live_mode":false,"transactions":{"payments":[
                  {"id":"99119911","status":"approved","status_detail":"accredited",
                   "transaction_amount":%s,"currency_id":"PEN","date_approved":"2026-11-05T19:00:00Z"}]}}
                 """.formatted(orderId, amount, paymentId, amount);
@@ -217,7 +217,7 @@ class OrderReconciliationPostgresIntegrationTest {
         TestPostgresConfig.requireDestructiveIntegrationDatabase(
                 jdbcTemplate.queryForObject("SELECT current_database()", String.class));
         simulateTimeout.set(false);
-        orderMockResponse.set(new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\"}"));
+        orderMockResponse.set(new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}"));
         jdbcTemplate.update("DELETE FROM payment_refund_execution_attempts");
         jdbcTemplate.update("DELETE FROM payment_refund_intents");
         jdbcTemplate.update("DELETE FROM payment_incidences");
@@ -332,6 +332,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status_detail": "accredited",
                   "total_amount": 50.00,
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": [
                       {
@@ -383,6 +384,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status": "created",
                   "total_amount": 50.00,
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": []
                   }
@@ -420,6 +422,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status": "cancelled",
                   "status_detail": "cancelled_by_user",
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": []
                   }
@@ -453,6 +456,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "id": "ORD-RECON-004",
                   "status": "expired",
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": []
                   }
@@ -485,6 +489,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status": "canceled",
                   "status_detail": "expired",
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": []
                   }
@@ -531,6 +536,7 @@ class OrderReconciliationPostgresIntegrationTest {
                 {
                   "id": "ORD-RECON-004C",
                   "status": "canceled",
+                  "live_mode": false,
                   "transactions": {
                     "payments": []
                   }
@@ -565,6 +571,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status_detail": "accredited",
                   "total_amount": 60.00,
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": [
                       {
@@ -622,7 +629,7 @@ class OrderReconciliationPostgresIntegrationTest {
 
         OrderReconciliationCandidateResult result = orderProcessor.consolidateOrderReconciliation(
                 claim, new OrderQueryResult("ORD-RECON-006", "created", null, amount, BigDecimal.ZERO,
-                        "pa1_" + attempt.getId(), java.util.List.of(), null, null), workerToken, Instant.now()
+                        "pa1_" + attempt.getId(), java.util.List.of(), null, false), workerToken, Instant.now()
         );
 
         assertThat(result.status()).isEqualTo(OrderReconciliationCandidateResult.Status.SUCCESS_CONFIRMED);
@@ -762,6 +769,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status_detail": "accredited",
                   "total_amount": 50.00,
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": [
                       {
@@ -832,6 +840,7 @@ class OrderReconciliationPostgresIntegrationTest {
                   "status_detail": "accredited",
                   "total_amount": 50.00,
                   "external_reference": "%s",
+                  "live_mode": false,
                   "transactions": {
                     "payments": [
                       {
