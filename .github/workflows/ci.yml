@@ -78,10 +78,12 @@ jobs:
           STORE_SEARCH_TEST_PG_BIN: /usr/lib/postgresql/16/bin
           SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "0"
           SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: "10000"
+          PASSWORD_RESET_MAIL_MODE: disabled
+          PASSWORD_RESET_REAL_DELIVERY_ENABLED: "false"
           DB_USERNAME: postgres
           DB_PASSWORD: postgrespassword
           JWT_SECRET: c2VjdXJlX2p3dF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nX3B1cnBvc2VzXzEyMzQ1Njc4OTA=
-        run: ./mvnw clean test
+        run: ./mvnw -B -Dspring.config.import= clean verify
 
       - name: Upload Surefire reports
         if: always()
