@@ -264,6 +264,25 @@ class StompAuthChannelInterceptorTest {
         verifyNoInteractions(storeContextService);
     }
 
+    @Test
+    void passwordResetRejectsOldConnectAndExistingSubscription() {
+        UUID id = UUID.randomUUID();
+        JwtPrincipal old = new JwtPrincipal(id, Set.of("CUSTOMER"));
+        User user = User.create("a@example.com", "encoded", "Test", "User", null,
+                Set.of(new Role((short) 1, RoleName.CUSTOMER)));
+        user.resetPassword("new-encoded");
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(jwtService.getPrincipal("old-token")).thenReturn(old);
+        StompHeaderAccessor connect = StompHeaderAccessor.create(StompCommand.CONNECT);
+        connect.setNativeHeader("Authorization", "Bearer old-token");
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(
+                MessageBuilder.createMessage(new byte[0], connect.getMessageHeaders()), messageChannel));
+        StompHeaderAccessor subscribe = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        subscribe.setUser(createAuthentication(old)); subscribe.setDestination("/user/queue/orders");
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(
+                MessageBuilder.createMessage(new byte[0], subscribe.getMessageHeaders()), messageChannel));
+    }
+
     private void allow(JwtPrincipal principal) {
         var roles = principal.roles().stream().map(role -> new Role((short) 1, RoleName.valueOf(role)))
                 .collect(java.util.stream.Collectors.toSet());

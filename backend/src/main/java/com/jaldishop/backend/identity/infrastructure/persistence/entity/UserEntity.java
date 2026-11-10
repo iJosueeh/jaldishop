@@ -23,8 +23,14 @@ public class UserEntity {
     @Column(nullable = false, unique = true, length = 254)
     private String email;
 
-    @Column(name = "password_encoded", nullable = false, length = 255)
+    @Column(name = "password_encoded", nullable = false, length = 255, updatable = false)
     private String passwordEncoded;
+
+    // Only the recovery adapter updates this counter; stale profile saves cannot undo revocation.
+    @Column(name = "credentials_version", nullable = false, insertable = false, updatable = false)
+    private long credentialsVersion;
+
+    public long getCredentialsVersion() { return credentialsVersion; }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

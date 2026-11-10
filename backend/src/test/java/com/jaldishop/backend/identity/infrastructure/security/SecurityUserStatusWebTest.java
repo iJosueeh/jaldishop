@@ -91,7 +91,7 @@ class SecurityUserStatusWebTest {
 
         @PostMapping("/api/v1/auth/refresh")
         public AuthResult refresh(@AuthenticationPrincipal JwtPrincipal principal) {
-            return refresh.execute(principal.userId());
+            return refresh.execute(principal.userId(), principal.credentialsVersion());
         }
 
         @GetMapping("/api/v1/users/me")
@@ -377,11 +377,11 @@ class SecurityUserStatusWebTest {
         mockMvc.perform(get("/api/v1/users/me").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.roles[0]").value("CUSTOMER"));
-        when(jwtService.generateToken(testUserId, Set.of("CUSTOMER"))).thenReturn("refreshed-customer-token");
+        when(jwtService.generateToken(testUserId, Set.of("CUSTOMER"), 0L)).thenReturn("refreshed-customer-token");
         mockMvc.perform(post("/api/v1/auth/refresh").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("refreshed-customer-token"))
                 .andExpect(jsonPath("$.roles[0]").value("CUSTOMER"));
-        verify(jwtService).generateToken(testUserId, Set.of("CUSTOMER"));
+        verify(jwtService).generateToken(testUserId, Set.of("CUSTOMER"), 0L);
     }
 }

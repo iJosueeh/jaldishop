@@ -52,7 +52,7 @@ public class StompDeliveryAuthorizationInterceptor implements ExecutorChannelInt
                     || !(auth.getPrincipal() instanceof StompPrincipal stompPrincipal)) {
                 return null;
             }
-            authorization.authorize(stompPrincipal.jwtPrincipal().userId(), requested);
+            authorization.authorize(stompPrincipal.jwtPrincipal(), requested);
             return message;
         } catch (RuntimeException exception) {
             log.warn("Entrega STOMP bloqueada: no se pudo validar la autorización actual.");

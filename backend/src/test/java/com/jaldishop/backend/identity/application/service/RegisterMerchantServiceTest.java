@@ -89,7 +89,7 @@ class RegisterMerchantServiceTest {
         when(roleRepository.findByName(RoleName.CUSTOMER)).thenReturn(Optional.of(customerRole));
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(jwtService.generateToken(any(), anySet())).thenReturn("mocked-jwt-token");
+        when(jwtService.generateToken(any(), anySet(), eq(0L))).thenReturn("mocked-jwt-token");
 
         AuthResult result = registerMerchantService.execute(command);
 
@@ -102,7 +102,7 @@ class RegisterMerchantServiceTest {
 
         verify(userRepository).save(any(User.class));
         verify(storeProvisioning).provisionStore(any(StoreProvisioningData.class));
-        verify(jwtService).generateToken(any(), anySet());
+        verify(jwtService).generateToken(any(), anySet(), eq(0L));
     }
 
     @Test
@@ -134,7 +134,7 @@ class RegisterMerchantServiceTest {
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
         when(userRepository.findByEmail("cliente@test.com")).thenReturn(Optional.of(existingCustomer));
         when(passwordEncoder.matches("password123", "hashed-password")).thenReturn(true);
-        when(jwtService.generateToken(any(), anySet())).thenReturn("upgrade-jwt-token");
+        when(jwtService.generateToken(any(), anySet(), eq(0L))).thenReturn("upgrade-jwt-token");
 
         AuthResult result = registerMerchantService.execute(command);
 
@@ -259,7 +259,7 @@ class RegisterMerchantServiceTest {
         );
 
         assertEquals("STORE_SLUG_ALREADY_EXISTS", exception.getCode());
-        verify(jwtService, never()).generateToken(any(), anySet());
+        verify(jwtService, never()).generateToken(any(), anySet(), eq(0L));
     }
 
     @Test
@@ -292,7 +292,7 @@ class RegisterMerchantServiceTest {
         when(roleRepository.findByName(RoleName.CUSTOMER)).thenReturn(Optional.of(customerRole));
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(jwtService.generateToken(any(), anySet())).thenReturn("mocked-jwt-token");
+        when(jwtService.generateToken(any(), anySet(), eq(0L))).thenReturn("mocked-jwt-token");
 
         registerMerchantService.execute(command);
 

@@ -1,0 +1,7 @@
+package com.jaldishop.backend.identity.web.dto;
+
+import jakarta.validation.constraints.*;
+
+public record ForgotPasswordRequest(@NotBlank @Email @Size(max = 254) String email) {
+    @Override public String toString() { return "ForgotPasswordRequest[REDACTED]"; }
+}

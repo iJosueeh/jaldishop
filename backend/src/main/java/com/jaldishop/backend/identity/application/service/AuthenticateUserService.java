@@ -43,7 +43,7 @@ public class AuthenticateUserService {
                 .map(role -> role.getName().toString())
                 .collect(Collectors.toSet());
 
-        String token = jwtService.generateToken(user.getId(), roles);
+        String token = jwtService.generateToken(user.getId(), roles, user.getCredentialsVersion());
 
         return new AuthResult(
                 token,

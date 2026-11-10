@@ -83,6 +83,18 @@ class StompDeliveryAuthorizationBrokerTest {
     }
 
     @Test
+    void passwordResetStopsDeliveryToAlreadySubscribedSessions() {
+        connect("password-reset-session");
+        subscribe("password-reset-session", "merchant", topic());
+        subscribe("password-reset-session", "customer", "/user/queue/orders");
+        publish(topic()); publishCustomer();
+        assertThat(delivered).hasSize(2); delivered.clear();
+        current.get().resetPassword("new-encoded-password");
+        publish(topic()); publishCustomer();
+        assertThat(delivered).isEmpty();
+    }
+
+    @Test
     void existingSessionsStopReceivingAfterRoleRevocationAndOtherRoleContinues() {
         connect("s1");
         connect("s2");

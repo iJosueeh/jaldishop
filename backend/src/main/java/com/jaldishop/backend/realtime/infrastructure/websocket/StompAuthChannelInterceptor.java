@@ -76,7 +76,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         }
 
         String token = authHeader.substring(7).trim();
-        JwtPrincipal jwtPrincipal = currentPrincipal(jwtService.getPrincipal(token).userId());
+        JwtPrincipal jwtPrincipal = currentPrincipal(jwtService.getPrincipal(token));
 
         var authorities = jwtPrincipal.roles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -103,11 +103,11 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             throw new AccessDeniedException("Sesión no autenticada para realizar suscripción STOMP.");
         }
 
-        authorize(stompPrincipal.jwtPrincipal().userId(), destination);
+        authorize(stompPrincipal.jwtPrincipal(), destination);
     }
 
-    void authorize(UUID userId, String destination) {
-        JwtPrincipal jwtPrincipal = currentPrincipal(userId);
+    void authorize(JwtPrincipal session, String destination) {
+        JwtPrincipal jwtPrincipal = currentPrincipal(session);
 
         if (destination == null || destination.isBlank()) {
             throw new AccessDeniedException("Destino de suscripción no proporcionado.");
@@ -152,6 +152,13 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         throw new AccessDeniedException("No se permiten comandos de negocio mediante WebSocket. Utilice los endpoints HTTP REST oficiales.");
     }
 
+    private JwtPrincipal currentPrincipal(JwtPrincipal session) {
+        JwtPrincipal current = currentPrincipal(session.userId());
+        if (!current.credentialsVersion().equals(session.credentialsVersion()))
+            throw new AccessDeniedException("Sesión revocada.");
+        return current;
+    }
+
     private JwtPrincipal currentPrincipal(UUID userId) {
         var user = userRepository.findById(userId)
                 .filter(u -> u.canAuthenticate())
@@ -159,7 +166,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         var roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(java.util.stream.Collectors.toSet());
-        return new JwtPrincipal(userId, roles);
+        return new JwtPrincipal(userId, roles, user.getCredentialsVersion());
     }
 
 }
