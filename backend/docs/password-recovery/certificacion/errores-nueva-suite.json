@@ -1,0 +1,715 @@
+[
+  {
+    "class": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "free-port-probe-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest.startDisposablePostgres(CustomerAddressPostgresIntegrationTest.java:56)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.checkout.application.service.CheckoutHoldConcurrencyIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.checkout.application.service.CheckoutHoldConcurrencyIntegrationTest.initDatabase(CheckoutHoldConcurrencyIntegrationTest.java:42)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.checkout.application.service.ConfirmPurchaseConcurrencyIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.checkout.application.service.ConfirmPurchaseConcurrencyIntegrationTest.initDatabase(ConfirmPurchaseConcurrencyIntegrationTest.java:51)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.database.PostgreSqlArchitectureIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.database.PostgreSqlArchitectureIntegrationTest.initDatabase(PostgreSqlArchitectureIntegrationTest.java:27)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.e2e.EndToEndBackendFlowValidationIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.e2e.EndToEndBackendFlowValidationIntegrationTest.startMockServerAndSeed(EndToEndBackendFlowValidationIntegrationTest.java:62)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.identity.application.service.PasswordRecoveryPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.identity.application.service.PasswordRecoveryPostgresIntegrationTest.migratePreviousVersion(PasswordRecoveryPostgresIntegrationTest.java:46)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest.cleanPreexistingData(RegisterMerchantRollbackIntegrationTest.java:123)",
+      "at com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest.cleanTestData(RegisterMerchantRollbackIntegrationTest.java:133)",
+      "at com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest.cleanTestDataAfterRun(RegisterMerchantRollbackIntegrationTest.java:129)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenActuatorDiscoveryCalled_shouldDenyAccessWithoutExposingLinks",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.flywaydb.core.internal.exception.sqlExceptions.FlywaySqlUnableToConnectToDbException: Unable to obtain connection from database: The connection attempt failed.",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenHealthEndpointCalled_shouldReturnUpWithoutInternalDetails",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenAuthenticatedUserCallsActuatorInfo_shouldDenyAccess",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenPublicApiHealthCalled_shouldReturnOk",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenActuatorInfoCalled_shouldDenyAccessWithoutExposingInfo",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "test": "whenActuatorEnvCalled_shouldDenyAccessWithoutExposingEnvironment",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.application.service.InventoryRealConcurrencyPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.inventory.application.service.InventoryRealConcurrencyPostgresIntegrationTest.migrateDb(InventoryRealConcurrencyPostgresIntegrationTest.java:74)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryJpaRepositorySpringDataTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.inventory.infrastructure.persistence.InventoryJpaRepositorySpringDataTest.migrateDb(InventoryJpaRepositorySpringDataTest.java:49)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.inventory.infrastructure.persistence.InventoryPostgresIntegrationTest.initDatabase(InventoryPostgresIntegrationTest.java:36)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.notification.infrastructure.persistence.OrderNotificationPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.notification.infrastructure.persistence.OrderNotificationPostgresIntegrationTest.initSchemaAndData(OrderNotificationPostgresIntegrationTest.java:127)",
+      "at com.jaldishop.backend.notification.infrastructure.persistence.OrderNotificationPostgresIntegrationTest.cleanTestData(OrderNotificationPostgresIntegrationTest.java:149)",
+      "at com.jaldishop.backend.notification.infrastructure.persistence.OrderNotificationPostgresIntegrationTest.cleanUpTestData(OrderNotificationPostgresIntegrationTest.java:145)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest",
+    "test": "shouldSerializeConcurrentStatusChangesWithoutLostUpdate",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.flywaydb.core.internal.exception.sqlExceptions.FlywaySqlUnableToConnectToDbException: Unable to obtain connection from database: The connection attempt failed.",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest",
+    "test": "shouldBeIdempotentAndSerializeWhenTwoThreadsAttemptSameTransition",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest",
+    "test": "shouldNotPublishWebSocketEventWhenTransactionRollsBack",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest",
+    "test": "shouldPublishWebSocketEventWhenTransactionCommits",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.OrderCancellationPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.ordering.application.service.OrderCancellationPostgresIntegrationTest.initSchema(OrderCancellationPostgresIntegrationTest.java:93)",
+      "at com.jaldishop.backend.ordering.application.service.OrderCancellationPostgresIntegrationTest.cleanUpTestData(OrderCancellationPostgresIntegrationTest.java:133)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.infrastructure.persistence.OrderPersistenceIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.ordering.infrastructure.persistence.OrderPersistenceIntegrationTest.seedDatabase(OrderPersistenceIntegrationTest.java:83)",
+      "at com.jaldishop.backend.ordering.infrastructure.persistence.OrderPersistenceIntegrationTest.cleanUpTestData(OrderPersistenceIntegrationTest.java:159)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest.seedOrderInPostgres(MerchantOrderEndToEndIntegrationTest.java:575)",
+      "at com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest.seedDatabase(MerchantOrderEndToEndIntegrationTest.java:131)",
+      "at com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest.cleanUpTestData(MerchantOrderEndToEndIntegrationTest.java:167)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.MercadoPagoOrdersApiEndToEndIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.payment.application.MercadoPagoOrdersApiEndToEndIntegrationTest.startMockServer(MercadoPagoOrdersApiEndToEndIntegrationTest.java:108)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.PaymentFlowEndToEndIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.payment.application.PaymentFlowEndToEndIntegrationTest.startMockServer(PaymentFlowEndToEndIntegrationTest.java:75)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "contradictoryWebhookCommitsAuditWithoutFinancialMutation",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.flywaydb.core.internal.exception.sqlExceptions.FlywaySqlUnableToConnectToDbException: Unable to obtain connection from database: The connection attempt failed.",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "webhookHoldingPaymentCanUpdateAttemptWhileInvestigationWaits(String)[1]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "webhookHoldingPaymentCanUpdateAttemptWhileInvestigationWaits(String)[2]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "verifiesHistoricalReferenceAndCommitsAssociationWithBothAudits",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "twoInvestigationsSerializeAndCreateOnlyOneAssociation",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "noKnownIdRemainsUnknownWithoutAnyHttpRequestOrNewAttempt",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "remoteErrorsPreserveUnknownWithoutRetryingCreation(int)[1]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "remoteErrorsPreserveUnknownWithoutRetryingCreation(int)[2]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "remoteErrorsPreserveUnknownWithoutRetryingCreation(int)[3]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "webhookApprovalAndCompletedRefundDuringGetArePreserved",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "deferredJdbcAuditFailureRollsBackFlushedJpaAssociation",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "jpaFlushFailureRollsBackPreviouslyInsertedJdbcAudit",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "remoteGetSuspendsCallerTransactionAndRestoresItAfterwards",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "duplicateAndLateWebhookPreserveFinancialEvidence(boolean)[1]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "duplicateAndLateWebhookPreserveFinancialEvidence(boolean)[2]",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "test": "concurrentAttemptReferenceSnapshotsHaveOneWinnerAndStayDurable",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.OrderReconciliationPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.payment.application.reconciliation.OrderReconciliationPostgresIntegrationTest.startMockHttpServer(OrderReconciliationPostgresIntegrationTest.java:68)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldSkipPaymentWhenReattemptHasBackoffStillActive",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class]: Failed to initialize dependency 'flywayInitializer' of LoadTimeWeaverAware bean 'entityManagerFactory': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.flywaydb.core.internal.exception.sqlExceptions.FlywaySqlUnableToConnectToDbException: Unable to obtain connection from database: The connection attempt failed.",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldHandleTwoWorkersCreatingSameIncidenceConcurrently",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldIncrementAttemptsCountConcurrentlyWithoutLostUpdates",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldRollbackOrderAndPersistCommercialFailureWhenReservationExpired",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldConfirmPurchaseWithoutDoubleInventoryDeductionOnReconciliation",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldSkipPaymentWhenIncidenceIsManualReviewRequired",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "test": "shouldAvoidDuplicateOrdersWhenTwoReconcilersCompete",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.refund.PaymentRefundPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.payment.application.refund.PaymentRefundPostgresIntegrationTest.startMockHttpServer(PaymentRefundPostgresIntegrationTest.java:58)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.refund.PaymentSchedulerExecutionPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "http-mock-server-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.payment.application.refund.PaymentSchedulerExecutionPostgresIntegrationTest.startMockHttpServer(PaymentSchedulerExecutionPostgresIntegrationTest.java:64)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.payment.infrastructure.persistence.RemoteOrderCreationMigrationTest",
+    "test": "preservesHistoricalRowsAndAuditsAtomicTransitions",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.payment.infrastructure.persistence.RemoteOrderCreationMigrationTest.preservesHistoricalRowsAndAuditsAtomicTransitions(RemoteOrderCreationMigrationTest.java:17)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldConnectSuccessfullyWithValidJwt",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "org.springframework.context.ApplicationContextException: Unable to start web server",
+      "org.springframework.boot.web.server.WebServerException: Unable to start embedded Tomcat",
+      "org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jwtAuthenticationFilter' defined in file [/home/ijosueeh/Documentos/Proyectos/jaldishop/backend/target/classes/com/jaldishop/backend/identity/infrastructure/security/JwtAuthenticationFilter.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'userRepositoryAdapter' defined in file [/home/ijosueeh/Documentos/Proyectos/jaldishop/backend/target/classes/com/jaldishop/backend/identity/infrastructure/persistence/adapter/UserRepositoryAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userJpaRepository' defined in com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository defined in @EnableJpaRepositories declared on DataJpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'",
+      "org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'userRepositoryAdapter' defined in file [/home/ijosueeh/Documentos/Proyectos/jaldishop/backend/target/classes/com/jaldishop/backend/identity/infrastructure/persistence/adapter/UserRepositoryAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'userJpaRepository' defined in com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository defined in @EnableJpaRepositories declared on DataJpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'userJpaRepository' defined in com.jaldishop.backend.identity.infrastructure.persistence.repository.UserJpaRepository defined in @EnableJpaRepositories declared on DataJpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jpaSharedEM_entityManagerFactory': Cannot resolve reference to bean 'entityManagerFactory' while setting constructor argument",
+      "org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/flyway/autoconfigure/FlywayAutoConfiguration$FlywayConfiguration.class]: Unable to obtain connection from database: The connection attempt failed.",
+      "org.flywaydb.core.internal.exception.sqlExceptions.FlywaySqlUnableToConnectToDbException: Unable to obtain connection from database: The connection attempt failed.",
+      "org.postgresql.util.PSQLException: The connection attempt failed.",
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRejectConnectWithInvalidJwt",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRejectConnectWithExpiredJwt",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRejectConnectWithoutJwt",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldAllowPermittedOriginAndRejectUnauthorizedOrigin",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldBlockClientSendCommand",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRejectSubscriptionToUnauthorizedDestinations",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldIsolateEventsBetweenStores",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRejectMerchantSubscribingToAnotherStore",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldIsolateEventsBetweenCustomers",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldDeliverToMultipleSessionsOfSameCustomer",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldDeliverRealStompFrameOnConfirmPurchase",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldDeliverRealStompFrameOnChangeOrderStatus",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldNotDeliverFrameWhenTransactionRollsBack",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldNotDeliverDuplicateFrameOnIdempotentRetry",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldRequireReAuthenticationAndReSubscriptionUponReconnect",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "shouldDemonstrateEphemeralBehaviorDuringDisconnection",
+    "kind": "error",
+    "category": "spring-context-cascade",
+    "causes": [],
+    "frames": []
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "jdbc-socket-forbidden",
+    "causes": [
+      "java.net.SocketException: Operation not permitted"
+    ],
+    "frames": [
+      "at com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest.cleanUpTestData(WebSocketStompRealIntegrationTest.java:140)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "free-port-probe-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest.startDisposablePostgres(StoreCustomerPostgresIntegrationTest.java:49)"
+    ]
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "",
+    "kind": "error",
+    "category": "free-port-probe-socket-forbidden",
+    "causes": [],
+    "frames": [
+      "at com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest.startDisposablePostgres(StoreSearchPostgresIntegrationTest.java:60)"
+    ]
+  }
+]

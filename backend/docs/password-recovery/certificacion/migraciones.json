@@ -1,0 +1,112 @@
+{
+  "scripts": [
+    {
+      "migration": "V1__initial_schema.sql",
+      "sha256": "73ef80e1129344c963fad846aa0e296069c22c206bfa6be165ede82b5eb9b89d"
+    },
+    {
+      "migration": "V2__seed_roles.sql",
+      "sha256": "384a36d38ed36e0eabd40391dfc152851a6dc5a4080a374e8434d98dc730d621"
+    },
+    {
+      "migration": "V3__add_store_customers.sql",
+      "sha256": "008902949f03c06cfda012c345fe964ec5b600f87cb2ed0788d620eedea84243"
+    },
+    {
+      "migration": "V4__seed_complete_demo_data.sql",
+      "sha256": "6b3137482b01cbbb43e924e9719998d5f1837d1d590f3b659f2dedc9664695a0"
+    },
+    {
+      "migration": "V5__remove_tax_applies_from_stores.sql",
+      "sha256": "e728f7dd71407508a9dc98424d0fa8a8e8a1c168496acf2588d2b5058ecc5682"
+    },
+    {
+      "migration": "V6__set_default_currency_and_normalize_phones.sql",
+      "sha256": "ab31d5a79478ca69f1b4a9a9b95b6c5c7ff0d35864642129cf9491e1dae98519"
+    },
+    {
+      "migration": "V7__strengthen_relational_integrity_and_multitenancy.sql",
+      "sha256": "9e14d9827bd3360ef1870048db9ff75e2f451d811024dbda88a90c6f81e9a613"
+    },
+    {
+      "migration": "V8__seed_store_categories_and_branding.sql",
+      "sha256": "2c9ca6a9780898fc45a01d3b159e4a7eb9c754e7ac5bdbb54989a9f59b637201"
+    },
+    {
+      "migration": "V10__fix_user_roles_id_default_and_store_sync.sql",
+      "sha256": "96877fe9a6b0279c9a032dec824ab95db0eb75278dc06a29655d5589bef9b3cd"
+    },
+    {
+      "migration": "V11__refine_store_ownership.sql",
+      "sha256": "b7d76cac2ddab035e284692d0f97dc386ee51cac7bc95f85aca53b9aa2f17367"
+    },
+    {
+      "migration": "V12__migrate_store_customers_to_user_roles_and_check_scope.sql",
+      "sha256": "74b1159defe6d83798a007140df308edfffeddd73ecc1b8287444ed0e50cfbe7"
+    },
+    {
+      "migration": "V13__strengthen_inventory_reservations_multitenancy.sql",
+      "sha256": "8b8955381fd114dc86ec7be5c8c0e3fc06e57d5c1c3254b3a501342e5c0791e3"
+    },
+    {
+      "migration": "V14__prevent_capacity_slot_overlaps.sql",
+      "sha256": "e85570f8435ad6d56761e9d594cbaff35c2e59a812affbe3fbe4d52d9be8c24d"
+    },
+    {
+      "migration": "V15__create_customer_addresses_table.sql",
+      "sha256": "2cdb63b9d7f4fd31cadaa2acaad57aa932e22c71367dfc03c03f7f4d2653c31c"
+    },
+    {
+      "migration": "V16__add_deduplication_key_to_notifications.sql",
+      "sha256": "c5a02ce56f1ba88aae4ac81b2ece302dfa562f7f82a5be1e369cb3aae5f2f284"
+    },
+    {
+      "migration": "V17__expand_payment_persistence_and_attempts.sql",
+      "sha256": "a63449da5cd061ddc9affab433faa73aadf0e8ca907b8d03f6c126892ec11648"
+    },
+    {
+      "migration": "V18__create_payment_incidences_table.sql",
+      "sha256": "ab5cee54f4739bc67e08e9ef7bc5c24e717341a90602f98aceb01a66fb7a618f"
+    },
+    {
+      "migration": "V19__create_payment_refunds_schema.sql",
+      "sha256": "2d96be576f75ecae4dc39e62ad8607149f348233347e8b7c88572f85c8448b93"
+    },
+    {
+      "migration": "V20__add_provider_order_id_to_payment_attempts.sql",
+      "sha256": "dc7e40d668f672cbf672a4ef5839af08f76a6eb73d499020cd14547630b719ed"
+    },
+    {
+      "migration": "V21__add_unique_constraint_to_provider_order_id_and_checkout_mode.sql",
+      "sha256": "3d1d73d223092e87f62fcc5aba78635466a5fa3ed39a1ad47c6e8c0f4ea18cc4"
+    },
+    {
+      "migration": "V22__add_orders_fields_to_refund_intents.sql",
+      "sha256": "fd2198999722722399fbaf19a4da67d69b3b2813611472161a0ead25fa285cda"
+    },
+    {
+      "migration": "V23__add_reconciliation_lease_to_payment_attempts.sql",
+      "sha256": "3ef597296462574e195ab758ec2cedb12ab8024bd3ced7b9d3b646c9cac6cafe"
+    },
+    {
+      "migration": "V24__create_checkout_creation_requests.sql",
+      "sha256": "62c58e3a3ed828fffc567c4a376cb6ebb2cafa05dbb012bce48bdad56fa2ad5f"
+    },
+    {
+      "migration": "V25__add_remote_order_creation_evidence.sql",
+      "sha256": "ec068a310b92cce56cb4285f11d75c83a05306788dbc08093b7b999d051ce4bd"
+    },
+    {
+      "migration": "V26__enable_unaccent_for_store_search.sql",
+      "sha256": "090e34402d7fe5b11a381323eba605ed6359a104a20e689245b8ee3276ec4bb7"
+    },
+    {
+      "migration": "V27__add_password_recovery.sql",
+      "sha256": "cc91e8f400c3a0b2df5f4dd8e7326f5a430479a23d3fa684ea4dd1ed768f72bb"
+    }
+  ],
+  "count": 26,
+  "sql_applied": true,
+  "flyway_schema_history_verified": false,
+  "reason": "Flyway JDBC initialization fails before a connection can be opened; SQL-only execution is not a Flyway history certification."
+}
