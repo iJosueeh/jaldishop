@@ -510,6 +510,7 @@ class MercadoPagoRestClientAdapterTest {
                   "total_amount": 120.00,
                   "external_reference": "ext-order-001",
                   "checkout_url": "https://www.mercadopago.com.pe/checkout/v1/redirect?order_id=ORD01J67CQQH5904WDBVZEM4JMEP3",
+                  "live_mode": false,
                   "status": "created"
                 }
                 """;
@@ -559,6 +560,112 @@ class MercadoPagoRestClientAdapterTest {
         assertThat(result.checkoutUrl()).contains("order_id=ORD01J67CQQH5904WDBVZEM4JMEP3");
         assertThat(result.status()).isEqualTo("created");
         assertThat(result.totalAmount()).isEqualByComparingTo("120.00");
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si expectedLiveMode=false pero Mercado Pago retorna live_mode=true")
+    void shouldRejectCreateOrderWhenExpectedLiveModeFalseAndResponseLiveModeTrue() {
+        properties.setExpectedLiveMode(false);
+
+        String liveOrderResponseJson = """
+                {
+                  "id": "ORD-LIVE-001",
+                  "status": "created",
+                  "total_amount": 120.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-LIVE-001",
+                  "live_mode": true
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(liveOrderResponseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-live-001",
+                new BigDecimal("120.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("120.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-live-001"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .hasMessageContaining("live_mode=true")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORD-LIVE-001"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("Crear orden rechaza con SecurityException si expectedLiveMode=false pero Mercado Pago no incluye live_mode (null)")
+    void shouldRejectCreateOrderWhenExpectedLiveModeFalseAndResponseLiveModeNull() {
+        properties.setExpectedLiveMode(false);
+
+        String nullLiveModeResponseJson = """
+                {
+                  "id": "ORD-NULL-LIVE",
+                  "status": "created",
+                  "total_amount": 120.00,
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-NULL-LIVE"
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(nullLiveModeResponseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-null-001",
+                new BigDecimal("120.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("120.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-null-001"
+        );
+
+        assertThatThrownBy(() -> adapter.createOrder(command, UUID.randomUUID()))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .hasMessageContaining("live_mode=null")
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORD-NULL-LIVE"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("Crear orden exitosa cuando expectedLiveMode=false y Mercado Pago retorna live_mode=false")
+    void shouldAllowCreateOrderWhenExpectedLiveModeFalseAndResponseLiveModeFalse() {
+        properties.setExpectedLiveMode(false);
+
+        String sandboxOrderResponseJson = """
+                {
+                  "id": "ORD-SANDBOX-001",
+                  "status": "created",
+                  "total_amount": 120.00,
+                  "checkout_url": "https://sandbox.mercadopago.com.pe/checkout/orders/ORD-SANDBOX-001",
+                  "live_mode": false
+                }
+                """;
+
+        mockServer.expect(requestTo(BASE_URL + "/v1/orders"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(sandboxOrderResponseJson));
+
+        CreateOrderCommand command = new CreateOrderCommand(
+                "ext-sandbox-001",
+                new BigDecimal("120.00"),
+                List.of(new CreateOrderCommand.OrderItem("i-1", "Item", "Desc", 1, new BigDecimal("120.00"), "PEN")),
+                null, null, null, null, null, "JALDI", "idemp-sandbox-001"
+        );
+
+        OrderResult result = adapter.createOrder(command, UUID.randomUUID());
+
+        mockServer.verify();
+        assertThat(result.orderId()).isEqualTo("ORD-SANDBOX-001");
+        assertThat(result.checkoutUrl()).isEqualTo("https://sandbox.mercadopago.com.pe/checkout/orders/ORD-SANDBOX-001");
     }
 
     @Test
@@ -965,7 +1072,8 @@ class MercadoPagoRestClientAdapterTest {
                   "id": "ORD-EXP-001",
                   "status": "created",
                   "total_amount": 50.00,
-                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-001"
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-001",
+                  "live_mode": false
                 }
                 """;
 
@@ -1010,7 +1118,8 @@ class MercadoPagoRestClientAdapterTest {
                   "id": "ORD-EXP-NULL",
                   "status": "created",
                   "total_amount": 30.00,
-                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-NULL"
+                  "checkout_url": "https://mercadopago.com.pe/checkout/orders/ORD-EXP-NULL",
+                  "live_mode": false
                 }
                 """;
 

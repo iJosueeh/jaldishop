@@ -7,6 +7,7 @@ import com.jaldishop.backend.payment.application.gateway.dto.CreatePreferenceCom
 import com.jaldishop.backend.payment.application.gateway.dto.OrderResult;
 import com.jaldishop.backend.payment.application.gateway.dto.PreferenceResult;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoException;
+import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoOrderSecurityException;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.OrderCreationRejection;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
 import com.jaldishop.backend.shared.exception.ConflictException;
@@ -69,6 +70,10 @@ public class CreatePaymentPreferenceService {
     }
 
     public CreatePaymentPreferenceResult execute(CreatePaymentPreferenceCommand command) {
+        if (!properties.isCheckoutEnabled()) {
+            throw new ConflictException("CHECKOUT_DISABLED", "La creación de checkouts se encuentra temporalmente deshabilitada.");
+        }
+
         // 1. Paso DB 1: Transaccional. Valida reserva, protege capacidad y persiste Payment y PaymentAttempt
         PreparationResult prep = preparationService.prepareOrGetExistingPayment(command);
 
@@ -112,6 +117,10 @@ public class CreatePaymentPreferenceService {
             preferenceResult = mercadoPagoGateway.createPreference(mpCommand, prep.attempt().getId());
         } catch (ConflictException ex) {
             throw ex;
+        } catch (SecurityException ex) {
+            log.warn("Violación de seguridad de entorno al crear preferencia para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
+            preparationService.recordAttemptError(prep.attempt().getId(), "SECURITY_ERROR", ex.getMessage());
+            throw ex;
         } catch (MercadoPagoException ex) {
             log.warn("Mercado Pago falló al crear preferencia para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
             // Registrar error de intento en DB sin reintentar automáticamente
@@ -151,6 +160,20 @@ public class CreatePaymentPreferenceService {
             CreateOrderCommand orderCommand = buildGatewayOrderCommand(prep);
             orderResult = mercadoPagoGateway.createOrder(orderCommand, prep.attempt().getId());
         } catch (ConflictException ex) {
+            throw ex;
+        } catch (MercadoPagoOrderSecurityException ex) {
+            log.error("Violación de seguridad de entorno al crear orden remota {} para el intento {}: {}",
+                    ex.getRemoteOrderId(), prep.attempt().getId(), ex.getMessage());
+            preparationService.recordOrderCreationSecurityError(
+                    prep.attempt().getPaymentId(),
+                    prep.attempt().getId(),
+                    ex.getRemoteOrderId(),
+                    "SECURITY_ERROR_LIVE_MODE_MISMATCH"
+            );
+            throw ex;
+        } catch (SecurityException ex) {
+            log.warn("Violación de seguridad de entorno al crear orden para el intento {}: {}", prep.attempt().getId(), ex.getMessage());
+            preparationService.recordOrderCreationError(prep.attempt().getPaymentId(), prep.attempt().getId(), false, "SECURITY_ERROR");
             throw ex;
         } catch (MercadoPagoException ex) {
             log.warn("Mercado Pago falló al crear orden para el intento {}: {}", prep.attempt().getId(), ex.getMessage());

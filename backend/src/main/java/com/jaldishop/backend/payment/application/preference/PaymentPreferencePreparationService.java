@@ -24,6 +24,7 @@ import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -346,6 +347,16 @@ public class PaymentPreferencePreparationService {
             if (attempt.getProviderPaymentId() == null) {
                 attempt.markError(safeCode, "Order creation requires review");
             }
+        }
+        paymentAttemptRepository.save(attempt);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordOrderCreationSecurityError(UUID paymentId, UUID attemptId, String remoteOrderId, String safeCode) {
+        PaymentAttempt attempt = lockOrderAttempt(paymentId, attemptId);
+        attempt.recordOrderCreationFailure(true);
+        if (attempt.getRemoteOrderCreationState() != RemoteOrderCreationState.CREATED) {
+            attempt.markError(safeCode, "Orden remota [" + remoteOrderId + "] rechazada por discrepancia de entorno");
         }
         paymentAttemptRepository.save(attempt);
     }

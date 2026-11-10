@@ -141,6 +141,8 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
         } catch (ResourceAccessException ex) {
             log.error("Timeout o error de conexión al comunicarse con Mercado Pago: {}", ex.getMessage());
             throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar Mercado Pago", ex);
+        } catch (SecurityException ex) {
+            throw ex;
         } catch (MercadoPagoException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -460,6 +462,18 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
                 );
             }
 
+            if (properties.getExpectedLiveMode() != null) {
+                if (!Boolean.FALSE.equals(response.liveMode())) {
+                    log.error("CRÍTICO DE SEGURIDAD: Orden creada en Mercado Pago con ID {} pero con live_mode={} (esperado false). Intento {}. Bloqueando operación.",
+                            response.id(), response.liveMode(), attemptId);
+                    throw new MercadoPagoOrderSecurityException(
+                            "Entorno remoto no autorizado al crear orden (live_mode=" + response.liveMode() + ").",
+                            response.id(),
+                            response.liveMode()
+                    );
+                }
+            }
+
             log.info("Orden creada exitosamente en Mercado Pago con ID: {}", response.id());
             return new OrderResult(response.id(), response.checkoutUrl(), response.status(), response.totalAmount());
 
@@ -477,6 +491,8 @@ public class MercadoPagoRestClientAdapter implements MercadoPagoGateway {
         } catch (ResourceAccessException ex) {
             log.error("Timeout o error de conexión al comunicarse con Mercado Pago (crear orden): {}", ex.getMessage());
             throw new MercadoPagoException(0, "MP_TIMEOUT", "Timeout o falla de red al invocar Mercado Pago", ex);
+        } catch (SecurityException ex) {
+            throw ex;
         } catch (MercadoPagoException ex) {
             throw ex;
         } catch (Exception ex) {

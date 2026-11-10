@@ -540,16 +540,16 @@ class ProcessMercadoPagoWebhookServiceTest {
         String xSignature = "ts=1700000000,v1=validhash";
         String xRequestId = "req-111";
 
-        properties.setExpectedLiveMode(true); // Se espera producción
+        properties.setExpectedLiveMode(false); // Entorno de pruebas obligatorio
 
         when(signatureValidator.isValid(eq(xSignature), eq(xRequestId), eq(dataId), eq(secretKey)))
                 .thenReturn(true);
 
-        // Pago realizado en sandbox (live_mode = false)
+        // Pago realizado en producción (live_mode = true) llegando a entorno de pruebas
         PaymentQueryResult queryResult = new PaymentQueryResult(
                 dataId, "approved", "accredited", new BigDecimal("50.00"), "PEN",
                 "visa", "credit_card", paymentId.toString(), Instant.now(),
-                null, false
+                null, true
         );
         when(mercadoPagoGateway.queryPayment(dataId)).thenReturn(queryResult);
 
