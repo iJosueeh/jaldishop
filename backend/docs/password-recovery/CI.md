@@ -1,6 +1,6 @@
 # Certificación de Password Recovery en CI
 
-Estado al preparar el PR: rama local, sin push ni PR abierto. GitHub Actions todavía no se ha ejecutado para estos commits. La publicación está pendiente de verificar o confirmar que la integración externa de Render no crea despliegues automáticos ni previews.
+El [PR #86](https://github.com/iJosueeh/jaldishop/pull/86) fue publicado desde `feature/password-recovery`. La primera ejecución de CI sobre `9ea13cb` terminó con un fallo real de entrega WebSocket, descrito a continuación. La corrección por sesión se ha verificado localmente con el broker real en memoria; todavía necesita una nueva ejecución TCP en GitHub Actions.
 
 ## Alcance de los workflows
 
@@ -30,7 +30,7 @@ El job aislado ejecuta las pruebas de recuperación, seguridad HTTP, revocación
 | Límites y protección contra enumeración | Políticas de IP/cuenta, respuestas genéricas y cola limitada en pruebas HTTP/de servicio |
 | CONNECT antiguo rechazado por WebSocket TCP real | `oldJwtCannotConnectAfterPasswordReset`, con JWT nuevo aceptado |
 | Suscripción TCP existente deja de recibir | `alreadySubscribedSessionStopsReceivingAfterPasswordReset`; un cliente con JWT nuevo sí recibe el mismo evento |
-| Revocación en interceptor y broker en memoria | Métodos explícitos de `StompAuthChannelInterceptorTest` y `StompDeliveryAuthorizationBrokerTest` |
+| Revocación en interceptor y broker en memoria | Métodos explícitos de `StompAuthChannelInterceptorTest` y `StompDeliveryAuthorizationBrokerTest`, incluida coexistencia de sesiones con distintas versiones |
 
 El nuevo test WebSocket solo crea sus propios clientes de prueba. Se conecta a `ws://127.0.0.1:<puerto>/ws`; el origen HTTP reservado `http://recovery.test` es un header permitido únicamente por la configuración de ese test. No envía tráfico a ese dominio ni modifica la política CORS de producción. El correo está simulado y no se activa Resend.
 
@@ -53,3 +53,19 @@ Se deben revisar ambos jobs backend, los XML publicados como artefactos y el lis
 Si hay fallos, se documentarán separando inicialización/infraestructura, configuración de pruebas preexistente y regresiones del cambio. Los controles de seguridad y las aserciones no se debilitarán para obtener un resultado verde.
 
 El PR no queda certificado para merge hasta que pasen JDBC/concurrencia real, Flyway completo, JWT/refresh, WebSocket real y la suite general, o se documenten explícitamente los bloqueos preexistentes que requieran una decisión de revisión. No se hará merge ni despliegue desde este trabajo.
+
+## Primer resultado real en GitHub Actions y corrección
+
+- [CI, ejecución 258](https://github.com/iJosueeh/jaldishop/actions/runs/42821966200): frontend Merchant y Marketplace aprobados; backend reportó 1573 pruebas, un fallo, cero errores y cero omitidos.
+- [Password Recovery Certification, ejecución 1](https://github.com/iJosueeh/jaldishop/actions/runs/42821966477): 63 pruebas, un fallo, cero errores y cero omitidos. El historial de los 26 scripts SQL hasta V27 fue aprobado. El gate rechazó correctamente el escenario crítico fallido.
+- Ambos fallaron en `alreadySubscribedSessionStopsReceivingAfterPasswordReset`: el cliente con JWT nuevo no recibió `after-reset`. Este fallo es funcional y no pertenece a las restricciones de sockets del agente.
+
+`DefaultSimpUserRegistry` conserva un principal por usuario, correspondiente a su primera conexión, aunque el usuario tenga varias sesiones. La autorización de entrega usaba ese principal global: cuando una conexión antigua seguía abierta, también evaluaba la conexión nueva con la versión de credenciales antigua.
+
+La corrección captura el `JwtPrincipal` de cada sesión desde el `CONNECT_ACK` emitido por el broker después de la autenticación. Antes de cada entrega comprueba la sesión, el usuario, la suscripción y la autorización vigente en base de datos. Elimina esa identidad al recibir `DISCONNECT_ACK` o `SessionDisconnectEvent`. Si no hay identidad de sesión, descarta la entrega; no usa como fallback el principal global.
+
+Se añadió una regresión con dos conexiones del mismo usuario y versiones distintas sobre `DefaultSimpUserRegistry` y `SimpleBrokerMessageHandler` reales, sin sockets. Falló antes de corregir el interceptor y pasó después. También se verificó la limpieza por desconexión y la conservación de la política de denegación. El test WebSocket TCP conserva sus aserciones y sus tiempos originales; no se deshabilitó ni se amplió el timeout para ocultar el defecto.
+
+En ambas ejecuciones de GitHub, `PasswordRecoveryPostgresIntegrationTest` completó sus nueve casos con cero fallos, errores u omisiones. Eso incluye cliente/comerciante, concurrencia, rollback, guardado obsoleto y validación Flyway. El problema pendiente de aquellas ejecuciones quedó acotado a la entrega a la sesión WebSocket nueva.
+
+La corrección pasó localmente 22 pruebas centradas en STOMP/broker/configuración y una selección ampliada de 104 pruebas con cero fallos, errores u omisiones. Las aserciones TCP no se cambiaron. Aún hay que publicar la corrección y volver a ejecutar ambos jobs backend sobre su nuevo SHA; el agente no puede certificar el transporte TCP dentro de su sandbox.

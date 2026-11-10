@@ -36,6 +36,7 @@ CRITICAL = {
     },
     PREFIX + 'realtime.infrastructure.websocket.StompDeliveryAuthorizationBrokerTest': {
         'passwordResetStopsDeliveryToAlreadySubscribedSessions': 1,
+        'newSessionReceivesAfterResetWhileOldSessionRemainsConnected': 1,
     },
 }
 
