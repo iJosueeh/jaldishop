@@ -10,6 +10,8 @@ Estado al preparar el PR: rama local, sin push ni PR abierto. GitHub Actions tod
 
 El workflow `deploy-docs.yml` solo se activa por push a `main`; no fue modificado. Estos disparadores no permiten verificar la configuración de autodespliegue o previews del servicio externo Render. No existe un Blueprint `render.yaml` en la raíz del repositorio y no hay conexión de lectura confirmada al proveedor al preparar esta publicación.
 
+Los servicios de aplicación siguen `execute(command)`: `ForgotPasswordService` y `ResetPasswordService`. La emisión es un método privado del caso de solicitud, sin un coordinador o worker adicional. En el test JDBC, el límite de planificación ejecuta las tareas en cada hilo de prueba para conservar dos transacciones/conexiones reales concurrentes; la cola asíncrona se verifica por separado y el test WebSocket espera el correo mediante una cola bloqueante.
+
 ## Pruebas críticas obligatorias
 
 El job aislado ejecuta las pruebas de recuperación, seguridad HTTP, revocación STOMP y correo deshabilitado. `verify-ci-reports.py` rechaza informes ausentes, cero tests, fallos, errores, omisiones y escenarios críticos ausentes aunque el resultado agregado parezca verde.

@@ -27,7 +27,7 @@ CRITICAL = {
         'legacyJwtWithoutVersionRemainsUsableUntilPasswordReset': 1,
         'ipLimitsCannotBeBypassedUsingForwardedHeaders': 1,
     },
-    PREFIX + 'identity.application.service.RequestPasswordRecoveryServiceTest': {
+    PREFIX + 'identity.application.service.ForgotPasswordServiceTest': {
         'normalizesAndQueuesWithoutAccountLookupAndSuppressesAccountLimitForAllAddresses': 1,
         'queueCapacityReturnsRateLimitAndProviderFailureDoesNotReachHttpCaller': 1,
     },

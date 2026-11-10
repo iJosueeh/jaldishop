@@ -6,6 +6,8 @@ import com.jaldishop.backend.identity.domain.model.*;
 import com.jaldishop.backend.identity.domain.enums.*;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
+import com.jaldishop.backend.identity.infrastructure.security.PasswordResetTokens;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
@@ -50,7 +52,8 @@ class PasswordRecoveryPostgresIntegrationTest {
             passwordsBeforeMigration.put(rs.getObject(1, UUID.class), rs.getString(2));
         });
     }
-    @Autowired PasswordRecoveryService recovery;
+    @Autowired ForgotPasswordService forgot;
+    @Autowired ResetPasswordService resetPassword;
     @Autowired AuthenticateUserService login;
     @Autowired RefreshTokenService refresh;
     @Autowired RegisterMerchantService registerMerchant;
@@ -60,12 +63,16 @@ class PasswordRecoveryPostgresIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired Flyway flyway;
     @MockitoBean PasswordResetMail mail;
+    @MockitoBean(name = "passwordRecoveryExecutor") ThreadPoolTaskExecutor executor;
     @MockitoBean(name = "passwordRecoveryClock") Clock clock;
     UUID id;
     String email;
     String token;
     @BeforeEach void setup() {
         when(clock.instant()).thenReturn(NOW);
+        // Run jobs on each test caller thread; concurrent cases keep two real JDBC transactions.
+        doAnswer(invocation -> { invocation.getArgument(0, Runnable.class).run(); return null; })
+                .when(executor).execute(any(Runnable.class));
         email = "recovery-" + UUID.randomUUID() + "@example.test";
         // Use the seeded role ID, not an assumption about role sequence order.
         short customerId = jdbc.queryForObject("SELECT id FROM roles WHERE name='CUSTOMER'", Short.class);
@@ -81,16 +88,22 @@ class PasswordRecoveryPostgresIntegrationTest {
         jdbc.update("DELETE FROM stores WHERE owner_user_id=?", id);
         jdbc.update("DELETE FROM users WHERE id=?", id);
     }
+    private void issueToken() {
+        token = null;
+        forgot.execute(new ForgotPasswordCommand(email));
+        if (token == null) throw new AssertionError("Recovery mail was not captured");
+    }
+
     @ParameterizedTest @ValueSource(booleans = {false, true})
     void fullFlowWorksForCustomerAndMerchantWithJwtRevocation(boolean merchant) {
         if (merchant) registerMerchant.execute(new RegisterMerchantCommand(email, "old-password", "Recovery", "Test",
                 "987654321", "Recovery " + id, "Test", "987654321", "Av Test 1", true, false));
         var before = login.execute(new LoginCommand(email, "old-password"));
-        recovery.issue(email);
+        issueToken();
         assertThat(token).matches("[A-Za-z0-9_-]{43}");
         String hash = jdbc.queryForObject("SELECT token_hash FROM password_reset_tokens WHERE user_id=?", String.class, id);
         assertThat(hash).isEqualTo(new PasswordResetTokens().hash(token)).isNotEqualTo(token);
-        recovery.reset(token, "new-password");
+        resetPassword.execute(new ResetPasswordCommand(token, "new-password"));
         assertThatThrownBy(() -> login.execute(new LoginCommand(email, "old-password"))).isInstanceOf(BadCredentialsException.class);
         var after = login.execute(new LoginCommand(email, "new-password"));
         assertThat(after.roles()).contains("CUSTOMER");
@@ -98,33 +111,33 @@ class PasswordRecoveryPostgresIntegrationTest {
         assertThat(jwt.getPrincipal(after.token()).credentialsVersion()).isEqualTo(1);
         assertThatThrownBy(() -> refresh.execute(id, jwt.getPrincipal(before.token()).credentialsVersion()))
                 .isInstanceOf(BadCredentialsException.class);
-        assertThatThrownBy(() -> recovery.reset(token, "another-password"))
+        assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(token, "another-password")))
                 .hasMessage("El token de recuperación no es válido o ha vencido.");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM password_reset_tokens WHERE user_id=?", Integer.class, id)).isZero();
     }
     @Test void expiresExactlyAtFifteenMinutesAndUnknownTokensHaveSameError() {
-        recovery.issue(email);
+        issueToken();
         when(clock.instant()).thenReturn(NOW.plusSeconds(900));
-        assertThatThrownBy(() -> recovery.reset(token, "new-password"))
+        assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(token, "new-password")))
                 .hasMessage("El token de recuperación no es válido o ha vencido.");
-        assertThatThrownBy(() -> recovery.reset(new PasswordResetTokens().generate(), "new-password"))
+        assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(new PasswordResetTokens().generate(), "new-password")))
                 .hasMessage("El token de recuperación no es válido o ha vencido.");
         assertThat(login.execute(new LoginCommand(email, "old-password"))).isNotNull();
     }
     @Test void newRequestReplacesPreviousToken() {
-        recovery.issue(email); String previous = token;
-        recovery.issue(email); String latest = token;
+        issueToken(); String previous = token;
+        issueToken(); String latest = token;
         assertThat(latest).isNotEqualTo(previous);
-        assertThatThrownBy(() -> recovery.reset(previous, "new-password")).isInstanceOf(RuntimeException.class);
-        recovery.reset(latest, "new-password");
+        assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(previous, "new-password"))).isInstanceOf(RuntimeException.class);
+        resetPassword.execute(new ResetPasswordCommand(latest, "new-password"));
     }
     @Test void concurrentResetsHaveExactlyOneWinner() throws Exception {
-        recovery.issue(email);
+        issueToken();
         var ready = new CountDownLatch(2); var start = new CountDownLatch(1);
         try (var pool = Executors.newFixedThreadPool(2)) {
             Callable<Boolean> attempt = () -> {
                 ready.countDown(); assertThat(start.await(5, TimeUnit.SECONDS)).isTrue();
-                try { recovery.reset(token, "new-password"); return true; }
+                try { resetPassword.execute(new ResetPasswordCommand(token, "new-password")); return true; }
                 catch (com.jaldishop.backend.shared.exception.BusinessRuleException invalid) {
                     assertThat(invalid.getCode()).isEqualTo("INVALID_PASSWORD_RESET_TOKEN"); return false;
                 }
@@ -143,7 +156,7 @@ class PasswordRecoveryPostgresIntegrationTest {
         try (var pool = Executors.newFixedThreadPool(2)) {
             Callable<Void> issue = () -> {
                 ready.countDown(); assertThat(start.await(5, TimeUnit.SECONDS)).isTrue();
-                recovery.issue(email); return null;
+                forgot.execute(new ForgotPasswordCommand(email)); return null;
             };
             var a = pool.submit(issue); var b = pool.submit(issue);
             assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue(); start.countDown();
@@ -154,30 +167,30 @@ class PasswordRecoveryPostgresIntegrationTest {
         String valid = delivered.stream().filter(value -> new PasswordResetTokens().hash(value).equals(currentHash))
                 .findFirst().orElseThrow();
         String invalid = delivered.stream().filter(value -> !value.equals(valid)).findFirst().orElseThrow();
-        assertThatThrownBy(() -> recovery.reset(invalid, "new-password"))
+        assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(invalid, "new-password")))
                 .hasMessage("El token de recuperación no es válido o ha vencido.");
-        recovery.reset(valid, "new-password");
+        resetPassword.execute(new ResetPasswordCommand(valid, "new-password"));
     }
 
     @Test void failedCredentialUpdateRollsBackTokenConsumption() {
-        recovery.issue(email);
+        issueToken();
         jdbc.execute("""
                 CREATE FUNCTION password_recovery_test_failure() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN RAISE EXCEPTION 'test failure'; END $$
                 """);
         jdbc.execute("CREATE TRIGGER password_recovery_test_failure BEFORE UPDATE OF password_encoded ON users "
                 + "FOR EACH ROW WHEN (NEW.id = '" + id + "'::uuid) EXECUTE FUNCTION password_recovery_test_failure()");
-        try { assertThatThrownBy(() -> recovery.reset(token, "new-password")).isInstanceOf(RuntimeException.class); }
+        try { assertThatThrownBy(() -> resetPassword.execute(new ResetPasswordCommand(token, "new-password"))).isInstanceOf(RuntimeException.class); }
         finally {
             jdbc.execute("DROP TRIGGER password_recovery_test_failure ON users");
             jdbc.execute("DROP FUNCTION password_recovery_test_failure()");
         }
-        recovery.reset(token, "new-password");
+        resetPassword.execute(new ResetPasswordCommand(token, "new-password"));
         assertThat(login.execute(new LoginCommand(email, "new-password"))).isNotNull();
     }
     @Test void staleProfileSaveCannotRestorePasswordOrRevokedSessions() {
         User stale = users.findById(id).orElseThrow();
-        recovery.issue(email); recovery.reset(token, "new-password");
+        issueToken(); resetPassword.execute(new ResetPasswordCommand(token, "new-password"));
         stale.updateProfile("New", "Name", null); users.save(stale);
         assertThat(users.findById(id).orElseThrow().getCredentialsVersion()).isEqualTo(1);
         assertThat(login.execute(new LoginCommand(email, "new-password"))).isNotNull();

@@ -1,6 +1,8 @@
 package com.jaldishop.backend.identity.infrastructure.security;
 
 import com.jaldishop.backend.identity.application.service.*;
+import com.jaldishop.backend.identity.application.command.ForgotPasswordCommand;
+import com.jaldishop.backend.identity.application.command.ResetPasswordCommand;
 import com.jaldishop.backend.identity.domain.model.*;
 import com.jaldishop.backend.identity.domain.enums.*;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
@@ -36,8 +38,8 @@ class PasswordRecoverySecurityWebTest {
         @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
         @Bean JwtService jwt() { return new JwtService("local-test-signing-key-with-at-least-32-bytes", 600000); }
         @Bean UserRepository users() { return mock(UserRepository.class); }
-        @Bean PasswordRecoveryService recovery() { return mock(PasswordRecoveryService.class); }
-        @Bean RequestPasswordRecoveryService requests() { return mock(RequestPasswordRecoveryService.class); }
+        @Bean ResetPasswordService recovery() { return mock(ResetPasswordService.class); }
+        @Bean ForgotPasswordService requests() { return mock(ForgotPasswordService.class); }
         @Bean RateLimits limits() { return new RateLimits(new MockEnvironment()); }
         @Bean AuthenticateUserService login() { return mock(AuthenticateUserService.class); }
         @Bean RegisterCustomerService register() { return mock(RegisterCustomerService.class); }
@@ -47,10 +49,11 @@ class PasswordRecoverySecurityWebTest {
     @Autowired WebApplicationContext context;
     @Autowired UserRepository users;
     @Autowired JwtService jwt;
-    @Autowired PasswordRecoveryService recovery;
+    @Autowired ResetPasswordService recovery;
+    @Autowired ForgotPasswordService requests;
     MockMvc mvc;
     @BeforeEach void setup() {
-        reset(users, recovery);
+        reset(users, recovery, requests);
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
     }
     @Test void bothRecoveryEndpointsArePublicValidateAndNeverReturnSecrets() throws Exception {
@@ -59,9 +62,11 @@ class PasswordRecoverySecurityWebTest {
                 .andExpect(status().isAccepted()).andExpect(header().string("Cache-Control", "no-store"))
                 .andReturn().getResponse().getContentAsString();
         assertThat(response).doesNotContain("token", "a@example.com");
+        verify(requests).execute(new ForgotPasswordCommand("a@example.com"));
         mvc.perform(post("/api/v1/auth/reset-password").contentType("application/json")
                 .content("{\"token\":\"" + "A".repeat(43) + "\",\"newPassword\":\"new-password\"}"))
                 .andExpect(status().isNoContent()).andExpect(content().string(""));
+        verify(recovery).execute(new ResetPasswordCommand("A".repeat(43), "new-password"));
         mvc.perform(post("/api/v1/auth/reset-password").contentType("application/json")
                 .content("{\"token\":\"secret-invalid\",\"newPassword\":\"123\"}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))

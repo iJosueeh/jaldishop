@@ -4,7 +4,10 @@ import com.jaldishop.backend.identity.application.command.LoginCommand;
 import com.jaldishop.backend.identity.application.command.RegisterCustomerCommand;
 import com.jaldishop.backend.identity.application.port.PasswordResetMail;
 import com.jaldishop.backend.identity.application.service.AuthenticateUserService;
-import com.jaldishop.backend.identity.application.service.PasswordRecoveryService;
+import com.jaldishop.backend.identity.application.service.ForgotPasswordService;
+import com.jaldishop.backend.identity.application.service.ResetPasswordService;
+import com.jaldishop.backend.identity.application.command.ForgotPasswordCommand;
+import com.jaldishop.backend.identity.application.command.ResetPasswordCommand;
 import com.jaldishop.backend.identity.application.service.RegisterCustomerService;
 import com.jaldishop.backend.testutil.TestPostgresConfig;
 import org.junit.jupiter.api.*;
@@ -51,7 +54,8 @@ class PasswordRecoveryWebSocketIntegrationTest {
     @LocalServerPort int port;
     @Autowired RegisterCustomerService registration;
     @Autowired AuthenticateUserService login;
-    @Autowired PasswordRecoveryService recovery;
+    @Autowired ForgotPasswordService forgot;
+    @Autowired ResetPasswordService resetPassword;
     @Autowired SimpMessagingTemplate messages;
     @Autowired SimpUserRegistry registry;
     @Autowired SimpleBrokerMessageHandler broker;
@@ -60,7 +64,7 @@ class PasswordRecoveryWebSocketIntegrationTest {
     private final List<WebSocketStompClient> clients = new ArrayList<>();
     private UUID userId;
     private String email;
-    private String recoveryToken;
+    private final BlockingQueue<String> recoveryTokens = new LinkedBlockingQueue<>();
     private String previousJwt;
 
     @BeforeEach void fixture() {
@@ -68,7 +72,7 @@ class PasswordRecoveryWebSocketIntegrationTest {
         email = "recovery-ws-" + UUID.randomUUID() + "@example.test";
         userId = registration.execute(new RegisterCustomerCommand(email, "old-password", "Recovery", "Socket", null)).getId();
         previousJwt = login.execute(new LoginCommand(email, "old-password")).token();
-        doAnswer(invocation -> { recoveryToken = invocation.getArgument(1); return null; })
+        doAnswer(invocation -> { recoveryTokens.offer(invocation.getArgument(1)); return null; })
                 .when(mail).send(eq(email), any(), any());
     }
     @AfterEach void cleanup() {
@@ -92,10 +96,11 @@ class PasswordRecoveryWebSocketIntegrationTest {
         assertThat(currentMessages.poll(5, TimeUnit.SECONDS)).isEqualTo("after-reset");
         assertThat(oldMessages.poll(2, TimeUnit.SECONDS)).isNull();
     }
-    private void resetPassword() {
-        recovery.issue(email);
-        if (recoveryToken == null) throw new AssertionError("Recovery mail was not captured");
-        recovery.reset(recoveryToken, "new-password");
+    private void resetPassword() throws InterruptedException {
+        forgot.execute(new ForgotPasswordCommand(email));
+        String token = recoveryTokens.poll(8, TimeUnit.SECONDS);
+        if (token == null) throw new AssertionError("Recovery mail was not captured");
+        resetPassword.execute(new ResetPasswordCommand(token, "new-password"));
     }
     private String currentJwt() { return login.execute(new LoginCommand(email, "new-password")).token(); }
     private StompSession connect(String jwt) throws Exception {

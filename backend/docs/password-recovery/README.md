@@ -14,22 +14,25 @@ La última migración encontrada fue **V26**. Se añadió **V27__add_password_re
 
 ```mermaid
 flowchart LR
-    F[POST forgot-password] --> Q[Validación y límites]
-    Q --> A[Cola acotada: 100 tareas]
-    A --> S[PasswordRecoveryService]
-    R[POST reset-password] --> S
-    S --> U[User.resetPassword]
-    S --> P[PasswordRecoveryRepository]
+    F[POST forgot-password] --> FP[ForgotPasswordService.execute]
+    FP --> Q[Límites y cola acotada]
+    Q --> I[Emisión y envío después del commit]
+    R[POST reset-password] --> RP[ResetPasswordService.execute]
+    RP --> U[User.resetPassword]
+    I --> P[PasswordRecoveryRepository]
+    RP --> P
     P --> D[Adaptador JDBC + UserRepository JPA]
     D --> DB[(PostgreSQL local)]
-    S --> M[PasswordResetMail]
+    I --> M[PasswordResetMail]
     M --> L[Buzón privado .eml]
     M --> E[Resend: deshabilitado]
 ```
 
-`RequestPasswordRecoveryService` normaliza el correo, limita las solicitudes por cuenta y encola el trabajo para cualquier dirección válida, exista o no. La respuesta HTTP no espera búsquedas de cuenta ni llamadas al proveedor. La cola tiene un trabajador y capacidad 100; al saturarse responde 429. Los fallos del trabajador generan únicamente un mensaje fijo, sin excepción, destinatario, cuerpo ni token.
+Cada caso de uso tiene un servicio con una única entrada pública `execute(command)`, siguiendo las convenciones de `identity`. El controlador transforma los DTO HTTP en `ForgotPasswordCommand` y `ResetPasswordCommand`.
 
-`PasswordRecoveryService` genera 32 bytes con `SecureRandom`, los codifica como Base64 URL sin padding (43 caracteres), y guarda únicamente SHA-256 en PostgreSQL. La expiración es de 15 minutos. La contraseña nueva se codifica con el `PasswordEncoder` existente y se cambia mediante `User.resetPassword`.
+`ForgotPasswordService.execute(ForgotPasswordCommand)` normaliza el correo, aplica los límites y encola la emisión para cualquier dirección válida, exista o no. La emisión es un detalle privado del mismo caso de uso: genera el token, guarda su hash y envía el correo después del commit. La respuesta HTTP no espera búsquedas de cuenta ni llamadas al proveedor. La cola mantiene un trabajador y capacidad 100; al saturarse responde 429. Los fallos del trabajador generan únicamente un mensaje fijo, sin excepción, destinatario, cuerpo ni token.
+
+`ResetPasswordService.execute(ResetPasswordCommand)` valida y consume el token, codifica la contraseña con el `PasswordEncoder` existente y la cambia mediante `User.resetPassword`, dentro de la misma transacción. La utilidad técnica `PasswordResetTokens` está en `infrastructure/security`: genera 32 bytes con `SecureRandom`, codifica Base64 URL sin padding y calcula SHA-256. El token sigue expirando a los 15 minutos.
 
 El adaptador de correo tiene modos `disabled` (por defecto), `local` y `resend`. El modo local exige perfil `local` o `test` y escribe archivos `.eml` con permiso 0600 dentro de un directorio 0700, ignorado por Git. Esos archivos contienen el mensaje con su token: deben tratarse como correo privado y eliminarse después de la prueba. El token nunca se devuelve por HTTP ni se escribe en logs.
 

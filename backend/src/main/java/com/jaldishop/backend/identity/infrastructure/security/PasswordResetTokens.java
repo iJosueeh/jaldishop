@@ -1,4 +1,4 @@
-package com.jaldishop.backend.identity.application.service;
+package com.jaldishop.backend.identity.infrastructure.security;
 
 import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
