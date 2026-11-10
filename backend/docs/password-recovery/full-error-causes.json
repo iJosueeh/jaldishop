@@ -1,0 +1,140 @@
+[
+  {
+    "class": "com.jaldishop.backend.checkout.application.service.CheckoutHoldConcurrencyIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.checkout.application.service.ConfirmPurchaseConcurrencyIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.database.PostgreSqlArchitectureIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.e2e.EndToEndBackendFlowValidationIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.identity.application.service.PasswordRecoveryPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest",
+    "errors": 6,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.application.service.InventoryRealConcurrencyPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryJpaRepositorySpringDataTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.notification.infrastructure.persistence.OrderNotificationPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest",
+    "errors": 4,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.application.service.OrderCancellationPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.infrastructure.persistence.OrderPersistenceIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest",
+    "errors": 16,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.OrderReconciliationPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationPostgresIntegrationTest",
+    "errors": 7,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.refund.PaymentRefundPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.refund.PaymentSchedulerExecutionPostgresIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.MercadoPagoOrdersApiEndToEndIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Caused by: java.lang.IllegalStateException: PHASE2A_DB_URL, DB_USERNAME and DB_PASSWORD must be set in the process environment for integration tests."
+  },
+  {
+    "class": "com.jaldishop.backend.payment.application.PaymentFlowEndToEndIntegrationTest",
+    "errors": 1,
+    "type": "error",
+    "reason": "Operation not permitted"
+  },
+  {
+    "class": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest",
+    "errors": 18,
+    "type": "error",
+    "reason": "Caused by: java.net.SocketException: Operation not permitted"
+  }
+]

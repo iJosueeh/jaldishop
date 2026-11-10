@@ -25,15 +25,19 @@ public class RefreshTokenService {
         this.jwtService = jwtService;
     }
 
-    public AuthResult execute(UUID userId) {
+    public AuthResult execute(UUID userId, long credentialsVersion) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+
+        if (!user.canAuthenticate() || user.getCredentialsVersion() != credentialsVersion) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Sesión revocada.");
+        }
 
         Set<String> roleNames = user.getRoles().stream()
                 .map(r -> r.getName().name())
                 .collect(Collectors.toSet());
 
-        String token = jwtService.generateToken(user.getId(), roleNames);
+        String token = jwtService.generateToken(user.getId(), roleNames, user.getCredentialsVersion());
 
         return new AuthResult(
                 token,

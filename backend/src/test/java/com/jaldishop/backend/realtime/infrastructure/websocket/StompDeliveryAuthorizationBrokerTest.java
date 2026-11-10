@@ -28,6 +28,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.messaging.DefaultSimpUserRegistry;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.CloseStatus;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ class StompDeliveryAuthorizationBrokerTest {
     private final List<Message<?>> delivered = new ArrayList<>();
     private final AtomicReference<User> current = new AtomicReference<>();
     private StompAuthChannelInterceptor inboundAuthorization;
+    private StompDeliveryAuthorizationInterceptor deliveryAuthorization;
     private SimpleBrokerMessageHandler broker;
     private UserDestinationMessageHandler userDestinations;
     private Authentication principal;
@@ -70,7 +73,8 @@ class StompDeliveryAuthorizationBrokerTest {
         inboundAuthorization = new StompAuthChannelInterceptor(jwt, stores, users);
         ObjectProvider<SimpUserRegistry> provider = mock(ObjectProvider.class);
         when(provider.getObject()).thenReturn(registry);
-        outbound.addInterceptor(new StompDeliveryAuthorizationInterceptor(provider, inboundAuthorization));
+        deliveryAuthorization = new StompDeliveryAuthorizationInterceptor(provider, inboundAuthorization);
+        outbound.addInterceptor(deliveryAuthorization);
         outbound.subscribe(message -> {
             if (SimpMessageHeaderAccessor.getMessageType(message.getHeaders()) == SimpMessageType.MESSAGE) delivered.add(message);
         });
@@ -80,6 +84,42 @@ class StompDeliveryAuthorizationBrokerTest {
         userDestinations.start();
         JwtPrincipal jwtPrincipal = new JwtPrincipal(userId, Set.of("CUSTOMER", "MERCHANT"));
         principal = new UsernamePasswordAuthenticationToken(new StompPrincipal(userId.toString(), jwtPrincipal), null, List.of());
+    }
+
+    @Test
+    void passwordResetStopsDeliveryToAlreadySubscribedSessions() {
+        connect("password-reset-session");
+        subscribe("password-reset-session", "merchant", topic());
+        subscribe("password-reset-session", "customer", "/user/queue/orders");
+        publish(topic()); publishCustomer();
+        assertThat(delivered).hasSize(2); delivered.clear();
+        current.get().resetPassword("new-encoded-password");
+        publish(topic()); publishCustomer();
+        assertThat(delivered).isEmpty();
+    }
+
+    @Test
+    void newSessionReceivesAfterResetWhileOldSessionRemainsConnected() {
+        connect("old-session");
+        subscribe("old-session", "old-customer", "/user/queue/orders");
+        publishCustomer();
+        assertThat(delivered).hasSize(1);
+        delivered.clear();
+
+        current.get().resetPassword("new-encoded-password");
+        JwtPrincipal fresh = new JwtPrincipal(userId, Set.of("CUSTOMER", "MERCHANT"),
+                current.get().getCredentialsVersion());
+        principal = new UsernamePasswordAuthenticationToken(new StompPrincipal(userId.toString(), fresh), null, List.of());
+        connect("new-session");
+        subscribe("new-session", "new-customer", "/user/queue/orders");
+
+        publishCustomer();
+
+        assertThat(delivered).hasSize(1);
+        assertThat(SimpMessageHeaderAccessor.getSessionId(delivered.getFirst().getHeaders()))
+                .isEqualTo("new-session");
+        assertThat(SimpMessageHeaderAccessor.getSubscriptionId(delivered.getFirst().getHeaders()))
+                .isEqualTo("new-customer");
     }
 
     @Test
@@ -128,6 +168,29 @@ class StompDeliveryAuthorizationBrokerTest {
         publish(topic());
         assertThat(delivered).hasSize(1);
         assertThat(SimpMessageHeaderAccessor.getSubscriptionId(delivered.getFirst().getHeaders())).isEqualTo("merchant");
+    }
+
+    @Test
+    void transportDisconnectDropsDeliveryEvenBeforeUserRegistryCleansUp() {
+        connect("disconnected-session");
+        subscribe("disconnected-session", "customer", "/user/queue/orders");
+        var disconnected = message(SimpMessageType.DISCONNECT, "disconnected-session", null, null, principal);
+        var event = new SessionDisconnectEvent(this, disconnected, "disconnected-session", CloseStatus.NORMAL, principal);
+        deliveryAuthorization.onDisconnect(event);
+        deliveryAuthorization.onDisconnect(event);
+        publishCustomer();
+        assertThat(delivered).isEmpty();
+    }
+
+    @Test
+    void disconnectAcknowledgementClearsSessionIdentity() {
+        connect("disconnected-session");
+        subscribe("disconnected-session", "customer", "/user/queue/orders");
+        broker.handleMessage(message(SimpMessageType.DISCONNECT, "disconnected-session", null, null, principal));
+        // The user registry is deliberately still stale; no delivery may use the discarded session.
+        outbound.send(message(SimpMessageType.MESSAGE, "disconnected-session", "customer",
+                "/queue/orders-userdisconnected-session", null));
+        assertThat(delivered).isEmpty();
     }
 
     @Test

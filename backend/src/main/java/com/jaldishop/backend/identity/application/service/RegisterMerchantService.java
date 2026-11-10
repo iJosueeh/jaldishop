@@ -117,7 +117,7 @@ public class RegisterMerchantService {
                 .map(r -> r.getName().name())
                 .collect(Collectors.toSet());
 
-        String token = jwtService.generateToken(user.getId(), roleName);
+        String token = jwtService.generateToken(user.getId(), roleName, user.getCredentialsVersion());
 
         return new AuthResult(
                 token,

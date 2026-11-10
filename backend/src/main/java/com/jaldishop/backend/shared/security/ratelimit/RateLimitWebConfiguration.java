@@ -27,6 +27,15 @@ public class RateLimitWebConfiguration implements WebMvcConfigurer {
         return new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+                String recoveryPath = request.getRequestURI().substring(request.getContextPath().length());
+                if ("POST".equals(request.getMethod()) && (recoveryPath.equals("/api/v1/auth/forgot-password")
+                        || recoveryPath.equals("/api/v1/auth/reset-password"))) {
+                    boolean forgot = recoveryPath.endsWith("forgot-password");
+                    String policy = forgot ? "forgot-password" : "reset-password";
+                    limits.check(policy + "-global", "all", 100, Duration.ofMinutes(1));
+                    if (clientIp.enabled())
+                        limits.check(policy + "-ip", clientIp.resolve(request), forgot ? 10 : 20, Duration.ofMinutes(15));
+                }
                 // Pending verification on Render: do not trust headers or aggregate visitors by proxy.
                 // The separate login-account limit remains active.
                 if (!clientIp.enabled()) return true;

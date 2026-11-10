@@ -1,0 +1,1704 @@
+{
+  "totals": {
+    "tests": 1420,
+    "failures": 0,
+    "errors": 69,
+    "skipped": 15
+  },
+  "classes": [
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.application.service.CreateCustomerAddressServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 3,
+      "name": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.application.service.DeleteCustomerAddressServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.application.service.SetDefaultCustomerAddressServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.application.service.UpdateCustomerAddressServiceTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.domain.model.CustomerAddressTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.infrastructure.ubigeo.UbigeoCatalogServiceTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.address.web.controller.CustomerAddressControllerTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.availability.service.GetCapacityAvailabilityServiceTest"
+    },
+    {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.availability.service.GetEffectiveCapacityServiceTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.availability.service.ListStoreCapacitySlotsServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityConfigurationServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityExceptionServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.configuration.service.UpdateCapacityExceptionServiceTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.reservation.service.CreateCapacityReservationServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.reservation.service.GetCapacityReservationServiceTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.application.reservation.service.ReleaseCapacityReservationServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "ReleaseCommittedCapacityReservationService \u2014 Pruebas unitarias de liberaci\u00f3n de cupo cancelado"
+    },
+    {
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.domain.model.CapacityConfigurationTest"
+    },
+    {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.domain.model.CapacityExceptionTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.domain.model.CapacityPeriodTest"
+    },
+    {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.domain.model.CapacityReservationTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.infrastructure.persistence.mapper.CapacityConfigurationPersistenceMapperTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.infrastructure.persistence.mapper.CapacityExceptionPersistenceMapperTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.infrastructure.persistence.mapper.CapacityReservationPersistenceMapperTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.web.controller.CapacityConfigurationControllerTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.web.controller.CapacityExceptionControllerTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.web.controller.CapacityReservationControllerTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.web.controller.CapacitySlotsControllerTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.capacity.web.controller.EffectiveCapacityControllerTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.result.CartViewAssemblerTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.service.AddItemToCartServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.service.ClearCartServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.service.GetCartServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.service.RemoveCartItemServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.application.service.UpdateCartItemQuantityServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.domain.model.CartItemTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.domain.model.CartTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.infrastructure.persistence.adapter.CartRepositoryAdapterTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.infrastructure.persistence.mapper.CartPersistenceMapperTest"
+    },
+    {
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.web.controller.CartControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.cart.web.mapper.CartResponseMapperTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.CreateCategoryServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.CreateProductServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.CreateProductVariantServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.GetCategoriesServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.GetProductVariantsServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.GetProductsServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.GetPublicCategoriesServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.UpdateCategoryServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.UpdateProductServiceTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.application.service.UpdateProductVariantServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.domain.model.CategoryDomainTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.domain.model.ProductDomainTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.domain.model.ProductImageTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.domain.model.ProductVariantDomainTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.infrastructure.persistence.mapper.CategoryPersistenceMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.infrastructure.persistence.mapper.ProductPersistenceMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.infrastructure.persistence.mapper.ProductVariantPersistenceMapperTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantCategoryControllerTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantProductControllerTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantProductVariantControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.PublicCategoryControllerTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.PublicProductControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapperTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.mapper.ProductResponseMapperTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapperTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.application.result.CheckoutItemSnapshotAssemblerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.application.service.CheckoutHoldConcurrencyIntegrationTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.application.service.ConfirmPurchaseConcurrencyIntegrationTest"
+    },
+    {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.application.service.ConfirmPurchaseServiceTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.application.service.InitiateCheckoutServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.domain.model.CheckoutPricingTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.domain.service.CheckoutFulfillmentValidatorTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.checkout.web.controller.CheckoutControllerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.database.PostgreSqlArchitectureIntegrationTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "EndToEndBackendFlowValidationIntegrationTest \u2014 Validaci\u00f3n integral de flujos E2E con seed reproducible"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.testutil.PostgresTriggerAssertionsTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "TestPostgresConfigTest \u2014 Pruebas de validaci\u00f3n estricta y aislamiento de base de datos"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.favorite.application.service.AddFavoriteProductServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.favorite.web.controller.CustomerFavoriteControllerTest"
+    },
+    {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.favorite.web.controller.CustomerFavoriteHttpRoutingTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.ChangeUserStatusServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.GetAdminUsersServiceTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.PasswordRecoveryPostgresIntegrationTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.PasswordRecoveryServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RefreshTokenServiceTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RegisterMerchantRollbackIntegrationTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RegisterMerchantServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RequestPasswordRecoveryServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.UpdateUserRolesServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.domain.model.RoleTest"
+    },
+    {
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.domain.model.UserTest"
+    },
+    {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.persistence.mapper.UserPersistenceMapperTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 6,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.ActuatorSecurityWebTest"
+    },
+    {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.JwtAuthenticationFilterTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.PasswordRecoverySecurityWebTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.SecurityUserStatusWebTest"
+    },
+    {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.WebCorsSecurityTest$LocalEnvironmentOverrideTest"
+    },
+    {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.WebCorsSecurityTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.mail.ConfiguredPasswordResetMailTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.web.controller.AdminUserControllerTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.web.controller.AuthControllerTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.web.controller.UserControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.web.mapper.AdminUserResponseMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.BCryptHashVerificationTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.application.service.InventoryConcurrencyUnitTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.application.service.InventoryRealConcurrencyPostgresIntegrationTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.application.service.InventoryServicesTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.application.service.ReserveInventoryServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "RestockInventoryService \u2014 Pruebas unitarias de restituci\u00f3n de stock"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.domain.model.InventoryTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.domain.model.InventoryReservationTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryJpaRepositorySpringDataTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.infrastructure.persistence.InventoryPostgresIntegrationTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.inventory.web.controller.MerchantInventoryControllerTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.media.application.service.GenerateUploadSignatureServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.media.application.service.StoreMediaCleanupAdapterTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.media.infrastructure.cloudinary.CloudinaryMediaStorageServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.media.web.controller.MediaControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.application.service.CountUnreadNotificationsServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.application.service.CreateNotificationServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.application.service.ListUserNotificationsServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.application.service.MarkNotificationAsReadServiceTest"
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.domain.model.NotificationTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "Unit Tests: OrderNotificationEventListener"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.infrastructure.persistence.mapper.NotificationPersistenceMapperTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "Unit Tests: NotificationDeduplicationExceptionClassifier"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "PostgreSQL Real Integration Tests: Notification N2 with Flyway V16"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.notification.web.controller.NotificationControllerTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "CancelCustomerOrderService \u2014 Pruebas unitarias de cancelaci\u00f3n por cliente"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 4,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusConcurrencyIntegrationTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.ChangeOrderStatusServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.GetCustomerOrderDetailServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.GetCustomerOrdersServiceTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.GetMerchantOrderDetailServiceTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.ListMerchantOrdersServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "OrderCancellationCompensator \u2014 Pruebas unitarias de compensaci\u00f3n transaccional"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.application.service.OrderCancellationPostgresIntegrationTest"
+    },
+    {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.domain.model.OrderTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.infrastructure.persistence.adapter.JpaOrderRepositoryAdapterTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPersistenceMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.infrastructure.persistence.OrderPersistenceIntegrationTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.web.controller.CustomerOrderControllerTest"
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.web.controller.MerchantOrderControllerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.ordering.web.controller.MerchantOrderEndToEndIntegrationTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.gateway.ExternalPaymentReferenceTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.gateway.MercadoPagoResourceValidatorTest"
+    },
+    {
+      "tests": 16,
+      "failures": 0,
+      "errors": 16,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationPostgresIntegrationTest"
+    },
+    {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.preference.CheckoutRequestRetryTest"
+    },
+    {
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.preference.CreatePaymentPreferenceServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.preference.PaymentPreferenceSecurityPropagationTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.reconciliation.ManualOrderReconciliationTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "OrderReconciliationPostgresIntegrationTest \u2014 Pruebas de integraci\u00f3n real con PostgreSQL aislado para conciliaci\u00f3n 4B.2"
+    },
+    {
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.reconciliation.OrderReferenceReadTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentConfirmationRunner \u2014 Pruebas unitarias de ejecuci\u00f3n transaccional"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentIncidenceRecorder \u2014 Pruebas unitarias de registro y serializaci\u00f3n"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 7,
+      "skipped": 0,
+      "name": "PaymentReconciliationPostgresIntegrationTest \u2014 Pruebas de concurrencia e integraci\u00f3n real con PostgreSQL aislado"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentReconciliationProcessor \u2014 Pruebas unitarias de orquestaci\u00f3n de fallos y rollback"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentReconciliationScheduler \u2014 Pruebas unitarias del disparador"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentReconciliationService \u2014 Pruebas unitarias de procesamiento por lotes"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "PaymentRefundPostgresIntegrationTest \u2014 Pruebas de integraci\u00f3n real con PostgreSQL aislado y servidor HTTP simulado"
+    },
+    {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentRefundProcessor \u2014 Pruebas unitarias de orquestaci\u00f3n en 3 fases"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentRefundScheduler \u2014 Pruebas unitarias del disparador de reembolsos"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentRefundService \u2014 Pruebas unitarias de procesamiento de lotes"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.refund.PaymentSchedulerExecutionPostgresIntegrationTest"
+    },
+    {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.webhook.OrdersWebhookCorrelationTest"
+    },
+    {
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.application.webhook.ProcessMercadoPagoWebhookServiceTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "MercadoPagoOrdersApiEndToEndIntegrationTest \u2014 15 Escenarios E2E Simulados"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "name": "PaymentFlowEndToEndIntegrationTest \u2014 Fase 5C: Pruebas Integrales del Flujo de Pagos"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentSchedulerConditionsIntegrationTest \u2014 Validaci\u00f3n de condiciones de activaci\u00f3n de schedulers"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.domain.model.PaymentAttemptTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentIncidence \u2014 Pruebas unitarias de dominio"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentRefundIntent \u2014 Pruebas unitarias de dominio"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.domain.model.PaymentTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.domain.model.RemoteOrderCreationStateTest"
+    },
+    {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "Pruebas de serializaci\u00f3n Jackson para DTOs de Mercado Pago Orders API y Preferences"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.client.mercadopago.CheckoutCreationRequestStoreTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoPropertiesTest"
+    },
+    {
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoRestClientAdapterTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.client.mercadopago.OrderCreationRejectionTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.persistence.adapter.JpaPaymentAttemptRepositoryAdapterTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "PaymentIncidencePersistenceMapper \u2014 Pruebas unitarias"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.persistence.mapper.PaymentPersistenceMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "name": "com.jaldishop.backend.payment.infrastructure.persistence.RemoteOrderCreationMigrationTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.infrastructure.security.MercadoPagoWebhookSignatureValidatorTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.web.controller.AdminOrderInvestigationSecurityTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.web.controller.MercadoPagoPreferenceControllerTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.payment.web.controller.MercadoPagoWebhookControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.application.service.RealtimeNotificationPublisherTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.listener.OrderDomainEventListenerTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.listener.OrderDomainEventListenerTransactionalTest"
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.StompAuthChannelInterceptorTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.StompDeliveryAuthorizationBrokerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.StompDeliveryConfigurationTest"
+    },
+    {
+      "tests": 18,
+      "failures": 0,
+      "errors": 18,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.WebSocketStompRealIntegrationTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.application.service.CheckReviewEligibilityServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.application.service.CreateProductReviewServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.application.service.DeleteProductReviewServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.application.service.UpdateProductReviewServiceTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.web.controller.CustomerReviewControllerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.review.web.controller.PublicProductReviewControllerTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.domain.model.MoneyTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.domain.model.SharedDomainModelTest"
+    },
+    {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.exception.GlobalExceptionHandlerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.exception.RestAccessDeniedHandlerTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.exception.RestAuthenticationEntryPointTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimitWebTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.AuthenticatedRateLimitsTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.ClientIpResolverTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.RateLimitsTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.util.PhoneUtilsTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.ChangeStoreStatusServiceTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.CloseMyStoreServiceTest"
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.CreateStoreServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.GetAdminStoresServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.GetMyStoreServiceTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.GetStoreBySlugServiceTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.GetStoreCategoriesServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.GetStoreCustomersServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.RegisterStoreCustomerServiceTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.StoreContextServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.StoreProvisioningAdapterTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.application.service.UpdateStoreServiceTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.domain.model.StoreCategoryTest"
+    },
+    {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.domain.model.StoreTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.domain.model.StoreValueObjectsTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.infrastructure.persistence.adapter.StoreCustomerRepositoryAdapterTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.infrastructure.persistence.mapper.StorePersistenceMapperTest"
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 3,
+      "name": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8,
+      "name": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchQueryTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.controller.AdminStoreControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.controller.MerchantCustomerControllerTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.controller.MerchantCustomerProjectionHttpTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.controller.StoreCategoryControllerTest"
+    },
+    {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.controller.StoreControllerTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.mapper.AdminStoreResponseMapperTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.store.web.mapper.StoreCustomerResponseMapperTest"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.BackendApplicationTests"
+    },
+    {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.LocalDevelopmentConfigurationTest"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "totals": {
+    "tests": 175,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "classes": [
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantCategoryControllerTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantProductControllerTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.catalog.web.controller.MerchantProductVariantControllerTest"
+    },
+    {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.PasswordRecoveryServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RefreshTokenServiceTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RegisterMerchantServiceTest"
+    },
+    {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.application.service.RequestPasswordRecoveryServiceTest"
+    },
+    {
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.domain.model.UserTest"
+    },
+    {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.persistence.mapper.UserPersistenceMapperTest"
+    },
+    {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.JwtAuthenticationFilterTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.PasswordRecoverySecurityWebTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.security.SecurityUserStatusWebTest"
+    },
+    {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.infrastructure.mail.ConfiguredPasswordResetMailTest"
+    },
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.identity.web.controller.AuthControllerTest"
+    },
+    {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.StompAuthChannelInterceptorTest"
+    },
+    {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.realtime.infrastructure.websocket.StompDeliveryAuthorizationBrokerTest"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.ClientIpResolverTest"
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "name": "com.jaldishop.backend.shared.security.ratelimit.RateLimitsTest"
+    }
+  ]
+}

@@ -14,7 +14,8 @@ public class User {
     private String firstName;
     private String lastName;
     private final String email;
-    private final String password;
+    private String password;
+    private long credentialsVersion;
     private UserStatus status;
     private String phone;
     private final Set<Role> roles;
@@ -85,6 +86,20 @@ public class User {
                 updatedAt,
                 roles
         );
+    }
+
+    public long getCredentialsVersion() { return credentialsVersion; }
+
+    public void restoreCredentialsVersion(long version) {
+        if (version < 0) throw new IllegalArgumentException("Versión de credenciales inválida.");
+        this.credentialsVersion = version;
+    }
+
+    public void resetPassword(String encodedPassword) {
+        validateRequired(encodedPassword, "password");
+        this.password = encodedPassword;
+        this.credentialsVersion = Math.incrementExact(credentialsVersion);
+        this.updatedAt = Instant.now();
     }
 
     public void updateProfile(String firstName, String lastName, String phone) {

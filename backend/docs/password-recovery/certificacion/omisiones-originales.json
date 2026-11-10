@@ -1,0 +1,77 @@
+[
+  {
+    "class": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest",
+    "test": "shouldKeepFiveAddressLimitAndOneDefaultUnderConcurrency",
+    "reason": "Environment variable [ADDRESS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest",
+    "test": "shouldScopeIdentityByUserAndPreserveInteriorsAndUpdates",
+    "reason": "Environment variable [ADDRESS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest",
+    "test": "shouldSerializeIdenticalConcurrentCreates",
+    "reason": "Environment variable [ADDRESS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.payment.infrastructure.persistence.RemoteOrderCreationMigrationTest",
+    "test": "preservesHistoricalRowsAndAuditsAtomicTransitions",
+    "reason": "Environment variable [PHASE2A_DB_URL] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest",
+    "test": "preservesBlankAndFilteredSearches",
+    "reason": "Environment variable [STORE_CUSTOMERS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest",
+    "test": "materializesTimestamptzAsInstantThroughHibernateAndSpringData",
+    "reason": "Environment variable [STORE_CUSTOMERS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest",
+    "test": "preservesAssociationScopeCountsAmountsNullsAndOrder",
+    "reason": "Environment variable [STORE_CUSTOMERS_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "matchesNameAndSlugOnly",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "returnsEmptyArrayWhenUnmatched",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "matchesBothBakeriesAndExcludesHiddenStores(String)",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "treatsWildcardsAndEscapeLiterally",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "preservesAdministrativeStatusFilter",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "preservesBlankAndMissingQueryAndFeaturedBehavior",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "matchesBreadShops(String)",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  },
+  {
+    "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+    "test": "enforcesLimitsAndPreservesNewestFirstOrder",
+    "reason": "Environment variable [STORE_SEARCH_TEST_PG_BIN] does not exist"
+  }
+]

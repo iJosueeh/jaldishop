@@ -109,7 +109,7 @@ class JwtAuthenticationFilterTest {
         assertThat(((JwtPrincipal) authentication.getPrincipal()).roles()).containsExactly("CUSTOMER");
         assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority))
                 .containsExactly("ROLE_CUSTOMER");
-        String refreshed = new RefreshTokenService(userRepository, realJwt).execute(userId).token();
+        String refreshed = new RefreshTokenService(userRepository, realJwt).execute(userId, 0L).token();
         assertThat(realJwt.getPrincipal(refreshed).roles()).containsExactly("CUSTOMER");
         assertThat(realJwt.getPrincipal(oldToken).roles()).contains("ADMIN");
     }

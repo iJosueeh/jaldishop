@@ -17,7 +17,7 @@ public class UserPersistenceMapper {
                 .map(roleEntity -> new Role(roleEntity.getId(), roleEntity.getName()))
                 .collect(Collectors.toUnmodifiableSet());
 
-        return User.reconstitute(
+        User user = User.reconstitute(
                 entity.getId(),
                 entity.getEmail(),
                 entity.getPasswordEncoded(),
@@ -29,6 +29,8 @@ public class UserPersistenceMapper {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
+        user.restoreCredentialsVersion(entity.getCredentialsVersion());
+        return user;
     }
 
     public UserEntity toEntity(User user) {

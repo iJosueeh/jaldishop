@@ -29,12 +29,17 @@ public class JwtService {
     }
 
     public String generateToken(UUID userId, Set<String> roles) {
+        return generateToken(userId, roles, 0);
+    }
+
+    public String generateToken(UUID userId, Set<String> roles, long credentialsVersion) {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("roles", roles)
+                .claim("cv", credentialsVersion)
                 .issuedAt(now)
                 .expiration(expirationDate)
                 .signWith(key)
@@ -58,7 +63,8 @@ public class JwtService {
                 .map(Object::toString)
                 .collect(Collectors.toSet());
 
-        return new JwtPrincipal(userId, roles);
+        Number version = claims.get("cv", Number.class);
+        return new JwtPrincipal(userId, roles, version == null ? 0 : version.longValue());
     }
 
 }

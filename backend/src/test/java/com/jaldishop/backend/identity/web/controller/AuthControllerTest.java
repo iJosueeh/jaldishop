@@ -158,7 +158,7 @@ class AuthControllerTest {
                 Set.of("MERCHANT", "CUSTOMER")
         );
 
-        when(refreshTokenService.execute(testUserId)).thenReturn(authResult);
+        when(refreshTokenService.execute(testUserId, 0L)).thenReturn(authResult);
 
         mockMvc.perform(post("/api/v1/auth/refresh"))
                 .andExpect(status().isOk())

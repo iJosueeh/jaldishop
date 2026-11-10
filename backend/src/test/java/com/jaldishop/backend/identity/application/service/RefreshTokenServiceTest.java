@@ -60,9 +60,9 @@ class RefreshTokenServiceTest {
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(eq(userId), any())).thenReturn("new-jwt-token");
+        when(jwtService.generateToken(eq(userId), any(), eq(0L))).thenReturn("new-jwt-token");
 
-        AuthResult result = refreshTokenService.execute(userId);
+        AuthResult result = refreshTokenService.execute(userId, 0L);
 
         assertThat(result).isNotNull();
         assertThat(result.token()).isEqualTo("new-jwt-token");
@@ -76,7 +76,7 @@ class RefreshTokenServiceTest {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> refreshTokenService.execute(userId))
+        assertThatThrownBy(() -> refreshTokenService.execute(userId, 0L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }

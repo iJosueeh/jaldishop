@@ -106,7 +106,7 @@ public class AuthController {
         if (principal == null) {
             throw new AccessDeniedException("Usuario no autenticado.");
         }
-        AuthResult result = refreshTokenService.execute(principal.userId());
+        AuthResult result = refreshTokenService.execute(principal.userId(), principal.credentialsVersion());
         return ResponseEntity.ok(result);
     }
 

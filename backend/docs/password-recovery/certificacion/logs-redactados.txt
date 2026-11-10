@@ -1,0 +1,1 @@
+PASS: actual RestClient DEBUG logging redacts payload; body serialization exercised entirely in memory; DTOs redacted; prod rejects local mailbox; provider never activated.
