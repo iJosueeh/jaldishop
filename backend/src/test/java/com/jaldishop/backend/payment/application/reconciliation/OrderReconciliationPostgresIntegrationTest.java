@@ -85,7 +85,7 @@ class OrderReconciliationPostgresIntegrationTest {
 
                 MockHttpResponse resp = orderMockResponse.get();
                 if (resp == null) {
-                    resp = new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}");
+                    resp = new MockHttpResponse(200, "{\"id\": \"ORDTST-DEFAULT\", \"status\": \"created\", \"live_mode\": false}");
                 }
 
                 byte[] bytes = resp.responseBody().getBytes(StandardCharsets.UTF_8);
@@ -153,9 +153,9 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt target = createAttempt(payment, "ORD-MANUAL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
-        PaymentAttempt unrelated = createAttempt(payment, "ORD-UNRELATED", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
-        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORD-MANUAL", payment.getId(), "95.00")));
+        PaymentAttempt target = createAttempt(payment, "ORDTST-MANUAL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        PaymentAttempt unrelated = createAttempt(payment, "ORDTST-UNRELATED", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORDTST-MANUAL", payment.getId(), "95.00")));
 
         var result = reconciliationService.reconcileOrderAttempt(target.getId());
         assertThat(result.financialStatus()).isEqualTo("APPROVED");
@@ -178,8 +178,8 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("EXPIRED", Instant.now().minusSeconds(600));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt target = createAttempt(payment, "ORD-INCIDENCE-FAIL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
-        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORD-INCIDENCE-FAIL", payment.getId(), "95.00")));
+        PaymentAttempt target = createAttempt(payment, "ORDTST-INCIDENCE-FAIL", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now());
+        orderMockResponse.set(new MockHttpResponse(200, accreditedOrder("ORDTST-INCIDENCE-FAIL", payment.getId(), "95.00")));
         org.mockito.Mockito.doThrow(new org.springframework.dao.DataAccessResourceFailureException("injected storage failure"))
                 .when(incidenceRepository).save(org.mockito.ArgumentMatchers.any());
 
@@ -217,7 +217,7 @@ class OrderReconciliationPostgresIntegrationTest {
         TestPostgresConfig.requireDestructiveIntegrationDatabase(
                 jdbcTemplate.queryForObject("SELECT current_database()", String.class));
         simulateTimeout.set(false);
-        orderMockResponse.set(new MockHttpResponse(200, "{\"id\": \"ORD-DEFAULT\", \"status\": \"created\", \"live_mode\": false}"));
+        orderMockResponse.set(new MockHttpResponse(200, "{\"id\": \"ORDTST-DEFAULT\", \"status\": \"created\", \"live_mode\": false}"));
         jdbcTemplate.update("DELETE FROM payment_refund_execution_attempts");
         jdbcTemplate.update("DELETE FROM payment_refund_intents");
         jdbcTemplate.update("DELETE FROM payment_incidences");
@@ -323,11 +323,11 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-001", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-001", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         String mpOrderJson = String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-RECON-001",
+                  "id": "ORDTST-RECON-001",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 50.00,
@@ -376,11 +376,11 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-002", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-002", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         orderMockResponse.set(new MockHttpResponse(200, """
                 {
-                  "id": "ORD-RECON-002",
+                  "id": "ORDTST-RECON-002",
                   "status": "created",
                   "total_amount": 50.00,
                   "external_reference": "%s",
@@ -414,11 +414,11 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-003", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-003", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         orderMockResponse.set(new MockHttpResponse(200, """
                 {
-                  "id": "ORD-RECON-003",
+                  "id": "ORDTST-RECON-003",
                   "status": "cancelled",
                   "status_detail": "cancelled_by_user",
                   "external_reference": "%s",
@@ -449,11 +449,11 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-004", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-004", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         orderMockResponse.set(new MockHttpResponse(200, """
                 {
-                  "id": "ORD-RECON-004",
+                  "id": "ORDTST-RECON-004",
                   "status": "expired",
                   "external_reference": "%s",
                   "live_mode": false,
@@ -481,11 +481,11 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-004B", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-004B", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         orderMockResponse.set(new MockHttpResponse(200, """
                 {
-                  "id": "ORD-RECON-004B",
+                  "id": "ORDTST-RECON-004B",
                   "status": "canceled",
                   "status_detail": "expired",
                   "external_reference": "%s",
@@ -530,11 +530,11 @@ class OrderReconciliationPostgresIntegrationTest {
         payment.markApproved(Instant.now());
         paymentRepository.save(payment);
 
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-004C", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-004C", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         orderMockResponse.set(new MockHttpResponse(200, """
                 {
-                  "id": "ORD-RECON-004C",
+                  "id": "ORDTST-RECON-004C",
                   "status": "canceled",
                   "live_mode": false,
                   "transactions": {
@@ -562,11 +562,11 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("EXPIRED", Instant.now().minusSeconds(600));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-005", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-005", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         String mpOrderJson = String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-RECON-005",
+                  "id": "ORDTST-RECON-005",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 60.00,
@@ -617,7 +617,7 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-006", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-006", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         UUID workerToken = UUID.randomUUID();
         OrderReconciliationClaimResult claim = orderProcessor.claimAttempt(attempt.getId(), workerToken, Duration.ofMinutes(5), Instant.now());
@@ -628,7 +628,7 @@ class OrderReconciliationPostgresIntegrationTest {
         paymentRepository.save(payment);
 
         OrderReconciliationCandidateResult result = orderProcessor.consolidateOrderReconciliation(
-                claim, new OrderQueryResult("ORD-RECON-006", "created", null, amount, BigDecimal.ZERO,
+                claim, new OrderQueryResult("ORDTST-RECON-006", "created", null, amount, BigDecimal.ZERO,
                         "pa1_" + attempt.getId(), java.util.List.of(), null, false), workerToken, Instant.now()
         );
 
@@ -646,7 +646,7 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-007", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-007", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         UUID worker1 = UUID.randomUUID();
         UUID worker2 = UUID.randomUUID();
@@ -678,7 +678,7 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-008", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-008", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         UUID worker1 = UUID.randomUUID();
         UUID worker2 = UUID.randomUUID();
@@ -703,7 +703,7 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-009", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-009", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         UUID oldWorker = UUID.randomUUID();
         UUID newWorker = UUID.randomUUID();
@@ -713,7 +713,7 @@ class OrderReconciliationPostgresIntegrationTest {
         paymentAttemptRepository.save(attempt);
 
         OrderReconciliationClaimResult staleClaim = OrderReconciliationClaimResult.claimed(
-                attempt.getId(), payment.getId(), oldWorker, "ORD-RECON-009"
+                attempt.getId(), payment.getId(), oldWorker, "ORDTST-RECON-009"
         );
 
         OrderReconciliationCandidateResult result = orderProcessor.consolidateOrderReconciliation(
@@ -732,7 +732,7 @@ class OrderReconciliationPostgresIntegrationTest {
         BigDecimal amount = BigDecimal.valueOf(50.00);
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-010", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-010", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         simulateTimeout.set(true);
 
@@ -760,11 +760,11 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-011", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-011", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         String mpOrderJson = String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-RECON-011",
+                  "id": "ORDTST-RECON-011",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 50.00,
@@ -826,7 +826,7 @@ class OrderReconciliationPostgresIntegrationTest {
         UUID reservationId = createCapacityReservation("PAYMENT_PROTECTED", Instant.now().plusSeconds(1800));
         createActiveInventoryReservation(reservationId, 1);
         Payment payment = createPendingPayment(reservationId, amount, buildValidSnapshot(amount));
-        PaymentAttempt attempt = createAttempt(payment, "ORD-RECON-012", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
+        PaymentAttempt attempt = createAttempt(payment, "ORDTST-RECON-012", "ORDERS", PaymentAttemptStatus.PROCESSING, Instant.now().minusSeconds(300));
 
         UUID crashedWorker = UUID.randomUUID();
         // Worker se cae y el lease vence
@@ -835,7 +835,7 @@ class OrderReconciliationPostgresIntegrationTest {
 
         String mpOrderJson = String.format(Locale.ROOT, """
                 {
-                  "id": "ORD-RECON-012",
+                  "id": "ORDTST-RECON-012",
                   "status": "processed",
                   "status_detail": "accredited",
                   "total_amount": 50.00,

@@ -5,6 +5,8 @@ import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPa
 import com.jaldishop.backend.shared.exception.ConflictException;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 /** Trust checks shared by webhook reads and manual/scheduled reconciliation. */
 @Component
 public class MercadoPagoResourceValidator {
@@ -36,6 +38,38 @@ public class MercadoPagoResourceValidator {
                 || order.payments().getFirst().providerPaymentId().isBlank())) {
             throw new ConflictException("MISSING_REMOTE_PAYMENT_ID", "La transacción no tiene identidad remota.");
         }
-        validateAccount(order.collectorId(), order.liveMode());
+        validateOrderEnvironment(order);
+    }
+
+    /**
+     * Valida el entorno y la titularidad de una orden remota.
+     * En Orders API, Mercado Pago no incluye live_mode en el recurso Order (es null).
+     * La verificación TEST fail-closed se garantiza mediante:
+     * 1. Titularidad del collector_id / user_id esperado (cuenta del vendedor).
+     * 2. Prefijo del ID de orden compatible con Sandbox (ORDTST oficial o prefijos de test).
+     * 3. Rechazo estricto si live_mode llega explícitamente como true.
+     */
+    public void validateOrderEnvironment(OrderQueryResult order) {
+        if (properties.getExpectedCollectorId() != null && properties.getExpectedCollectorId() > 0) {
+            if (order.collectorId() == null || !properties.getExpectedCollectorId().equals(order.collectorId())) {
+                throw new SecurityException("Cuenta receptora ausente o no autorizada en orden (collector_id=" + order.collectorId()
+                        + ", esperado=" + properties.getExpectedCollectorId() + ").");
+            }
+        }
+        if (Boolean.FALSE.equals(properties.getExpectedLiveMode())) {
+            if (Boolean.TRUE.equals(order.liveMode())) {
+                throw new SecurityException("Entorno remoto no autorizado: orden contiene live_mode=true explícito.");
+            }
+            if (!isCompatibleTestOrderId(order.orderId())) {
+                throw new SecurityException("Identificador de orden incompatible con entorno TEST (id=" + order.orderId() + ").");
+            }
+        }
+    }
+
+    public static boolean isCompatibleTestOrderId(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            return false;
+        }
+        return orderId.trim().toUpperCase(Locale.ROOT).startsWith("ORDTST");
     }
 }
