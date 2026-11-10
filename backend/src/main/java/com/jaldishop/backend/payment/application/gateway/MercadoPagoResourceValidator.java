@@ -19,7 +19,7 @@ public class MercadoPagoResourceValidator {
                 && !properties.getExpectedCollectorId().equals(collectorId)) {
             throw new SecurityException("Cuenta receptora ausente o no autorizada (collector_id=" + collectorId + ").");
         }
-        if (properties.getExpectedLiveMode() != null && !properties.getExpectedLiveMode().equals(liveMode)) {
+        if (properties.getExpectedLiveMode() != null && !Boolean.FALSE.equals(liveMode)) {
             throw new SecurityException("Entorno remoto ausente o no autorizado (live_mode=" + liveMode + ").");
         }
     }

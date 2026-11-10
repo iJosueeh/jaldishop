@@ -21,6 +21,7 @@ import com.jaldishop.backend.payment.domain.enums.*;
 import com.jaldishop.backend.payment.domain.model.*;
 import com.jaldishop.backend.payment.domain.repository.*;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoException;
+import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoOrderSecurityException;
 import com.jaldishop.backend.payment.infrastructure.client.mercadopago.MercadoPagoProperties;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.store.domain.model.Store;
@@ -1021,4 +1022,70 @@ class CreatePaymentPreferenceServiceTest {
         verify(mercadoPagoGateway, never()).createOrder(any(), any(UUID.class));
     }
 
+    @Test
+    @DisplayName("Rechaza inmediatamente con CHECKOUT_DISABLED cuando checkoutEnabled es false")
+    void shouldRejectWhenCheckoutDisabled() {
+        properties.setCheckoutEnabled(false);
+
+        CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
+                userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
+        );
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ConflictException.class)
+                .satisfies(ex -> assertThat(((ConflictException) ex).getCode()).isEqualTo("CHECKOUT_DISABLED"));
+
+        verifyNoInteractions(mercadoPagoGateway);
+    }
+
+    @Test
+    @DisplayName("Captura MercadoPagoOrderSecurityException, registra error con ID remoto y relanza")
+    void shouldRecordSecurityRejectionAndPreserveRemoteOrderIdWhenMercadoPagoOrderSecurityExceptionThrown() {
+        properties.setCheckoutMode(MercadoPagoProperties.CheckoutIntegrationMode.ORDERS);
+
+        CreatePaymentPreferenceCommand command = new CreatePaymentPreferenceCommand(
+                userId, reservationId, CheckoutFulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null
+        );
+
+        when(capacityReservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(activeReservation));
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(activeStore));
+        when(paymentRepository.findByCapacityReservationId(activeReservation.getId())).thenReturn(Optional.empty());
+
+        UUID cartId = UUID.randomUUID();
+        CartItem item = new CartItem(cartId, UUID.randomUUID(), 1, new BigDecimal("10.00"), "PEN", fixedNow, fixedNow);
+        Cart cart = new Cart(cartId, userId, storeId, List.of(item), fixedNow, fixedNow);
+        when(cartRepository.findByUserIdAndStoreId(userId, storeId)).thenReturn(Optional.of(cart));
+        when(snapshotAssembler.assemble(cart, storeId)).thenReturn(List.of(new CheckoutItemSnapshot(
+                UUID.randomUUID(), UUID.randomUUID(), "Pan", "Bolsa", "SKU-PAN", null, 1, new BigDecimal("10.00"), "PEN", new BigDecimal("10.00"), false
+        )));
+
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        PaymentAttempt attempt = PaymentAttempt.create(
+                UUID.randomUUID(), 1, PaymentProvider.MERCADO_PAGO, PaymentMethod.CARD, "idemp-sec-test-01", "ORDERS"
+        );
+        when(paymentAttemptRepository.save(any(PaymentAttempt.class))).thenReturn(attempt);
+        when(paymentAttemptRepository.findById(attempt.getId())).thenReturn(Optional.of(attempt));
+        when(paymentAttemptRepository.findByIdForUpdate(attempt.getId())).thenReturn(Optional.of(attempt));
+        Payment payment = Payment.createPending(
+                reservationId, new BigDecimal("10.00"), "PEN", FulfillmentType.PICKUP,
+                "Valeria Ramos", "+51987654321", "valeria@example.com", null, null, null, null,
+                new BigDecimal("10.00"), BigDecimal.ZERO, null, BigDecimal.ZERO, new BigDecimal("1.53"), "[]"
+        );
+        when(paymentRepository.findByIdForUpdate(attempt.getPaymentId())).thenReturn(Optional.of(payment));
+
+        when(mercadoPagoGateway.createOrder(any(CreateOrderCommand.class), any(UUID.class)))
+                .thenThrow(new MercadoPagoOrderSecurityException("live_mode=true", "ORD-REMOTE-999", true));
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(MercadoPagoOrderSecurityException.class)
+                .satisfies(ex -> assertThat(((MercadoPagoOrderSecurityException) ex).getRemoteOrderId()).isEqualTo("ORD-REMOTE-999"));
+
+        verify(paymentAttemptRepository, atLeastOnce()).save(attempt);
+        assertThat(attempt.getErrorCode()).isEqualTo("SECURITY_ERROR_LIVE_MODE_MISMATCH");
+        assertThat(attempt.getErrorMessage()).contains("ORD-REMOTE-999");
+        assertThat(attempt.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.REJECTED_CONFIRMED);
+    }
 }

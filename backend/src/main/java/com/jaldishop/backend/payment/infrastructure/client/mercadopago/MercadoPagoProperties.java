@@ -1,5 +1,6 @@
 package com.jaldishop.backend.payment.infrastructure.client.mercadopago;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -73,10 +74,33 @@ public class MercadoPagoProperties {
     private Long expectedCollectorId;
 
     /**
-     * Entorno esperado (true para producción, false para sandbox/test).
-     * Si está configurado, se valida en cada notificación de pago.
+     * Interruptor de emergencia para habilitar o deshabilitar la creación de nuevos checkouts.
+     * Predeterminado: true. Si es false, rechaza nuevos checkouts pero mantiene operativo el procesamiento de webhooks.
+     */
+    private boolean checkoutEnabled = true;
+
+    /**
+     * Entorno esperado (estrictamente false para sandbox/test).
+     * Política fail-closed: este entorno rechaza true o null en arranque y en tiempo de ejecución.
      */
     private Boolean expectedLiveMode;
+
+    @PostConstruct
+    public void validateEnvironmentSafety() {
+        if (!Boolean.FALSE.equals(this.expectedLiveMode)) {
+            throw new IllegalStateException("FAIL-CLOSED: Entorno actual configurado exclusivamente para pruebas. "
+                    + "mercadopago.expected-live-mode debe ser estrictamente false (recibido: " + this.expectedLiveMode + "). "
+                    + "Arranque abortado para impedir cobros productivos accidentales.");
+        }
+    }
+
+    public boolean isCheckoutEnabled() {
+        return checkoutEnabled;
+    }
+
+    public void setCheckoutEnabled(boolean checkoutEnabled) {
+        this.checkoutEnabled = checkoutEnabled;
+    }
 
     public Long getExpectedCollectorId() {
         return expectedCollectorId;
@@ -91,6 +115,11 @@ public class MercadoPagoProperties {
     }
 
     public void setExpectedLiveMode(Boolean expectedLiveMode) {
+        if (!Boolean.FALSE.equals(expectedLiveMode)) {
+            throw new IllegalArgumentException("FAIL-CLOSED: Entorno actual restringido exclusivamente a pruebas. "
+                    + "mercadopago.expected-live-mode debe ser estrictamente false (recibido: " + expectedLiveMode + "). "
+                    + "Valores null o true están prohibidos para evitar operaciones productivas.");
+        }
         this.expectedLiveMode = expectedLiveMode;
     }
 

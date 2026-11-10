@@ -175,6 +175,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ApiError> handleSecurityException(SecurityException ex) {
+        log.warn("Violación de seguridad o entorno no autorizado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                new ApiError("UNAUTHORIZED_ENVIRONMENT", ex.getMessage())
+        );
+    }
+
     @ExceptionHandler(MercadoPagoException.class)
     public ResponseEntity<ApiError> handleMercadoPagoException(MercadoPagoException ex) {
         log.error("Error en invocación a pasarela Mercado Pago [status={}, errorCode={}]: {}",
