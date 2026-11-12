@@ -77,9 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var currentRoles = userOpt.get().getRoles().stream()
                     .map(role -> role.getName().name())
                     .collect(Collectors.toSet());
-            principal = new JwtPrincipal(principal.userId(), currentRoles, principal.credentialsVersion());
-            var authorities = principal.roles().stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
+            boolean isPrimaryAdmin = userOpt.get().isPrimaryAdmin();
+            principal = new JwtPrincipal(principal.userId(), currentRoles, principal.credentialsVersion(), isPrimaryAdmin);
+            
+            var authorities = new java.util.ArrayList<>(principal.roles().stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList());
+            if (isPrimaryAdmin) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_PRIMARY_ADMIN"));
+            }
 
             var authentication = new UsernamePasswordAuthenticationToken(
                     principal,

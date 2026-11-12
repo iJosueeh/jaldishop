@@ -1,0 +1,34 @@
+meta {
+  name: 10. Crear Customer Administrativo
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/users/customers
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "nuevo.cliente.admin@jaldishop.com",
+    "password": "Password123!",
+    "firstName": "Cliente",
+    "lastName": "Admin",
+    "phoneNumber": "+51999888777"
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(201); });
+}

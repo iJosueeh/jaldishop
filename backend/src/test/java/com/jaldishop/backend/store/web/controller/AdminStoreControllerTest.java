@@ -38,6 +38,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -52,6 +53,9 @@ class AdminStoreControllerTest {
 
     @Mock
     private ChangeStoreStatusService changeStoreStatusService;
+
+    @Mock
+    private com.jaldishop.backend.store.application.service.AdminCreateStoreService adminCreateStoreService;
 
     @Mock
     private AdminStoreResponseMapper responseMapper;
@@ -88,6 +92,7 @@ class AdminStoreControllerTest {
         AdminStoreController controller = new AdminStoreController(
                 getAdminStoresService,
                 changeStoreStatusService,
+                adminCreateStoreService,
                 responseMapper
         );
 
@@ -281,5 +286,58 @@ class AdminStoreControllerTest {
                 .andExpect(jsonPath("$.code").value("STORE_ALREADY_ACTIVE"))
                 .andExpect(jsonPath("$.message").value("La tienda ya se encuentra activa."))
                 .andExpect(jsonPath("$.errors").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/admin/stores - Debe delegar creación a AdminCreateStoreService")
+    void shouldCreateStoreSuccessfully() throws Exception {
+        AdminStoreDetailResponse detail = new AdminStoreDetailResponse(
+                storeId,
+                merchantId,
+                "Tienda Nueva",
+                "tienda-nueva",
+                "Desc",
+                "987654321",
+                "Calle 123",
+                "Piso 2",
+                null,
+                null,
+                true,
+                true,
+                BigDecimal.valueOf(5),
+                "PEN",
+                null,
+                StoreStatus.ACTIVE,
+                Instant.now(),
+                Instant.now(),
+                null
+        );
+
+        when(adminCreateStoreService.execute(any(com.jaldishop.backend.store.application.command.CreateStoreCommand.class), any()))
+                .thenReturn(testStore);
+        when(responseMapper.toDetail(testStore)).thenReturn(detail);
+
+        String json = """
+                {
+                    "merchantUserId": "%s",
+                    "name": "Tienda Nueva",
+                    "slug": "tienda-nueva",
+                    "description": "Desc",
+                    "contactPhone": "987654321",
+                    "address": "Calle 123",
+                    "pickupEnabled": true,
+                    "deliveryEnabled": true,
+                    "deliveryFeeAmount": 5.0,
+                    "deliveryFeeCurrency": "PEN"
+                }
+                """.formatted(merchantId);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/admin/stores")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Tienda Nueva"));
+
+        verify(adminCreateStoreService).execute(any(com.jaldishop.backend.store.application.command.CreateStoreCommand.class), any());
     }
 }

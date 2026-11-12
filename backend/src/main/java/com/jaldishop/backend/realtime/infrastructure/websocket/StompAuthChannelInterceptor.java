@@ -29,6 +29,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             Pattern.compile("^/topic/stores/([0-9a-fA-F\\-]{36})/orders$");
 
     private static final String USER_QUEUE_ORDERS = "/user/queue/orders";
+    private static final String TOPIC_ADMIN_EVENTS = "/topic/admin/events";
+    private static final String USER_QUEUE_ADMIN = "/user/queue/admin";
 
     private final JwtService jwtService;
     private final StoreContextService storeContextService;
@@ -78,9 +80,12 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         String token = authHeader.substring(7).trim();
         JwtPrincipal jwtPrincipal = currentPrincipal(jwtService.getPrincipal(token));
 
-        var authorities = jwtPrincipal.roles().stream()
+        var authorities = new java.util.ArrayList<>(jwtPrincipal.roles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .toList();
+                .toList());
+        if (jwtPrincipal.isPrimaryAdmin()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_PRIMARY_ADMIN"));
+        }
 
         StompPrincipal stompPrincipal = new StompPrincipal(jwtPrincipal.userId().toString(), jwtPrincipal);
         var authentication = new UsernamePasswordAuthenticationToken(stompPrincipal, null, authorities);
@@ -124,7 +129,29 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             return;
         }
 
+        if (TOPIC_ADMIN_EVENTS.equals(destination)) {
+            handleAdminEventsSubscribe(jwtPrincipal);
+            return;
+        }
+
+        if (USER_QUEUE_ADMIN.equals(destination)) {
+            handleAdminQueueSubscribe(jwtPrincipal);
+            return;
+        }
+
         throw new AccessDeniedException("Destino de suscripción no autorizado: " + destination);
+    }
+
+    private void handleAdminEventsSubscribe(JwtPrincipal jwtPrincipal) {
+        if (!jwtPrincipal.roles().contains("ADMIN")) {
+            throw new AccessDeniedException("Solo administradores pueden suscribirse a eventos de plataforma.");
+        }
+    }
+
+    private void handleAdminQueueSubscribe(JwtPrincipal jwtPrincipal) {
+        if (!jwtPrincipal.roles().contains("ADMIN") || !jwtPrincipal.isPrimaryAdmin()) {
+            throw new AccessDeniedException("Solo el administrador principal puede suscribirse a la cola de eventos privilegiados.");
+        }
     }
 
     private void handleStoreOrdersSubscribe(String storeIdStr, JwtPrincipal jwtPrincipal) {
@@ -166,7 +193,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         var roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(java.util.stream.Collectors.toSet());
-        return new JwtPrincipal(userId, roles, user.getCredentialsVersion());
+        return new JwtPrincipal(userId, roles, user.getCredentialsVersion(), user.isPrimaryAdmin());
     }
 
 }

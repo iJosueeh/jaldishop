@@ -32,6 +32,11 @@ public class UserEntity {
 
     public long getCredentialsVersion() { return credentialsVersion; }
 
+    @Column(name = "is_primary_admin", nullable = false)
+    private boolean isPrimaryAdmin;
+
+    public boolean isPrimaryAdmin() { return isPrimaryAdmin; }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private UserStatus status;
@@ -56,6 +61,10 @@ public class UserEntity {
     }
 
     public UserEntity(UUID id, String firstName, String lastName, String email, String passwordEncoded, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<RoleEntity> roles) {
+        this(id, firstName, lastName, email, passwordEncoded, status, phone, createdAt, updatedAt, roles, false);
+    }
+
+    public UserEntity(UUID id, String firstName, String lastName, String email, String passwordEncoded, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<RoleEntity> roles, boolean isPrimaryAdmin) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -66,6 +75,7 @@ public class UserEntity {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.roles = roles;
+        this.isPrimaryAdmin = isPrimaryAdmin;
     }
 
     public UUID getId() {

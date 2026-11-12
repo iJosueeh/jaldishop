@@ -70,7 +70,8 @@ public class StompDeliveryAuthorizationInterceptor implements ExecutorChannelInt
             var subscription = subscriptions.iterator().next();
             String requested = subscription.getDestination();
             boolean matches = requested.equals(destination)
-                    || (requested.equals("/user/queue/orders") && destination.equals("/queue/orders-user" + sessionId));
+                    || (requested.equals("/user/queue/orders") && destination.equals("/queue/orders-user" + sessionId))
+                    || (requested.equals("/user/queue/admin") && destination.equals("/queue/admin-user" + sessionId));
             JwtPrincipal principal = sessionPrincipals.get(sessionId);
             if (!matches || principal == null
                     || !principal.userId().toString().equals(subscription.getSession().getUser().getName())) {

@@ -1,0 +1,30 @@
+meta {
+  name: 13. Invitar Administrador
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/administrators/invitations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{primaryAdminToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "nuevo.operativo@jaldishop.com"
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(201); });
+}

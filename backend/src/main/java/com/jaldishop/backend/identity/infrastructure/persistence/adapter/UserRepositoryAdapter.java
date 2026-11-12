@@ -61,4 +61,9 @@ public class UserRepositoryAdapter implements UserRepository {
     public void assignStoreToMerchantRole(UUID userId, UUID storeId) {
         userJpaRepository.assignStoreToMerchantRole(userId, storeId);
     }
+
+    @Override
+    public void incrementCredentialsVersion(UUID userId) {
+        userJpaRepository.incrementCredentialsVersion(userId);
+    }
 }
