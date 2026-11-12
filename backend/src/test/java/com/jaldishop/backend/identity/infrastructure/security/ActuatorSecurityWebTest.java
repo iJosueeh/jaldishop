@@ -118,4 +118,19 @@ class ActuatorSecurityWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Jaldi Shop is running"));
     }
+
+    @Test
+    @DisplayName("Actuator por defecto (solo health): /actuator/metrics no queda expuesto a anónimos (4xx)")
+    void whenDefaultExposureAndAnonymousCallsMetrics_shouldDenyAccess() throws Exception {
+        mockMvc.perform(get("/actuator/metrics"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @DisplayName("Actuator por defecto (solo health): /actuator/metrics no está expuesto y responde 404 a ADMIN")
+    void whenDefaultExposureAndAdminCallsMetrics_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get("/actuator/metrics"))
+                .andExpect(status().isNotFound());
+    }
 }
