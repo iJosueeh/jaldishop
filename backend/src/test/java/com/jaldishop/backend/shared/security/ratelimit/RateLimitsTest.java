@@ -132,6 +132,167 @@ class RateLimitsTest {
         assertThat(accepted.get()).isEqualTo(5);
     }
 
+    @Test void concurrentRequestsAcrossDistinctKeysDoNotContendOrCrossInterfere() {
+        var limits = new RateLimits(new MockEnvironment());
+        int keyCount = 20;
+        int limitPerKey = 4;
+        var acceptedTotal = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.stream.IntStream.range(0, keyCount * 10).parallel().forEach(i -> {
+            String key = "user-" + (i % keyCount);
+            try {
+                limits.check("policy-distinct", key, limitPerKey, Duration.ofMinutes(1));
+                acceptedTotal.incrementAndGet();
+            } catch (RateLimitExceeded expected) { }
+        });
+        assertThat(acceptedTotal.get()).isEqualTo(keyCount * limitPerKey);
+    }
+
+    @Test void concurrentCapacityBoundaryFailsClosedPredictably() {
+        var limits = new RateLimits(new MockEnvironment().withProperty("app.security.rate-limit.max-entries", "5"));
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+        java.util.stream.IntStream.range(0, 50).parallel().forEach(i -> {
+            try {
+                limits.check("capacity-test", "key-" + i, 1, Duration.ofMinutes(1));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded exceeded) {
+                rejected.incrementAndGet();
+            }
+        });
+        assertThat(accepted.get()).isEqualTo(5);
+        assertThat(rejected.get()).isEqualTo(45);
+        assertThat(limits.size()).isEqualTo(5);
+    }
+
+    @Test void concurrencyWithControlledClockAtExactExpiryBoundary() throws Exception {
+        var clock = new AtomicLong(1_000_000_000L); // 1 second
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // Fill window to limit of 3
+        for (int i = 0; i < 3; i++) {
+            limits.check("expiry-boundary", "user1", 3, Duration.ofSeconds(10));
+        }
+        assertThatThrownBy(() -> limits.check("expiry-boundary", "user1", 3, Duration.ofSeconds(10)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Advance clock past expiration
+        clock.addAndGet(Duration.ofSeconds(11).toNanos());
+
+        // 20 concurrent threads trying to access the key after expiry
+        int threads = 20;
+        var startBarrier = new java.util.concurrent.CyclicBarrier(threads);
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> executor.submit(() -> {
+            try {
+                startBarrier.await();
+                limits.check("expiry-boundary", "user1", 3, Duration.ofSeconds(10));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // Exactly 3 allowed in the new window, exactly 17 rejected
+        assertThat(accepted.get()).isEqualTo(3);
+        assertThat(rejected.get()).isEqualTo(17);
+    }
+
+    @Test void massKeysConcurrentAdmissionRespectsExactCapacity() throws Exception {
+        int capacity = 25;
+        var limits = new RateLimits(new MockEnvironment()
+                .withProperty("app.security.rate-limit.max-entries", String.valueOf(capacity)));
+
+        int threads = 16;
+        int keys = 1000;
+        var startBarrier = new java.util.concurrent.CyclicBarrier(threads);
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+
+        var futures = java.util.stream.IntStream.range(0, keys).mapToObj(i -> executor.submit(() -> {
+            try {
+                if (i < threads) startBarrier.await();
+                limits.check("mass-capacity", "unique-key-" + i, 5, Duration.ofMinutes(1));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        assertThat(accepted.get()).isEqualTo(capacity);
+        assertThat(rejected.get()).isEqualTo(keys - capacity);
+        assertThat(limits.size()).isEqualTo(capacity);
+    }
+
+    @Test void expirationAndSweepUnderContentionFreesCapacityForNewKeys() throws Exception {
+        var clock = new AtomicLong(10_000_000_000L);
+        int capacity = 5;
+        var limits = new RateLimits(new MockEnvironment()
+                .withProperty("app.security.rate-limit.max-entries", String.valueOf(capacity)), clock::get);
+
+        // Fill initial capacity
+        for (int i = 0; i < capacity; i++) {
+            limits.check("recycle", "old-key-" + i, 1, Duration.ofSeconds(5));
+        }
+        assertThat(limits.size()).isEqualTo(capacity);
+        assertThatThrownBy(() -> limits.check("recycle", "overflow", 1, Duration.ofSeconds(5)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Advance clock past expiration of all initial keys
+        clock.addAndGet(Duration.ofSeconds(6).toNanos());
+
+        // Concurrently admit 10 new keys
+        int threads = 10;
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> executor.submit(() -> {
+            try {
+                limits.check("recycle", "fresh-key-" + i, 1, Duration.ofSeconds(5));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // Exactly 5 should be accepted into recycled capacity, 5 rejected
+        assertThat(accepted.get()).isEqualTo(5);
+        assertThat(rejected.get()).isEqualTo(5);
+        assertThat(limits.size()).isEqualTo(5);
+    }
+
+    @Test void negativeNanoTimeOriginIsSupportedProperly() {
+        var clock = new AtomicLong(-500_000_000_000L); // Negative start
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        limits.check("negative-clock", "user", 2, Duration.ofSeconds(10));
+        limits.check("negative-clock", "user", 2, Duration.ofSeconds(10));
+        assertThatThrownBy(() -> limits.check("negative-clock", "user", 2, Duration.ofSeconds(10)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Advance clock past 0
+        clock.set(100_000_000_000L);
+        // Window expired, request should now succeed
+        limits.check("negative-clock", "user", 2, Duration.ofSeconds(10));
+    }
+
     @RestController static class Endpoints {
         @PostMapping({"/api/v1/auth/register", "/api/v1/auth/register/merchant"}) String register() { return "ok"; }
         @PostMapping("/api/v1/auth/login") String login(@RequestBody LoginRequest request) { return "ok"; }
