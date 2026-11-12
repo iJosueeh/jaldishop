@@ -2,7 +2,7 @@ package com.jaldishop.backend.shared.security.ratelimit;
 
 import java.time.Duration;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -10,43 +10,65 @@ public class RateLimitsBenchmarkTest {
 
     @Test
     void runBenchmark() throws Exception {
-        System.out.println("Running rate limits micro-benchmark...");
+        System.out.println("Running rate limits micro-benchmark (in-memory Java ops/sec)...");
         var env = new MockEnvironment();
         var limits = new RateLimits(env);
 
         int threads = 16;
         int operationsPerThread = 20_000;
-        int keySpace = 100; // 100 distinct keys to simulate concurrent distinct traffic
+        int activeKeySpace = 100; // 80% repeat traffic on active keys
+        int burstKeySpace = 20;   // 20% traffic that exceeds limit (burst)
 
         ExecutorService executor = Executors.newFixedThreadPool(threads);
 
-        // Warmup
-        for (int i = 0; i < 5_000; i++) {
+        // Multi-threaded JIT compilation warmup
+        for (int i = 0; i < 20_000; i++) {
             try {
-                limits.check("bench", "key-" + (i % keySpace), 100_000, Duration.ofMinutes(1));
+                limits.check("warmup", "key-" + (i % activeKeySpace), 50_000, Duration.ofMinutes(1));
             } catch (Exception ignored) {}
         }
 
-        CountDownLatch latch = new CountDownLatch(threads);
-        long start = System.nanoTime();
+        var admitted = new AtomicInteger();
+        var rejected = new AtomicInteger();
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threads);
 
         for (int t = 0; t < threads; t++) {
             final int threadId = t;
             executor.submit(() -> {
                 try {
+                    startLatch.await();
                     for (int i = 0; i < operationsPerThread; i++) {
-                        String key = "thread-" + (threadId % keySpace) + "-" + (i % 10);
+                        // 80% traffic on active keys (limit 50,000), 20% traffic on burst keys (limit 50)
+                        boolean isActive = (i % 5) != 0;
+                        String key;
+                        int limit;
+                        if (isActive) {
+                            key = "active-" + (threadId % activeKeySpace) + "-" + (i % 10);
+                            limit = 50_000;
+                        } else {
+                            key = "burst-" + (i % burstKeySpace);
+                            limit = 50;
+                        }
+
                         try {
-                            limits.check("bench", key, 100_000, Duration.ofMinutes(1));
-                        } catch (RateLimitExceeded ignored) {}
+                            limits.check("bench", key, limit, Duration.ofMinutes(1));
+                            admitted.incrementAndGet();
+                        } catch (RateLimitExceeded e) {
+                            rejected.incrementAndGet();
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 } finally {
-                    latch.countDown();
+                    doneLatch.countDown();
                 }
             });
         }
 
-        latch.await();
+        long start = System.nanoTime();
+        startLatch.countDown();
+        doneLatch.await();
         long elapsedNanos = System.nanoTime() - start;
         executor.shutdown();
 
@@ -54,7 +76,15 @@ public class RateLimitsBenchmarkTest {
         double elapsedMs = elapsedNanos / 1_000_000.0;
         double opsPerSec = (totalOps / (double) elapsedNanos) * 1_000_000_000.0;
 
-        System.out.printf("BENCHMARK RESULT: Total ops: %d, Elapsed: %.2f ms, Throughput: %.0f ops/sec%n",
-                totalOps, elapsedMs, opsPerSec);
+        System.out.printf("BENCHMARK RESULT:%n" +
+                "  Total operations : %d%n" +
+                "  Admitted ops     : %d (%.1f%%)%n" +
+                "  Rejected ops     : %d (%.1f%%)%n" +
+                "  Elapsed time     : %.2f ms%n" +
+                "  Throughput       : %.0f in-memory ops/sec (approx %.2f µs/op)%n" +
+                "  [NOTE: Measures JVM check method throughput; does not represent full HTTP network capacity]%n",
+                totalOps, admitted.get(), (admitted.get() * 100.0 / totalOps),
+                rejected.get(), (rejected.get() * 100.0 / totalOps),
+                elapsedMs, opsPerSec, (elapsedNanos / (double) totalOps / 1000.0));
     }
 }

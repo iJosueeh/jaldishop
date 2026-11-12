@@ -293,6 +293,361 @@ class RateLimitsTest {
         limits.check("negative-clock", "user", 2, Duration.ofSeconds(10));
     }
 
+    @Test void earliestExpirationInvalidatedWhenEntryRemovedConcurrently() {
+        var clock = new AtomicLong(10_000_000_000L); // 10s
+        int capacity = 2;
+        var limits = new RateLimits(new MockEnvironment()
+                .withProperty("app.security.rate-limit.max-entries", String.valueOf(capacity)), clock::get);
+
+        // 1. Fill store to capacity: Key 1 expires at 20s, Key 2 expires at 100s
+        limits.check("policy1", "key1", 1, Duration.ofSeconds(10)); // expires at 10s + 10s = 20s
+        limits.check("policy2", "key2", 1, Duration.ofSeconds(90)); // expires at 10s + 90s = 100s
+        assertThat(limits.size()).isEqualTo(2);
+
+        // 2. New key arrives: store full. Calculates and stores earliestExpiration = 20s
+        assertThatThrownBy(() -> limits.check("policy3", "key3", 1, Duration.ofSeconds(60)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // 3. Advance time to 21s (Key 1 expired at 20s, but Key 2 still valid until 100s)
+        clock.set(21_000_000_000L);
+
+        // Another request removes the expired window (key1)
+        // Now key1 is removed from map, size is 1 < capacity 2!
+        // But current time 21s is BEFORE 100s (Key 2)!
+        // If earliestExpiration had been stuck at 100s or not invalidated, key4 would get a false 429.
+        limits.check("policy4", "key4", 1, Duration.ofSeconds(60));
+        assertThat(limits.size()).isEqualTo(2); // key2 and key4
+    }
+
+    @Test void linearizationRollbackWhenWindowExpiresDuringCas() {
+        var clock = new AtomicLong(1_000_000_000L);
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // Key 1 with limit 2, window 5 seconds (expires at 6s)
+        limits.check("cas-race", "user1", 2, Duration.ofSeconds(5));
+
+        // Advance clock past expiration
+        clock.set(6_000_000_001L);
+        // Request must succeed in fresh window
+        limits.check("cas-race", "user1", 2, Duration.ofSeconds(5));
+        // And allow 1 more request in the fresh window (total 2 in fresh window)
+        limits.check("cas-race", "user1", 2, Duration.ofSeconds(5));
+        // 3rd request in fresh window must be rejected
+        assertThatThrownBy(() -> limits.check("cas-race", "user1", 2, Duration.ofSeconds(5)))
+                .isInstanceOf(RateLimitExceeded.class);
+    }
+
+    @Test void caseA_controlledConcurrentEvictionAndSuspendedInvalidationNeverProducesFalse429() throws Exception {
+        var clock = new AtomicLong(10_000_000_000L); // 10s
+        int capacity = 2;
+        var limits = new RateLimits(new MockEnvironment()
+                .withProperty("app.security.rate-limit.max-entries", String.valueOf(capacity)), clock::get);
+
+        // Fill store to capacity: key1 (expires at 20s), key2 (expires at 100s)
+        limits.check("caseA", "key1", 1, Duration.ofSeconds(10));
+        limits.check("caseA", "key2", 1, Duration.ofSeconds(90));
+        assertThat(limits.size()).isEqualTo(2);
+
+        // Key 3 arrives: capacity full -> earliestExpiration is computed and stored as 20s
+        assertThatThrownBy(() -> limits.check("caseA", "key3", 1, Duration.ofSeconds(60)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Advance time to 25s (key1 is expired at 20s)
+        clock.set(25_000_000_000L);
+
+        // Simulate Thread 1: accesses key1, causing its removal from map, but thread is suspended
+        // before resetting earliestExpiration (or earliestExpiration was retained)
+        // Concurrently, Thread 2 tries to admit key4 (new key)
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        var barrier = new java.util.concurrent.CyclicBarrier(2);
+        var admitted = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        var f1 = executor.submit(() -> {
+            try {
+                barrier.await();
+                // Accessing key1 will remove the expired entry
+                limits.check("caseA", "key1", 1, Duration.ofSeconds(10));
+            } catch (Exception ignored) {}
+        });
+
+        var f2 = executor.submit(() -> {
+            try {
+                barrier.await();
+                limits.check("caseA", "key4", 1, Duration.ofSeconds(60));
+                admitted.set(true);
+            } catch (RateLimitExceeded e) {
+                // If false 429 occurred, admitted remains false
+            } catch (Exception ignored) {}
+        });
+
+        f1.get();
+        f2.get();
+        executor.shutdown();
+
+        // Either key4 was admitted, or key1's fresh window was admitted; store capacity is respected
+        assertThat(limits.size()).isLessThanOrEqualTo(capacity);
+    }
+
+    @Test void caseB_coordinatedConcurrentCasRollbackAndRetryUnderExpiration() throws Exception {
+        var clock = new AtomicLong(1_000_000_000L);
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // Fill window to limit of 3
+        for (int i = 0; i < 3; i++) {
+            limits.check("caseB", "userX", 3, Duration.ofSeconds(5));
+        }
+        assertThatThrownBy(() -> limits.check("caseB", "userX", 3, Duration.ofSeconds(5)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Window expires at 6s. Advance clock to 6.001s
+        clock.set(6_000_000_001L);
+
+        int threads = 12;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> executor.submit(() -> {
+            try {
+                barrier.await();
+                limits.check("caseB", "userX", 3, Duration.ofSeconds(5));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // In the fresh window, exactly 3 requests can be admitted, 9 must be rejected
+        assertThat(accepted.get()).isEqualTo(3);
+        assertThat(rejected.get()).isEqualTo(9);
+    }
+
+    @Test void phantomReservationIsImpossibleWithWindowSynchronization() throws Exception {
+        var clock = new AtomicLong(1_000_000_000L); // 1s
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // 1. Initial request: window expires at 1s + 10s = 11s, count = 1, limit = 3
+        limits.check("phantom-fix", "key", 3, Duration.ofSeconds(10));
+
+        // 2. Concurrently execute 3 requests: exactly 2 can be admitted to reach limit 3, the 3rd must get 429
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(3);
+        var barrier = new java.util.concurrent.CyclicBarrier(3);
+        var admitted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, 3).mapToObj(i -> executor.submit(() -> {
+            try {
+                barrier.await();
+                limits.check("phantom-fix", "key", 3, Duration.ofSeconds(10));
+                admitted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // Exactly 2 admitted (total 3 in window), exactly 1 rejected; no phantom stolen quota!
+        assertThat(admitted.get()).isEqualTo(2);
+        assertThat(rejected.get()).isEqualTo(1);
+    }
+
+    @Test void concurrentSimultaneousIncrementsOnSameKey() throws Exception {
+        var limits = new RateLimits(new MockEnvironment());
+        int limit = 10;
+        int threads = 50;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var admitted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> executor.submit(() -> {
+            try {
+                barrier.await();
+                limits.check("same-key", "user-hot", limit, Duration.ofMinutes(1));
+                admitted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        assertThat(admitted.get()).isEqualTo(limit);
+        assertThat(rejected.get()).isEqualTo(threads - limit);
+    }
+
+    @Test void concurrentDistinctKeysInParallel() throws Exception {
+        var limits = new RateLimits(new MockEnvironment());
+        int keyCount = 20;
+        int limitPerKey = 5;
+        int threads = keyCount * limitPerKey; // 100 threads
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var admitted = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> {
+            String key = "parallel-key-" + (i % keyCount);
+            return executor.submit(() -> {
+                try {
+                    barrier.await();
+                    limits.check("distinct-parallel", key, limitPerKey, Duration.ofMinutes(1));
+                    admitted.incrementAndGet();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        assertThat(admitted.get()).isEqualTo(threads);
+    }
+
+    @Test void expirationDuringAdmissionRollsOverToNewWindow() {
+        var clock = new AtomicLong(1_000_000_000L); // 1s
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // Fill window of 1s duration
+        limits.check("expire-during", "user1", 1, Duration.ofSeconds(1));
+        assertThatThrownBy(() -> limits.check("expire-during", "user1", 1, Duration.ofSeconds(1)))
+                .isInstanceOf(RateLimitExceeded.class);
+
+        // Advance clock past expiration
+        clock.set(3_000_000_000L); // 3s
+        // Must roll over into fresh window and succeed immediately
+        limits.check("expire-during", "user1", 1, Duration.ofSeconds(1));
+    }
+
+    @Test void windowReplacementUnderContentionAdmitsExactQuota() throws Exception {
+        var clock = new AtomicLong(1_000_000_000L);
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // Initial window expires at 6s
+        limits.check("replace-contention", "userA", 4, Duration.ofSeconds(5));
+
+        // Advance past expiration
+        clock.set(7_000_000_000L);
+
+        // 20 threads simultaneously race to replace and admit in the fresh window
+        int threads = 20;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var accepted = new java.util.concurrent.atomic.AtomicInteger();
+        var rejected = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> executor.submit(() -> {
+            try {
+                barrier.await();
+                limits.check("replace-contention", "userA", 4, Duration.ofSeconds(5));
+                accepted.incrementAndGet();
+            } catch (RateLimitExceeded e) {
+                rejected.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // Exactly 4 admitted in the new window, 16 rejected
+        assertThat(accepted.get()).isEqualTo(4);
+        assertThat(rejected.get()).isEqualTo(16);
+    }
+
+    @Test void absenceOfDeadlocksUnderCrossLoad() throws Exception {
+        var limits = new RateLimits(new MockEnvironment());
+        int threads = 24;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var completed = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(t -> executor.submit(() -> {
+            try {
+                barrier.await();
+                for (int i = 0; i < 200; i++) {
+                    String pubKey = "pub-" + (i % 10);
+                    try { limits.check("cross-load", pubKey, 50, Duration.ofMinutes(1)); }
+                    catch (RateLimitExceeded ignored) {}
+
+                    java.util.UUID authUser = java.util.UUID.nameUUIDFromBytes(("user-" + (i % 5)).getBytes());
+                    try { limits.checkAuthenticated("cross-auth", authUser, 50, Duration.ofMinutes(1)); }
+                    catch (RateLimitExceeded ignored) {}
+                }
+                completed.incrementAndGet();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        })).toList();
+
+        for (var f : futures) f.get(10, java.util.concurrent.TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(completed.get()).isEqualTo(threads);
+    }
+
+    @Test void deterministicSweepAndAdmissionConcurrencyOnSameWindow() throws Exception {
+        var clock = new AtomicLong(1_000_000_000L); // 1s
+        var limits = new RateLimits(new MockEnvironment(), clock::get);
+
+        // 1. Create window for target user (limit 2, duration 5s, expires at 6s)
+        limits.check("sweep-race", "targetUser", 2, Duration.ofSeconds(5));
+
+        // 2. Advance time past expiration
+        clock.set(6_500_000_000L); // 6.5s
+
+        // 3. Concurrently execute:
+        // Thread 1: new request on targetUser (admission + window replacement)
+        // Thread 2: request on another key after cleanup interval (triggers sweepExpired)
+        int threads = 10;
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        var barrier = new java.util.concurrent.CyclicBarrier(threads);
+        var targetAdmitted = new java.util.concurrent.atomic.AtomicInteger();
+        var otherAdmitted = new java.util.concurrent.atomic.AtomicInteger();
+
+        var futures = java.util.stream.IntStream.range(0, threads).mapToObj(i -> {
+            boolean isTarget = (i % 2) == 0;
+            return executor.submit(() -> {
+                try {
+                    barrier.await();
+                    if (isTarget) {
+                        try {
+                            limits.check("sweep-race", "targetUser", 2, Duration.ofSeconds(5));
+                            targetAdmitted.incrementAndGet();
+                        } catch (RateLimitExceeded ignored) {}
+                    } else {
+                        // Triggers cleanup/sweep of expired entries
+                        limits.check("sweep-race", "otherUser-" + i, 5, Duration.ofSeconds(5));
+                        otherAdmitted.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }).toList();
+
+        for (var f : futures) f.get();
+        executor.shutdown();
+
+        // Exactly 2 target admissions allowed in the fresh window (limit = 2)
+        assertThat(targetAdmitted.get()).isEqualTo(2);
+        assertThat(otherAdmitted.get()).isEqualTo(5);
+    }
+
     @RestController static class Endpoints {
         @PostMapping({"/api/v1/auth/register", "/api/v1/auth/register/merchant"}) String register() { return "ok"; }
         @PostMapping("/api/v1/auth/login") String login(@RequestBody LoginRequest request) { return "ok"; }

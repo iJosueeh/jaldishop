@@ -18,7 +18,7 @@ public class RateLimits {
 
     private static final class CounterWindow {
         final long expires;
-        final AtomicInteger count = new AtomicInteger(1);
+        int count = 1;
 
         CounterWindow(long expires) {
             this.expires = expires;
@@ -28,7 +28,7 @@ public class RateLimits {
     private static final class Store {
         final ConcurrentHashMap<String, CounterWindow> map = new ConcurrentHashMap<>();
         final AtomicLong lastCleanup = new AtomicLong(0);
-        long earliestExpiration = 0;
+        volatile long earliestExpiration = 0;
         // Throttle background sweeps
         static final long CLEANUP_INTERVAL_NANOS = Duration.ofMillis(250).toNanos();
     }
@@ -79,30 +79,27 @@ public class RateLimits {
             CounterWindow window = store.map.get(key);
 
             if (window != null) {
-                long remaining = window.expires - now;
-                if (remaining <= 0) {
-                    // Window expired: atomically remove old window and retry
-                    store.map.remove(key, window);
-                    continue;
-                }
+                synchronized (window) {
+                    // Double check under window lock: ensure it is still mapped to key
+                    if (store.map.get(key) != window) {
+                        continue;
+                    }
 
-                // Window is active: atomically attempt to increment
-                while (true) {
                     long currentNow = time.getAsLong();
-                    long currentRemaining = window.expires - currentNow;
-                    if (currentRemaining <= 0) {
-                        // Window expired while in contention: evict and retry
-                        store.map.remove(key, window);
-                        break;
+                    long remaining = window.expires - currentNow;
+                    if (remaining <= 0) {
+                        // Window expired: atomically remove old window and retry
+                        if (store.map.remove(key, window)) {
+                            store.earliestExpiration = 0;
+                        }
+                        continue;
                     }
 
-                    int current = window.count.get();
-                    if (current >= limit) {
-                        throw new RateLimitExceeded(seconds(currentRemaining));
+                    if (window.count >= limit) {
+                        throw new RateLimitExceeded(seconds(remaining));
                     }
-                    if (window.count.compareAndSet(current, current + 1)) {
-                        return;
-                    }
+                    window.count++;
+                    return;
                 }
             } else {
                 // Key not present: enforce hard capacity before admitting new key
@@ -117,8 +114,9 @@ public class RateLimits {
 
                     if (store.map.size() >= capacity) {
                         // Fast path: if known earliest expiration has not elapsed, map remains full
-                        if (store.earliestExpiration > currentNow) {
-                            throw new RateLimitExceeded(seconds(store.earliestExpiration - currentNow));
+                        long bound = store.earliestExpiration;
+                        if (bound > currentNow) {
+                            throw new RateLimitExceeded(seconds(bound - currentNow));
                         }
 
                         sweepExpired(store, currentNow);
@@ -150,7 +148,22 @@ public class RateLimits {
     }
 
     private void sweepExpired(Store store, long now) {
-        store.map.entrySet().removeIf(entry -> now - entry.getValue().expires >= 0);
+        boolean removed = false;
+        for (var entry : store.map.entrySet()) {
+            CounterWindow w = entry.getValue();
+            if (now - w.expires >= 0) {
+                synchronized (w) {
+                    if (now - w.expires >= 0) {
+                        if (store.map.remove(entry.getKey(), w)) {
+                            removed = true;
+                        }
+                    }
+                }
+            }
+        }
+        if (removed) {
+            store.earliestExpiration = 0;
+        }
     }
 
     private long seconds(long nanos) {
