@@ -92,6 +92,26 @@ class ActuatorSecurityWebTest {
     }
 
     @Test
+    @DisplayName("Actuator: /actuator/health/liveness responde 200 UP sin depender de base de datos")
+    void whenLivenessEndpointCalled_shouldReturnUpWithoutDatabaseDependency() throws Exception {
+        mockMvc.perform(get("/actuator/health/liveness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.components").doesNotExist())
+                .andExpect(jsonPath("$.details").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Actuator: /actuator/health/readiness responde 200 UP con base de datos disponible")
+    void whenReadinessEndpointCalled_shouldReturnUpWithDatabaseAvailable() throws Exception {
+        mockMvc.perform(get("/actuator/health/readiness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.components").doesNotExist())
+                .andExpect(jsonPath("$.details").doesNotExist());
+    }
+
+    @Test
     @DisplayName("Rutas públicas: /api/v1/health permanece funcional respondiendo 200")
     void whenPublicApiHealthCalled_shouldReturnOk() throws Exception {
         mockMvc.perform(get("/api/v1/health"))
