@@ -144,47 +144,47 @@ class AnalyticsPostgresIntegrationTest {
 
     @Test
     @Order(1)
-    @DisplayName("1. Pago aprobado en octubre y reembolsado en noviembre: imputación contable independiente")
+    @DisplayName("1. Pago aprobado en agosto y reembolsado en septiembre: imputación contable independiente")
     void scenario01_paymentOctRefundNov() throws SQLException {
         ensureUserAndStore(USER_ID_1, STORE_A, "Store A");
 
-        ZonedDateTime octDate = ZonedDateTime.of(2026, 10, 15, 14, 0, 0, 0, LIMA);
-        ZonedDateTime novDate = ZonedDateTime.of(2026, 11, 3, 10, 0, 0, 0, LIMA);
+        ZonedDateTime augDate = ZonedDateTime.of(2026, 8, 15, 14, 0, 0, 0, LIMA);
+        ZonedDateTime sepDate = ZonedDateTime.of(2026, 9, 3, 10, 0, 0, 0, LIMA);
 
-        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 10, 15), "COMMITTED");
-        UUID paymentId = insertPayment(capResId, new BigDecimal("100.00"), "APPROVED", octDate.toInstant(),
-                "COMPLETED", new BigDecimal("100.00"), novDate.toInstant());
-        insertOrder(STORE_A, USER_ID_1, paymentId, capResId, "CONFIRMED", new BigDecimal("100.00"), octDate.toInstant());
+        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 8, 15), "COMMITTED");
+        UUID paymentId = insertPayment(capResId, new BigDecimal("100.00"), "APPROVED", augDate.toInstant(),
+                "COMPLETED", new BigDecimal("100.00"), sepDate.toInstant());
+        insertOrder(STORE_A, USER_ID_1, paymentId, capResId, "CONFIRMED", new BigDecimal("100.00"), augDate.toInstant());
 
-        PeriodFilter periodOct = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
-        FinancialSummary finOct = repository.findFinancialSummary(periodOct, STORE_A, null);
-        assertThat(finOct.grossInflowAmount()).isEqualTo(new BigDecimal("100.00"));
-        assertThat(finOct.settledRefundsAmount()).isEqualTo(new BigDecimal("0.00"));
-        assertThat(finOct.netFinancialInflow()).isEqualTo(new BigDecimal("100.00"));
+        PeriodFilter periodAug = PeriodFilter.of(LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31));
+        FinancialSummary finAug = repository.findFinancialSummary(periodAug, STORE_A, null);
+        assertThat(finAug.grossInflowAmount()).isEqualTo(new BigDecimal("100.00"));
+        assertThat(finAug.settledRefundsAmount()).isEqualTo(new BigDecimal("0.00"));
+        assertThat(finAug.netFinancialInflow()).isEqualTo(new BigDecimal("100.00"));
 
-        PeriodFilter periodNov = PeriodFilter.of(LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30));
-        FinancialSummary finNov = repository.findFinancialSummary(periodNov, STORE_A, null);
-        assertThat(finNov.grossInflowAmount()).isEqualTo(new BigDecimal("0.00"));
-        assertThat(finNov.settledRefundsAmount()).isEqualTo(new BigDecimal("100.00"));
-        assertThat(finNov.netFinancialInflow()).isEqualTo(new BigDecimal("-100.00"));
+        PeriodFilter periodSep = PeriodFilter.of(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+        FinancialSummary finSep = repository.findFinancialSummary(periodSep, STORE_A, null);
+        assertThat(finSep.grossInflowAmount()).isEqualTo(new BigDecimal("0.00"));
+        assertThat(finSep.settledRefundsAmount()).isEqualTo(new BigDecimal("100.00"));
+        assertThat(finSep.netFinancialInflow()).isEqualTo(new BigDecimal("-100.00"));
     }
 
     @Test
     @Order(2)
-    @DisplayName("2. Pago aprobado y reembolsado en el mismo periodo (noviembre): saldo neto se compensa")
+    @DisplayName("2. Pago aprobado y reembolsado en el mismo periodo (septiembre): saldo neto se compensa")
     void scenario02_paymentAndRefundInSameMonth() throws SQLException {
         ensureUserAndStore(USER_ID_1, STORE_A, "Store A");
 
-        ZonedDateTime payDate = ZonedDateTime.of(2026, 11, 5, 11, 0, 0, 0, LIMA);
-        ZonedDateTime refDate = ZonedDateTime.of(2026, 11, 10, 16, 0, 0, 0, LIMA);
+        ZonedDateTime payDate = ZonedDateTime.of(2026, 9, 5, 11, 0, 0, 0, LIMA);
+        ZonedDateTime refDate = ZonedDateTime.of(2026, 9, 10, 16, 0, 0, 0, LIMA);
 
-        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 11, 5), "COMMITTED");
+        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 9, 5), "COMMITTED");
         UUID paymentId = insertPayment(capResId, new BigDecimal("80.00"), "APPROVED", payDate.toInstant(),
                 "COMPLETED", new BigDecimal("80.00"), refDate.toInstant());
         insertOrder(STORE_A, USER_ID_1, paymentId, capResId, "CONFIRMED", new BigDecimal("80.00"), payDate.toInstant());
 
-        PeriodFilter periodNov = PeriodFilter.of(LocalDate.of(2026, 11, 5), LocalDate.of(2026, 11, 12));
-        FinancialSummary fin = repository.findFinancialSummary(periodNov, STORE_A, null);
+        PeriodFilter periodSep = PeriodFilter.of(LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 12));
+        FinancialSummary fin = repository.findFinancialSummary(periodSep, STORE_A, null);
 
         assertThat(fin.grossInflowAmount()).isEqualTo(new BigDecimal("80.00"));
         assertThat(fin.settledRefundsAmount()).isEqualTo(new BigDecimal("80.00"));
@@ -272,20 +272,20 @@ class AnalyticsPostgresIntegrationTest {
     void scenario06_technicalRefundRetriesDoNotDuplicate() throws SQLException {
         ensureUserAndStore(USER_ID_1, STORE_A, "Store A");
 
-        ZonedDateTime novDate = ZonedDateTime.of(2026, 11, 15, 10, 0, 0, 0, LIMA);
-        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 11, 15), "RELEASED");
-        UUID paymentId = insertPayment(capResId, new BigDecimal("75.00"), "APPROVED", novDate.toInstant(),
-                "COMPLETED", new BigDecimal("75.00"), novDate.toInstant());
-        insertOrder(STORE_A, USER_ID_1, paymentId, capResId, "CANCELLED", new BigDecimal("75.00"), novDate.toInstant());
+        ZonedDateTime sepDate = ZonedDateTime.of(2026, 9, 15, 10, 0, 0, 0, LIMA);
+        UUID capResId = insertCapacityReservation(STORE_A, USER_ID_1, LocalDate.of(2026, 9, 15), "RELEASED");
+        UUID paymentId = insertPayment(capResId, new BigDecimal("75.00"), "APPROVED", sepDate.toInstant(),
+                "COMPLETED", new BigDecimal("75.00"), sepDate.toInstant());
+        insertOrder(STORE_A, USER_ID_1, paymentId, capResId, "CANCELLED", new BigDecimal("75.00"), sepDate.toInstant());
 
         // Insertar 1 intent y 3 execution attempts técnicos HTTP
         UUID intentId = UUID.randomUUID();
-        insertRefundIntent(intentId, paymentId, new BigDecimal("75.00"), novDate.toInstant());
-        insertExecutionAttempt(intentId, 1, "FAILED", novDate.toInstant());
-        insertExecutionAttempt(intentId, 2, "FAILED", novDate.toInstant());
-        insertExecutionAttempt(intentId, 3, "SUCCESSFUL", novDate.toInstant());
+        insertRefundIntent(intentId, paymentId, new BigDecimal("75.00"), sepDate.toInstant());
+        insertExecutionAttempt(intentId, 1, "FAILED", sepDate.toInstant());
+        insertExecutionAttempt(intentId, 2, "FAILED", sepDate.toInstant());
+        insertExecutionAttempt(intentId, 3, "SUCCESSFUL", sepDate.toInstant());
 
-        PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 11, 15), LocalDate.of(2026, 11, 15));
+        PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 9, 15), LocalDate.of(2026, 9, 15));
         FinancialSummary fin = repository.findFinancialSummary(period, STORE_A, null);
 
         // Debe sumar exactamente 75.00 una sola vez, nunca 225.00
