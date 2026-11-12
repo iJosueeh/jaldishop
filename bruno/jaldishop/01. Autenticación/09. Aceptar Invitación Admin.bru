@@ -1,0 +1,30 @@
+meta {
+  name: 09. Aceptar Invitación Admin
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/admin-invitations/accept
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "raw-invitation-token-here",
+    "password": "Password123!",
+    "firstName": "Admin",
+    "lastName": "Invitado",
+    "phoneNumber": "+51999333444"
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(201); });
+}

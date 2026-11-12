@@ -1,0 +1,46 @@
+meta {
+  name: 12. Crear Tienda Administrativa
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/stores
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "merchantId": "{{merchantUserId}}",
+    "name": "Segunda Tienda Merchant",
+    "slug": "segunda-tienda-merchant",
+    "description": "Tienda asignada directamente por administración",
+    "phoneNumber": "+51999222333",
+    "email": "segunda.tienda@jaldishop.com",
+    "categoryIds": [1],
+    "address": {
+      "addressLine": "Jr. Unión 456",
+      "reference": "Esq. con Jr. Carabaya",
+      "department": "LIMA",
+      "province": "LIMA",
+      "district": "LIMA",
+      "ubigeo": "150101",
+      "latitude": -12.0464,
+      "longitude": -77.0305
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(201); });
+}

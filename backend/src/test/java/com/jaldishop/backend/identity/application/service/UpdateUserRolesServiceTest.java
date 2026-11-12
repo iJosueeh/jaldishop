@@ -6,7 +6,7 @@ import com.jaldishop.backend.identity.domain.model.Role;
 import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.domain.repository.RoleRepository;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
-
+import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +37,9 @@ class UpdateUserRolesServiceTest {
 
     @Mock
     private RoleRepository roleRepository;
+
+    @Mock
+    private AdminAuditService auditService;
 
     @InjectMocks
     private UpdateUserRolesService updateUserRolesService;
@@ -65,7 +70,8 @@ class UpdateUserRolesServiceTest {
                 UserStatus.ACTIVE,
                 Set.of(customerRole),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                false
         );
     }
 
@@ -86,33 +92,105 @@ class UpdateUserRolesServiceTest {
         assertThat(response.hasRole(RoleName.MERCHANT)).isTrue();
         assertThat(response.hasRole(RoleName.CUSTOMER)).isFalse();
         verify(userRepository).save(customerUser);
+        verify(auditService).logSuccess(eq(adminId), any(), eq("UPDATE_USER_ROLES"), eq("USER"), eq(userId), any(), any());
     }
 
     @Test
-    @DisplayName("Debe lanzar excepción si un administrador intenta removerse el rol ADMIN a sí mismo")
-    void shouldThrowWhenAdminRemovesOwnAdminRole() {
+    @DisplayName("Seguridad: Rechaza asignar rol ADMIN mediante actualización genérica de roles")
+    void shouldRejectAddingAdminRoleViaGenericUpdate() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(customerUser));
+
+        assertThatThrownBy(() -> updateUserRolesService.execute(
+                userId,
+                Set.of(RoleName.ADMIN, RoleName.CUSTOMER),
+                adminId
+        ))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("No se puede asignar el rol ADMIN mediante actualización genérica");
+    }
+
+    @Test
+    @DisplayName("Seguridad: Rechaza revocar rol ADMIN a un administrador mediante actualización genérica")
+    void shouldRejectRevokingAdminRoleViaGenericUpdate() {
         User adminUser = User.reconstitute(
-                adminId,
+                userId,
                 "admin@jaldishop.com",
                 "hashed",
-                "Super",
+                "Admin",
+                "User",
+                "987654321",
+                UserStatus.ACTIVE,
+                Set.of(adminRole),
+                Instant.now(),
+                Instant.now(),
+                false
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
+
+        assertThatThrownBy(() -> updateUserRolesService.execute(
+                userId,
+                Set.of(RoleName.CUSTOMER),
+                adminId
+        ))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("No se puede revocar el rol ADMIN mediante actualización genérica");
+    }
+
+    @Test
+    @DisplayName("Seguridad: Rechaza modificar roles de un administrador mediante actualización genérica")
+    void shouldRejectModifyingAdminRolesViaGenericUpdate() {
+        User adminUser = User.reconstitute(
+                userId,
+                "admin@jaldishop.com",
+                "hashed",
+                "Admin",
+                "User",
+                "987654321",
+                UserStatus.ACTIVE,
+                Set.of(adminRole),
+                Instant.now(),
+                Instant.now(),
+                false
+        );
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
+
+        assertThatThrownBy(() -> updateUserRolesService.execute(
+                userId,
+                Set.of(RoleName.ADMIN, RoleName.CUSTOMER),
+                adminId
+        ))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("No se pueden modificar los roles de un administrador mediante este endpoint");
+    }
+
+    @Test
+    @DisplayName("Seguridad: Rechaza modificar roles del administrador principal bajo cualquier circunstancia")
+    void shouldRejectModifyingPrimaryAdminRoles() {
+        User primaryAdmin = User.reconstitute(
+                userId,
+                "primary@jaldishop.com",
+                "hashed",
+                "Primary",
                 "Admin",
                 "987654321",
                 UserStatus.ACTIVE,
                 Set.of(adminRole),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                true
         );
 
-        when(userRepository.findById(adminId)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(primaryAdmin));
 
         assertThatThrownBy(() -> updateUserRolesService.execute(
-                adminId,
-                Set.of(RoleName.CUSTOMER),
+                userId,
+                Set.of(RoleName.ADMIN),
                 adminId
         ))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("No puedes removerte tu propio rol de administrador");
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("No se pueden modificar los roles del administrador principal");
     }
 
     @Test
@@ -128,7 +206,7 @@ class UpdateUserRolesServiceTest {
     void shouldThrowWhenUserNotFound() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> updateUserRolesService.execute(userId, Set.of(RoleName.ADMIN), adminId))
+        assertThatThrownBy(() -> updateUserRolesService.execute(userId, Set.of(RoleName.CUSTOMER), adminId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }

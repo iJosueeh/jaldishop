@@ -215,6 +215,77 @@ class StompDeliveryAuthorizationBrokerTest {
         assertThat(delivered).isEmpty();
     }
 
+    @Test
+    void adminTopicStopsDeliveryWhenRoleRevokedOrSuspended() {
+        current.set(userWithPrimary(UserStatus.ACTIVE, false, RoleName.ADMIN));
+        JwtPrincipal adminPrincipal = new JwtPrincipal(userId, Set.of("ADMIN"), 0L, false);
+        principal = new UsernamePasswordAuthenticationToken(new StompPrincipal(userId.toString(), adminPrincipal), null, List.of());
+
+        connect("admin-session");
+        subscribe("admin-session", "sub-admin-events", "/topic/admin/events");
+        publish("/topic/admin/events");
+        assertThat(delivered).hasSize(1);
+        delivered.clear();
+
+        // 1. Role revoked
+        current.set(userWithPrimary(UserStatus.ACTIVE, false, RoleName.CUSTOMER));
+        publish("/topic/admin/events");
+        assertThat(delivered).isEmpty();
+
+        // 2. Account suspended
+        current.set(userWithPrimary(UserStatus.SUSPENDED, false, RoleName.ADMIN));
+        publish("/topic/admin/events");
+        assertThat(delivered).isEmpty();
+    }
+
+    @Test
+    void operationalAdminCannotSubscribeToAdminUserQueueAndForeignUserCannotReceivePrivateQueue() {
+        // Operational admin
+        current.set(userWithPrimary(UserStatus.ACTIVE, false, RoleName.ADMIN));
+        JwtPrincipal operational = new JwtPrincipal(userId, Set.of("ADMIN"), 0L, false);
+        principal = new UsernamePasswordAuthenticationToken(new StompPrincipal(userId.toString(), operational), null, List.of());
+
+        connect("op-session");
+        // Operational admin cannot subscribe to /user/queue/admin
+        assertThatThrownBy(() -> subscribe("op-session", "sub-op", "/user/queue/admin"))
+                .isInstanceOf(AccessDeniedException.class);
+
+        // Primary admin CAN subscribe
+        UUID primaryId = UUID.randomUUID();
+        User primaryUser = User.reconstitute(primaryId, "primary@example.com", "hash", "Primary", "Admin", null,
+                UserStatus.ACTIVE, Set.of(new Role((short) 3, RoleName.ADMIN)), Instant.now(), Instant.now(), true);
+        when(users.findById(primaryId)).thenReturn(Optional.of(primaryUser));
+        JwtPrincipal primaryPrinc = new JwtPrincipal(primaryId, Set.of("ADMIN"), 0L, true);
+        Authentication primaryAuth = new UsernamePasswordAuthenticationToken(new StompPrincipal(primaryId.toString(), primaryPrinc), null, List.of());
+
+        Message<byte[]> connectPrimary = message(SimpMessageType.CONNECT, "primary-session", null, null, primaryAuth);
+        broker.handleMessage(connectPrimary);
+        registry.onApplicationEvent(new SessionConnectedEvent(this, connectPrimary, primaryAuth));
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setSessionId("primary-session");
+        accessor.setSubscriptionId("sub-pri");
+        accessor.setDestination("/user/queue/admin");
+        accessor.setUser(primaryAuth);
+        Message<byte[]> subMessage = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+        inboundAuthorization.preSend(subMessage, inbound);
+        registry.onApplicationEvent(new SessionSubscribeEvent(this, subMessage, primaryAuth));
+        userDestinations.handleMessage(subMessage);
+
+        // Publish to primary admin queue
+        Message<byte[]> msg = message(SimpMessageType.MESSAGE, null, null, "/user/" + primaryId + "/queue/admin", null);
+        userDestinations.handleMessage(msg);
+
+        assertThat(delivered).hasSize(1);
+        assertThat(SimpMessageHeaderAccessor.getSessionId(delivered.getFirst().getHeaders()))
+                .isEqualTo("primary-session");
+    }
+
+    private User userWithPrimary(UserStatus status, boolean primary, RoleName... roleNames) {
+        var roles = java.util.Arrays.stream(roleNames).map(role -> new Role((short) 1, role)).collect(java.util.stream.Collectors.toSet());
+        return User.reconstitute(userId, "test@example.com", "hash", "Test", "User", null, status, roles, Instant.now(), Instant.now(), primary);
+    }
+
     private String topic() { return "/topic/stores/" + storeId + "/orders"; }
 
     private User user(UserStatus status, RoleName... roleNames) {
@@ -237,7 +308,7 @@ class StompDeliveryAuthorizationBrokerTest {
         Message<byte[]> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
         inboundAuthorization.preSend(message, inbound);
         registry.onApplicationEvent(new SessionSubscribeEvent(this, message, principal));
-        if (destination.equals("/user/queue/orders")) {
+        if (destination.equals("/user/queue/orders") || destination.equals("/user/queue/admin")) {
             userDestinations.handleMessage(message);
         } else {
             broker.handleMessage(message);

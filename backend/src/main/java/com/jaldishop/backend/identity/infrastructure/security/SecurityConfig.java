@@ -67,6 +67,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/reset-password",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/register/**",
+                                "/api/v1/auth/admin-invitations/**",
                                 "/api/v1/store-categories",
                                 "/api/v1/store-categories/**",
                                 "/api/v1/media/upload-signature",

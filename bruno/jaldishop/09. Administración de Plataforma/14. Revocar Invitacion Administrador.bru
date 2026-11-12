@@ -1,0 +1,23 @@
+meta {
+  name: 14. Revocar Invitacion Administrador
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/administrators/invitations/{{invitationId}}/revoke
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{primaryAdminToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(204); });
+}

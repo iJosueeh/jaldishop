@@ -1,0 +1,54 @@
+meta {
+  name: 11. Crear Merchant con Tienda
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/users/merchants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "merchant": {
+      "email": "comerciante.admin@jaldishop.com",
+      "password": "Password123!",
+      "firstName": "Comerciante",
+      "lastName": "Admin",
+      "phoneNumber": "+51999111222"
+    },
+    "store": {
+      "name": "Bodega Don Pepe Admin",
+      "slug": "bodega-don-pepe-admin",
+      "description": "Tienda creada desde panel administrativo",
+      "phoneNumber": "+51999111222",
+      "email": "contacto.pepe@jaldishop.com",
+      "categoryIds": [1],
+      "address": {
+        "addressLine": "Av. Las Palmeras 123",
+        "reference": "Frente al parque",
+        "department": "LIMA",
+        "province": "LIMA",
+        "district": "MIRAFLORES",
+        "ubigeo": "150122",
+        "latitude": -12.1215,
+        "longitude": -77.0298
+      }
+    }
+  }
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(201); });
+}

@@ -283,11 +283,86 @@ class StompAuthChannelInterceptorTest {
                 MessageBuilder.createMessage(new byte[0], subscribe.getMessageHeaders()), messageChannel));
     }
 
+    @Test
+    @DisplayName("SUBSCRIBE: Administrador puede suscribirse a /topic/admin/events")
+    void adminCanSubscribeToAdminEventsTopic() {
+        UUID adminId = UUID.randomUUID();
+        JwtPrincipal principal = new JwtPrincipal(adminId, Set.of("ADMIN"), 0L, false);
+        Authentication auth = createAuthentication(principal);
+        allow(principal, false);
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setUser(auth);
+        accessor.setDestination("/topic/admin/events");
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+
+        assertDoesNotThrow(() -> interceptor.preSend(message, messageChannel));
+    }
+
+    @Test
+    @DisplayName("SUBSCRIBE: Administrador principal puede suscribirse a /user/queue/admin")
+    void primaryAdminCanSubscribeToAdminUserQueue() {
+        UUID adminId = UUID.randomUUID();
+        JwtPrincipal principal = new JwtPrincipal(adminId, Set.of("ADMIN"), 0L, true);
+        Authentication auth = createAuthentication(principal);
+        allow(principal, true);
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setUser(auth);
+        accessor.setDestination("/user/queue/admin");
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+
+        assertDoesNotThrow(() -> interceptor.preSend(message, messageChannel));
+    }
+
+    @Test
+    @DisplayName("SUBSCRIBE: Administrador operativo es rechazado en /user/queue/admin")
+    void operationalAdminCannotSubscribeToAdminUserQueue() {
+        UUID adminId = UUID.randomUUID();
+        JwtPrincipal principal = new JwtPrincipal(adminId, Set.of("ADMIN"), 0L, false);
+        Authentication auth = createAuthentication(principal);
+        allow(principal, false);
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessor.setUser(auth);
+        accessor.setDestination("/user/queue/admin");
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(message, messageChannel));
+    }
+
+    @Test
+    @DisplayName("SUBSCRIBE: Customer o Merchant no pueden suscribirse a eventos administrativos")
+    void nonAdminCannotSubscribeToAdminEvents() {
+        UUID customerId = UUID.randomUUID();
+        JwtPrincipal customerPrincipal = new JwtPrincipal(customerId, Set.of("CUSTOMER"));
+        Authentication customerAuth = createAuthentication(customerPrincipal);
+        allow(customerPrincipal, false);
+
+        StompHeaderAccessor accessorTopic = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessorTopic.setUser(customerAuth);
+        accessorTopic.setDestination("/topic/admin/events");
+        Message<byte[]> messageTopic = MessageBuilder.createMessage(new byte[0], accessorTopic.getMessageHeaders());
+
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(messageTopic, messageChannel));
+
+        StompHeaderAccessor accessorQueue = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+        accessorQueue.setUser(customerAuth);
+        accessorQueue.setDestination("/user/queue/admin");
+        Message<byte[]> messageQueue = MessageBuilder.createMessage(new byte[0], accessorQueue.getMessageHeaders());
+
+        assertThrows(AccessDeniedException.class, () -> interceptor.preSend(messageQueue, messageChannel));
+    }
+
     private void allow(JwtPrincipal principal) {
+        allow(principal, principal.isPrimaryAdmin());
+    }
+
+    private void allow(JwtPrincipal principal, boolean primaryAdmin) {
         var roles = principal.roles().stream().map(role -> new Role((short) 1, RoleName.valueOf(role)))
                 .collect(java.util.stream.Collectors.toSet());
         User user = User.reconstitute(principal.userId(), "test@example.com", "hash", "Test", "User", null,
-                UserStatus.ACTIVE, roles, Instant.now(), Instant.now());
+                UserStatus.ACTIVE, roles, Instant.now(), Instant.now(), primaryAdmin);
         when(userRepository.findById(principal.userId())).thenReturn(Optional.of(user));
     }
 

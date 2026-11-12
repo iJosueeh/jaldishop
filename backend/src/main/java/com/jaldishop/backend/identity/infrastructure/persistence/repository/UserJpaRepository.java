@@ -45,6 +45,10 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, UUID> {
     @Query(value = "DELETE FROM user_roles WHERE user_id = :userId AND role_id = (SELECT id FROM roles WHERE name = 'MERCHANT')", nativeQuery = true)
     void removeMerchantRole(@Param("userId") UUID userId);
 
+    @Modifying
+    @Query(value = "UPDATE users SET credentials_version = credentials_version + 1, updated_at = NOW() WHERE id = :userId", nativeQuery = true)
+    int incrementCredentialsVersion(@Param("userId") UUID userId);
+
     @Query("SELECT DISTINCT u FROM UserEntity u LEFT JOIN u.roles r WHERE " +
             "(:status IS NULL OR u.status = :status) AND " +
             "(:role IS NULL OR r.name = :role) AND " +

@@ -21,8 +21,13 @@ public class User {
     private final Set<Role> roles;
     private final Instant createdAt;
     private Instant updatedAt;
+    private boolean primaryAdmin;
 
     public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles) {
+        this(id, firstName, lastName, email, password, status, phone, createdAt, updatedAt, roles, false);
+    }
+
+    public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles, boolean primaryAdmin) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -33,6 +38,7 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.roles = new HashSet<>(roles);
+        this.primaryAdmin = primaryAdmin;
     }
 
     public static User create(String email, String password, String firstName, String lastName, String phone, Set<Role> roles) {
@@ -74,6 +80,22 @@ public class User {
             Instant createdAt,
             Instant updatedAt
     ) {
+        return reconstitute(id, email, password, firstName, lastName, phone, status, roles, createdAt, updatedAt, false);
+    }
+
+    public static User reconstitute(
+            UUID id,
+            String email,
+            String password,
+            String firstName,
+            String lastName,
+            String phone,
+            UserStatus status,
+            Set<Role> roles,
+            Instant createdAt,
+            Instant updatedAt,
+            boolean primaryAdmin
+    ) {
         return new User(
                 id,
                 firstName,
@@ -84,7 +106,8 @@ public class User {
                 phone,
                 createdAt,
                 updatedAt,
-                roles
+                roles,
+                primaryAdmin
         );
     }
 
@@ -148,7 +171,14 @@ public class User {
         return status == UserStatus.ACTIVE;
     }
 
+    public boolean isPrimaryAdmin() {
+        return primaryAdmin;
+    }
+
     public void suspend(UUID currentAdminId) {
+        if (this.primaryAdmin) {
+            throw new ConflictException("PRIMARY_ADMIN_CANNOT_BE_SUSPENDED", "El administrador principal no puede ser suspendido.");
+        }
         if (currentAdminId != null && this.id.equals(currentAdminId)) {
             throw new IllegalArgumentException("No puedes suspender tu propia cuenta de administrador.");
         }

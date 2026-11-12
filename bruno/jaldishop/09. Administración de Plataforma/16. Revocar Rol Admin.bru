@@ -1,0 +1,23 @@
+meta {
+  name: 16. Revocar Rol Admin
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/administrators/{{userId}}/revoke
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{primaryAdminToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("HTTP esperado", function() { expect(res.getStatus()).to.equal(200); });
+}

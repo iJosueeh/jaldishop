@@ -25,6 +25,15 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
+import com.jaldishop.backend.identity.application.service.AdminAuditService;
+import com.jaldishop.backend.shared.security.JwtPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.UUID;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +43,15 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @Autowired(required = false)
+    private ObjectProvider<AdminAuditService> auditServiceProvider;
+
+    public GlobalExceptionHandler() {}
+
+    public GlobalExceptionHandler(ObjectProvider<AdminAuditService> auditServiceProvider) {
+        this.auditServiceProvider = auditServiceProvider;
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
@@ -164,8 +182,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         log.warn("Acceso denegado: {}", ex.getMessage());
+        if (request != null && request.getAttribute("ADMIN_AUDIT_DENIED_LOGGED") == null) {
+            request.setAttribute("ADMIN_AUDIT_DENIED_LOGGED", Boolean.TRUE);
+            String uri = request.getRequestURI();
+            if (uri != null && uri.startsWith("/api/v1/admin") && auditServiceProvider != null) {
+                auditServiceProvider.ifAvailable(auditService -> {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    UUID actorId = null;
+                    if (auth != null && auth.getPrincipal() instanceof JwtPrincipal principal) {
+                        actorId = principal.userId();
+                    }
+                    auditService.logDenied(
+                            actorId,
+                            null,
+                            "ACCESS_DENIED",
+                            "ADMIN_ROUTE",
+                            null,
+                            request.getRemoteAddr(),
+                            ex.getMessage()
+                    );
+                });
+            }
+        }
         String msg = ex.getMessage();
         if (msg == null || msg.isBlank() || "Access is denied".equalsIgnoreCase(msg.trim()) || "Access Denied".equalsIgnoreCase(msg.trim())) {
             msg = "No tienes permisos para realizar esta operación";
