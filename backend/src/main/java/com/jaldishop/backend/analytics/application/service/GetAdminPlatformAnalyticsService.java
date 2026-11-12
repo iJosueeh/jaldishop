@@ -2,7 +2,7 @@ package com.jaldishop.backend.analytics.application.service;
 
 import com.jaldishop.backend.analytics.domain.model.*;
 import com.jaldishop.backend.analytics.domain.port.in.GetAdminPlatformAnalyticsUseCase;
-import com.jaldishop.backend.analytics.domain.port.out.AnalyticsRepository;
+import com.jaldishop.backend.analytics.domain.repository.AnalyticsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ public class GetAdminPlatformAnalyticsService implements GetAdminPlatformAnalyti
     }
 
     @Override
-    public AdminPlatformAnalyticsReport getPlatformAnalytics(PeriodFilter period, UUID filterStoreId) {
+    public AdminPlatformAnalyticsReport execute(PeriodFilter period, UUID filterStoreId) {
         Objects.requireNonNull(period, "El periodo de consulta es obligatorio.");
 
         CommercialSummary commercial = analyticsRepository.findCommercialSummary(period, filterStoreId, null);
@@ -42,5 +42,10 @@ public class GetAdminPlatformAnalyticsService implements GetAdminPlatformAnalyti
                 storeRankings,
                 capacityDemand
         );
+    }
+
+    @Override
+    public AdminPlatformAnalyticsReport getPlatformAnalytics(PeriodFilter period, UUID filterStoreId) {
+        return execute(period, filterStoreId);
     }
 }

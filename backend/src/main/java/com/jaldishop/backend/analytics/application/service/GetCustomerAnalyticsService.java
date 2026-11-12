@@ -5,7 +5,7 @@ import com.jaldishop.backend.analytics.domain.model.CustomerSpendingSummary;
 import com.jaldishop.backend.analytics.domain.model.PeriodFilter;
 import com.jaldishop.backend.analytics.domain.model.ProductSalesRank;
 import com.jaldishop.backend.analytics.domain.port.in.GetCustomerAnalyticsUseCase;
-import com.jaldishop.backend.analytics.domain.port.out.AnalyticsRepository;
+import com.jaldishop.backend.analytics.domain.repository.AnalyticsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ public class GetCustomerAnalyticsService implements GetCustomerAnalyticsUseCase 
     }
 
     @Override
-    public CustomerAnalyticsReport getCustomerAnalytics(UUID userId, PeriodFilter period) {
+    public CustomerAnalyticsReport execute(UUID userId, PeriodFilter period) {
         Objects.requireNonNull(userId, "El identificador del usuario (userId) es obligatorio.");
         Objects.requireNonNull(period, "El periodo de consulta es obligatorio.");
 
@@ -40,5 +40,10 @@ public class GetCustomerAnalyticsService implements GetCustomerAnalyticsUseCase 
                 spending,
                 topPurchasedProducts
         );
+    }
+
+    @Override
+    public CustomerAnalyticsReport getCustomerAnalytics(UUID userId, PeriodFilter period) {
+        return execute(userId, period);
     }
 }

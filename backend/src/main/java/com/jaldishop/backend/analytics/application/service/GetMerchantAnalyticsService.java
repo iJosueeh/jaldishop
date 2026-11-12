@@ -2,7 +2,7 @@ package com.jaldishop.backend.analytics.application.service;
 
 import com.jaldishop.backend.analytics.domain.model.*;
 import com.jaldishop.backend.analytics.domain.port.in.GetMerchantAnalyticsUseCase;
-import com.jaldishop.backend.analytics.domain.port.out.AnalyticsRepository;
+import com.jaldishop.backend.analytics.domain.repository.AnalyticsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,7 @@ public class GetMerchantAnalyticsService implements GetMerchantAnalyticsUseCase 
     }
 
     @Override
-    public MerchantAnalyticsReport getMerchantAnalytics(UUID storeId, PeriodFilter period) {
+    public MerchantAnalyticsReport execute(UUID storeId, PeriodFilter period) {
         Objects.requireNonNull(storeId, "El identificador de la tienda (storeId) es obligatorio.");
         Objects.requireNonNull(period, "El periodo de consulta es obligatorio.");
 
@@ -39,5 +39,10 @@ public class GetMerchantAnalyticsService implements GetMerchantAnalyticsUseCase 
                 topProducts,
                 capacityDemand
         );
+    }
+
+    @Override
+    public MerchantAnalyticsReport getMerchantAnalytics(UUID storeId, PeriodFilter period) {
+        return execute(storeId, period);
     }
 }

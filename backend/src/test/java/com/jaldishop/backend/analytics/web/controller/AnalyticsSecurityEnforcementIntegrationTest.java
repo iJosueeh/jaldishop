@@ -158,7 +158,7 @@ class AnalyticsSecurityEnforcementIntegrationTest {
         JwtPrincipal principal = new JwtPrincipal(USER_ID, Set.of("CUSTOMER"), 0L, false);
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 15));
 
-        when(customerUseCase.getCustomerAnalytics(eq(USER_ID), any())).thenReturn(
+        when(customerUseCase.execute(eq(USER_ID), any())).thenReturn(
                 new CustomerAnalyticsReport(USER_ID, period, new CustomerSpendingSummary(USER_ID, 1L, BigDecimal.TEN, BigDecimal.ZERO, null, null), Collections.emptyList())
         );
 
@@ -175,7 +175,7 @@ class AnalyticsSecurityEnforcementIntegrationTest {
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 15));
 
         when(storeContextService.requireStoreId(principal)).thenReturn(STORE_ID);
-        when(merchantUseCase.getMerchantAnalytics(eq(STORE_ID), any())).thenReturn(
+        when(merchantUseCase.execute(eq(STORE_ID), any())).thenReturn(
                 new MerchantAnalyticsReport(STORE_ID, period, CommercialSummary.empty(), FinancialSummary.empty(), Collections.emptyList(), null)
         );
 
@@ -191,7 +191,7 @@ class AnalyticsSecurityEnforcementIntegrationTest {
         JwtPrincipal principal = new JwtPrincipal(USER_ID, Set.of("ADMIN"), 0L, false);
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 15));
 
-        when(adminUseCase.getPlatformAnalytics(any(), any())).thenReturn(
+        when(adminUseCase.execute(any(), any())).thenReturn(
                 new AdminPlatformAnalyticsReport(period, null, CommercialSummary.empty(), FinancialSummary.empty(), Collections.emptyList(), Collections.emptyList(), null)
         );
 
@@ -207,7 +207,7 @@ class AnalyticsSecurityEnforcementIntegrationTest {
         JwtPrincipal principal = new JwtPrincipal(USER_ID, Set.of("ADMIN"), 0L, true);
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 15));
 
-        when(adminUseCase.getPlatformAnalytics(any(), any())).thenReturn(
+        when(adminUseCase.execute(any(), any())).thenReturn(
                 new AdminPlatformAnalyticsReport(period, null, CommercialSummary.empty(), FinancialSummary.empty(), Collections.emptyList(), Collections.emptyList(), null)
         );
 
@@ -274,7 +274,7 @@ class AnalyticsSecurityEnforcementIntegrationTest {
         JwtPrincipal principal = new JwtPrincipal(USER_ID, Set.of("CUSTOMER"), 0L, false);
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 15));
 
-        when(customerUseCase.getCustomerAnalytics(eq(USER_ID), any())).thenReturn(
+        when(customerUseCase.execute(eq(USER_ID), any())).thenReturn(
                 new CustomerAnalyticsReport(USER_ID, period, new CustomerSpendingSummary(USER_ID, 0L, BigDecimal.ZERO, BigDecimal.ZERO, null, null), Collections.emptyList())
         );
         when(analyticsPdfExportPort.generateCustomerReportPdf(any())).thenReturn("%PDF-1.4 mock".getBytes());

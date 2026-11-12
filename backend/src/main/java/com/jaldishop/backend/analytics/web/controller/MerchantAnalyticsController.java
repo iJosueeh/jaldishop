@@ -58,7 +58,7 @@ public class MerchantAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        MerchantAnalyticsReport report = getMerchantAnalyticsUseCase.getMerchantAnalytics(authenticatedStoreId, period);
+        MerchantAnalyticsReport report = getMerchantAnalyticsUseCase.execute(authenticatedStoreId, period);
 
         return ResponseEntity.ok(MerchantAnalyticsSummaryResponse.from(report));
     }
@@ -79,7 +79,7 @@ public class MerchantAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        MerchantAnalyticsReport report = getMerchantAnalyticsUseCase.getMerchantAnalytics(authenticatedStoreId, period);
+        MerchantAnalyticsReport report = getMerchantAnalyticsUseCase.execute(authenticatedStoreId, period);
         byte[] pdfBytes = analyticsPdfExportPort.generateMerchantReportPdf(report);
 
         String filename = "jaldishop-merchant-analytics-" + fromDate + "-al-" + toDate + ".pdf";

@@ -49,7 +49,7 @@ public class AdminAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        AdminPlatformAnalyticsReport report = getAdminPlatformAnalyticsUseCase.getPlatformAnalytics(period, storeId);
+        AdminPlatformAnalyticsReport report = getAdminPlatformAnalyticsUseCase.execute(period, storeId);
 
         return ResponseEntity.ok(AdminAnalyticsSummaryResponse.from(report));
     }
@@ -65,7 +65,7 @@ public class AdminAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        AdminPlatformAnalyticsReport report = getAdminPlatformAnalyticsUseCase.getPlatformAnalytics(period, storeId);
+        AdminPlatformAnalyticsReport report = getAdminPlatformAnalyticsUseCase.execute(period, storeId);
         byte[] pdfBytes = analyticsPdfExportPort.generateAdminReportPdf(report);
 
         String filename = "jaldishop-admin-analytics-" + fromDate + "-al-" + toDate + ".pdf";

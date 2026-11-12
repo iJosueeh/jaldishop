@@ -38,11 +38,11 @@ class AnalyticsServicesTest {
     void merchantServiceShouldValidateInputs() {
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
 
-        assertThatThrownBy(() -> merchantAnalyticsService.getMerchantAnalytics(null, period))
+        assertThatThrownBy(() -> merchantAnalyticsService.execute(null, period))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("storeId");
 
-        assertThatThrownBy(() -> merchantAnalyticsService.getMerchantAnalytics(UUID.randomUUID(), null))
+        assertThatThrownBy(() -> merchantAnalyticsService.execute(UUID.randomUUID(), null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("periodo");
     }
@@ -62,7 +62,7 @@ class AnalyticsServicesTest {
         when(analyticsRepository.findCapacityDemand(eq(period), eq(storeId)))
                 .thenReturn(CapacityDemandSummary.of(5, 1));
 
-        MerchantAnalyticsReport report = merchantAnalyticsService.getMerchantAnalytics(storeId, period);
+        MerchantAnalyticsReport report = merchantAnalyticsService.execute(storeId, period);
 
         assertThat(report).isNotNull();
         assertThat(report.storeId()).isEqualTo(storeId);
@@ -87,7 +87,7 @@ class AnalyticsServicesTest {
         when(analyticsRepository.findCapacityDemand(eq(period), isNull()))
                 .thenReturn(CapacityDemandSummary.of(10, 2));
 
-        AdminPlatformAnalyticsReport report = adminAnalyticsService.getPlatformAnalytics(period, null);
+        AdminPlatformAnalyticsReport report = adminAnalyticsService.execute(period, null);
 
         assertThat(report).isNotNull();
         assertThat(report.filterStoreId()).isNull();
@@ -106,7 +106,7 @@ class AnalyticsServicesTest {
         when(analyticsRepository.findTopSellingProducts(eq(period), isNull(), eq(userId), anyInt()))
                 .thenReturn(List.of());
 
-        CustomerAnalyticsReport report = customerAnalyticsService.getCustomerAnalytics(userId, period);
+        CustomerAnalyticsReport report = customerAnalyticsService.execute(userId, period);
 
         assertThat(report).isNotNull();
         assertThat(report.userId()).isEqualTo(userId);

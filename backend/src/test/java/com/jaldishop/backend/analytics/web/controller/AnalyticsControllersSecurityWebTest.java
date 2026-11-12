@@ -132,7 +132,7 @@ class AnalyticsControllersSecurityWebTest {
                 userId, period, spending, Collections.emptyList()
         );
 
-        when(customerAnalyticsUseCase.getCustomerAnalytics(eq(userId), any(PeriodFilter.class))).thenReturn(report);
+        when(customerAnalyticsUseCase.execute(eq(userId), any(PeriodFilter.class))).thenReturn(report);
 
         customerMockMvc.perform(get("/api/v1/customer/analytics/summary")
                         .param("from", "2026-10-01")
@@ -143,7 +143,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(jsonPath("$.spending.totalOrdersCount").value(2))
                 .andExpect(jsonPath("$.spending.totalSpentAmount").value(120.00));
 
-        verify(customerAnalyticsUseCase).getCustomerAnalytics(eq(userId), any(PeriodFilter.class));
+        verify(customerAnalyticsUseCase).execute(eq(userId), any(PeriodFilter.class));
     }
 
     @Test
@@ -198,7 +198,7 @@ class AnalyticsControllersSecurityWebTest {
                 CapacityDemandSummary.of(10L, 1L)
         );
 
-        when(merchantAnalyticsUseCase.getMerchantAnalytics(eq(storeId), any(PeriodFilter.class))).thenReturn(report);
+        when(merchantAnalyticsUseCase.execute(eq(storeId), any(PeriodFilter.class))).thenReturn(report);
 
         merchantMockMvc.perform(get("/api/v1/merchant/analytics/summary")
                         .param("from", "2026-10-01")
@@ -212,7 +212,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(jsonPath("$.financial.netFinancialInflow").value(800.00));
 
         verify(storeContextService).requireStoreId(merchantPrincipal);
-        verify(merchantAnalyticsUseCase).getMerchantAnalytics(eq(storeId), any(PeriodFilter.class));
+        verify(merchantAnalyticsUseCase).execute(eq(storeId), any(PeriodFilter.class));
     }
 
     @Test
@@ -231,7 +231,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("No tiene permisos para operar sobre una tienda ajena."));
 
-        verify(merchantAnalyticsUseCase, never()).getMerchantAnalytics(any(), any());
+        verify(merchantAnalyticsUseCase, never()).execute(any(), any());
     }
 
     // =========================================================================
@@ -257,7 +257,7 @@ class AnalyticsControllersSecurityWebTest {
                 CapacityDemandSummary.of(50L, 2L)
         );
 
-        when(adminAnalyticsUseCase.getPlatformAnalytics(any(PeriodFilter.class), isNull())).thenReturn(report);
+        when(adminAnalyticsUseCase.execute(any(PeriodFilter.class), isNull())).thenReturn(report);
 
         adminMockMvc.perform(get("/api/v1/admin/analytics/summary")
                         .param("from", "2026-10-01")
@@ -269,7 +269,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(jsonPath("$.storeRankings[0].storeName").value("Pastelería"))
                 .andExpect(jsonPath("$.topProducts[0].productName").value("Torta"));
 
-        verify(adminAnalyticsUseCase).getPlatformAnalytics(any(PeriodFilter.class), isNull());
+        verify(adminAnalyticsUseCase).execute(any(PeriodFilter.class), isNull());
     }
 
     @Test
@@ -288,7 +288,7 @@ class AnalyticsControllersSecurityWebTest {
                 CapacityDemandSummary.of(0L, 0L)
         );
 
-        when(adminAnalyticsUseCase.getPlatformAnalytics(any(PeriodFilter.class), eq(storeId))).thenReturn(report);
+        when(adminAnalyticsUseCase.execute(any(PeriodFilter.class), eq(storeId))).thenReturn(report);
 
         adminMockMvc.perform(get("/api/v1/admin/analytics/summary")
                         .param("from", "2026-10-01")
@@ -299,7 +299,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(jsonPath("$.filterStoreId").value(storeId.toString()))
                 .andExpect(jsonPath("$.commercial.historicalConfirmedOrdersCount").value(0));
 
-        verify(adminAnalyticsUseCase).getPlatformAnalytics(any(PeriodFilter.class), eq(storeId));
+        verify(adminAnalyticsUseCase).execute(any(PeriodFilter.class), eq(storeId));
     }
 
     // =========================================================================
@@ -319,7 +319,7 @@ class AnalyticsControllersSecurityWebTest {
         );
 
         byte[] fakePdfBytes = "%PDF-1.4 Fake customer PDF".getBytes();
-        when(customerAnalyticsUseCase.getCustomerAnalytics(eq(userId), any(PeriodFilter.class))).thenReturn(report);
+        when(customerAnalyticsUseCase.execute(eq(userId), any(PeriodFilter.class))).thenReturn(report);
         when(analyticsPdfExportPort.generateCustomerReportPdf(report)).thenReturn(fakePdfBytes);
 
         customerMockMvc.perform(get("/api/v1/customer/analytics/export/pdf")
@@ -330,7 +330,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"jaldishop-customer-analytics-2026-10-01-al-2026-10-31.pdf\""))
                 .andExpect(content().bytes(fakePdfBytes));
 
-        verify(customerAnalyticsUseCase).getCustomerAnalytics(eq(userId), any(PeriodFilter.class));
+        verify(customerAnalyticsUseCase).execute(eq(userId), any(PeriodFilter.class));
         verify(analyticsPdfExportPort).generateCustomerReportPdf(report);
     }
 
@@ -350,7 +350,7 @@ class AnalyticsControllersSecurityWebTest {
 
         byte[] fakePdfBytes = "%PDF-1.4 Fake merchant PDF".getBytes();
         when(storeContextService.requireStoreId(merchantPrincipal)).thenReturn(storeId);
-        when(merchantAnalyticsUseCase.getMerchantAnalytics(eq(storeId), any(PeriodFilter.class))).thenReturn(report);
+        when(merchantAnalyticsUseCase.execute(eq(storeId), any(PeriodFilter.class))).thenReturn(report);
         when(analyticsPdfExportPort.generateMerchantReportPdf(report)).thenReturn(fakePdfBytes);
 
         merchantMockMvc.perform(get("/api/v1/merchant/analytics/export/pdf")
@@ -362,7 +362,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(content().bytes(fakePdfBytes));
 
         verify(storeContextService).requireStoreId(merchantPrincipal);
-        verify(merchantAnalyticsUseCase).getMerchantAnalytics(eq(storeId), any(PeriodFilter.class));
+        verify(merchantAnalyticsUseCase).execute(eq(storeId), any(PeriodFilter.class));
         verify(analyticsPdfExportPort).generateMerchantReportPdf(report);
     }
 
@@ -402,7 +402,7 @@ class AnalyticsControllersSecurityWebTest {
         );
 
         byte[] fakePdfBytes = "%PDF-1.4 Fake admin PDF".getBytes();
-        when(adminAnalyticsUseCase.getPlatformAnalytics(any(PeriodFilter.class), isNull())).thenReturn(report);
+        when(adminAnalyticsUseCase.execute(any(PeriodFilter.class), isNull())).thenReturn(report);
         when(analyticsPdfExportPort.generateAdminReportPdf(report)).thenReturn(fakePdfBytes);
 
         adminMockMvc.perform(get("/api/v1/admin/analytics/export/pdf")
@@ -413,7 +413,7 @@ class AnalyticsControllersSecurityWebTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"jaldishop-admin-analytics-2026-10-01-al-2026-10-31.pdf\""))
                 .andExpect(content().bytes(fakePdfBytes));
 
-        verify(adminAnalyticsUseCase).getPlatformAnalytics(any(PeriodFilter.class), isNull());
+        verify(adminAnalyticsUseCase).execute(any(PeriodFilter.class), isNull());
         verify(analyticsPdfExportPort).generateAdminReportPdf(report);
     }
 }

@@ -47,7 +47,7 @@ public class CustomerAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        CustomerAnalyticsReport report = getCustomerAnalyticsUseCase.getCustomerAnalytics(principal.userId(), period);
+        CustomerAnalyticsReport report = getCustomerAnalyticsUseCase.execute(principal.userId(), period);
 
         return ResponseEntity.ok(CustomerAnalyticsSummaryResponse.from(report));
     }
@@ -62,7 +62,7 @@ public class CustomerAnalyticsController {
         LocalDate fromDate = from != null ? from : toDate.minusDays(30);
 
         PeriodFilter period = PeriodFilter.of(fromDate, toDate);
-        CustomerAnalyticsReport report = getCustomerAnalyticsUseCase.getCustomerAnalytics(principal.userId(), period);
+        CustomerAnalyticsReport report = getCustomerAnalyticsUseCase.execute(principal.userId(), period);
         byte[] pdfBytes = analyticsPdfExportPort.generateCustomerReportPdf(report);
 
         String filename = "jaldishop-customer-analytics-" + fromDate + "-al-" + toDate + ".pdf";

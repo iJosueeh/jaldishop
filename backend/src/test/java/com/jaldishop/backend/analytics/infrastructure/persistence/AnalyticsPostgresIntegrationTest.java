@@ -465,21 +465,21 @@ class AnalyticsPostgresIntegrationTest {
         PeriodFilter period = PeriodFilter.of(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31));
 
         // 1. Reporte Customer y PDF
-        CustomerAnalyticsReport customerReport = getCustomerAnalyticsUseCase.getCustomerAnalytics(USER_ID_1, period);
+        CustomerAnalyticsReport customerReport = getCustomerAnalyticsUseCase.execute(USER_ID_1, period);
         byte[] customerPdf = analyticsPdfExportPort.generateCustomerReportPdf(customerReport);
         assertThat(customerPdf).isNotNull();
         assertThat(customerPdf.length).isGreaterThan(500);
         assertThat(new String(customerPdf, 0, 5)).isEqualTo("%PDF-");
 
         // 2. Reporte Merchant y PDF
-        MerchantAnalyticsReport merchantReport = getMerchantAnalyticsUseCase.getMerchantAnalytics(STORE_A, period);
+        MerchantAnalyticsReport merchantReport = getMerchantAnalyticsUseCase.execute(STORE_A, period);
         byte[] merchantPdf = analyticsPdfExportPort.generateMerchantReportPdf(merchantReport);
         assertThat(merchantPdf).isNotNull();
         assertThat(merchantPdf.length).isGreaterThan(500);
         assertThat(new String(merchantPdf, 0, 5)).isEqualTo("%PDF-");
 
         // 3. Reporte Admin y PDF
-        AdminPlatformAnalyticsReport adminReport = getAdminPlatformAnalyticsUseCase.getPlatformAnalytics(period, null);
+        AdminPlatformAnalyticsReport adminReport = getAdminPlatformAnalyticsUseCase.execute(period, null);
         byte[] adminPdf = analyticsPdfExportPort.generateAdminReportPdf(adminReport);
         assertThat(adminPdf).isNotNull();
         assertThat(adminPdf.length).isGreaterThan(500);
