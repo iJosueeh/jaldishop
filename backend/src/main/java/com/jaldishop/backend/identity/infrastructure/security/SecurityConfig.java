@@ -80,6 +80,7 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/api/v1/checkout/mercado-pago/webhook"
                         ).permitAll()
+                        .requestMatchers("/actuator/metrics", "/actuator/metrics/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/**").denyAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
