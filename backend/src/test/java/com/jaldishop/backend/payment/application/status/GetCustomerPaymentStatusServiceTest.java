@@ -291,6 +291,44 @@ class GetCustomerPaymentStatusServiceTest {
         assertThat(result.orderNumber()).isNull();
         assertThat(result.hasIncidence()).isTrue();
         assertThat(result.incidenceCode()).isEqualTo("PAYMENT_APPROVED_AFTER_RESERVATION_EXPIRED");
+        assertThat(result.incidenceMessage()).isEqualTo("La reserva de horario ha vencido. Se gestionará la devolución correspondiente.");
         assertThat(result.refundStatus()).isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("Sanitiza mensaje de incidencia técnica para no divulgar detalles internos al cliente")
+    void sanitizesTechnicalIncidenceMessageForCustomer() {
+        Payment payment = createPaymentFixture(PaymentStatus.APPROVED);
+        CapacityReservation reservation = createReservationFixture(userId);
+
+        PaymentIncidence incidence = new PaymentIncidence(
+                UUID.randomUUID(),
+                paymentId,
+                IncidenceProcessType.ORDER_CONFIRMATION,
+                IncidenceCategory.TECHNICAL,
+                "INTERNAL_DATABASE_TIMEOUT",
+                "org.postgresql.util.PSQLException: Connection refused to neon-db-internal:5432 at schema_orders",
+                1,
+                5,
+                null,
+                IncidenceStatus.OPEN,
+                Instant.now(),
+                Instant.now(),
+                null
+        );
+
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+        when(capacityReservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+        when(orderRepository.findByPaymentId(paymentId)).thenReturn(Optional.empty());
+        when(paymentIncidenceRepository.findLatestByPaymentIdAndProcessType(paymentId, IncidenceProcessType.ORDER_CONFIRMATION))
+                .thenReturn(Optional.of(incidence));
+        when(refundIntentRepository.findByPaymentId(paymentId)).thenReturn(Optional.empty());
+
+        CustomerPaymentStatusResponse result = service.execute(paymentId, userId);
+
+        assertThat(result.hasIncidence()).isTrue();
+        assertThat(result.incidenceCode()).isEqualTo("INTERNAL_DATABASE_TIMEOUT");
+        assertThat(result.incidenceMessage()).isEqualTo("Ocurrió una incidencia al procesar tu pedido. Tu pago se encuentra bajo revisión.");
+        assertThat(result.incidenceMessage()).doesNotContain("org.postgresql").doesNotContain("neon-db-internal");
     }
 }

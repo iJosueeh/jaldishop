@@ -39,7 +39,7 @@ describe('WhatsAppBridgeModal Component', () => {
 
     expect(screen.getByText('Panadería Don Pepe')).toBeInTheDocument();
     expect(screen.getByText('10:00 - 11:00 AM')).toBeInTheDocument();
-    expect(screen.getByText('Abrir WhatsApp y Enviar Pedido')).toBeInTheDocument();
+    expect(screen.getByText('Abrir WhatsApp y Enviar Solicitud')).toBeInTheDocument();
   });
 
   it('copies WhatsApp message to clipboard on click', () => {

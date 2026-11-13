@@ -207,7 +207,10 @@ export const checkoutService = {
   /**
    * Fetches the current payment verification status for a specific paymentId.
    */
-  async getPaymentStatus(paymentId: string): Promise<CustomerPaymentStatusResponse> {
+  async getPaymentStatus(
+    paymentId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<CustomerPaymentStatusResponse> {
     const cleanId = paymentId?.trim();
     if (!cleanId) {
       throw new PaymentServiceError(
@@ -225,8 +228,12 @@ export const checkoutService = {
           'Content-Type': 'application/json',
         },
         cache: 'no-store',
+        signal: options?.signal,
       });
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw err;
+      }
       throw new PaymentServiceError(
         'Error de red al consultar el estado del pago. Intenta nuevamente.',
         'NETWORK_ERROR',
@@ -277,7 +284,7 @@ export const checkoutService = {
       }
 
       try {
-        const status = await this.getPaymentStatus(paymentId);
+        const status = await this.getPaymentStatus(paymentId, { signal });
         latestStatus = status;
 
         // Terminal states: order created, incidence recorded, or payment failed
@@ -285,6 +292,9 @@ export const checkoutService = {
           return status;
         }
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          throw err;
+        }
         lastError = err;
         // If authentication error or client error (400, 401, 403, 404), do not keep polling
         if (

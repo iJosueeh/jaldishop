@@ -77,7 +77,9 @@ public class GetCustomerPaymentStatusService {
                         || incidenceOpt.get().getStatus() == IncidenceStatus.MANUAL_REVIEW_REQUIRED);
 
         String incidenceCode = hasIncidence ? incidenceOpt.get().getCode() : null;
-        String incidenceMessage = hasIncidence ? incidenceOpt.get().getMessage() : null;
+        String incidenceMessage = hasIncidence
+                ? resolveCustomerIncidenceMessage(incidenceOpt.get().getCode(), incidenceOpt.get().getMessage())
+                : null;
 
         // Consultar estado de devolución
         String refundStatus = payment.getRefundStatus() != null ? payment.getRefundStatus().name() : "NOT_REQUIRED";
@@ -106,5 +108,21 @@ public class GetCustomerPaymentStatusService {
                 payment.getCreatedAt(),
                 payment.getApprovedAt()
         );
+    }
+
+    private String resolveCustomerIncidenceMessage(String code, String rawMessage) {
+        if (code == null) {
+            return "Ocurrió una incidencia al procesar tu pedido. Tu pago se encuentra bajo revisión.";
+        }
+        return switch (code) {
+            case "RESERVATION_EXPIRED", "PAYMENT_APPROVED_AFTER_RESERVATION_EXPIRED" ->
+                    "La reserva de horario ha vencido. Se gestionará la devolución correspondiente.";
+            case "INVENTORY_RESERVATION_EXPIRED", "INSUFFICIENT_STOCK" ->
+                    "No hay disponibilidad suficiente para los productos seleccionados. Se gestionará la devolución correspondiente.";
+            case "RESERVATION_PROTECTION_EXPIRED" ->
+                    "El tiempo límite para confirmar el pedido ha vencido. Se gestionará la devolución correspondiente.";
+            default ->
+                    "Ocurrió una incidencia al procesar tu pedido. Tu pago se encuentra bajo revisión.";
+        };
     }
 }

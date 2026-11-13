@@ -465,5 +465,25 @@ describe('checkoutService & Payment Helpers', () => {
         name: 'AbortError',
       });
     });
+
+    it('propagates AbortSignal to in-flight getPaymentStatus fetch', async () => {
+      const controller = new AbortController();
+      fetchMock.mockImplementationOnce((_url, init) => {
+        return new Promise((_, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('This operation was aborted', 'AbortError'));
+          });
+        });
+      });
+
+      const promise = checkoutService.getPaymentStatus(validPaymentId, {
+        signal: controller.signal,
+      });
+      controller.abort();
+
+      await expect(promise).rejects.toMatchObject({
+        name: 'AbortError',
+      });
+    });
   });
 });

@@ -377,4 +377,144 @@ describe('CatalogContainer Payment & Mercado Pago Integration', () => {
       expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
     });
   });
+
+  it('handles PAYMENT_IN_PROGRESS (409 Conflict) without closing modal or discarding reservation', async () => {
+    vi.mocked(checkoutService.initiateCheckout).mockResolvedValueOnce({
+      reservationId: 'res-in-progress-409',
+      reservationExpiresAt: new Date(Date.now() + 600000).toISOString(),
+      storeId: mockStore.id,
+      storeName: mockStore.name,
+      userId: 'user-1',
+      fulfillmentType: 'PICKUP',
+      serviceDate: '2026-11-13',
+      startTime: '10:00:00',
+      endTime: '11:00:00',
+      customerInfo: {
+        customerName: 'Rosa Flores',
+        customerPhone: '987654321',
+        customerEmail: 'rosa@example.com',
+      },
+      pricing: {
+        currency: 'PEN',
+        productsSubtotalAmount: 25,
+        discountAmount: 0,
+        deliveryFeeAmount: 0,
+        includedTaxAmount: 0,
+        totalAmount: 25,
+      },
+      createdAt: new Date().toISOString(),
+    });
+
+    const inProgressErr = new PaymentServiceError(
+      'Existe un intento de pago en proceso para esta reserva.',
+      'PAYMENT_IN_PROGRESS',
+      409
+    );
+    vi.mocked(checkoutService.createPaymentPreference).mockRejectedValueOnce(inProgressErr);
+
+    renderWithClient(
+      <CatalogContainer
+        store={mockStore}
+        storeName={mockStore.name}
+        products={mockProducts}
+        categories={[{ id: 'platos', name: 'Platos', slug: 'platos', itemCount: 1 }]}
+      />
+    );
+
+    const slotElements = await screen.findAllByText('10:00 - 11:00');
+    fireEvent.click(slotElements[0]);
+
+    const pickupBtn = screen.getByRole('button', { name: /Retiro en Tienda/ });
+    fireEvent.click(pickupBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Continuar al pago/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Continuar al pago/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Pagar con Mercado Pago'));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        'Existe un intento de pago en proceso para esta reserva.'
+      );
+      // Regression: Modal MUST remain open and reservation kept
+      expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
+    });
+  });
+
+  it('handles generic 409 Conflict without closing modal or misclassifying as expired reservation', async () => {
+    vi.mocked(checkoutService.initiateCheckout).mockResolvedValueOnce({
+      reservationId: 'res-generic-409',
+      reservationExpiresAt: new Date(Date.now() + 600000).toISOString(),
+      storeId: mockStore.id,
+      storeName: mockStore.name,
+      userId: 'user-1',
+      fulfillmentType: 'PICKUP',
+      serviceDate: '2026-11-13',
+      startTime: '10:00:00',
+      endTime: '11:00:00',
+      customerInfo: {
+        customerName: 'Rosa Flores',
+        customerPhone: '987654321',
+        customerEmail: 'rosa@example.com',
+      },
+      pricing: {
+        currency: 'PEN',
+        productsSubtotalAmount: 25,
+        discountAmount: 0,
+        deliveryFeeAmount: 0,
+        includedTaxAmount: 0,
+        totalAmount: 25,
+      },
+      createdAt: new Date().toISOString(),
+    });
+
+    const otherConflictErr = new PaymentServiceError(
+      'Conflicto de concurrencia al procesar el pago.',
+      'CONCURRENCY_CONFLICT',
+      409
+    );
+    vi.mocked(checkoutService.createPaymentPreference).mockRejectedValueOnce(otherConflictErr);
+
+    renderWithClient(
+      <CatalogContainer
+        store={mockStore}
+        storeName={mockStore.name}
+        products={mockProducts}
+        categories={[{ id: 'platos', name: 'Platos', slug: 'platos', itemCount: 1 }]}
+      />
+    );
+
+    const slotElements = await screen.findAllByText('10:00 - 11:00');
+    fireEvent.click(slotElements[0]);
+
+    const pickupBtn = screen.getByRole('button', { name: /Retiro en Tienda/ });
+    fireEvent.click(pickupBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Continuar al pago/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Continuar al pago/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Pagar con Mercado Pago'));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        'Conflicto de concurrencia al procesar el pago.'
+      );
+      // Regression: Modal MUST remain open and reservation kept
+      expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
+    });
+  });
 });

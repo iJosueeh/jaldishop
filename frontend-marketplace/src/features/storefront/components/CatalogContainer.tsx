@@ -372,10 +372,29 @@ export function CatalogContainer({
         return;
       }
 
-      if (errorObj?.code === 'RESERVATION_EXPIRED' || errorObj?.status === 409) {
+      if (
+        errorObj?.code === 'RESERVATION_EXPIRED' ||
+        errorObj?.code === 'INVENTORY_RESERVATION_EXPIRED'
+      ) {
         toast.error(errorObj.message || 'Tu reserva de horario ha vencido. Por favor selecciona una nueva franja.');
         setIsPaymentModalOpen(false);
         setCheckoutResponse(null);
+        return;
+      }
+
+      if (errorObj?.code === 'PAYMENT_IN_PROGRESS') {
+        toast.error(
+          errorObj.message ||
+            'Existe una operación de pago en curso para esta reserva. Por favor verifica su estado antes de reintentar.'
+        );
+        return;
+      }
+
+      if (errorObj?.status === 409) {
+        toast.error(
+          errorObj.message ||
+            'Existe un conflicto con la reserva actual. Por favor verifica el estado de tu pedido.'
+        );
         return;
       }
 
