@@ -239,7 +239,7 @@ describe('OrderDetailView Component', () => {
 
   it('resultado incierto tras timeout: shows connection warning inviting to refresh without claiming definitive success or closing modal', async () => {
     const uncertainMsg =
-      'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.';
+      'El pedido continúa en estado confirmado en la última consulta. No se dispone de confirmación sobre la cancelación. Por favor, actualiza la página más adelante para verificar el estado definitivo.';
     mockCancelOrder.mockRejectedValue(new Error(uncertainMsg));
 
     vi.mocked(useCustomerOrderDetail).mockReturnValue({

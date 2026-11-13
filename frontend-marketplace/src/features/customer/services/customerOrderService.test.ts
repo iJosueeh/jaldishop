@@ -132,8 +132,7 @@ describe('customerOrderService', () => {
     });
 
     describe('Response Validation & Inconsistency Recovery', () => {
-      it('reconsults GET detail when PATCH returns mismatched orderNumber and succeeds if backend shows CANCELLED', async () => {
-        // PATCH returns order ORD-999 (mismatched)
+      it('reconsults GET detail when PATCH returns mismatched orderNumber and succeeds if backend shows CANCELLED (Scenario 1)', async () => {
         fetchMock
           .mockResolvedValueOnce({
             ok: true,
@@ -143,7 +142,6 @@ describe('customerOrderService', () => {
               status: 'CANCELLED',
             }),
           })
-          // Fallback GET /api/customer/orders/ORD-123
           .mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -159,7 +157,7 @@ describe('customerOrderService', () => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
       });
 
-      it('throws inconsistent error when PATCH returns mismatched orderNumber and fallback GET shows not CANCELLED', async () => {
+      it('indicates order remains confirmed in last query when PATCH returns mismatched orderNumber and GET shows CONFIRMED (Scenario 2)', async () => {
         fetchMock
           .mockResolvedValueOnce({
             ok: true,
@@ -179,12 +177,20 @@ describe('customerOrderService', () => {
           });
 
         await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
-          'La respuesta de cancelación fue inconsistente. El pedido no figura como cancelado. Por favor, actualiza la página para revisar el estado.'
+          'El pedido continúa en estado confirmado en la última consulta. No se dispone de confirmación sobre la cancelación. Por favor, actualiza la página más adelante para verificar el estado definitivo.'
         );
       });
 
-      it('reconsults GET detail when PATCH returns status !== CANCELLED and recovers if backend shows CANCELLED', async () => {
+      it('shows real status when PATCH returns status !== CANCELLED and GET confirms IN_PREPARATION (Scenario 3)', async () => {
         fetchMock
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              ...mockOrderDetail,
+              orderNumber: 'ORD-123',
+              status: 'CONFIRMED',
+            }),
+          })
           .mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -192,21 +198,14 @@ describe('customerOrderService', () => {
               orderNumber: 'ORD-123',
               status: 'IN_PREPARATION',
             }),
-          })
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({
-              ...mockOrderDetail,
-              orderNumber: 'ORD-123',
-              status: 'CANCELLED',
-            }),
           });
 
-        const res = await customerOrderService.cancelOrder('ORD-123');
-        expect(res.status).toBe('CANCELLED');
+        await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
+          'El pedido figura actualmente en estado IN_PREPARATION. No se pudo confirmar la cancelación. Por favor, actualiza la página para revisar el detalle.'
+        );
       });
 
-      it('throws inconsistent error when PATCH status !== CANCELLED and fallback GET also confirms not CANCELLED', async () => {
+      it('indicates status could not be determined when PATCH status !== CANCELLED and GET fails (Scenario 4 - does NOT claim CONFIRMED)', async () => {
         fetchMock
           .mockResolvedValueOnce({
             ok: true,
@@ -216,31 +215,24 @@ describe('customerOrderService', () => {
               status: 'CONFIRMED',
             }),
           })
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({
-              ...mockOrderDetail,
-              orderNumber: 'ORD-123',
-              status: 'CONFIRMED',
-            }),
-          });
+          .mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
-        await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
-          'La respuesta de cancelación fue inconsistente. El pedido no figura como cancelado. Por favor, actualiza la página para revisar el estado.'
+        const errorPromise = customerOrderService.cancelOrder('ORD-123');
+        await expect(errorPromise).rejects.toThrow(
+          'No se pudo determinar el estado actual del pedido debido a un problema de conexión. Por favor, actualiza la página para verificar el estado.'
         );
+        await expect(errorPromise).rejects.not.toThrow(/continúa en estado confirmado/i);
       });
     });
 
     describe('Timeout & Uncertain State Handling', () => {
-      it('recovers cancelled order when PATCH returns 503 timeout but backend finished cancellation (GET CANCELLED)', async () => {
-        // PATCH 503
+      it('recovers cancelled order when PATCH returns 503 timeout but backend finished cancellation (Scenario 1)', async () => {
         fetchMock
           .mockResolvedValueOnce({
             ok: false,
             status: 503,
             json: async () => ({ message: 'Gateway timeout' }),
           })
-          // Fallback GET shows CANCELLED
           .mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -254,14 +246,13 @@ describe('customerOrderService', () => {
         expect(res.status).toBe('CANCELLED');
       });
 
-      it('throws informative uncertain error when PATCH returns 503 and order remains CONFIRMED', async () => {
+      it('indicates order remains confirmed in last query when PATCH returns 503 and order remains CONFIRMED (Scenario 2)', async () => {
         fetchMock
           .mockResolvedValueOnce({
             ok: false,
             status: 503,
             json: async () => ({ message: 'Gateway timeout' }),
           })
-          // Fallback GET shows order is still CONFIRMED
           .mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -272,15 +263,34 @@ describe('customerOrderService', () => {
           });
 
         await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
-          'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.'
+          'El pedido continúa en estado confirmado en la última consulta. No se dispone de confirmación sobre la cancelación. Por favor, actualiza la página más adelante para verificar el estado definitivo.'
         );
       });
 
-      it('recovers cancelled order when fetch throws network error but backend finished cancellation (GET CANCELLED)', async () => {
-        // Fetch throws network error
+      it('shows real status when PATCH returns 503 and order is already IN_PREPARATION (Scenario 3)', async () => {
+        fetchMock
+          .mockResolvedValueOnce({
+            ok: false,
+            status: 503,
+            json: async () => ({ message: 'Gateway timeout' }),
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              ...mockOrderDetail,
+              orderNumber: 'ORD-123',
+              status: 'IN_PREPARATION',
+            }),
+          });
+
+        await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
+          'El pedido figura actualmente en estado IN_PREPARATION. No se pudo confirmar la cancelación. Por favor, actualiza la página para revisar el detalle.'
+        );
+      });
+
+      it('recovers cancelled order when fetch throws network error but backend finished cancellation (Scenario 1)', async () => {
         fetchMock
           .mockRejectedValueOnce(new TypeError('Failed to fetch (timeout)'))
-          // Fallback GET succeeds with CANCELLED
           .mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -294,14 +304,16 @@ describe('customerOrderService', () => {
         expect(res.status).toBe('CANCELLED');
       });
 
-      it('throws uncertain error when fetch throws network error and fallback GET also fails', async () => {
+      it('indicates status could not be determined when fetch throws network error and fallback GET also fails (Scenario 4 - does NOT claim CONFIRMED)', async () => {
         fetchMock
           .mockRejectedValueOnce(new TypeError('Failed to fetch'))
           .mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
-        await expect(customerOrderService.cancelOrder('ORD-123')).rejects.toThrow(
-          'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.'
+        const errorPromise = customerOrderService.cancelOrder('ORD-123');
+        await expect(errorPromise).rejects.toThrow(
+          'No se pudo determinar el estado actual del pedido debido a un problema de conexión. Por favor, actualiza la página para verificar el estado.'
         );
+        await expect(errorPromise).rejects.not.toThrow(/continúa en estado confirmado/i);
       });
     });
 

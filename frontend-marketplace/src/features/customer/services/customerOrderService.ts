@@ -66,22 +66,7 @@ export const customerOrderService = {
       }
 
       // Inconsistent response DTO: do not invent success; reconsult backend
-      try {
-        const verified = await this.getOrderDetail(sanitizedOrderNumber);
-        if (
-          verified &&
-          verified.orderNumber?.trim().toLowerCase() === sanitizedOrderNumber.toLowerCase() &&
-          verified.status === 'CANCELLED'
-        ) {
-          return verified;
-        }
-      } catch {
-        // Fallback GET failed
-      }
-
-      throw new Error(
-        'La respuesta de cancelación fue inconsistente. El pedido no figura como cancelado. Por favor, actualiza la página para revisar el estado.'
-      );
+      return this.handleUncertainCancellation(sanitizedOrderNumber);
     }
 
     // 503 or transient upstream timeout: check if backend actually cancelled
@@ -114,25 +99,53 @@ export const customerOrderService = {
   },
 
   async handleUncertainCancellation(orderNumber: string): Promise<CustomerOrderDetail> {
+    let verified: CustomerOrderDetail | null = null;
+
     try {
-      const verified = await this.getOrderDetail(orderNumber);
-      if (
-        verified &&
-        verified.orderNumber?.trim().toLowerCase() === orderNumber.trim().toLowerCase() &&
-        verified.status === 'CANCELLED'
-      ) {
-        return verified;
-      }
+      verified = await this.getOrderDetail(orderNumber);
     } catch {
       // Re-query failed
     }
 
-    const uncertainErr = new Error(
-      'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.'
+    const isMatchingOrder =
+      verified &&
+      typeof verified.orderNumber === 'string' &&
+      verified.orderNumber.trim().toLowerCase() === orderNumber.trim().toLowerCase();
+
+    // Scenario 4: GET fails or returns invalid DTO -> indicate cannot determine current status. Do NOT claim CONFIRMED.
+    if (!verified || !isMatchingOrder) {
+      const err = new Error(
+        'No se pudo determinar el estado actual del pedido debido a un problema de conexión. Por favor, actualiza la página para verificar el estado.'
+      ) as Error & { status?: number; code?: string; isUncertain?: boolean };
+      err.status = 503;
+      err.code = 'UNCERTAIN_CANCELLATION';
+      err.isUncertain = true;
+      throw err;
+    }
+
+    // Scenario 1: GET confirms CANCELLED -> return success
+    if (verified.status === 'CANCELLED') {
+      return verified;
+    }
+
+    // Scenario 2: GET confirms CONFIRMED -> indicate order remains confirmed in last query, without asserting a pending operation cannot complete
+    if (verified.status === 'CONFIRMED') {
+      const err = new Error(
+        'El pedido continúa en estado confirmado en la última consulta. No se dispone de confirmación sobre la cancelación. Por favor, actualiza la página más adelante para verificar el estado definitivo.'
+      ) as Error & { status?: number; code?: string; isUncertain?: boolean };
+      err.status = 503;
+      err.code = 'UNCERTAIN_CANCELLATION';
+      err.isUncertain = true;
+      throw err;
+    }
+
+    // Scenario 3: GET returns another status -> show real status neutrally
+    const err = new Error(
+      `El pedido figura actualmente en estado ${verified.status}. No se pudo confirmar la cancelación. Por favor, actualiza la página para revisar el detalle.`
     ) as Error & { status?: number; code?: string; isUncertain?: boolean };
-    uncertainErr.status = 503;
-    uncertainErr.code = 'UNCERTAIN_CANCELLATION';
-    uncertainErr.isUncertain = true;
-    throw uncertainErr;
+    err.status = 503;
+    err.code = 'UNCERTAIN_CANCELLATION';
+    err.isUncertain = true;
+    throw err;
   },
 };
