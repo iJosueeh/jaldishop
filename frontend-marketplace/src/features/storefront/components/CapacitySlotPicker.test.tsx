@@ -100,4 +100,64 @@ describe('CapacitySlotPicker Component', () => {
     }
     expect(handleSelectSlot).not.toHaveBeenCalled();
   });
+
+  it('renders loading state when isLoading is true', () => {
+    render(<CapacitySlotPicker slots={[]} isLoading={true} onDateChange={vi.fn()} />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(
+      screen.getByText('Consultando disponibilidad de horarios en tiempo real...')
+    ).toBeInTheDocument();
+  });
+
+  it('renders error state and handles onRetry', () => {
+    const handleRetry = vi.fn();
+    render(
+      <CapacitySlotPicker
+        slots={[]}
+        error="Fallo al cargar horarios."
+        onRetry={handleRetry}
+        onDateChange={vi.fn()}
+      />
+    );
+    expect(screen.getByText('Fallo al cargar horarios.')).toBeInTheDocument();
+    const retryBtn = screen.getByRole('button', { name: 'Reintentar' });
+    fireEvent.click(retryBtn);
+    expect(handleRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders date selector and triggers onDateChange', () => {
+    const handleDateChange = vi.fn();
+    render(
+      <CapacitySlotPicker
+        slots={TEST_SLOTS}
+        selectedDate="2026-11-13"
+        onDateChange={handleDateChange}
+      />
+    );
+
+    const dateInput = screen.getByLabelText(/Fecha:/);
+    expect(dateInput).toHaveValue('2026-11-13');
+    fireEvent.change(dateInput, { target: { value: '2026-11-14' } });
+    expect(handleDateChange).toHaveBeenCalledWith('2026-11-14');
+  });
+
+  it('shows warning banner when all slots are sold out', () => {
+    const allSoldOutSlots: CapacitySlot[] = [
+      {
+        id: 'slot-1',
+        timeRange: '09:00 - 10:00 AM',
+        totalCapacity: 10,
+        reservedCount: 10,
+        status: 'sold_out',
+        estimatedDeliveryMinutes: 30,
+      },
+    ];
+
+    render(<CapacitySlotPicker slots={allSoldOutSlots} />);
+    expect(
+      screen.getByText(
+        'Todos los horarios para esta fecha están agotados. Selecciona otra fecha para continuar.'
+      )
+    ).toBeInTheDocument();
+  });
 });
