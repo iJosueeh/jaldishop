@@ -17,6 +17,11 @@ import { DeliveryFormData, CheckoutResponse, InitiateCheckoutPayload } from '@/f
 import { checkoutService } from '@/features/checkout/services/checkoutService';
 import { mapDeliveryFormDataToCheckoutFields, parseSlotTimeRange } from '@/features/checkout/utils/addressMapper';
 import { customerAddressService } from '@/features/customer/services/customerAddressService';
+import {
+  capacityService,
+  mapBackendSlotsToPickerSlots,
+  getBusinessTodayDate,
+} from '../services/capacityService';
 import { PaymentHubModal } from './PaymentHubModal';
 import { WhatsAppBridgeModal } from './WhatsAppBridgeModal';
 import { Button } from '@/shared/components/ui/Button';
@@ -65,10 +70,76 @@ export function CatalogContainer({
     if (store) selectStore({ id: store.id, name: store.name, slug: store.slug });
   }, [store, selectStore]);
 
+  const [selectedDate, setSelectedDate] = useState<string>(() => getBusinessTodayDate());
+  const [fetchedSlots, setFetchedSlots] = useState<CapacitySlot[] | null>(null);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+
   const [selectedSlot, setSelectedSlot] = useState<CapacitySlot | null>(null);
   const [fulfillment, setFulfillment] = useState<'DELIVERY' | 'PICKUP'>('DELIVERY');
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
   const [isDeliveryValid, setIsDeliveryValid] = useState(false);
+
+  // Reset selected slot whenever selected date or store changes to enforce explicit customer choice
+  const handleDateChange = useCallback((newDate: string) => {
+    setSelectedDate(newDate);
+    setSelectedSlot(null);
+  }, []);
+
+  // Fetch real capacity slots with race condition / out-of-order response guard
+  useEffect(() => {
+    if (slots !== undefined) return;
+    if (totalCartCount <= 0 || !store?.id || !authenticated) {
+      setFetchedSlots(null);
+      setSelectedSlot(null);
+      return;
+    }
+
+    let isCurrent = true;
+    setIsLoadingSlots(true);
+    setSlotsError(null);
+
+    capacityService
+      .getCapacitySlots(store.id, selectedDate)
+      .then((response) => {
+        if (!isCurrent) return;
+        const mapped = mapBackendSlotsToPickerSlots(response.slots);
+        setFetchedSlots(mapped);
+        // Only keep previous selection if it belongs to current date and remains available
+        setSelectedSlot((prev) => {
+          if (
+            prev &&
+            prev.serviceDate === selectedDate &&
+            mapped.some((s) => s.id === prev.id && s.status !== 'sold_out')
+          ) {
+            return mapped.find((s) => s.id === prev.id) || prev;
+          }
+          return null;
+        });
+      })
+      .catch((err: unknown) => {
+        if (!isCurrent) return;
+        const errorObj = err as { code?: string; status?: number; message?: string };
+        if (errorObj?.status === 401 || errorObj?.code === 'SESSION_EXPIRED') {
+          setSlotsError('Tu sesión ha expirado. Inicia sesión para consultar horarios.');
+        } else {
+          setSlotsError(errorObj?.message || 'No se pudieron consultar los horarios en este momento.');
+        }
+        setFetchedSlots([]);
+        setSelectedSlot(null);
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoadingSlots(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [slots, totalCartCount, store?.id, authenticated, selectedDate]);
+
+  const effectiveSlots = slots !== undefined ? slots : fetchedSlots;
 
   // Modal & checkout state
   const [isSubmittingCheckout, setIsSubmittingCheckout] = useState(false);
@@ -151,6 +222,11 @@ export function CatalogContainer({
       return;
     }
 
+    if (selectedSlot.status === 'sold_out') {
+      toast.error('El horario seleccionado se encuentra agotado. Elige otro horario.');
+      return;
+    }
+
     if (fulfillment === 'DELIVERY') {
       if (!store.deliveryEnabled) {
         toast.error('La tienda no realiza envíos a domicilio en este momento.');
@@ -187,7 +263,9 @@ export function CatalogContainer({
       setIsSubmittingCheckout(true);
 
       const parsedTimes = parseSlotTimeRange(selectedSlot.timeRange);
-      const serviceDate = new Date().toISOString().split('T')[0];
+      const serviceDate = selectedSlot.serviceDate || selectedDate || getBusinessTodayDate();
+      const startTime = selectedSlot.startTime || parsedTimes.startTime || null;
+      const endTime = selectedSlot.endTime || parsedTimes.endTime || null;
 
       let deliveryFields: {
         deliveryAddress?: string | null;
@@ -215,8 +293,8 @@ export function CatalogContainer({
         storeId: store.id,
         fulfillmentType: fulfillment,
         serviceDate,
-        startTime: parsedTimes.startTime || null,
-        endTime: parsedTimes.endTime || null,
+        startTime,
+        endTime,
         customerName: deliveryFields.customerName || null,
         customerPhone: deliveryFields.customerPhone || null,
         customerEmail: null,
@@ -231,6 +309,17 @@ export function CatalogContainer({
       setIsPaymentModalOpen(true);
       toast.success('¡Horario reservado por 10 minutos! Realiza tu pago para completar la compra.');
     } catch (err: unknown) {
+      const errorObj = err as { code?: string; status?: number; message?: string };
+      if (
+        errorObj?.status === 401 ||
+        errorObj?.code === 'SESSION_EXPIRED' ||
+        errorObj?.code === 'UNAUTHENTICATED'
+      ) {
+        toast.error('Tu sesión ha expirado. Inicia sesión para continuar.');
+        const targetUrl = window.location.pathname + '#entrega';
+        window.location.href = `/login?redirect=${encodeURIComponent(targetUrl)}`;
+        return;
+      }
       const msg = err instanceof Error ? err.message : 'Ocurrió un error al iniciar la compra.';
       toast.error(msg);
     } finally {
@@ -338,24 +427,71 @@ export function CatalogContainer({
           )}
 
           {capacitySlot ??
-            (slots && slots.length > 0 && !capacityError ? (
+            (slots !== undefined ? (
+              slots && slots.length > 0 && !capacityError ? (
+                <CapacitySlotPicker
+                  slots={slots}
+                  selectedSlotId={selectedSlot?.id}
+                  onSelectSlot={setSelectedSlot}
+                  fulfillmentType={fulfillment}
+                  onFulfillmentTypeChange={setFulfillment}
+                />
+              ) : (
+                <section className="rounded-[12px] border border-stone-200/90 bg-white p-6 sm:p-8 shadow-2xs">
+                  <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-stone-900">
+                    <Clock aria-hidden="true" className="h-5 w-5 text-[#005141]" />
+                    {capacityTitle}
+                  </h2>
+                  <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-stone-600">
+                    {capacityMessage}
+                  </p>
+                </section>
+              )
+            ) : !authenticated ? (
+              <section className="rounded-[12px] border border-emerald-200/90 bg-emerald-50/50 p-6 sm:p-8 shadow-2xs text-center space-y-3">
+                <h3 className="font-semibold text-stone-900">Inicia sesión para seleccionar horario</h3>
+                <p className="text-sm text-stone-600 max-w-md mx-auto">
+                  Para garantizar la disponibilidad de tu pedido y reservar tu turno de preparación, necesitas acceder con tu cuenta de cliente.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href={`/login?redirect=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + '#entrega' : '')}`}
+                    className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-[#005141] hover:bg-[#00382d] text-white font-bold text-sm shadow-xs transition-colors"
+                  >
+                    Iniciar sesión
+                  </a>
+                </div>
+              </section>
+            ) : (
               <CapacitySlotPicker
-                slots={slots}
-                selectedSlotId={selectedSlot?.id}
+                slots={effectiveSlots ?? []}
+                selectedSlotId={selectedSlot ? selectedSlot.id : null}
                 onSelectSlot={setSelectedSlot}
                 fulfillmentType={fulfillment}
                 onFulfillmentTypeChange={setFulfillment}
+                selectedDate={selectedDate}
+                onDateChange={handleDateChange}
+                isLoading={isLoadingSlots}
+                error={slotsError}
+                onRetry={() => {
+                  if (store?.id) {
+                    setIsLoadingSlots(true);
+                    setSlotsError(null);
+                    capacityService
+                      .getCapacitySlots(store.id, selectedDate)
+                      .then((response) => {
+                        setFetchedSlots(mapBackendSlotsToPickerSlots(response.slots));
+                      })
+                      .catch((err: unknown) => {
+                        const errorObj = err as { code?: string; status?: number; message?: string };
+                        setSlotsError(errorObj?.message || 'No se pudieron consultar los horarios en este momento.');
+                        setFetchedSlots([]);
+                      })
+                      .finally(() => setIsLoadingSlots(false));
+                  }
+                }}
+                minDate={getBusinessTodayDate()}
               />
-            ) : (
-              <section className="rounded-[12px] border border-stone-200/90 bg-white p-6 sm:p-8 shadow-2xs">
-                <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-stone-900">
-                  <Clock aria-hidden="true" className="h-5 w-5 text-[#005141]" />
-                  {capacityTitle}
-                </h2>
-                <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-stone-600">
-                  {capacityMessage}
-                </p>
-              </section>
             ))}
 
           {/* Panel de Resumen y Botón de Inicio de Checkout */}
