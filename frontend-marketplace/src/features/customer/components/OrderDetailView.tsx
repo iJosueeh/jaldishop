@@ -1,19 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MapPin, Store, Receipt, AlertCircle, RefreshCw, Star, MessageSquareQuote } from 'lucide-react';
+import {
+  ArrowLeft,
+  Clock,
+  MapPin,
+  Store,
+  Receipt,
+  AlertCircle,
+  RefreshCw,
+  Star,
+  MessageSquareQuote,
+  XCircle,
+} from 'lucide-react';
 import { useCustomerOrderDetail } from '../hooks/useCustomerOrderDetail';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderTimelineStepper } from './OrderTimelineStepper';
 import { WhatsAppContactButton } from './WhatsAppContactButton';
+import { CancelOrderModal } from './CancelOrderModal';
 
 interface OrderDetailViewProps {
   orderNumber: string;
 }
 
 export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber }) => {
-  const { order, isLoading, error, reload } = useCustomerOrderDetail(orderNumber);
+  const {
+    order,
+    isLoading,
+    error,
+    reload,
+    cancelOrder,
+    isCancelling,
+    cancelError,
+    resetCancelError,
+  } = useCustomerOrderDetail(orderNumber);
+
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -105,12 +128,28 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
             </p>
           </div>
 
-          <WhatsAppContactButton
-            phone={order.store.whatsappNumber || order.store.contactPhone}
-            orderNumber={order.orderNumber}
-            storeName={order.store.name}
-            variant="primary"
-          />
+          <div className="flex flex-wrap items-center gap-2.5">
+            {order.status === 'CONFIRMED' && (
+              <button
+                type="button"
+                onClick={() => {
+                  resetCancelError();
+                  setIsCancelModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors cursor-pointer"
+              >
+                <XCircle className="w-4 h-4 text-rose-600" />
+                <span>Cancelar pedido</span>
+              </button>
+            )}
+
+            <WhatsAppContactButton
+              phone={order.store.whatsappNumber || order.store.contactPhone}
+              orderNumber={order.orderNumber}
+              storeName={order.store.name}
+              variant="primary"
+            />
+          </div>
         </div>
 
         {/* Store & Fulfillment banner */}
@@ -298,6 +337,24 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
             <span>Gestionar mis reseñas</span>
           </Link>
         </div>
+      )}
+
+      {/* Cancellation Modal */}
+      {order && (
+        <CancelOrderModal
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          orderNumber={order.orderNumber}
+          storeName={order.store.name}
+          totalAmount={order.totalAmount}
+          currency={order.currency}
+          onConfirm={async (reason) => {
+            await cancelOrder(reason);
+          }}
+          isCancelling={isCancelling}
+          error={cancelError}
+          onClearError={resetCancelError}
+        />
       )}
     </div>
   );
