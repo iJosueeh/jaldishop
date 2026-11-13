@@ -78,3 +78,52 @@ export interface DeliveryFormData {
   latitude?: number | null;
   longitude?: number | null;
 }
+
+export interface CreatePaymentPreferencePayload {
+  capacityReservationId: string;
+  fulfillmentType: CheckoutFulfillmentType;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  customerEmail?: string | null;
+  deliveryAddress?: string | null;
+  deliveryReference?: string | null;
+  deliveryLatitude?: number | null;
+  deliveryLongitude?: number | null;
+  storeId?: string;
+  storeName?: string;
+}
+
+export interface CreatePaymentPreferenceResponse {
+  paymentId: string;
+  preferenceId: string;
+  initPoint: string;
+  status: string;
+}
+
+export interface PendingPaymentCorrelation {
+  paymentId: string;
+  preferenceId: string;
+  capacityReservationId: string;
+  storeId?: string;
+  storeName?: string;
+  createdAt: number;
+  status: string;
+}
+
+export interface CustomerPaymentStatusResponse {
+  paymentId: string;
+  paymentStatus: 'PENDING' | 'APPROVED' | 'FAILED' | 'PROCESSING';
+  orderCreated: boolean;
+  orderNumber: string | null;
+  orderStatus: string | null;
+  hasIncidence: boolean;
+  incidenceCode: string | null;
+  incidenceMessage: string | null;
+  refundStatus: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+  approvedAt: string | null;
+}
+
+

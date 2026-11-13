@@ -148,6 +148,7 @@ export function CatalogContainer({
 
   // Modal & checkout state
   const [isSubmittingCheckout, setIsSubmittingCheckout] = useState(false);
+  const [isInitiatingPayment, setIsInitiatingPayment] = useState(false);
   const [checkoutResponse, setCheckoutResponse] = useState<CheckoutResponse | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -329,6 +330,83 @@ export function CatalogContainer({
       toast.error(msg);
     } finally {
       setIsSubmittingCheckout(false);
+    }
+  };
+
+  const handlePayWithMercadoPago = async () => {
+    if (!checkoutResponse?.reservationId) {
+      toast.error('No se encontró una reserva activa. Por favor selecciona tu horario nuevamente.');
+      return;
+    }
+
+    setIsInitiatingPayment(true);
+    try {
+      const res = await checkoutService.createPaymentPreference({
+        capacityReservationId: checkoutResponse.reservationId,
+        fulfillmentType: fulfillment,
+        customerName: deliveryData?.recipientName || checkoutResponse.customerInfo?.customerName || null,
+        customerPhone: deliveryData?.recipientPhone || checkoutResponse.customerInfo?.customerPhone || null,
+        customerEmail: checkoutResponse.customerInfo?.customerEmail || null,
+        deliveryAddress: deliveryData?.addressLine || checkoutResponse.customerInfo?.deliveryAddress || null,
+        deliveryReference: deliveryData?.reference || checkoutResponse.customerInfo?.deliveryReference || null,
+        deliveryLatitude: deliveryData?.latitude ?? null,
+        deliveryLongitude: deliveryData?.longitude ?? null,
+        storeId: store?.id,
+        storeName: store?.name || storeName,
+      });
+
+      toast.success('Redirigiendo a la pasarela segura de Mercado Pago...');
+      if (typeof window !== 'undefined') {
+        window.location.assign(res.initPoint);
+      }
+    } catch (err: unknown) {
+      const errorObj = err as { code?: string; status?: number; message?: string };
+      if (
+        errorObj?.status === 401 ||
+        errorObj?.code === 'SESSION_EXPIRED' ||
+        errorObj?.code === 'UNAUTHENTICATED'
+      ) {
+        toast.error('Tu sesión ha expirado. Inicia sesión para continuar con el pago.');
+        const targetUrl = window.location.pathname + '#entrega';
+        window.location.href = `/login?redirect=${encodeURIComponent(targetUrl)}`;
+        return;
+      }
+
+      if (
+        errorObj?.code === 'RESERVATION_EXPIRED' ||
+        errorObj?.code === 'INVENTORY_RESERVATION_EXPIRED'
+      ) {
+        toast.error(errorObj.message || 'Tu reserva de horario ha vencido. Por favor selecciona una nueva franja.');
+        setIsPaymentModalOpen(false);
+        setCheckoutResponse(null);
+        return;
+      }
+
+      if (errorObj?.code === 'PAYMENT_IN_PROGRESS') {
+        toast.error(
+          errorObj.message ||
+            'Existe una operación de pago en curso para esta reserva. Por favor verifica su estado antes de reintentar.'
+        );
+        return;
+      }
+
+      if (errorObj?.status === 409) {
+        toast.error(
+          errorObj.message ||
+            'Existe un conflicto con la reserva actual. Por favor verifica el estado de tu pedido.'
+        );
+        return;
+      }
+
+      if (errorObj?.status === 429) {
+        toast.error('Demasiadas solicitudes de pago. Por favor espera un momento antes de intentar nuevamente.');
+        return;
+      }
+
+      const msg = err instanceof Error ? err.message : 'No se pudo iniciar el pago con Mercado Pago.';
+      toast.error(msg);
+    } finally {
+      setIsInitiatingPayment(false);
     }
   };
 
@@ -562,6 +640,8 @@ export function CatalogContainer({
       <PaymentHubModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+        onPayWithMercadoPago={handlePayWithMercadoPago}
+        isPaying={isInitiatingPayment}
         total={checkoutResponse?.pricing?.totalAmount ?? totalAmount}
         storeName={store?.name || storeName}
         slotTime={selectedSlot?.timeRange}
@@ -587,6 +667,7 @@ export function CatalogContainer({
         storeName={store?.name || storeName}
         storePhone={store?.whatsappNumber || store?.phone || undefined}
         deliveryFee={deliveryFee}
+        reservationId={checkoutResponse?.reservationId}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -32,6 +32,7 @@ export interface WhatsAppBridgeModalProps {
   storePhone?: string;
   paymentMethod?: PaymentMethod;
   hasReceipt?: boolean;
+  reservationId?: string | null;
   onTrackOrder?: (orderId: string) => void;
 }
 
@@ -46,16 +47,15 @@ export function WhatsAppBridgeModal({
   storePhone = '51987654321',
   paymentMethod = 'yape',
   hasReceipt = true,
+  reservationId,
   onTrackOrder,
 }: WhatsAppBridgeModalProps) {
   const [copied, setCopied] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
-  const [orderId, setOrderId] = useState('JALDI-1048');
 
-  // Generate randomized order ID on client mount to prevent SSR hydration mismatch
-  useEffect(() => {
-    setOrderId(`JALDI-${Math.floor(1000 + Math.random() * 9000)}`);
-  }, []);
+  const referenceCode = reservationId
+    ? `RES-${reservationId.slice(0, 8).toUpperCase()}`
+    : 'CONSULTA';
 
   const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const actualDeliveryFee = fulfillmentType === 'PICKUP' ? 0 : (subtotal > 0 ? deliveryFee : 0);
@@ -74,17 +74,17 @@ export function WhatsAppBridgeModal({
     .map((item) => `• ${item.quantity}x ${item.product.name} (${formatCurrency(item.product.price * item.quantity)})${item.notes ? ` [Nota: ${item.notes}]` : ''}`)
     .join('\n');
 
-  const formattedWhatsAppMessage = `👋 ¡Hola ${storeName}! Acabo de generar mi pedido por JaldiShop.
+  const formattedWhatsAppMessage = `👋 ¡Hola ${storeName}! Acabo de coordinar mi pedido por JaldiShop.
 
-📦 *PEDIDO #${orderId}*
+📦 *SOLICITUD / ${referenceCode}*
 ${itemsText}
 
 ⏰ *Franja Horaria:* ${slotTime} (Cupo apartado)
 🛵 *Modalidad:* ${fulfillmentType === 'DELIVERY' ? 'Delivery a Domicilio' : 'Retiro en Tienda'}
-💰 *Total a Pagar:* ${formatCurrency(total)}
-🧾 *Pago:* ${paymentMethodLabel} ${hasReceipt ? '✅ Comprobante adjunto' : '⏳ Por transferir'}
+💰 *Total:* ${formatCurrency(total)}
+🧾 *Pago:* ${paymentMethodLabel} ${hasReceipt ? '✅ Comprobante adjunto' : '⏳ Por coordinar'}
 
-Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas gracias!`;
+Por favor confírmenme la recepción para iniciar la preparación. ¡Muchas gracias!`;
 
   const handleCopyMessage = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -109,8 +109,8 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
     }
 
     setOrderSent(true);
-    toast.success('¡Pedido enviado al WhatsApp del comercio!', {
-      description: `Código #${orderId}. Franja ${slotTime} protegida contra sobreventa.`,
+    toast.success('¡Mensaje enviado al WhatsApp del comercio!', {
+      description: `Referencia: ${referenceCode}. Franja ${slotTime} protegida contra sobreventa.`,
     });
 
     const encoded = encodeURIComponent(formattedWhatsAppMessage);
@@ -153,7 +153,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                   </h3>
                   <div className="text-[11px] text-emerald-200 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>WhatsApp Order Bridge • En línea</span>
+                    <span>Solicitud de Coordinación • En línea</span>
                   </div>
                 </div>
               </div>
@@ -172,10 +172,10 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
             <div className="bg-[#e5ddd5]/60 px-5 py-2.5 border-b border-stone-200 flex items-center justify-between text-xs">
               <span className="text-stone-600 font-bold flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#ea580c]" />
-                Pedido estructurado listo para enviar
+                Solicitud estructurada lista para enviar
               </span>
               <span className="font-mono font-black text-[#005141] bg-white px-2 py-0.5 rounded-md shadow-2xs border border-stone-200">
-                #{orderId}
+                {referenceCode}
               </span>
             </div>
 
@@ -211,7 +211,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
 
                 <div className="p-3 bg-white rounded-2xl border border-stone-200 shadow-2xs space-y-1">
                   <div className="text-[10px] text-stone-500 font-bold uppercase flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-[#005141]" /> Total Confirmado
+                    <ShieldCheck className="w-3 h-3 text-[#005141]" /> Total Estimado
                   </div>
                   <div className="font-black text-[#005141] font-mono">{formatCurrency(total)}</div>
                 </div>
@@ -226,10 +226,10 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                 >
                   <div className="text-xs font-black text-[#005141] flex items-center justify-center gap-1.5">
                     <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
-                    ¡Pedido enviado al comercio exitosamente!
+                    ¡Solicitud enviada al comercio por WhatsApp!
                   </div>
                   <p className="text-[11px] text-stone-600">
-                    El negocio preparará tu orden según la franja horaria pactada.
+                    El negocio coordinará contigo y confirmará tu orden según la disponibilidad pactada.
                   </p>
                 </motion.div>
               )}
@@ -254,7 +254,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                 className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs sm:text-sm bg-[#25d366] hover:bg-[#128c7e] text-white border-0 shadow-md shadow-emerald-500/25 cursor-pointer flex items-center justify-center gap-2 active:scale-95 transition-all"
               >
                 <Send className="w-4 h-4" />
-                <span>Abrir WhatsApp y Enviar Pedido</span>
+                <span>Abrir WhatsApp y Enviar Solicitud</span>
                 <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-80" />
               </Button>
             </div>
@@ -266,7 +266,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                   type="button"
                   onClick={() => {
                     onClose();
-                    onTrackOrder(orderId);
+                    onTrackOrder(referenceCode);
                   }}
                   className="text-xs font-bold text-[#005141] hover:text-[#00382d] inline-flex items-center gap-1 cursor-pointer"
                 >

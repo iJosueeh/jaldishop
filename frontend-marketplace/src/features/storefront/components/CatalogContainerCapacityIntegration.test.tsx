@@ -65,6 +65,7 @@ vi.mock('../services/capacityService', () => ({
 vi.mock('@/features/checkout/services/checkoutService', () => ({
   checkoutService: {
     initiateCheckout: vi.fn(),
+    createPaymentPreference: vi.fn(),
   },
 }));
 
