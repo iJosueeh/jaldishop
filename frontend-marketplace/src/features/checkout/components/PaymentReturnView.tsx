@@ -69,6 +69,83 @@ export function isValidCorrelation(obj: unknown): obj is PendingPaymentCorrelati
 }
 
 /**
+ * Conditionally clears pending payment correlation only if the stored paymentId matches the confirmed payment.
+ * If storage contains a newer or distinct correlation, it is safely preserved.
+ */
+export function clearMatchingPendingPayment(confirmedPaymentId: string): boolean {
+  try {
+    const stored = getPendingPayment();
+    if (!isValidCorrelation(stored)) {
+      return false;
+    }
+    if (stored.paymentId.trim().toLowerCase() === confirmedPaymentId.trim().toLowerCase()) {
+      clearPendingPayment();
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export interface RefundStatusInfo {
+  label: string;
+  badgeVariant: 'warning' | 'jade' | 'success' | 'danger' | 'default';
+  description: string;
+  showAmount: boolean;
+}
+
+/**
+ * Maps the backend refundStatus strictly without assuming or promising actions not backed by official data.
+ */
+export function getRefundStatusInfo(refundStatus: string | null | undefined): RefundStatusInfo {
+  switch (refundStatus) {
+    case 'PENDING':
+      return {
+        label: 'Devolución Pendiente',
+        badgeVariant: 'warning',
+        description: 'La devolución se encuentra registrada y pendiente de procesamiento por la pasarela de pagos.',
+        showAmount: true,
+      };
+    case 'PROCESSING':
+      return {
+        label: 'Devolución en Proceso',
+        badgeVariant: 'warning',
+        description: 'La devolución está en proceso de gestión con la entidad de pago.',
+        showAmount: true,
+      };
+    case 'COMPLETED':
+      return {
+        label: 'Devolución Procesada',
+        badgeVariant: 'success',
+        description: 'La devolución fue procesada en la pasarela. La acreditación efectiva dependerá de los tiempos y políticas de tu entidad bancaria o medio de pago.',
+        showAmount: true,
+      };
+    case 'FAILED':
+      return {
+        label: 'Devolución No Completada',
+        badgeVariant: 'danger',
+        description: 'La devolución no pudo completarse de forma automática y requiere revisión manual por nuestro equipo de soporte.',
+        showAmount: true,
+      };
+    case 'NOT_REQUIRED':
+      return {
+        label: 'No Aplica Devolución',
+        badgeVariant: 'default',
+        description: 'Para esta incidencia no se requirió la emisión de un reembolso monetario.',
+        showAmount: false,
+      };
+    default:
+      return {
+        label: 'Estado No Confirmado',
+        badgeVariant: 'default',
+        description: 'No se dispone de una confirmación oficial del estado de devolución en este momento. Si tienes consultas sobre tu cobro, comunícate con nuestro centro de ayuda.',
+        showAmount: false,
+      };
+  }
+}
+
+/**
  * Resolves the paymentId candidate from sessionStorage and searchParams.
  * Returns either:
  * - { status: 'RESOLVED', paymentId: string }
@@ -118,7 +195,7 @@ export function resolveCorrelationId(
   return { status: 'ERROR', code: 'MISSING_CORRELATION' };
 }
 
-export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
+export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPath = 'success' }) => {
   const searchParams = useSearchParams();
 
   const [state, setState] = useState<PaymentResolutionState>('RESOLVING_CORRELATION');
@@ -160,8 +237,8 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
       // Rule 2: Order confirmed and persisted
       if (res.orderCreated && res.orderNumber) {
         setState('ORDER_CONFIRMED');
-        // Safely clean storage ONLY on confirmed order
-        clearPendingPayment();
+        // Safely clean storage ONLY if stored correlation matches this confirmed payment
+        clearMatchingPendingPayment(res.paymentId || paymentId);
         return;
       }
 
@@ -242,11 +319,11 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
         );
       } else if (resolution.code === 'ATTEMPT_ID_ONLY') {
         setErrorMessage(
-          'No fue posible recuperar la sesión de pago debido a que no se cuenta con el identificador del pedido. Puedes revisar tu historial de compras.'
+          'No fue posible recuperar la sesión de pago debido a que el retorno solo contiene una referencia de intento y no la correlación activa de la compra. Si el pedido no llegó a crearse, no figurará en tu historial.'
         );
       } else {
         setErrorMessage(
-          'No se encontró una correlación de pago válida para verificar. Si completaste una compra, consulta tu historial en Mi JaldiShop.'
+          'No se encontró una correlación de pago válida para verificar en esta sesión. Si no se generó un pedido confirmado, este no figurará en tu historial.'
         );
       }
     }
@@ -350,69 +427,62 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
         )}
 
         {/* State: Commercial Incidence */}
-        {state === 'INCIDENCE' && statusData && (
-          <div className="space-y-6" data-testid="state-incidence">
-            <div className="inline-flex p-4 rounded-full bg-amber-50 text-amber-600 mb-2">
-              <AlertCircle className="w-12 h-12" />
-            </div>
-            <div className="space-y-2">
-              <Badge variant="warning" size="lg">
-                Revisión Requerida
-              </Badge>
-              <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
-                Incidencia en la confirmación
-              </h1>
-              <p className="text-sm text-[#57534e] max-w-md mx-auto">
-                {statusData.incidenceMessage ||
-                  'Tu pago fue recibido, pero ocurrió una eventualidad al reservar tus productos o cupo de entrega.'}
-              </p>
-            </div>
+        {state === 'INCIDENCE' && statusData && (() => {
+          const refundInfo = getRefundStatusInfo(statusData.refundStatus);
+          return (
+            <div className="space-y-6" data-testid="state-incidence">
+              <div className="inline-flex p-4 rounded-full bg-amber-50 text-amber-600 mb-2">
+                <AlertCircle className="w-12 h-12" />
+              </div>
+              <div className="space-y-2">
+                <Badge variant="warning" size="lg">
+                  Revisión Requerida
+                </Badge>
+                <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
+                  Incidencia en la confirmación
+                </h1>
+                <p className="text-sm text-[#57534e] max-w-md mx-auto">
+                  {statusData.incidenceMessage ||
+                    'Tu pago fue recibido, pero ocurrió una eventualidad al reservar tus productos o cupo de entrega.'}
+                </p>
+              </div>
 
-            {/* Refund Status Details */}
-            <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 text-left space-y-2.5">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-[#57534e] font-medium">Estado de la devolución:</span>
-                {statusData.refundStatus === 'COMPLETED' ? (
-                  <Badge variant="success" size="sm">
-                    Devolución Completada
+              {/* Refund Status Details */}
+              <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 text-left space-y-2.5">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-[#57534e] font-medium">Estado de la devolución:</span>
+                  <Badge variant={refundInfo.badgeVariant} size="sm">
+                    {refundInfo.label}
                   </Badge>
-                ) : statusData.refundStatus === 'PENDING' || statusData.refundStatus === 'PROCESSING' ? (
-                  <Badge variant="warning" size="sm">
-                    Devolución en Trámite
-                  </Badge>
-                ) : (
-                  <Badge variant="default" size="sm">
-                    En Evaluación
-                  </Badge>
+                </div>
+                <p className="text-xs text-[#78716c]">
+                  {refundInfo.description}
+                </p>
+                {refundInfo.showAmount && (
+                  <div className="flex justify-between items-center text-xs text-[#57534e] pt-1 border-t border-amber-200/60">
+                    <span>Monto de la transacción:</span>
+                    <span className="font-bold text-[#1c1917]">
+                      {statusData.currency} {Number(statusData.amount).toFixed(2)}
+                    </span>
+                  </div>
                 )}
               </div>
-              <p className="text-xs text-[#78716c]">
-                {statusData.refundStatus === 'COMPLETED'
-                  ? 'El reembolso ha sido emitido hacia el medio de pago original de Mercado Pago.'
-                  : 'Nuestro sistema ha registrado la devolución automática y se acreditará según los tiempos de tu entidad financiera.'}
-              </p>
-              <div className="flex justify-between items-center text-xs text-[#57534e] pt-1 border-t border-amber-200/60">
-                <span>Monto a reintegrar:</span>
-                <span className="font-bold text-[#1c1917]">
-                  {statusData.currency} {Number(statusData.amount).toFixed(2)}
-                </span>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/ayuda" className="w-full sm:w-auto">
+                  <Button variant="primary" size="lg" className="w-full" rightIcon={<ExternalLink className="w-3.5 h-3.5" />}>
+                    Centro de Ayuda
+                  </Button>
+                </Link>
+                <Link href="/" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full">
+                    Volver a la tienda
+                  </Button>
+                </Link>
               </div>
             </div>
-
-            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/mi-jaldishop/pedidos" className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="w-full">
-                  Consultar mis pedidos
-                </Button>
-              </Link>
-              <Link href="/ayuda" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full" rightIcon={<ExternalLink className="w-3.5 h-3.5" />}>
-                  Centro de Ayuda
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* State: Approved Pending Order */}
         {state === 'APPROVED_PENDING_ORDER' && statusData && (
@@ -425,10 +495,10 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
                 Pago Recibido
               </Badge>
               <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
-                Pago aprobado comercialmente en proceso
+                Pago aprobado en proceso de confirmación
               </h1>
               <p className="text-sm text-[#57534e] max-w-md mx-auto">
-                Tu pago fue aprobado por Mercado Pago. La confirmación del pedido está tomando unos segundos adicionales en sincronizarse.
+                Tu pago fue aprobado por Mercado Pago. La emisión del pedido está en proceso de sincronización con la tienda.
               </p>
             </div>
 
@@ -440,7 +510,7 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
                 </span>
               </div>
               <p className="text-xs text-[#78716c]">
-                Puedes actualizar la consulta para verificar si tu pedido ya fue emitido.
+                El pedido aún no ha sido emitido. No figurará en tu historial de compras hasta que el sistema complete la confirmación oficial. Puedes reintentar la verificación aquí.
               </p>
             </div>
 
@@ -455,9 +525,9 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
               >
                 Actualizar estado
               </Button>
-              <Link href="/mi-jaldishop/pedidos" className="w-full sm:w-auto">
+              <Link href="/ayuda" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="w-full">
-                  Revisar mis pedidos
+                  Centro de Ayuda
                 </Button>
               </Link>
             </div>
@@ -561,12 +631,12 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
                 Tu sesión ha expirado
               </h1>
               <p className="text-sm text-[#57534e] max-w-md mx-auto">
-                Por motivos de seguridad y protección de datos, inicia sesión nuevamente para consultar el estado de tu pago.
+                Por motivos de seguridad, inicia sesión nuevamente para consultar el estado oficial de tu pago. Conservamos los datos de tu compra en este dispositivo para reanudar la verificación al volver.
               </p>
             </div>
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/login" className="w-full sm:w-auto">
+              <Link href={`/login?redirect=${encodeURIComponent(expectedPath ? `/checkout/${expectedPath}` : '/checkout/success')}`} className="w-full sm:w-auto">
                 <Button variant="primary" size="lg" className="w-full">
                   Iniciar sesión
                 </Button>
@@ -633,9 +703,9 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = () => {
             </div>
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/mi-jaldishop/pedidos" className="w-full sm:w-auto">
+              <Link href="/ayuda" className="w-full sm:w-auto">
                 <Button variant="primary" size="lg" className="w-full">
-                  Revisar mis pedidos
+                  Centro de Ayuda
                 </Button>
               </Link>
               <Link href="/" className="w-full sm:w-auto">
