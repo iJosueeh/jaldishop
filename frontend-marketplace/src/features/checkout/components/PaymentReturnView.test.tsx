@@ -196,14 +196,9 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
       status: 'PENDING',
     });
 
-    // Verification happens for VALID_PAYMENT_ID from query parameter
-    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
-
-    // Mock resolveCorrelationId to resolve the external reference for this test
-    vi.spyOn(checkoutService, 'pollPaymentStatus').mockResolvedValue(baseStatusResponse);
-
-    // Call helper directly to prove preservation
-    clearMatchingPendingPayment(VALID_PAYMENT_ID);
+    // Directly execute clearMatchingPendingPayment for another paymentId to prove preservation
+    const result = clearMatchingPendingPayment(VALID_PAYMENT_ID);
+    expect(result).toBe(false);
 
     // Storage must still contain the newer correlation
     const preserved = sessionStorage.getItem('jaldishop_pending_payment');
@@ -211,8 +206,8 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(JSON.parse(preserved!).paymentId).toBe(OTHER_PAYMENT_ID);
   });
 
-  // Scenario 3: Pago pendiente: no se limpia
-  it('3. Pago pendiente: no se limpia', async () => {
+  // Scenario 3: Pago pendiente: no se limpia y permite reconsulta manual
+  it('3. Pago pendiente: no se limpia y permite reconsulta manual', async () => {
     savePendingPayment({
       paymentId: VALID_PAYMENT_ID,
       preferenceId: 'pref-100',
@@ -400,7 +395,7 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(screen.queryByText(/monto de la transacción:/i)).toBeNull();
   });
 
-  // Scenario 10: Sesión expirada y posterior recuperación
+  // Scenario 10: Sesión expirada (401)
   it('10. Sesión expirada conserva la correlación en storage y enlaza a login con redirect', async () => {
     savePendingPayment({
       paymentId: VALID_PAYMENT_ID,
@@ -428,7 +423,7 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(loginLink).toHaveAttribute('href', '/login?redirect=%2Fcheckout%2Fsuccess');
   });
 
-  // Scenario 11: Retorno repetido
+  // Scenario 11: Retorno repetido (idempotencia en UI)
   it('11. Retorno repetido a la misma URL resuelve orden confirmada de forma idempotente', async () => {
     mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
 
@@ -475,8 +470,40 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(pollSpy).not.toHaveBeenCalled();
   });
 
-  // Complementary Scenario: Pago aprobado sin orden creada
-  it('Handles approved payment without order: informs customer without promising order in history', async () => {
+  // Scenario 13: Respuesta cruzada entre pagos (res.paymentId !== paymentId)
+  it('13. Respuesta cruzada entre pagos: detiene resolución, no muestra éxito y no limpia sessionStorage', async () => {
+    savePendingPayment({
+      paymentId: VALID_PAYMENT_ID,
+      preferenceId: 'pref-100',
+      capacityReservationId: 'cap-100',
+      createdAt: Date.now(),
+      status: 'PENDING',
+    });
+
+    // Backend responds with an order confirmation, but for a completely different paymentId
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockResolvedValue({
+      ...baseStatusResponse,
+      paymentId: OTHER_PAYMENT_ID, // Mismatched payment ID returned
+      orderCreated: true,
+      orderNumber: 'ORD-FOREIGN-999',
+    });
+
+    render(<PaymentReturnView expectedPath="success" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-correlation-error')).toBeInTheDocument();
+    });
+
+    // Verify error state is shown and NOT confirmed order
+    expect(screen.queryByTestId('state-order-confirmed')).toBeNull();
+    expect(screen.getByText(/se detectó una respuesta inconsistente en el identificador de pago/i)).toBeInTheDocument();
+
+    // Verify sessionStorage was NOT cleared
+    expect(sessionStorage.getItem('jaldishop_pending_payment')).not.toBeNull();
+  });
+
+  // Scenario 14: Pago APPROVED sin pedido
+  it('14. Pago APPROVED sin pedido: informa al cliente sin prometer orden en historial', async () => {
     savePendingPayment({
       paymentId: VALID_PAYMENT_ID,
       preferenceId: 'pref-100',
@@ -504,8 +531,8 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(screen.queryByRole('link', { name: /revisar mis pedidos/i })).toBeNull();
   });
 
-  // Complementary Scenario: Pago rechazado
-  it('Handles rejected/failed payment: displays failure and link to store', async () => {
+  // Scenario 15: Pago FAILED sin generación de otra preferencia
+  it('15. Pago FAILED sin generación de otra preferencia: muestra error y enlace al comercio', async () => {
     savePendingPayment({
       paymentId: VALID_PAYMENT_ID,
       preferenceId: 'pref-100',
@@ -531,8 +558,44 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     expect(screen.getByRole('link', { name: /volver al comercio/i })).toHaveAttribute('href', '/');
   });
 
-  // Complementary Scenario: 403 Forbidden
-  it('Handles 403 Forbidden safely without disclosing technical details', async () => {
+  // Scenario 16: Retorno a success con backend PENDING
+  it('16. Retorno nominal /success pero con pago PENDING en backend: ignora path nominal y muestra pendiente', async () => {
+    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
+
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockResolvedValue({
+      ...baseStatusResponse,
+      paymentStatus: 'PENDING',
+      orderCreated: false,
+      orderNumber: null,
+    });
+
+    render(<PaymentReturnView expectedPath="success" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-pending')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('state-order-confirmed')).toBeNull();
+  });
+
+  // Scenario 17: Retorno a failure con pedido confirmado
+  it('17. Retorno nominal /failure pero con orden confirmada en backend: ignora path nominal y muestra confirmado', async () => {
+    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
+
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockResolvedValue(baseStatusResponse);
+
+    render(<PaymentReturnView expectedPath="failure" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-order-confirmed')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('#ORD-2026-99999')).toBeInTheDocument();
+    expect(screen.queryByTestId('state-failed')).toBeNull();
+  });
+
+  // Scenario 18: Error 403 Forbidden
+  it('18. Error 403 Forbidden: maneja acceso no autorizado sin revelar detalles técnicos', async () => {
     mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
 
     vi.spyOn(checkoutService, 'pollPaymentStatus').mockRejectedValue(
@@ -546,5 +609,78 @@ describe('PaymentReturnView — F.1B.3 Return and Recovery Logic', () => {
     });
 
     expect(screen.getByText(/no tienes permisos para ver este pago/i)).toBeInTheDocument();
+  });
+
+  // Scenario 19: Error 404 Not Found
+  it('19. Error 404 Not Found: maneja pago inexistente informando error de correlación', async () => {
+    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
+
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockRejectedValue(
+      new PaymentServiceError('No encontrado', 'NOT_FOUND', 404)
+    );
+
+    render(<PaymentReturnView />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-correlation-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/no encontramos un registro de pago asociado a esta sesión/i)).toBeInTheDocument();
+  });
+
+  // Scenario 20: Error de red / timeout sin fabricar estado FAILED
+  it('20. Error de red / timeout: muestra error desconocido sin fabricar estado FAILED', async () => {
+    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
+
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockRejectedValue(
+      new PaymentServiceError('Timeout de verificación', 'POLL_TIMEOUT', 408)
+    );
+
+    render(<PaymentReturnView />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-unknown-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/no pudimos comprobar el estado de inmediato/i)).toBeInTheDocument();
+    expect(screen.queryByTestId('state-failed')).toBeNull();
+  });
+
+  // Scenario 21: external_reference de tipo Orders API (pa1_attemptId) sin sessionStorage
+  it('21. Rechaza de forma segura pa1_attemptId sin correlación local', async () => {
+    mockSearchParams.set('external_reference', `pa1_${OTHER_PAYMENT_ID}`);
+
+    const pollSpy = vi.spyOn(checkoutService, 'pollPaymentStatus');
+
+    render(<PaymentReturnView />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('state-correlation-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/no fue posible recuperar la sesión de pago/i)).toBeInTheDocument();
+    expect(pollSpy).not.toHaveBeenCalled();
+  });
+
+  // Scenario 22: Desmontaje del componente aborta el controlador de polling
+  it('22. Desmontaje del componente cancela limpiamente la llamada en curso', async () => {
+    mockSearchParams.set('external_reference', VALID_PAYMENT_ID);
+
+    let capturedSignal: AbortSignal | undefined;
+    vi.spyOn(checkoutService, 'pollPaymentStatus').mockImplementation(
+      (_id, options) => {
+        capturedSignal = options?.signal;
+        return new Promise(() => {}); // Never resolves
+      }
+    );
+
+    const { unmount } = render(<PaymentReturnView />);
+
+    expect(screen.getByTestId('state-polling')).toBeInTheDocument();
+    expect(capturedSignal?.aborted).toBe(false);
+
+    unmount();
+
+    expect(capturedSignal?.aborted).toBe(true);
   });
 });

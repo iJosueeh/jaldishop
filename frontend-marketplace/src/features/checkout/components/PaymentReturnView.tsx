@@ -225,6 +225,18 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
         signal: controller.signal,
       });
 
+      // Strict Payment ID Matching: Verify backend response corresponds strictly to the queried paymentId
+      if (
+        !res.paymentId ||
+        res.paymentId.trim().toLowerCase() !== paymentId.trim().toLowerCase()
+      ) {
+        setState('CORRELATION_ERROR');
+        setErrorMessage(
+          'Se detectó una respuesta inconsistente en el identificador de pago. La verificación fue detenida por seguridad.'
+        );
+        return;
+      }
+
       setStatusData(res);
 
       // Deterministic State Machine evaluation
