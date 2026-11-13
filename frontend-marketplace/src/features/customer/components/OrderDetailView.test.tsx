@@ -237,6 +237,61 @@ describe('OrderDetailView Component', () => {
     ).toBeInTheDocument();
   });
 
+  it('resultado incierto tras timeout: shows connection warning inviting to refresh without claiming definitive success or closing modal', async () => {
+    const uncertainMsg =
+      'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.';
+    mockCancelOrder.mockRejectedValue(new Error(uncertainMsg));
+
+    vi.mocked(useCustomerOrderDetail).mockReturnValue({
+      order: baseMockOrder,
+      isLoading: false,
+      isFetching: false,
+      error: null,
+      reload: mockReload,
+      cancelOrder: mockCancelOrder,
+      isCancelling: false,
+      cancelError: uncertainMsg,
+      resetCancelError: mockResetCancelError,
+    });
+
+    render(<OrderDetailView orderNumber="ORD-20261113-0001" />);
+
+    // Open modal
+    fireEvent.click(screen.getByRole('button', { name: /cancelar pedido/i }));
+
+    // Modal renders with uncertain banner
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(uncertainMsg)).toBeInTheDocument();
+
+    // Order status on page remains CONFIRMED (does not invent success)
+    expect(screen.getAllByText('Confirmado').length).toBeGreaterThan(0);
+  });
+
+  it('respuesta inconsistente: modal displays error and does not treat cancellation as successful', async () => {
+    const inconsistentMsg =
+      'La respuesta de cancelación fue inconsistente. El pedido no figura como cancelado. Por favor, actualiza la página para revisar el estado.';
+    mockCancelOrder.mockRejectedValue(new Error(inconsistentMsg));
+
+    vi.mocked(useCustomerOrderDetail).mockReturnValue({
+      order: baseMockOrder,
+      isLoading: false,
+      isFetching: false,
+      error: null,
+      reload: mockReload,
+      cancelOrder: mockCancelOrder,
+      isCancelling: false,
+      cancelError: inconsistentMsg,
+      resetCancelError: mockResetCancelError,
+    });
+
+    render(<OrderDetailView orderNumber="ORD-20261113-0001" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /cancelar pedido/i }));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(inconsistentMsg)).toBeInTheDocument();
+  });
+
   it('error de red o pedido ajeno: renders error state with retry and navigation', () => {
     vi.mocked(useCustomerOrderDetail).mockReturnValue({
       order: null,

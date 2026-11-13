@@ -21,11 +21,19 @@ export function useCustomerOrderDetail(orderNumber: string) {
   const cancelMutation = useMutation({
     mutationFn: (reason?: string) => customerOrderService.cancelOrder(orderNumber, reason),
     onSuccess: (updatedOrder: CustomerOrderDetail) => {
-      // Invalidate customer orders list so the tab counters and cards update
-      queryClient.invalidateQueries({ queryKey: CUSTOMER_ORDERS_QUERY_KEY });
-      // Update cache and refetch current order detail
-      queryClient.setQueryData(['customer-order', orderNumber], updatedOrder);
-      queryClient.invalidateQueries({ queryKey: ['customer-order', orderNumber] });
+      // Validate that returned order strictly matches orderNumber and status is CANCELLED
+      if (
+        updatedOrder &&
+        typeof updatedOrder.orderNumber === 'string' &&
+        updatedOrder.orderNumber.trim().toLowerCase() === orderNumber.trim().toLowerCase() &&
+        updatedOrder.status === 'CANCELLED'
+      ) {
+        // Invalidate customer orders list so the tab counters and cards update
+        queryClient.invalidateQueries({ queryKey: CUSTOMER_ORDERS_QUERY_KEY });
+        // Update cache and refetch current order detail
+        queryClient.setQueryData(['customer-order', orderNumber], updatedOrder);
+        queryClient.invalidateQueries({ queryKey: ['customer-order', orderNumber] });
+      }
     },
   });
 

@@ -66,7 +66,7 @@ describe('useCustomerOrderDetail Hook', () => {
     });
   });
 
-  it('executes cancelOrder mutation, updates cache and invalidates orders list', async () => {
+  it('executes cancelOrder mutation, updates cache and invalidates orders list on verified CANCELLED', async () => {
     const cancelledOrder: CustomerOrderDetail = {
       ...mockOrder,
       status: 'CANCELLED',
@@ -100,6 +100,31 @@ describe('useCustomerOrderDetail Hook', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['customer-order', 'ORD-100'] });
   });
 
+  it('does NOT update cache if mutation response is inconsistent or not CANCELLED', async () => {
+    vi.mocked(customerOrderService.getOrderDetail).mockResolvedValue(mockOrder);
+    // Simulated inconsistent DTO bypassing service check
+    const inconsistentOrder: CustomerOrderDetail = {
+      ...mockOrder,
+      orderNumber: 'ORD-DIFFERENT',
+      status: 'CONFIRMED',
+    };
+    vi.mocked(customerOrderService.cancelOrder).mockResolvedValue(inconsistentOrder);
+
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useCustomerOrderDetail('ORD-100'), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.order).toEqual(mockOrder);
+    });
+
+    await result.current.cancelOrder();
+
+    // Cache should remain original mockOrder, not inconsistentOrder
+    expect(queryClient.getQueryData(['customer-order', 'ORD-100'])).toEqual(mockOrder);
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: CUSTOMER_ORDERS_QUERY_KEY });
+  });
+
   it('handles cancelOrder mutation failure and captures cancelError', async () => {
     vi.mocked(customerOrderService.getOrderDetail).mockResolvedValue(mockOrder);
     vi.mocked(customerOrderService.cancelOrder).mockRejectedValue(
@@ -126,6 +151,29 @@ describe('useCustomerOrderDetail Hook', () => {
     result.current.resetCancelError();
     await waitFor(() => {
       expect(result.current.cancelError).toBeNull();
+    });
+  });
+
+  it('handles timeout uncertain error and preserves error message for UI', async () => {
+    vi.mocked(customerOrderService.getOrderDetail).mockResolvedValue(mockOrder);
+    vi.mocked(customerOrderService.cancelOrder).mockRejectedValue(
+      new Error(
+        'No pudimos confirmar la cancelación debido a un problema de conexión. El pedido continúa en estado confirmado. Por favor, actualiza la vista antes de volver a intentarlo.'
+      )
+    );
+
+    const { result } = renderHook(() => useCustomerOrderDetail('ORD-100'), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.order).toEqual(mockOrder);
+    });
+
+    await expect(result.current.cancelOrder()).rejects.toThrow(
+      'No pudimos confirmar la cancelación debido a un problema de conexión'
+    );
+
+    await waitFor(() => {
+      expect(result.current.cancelError).toContain('El pedido continúa en estado confirmado');
     });
   });
 });
