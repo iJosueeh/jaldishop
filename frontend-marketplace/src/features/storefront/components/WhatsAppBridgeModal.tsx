@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -32,6 +32,7 @@ export interface WhatsAppBridgeModalProps {
   storePhone?: string;
   paymentMethod?: PaymentMethod;
   hasReceipt?: boolean;
+  reservationId?: string | null;
   onTrackOrder?: (orderId: string) => void;
 }
 
@@ -46,16 +47,15 @@ export function WhatsAppBridgeModal({
   storePhone = '51987654321',
   paymentMethod = 'yape',
   hasReceipt = true,
+  reservationId,
   onTrackOrder,
 }: WhatsAppBridgeModalProps) {
   const [copied, setCopied] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
-  const [orderId, setOrderId] = useState('JALDI-1048');
 
-  // Generate randomized order ID on client mount to prevent SSR hydration mismatch
-  useEffect(() => {
-    setOrderId(`JALDI-${Math.floor(1000 + Math.random() * 9000)}`);
-  }, []);
+  const referenceCode = reservationId
+    ? `RES-${reservationId.slice(0, 8).toUpperCase()}`
+    : 'CONSULTA';
 
   const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const actualDeliveryFee = fulfillmentType === 'PICKUP' ? 0 : (subtotal > 0 ? deliveryFee : 0);
@@ -74,17 +74,17 @@ export function WhatsAppBridgeModal({
     .map((item) => `• ${item.quantity}x ${item.product.name} (${formatCurrency(item.product.price * item.quantity)})${item.notes ? ` [Nota: ${item.notes}]` : ''}`)
     .join('\n');
 
-  const formattedWhatsAppMessage = `👋 ¡Hola ${storeName}! Acabo de generar mi pedido por JaldiShop.
+  const formattedWhatsAppMessage = `👋 ¡Hola ${storeName}! Acabo de coordinar mi pedido por JaldiShop.
 
-📦 *PEDIDO #${orderId}*
+📦 *SOLICITUD / ${referenceCode}*
 ${itemsText}
 
 ⏰ *Franja Horaria:* ${slotTime} (Cupo apartado)
 🛵 *Modalidad:* ${fulfillmentType === 'DELIVERY' ? 'Delivery a Domicilio' : 'Retiro en Tienda'}
-💰 *Total a Pagar:* ${formatCurrency(total)}
-🧾 *Pago:* ${paymentMethodLabel} ${hasReceipt ? '✅ Comprobante adjunto' : '⏳ Por transferir'}
+💰 *Total:* ${formatCurrency(total)}
+🧾 *Pago:* ${paymentMethodLabel} ${hasReceipt ? '✅ Comprobante adjunto' : '⏳ Por coordinar'}
 
-Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas gracias!`;
+Por favor confírmenme la recepción para iniciar la preparación. ¡Muchas gracias!`;
 
   const handleCopyMessage = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -109,8 +109,8 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
     }
 
     setOrderSent(true);
-    toast.success('¡Pedido enviado al WhatsApp del comercio!', {
-      description: `Código #${orderId}. Franja ${slotTime} protegida contra sobreventa.`,
+    toast.success('¡Mensaje enviado al WhatsApp del comercio!', {
+      description: `Referencia: ${referenceCode}. Franja ${slotTime} protegida contra sobreventa.`,
     });
 
     const encoded = encodeURIComponent(formattedWhatsAppMessage);
@@ -175,7 +175,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                 Pedido estructurado listo para enviar
               </span>
               <span className="font-mono font-black text-[#005141] bg-white px-2 py-0.5 rounded-md shadow-2xs border border-stone-200">
-                #{orderId}
+                {referenceCode}
               </span>
             </div>
 
@@ -266,7 +266,7 @@ Por favor confírmenme la recepción del pedido para la preparación. ¡Muchas g
                   type="button"
                   onClick={() => {
                     onClose();
-                    onTrackOrder(orderId);
+                    onTrackOrder(referenceCode);
                   }}
                   className="text-xs font-bold text-[#005141] hover:text-[#00382d] inline-flex items-center gap-1 cursor-pointer"
                 >

@@ -25,11 +25,13 @@ export type PaymentMethod = 'yape' | 'plin' | 'transferencia';
 export interface PaymentHubModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProceedToWhatsApp: (paymentDetails: {
+  onProceedToWhatsApp?: (paymentDetails: {
     method: PaymentMethod;
     receiptFile: string | null;
     total: number;
   }) => void;
+  onPayWithMercadoPago?: () => Promise<void> | void;
+  isPaying?: boolean;
   total: number;
   storeName?: string;
   slotTime?: string;
@@ -40,6 +42,8 @@ export function PaymentHubModal({
   isOpen,
   onClose,
   onProceedToWhatsApp,
+  onPayWithMercadoPago,
+  isPaying = false,
   total,
   storeName = 'Panadería Don Pepe',
   slotTime = '10:00 - 11:00 AM',
@@ -383,39 +387,70 @@ export function PaymentHubModal({
               <div className="p-3 bg-emerald-50/70 rounded-[8px] border border-emerald-200/80 flex items-start gap-2.5 text-xs text-[#005141]">
                 <Lock className="w-4 h-4 text-[#005141] shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
-                  Tu turno para la franja <strong className="font-bold text-[#005141]">{slotTime}</strong> está apartado. Al pulsar en continuar, se redactará el mensaje oficial para WhatsApp.
+                  Tu turno para la franja <strong className="font-bold text-[#005141]">{slotTime}</strong> está apartado.{' '}
+                  {onPayWithMercadoPago
+                    ? 'Al pulsar en pagar, serás redirigido a la pasarela segura de Mercado Pago.'
+                    : 'Al pulsar en continuar, se redactará el mensaje oficial para WhatsApp.'}
                 </div>
               </div>
             </div>
 
             {/* Modal Sticky Footer CTA */}
-            <div className="p-5 border-t border-stone-200 bg-white sticky bottom-0 z-10 flex flex-col sm:flex-row items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={onClose}
-                className="w-full sm:w-auto text-xs font-bold rounded-full border-stone-300 hover:bg-stone-50"
-              >
-                Volver al carrito
-              </Button>
+            <div className="p-5 border-t border-stone-200 bg-white sticky bottom-0 z-10 flex flex-col gap-2">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={onClose}
+                  disabled={isPaying}
+                  className="w-full sm:w-auto text-xs font-bold rounded-full border-stone-300 hover:bg-stone-50"
+                >
+                  Volver al carrito
+                </Button>
 
-              <Button
-                type="button"
-                variant="terracotta"
-                size="md"
-                onClick={() => {
-                  onProceedToWhatsApp({
-                    method: selectedMethod,
-                    receiptFile,
-                    total,
-                  });
-                }}
-                className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs shadow-md shadow-[#ea580c]/25 cursor-pointer border-0 bg-[#ea580c] hover:bg-[#c2410c] flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <span>Confirmar Pedido por WhatsApp</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+                <Button
+                  type="button"
+                  variant="terracotta"
+                  size="md"
+                  onClick={() => {
+                    if (onPayWithMercadoPago) {
+                      onPayWithMercadoPago();
+                    } else if (onProceedToWhatsApp) {
+                      onProceedToWhatsApp({
+                        method: selectedMethod,
+                        receiptFile,
+                        total,
+                      });
+                    }
+                  }}
+                  isLoading={isPaying}
+                  disabled={isPaying}
+                  className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs shadow-md shadow-[#ea580c]/25 cursor-pointer border-0 bg-[#ea580c] hover:bg-[#c2410c] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                >
+                  <span>{onPayWithMercadoPago ? 'Pagar con Mercado Pago' : 'Confirmar Pedido por WhatsApp'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {onPayWithMercadoPago && onProceedToWhatsApp && (
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onProceedToWhatsApp({
+                        method: selectedMethod,
+                        receiptFile,
+                        total,
+                      })
+                    }
+                    disabled={isPaying}
+                    className="text-[11px] font-semibold text-stone-500 hover:text-stone-700 underline cursor-pointer disabled:opacity-50"
+                  >
+                    ¿Problemas con la pasarela? Coordinar por WhatsApp
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

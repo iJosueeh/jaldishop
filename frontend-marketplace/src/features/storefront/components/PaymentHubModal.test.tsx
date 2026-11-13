@@ -62,4 +62,39 @@ describe('PaymentHubModal Component', () => {
       })
     );
   });
+
+  it('renders Pagar con Mercado Pago and triggers onPayWithMercadoPago callback', () => {
+    const handlePayWithMP = vi.fn();
+    render(
+      <PaymentHubModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onPayWithMercadoPago={handlePayWithMP}
+        total={70}
+      />
+    );
+
+    const payButton = screen.getByText('Pagar con Mercado Pago');
+    expect(payButton).toBeInTheDocument();
+    fireEvent.click(payButton);
+    expect(handlePayWithMP).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables pay button when isPaying is true', () => {
+    const handlePayWithMP = vi.fn();
+    render(
+      <PaymentHubModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onPayWithMercadoPago={handlePayWithMP}
+        isPaying={true}
+        total={70}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: /pagar con mercado pago/i });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(handlePayWithMP).not.toHaveBeenCalled();
+  });
 });
