@@ -74,14 +74,15 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.json(data, { status: upstream.status });
 
     if (upstream.status === 401) {
-      response.cookies.delete(CUSTOMER_COOKIE);
-      return NextResponse.json(
+      const expiredResponse = NextResponse.json(
         {
           code: 'SESSION_EXPIRED',
           message: 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.',
         },
         { status: 401 }
       );
+      expiredResponse.cookies.delete(CUSTOMER_COOKIE);
+      return expiredResponse;
     }
 
     if (upstream.status === 403) {

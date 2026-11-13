@@ -79,6 +79,7 @@ export function CatalogContainer({
   const [fulfillment, setFulfillment] = useState<'DELIVERY' | 'PICKUP'>('DELIVERY');
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
   const [isDeliveryValid, setIsDeliveryValid] = useState(false);
+  const [retryCounter, setRetryCounter] = useState(0);
 
   // Reset selected slot whenever selected date or store changes to enforce explicit customer choice
   const handleDateChange = useCallback((newDate: string) => {
@@ -86,7 +87,11 @@ export function CatalogContainer({
     setSelectedSlot(null);
   }, []);
 
-  // Fetch real capacity slots with race condition / out-of-order response guard
+  const handleRetryCapacity = useCallback(() => {
+    setRetryCounter((c) => c + 1);
+  }, []);
+
+  // Unified capacity fetch pipeline with race condition & out-of-order response guard
   useEffect(() => {
     if (slots !== undefined) return;
     if (totalCartCount <= 0 || !store?.id || !authenticated) {
@@ -137,7 +142,7 @@ export function CatalogContainer({
     return () => {
       isCurrent = false;
     };
-  }, [slots, totalCartCount, store?.id, authenticated, selectedDate]);
+  }, [slots, totalCartCount, store?.id, authenticated, selectedDate, retryCounter]);
 
   const effectiveSlots = slots !== undefined ? slots : fetchedSlots;
 
@@ -473,23 +478,7 @@ export function CatalogContainer({
                 onDateChange={handleDateChange}
                 isLoading={isLoadingSlots}
                 error={slotsError}
-                onRetry={() => {
-                  if (store?.id) {
-                    setIsLoadingSlots(true);
-                    setSlotsError(null);
-                    capacityService
-                      .getCapacitySlots(store.id, selectedDate)
-                      .then((response) => {
-                        setFetchedSlots(mapBackendSlotsToPickerSlots(response.slots));
-                      })
-                      .catch((err: unknown) => {
-                        const errorObj = err as { code?: string; status?: number; message?: string };
-                        setSlotsError(errorObj?.message || 'No se pudieron consultar los horarios en este momento.');
-                        setFetchedSlots([]);
-                      })
-                      .finally(() => setIsLoadingSlots(false));
-                  }
-                }}
+                onRetry={handleRetryCapacity}
                 minDate={getBusinessTodayDate()}
               />
             ))}

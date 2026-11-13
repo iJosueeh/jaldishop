@@ -77,7 +77,7 @@ export function mapBackendSlotsToPickerSlots(
       totalCapacity: slot.effectiveCapacity,
       reservedCount: slot.occupiedCapacity,
       status,
-      estimatedDeliveryMinutes: 45,
+      estimatedDeliveryMinutes: undefined,
       startTime: slot.startTime,
       endTime: slot.endTime,
       serviceDate: slot.serviceDate,

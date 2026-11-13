@@ -11,7 +11,7 @@ export interface CapacitySlot {
   totalCapacity: number;
   reservedCount: number;
   status: 'available' | 'few_left' | 'sold_out';
-  estimatedDeliveryMinutes: number;
+  estimatedDeliveryMinutes?: number;
   startTime?: string;
   endTime?: string;
   serviceDate?: string;
@@ -258,7 +258,9 @@ export function CapacitySlotPicker({
                       </div>
                       <div className="flex items-center justify-between text-[9px] font-bold text-stone-500">
                         <span>{occupancyPct}% lleno</span>
-                        <span>~{slot.estimatedDeliveryMinutes}m</span>
+                        {slot.estimatedDeliveryMinutes != null && (
+                          <span>~{slot.estimatedDeliveryMinutes}m</span>
+                        )}
                       </div>
                     </div>
                   </button>

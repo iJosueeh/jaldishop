@@ -139,6 +139,12 @@ describe('Capacity Slots BFF Endpoint (GET /api/customer/capacity/slots)', () =>
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.code).toBe('SESSION_EXPIRED');
+
+    // Confirm that the Set-Cookie header instructs browser to delete jaldishop_customer_token
+    const setCookieHeader = response.headers.get('set-cookie');
+    expect(setCookieHeader).toBeTruthy();
+    expect(setCookieHeader).toContain('jaldishop_customer_token=;');
+    expect(setCookieHeader).toContain('Expires=Thu, 01 Jan 1970 00:00:00 GMT');
   });
 
   it('handles backend network failure with 503', async () => {

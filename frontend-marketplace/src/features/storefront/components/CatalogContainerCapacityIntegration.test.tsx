@@ -6,7 +6,10 @@ import { CatalogContainer } from './CatalogContainer';
 import { capacityService } from '../services/capacityService';
 import { checkoutService } from '@/features/checkout/services/checkoutService';
 import { PublicStore, CartItem } from '../types/storefront.types';
-import { CapacitySlotBackendResponse } from '../services/capacityService';
+import {
+  CapacitySlotBackendResponse,
+  CapacitySlotsBackendResponse,
+} from '../services/capacityService';
 
 // Mock StorefrontCartProvider with controllable state
 let mockCartState = {
@@ -338,6 +341,203 @@ describe('CatalogContainer Capacity & Slot Integration', () => {
 
     await waitFor(() => {
       expect(checkoutService.initiateCheckout).toHaveBeenCalled();
+    });
+  });
+
+  it('handles out-of-order HTTP responses when changing dates and discards stale responses', async () => {
+    let resolveFirstRequest: (value: CapacitySlotsBackendResponse) => void;
+    const firstRequestPromise = new Promise<CapacitySlotsBackendResponse>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+
+    vi.mocked(capacityService.getCapacitySlots).mockImplementation((_storeId, date) => {
+      if (date === '2026-11-13') {
+        return firstRequestPromise;
+      }
+      return Promise.resolve({
+        storeId: mockStore.id,
+        serviceDate: '2026-11-14',
+        slots: [
+          {
+            storeId: mockStore.id,
+            serviceDate: '2026-11-14',
+            startTime: '18:00:00',
+            endTime: '20:00:00',
+            effectiveCapacity: 8,
+            availableCapacity: 6,
+            reservedCapacity: 2,
+            committedCapacity: 0,
+            occupiedCapacity: 2,
+          },
+        ],
+      });
+    });
+
+    renderWithClient(
+      <CatalogContainer
+        storeName={mockStore.name}
+        store={mockStore}
+        products={mockProducts}
+      />
+    );
+
+    // Initial query for 2026-11-13 is pending.
+    // User switches date to 2026-11-14:
+    const dateInput = await screen.findByLabelText(/Fecha:/);
+    fireEvent.change(dateInput, { target: { value: '2026-11-14' } });
+
+    // Second request resolves first:
+    expect(await screen.findByText('18:00 - 20:00')).toBeInTheDocument();
+
+    // Now resolve the stale first request for 2026-11-13:
+    resolveFirstRequest!({
+      storeId: mockStore.id,
+      serviceDate: '2026-11-13',
+      slots: [
+        {
+          storeId: mockStore.id,
+          serviceDate: '2026-11-13',
+          startTime: '08:00:00',
+          endTime: '10:00:00',
+          effectiveCapacity: 10,
+          availableCapacity: 10,
+          reservedCapacity: 0,
+          committedCapacity: 0,
+          occupiedCapacity: 0,
+        },
+      ],
+    });
+
+    // Wait and ensure stale 08:00 - 10:00 slot is NEVER rendered
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.queryByText('08:00 - 10:00')).not.toBeInTheDocument();
+    expect(screen.getByText('18:00 - 20:00')).toBeInTheDocument();
+  });
+
+  it('unifies retry through pipeline and discards stale retry response when date changes', async () => {
+    let failFirst = true;
+    let resolveRetry: (value: CapacitySlotsBackendResponse) => void;
+    const retryPromise = new Promise<CapacitySlotsBackendResponse>((resolve) => {
+      resolveRetry = resolve;
+    });
+
+    vi.mocked(capacityService.getCapacitySlots).mockImplementation((_storeId, date) => {
+      if (failFirst && date === '2026-11-13') {
+        failFirst = false;
+        return Promise.reject(new Error('Fallo transitorio'));
+      }
+      if (date === '2026-11-13') {
+        return retryPromise;
+      }
+      return Promise.resolve({
+        storeId: mockStore.id,
+        serviceDate: '2026-11-15',
+        slots: [
+          {
+            storeId: mockStore.id,
+            serviceDate: '2026-11-15',
+            startTime: '12:00:00',
+            endTime: '14:00:00',
+            effectiveCapacity: 10,
+            availableCapacity: 5,
+            reservedCapacity: 5,
+            committedCapacity: 0,
+            occupiedCapacity: 5,
+          },
+        ],
+      });
+    });
+
+    renderWithClient(
+      <CatalogContainer
+        storeName={mockStore.name}
+        store={mockStore}
+        products={mockProducts}
+      />
+    );
+
+    // Initial failure shows retry button
+    const retryBtn = await screen.findByRole('button', { name: 'Reintentar' });
+    expect(screen.getByText('Fallo transitorio')).toBeInTheDocument();
+
+    // Click retry (triggers pending retry on 2026-11-13)
+    fireEvent.click(retryBtn);
+
+    // Concurrently change date to 2026-11-15
+    const dateInput = screen.getByLabelText(/Fecha:/);
+    fireEvent.change(dateInput, { target: { value: '2026-11-15' } });
+
+    // New date's slots arrive
+    expect(await screen.findByText('12:00 - 14:00')).toBeInTheDocument();
+
+    // Now resolve the stale retry response for 2026-11-13
+    resolveRetry!({
+      storeId: mockStore.id,
+      serviceDate: '2026-11-13',
+      slots: [
+        {
+          storeId: mockStore.id,
+          serviceDate: '2026-11-13',
+          startTime: '07:00:00',
+          endTime: '09:00:00',
+          effectiveCapacity: 10,
+          availableCapacity: 10,
+          reservedCapacity: 0,
+          committedCapacity: 0,
+          occupiedCapacity: 0,
+        },
+      ],
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+    // Verify stale retry for 07:00 - 09:00 was ignored
+    expect(screen.queryByText('07:00 - 09:00')).not.toBeInTheDocument();
+    expect(screen.getByText('12:00 - 14:00')).toBeInTheDocument();
+  });
+
+  it('resets selectedSlot when changing dates to enforce explicit customer choice', async () => {
+    vi.mocked(capacityService.getCapacitySlots).mockImplementation((_storeId, date) => {
+      return Promise.resolve({
+        storeId: mockStore.id,
+        serviceDate: date || '2026-11-13',
+        slots: [
+          {
+            storeId: mockStore.id,
+            serviceDate: date || '2026-11-13',
+            startTime: '10:00:00',
+            endTime: '12:00:00',
+            effectiveCapacity: 10,
+            availableCapacity: 8,
+            reservedCapacity: 2,
+            committedCapacity: 0,
+            occupiedCapacity: 2,
+          },
+        ],
+      });
+    });
+
+    renderWithClient(
+      <CatalogContainer
+        storeName={mockStore.name}
+        store={mockStore}
+        products={mockProducts}
+      />
+    );
+
+    // Initial slots load
+    const slotElements = await screen.findAllByText('10:00 - 12:00');
+    fireEvent.click(slotElements[0]);
+
+    // Order summary panel appears
+    expect(await screen.findByText(/Resumen de tu pedido/i)).toBeInTheDocument();
+
+    // Switch date
+    const dateInput = screen.getByLabelText(/Fecha:/);
+    fireEvent.change(dateInput, { target: { value: '2026-11-14' } });
+
+    // Verify order summary panel disappears because slot is reset to null
+    await waitFor(() => {
+      expect(screen.queryByText(/Resumen de tu pedido/i)).not.toBeInTheDocument();
     });
   });
 });

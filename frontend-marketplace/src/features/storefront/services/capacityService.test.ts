@@ -129,7 +129,7 @@ describe('mapBackendSlotsToPickerSlots', () => {
       totalCapacity: 10,
       reservedCount: 10,
       status: 'sold_out',
-      estimatedDeliveryMinutes: 45,
+      estimatedDeliveryMinutes: undefined,
       startTime: '09:00:00',
       endTime: '11:00:00',
       serviceDate: '2026-11-13',
