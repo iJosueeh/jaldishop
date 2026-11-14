@@ -3,12 +3,14 @@
  */
 
 export interface ApiErrorResponse {
-  timestamp: string;
-  status: number;
-  error: string;
-  message: string;
-  path: string;
+  timestamp?: string;
+  status?: number;
+  error?: string;
+  code?: string;
+  message?: string;
+  path?: string;
   details?: Record<string, string>;
+  errors?: Record<string, string>;
 }
 
 export interface PublicStoreDto {

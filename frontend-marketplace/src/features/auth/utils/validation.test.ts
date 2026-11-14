@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   isValidEmail,
   isValidPeruPhone,
+  isValidResetToken,
   normalizePhone,
   validateFirstName,
   validateLastName,
   validateEmailField,
   validateRegisterPassword,
+  validateResetPassword,
   validateConfirmPassword,
   validatePhoneField,
 } from './validation';
@@ -99,6 +101,29 @@ describe('Validation utilities', () => {
       );
       expect(validatePhoneField('987654321')).toBeNull();
       expect(validatePhoneField('+51 987 654 321')).toBeNull();
+    });
+
+    it('validates reset token format according to backend 43-character base64url constraint', () => {
+      expect(isValidResetToken('abcdefghijklmnopqrstuvwxyz0123456789_-ABCDE')).toBe(true);
+      expect(isValidResetToken('short-token')).toBe(false);
+      expect(isValidResetToken('abcdefghijklmnopqrstuvwxyz0123456789_-ABCD+')).toBe(false); // + is not in base64url
+      expect(isValidResetToken('')).toBe(false);
+      expect(isValidResetToken(null)).toBe(false);
+      expect(isValidResetToken(undefined)).toBe(false);
+    });
+
+    it('validates reset password length and UTF-8 byte boundary', () => {
+      expect(validateResetPassword('')).toBe('Ingresa una nueva contraseña.');
+      expect(validateResetPassword('1234567')).toBe('La contraseña debe tener al menos 8 caracteres.');
+      expect(validateResetPassword('valida1234')).toBeNull();
+      expect(validateResetPassword('a'.repeat(73))).toBe('La contraseña no puede superar los 72 caracteres.');
+
+      // 37 multibyte characters * 2 bytes = 74 bytes > 72 bytes
+      expect(validateResetPassword('ñ'.repeat(37))).toBe(
+        'La contraseña no puede superar los 72 bytes UTF-8.'
+      );
+      // 36 multibyte characters * 2 bytes = 72 bytes <= 72 bytes
+      expect(validateResetPassword('ñ'.repeat(36))).toBeNull();
     });
   });
 });

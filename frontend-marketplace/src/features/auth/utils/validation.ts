@@ -124,3 +124,37 @@ export function validatePhoneField(phone: string): string | null {
   }
   return null;
 }
+
+export const RESET_TOKEN_REGEX = /^[A-Za-z0-9_-]{43}$/;
+
+/**
+ * Validates reset token format (43-character base64url).
+ */
+export function isValidResetToken(token: string | null | undefined): boolean {
+  if (!token || typeof token !== 'string') return false;
+  return RESET_TOKEN_REGEX.test(token.trim());
+}
+
+/**
+ * Validates password according to backend recovery constraints:
+ * - min 8 characters
+ * - max 72 characters
+ * - max 72 bytes UTF-8 (BCrypt constraint)
+ */
+export function validateResetPassword(password: string): string | null {
+  if (!password) {
+    return 'Ingresa una nueva contraseña.';
+  }
+  if (password.length < 8) {
+    return 'La contraseña debe tener al menos 8 caracteres.';
+  }
+  if (password.length > 72) {
+    return 'La contraseña no puede superar los 72 caracteres.';
+  }
+  const utf8Bytes = new TextEncoder().encode(password).length;
+  if (utf8Bytes > 72) {
+    return 'La contraseña no puede superar los 72 bytes UTF-8.';
+  }
+  return null;
+}
+

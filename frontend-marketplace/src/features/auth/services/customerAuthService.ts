@@ -1,9 +1,12 @@
 import { apiClient } from '@/core/api/apiClient';
 import {
   AuthSessionResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginCredentials,
   RegisterCustomerData,
   RegisterCustomerResponse,
+  ResetPasswordRequest,
 } from '../types/auth.types';
 
 export const customerAuthService = {
@@ -43,5 +46,25 @@ export const customerAuthService = {
     apiClient<{ authenticated: boolean }>('/api/customer/session', {
       baseUrl: '',
       method: 'DELETE',
+    }),
+
+  /**
+   * Requests a password recovery link to the customer email.
+   */
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    apiClient<ForgotPasswordResponse>('/api/customer/forgot-password', {
+      baseUrl: '',
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /**
+   * Resets customer password using the token received in email.
+   */
+  resetPassword: (data: ResetPasswordRequest) =>
+    apiClient<void>('/api/customer/reset-password', {
+      baseUrl: '',
+      method: 'POST',
+      body: JSON.stringify(data),
     }),
 };
