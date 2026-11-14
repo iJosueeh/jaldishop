@@ -2,10 +2,12 @@ package com.jaldishop.backend.ordering.domain.repository;
 
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.model.OrderStatusCounts;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,4 +27,6 @@ public interface OrderRepository {
     Page<Order> findByStoreIdAndStatus(UUID storeId, OrderStatus status, Pageable pageable);
     Optional<Order> findByIdAndStoreId(UUID id, UUID storeId);
     Optional<Order> findByOrderNumberAndStoreId(String orderNumber, UUID storeId);
+
+    OrderStatusCounts countByStoreIdAndServiceDate(UUID storeId, LocalDate serviceDate);
 }

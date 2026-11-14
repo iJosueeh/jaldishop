@@ -2,9 +2,11 @@ package com.jaldishop.backend.ordering.web.controller;
 
 import com.jaldishop.backend.ordering.application.service.ChangeOrderStatusService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderDetailService;
+import com.jaldishop.backend.ordering.application.service.GetMerchantOrderStatusCountsService;
 import com.jaldishop.backend.ordering.application.service.ListMerchantOrdersService;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderDetailResponse;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderPageResponse;
+import com.jaldishop.backend.ordering.application.result.MerchantOrderStatusCountsResponse;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.web.dto.ChangeOrderStatusRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -42,17 +46,37 @@ public class MerchantOrderController {
     private final ListMerchantOrdersService listMerchantOrdersService;
     private final GetMerchantOrderDetailService getMerchantOrderDetailService;
     private final ChangeOrderStatusService changeOrderStatusService;
+    private final GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService;
 
     public MerchantOrderController(
             StoreContextService storeContextService,
             ListMerchantOrdersService listMerchantOrdersService,
             GetMerchantOrderDetailService getMerchantOrderDetailService,
-            ChangeOrderStatusService changeOrderStatusService
+            ChangeOrderStatusService changeOrderStatusService,
+            GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService
     ) {
         this.storeContextService = storeContextService;
         this.listMerchantOrdersService = listMerchantOrdersService;
         this.getMerchantOrderDetailService = getMerchantOrderDetailService;
         this.changeOrderStatusService = changeOrderStatusService;
+        this.getMerchantOrderStatusCountsService = getMerchantOrderStatusCountsService;
+    }
+
+    /**
+     * Consulta contadores agregados de pedidos por estado para la tienda.
+     * Si no se especifica 'date', devuelve el histórico acumulado completo de la tienda (RN-COUNT-01).
+     * Si se especifica 'date', devuelve los contadores de pedidos para esa fecha de servicio (RN-COUNT-04).
+     */
+    @GetMapping("/counts")
+    public ResponseEntity<MerchantOrderStatusCountsResponse> getOrderCounts(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        validatePrincipal(principal);
+        storeContextService.validateStoreOwnership(storeId, principal);
+        MerchantOrderStatusCountsResponse response = getMerchantOrderStatusCountsService.execute(storeId, date);
+        return ResponseEntity.ok(response);
     }
 
     /**

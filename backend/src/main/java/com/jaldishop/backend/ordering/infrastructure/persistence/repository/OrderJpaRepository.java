@@ -2,6 +2,7 @@ package com.jaldishop.backend.ordering.infrastructure.persistence.repository;
 
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
+import com.jaldishop.backend.ordering.infrastructure.persistence.projection.OrderStatusAggregationProjection;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,5 +53,37 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
     Optional<OrderEntity> findByIdAndStoreId(UUID id, UUID storeId);
 
     Optional<OrderEntity> findByOrderNumberAndStoreId(String orderNumber, UUID storeId);
+
+    @Query("""
+        SELECT
+            COUNT(o) AS total,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.CONFIRMED THEN 1 END) AS confirmed,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.IN_PREPARATION THEN 1 END) AS inPreparation,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.READY THEN 1 END) AS ready,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.OUT_FOR_DELIVERY THEN 1 END) AS outForDelivery,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.COMPLETED THEN 1 END) AS completed,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.CANCELLED THEN 1 END) AS cancelled
+        FROM OrderEntity o
+        WHERE o.storeId = :storeId
+    """)
+    OrderStatusAggregationProjection countOrdersByStoreId(@Param("storeId") UUID storeId);
+
+    @Query("""
+        SELECT
+            COUNT(o) AS total,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.CONFIRMED THEN 1 END) AS confirmed,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.IN_PREPARATION THEN 1 END) AS inPreparation,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.READY THEN 1 END) AS ready,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.OUT_FOR_DELIVERY THEN 1 END) AS outForDelivery,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.COMPLETED THEN 1 END) AS completed,
+            COUNT(CASE WHEN o.status = com.jaldishop.backend.ordering.domain.enums.OrderStatus.CANCELLED THEN 1 END) AS cancelled
+        FROM OrderEntity o
+        WHERE o.storeId = :storeId
+          AND o.serviceDate = :serviceDate
+    """)
+    OrderStatusAggregationProjection countOrdersByStoreIdAndServiceDate(
+            @Param("storeId") UUID storeId,
+            @Param("serviceDate") LocalDate serviceDate
+    );
 
 }

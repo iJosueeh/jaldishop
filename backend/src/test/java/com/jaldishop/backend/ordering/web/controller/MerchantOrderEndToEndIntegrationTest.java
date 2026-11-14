@@ -330,6 +330,16 @@ class MerchantOrderEndToEndIntegrationTest {
                 .build();
         HttpResponse<String> patchResponse = httpClient.send(patchRequest, HttpResponse.BodyHandlers.ofString());
         assertThat(patchResponse.statusCode()).isEqualTo(403);
+
+        // 4. GET contadores de otra tienda
+        HttpRequest getCountsRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_B_ID + "/orders/counts"))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        HttpResponse<String> getCountsResponse = httpClient.send(getCountsRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(getCountsResponse.statusCode()).isEqualTo(403);
     }
 
     @Test
@@ -345,6 +355,16 @@ class MerchantOrderEndToEndIntegrationTest {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertThat(response.statusCode()).isEqualTo(403);
+
+        HttpRequest countsRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders/counts"))
+                .header("Authorization", "Bearer " + customerAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> countsResponse = httpClient.send(countsRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(countsResponse.statusCode()).isEqualTo(403);
     }
 
     @Test
@@ -359,6 +379,15 @@ class MerchantOrderEndToEndIntegrationTest {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertThat(response.statusCode()).isEqualTo(401);
+
+        HttpRequest countsRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders/counts"))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> countsResponse = httpClient.send(countsRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(countsResponse.statusCode()).isEqualTo(401);
     }
 
     @Test
@@ -555,6 +584,40 @@ class MerchantOrderEndToEndIntegrationTest {
 
         // 1 orders + 1 count + 1 order_items batch + 1 order_status_history batch = 4
         assertThat(queryCount).isEqualTo(4L);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(13)
+    @DisplayName("E2E HTTP: Comerciante A consulta contadores de pedidos con autenticación JWT y recibe 200 OK")
+    void shouldGetOrderCountsForAuthorizedMerchantOverHttp() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders/counts"))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        JsonNode root = jsonMapper.readTree(response.body());
+
+        assertThat(root.has("all")).isTrue();
+        assertThat(root.has("confirmed")).isTrue();
+        assertThat(root.has("inPreparation")).isTrue();
+        assertThat(root.has("ready")).isTrue();
+        assertThat(root.has("outForDelivery")).isTrue();
+        assertThat(root.has("completed")).isTrue();
+        assertThat(root.has("cancelled")).isTrue();
+
+        long all = root.get("all").asLong();
+        long sum = root.get("confirmed").asLong()
+                + root.get("inPreparation").asLong()
+                + root.get("ready").asLong()
+                + root.get("outForDelivery").asLong()
+                + root.get("completed").asLong()
+                + root.get("cancelled").asLong();
+        assertThat(all).isEqualTo(sum);
     }
 
     // =========================================================================

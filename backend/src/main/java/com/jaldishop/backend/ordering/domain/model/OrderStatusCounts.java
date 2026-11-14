@@ -1,0 +1,59 @@
+package com.jaldishop.backend.ordering.domain.model;
+
+/**
+ * Agregación inmutable de contadores de pedidos para una tienda.
+ *
+ * <p>Reglas de negocio garantizadas:</p>
+ * <ul>
+ *   <li><strong>RN-COUNT-01</strong>: Representa el historial completo o la fecha operativa especificada.</li>
+ *   <li><strong>RN-COUNT-02</strong>: {@code all = confirmed + inPreparation + ready + outForDelivery + completed + cancelled}.
+ *       No representa ventas netas ni ingresos.</li>
+ *   <li><strong>RN-COUNT-03</strong>: Pedidos activos = {@code confirmed + inPreparation + ready}.</li>
+ * </ul>
+ */
+public record OrderStatusCounts(
+        long all,
+        long confirmed,
+        long inPreparation,
+        long ready,
+        long outForDelivery,
+        long completed,
+        long cancelled
+) {
+    public OrderStatusCounts {
+        if (all < 0 || confirmed < 0 || inPreparation < 0 || ready < 0 || outForDelivery < 0 || completed < 0 || cancelled < 0) {
+            throw new IllegalArgumentException("Los contadores de estado de pedidos no pueden ser negativos.");
+        }
+        long expectedAll = confirmed + inPreparation + ready + outForDelivery + completed + cancelled;
+        if (all != expectedAll) {
+            throw new IllegalArgumentException(String.format(
+                    "Invariante violada: 'all' (%d) debe ser exactamente la suma de los seis estados (%d).",
+                    all, expectedAll
+            ));
+        }
+    }
+
+    public static OrderStatusCounts of(
+            long confirmed,
+            long inPreparation,
+            long ready,
+            long outForDelivery,
+            long completed,
+            long cancelled
+    ) {
+        long all = confirmed + inPreparation + ready + outForDelivery + completed + cancelled;
+        return new OrderStatusCounts(all, confirmed, inPreparation, ready, outForDelivery, completed, cancelled);
+    }
+
+    public static OrderStatusCounts empty() {
+        return new OrderStatusCounts(0L, 0L, 0L, 0L, 0L, 0L, 0L);
+    }
+
+    /**
+     * Calcula los pedidos que demandan atención operativa en cocina/recojo (RN-COUNT-03).
+     * Excluye OUT_FOR_DELIVERY, COMPLETED y CANCELLED.
+     */
+    public long activeOrdersCount() {
+        return confirmed + inPreparation + ready;
+    }
+}
