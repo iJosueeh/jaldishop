@@ -8,16 +8,27 @@
     <div class="flex items-center justify-between pb-3 border-b border-white/10">
       <div class="flex items-center gap-2.5 min-w-0">
         @if (hasValidLogo()) {
-          <div class="w-9 h-9 rounded-xl overflow-hidden border border-emerald-500/40 shadow-xs shrink-0 bg-stone-900">
-            <img [src]="storeLogoUrl()" (error)="onLogoError()" alt="" class="w-full h-full object-cover" />
+          <div
+            class="w-9 h-9 rounded-xl overflow-hidden border border-emerald-500/40 shadow-xs shrink-0 bg-stone-900"
+          >
+            <img
+              [src]="storeLogoUrl()"
+              (error)="onLogoError()"
+              alt=""
+              class="w-full h-full object-cover"
+            />
           </div>
         } @else {
-          <div class="w-9 h-9 rounded-xl bg-[#005141] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 ring-1 ring-white/15">
+          <div
+            class="w-9 h-9 rounded-xl bg-[#005141] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 ring-1 ring-white/15"
+          >
             {{ storeName() ? storeName().charAt(0).toUpperCase() : 'J' }}
           </div>
         }
         <div class="flex flex-col min-w-0">
-          <span class="text-sm font-bold text-white tracking-tight truncate leading-tight">{{ storeName() }}</span>
+          <span class="text-sm font-bold text-white tracking-tight truncate leading-tight">{{
+            storeName()
+          }}</span>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
             <span class="text-[11px] font-medium text-stone-400 truncate">
@@ -39,14 +50,22 @@
     </div>
 
     <!-- Módulo Craft de Capacidad de Hoy -->
-    <div class="p-3.5 rounded-2xl bg-[#141413] flex flex-col gap-2 border border-white/10 shadow-inner">
+    <div
+      class="p-3.5 rounded-2xl bg-[#141413] flex flex-col gap-2 border border-white/10 shadow-inner"
+    >
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1">
+        <span
+          class="text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1"
+        >
           <ng-icon name="matViewWeekOutline" class="text-[14px] text-emerald-400" />
           Capacidad Hoy
         </span>
-        <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
-          {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}/{{ capacityTotal() > 0 ? capacityTotal() : 0 }}
+        <span
+          class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30"
+        >
+          {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}/{{
+            capacityTotal() > 0 ? capacityTotal() : 0
+          }}
         </span>
       </div>
 
@@ -65,14 +84,20 @@
       <div class="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
         <span>
           @if (capacityOccupied() !== null && capacityTotal() > 0) {
-            Quedan <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied()! }}</strong> {{ (capacityTotal() - capacityOccupied()!) === 1 ? 'cupo' : 'cupos' }}
+            Quedan
+            <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied()! }}</strong>
+            {{ capacityTotal() - capacityOccupied()! === 1 ? 'cupo' : 'cupos' }}
           } @else if (capacityTotal() > 0) {
             Capacidad: <strong class="text-stone-200">{{ capacityTotal() }}</strong> cupos
           } @else {
             Sin límite fijo
           }
         </span>
-        <a routerLink="/capacity" (click)="closeSidebar.emit()" class="text-emerald-400 hover:text-emerald-300 font-bold hover:underline">
+        <a
+          routerLink="/capacity"
+          (click)="closeSidebar.emit()"
+          class="text-emerald-400 hover:text-emerald-300 font-bold hover:underline"
+        >
           Ajustar
         </a>
       </div>
@@ -101,10 +126,29 @@
           <ng-icon name="matReceiptLongOutline" class="text-[20px]" />
           <span>Pedidos</span>
         </div>
-        @if (activeOrdersCount() > 0) {
-          <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
-            {{ activeOrdersCount() }} hoy
+        @if (orderService.isTodayCountsLoading() && !orderService.todayOrderCounts()) {
+          <span
+            class="px-2 py-0.5 rounded-md bg-white/10 text-stone-400 text-[10px] font-medium animate-pulse"
+          >
+            ...
           </span>
+        } @else if (orderService.todayCountsError() && !orderService.todayOrderCounts()) {
+          <!-- Error sin datos previos: no mostrar cifras ficticias ni ceros -->
+        } @else if (activeOrdersCount() > 0) {
+          @if (orderService.isTodayOutdated()) {
+            <span
+              class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold"
+              title="Datos desactualizados: fallo de actualización o cambio de fecha operativa"
+            >
+              {{ activeOrdersCount() }} hoy (desactualizado)
+            </span>
+          } @else {
+            <span
+              class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold"
+            >
+              {{ activeOrdersCount() }} hoy
+            </span>
+          }
         }
       </a>
 
@@ -170,16 +214,16 @@
           title="Ver mi perfil"
           class="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-85 transition-opacity"
         >
-          <div class="w-8 h-8 rounded-full bg-[#005141] flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-xs ring-1 ring-white/15">
+          <div
+            class="w-8 h-8 rounded-full bg-[#005141] flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-xs ring-1 ring-white/15"
+          >
             {{ userInitials() }}
           </div>
           <div class="flex flex-col min-w-0">
             <span class="text-xs font-bold text-white truncate">
               {{ userName() }}
             </span>
-            <span class="text-[11px] text-stone-400 truncate">
-              Comerciante
-            </span>
+            <span class="text-[11px] text-stone-400 truncate"> Comerciante </span>
           </div>
         </a>
 
@@ -193,7 +237,11 @@
         </button>
       </div>
 
-      <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider {{ storeOperationalStatus().footerClass }}">
+      <div
+        class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider {{
+          storeOperationalStatus().footerClass
+        }}"
+      >
         <span>{{ storeOperationalStatus().footerLabel }}</span>
         <span class="w-1.5 h-1.5 rounded-full {{ storeOperationalStatus().dotClass }}"></span>
       </div>

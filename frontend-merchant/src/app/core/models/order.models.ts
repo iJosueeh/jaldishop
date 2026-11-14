@@ -1,10 +1,5 @@
 export type OrderStatus =
-  | 'CONFIRMED'
-  | 'IN_PREPARATION'
-  | 'READY'
-  | 'OUT_FOR_DELIVERY'
-  | 'COMPLETED'
-  | 'CANCELLED';
+  'CONFIRMED' | 'IN_PREPARATION' | 'READY' | 'OUT_FOR_DELIVERY' | 'COMPLETED' | 'CANCELLED';
 
 export type DeliveryMode = 'PICKUP' | 'DELIVERY';
 
@@ -159,6 +154,21 @@ export interface ChangeOrderStatusRequest {
   status: OrderStatus;
 }
 
+/**
+ * Contadores agregados de pedidos por estado retornados por el backend.
+ * Equivalente a {@code MerchantOrderStatusCountsResponse.java}.
+ * Ruta: GET /api/v1/merchants/stores/{storeId}/orders/counts
+ */
+export interface MerchantOrderStatusCounts {
+  all: number;
+  confirmed: number;
+  inPreparation: number;
+  ready: number;
+  outForDelivery: number;
+  completed: number;
+  cancelled: number;
+}
+
 // =============================================================================
 // CONTRATOS WEBSOCKET / STOMP
 // =============================================================================
@@ -167,11 +177,7 @@ export interface ChangeOrderStatusRequest {
  * Estados del ciclo de vida de la conexión STOMP.
  */
 export type StompConnectionState =
-  | 'CONNECTING'
-  | 'CONNECTED'
-  | 'DISCONNECTED'
-  | 'RECONNECTING'
-  | 'AUTH_ERROR';
+  'CONNECTING' | 'CONNECTED' | 'DISCONNECTED' | 'RECONNECTING' | 'AUTH_ERROR';
 
 /**
  * Evento ligero de dominio emitido por el backend al confirmar un pedido.
@@ -187,4 +193,3 @@ export interface OrderConfirmedDomainEvent {
   currency: string;
   occurredAt: string;
 }
-

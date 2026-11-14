@@ -7,7 +7,7 @@
   />
 
   <!-- 2. Alerta / Banner Consolidado Unificado (solo si hay órdenes activas) -->
-  @if (orderService.totalElements() > 0) {
+  @if (orderService.totalElements() > 0 || (orderService.orderCounts()?.all ?? 0) > 0) {
     <app-orders-alert-banner
       [urgentOrder]="urgentOrder()"
       [readyCount]="orderService.readyCount()"
@@ -28,11 +28,11 @@
   <!-- 4. Filtros Unificados y Búsqueda Compacta -->
   <app-orders-filter-bar
     [activeTab]="activeTab()"
-    [totalCount]="activeTab() === 'ALL' ? orderService.totalElements() : '—'"
-    [confirmedCount]="activeTab() === 'CONFIRMED' ? orderService.totalElements() : '—'"
-    [inPrepCount]="activeTab() === 'IN_PREPARATION' ? orderService.totalElements() : '—'"
-    [readyCount]="activeTab() === 'READY' ? orderService.totalElements() : '—'"
-    [completedCount]="activeTab() === 'COMPLETED' ? orderService.totalElements() : '—'"
+    [totalCount]="orderService.tabCounts().all"
+    [confirmedCount]="orderService.tabCounts().confirmed"
+    [inPrepCount]="orderService.tabCounts().inPreparation"
+    [readyCount]="orderService.tabCounts().ready"
+    [completedCount]="orderService.tabCounts().completed"
     [searchQuery]="orderService.searchQuery()"
     [selectedChannel]="orderService.channelFilter()"
     (tabChange)="onTabChange($event)"

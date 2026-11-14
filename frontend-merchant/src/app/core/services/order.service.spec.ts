@@ -9,7 +9,9 @@ import {
   MerchantOrderDetailResponse,
   MerchantOrderPageResponse,
   MerchantOrder,
+  MerchantOrderStatusCounts,
 } from '../models/order.models';
+import { getOperatingDateLima } from '../utils/date.utils';
 import { environment } from '../../../environments/environment';
 
 describe('OrderService', () => {
@@ -165,11 +167,12 @@ describe('OrderService', () => {
       expect(res?.totalElements).toBe(25);
     });
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '0' &&
-      r.params.get('size') === '10' &&
-      !r.params.has('status'),
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '0' &&
+        r.params.get('size') === '10' &&
+        !r.params.has('status'),
     );
     expect(req.request.method).toBe('GET');
 
@@ -186,11 +189,12 @@ describe('OrderService', () => {
   it('debe enviar el parámetro status cuando el filtro no es ALL', () => {
     service.loadOrders(1, 20, 'IN_PREPARATION', 'store-123').subscribe();
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '1' &&
-      r.params.get('size') === '20' &&
-      r.params.get('status') === 'IN_PREPARATION',
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '1' &&
+        r.params.get('size') === '20' &&
+        r.params.get('status') === 'IN_PREPARATION',
     );
     expect(req.request.method).toBe('GET');
     req.flush({ ...mockPageResponse, page: 1, size: 20 });
@@ -210,8 +214,8 @@ describe('OrderService', () => {
     storeReq.flush({ id: 'store-resolved', name: 'Mi Tienda' });
 
     // 2. Solicitud a /merchants/stores/store-resolved/orders
-    const ordersReq = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-resolved/orders`,
+    const ordersReq = httpMock.expectOne(
+      (r) => r.url === `${environment.apiUrl}/merchants/stores/store-resolved/orders`,
     );
     expect(ordersReq.request.method).toBe('GET');
     ordersReq.flush(mockPageResponse);
@@ -223,13 +227,15 @@ describe('OrderService', () => {
     service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
     service.loadOrders(1, 10, 'READY', 'store-123').subscribe();
 
-    const req1 = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '0',
+    const req1 = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '0',
     );
-    const req2 = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '1',
+    const req2 = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '1',
     );
 
     // Responder la petición 2 primero
@@ -254,21 +260,23 @@ describe('OrderService', () => {
   it('debe manejar error 403 Forbidden mostrando toast y seteando señal de error', () => {
     service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders`,
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.apiUrl}/merchants/stores/store-123/orders`,
     );
     req.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
 
     expect(service.error()).toBe('No tienes permisos para ver los pedidos de esta tienda');
-    expect(toastMock.error).toHaveBeenCalledWith('No tienes permisos para ver los pedidos de esta tienda.');
+    expect(toastMock.error).toHaveBeenCalledWith(
+      'No tienes permisos para ver los pedidos de esta tienda.',
+    );
     expect(service.isLoading()).toBe(false);
   });
 
   it('debe manejar error 500 del servidor', () => {
     service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders`,
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.apiUrl}/merchants/stores/store-123/orders`,
     );
     req.flush({ message: 'Internal Error' }, { status: 500, statusText: 'Internal Server Error' });
 
@@ -311,8 +319,12 @@ describe('OrderService', () => {
     service.getOrderDetail('store-123', 'ord-A').subscribe();
     service.getOrderDetail('store-123', 'ord-B').subscribe();
 
-    const reqA = httpMock.expectOne(`${environment.apiUrl}/merchants/stores/store-123/orders/ord-A`);
-    const reqB = httpMock.expectOne(`${environment.apiUrl}/merchants/stores/store-123/orders/ord-B`);
+    const reqA = httpMock.expectOne(
+      `${environment.apiUrl}/merchants/stores/store-123/orders/ord-A`,
+    );
+    const reqB = httpMock.expectOne(
+      `${environment.apiUrl}/merchants/stores/store-123/orders/ord-B`,
+    );
 
     // reqB termina primero
     reqB.flush({ ...mockDetailResponse, id: 'ord-B', customerName: 'Cliente B' });
@@ -338,10 +350,11 @@ describe('OrderService', () => {
     expect(service.activeTab()).toBe('READY');
     expect(service.currentPage()).toBe(0);
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '0' &&
-      r.params.get('status') === 'READY',
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '0' &&
+        r.params.get('status') === 'READY',
     );
     req.flush(mockPageResponse);
   });
@@ -349,9 +362,10 @@ describe('OrderService', () => {
   it('debe cambiar de página con setPage y ejecutar GET con la página indicada', () => {
     service.setPage(3);
 
-    const req = httpMock.expectOne((r) =>
-      r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
-      r.params.get('page') === '3',
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('page') === '3',
     );
     req.flush({ ...mockPageResponse, page: 3 });
     expect(service.currentPage()).toBe(3);
@@ -528,7 +542,9 @@ describe('OrderService', () => {
 
       // El estado local se reconcilia con la verdad de PostgreSQL
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
-      expect(toastMock.info).toHaveBeenCalledWith('Estado del pedido sincronizado con el servidor.');
+      expect(toastMock.info).toHaveBeenCalledWith(
+        'Estado del pedido sincronizado con el servidor.',
+      );
     });
 
     it('debe sincronizar selectedOrder y selectedOrderDetail en el Drawer', () => {
@@ -574,9 +590,8 @@ describe('OrderService', () => {
       });
 
       // Al no pertenecer a 'CONFIRMED', debe invocar loadOrders para refrescar el filtro y totalElements
-      const reloadReq = httpMock.expectOne((r) =>
-        r.url.includes('/orders') &&
-        r.params.get('status') === 'CONFIRMED',
+      const reloadReq = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && r.params.get('status') === 'CONFIRMED',
       );
       expect(reloadReq.request.method).toBe('GET');
       reloadReq.flush({
@@ -611,7 +626,9 @@ describe('OrderService', () => {
 
       // Bloqueo de acciones ciegas adicionales mientras esté en verificación pendiente
       service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
-      httpMock.expectNone(`${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`);
+      httpMock.expectNone(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
     });
 
     it('debe permitir verificación manual mediante verifyOrderStatus y sincronizar si ya se aplicó el cambio', () => {
@@ -732,7 +749,9 @@ describe('OrderService', () => {
 
       service.updateOrderStatus('ord-123', 'CANCELLED', 'store-123').subscribe();
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/merchants/stores/store-123/orders/ord-123/status`);
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-123/status`,
+      );
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual({ status: 'CANCELLED' });
 
@@ -762,7 +781,9 @@ describe('OrderService', () => {
       });
 
       expect(service.orders().length).toBe(initialCount);
-      expect(toastMock.info).toHaveBeenCalledWith('La creación manual de pedidos estará disponible próximamente.');
+      expect(toastMock.info).toHaveBeenCalledWith(
+        'La creación manual de pedidos estará disponible próximamente.',
+      );
     });
 
     it('debe mantener channelFilter bloqueado en ALL y no descartar pedidos por canales no soportados', () => {
@@ -822,6 +843,298 @@ describe('OrderService', () => {
       const req = httpMock.expectOne((r) => r.url.includes('/orders'));
       expect(req.request.method).toBe('GET');
       req.flush(mockPageResponse);
+    });
+  });
+
+  describe('getOrderStatusCounts y gestión reactiva de contadores', () => {
+    const mockCountsResponse: MerchantOrderStatusCounts = {
+      all: 48,
+      confirmed: 12,
+      inPreparation: 6,
+      ready: 4,
+      outForDelivery: 2,
+      completed: 20,
+      cancelled: 4,
+    };
+
+    it('debe consultar contadores históricos sin parámetro date con la URL y método correctos', () => {
+      service.getOrderStatusCounts('store-123').subscribe((counts) => {
+        expect(counts).toEqual(mockCountsResponse);
+        expect(counts.all).toBe(48);
+        expect(counts.confirmed).toBe(12);
+        expect(counts.cancelled).toBe(4);
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.has('date')).toBe(false);
+
+      req.flush(mockCountsResponse);
+    });
+
+    it('debe consultar contadores diarios con parámetro date en formato YYYY-MM-DD', () => {
+      service.getOrderStatusCounts('store-123', '2026-11-14').subscribe((counts) => {
+        expect(counts).toEqual(mockCountsResponse);
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=2026-11-14`,
+      );
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('date')).toBe('2026-11-14');
+
+      req.flush(mockCountsResponse);
+    });
+
+    it('debe propagar error si storeId no puede ser determinado en getOrderStatusCounts', () => {
+      storeService.currentStore.set(null);
+
+      service.getOrderStatusCounts().subscribe({
+        next: () => {
+          throw new Error('No debió resolverse sin storeId');
+        },
+        error: (err) => {
+          expect(err.message).toContain('No se pudo determinar la tienda activa');
+        },
+      });
+
+      httpMock.expectNone(`${environment.apiUrl}/merchants/stores/null/orders/counts`);
+    });
+
+    it('loadOrderCounts debe actualizar señales reactivas de contadores históricos y tabCounts', () => {
+      service.loadOrderCounts('store-123').subscribe();
+
+      expect(service.isCountsLoading()).toBe(true);
+      expect(service.tabCounts().all).toBe('...');
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+      req.flush(mockCountsResponse);
+
+      expect(service.isCountsLoading()).toBe(false);
+      expect(service.orderCounts()).toEqual(mockCountsResponse);
+      expect(service.totalOrdersCount()).toBe(48);
+      expect(service.confirmedCount()).toBe(12);
+      expect(service.inPrepCount()).toBe(6);
+      expect(service.readyCount()).toBe(4);
+      expect(service.completedCount()).toBe(20);
+      expect(service.remainingDeliveriesCount()).toBe(10); // 6 en preparación + 4 listos
+      expect(service.tabCounts().all).toBe(48);
+      expect(service.tabCounts().confirmed).toBe(12);
+      expect(service.tabCounts().inPreparation).toBe(6);
+      expect(service.tabCounts().ready).toBe(4);
+      expect(service.tabCounts().completed).toBe(20);
+    });
+
+    it('loadTodayOrderCounts debe consultar con la fecha operativa de Lima y actualizar activeOrdersTodayCount', () => {
+      service.loadTodayOrderCounts('store-123').subscribe();
+
+      expect(service.isTodayCountsLoading()).toBe(true);
+      const todayLima = getOperatingDateLima();
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockCountsResponse);
+
+      expect(service.isTodayCountsLoading()).toBe(false);
+      expect(service.todayOrderCounts()).toEqual(mockCountsResponse);
+      // Pedidos activos del sidebar: confirmed (12) + inPreparation (6) + ready (4) = 22
+      // Excluye outForDelivery (2), completed (20), cancelled (4)
+      expect(service.activeOrdersTodayCount()).toBe(22);
+    });
+
+    it('debe manejar error HTTP en contadores sin enmascarar en ceros ni destruir listado', () => {
+      service.loadOrderCounts('store-123').subscribe();
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+      req.flush({ message: 'Error interno' }, { status: 500, statusText: 'Server Error' });
+
+      expect(service.isCountsLoading()).toBe(false);
+      expect(service.orderCounts()).toBeNull();
+      expect(service.countsError()).toBe('Error al consultar contadores de pedidos');
+      expect(service.tabCounts().all).toBe('—');
+    });
+
+    it('debe descartar respuestas fuera de orden (race condition) si llega una respuesta más reciente', () => {
+      service.loadOrderCounts('store-123').subscribe();
+      const req1 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+
+      service.loadOrderCounts('store-123', true).subscribe();
+      const req2 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+
+      // req1 responde después con datos viejos
+      req1.flush({ ...mockCountsResponse, all: 10 });
+      expect(service.orderCounts()).toBeNull();
+
+      // req2 responde con datos vigentes
+      req2.flush({ ...mockCountsResponse, all: 50 });
+      expect(service.orderCounts()?.all).toBe(50);
+    });
+
+    it('debe deduplicar peticiones concurrentes en vuelo para la misma tienda y fecha', () => {
+      let emission1: MerchantOrderStatusCounts | null = null;
+      let emission2: MerchantOrderStatusCounts | null = null;
+
+      // Dos invocaciones concurrentes (ej. Dashboard y Sidebar simultáneos)
+      service.loadTodayOrderCounts('store-123').subscribe((counts) => (emission1 = counts));
+      service.loadTodayOrderCounts('store-123').subscribe((counts) => (emission2 = counts));
+
+      const todayLima = service.currentOperatingDate();
+      // Solo debe existir UNA petición HTTP en curso
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+      expect(req.request.method).toBe('GET');
+
+      req.flush(mockCountsResponse);
+
+      // Ambas suscripciones reciben el mismo resultado deduplicado
+      expect(emission1).toEqual(mockCountsResponse);
+      expect(emission2).toEqual(mockCountsResponse);
+    });
+
+    it('debe permitir forzar un refresco (force=true) tras mutación sin usar caché en vuelo', () => {
+      service.loadTodayOrderCounts('store-123').subscribe();
+      const todayLima = service.currentOperatingDate();
+      const req1 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+
+      // Refresco forzado explícito (ej. después de mutación)
+      service.loadTodayOrderCounts('store-123', true).subscribe();
+      const req2 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+
+      req1.flush(mockCountsResponse);
+      req2.flush({ ...mockCountsResponse, confirmed: 15 });
+
+      expect(service.todayOrderCounts()?.confirmed).toBe(15);
+    });
+
+    it('debe preservar datos previos y activar isTodayOutdated si falla una actualización diaria', () => {
+      // Estado previo válido
+      service.todayOrderCounts.set(mockCountsResponse);
+      service.todayOperatingDate.set(service.currentOperatingDate());
+      service.todayCountsError.set(null);
+      expect(service.isTodayOutdated()).toBe(false);
+
+      // Intento de refresco que falla
+      service.loadTodayOrderCounts('store-123', true).subscribe();
+      const todayLima = service.currentOperatingDate();
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+      req.flush({ message: 'Error temporal' }, { status: 500, statusText: 'Server Error' });
+
+      // Los datos previos no son destruidos pero quedan marcados como desactualizados
+      expect(service.todayOrderCounts()).toEqual(mockCountsResponse);
+      expect(service.todayCountsError()).toBe('Error al consultar contadores del día');
+      expect(service.isTodayOutdated()).toBe(true);
+    });
+
+    it('debe detectar cruce de medianoche en Lima, invalidar contadores previos y refrescar', () => {
+      service.todayOrderCounts.set(mockCountsResponse);
+      service.todayOperatingDate.set('2026-11-14');
+      service.currentOperatingDate.set('2026-11-14');
+
+      // Simular transición a nuevo día operativo
+      (service as any).handleOperatingDateTransition('2026-11-15');
+
+      expect(service.currentOperatingDate()).toBe('2026-11-15');
+      // Contadores del día anterior son invalidados
+      expect(service.todayOrderCounts()).toBeNull();
+      expect(service.todayOperatingDate()).toBeNull();
+
+      // Refresco automático solicitado para la nueva fecha
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=2026-11-15`,
+      );
+      req.flush({ ...mockCountsResponse, all: 5, confirmed: 2, ready: 0, inPreparation: 1 });
+
+      expect(service.todayOrderCounts()?.all).toBe(5);
+      expect(service.todayOperatingDate()).toBe('2026-11-15');
+    });
+
+    it('debe limpiar el temporizador de medianoche al llamar a ngOnDestroy', () => {
+      service.ngOnDestroy();
+      expect((service as any).midnightTimerId).toBeNull();
+    });
+
+    it('debe descartar respuesta de contadores si la tienda activa cambió mientras estaba en vuelo', () => {
+      service.loadOrderCounts('store-123').subscribe();
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+
+      // Simular cambio de tienda en StoreService
+      storeService.currentStore.set({
+        ...storeService.currentStore()!,
+        id: 'store-otra',
+      });
+
+      req.flush(mockCountsResponse);
+      expect(service.orderCounts()).toBeNull();
+    });
+
+    it('debe refrescar contadores tras mutación exitosa en updateOrderStatus cuando los contadores están activos', () => {
+      service.orderCounts.set(mockCountsResponse);
+      service.todayOrderCounts.set(mockCountsResponse);
+
+      service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
+
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
+      patchReq.flush({
+        ...mockDetailResponse,
+        status: 'IN_PREPARATION',
+      });
+
+      const countsReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
+      );
+      const todayLima = getOperatingDateLima();
+      const todayCountsReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+
+      countsReq.flush({
+        ...mockCountsResponse,
+        confirmed: 11,
+        inPreparation: 7,
+      });
+      todayCountsReq.flush({
+        ...mockCountsResponse,
+        confirmed: 11,
+        inPreparation: 7,
+      });
+
+      expect(service.confirmedCount()).toBe(11);
+      expect(service.inPrepCount()).toBe(7);
+    });
+
+    it('debe limpiar los contadores al llamar a clearOrders', () => {
+      service.orderCounts.set(mockCountsResponse);
+      service.todayOrderCounts.set(mockCountsResponse);
+
+      service.clearOrders();
+
+      expect(service.orderCounts()).toBeNull();
+      expect(service.todayOrderCounts()).toBeNull();
+      expect(service.countsError()).toBeNull();
+      expect(service.todayCountsError()).toBeNull();
     });
   });
 });

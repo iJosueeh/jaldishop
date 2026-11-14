@@ -1,11 +1,17 @@
 <section class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- Métrica 1: Cupos de Hoy -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+  <div
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+  >
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span
+        class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant"
+      >
         Cupos de Hoy
       </span>
-      <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary-container font-bold text-xs">
+      <span
+        class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary-container font-bold text-xs"
+      >
         @if (hasCapacityOccupied()) {
           {{ capacityOccupied() }} de {{ capacityTotal() > 0 ? capacityTotal() : 10 }}
         } @else {
@@ -27,20 +33,29 @@
 
     <p class="text-xs text-on-surface-variant font-medium">
       @if (hasCapacityOccupied()) {
-        {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
+        {{ availableCapacity() }}
+        {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
       } @else {
-        Capacidad configurada: {{ capacityTotal() > 0 ? capacityTotal() + ' cupos' : 'Sin franjas' }} (ocupación en desarrollo)
+        Capacidad configurada:
+        {{ capacityTotal() > 0 ? capacityTotal() + ' cupos' : 'Sin franjas' }} (ocupación en
+        desarrollo)
       }
     </p>
   </div>
 
   <!-- Métrica 2: Despachos Restantes -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+  <div
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+  >
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span
+        class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant"
+      >
         Despachos Restantes
       </span>
-      <span class="p-1 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+      <span
+        class="p-1 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center"
+      >
         <ng-icon name="matLocalShippingOutline" class="text-[16px]" />
       </span>
     </div>
@@ -53,22 +68,31 @@
     </div>
 
     <p class="text-xs text-on-surface-variant font-medium">
-      <strong class="text-primary-container font-bold">{{ inPrepCount() }} en preparación</strong> · {{ readyCount() }} listos en taller (en página)
+      <strong class="text-primary-container font-bold">{{ inPrepCount() }} en preparación</strong> ·
+      {{ readyCount() }} listos para entrega
     </p>
   </div>
 
   <!-- Métrica 3: Tiempo promedio -->
-  <div class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+  <div
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+  >
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+      <span
+        class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-on-surface-variant"
+      >
         Tiempo Promedio
       </span>
       @if (hasAveragePace()) {
-        <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
+        <span
+          class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20"
+        >
           Ritmo fluido
         </span>
       } @else {
-        <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider border border-outline-variant/30">
+        <span
+          class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider border border-outline-variant/30"
+        >
           Sin registros
         </span>
       }
@@ -89,7 +113,11 @@
     </div>
 
     <p class="text-xs text-on-surface-variant font-medium">
-      {{ hasAveragePace() ? 'Producción sincronizada sin demoras' : 'Se calculará al completar pedidos' }}
+      {{
+        hasAveragePace()
+          ? 'Producción sincronizada sin demoras'
+          : 'Se calculará al completar pedidos'
+      }}
     </p>
   </div>
 </section>
