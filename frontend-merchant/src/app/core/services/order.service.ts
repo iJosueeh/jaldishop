@@ -80,6 +80,7 @@ export class OrderService implements OnDestroy {
 
   // Control de Concurrencia, Mutaciones en Vuelo e Incertidumbre
   private activeListRequestId = 0;
+  private isListHttpInFlight = false;
   private activeCountsRequestId = 0;
   private activeTodayCountsRequestId = 0;
   private activeDetailOrderId: string | null = null;
@@ -322,6 +323,7 @@ export class OrderService implements OnDestroy {
     search?: string,
   ): Observable<MerchantOrderPageResponse | null> {
     const requestId = ++this.activeListRequestId;
+    this.isListHttpInFlight = true;
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -352,6 +354,7 @@ export class OrderService implements OnDestroy {
         ) {
           return; // Descartar respuesta obsoleta o si no hay tienda activa o cambió
         }
+        this.isListHttpInFlight = false;
         const mapped = (response.content || []).map(mapSummaryToMerchantOrder);
         // Protección de mutaciones en vuelo: preservar el estado en memoria de pedidos en actualización
         const currentOrdersMap = new Map(this.orders().map((o) => [o.id, o]));
@@ -377,6 +380,7 @@ export class OrderService implements OnDestroy {
           requestId === this.activeListRequestId &&
           currentActiveStoreId === storeId
         ) {
+          this.isListHttpInFlight = false;
           this.isLoading.set(false);
           this.isLoaded.set(true);
           this.handleHttpError(err);
@@ -465,8 +469,8 @@ export class OrderService implements OnDestroy {
       return;
     }
 
-    const hadInFlightQuery = this.isLoading();
-    const hasActiveSearch = this.appliedSearchQuery().trim().length > 0;
+    const hadInFlightListHttp = this.isListHttpInFlight;
+    this.isListHttpInFlight = false;
 
     // Invalidar cualquier petición de listado en vuelo anterior para que no sobreescriba esta actualización confirmada
     this.activeListRequestId++;
@@ -488,7 +492,8 @@ export class OrderService implements OnDestroy {
     // 3. Evaluar si se requiere recarga remota del listado o resolución de carga
     const tab = this.activeTab();
     const isOutdatedTab = tab !== 'ALL' && detail.status !== tab;
-    const requiresRemoteReload = isOutdatedTab || (hadInFlightQuery && hasActiveSearch);
+    // Si la mutación invalida una solicitud HTTP de listado vigente, o el pedido cambió de pestaña:
+    const requiresRemoteReload = isOutdatedTab || hadInFlightListHttp;
 
     // Solo recargar si no hay un debounce de búsqueda activo en curso
     // (si hay debounce activo, el temporizador disparará la consulta con el término nuevo al expirar)
@@ -501,11 +506,6 @@ export class OrderService implements OnDestroy {
           storeId,
           this.appliedSearchQuery(),
         ).subscribe();
-      } else if (hadInFlightQuery) {
-        // Si el pedido se mantiene en la pestaña y no había búsqueda activa en vuelo,
-        // la actualización en memoria es suficiente y finalizamos isLoading para no dejarlo bloqueado.
-        this.isLoading.set(false);
-        this.isLoaded.set(true);
       }
     }
 
@@ -808,6 +808,7 @@ export class OrderService implements OnDestroy {
 
   clearOrders(): void {
     this.activeListRequestId++;
+    this.isListHttpInFlight = false;
     this.activeDetailOrderId = null;
     this.updatingOrderIds.set(new Set());
     this.pendingVerificationOrderIds.set(new Set());

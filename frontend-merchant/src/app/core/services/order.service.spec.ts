@@ -721,6 +721,9 @@ describe('OrderService', () => {
       });
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
 
+      // Se emite la petición de reconciliación porque había una consulta de listado en vuelo
+      const reconReq = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+
       // 4. Ahora llega la respuesta retrasada del listado con el snapshot antiguo CONFIRMED
       listReq.flush({
         ...mockPageResponse,
@@ -735,6 +738,20 @@ describe('OrderService', () => {
 
       // 5. La respuesta del listado debe haber sido descartada y el estado confirmado se mantiene
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
+
+      // 6. Responde la reconciliación y confirma estado final
+      reconReq.flush({
+        ...mockPageResponse,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-1039',
+            status: 'IN_PREPARATION',
+          },
+        ],
+      });
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      expect(service.isLoading()).toBe(false);
     });
 
     it('debe enviar PATCH con status CANCELLED y actualizar el estado', () => {
@@ -1484,6 +1501,110 @@ describe('OrderService', () => {
       expect(service.totalElements()).toBe(1);
       expect(service.totalPages()).toBe(1);
       expect(service.currentPage()).toBe(0);
+    });
+
+    it('debe reconciliar el listado remoto con search omitido y no finalizar isLoading prematuramente cuando un PATCH completa durante una carga HTTP sin búsqueda activa (P1 Regresión)', () => {
+      // 1. Pestaña ALL y búsqueda vacía
+      service.activeTab.set('ALL');
+      service.appliedSearchQuery.set('');
+      service.searchQuery.set('');
+
+      // 2. Página con datos previamente cargados (ej. página 1 con 50 elementos)
+      service.orders.set([
+        {
+          id: 'ord-prev',
+          orderNumber: '#PED-PREV',
+          customerName: 'Cliente Previo',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.totalElements.set(50);
+      service.totalPages.set(5);
+      service.currentPage.set(1);
+
+      // 3. Nueva petición HTTP de listado en vuelo para página 1
+      service.loadOrders(1, 10, 'ALL', 'store-123').subscribe();
+      const listReq = httpMock.expectOne((r) => {
+        return (
+          r.url.endsWith('/orders') &&
+          r.params.get('page') === '1' &&
+          r.params.get('size') === '10' &&
+          !r.params.has('search') &&
+          !r.params.has('status')
+        );
+      });
+      expect(service.isLoading()).toBe(true);
+
+      // 4. PATCH de mutación completado antes de la respuesta
+      service.updateOrderStatus('ord-prev', 'READY', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-prev/status`,
+      );
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-prev',
+        status: 'READY',
+      });
+
+      // La mutación actualiza en memoria, pero isLoading NO finaliza prematuramente:
+      // se emite la reconciliación HTTP con search omitido
+      expect(service.isLoading()).toBe(true);
+      const reconReq = httpMock.expectOne((r) => {
+        return (
+          r.url.endsWith('/orders') &&
+          r.params.get('page') === '1' &&
+          r.params.get('size') === '10' &&
+          !r.params.has('search') &&
+          !r.params.has('status')
+        );
+      });
+
+      // 5. Respuesta antigua retrasada responde y es descartada
+      listReq.flush({
+        ...mockPageResponse,
+        page: 1,
+        totalElements: 999,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-stale-page',
+            status: 'CONFIRMED',
+          },
+        ],
+      });
+      expect(service.orders().find((o) => o.id === 'ord-stale-page')).toBeUndefined();
+      expect(service.isLoading()).toBe(true);
+
+      // 6. Reconciliación HTTP responde con datos válidos
+      reconReq.flush({
+        ...mockPageResponse,
+        page: 1,
+        size: 10,
+        totalElements: 50,
+        totalPages: 5,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-prev',
+            status: 'READY',
+          },
+        ],
+      });
+
+      // 7. Verificación final de orders, totalElements, totalPages, currentPage e isLoading
+      expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-prev');
+      expect(service.orders()[0].status).toBe('READY');
+      expect(service.totalElements()).toBe(50);
+      expect(service.totalPages()).toBe(5);
+      expect(service.currentPage()).toBe(1);
     });
 
     it('debe impedir que un PATCH perteneciente a una tienda anterior modifique el listado de la tienda activa', () => {
