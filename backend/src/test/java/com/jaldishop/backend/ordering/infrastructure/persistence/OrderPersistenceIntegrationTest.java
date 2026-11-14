@@ -50,6 +50,7 @@ class OrderPersistenceIntegrationTest {
     // Tiendas dedicadas para la prueba de persistencia
     private static UUID storeAId;
     private static UUID storeBId;
+    private static UUID storeSpecialId;
     private static UUID customerUserId;
     private static final List<UUID> createdUserIds = new ArrayList<>();
     private static final List<UUID> createdStoreIds = new ArrayList<>();
@@ -88,9 +89,11 @@ class OrderPersistenceIntegrationTest {
             customerUserId = createTestUser(conn, "customer.persist@" + UUID.randomUUID() + ".com");
             UUID ownerA = createTestUser(conn, "owner.persist.a@" + UUID.randomUUID() + ".com");
             UUID ownerB = createTestUser(conn, "owner.persist.b@" + UUID.randomUUID() + ".com");
+            UUID ownerSpecial = createTestUser(conn, "owner.persist.special@" + UUID.randomUUID() + ".com");
 
             storeAId = createTestStore(conn, ownerA, "store-persist-a-" + UUID.randomUUID());
             storeBId = createTestStore(conn, ownerB, "store-persist-b-" + UUID.randomUUID());
+            storeSpecialId = createTestStore(conn, ownerSpecial, "store-persist-special-" + UUID.randomUUID());
         }
 
         Instant baseTime = Instant.now().minus(2, ChronoUnit.HOURS);
@@ -115,18 +118,18 @@ class OrderPersistenceIntegrationTest {
             storeAOrderNumbers.add(orderNumber);
         }
 
-        // Sembrar 6 pedidos especiales en Tienda A para verificar escape estricto de %, _ y \\
+        // Sembrar 6 pedidos especiales en Tienda Especial para verificar escape estricto de %, _ y \\
         // 1. Objetivo con '%' y señuelo para detectar falso positivo si '%' actuara como comodín
-        seedOrder(UUID.randomUUID(), "JAL-ESC-100%OFF", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(51, ChronoUnit.MINUTES), "Cliente 100% Descuento", "999%888");
-        seedOrder(UUID.randomUUID(), "JAL-ESC-100XOFF", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(52, ChronoUnit.MINUTES), "Cliente 100X Descuento", "9990888");
+        seedOrder(UUID.randomUUID(), "JAL-ESC-100%OFF", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(51, ChronoUnit.MINUTES), "Cliente 100% Descuento", "999%888");
+        seedOrder(UUID.randomUUID(), "JAL-ESC-100XOFF", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(52, ChronoUnit.MINUTES), "Cliente 100X Descuento", "9990888");
 
         // 2. Objetivo con '_' y señuelo para detectar falso positivo si '_' actuara como comodín de un caracter
-        seedOrder(UUID.randomUUID(), "JAL_ESC_UNDER", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(53, ChronoUnit.MINUTES), "Maria_Jose", "999_777");
-        seedOrder(UUID.randomUUID(), "JAL-ESC-UNDER", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(54, ChronoUnit.MINUTES), "MariaXJose", "9998777");
+        seedOrder(UUID.randomUUID(), "JAL_ESC_UNDER", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(53, ChronoUnit.MINUTES), "Maria_Jose", "999_777");
+        seedOrder(UUID.randomUUID(), "JAL-ESC-UNDER", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(54, ChronoUnit.MINUTES), "MariaXJose", "9998777");
 
         // 3. Objetivo con '\\' y señuelo para detectar falso positivo o error de escape con barra invertida
-        seedOrder(UUID.randomUUID(), "JAL\\ESC\\SLASH", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(55, ChronoUnit.MINUTES), "AC\\DC Fan", "999\\666");
-        seedOrder(UUID.randomUUID(), "JAL-ESC-SLASH", customerUserId, storeAId, OrderStatus.CONFIRMED, baseTime.plus(56, ChronoUnit.MINUTES), "ACDC Fan", "999666");
+        seedOrder(UUID.randomUUID(), "JAL\\ESC\\SLASH", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(55, ChronoUnit.MINUTES), "AC\\DC Fan", "999\\666");
+        seedOrder(UUID.randomUUID(), "JAL-ESC-SLASH", customerUserId, storeSpecialId, OrderStatus.CONFIRMED, baseTime.plus(56, ChronoUnit.MINUTES), "ACDC Fan", "999666");
 
         // Sembrar 5 pedidos en Tienda B
         for (int i = 0; i < 5; i++) {
@@ -443,50 +446,54 @@ class OrderPersistenceIntegrationTest {
     void shouldSearchWithLiteralSpecialCharactersWithoutWildcardLeak() {
         // 1. Literal '%': Buscar "100%OFF" encuentra JAL-ESC-100%OFF pero NO JAL-ESC-100XOFF (falso positivo si '%' fuera comodín)
         String percentPattern = SearchQueryUtils.toSqlLikeContainsPattern("100%OFF");
-        Page<Order> percentResult = orderRepository.searchOrders(storeAId, null, percentPattern, PageRequest.of(0, 10));
+        Page<Order> percentResult = orderRepository.searchOrders(storeSpecialId, null, percentPattern, PageRequest.of(0, 10));
         assertThat(percentResult.getTotalElements()).isEqualTo(1);
         assertThat(percentResult.getContent().get(0).getOrderNumber()).isEqualTo("JAL-ESC-100%OFF");
 
         // Coincidencia por nombre de cliente con '%'
         String percentNamePattern = SearchQueryUtils.toSqlLikeContainsPattern("100% Descuento");
-        Page<Order> percentNameResult = orderRepository.searchOrders(storeAId, null, percentNamePattern, PageRequest.of(0, 10));
+        Page<Order> percentNameResult = orderRepository.searchOrders(storeSpecialId, null, percentNamePattern, PageRequest.of(0, 10));
         assertThat(percentNameResult.getTotalElements()).isEqualTo(1);
         assertThat(percentNameResult.getContent().get(0).getCustomerName()).isEqualTo("Cliente 100% Descuento");
 
         // Coincidencia por teléfono con '%'
         String percentPhonePattern = SearchQueryUtils.toSqlLikeContainsPattern("999%888");
-        Page<Order> percentPhoneResult = orderRepository.searchOrders(storeAId, null, percentPhonePattern, PageRequest.of(0, 10));
+        Page<Order> percentPhoneResult = orderRepository.searchOrders(storeSpecialId, null, percentPhonePattern, PageRequest.of(0, 10));
         assertThat(percentPhoneResult.getTotalElements()).isEqualTo(1);
         assertThat(percentPhoneResult.getContent().get(0).getCustomerPhone()).isEqualTo("999%888");
 
         // 2. Literal '_': Buscar "ESC_UNDER" encuentra JAL_ESC_UNDER pero NO JAL-ESC-UNDER (falso positivo si '_' fuera comodín)
         String underPattern = SearchQueryUtils.toSqlLikeContainsPattern("ESC_UNDER");
-        Page<Order> underResult = orderRepository.searchOrders(storeAId, null, underPattern, PageRequest.of(0, 10));
+        Page<Order> underResult = orderRepository.searchOrders(storeSpecialId, null, underPattern, PageRequest.of(0, 10));
         assertThat(underResult.getTotalElements()).isEqualTo(1);
         assertThat(underResult.getContent().get(0).getOrderNumber()).isEqualTo("JAL_ESC_UNDER");
 
         // Coincidencia por nombre con '_'
         String underNamePattern = SearchQueryUtils.toSqlLikeContainsPattern("Maria_Jose");
-        Page<Order> underNameResult = orderRepository.searchOrders(storeAId, null, underNamePattern, PageRequest.of(0, 10));
+        Page<Order> underNameResult = orderRepository.searchOrders(storeSpecialId, null, underNamePattern, PageRequest.of(0, 10));
         assertThat(underNameResult.getTotalElements()).isEqualTo(1);
         assertThat(underNameResult.getContent().get(0).getCustomerName()).isEqualTo("Maria_Jose");
 
         // 3. Literal '\\': Buscar "\\ESC\\SLASH" encuentra JAL\\ESC\\SLASH pero NO JAL-ESC-SLASH
         String slashPattern = SearchQueryUtils.toSqlLikeContainsPattern("\\ESC\\SLASH");
-        Page<Order> slashResult = orderRepository.searchOrders(storeAId, null, slashPattern, PageRequest.of(0, 10));
+        Page<Order> slashResult = orderRepository.searchOrders(storeSpecialId, null, slashPattern, PageRequest.of(0, 10));
         assertThat(slashResult.getTotalElements()).isEqualTo(1);
         assertThat(slashResult.getContent().get(0).getOrderNumber()).isEqualTo("JAL\\ESC\\SLASH");
 
         // Coincidencia por cliente con '\\'
         String slashNamePattern = SearchQueryUtils.toSqlLikeContainsPattern("AC\\DC Fan");
-        Page<Order> slashNameResult = orderRepository.searchOrders(storeAId, null, slashNamePattern, PageRequest.of(0, 10));
+        Page<Order> slashNameResult = orderRepository.searchOrders(storeSpecialId, null, slashNamePattern, PageRequest.of(0, 10));
         assertThat(slashNameResult.getTotalElements()).isEqualTo(1);
         assertThat(slashNameResult.getContent().get(0).getCustomerName()).isEqualTo("AC\\DC Fan");
 
-        // 4. Aislamiento multi-tenant con caracteres especiales: Buscar el pedido con '%' en Tienda B retorna 0
-        Page<Order> crossTenantSpecial = orderRepository.searchOrders(storeBId, null, percentPattern, PageRequest.of(0, 10));
-        assertThat(crossTenantSpecial.getTotalElements()).isZero();
-        assertThat(crossTenantSpecial.getContent()).isEmpty();
+        // 4. Aislamiento multi-tenant con caracteres especiales: Buscar el pedido con '%' en Tienda A y Tienda B retorna 0
+        Page<Order> crossTenantA = orderRepository.searchOrders(storeAId, null, percentPattern, PageRequest.of(0, 10));
+        assertThat(crossTenantA.getTotalElements()).isZero();
+        assertThat(crossTenantA.getContent()).isEmpty();
+
+        Page<Order> crossTenantB = orderRepository.searchOrders(storeBId, null, percentPattern, PageRequest.of(0, 10));
+        assertThat(crossTenantB.getTotalElements()).isZero();
+        assertThat(crossTenantB.getContent()).isEmpty();
     }
 
     private static void seedOrder(UUID orderId, String orderNumber, UUID userId, UUID storeId,
