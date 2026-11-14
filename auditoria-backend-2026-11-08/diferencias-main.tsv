@@ -1,0 +1,765 @@
+estado_git	rutas	clasificacion
+M	.github/workflows/ci.yml	Configuración de repositorio / CI
+M	.gitignore	Configuración de repositorio / CI
+M	backend/README.md	Backend base / inventario / checkout / capacidad / soporte
+A	backend/docs/mercadopago-reconciliacion-individual.md	Mercado Pago / persistencia financiera
+A	backend/docs/phase-2b2-manual-investigation.md	Backend base / inventario / checkout / capacidad / soporte
+A	backend/docs/phase-2c1-reference-read.md	Backend base / inventario / checkout / capacidad / soporte
+D	backend/jaldishop-api.postman_collection.json	Backend base / inventario / checkout / capacidad / soporte
+A	backend/run-safe-sandbox.sh	Backend base / inventario / checkout / capacidad / soporte
+A	backend/seed-e2e.sh	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/main/java/com/jaldishop/backend/address/application/CreateCustomerAddressService.java -> backend/src/main/java/com/jaldishop/backend/address/application/service/CreateCustomerAddressService.java	Direcciones; corrección / refactor previo
+R087	backend/src/main/java/com/jaldishop/backend/address/application/DeleteCustomerAddressService.java -> backend/src/main/java/com/jaldishop/backend/address/application/service/DeleteCustomerAddressService.java	Direcciones; corrección / refactor previo
+R089	backend/src/main/java/com/jaldishop/backend/address/application/GetCustomerAddressesService.java -> backend/src/main/java/com/jaldishop/backend/address/application/service/GetCustomerAddressesService.java	Direcciones; corrección / refactor previo
+R090	backend/src/main/java/com/jaldishop/backend/address/application/SetDefaultCustomerAddressService.java -> backend/src/main/java/com/jaldishop/backend/address/application/service/SetDefaultCustomerAddressService.java	Direcciones; corrección / refactor previo
+R085	backend/src/main/java/com/jaldishop/backend/address/application/UpdateCustomerAddressService.java -> backend/src/main/java/com/jaldishop/backend/address/application/service/UpdateCustomerAddressService.java	Direcciones; corrección / refactor previo
+R091	backend/src/main/java/com/jaldishop/backend/address/domain/CustomerAddress.java -> backend/src/main/java/com/jaldishop/backend/address/domain/model/CustomerAddress.java	Direcciones; corrección / refactor previo
+R082	backend/src/main/java/com/jaldishop/backend/address/domain/CustomerAddressRepository.java -> backend/src/main/java/com/jaldishop/backend/address/domain/repository/CustomerAddressRepository.java	Direcciones; corrección / refactor previo
+M	backend/src/main/java/com/jaldishop/backend/address/infrastructure/persistence/adapter/JpaCustomerAddressRepositoryAdapter.java	Direcciones; corrección / refactor previo
+M	backend/src/main/java/com/jaldishop/backend/address/infrastructure/persistence/mapper/CustomerAddressPersistenceMapper.java	Direcciones; corrección / refactor previo
+M	backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java	Direcciones; corrección / refactor previo
+R076	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/EffectiveCapacityQuery.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/query/EffectiveCapacityQuery.java	Backend base / inventario / checkout / capacidad / soporte
+R070	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/CapacityAvailabilityResult.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/result/CapacityAvailabilityResult.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/CapacitySlotAvailability.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/result/CapacitySlotAvailability.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/EffectiveCapacityResolution.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/result/EffectiveCapacityResolution.java	Backend base / inventario / checkout / capacidad / soporte
+R054	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/EffectiveCapacityResult.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/result/EffectiveCapacityResult.java	Backend base / inventario / checkout / capacidad / soporte
+R050	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/EffectiveCapacitySource.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/result/EffectiveCapacitySource.java	Backend base / inventario / checkout / capacidad / soporte
+R082	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/GetCapacityAvailabilityService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/service/GetCapacityAvailabilityService.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/GetEffectiveCapacityService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/service/GetEffectiveCapacityService.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/main/java/com/jaldishop/backend/capacity/application/availability/ListStoreCapacitySlotsService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/availability/service/ListStoreCapacitySlotsService.java	Backend base / inventario / checkout / capacidad / soporte
+R096	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityConfigurationCommand.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/command/CreateCapacityConfigurationCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityExceptionCommand.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/command/CreateCapacityExceptionCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R096	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/UpdateCapacityConfigurationCommand.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/command/UpdateCapacityConfigurationCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/UpdateCapacityExceptionCommand.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/command/UpdateCapacityExceptionCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityConfigurationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/CreateCapacityConfigurationService.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityExceptionService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/CreateCapacityExceptionService.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/GetStoreCapacityConfigurationsService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/GetStoreCapacityConfigurationsService.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/GetStoreCapacityExceptionsService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/GetStoreCapacityExceptionsService.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/ToggleCapacityConfigurationStatusService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/ToggleCapacityConfigurationStatusService.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/ToggleCapacityExceptionStatusService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/ToggleCapacityExceptionStatusService.java	Backend base / inventario / checkout / capacidad / soporte
+R090	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/UpdateCapacityConfigurationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/UpdateCapacityConfigurationService.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/UpdateCapacityExceptionService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/configuration/service/UpdateCapacityExceptionService.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/CreateCapacityReservationCommand.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/command/CreateCapacityReservationCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/CommitCapacityReservationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/service/CommitCapacityReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/CreateCapacityReservationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/service/CreateCapacityReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/GetCapacityReservationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/service/GetCapacityReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+R080	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/ReleaseCapacityReservationService.java -> backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/service/ReleaseCapacityReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/capacity/application/reservation/service/ReleaseCommittedCapacityReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityErrorCodes.java	Backend base / inventario / checkout / capacidad / soporte
+R056	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityConfigurationStatus.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/enums/CapacityConfigurationStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R055	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityExceptionStatus.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/enums/CapacityExceptionStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R069	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityReservationStatus.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/enums/CapacityReservationStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R066	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityConfiguration.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/model/CapacityConfiguration.java	Backend base / inventario / checkout / capacidad / soporte
+R063	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityException.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/model/CapacityException.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/capacity/domain/model/CapacityPeriod.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityReservation.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/model/CapacityReservation.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityConfigurationRepository.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/repository/CapacityConfigurationRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityExceptionRepository.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/repository/CapacityExceptionRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R082	backend/src/main/java/com/jaldishop/backend/capacity/domain/CapacityReservationRepository.java -> backend/src/main/java/com/jaldishop/backend/capacity/domain/repository/CapacityReservationRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/adapter/CapacityConfigurationRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/adapter/CapacityExceptionRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/adapter/CapacityReservationRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/entity/CapacityConfigurationEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/entity/CapacityExceptionEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/entity/CapacityReservationEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityConfigurationPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityExceptionPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityReservationPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacitySlotsController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/controller/EffectiveCapacityController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/CapacityAvailabilityResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/CapacityConfigurationResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/CapacityExceptionResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/CapacityReservationResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/CapacitySlotResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/capacity/web/dto/EffectiveCapacityResponse.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/cart/application/AddItemToCartCommand.java -> backend/src/main/java/com/jaldishop/backend/cart/application/command/AddItemToCartCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R065	backend/src/main/java/com/jaldishop/backend/cart/application/ClearCartCommand.java -> backend/src/main/java/com/jaldishop/backend/cart/application/command/ClearCartCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R070	backend/src/main/java/com/jaldishop/backend/cart/application/RemoveCartItemCommand.java -> backend/src/main/java/com/jaldishop/backend/cart/application/command/RemoveCartItemCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/cart/application/UpdateCartItemQuantityCommand.java -> backend/src/main/java/com/jaldishop/backend/cart/application/command/UpdateCartItemQuantityCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R064	backend/src/main/java/com/jaldishop/backend/cart/application/GetCartQuery.java -> backend/src/main/java/com/jaldishop/backend/cart/application/query/GetCartQuery.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/main/java/com/jaldishop/backend/cart/application/CartItemView.java -> backend/src/main/java/com/jaldishop/backend/cart/application/result/CartItemView.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/main/java/com/jaldishop/backend/cart/application/CartView.java -> backend/src/main/java/com/jaldishop/backend/cart/application/result/CartView.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/main/java/com/jaldishop/backend/cart/application/CartViewAssembler.java -> backend/src/main/java/com/jaldishop/backend/cart/application/result/CartViewAssembler.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/main/java/com/jaldishop/backend/cart/application/AddItemToCartService.java -> backend/src/main/java/com/jaldishop/backend/cart/application/service/AddItemToCartService.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/main/java/com/jaldishop/backend/cart/application/ClearCartService.java -> backend/src/main/java/com/jaldishop/backend/cart/application/service/ClearCartService.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/cart/application/GetCartService.java -> backend/src/main/java/com/jaldishop/backend/cart/application/service/GetCartService.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/cart/application/RemoveCartItemService.java -> backend/src/main/java/com/jaldishop/backend/cart/application/service/RemoveCartItemService.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/main/java/com/jaldishop/backend/cart/application/UpdateCartItemQuantityService.java -> backend/src/main/java/com/jaldishop/backend/cart/application/service/UpdateCartItemQuantityService.java	Backend base / inventario / checkout / capacidad / soporte
+R098	backend/src/main/java/com/jaldishop/backend/cart/domain/Cart.java -> backend/src/main/java/com/jaldishop/backend/cart/domain/model/Cart.java	Backend base / inventario / checkout / capacidad / soporte
+R098	backend/src/main/java/com/jaldishop/backend/cart/domain/CartItem.java -> backend/src/main/java/com/jaldishop/backend/cart/domain/model/CartItem.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/cart/domain/CartRepository.java -> backend/src/main/java/com/jaldishop/backend/cart/domain/repository/CartRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/cart/infrastructure/persistence/adapter/CartRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/cart/infrastructure/persistence/mapper/CartPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/cart/web/mapper/CartResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+R069	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateCategoryCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/CreateCategoryCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateProductCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/CreateProductCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateProductVariantCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/CreateProductVariantCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateCategoryCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/UpdateCategoryCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateProductCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/UpdateProductCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateProductVariantCommand.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/command/UpdateProductVariantCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R065	backend/src/main/java/com/jaldishop/backend/catalog/application/GetProductsQuery.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/query/GetProductsQuery.java	Backend base / inventario / checkout / capacidad / soporte
+R068	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateCategoryService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/CreateCategoryService.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateProductService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/CreateProductService.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/main/java/com/jaldishop/backend/catalog/application/CreateProductVariantService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/CreateProductVariantService.java	Backend base / inventario / checkout / capacidad / soporte
+R062	backend/src/main/java/com/jaldishop/backend/catalog/application/GetCategoriesService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/GetCategoriesService.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/main/java/com/jaldishop/backend/catalog/application/GetProductVariantsService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/GetProductVariantsService.java	Backend base / inventario / checkout / capacidad / soporte
+R066	backend/src/main/java/com/jaldishop/backend/catalog/application/GetProductsService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/GetProductsService.java	Backend base / inventario / checkout / capacidad / soporte
+R064	backend/src/main/java/com/jaldishop/backend/catalog/application/GetPublicCategoriesService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/GetPublicCategoriesService.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateCategoryService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/UpdateCategoryService.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateProductService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/UpdateProductService.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/main/java/com/jaldishop/backend/catalog/application/UpdateProductVariantService.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/service/UpdateProductVariantService.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/main/java/com/jaldishop/backend/catalog/application/SlugUtils.java -> backend/src/main/java/com/jaldishop/backend/catalog/application/util/SlugUtils.java	Backend base / inventario / checkout / capacidad / soporte
+R051	backend/src/main/java/com/jaldishop/backend/catalog/domain/CategoryStatus.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/enums/CategoryStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R051	backend/src/main/java/com/jaldishop/backend/catalog/domain/ProductStatus.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/enums/ProductStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R051	backend/src/main/java/com/jaldishop/backend/catalog/domain/VariantStatus.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/enums/VariantStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/main/java/com/jaldishop/backend/catalog/domain/Category.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/model/Category.java	Backend base / inventario / checkout / capacidad / soporte
+R096	backend/src/main/java/com/jaldishop/backend/catalog/domain/Product.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/model/Product.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/main/java/com/jaldishop/backend/catalog/domain/ProductImage.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/model/ProductImage.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/main/java/com/jaldishop/backend/catalog/domain/ProductVariant.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/model/ProductVariant.java	Backend base / inventario / checkout / capacidad / soporte
+R092	backend/src/main/java/com/jaldishop/backend/catalog/domain/VariantAttribute.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/model/VariantAttribute.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/catalog/domain/CategoryRepository.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/repository/CategoryRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/main/java/com/jaldishop/backend/catalog/domain/ProductRepository.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/repository/ProductRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R070	backend/src/main/java/com/jaldishop/backend/catalog/domain/ProductVariantRepository.java -> backend/src/main/java/com/jaldishop/backend/catalog/domain/repository/ProductVariantRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/adapter/CategoryRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/adapter/ProductRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/adapter/ProductVariantRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/CategoryPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/ProductPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/ProductVariantPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/infrastructure/persistence/repository/ProductVariantJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicCategoryController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicProductController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/dto/CreateProductVariantRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/dto/UpdateProductVariantRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/dto/VariantAttributeDto.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/mapper/CategoryResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/mapper/ProductResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/catalog/web/mapper/ProductVariantResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/checkout/application/ConfirmPurchaseService.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/checkout/application/PaymentResume.java	Backend base / inventario / checkout / capacidad / soporte
+R068	backend/src/main/java/com/jaldishop/backend/checkout/application/ConfirmPurchaseCommand.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/command/ConfirmPurchaseCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/main/java/com/jaldishop/backend/checkout/application/InitiateCheckoutCommand.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/command/InitiateCheckoutCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R070	backend/src/main/java/com/jaldishop/backend/checkout/application/PaymentReader.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/port/PaymentReader.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/checkout/application/port/PaymentResume.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/main/java/com/jaldishop/backend/checkout/application/CheckoutItemSnapshotAssembler.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/result/CheckoutItemSnapshotAssembler.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/main/java/com/jaldishop/backend/checkout/application/CheckoutResult.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/result/CheckoutResult.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/checkout/application/OrderConfirmation.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/result/OrderConfirmation.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/checkout/application/service/ConfirmPurchaseService.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/main/java/com/jaldishop/backend/checkout/application/InitiateCheckoutService.java -> backend/src/main/java/com/jaldishop/backend/checkout/application/service/InitiateCheckoutService.java	Backend base / inventario / checkout / capacidad / soporte
+R055	backend/src/main/java/com/jaldishop/backend/checkout/domain/CheckoutFulfillmentType.java -> backend/src/main/java/com/jaldishop/backend/checkout/domain/enums/CheckoutFulfillmentType.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/main/java/com/jaldishop/backend/checkout/domain/CheckoutItemSnapshot.java -> backend/src/main/java/com/jaldishop/backend/checkout/domain/model/CheckoutItemSnapshot.java	Backend base / inventario / checkout / capacidad / soporte
+R094	backend/src/main/java/com/jaldishop/backend/checkout/domain/CheckoutPricing.java -> backend/src/main/java/com/jaldishop/backend/checkout/domain/model/CheckoutPricing.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/main/java/com/jaldishop/backend/checkout/domain/CheckoutFulfillmentValidator.java -> backend/src/main/java/com/jaldishop/backend/checkout/domain/service/CheckoutFulfillmentValidator.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/checkout/infrastructure/persistence/adapter/JpaPaymentReader.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/checkout/infrastructure/persistence/entity/PaymentEntity.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/checkout/infrastructure/persistence/repository/PaymentJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/checkout/web/controller/CheckoutController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/checkout/web/dto/CheckoutResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/checkout/web/dto/InitiateCheckoutRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/checkout/web/mapper/CheckoutResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/main/java/com/jaldishop/backend/favorite/application/AddFavoriteProductService.java -> backend/src/main/java/com/jaldishop/backend/favorite/application/service/AddFavoriteProductService.java	HTTP / autenticación / permisos
+R087	backend/src/main/java/com/jaldishop/backend/favorite/application/CheckFavoriteProductService.java -> backend/src/main/java/com/jaldishop/backend/favorite/application/service/CheckFavoriteProductService.java	HTTP / autenticación / permisos
+R081	backend/src/main/java/com/jaldishop/backend/favorite/application/GetCustomerFavoriteProductsService.java -> backend/src/main/java/com/jaldishop/backend/favorite/application/service/GetCustomerFavoriteProductsService.java	HTTP / autenticación / permisos
+R086	backend/src/main/java/com/jaldishop/backend/favorite/application/RemoveFavoriteProductService.java -> backend/src/main/java/com/jaldishop/backend/favorite/application/service/RemoveFavoriteProductService.java	HTTP / autenticación / permisos
+R081	backend/src/main/java/com/jaldishop/backend/favorite/domain/Favorite.java -> backend/src/main/java/com/jaldishop/backend/favorite/domain/model/Favorite.java	HTTP / autenticación / permisos
+R075	backend/src/main/java/com/jaldishop/backend/favorite/domain/FavoriteRepository.java -> backend/src/main/java/com/jaldishop/backend/favorite/domain/repository/FavoriteRepository.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/favorite/infrastructure/persistence/adapter/JpaFavoriteRepositoryAdapter.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/favorite/infrastructure/persistence/mapper/FavoritePersistenceMapper.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteController.java	HTTP / autenticación / permisos
+D	backend/src/main/java/com/jaldishop/backend/identity/application/GetAdminUsersQuery.java	Backend base / inventario / checkout / capacidad / soporte
+R055	backend/src/main/java/com/jaldishop/backend/identity/application/ChangeUserStatusCommand.java -> backend/src/main/java/com/jaldishop/backend/identity/application/command/ChangeUserStatusCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R053	backend/src/main/java/com/jaldishop/backend/identity/application/LoginCommand.java -> backend/src/main/java/com/jaldishop/backend/identity/application/command/LoginCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/main/java/com/jaldishop/backend/identity/application/RegisterCustomerCommand.java -> backend/src/main/java/com/jaldishop/backend/identity/application/command/RegisterCustomerCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/main/java/com/jaldishop/backend/identity/application/RegisterMerchantCommand.java -> backend/src/main/java/com/jaldishop/backend/identity/application/command/RegisterMerchantCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/main/java/com/jaldishop/backend/identity/application/UpdateProfileCommand.java -> backend/src/main/java/com/jaldishop/backend/identity/application/command/UpdateProfileCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/main/java/com/jaldishop/backend/identity/application/StoreProvisioning.java -> backend/src/main/java/com/jaldishop/backend/identity/application/port/StoreProvisioning.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/main/java/com/jaldishop/backend/identity/application/StoreProvisioningData.java -> backend/src/main/java/com/jaldishop/backend/identity/application/port/StoreProvisioningData.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/identity/application/query/GetAdminUsersQuery.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/identity/application/AuthResult.java -> backend/src/main/java/com/jaldishop/backend/identity/application/result/AuthResult.java	Backend base / inventario / checkout / capacidad / soporte
+R084	backend/src/main/java/com/jaldishop/backend/identity/application/AuthenticateUserService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/AuthenticateUserService.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/main/java/com/jaldishop/backend/identity/application/ChangeUserStatusService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/ChangeUserStatusService.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/main/java/com/jaldishop/backend/identity/application/GetAdminUsersService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/GetAdminUsersService.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/main/java/com/jaldishop/backend/identity/application/GetMyProfileService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/GetMyProfileService.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/main/java/com/jaldishop/backend/identity/application/RefreshTokenService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/RefreshTokenService.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/main/java/com/jaldishop/backend/identity/application/RegisterCustomerService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/RegisterCustomerService.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/main/java/com/jaldishop/backend/identity/application/RegisterMerchantService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/RegisterMerchantService.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/main/java/com/jaldishop/backend/identity/application/UpdateProfileService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/UpdateProfileService.java	Backend base / inventario / checkout / capacidad / soporte
+R082	backend/src/main/java/com/jaldishop/backend/identity/application/UpdateUserRolesService.java -> backend/src/main/java/com/jaldishop/backend/identity/application/service/UpdateUserRolesService.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/identity/domain/RoleRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R054	backend/src/main/java/com/jaldishop/backend/identity/domain/RoleName.java -> backend/src/main/java/com/jaldishop/backend/identity/domain/enums/RoleName.java	Backend base / inventario / checkout / capacidad / soporte
+R056	backend/src/main/java/com/jaldishop/backend/identity/domain/UserStatus.java -> backend/src/main/java/com/jaldishop/backend/identity/domain/enums/UserStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/main/java/com/jaldishop/backend/identity/domain/Role.java -> backend/src/main/java/com/jaldishop/backend/identity/domain/model/Role.java	Backend base / inventario / checkout / capacidad / soporte
+R092	backend/src/main/java/com/jaldishop/backend/identity/domain/User.java -> backend/src/main/java/com/jaldishop/backend/identity/domain/model/User.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/identity/domain/repository/RoleRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R062	backend/src/main/java/com/jaldishop/backend/identity/domain/UserRepository.java -> backend/src/main/java/com/jaldishop/backend/identity/domain/repository/UserRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/adapter/RoleRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/adapter/UserRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/entity/RoleEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/entity/UserEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/mapper/UserPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/repository/RoleJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/persistence/repository/UserJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/JwtAuthenticationFilter.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/SecurityConfig.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/WebCorsConfiguration.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/controller/AuthController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/controller/UserController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/AdminUserDetailResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/AdminUserSummaryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/RegisterMerchantRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/UpdateUserRolesRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/UserProfileResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/dto/UserResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/identity/web/mapper/AdminUserResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+R092	backend/src/main/java/com/jaldishop/backend/inventory/application/CommitInventoryReservationService.java -> backend/src/main/java/com/jaldishop/backend/inventory/application/service/CommitInventoryReservationService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/GetLowStockInventoryService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/GetStoreInventoryService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/GetVariantInventoryService.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/main/java/com/jaldishop/backend/inventory/application/ReserveInventoryService.java -> backend/src/main/java/com/jaldishop/backend/inventory/application/service/ReserveInventoryService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/RestockInventoryService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/UpdateInventoryStockService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/application/service/UpdateInventoryThresholdService.java	Backend base / inventario / checkout / capacidad / soporte
+R064	backend/src/main/java/com/jaldishop/backend/inventory/domain/InventoryReservationStatus.java -> backend/src/main/java/com/jaldishop/backend/inventory/domain/enums/InventoryReservationStatus.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/domain/model/Inventory.java	Backend base / inventario / checkout / capacidad / soporte
+R090	backend/src/main/java/com/jaldishop/backend/inventory/domain/InventoryReservation.java -> backend/src/main/java/com/jaldishop/backend/inventory/domain/model/InventoryReservation.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/domain/repository/InventoryRepository.java	Backend base / inventario / checkout / capacidad / soporte
+R080	backend/src/main/java/com/jaldishop/backend/inventory/domain/InventoryReservationRepository.java -> backend/src/main/java/com/jaldishop/backend/inventory/domain/repository/InventoryReservationRepository.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/adapter/InventoryRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/adapter/InventoryReservationRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/mapper/InventoryPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/mapper/InventoryReservationPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/repository/InventoryJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/infrastructure/persistence/repository/StoreVariantInventoryProjection.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/web/dto/InventoryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/web/dto/UpdateStockRequest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/web/dto/UpdateThresholdRequest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/inventory/web/mapper/InventoryResponseMapper.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/media/application/GenerateUploadSignatureCommand.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/media/application/command/GenerateUploadSignatureCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R051	backend/src/main/java/com/jaldishop/backend/media/application/GenerateUploadSignatureService.java -> backend/src/main/java/com/jaldishop/backend/media/application/service/GenerateUploadSignatureService.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/main/java/com/jaldishop/backend/media/application/StoreMediaCleanupAdapter.java -> backend/src/main/java/com/jaldishop/backend/media/application/service/StoreMediaCleanupAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+R086	backend/src/main/java/com/jaldishop/backend/media/domain/MediaTargetType.java -> backend/src/main/java/com/jaldishop/backend/media/domain/enums/MediaTargetType.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/main/java/com/jaldishop/backend/media/domain/UploadSignature.java -> backend/src/main/java/com/jaldishop/backend/media/domain/model/UploadSignature.java	Backend base / inventario / checkout / capacidad / soporte
+R055	backend/src/main/java/com/jaldishop/backend/media/domain/MediaStorageService.java -> backend/src/main/java/com/jaldishop/backend/media/domain/repository/MediaStorageService.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/media/infrastructure/cloudinary/CloudinaryMediaStorageService.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/media/web/controller/MediaController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/media/web/dto/GenerateSignatureRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/media/web/dto/UploadSignatureResponse.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/notification/application/CreateNotificationCommand.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/application/command/CreateNotificationCommand.java	Backend base / inventario / checkout / capacidad / soporte
+R053	backend/src/main/java/com/jaldishop/backend/notification/application/CountUnreadNotificationsService.java -> backend/src/main/java/com/jaldishop/backend/notification/application/service/CountUnreadNotificationsService.java	Backend base / inventario / checkout / capacidad / soporte
+R053	backend/src/main/java/com/jaldishop/backend/notification/application/CreateNotificationService.java -> backend/src/main/java/com/jaldishop/backend/notification/application/service/CreateNotificationService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/application/service/IsolatedOrderNotificationPersister.java	Backend base / inventario / checkout / capacidad / soporte
+R056	backend/src/main/java/com/jaldishop/backend/notification/application/ListUserNotificationsService.java -> backend/src/main/java/com/jaldishop/backend/notification/application/service/ListUserNotificationsService.java	Backend base / inventario / checkout / capacidad / soporte
+R065	backend/src/main/java/com/jaldishop/backend/notification/application/MarkNotificationAsReadService.java -> backend/src/main/java/com/jaldishop/backend/notification/application/service/MarkNotificationAsReadService.java	Backend base / inventario / checkout / capacidad / soporte
+R050	backend/src/main/java/com/jaldishop/backend/notification/domain/NotificationStatus.java -> backend/src/main/java/com/jaldishop/backend/notification/domain/enums/NotificationStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R063	backend/src/main/java/com/jaldishop/backend/notification/domain/NotificationType.java -> backend/src/main/java/com/jaldishop/backend/notification/domain/enums/NotificationType.java	Backend base / inventario / checkout / capacidad / soporte
+R069	backend/src/main/java/com/jaldishop/backend/notification/domain/Notification.java -> backend/src/main/java/com/jaldishop/backend/notification/domain/model/Notification.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/domain/port/NotificationRecipientResolver.java	Backend base / inventario / checkout / capacidad / soporte
+R069	backend/src/main/java/com/jaldishop/backend/notification/domain/NotificationRepository.java -> backend/src/main/java/com/jaldishop/backend/notification/domain/repository/NotificationRepository.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/adapter/StoreNotificationRecipientResolver.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/listener/OrderNotificationEventListener.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/persistence/NotificationDeduplicationExceptionClassifier.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/persistence/adapter/NotificationRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/persistence/entity/NotificationEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/persistence/mapper/NotificationPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/infrastructure/persistence/repository/NotificationJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/web/controller/NotificationController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/notification/web/dto/NotificationResponse.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/ordering/application/ChangeOrderStatusService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/result/MerchantOrderDetailResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/result/MerchantOrderItemResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/result/MerchantOrderPageResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/result/MerchantOrderStatusHistoryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/result/MerchantOrderSummaryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/service/CancelCustomerOrderService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/service/ChangeOrderStatusService.java	Backend base / inventario / checkout / capacidad / soporte
+R092	backend/src/main/java/com/jaldishop/backend/ordering/application/GetCustomerOrderDetailService.java -> backend/src/main/java/com/jaldishop/backend/ordering/application/service/GetCustomerOrderDetailService.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/main/java/com/jaldishop/backend/ordering/application/GetCustomerOrdersService.java -> backend/src/main/java/com/jaldishop/backend/ordering/application/service/GetCustomerOrdersService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/service/GetMerchantOrderDetailService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/service/ListMerchantOrdersService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/application/service/OrderCancellationCompensator.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/ordering/domain/DeliveryMode.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/domain/OrderErrorCodes.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/main/java/com/jaldishop/backend/ordering/domain/OrderRepository.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/domain/enums/DeliveryMode.java	Backend base / inventario / checkout / capacidad / soporte
+R091	backend/src/main/java/com/jaldishop/backend/ordering/domain/OrderStatus.java -> backend/src/main/java/com/jaldishop/backend/ordering/domain/enums/OrderStatus.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/domain/event/OrderConfirmedDomainEvent.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/domain/event/OrderStatusChangedDomainEvent.java	Backend base / inventario / checkout / capacidad / soporte
+R067	backend/src/main/java/com/jaldishop/backend/ordering/domain/Order.java -> backend/src/main/java/com/jaldishop/backend/ordering/domain/model/Order.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/main/java/com/jaldishop/backend/ordering/domain/OrderItem.java -> backend/src/main/java/com/jaldishop/backend/ordering/domain/model/OrderItem.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/main/java/com/jaldishop/backend/ordering/domain/OrderStatusHistory.java -> backend/src/main/java/com/jaldishop/backend/ordering/domain/model/OrderStatusHistory.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/domain/repository/OrderRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/infrastructure/persistence/adapter/JpaOrderRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/infrastructure/persistence/entity/OrderEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/infrastructure/persistence/entity/OrderStatusHistoryEntity.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/infrastructure/persistence/mapper/OrderPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/infrastructure/persistence/repository/OrderJpaRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/controller/CustomerOrderController.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderController.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/CancelOrderRequest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/ChangeOrderStatusRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/CreateOrderRequest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/CustomerOrderDetailResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/CustomerOrderStatusHistoryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/dto/CustomerOrderSummaryResponse.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/ordering/web/validation/OrderDeliveryValidator.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/ExternalPaymentReference.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/MercadoPagoGateway.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/MercadoPagoResourceValidator.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/CreateOrderCommand.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/CreatePreferenceCommand.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/ExecuteRefundCommand.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/OrderQueryResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/OrderResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/PaymentQueryResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/PreferenceResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/RefundQueryResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/RefundResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/investigation/ManualOrderInvestigationService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/preference/CreatePaymentPreferenceCommand.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/preference/CreatePaymentPreferenceResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/preference/CreatePaymentPreferenceService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/preference/PaymentPreferencePreparationService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/preference/PreparationResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/OrderReconciliationBatchSummary.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/OrderReconciliationCandidateResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/OrderReconciliationClaimResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentConfirmationRunner.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentIncidenceRecorder.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentOrderReconciliationProcessor.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationProcessor.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationScheduler.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/ReconciliationBatchSummary.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/reconciliation/ReconciliationCandidateResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/refund/PaymentRefundProcessor.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/refund/PaymentRefundScheduler.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/refund/PaymentRefundService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/webhook/PaymentWebhookPersistenceService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/webhook/ProcessMercadoPagoWebhookCommand.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/webhook/ProcessMercadoPagoWebhookResult.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/application/webhook/ProcessMercadoPagoWebhookService.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/PaymentErrorCodes.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/FulfillmentType.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/IncidenceCategory.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/IncidenceProcessType.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/IncidenceStatus.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/PaymentAttemptStatus.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/PaymentMethod.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/PaymentProvider.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/PaymentStatus.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/RefundIntentStatus.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/RefundStatus.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/enums/RemoteOrderCreationState.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/model/Payment.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/model/PaymentAttempt.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/model/PaymentIncidence.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/model/PaymentRefundExecutionAttempt.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/model/PaymentRefundIntent.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/repository/PaymentAttemptRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/repository/PaymentIncidenceRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/repository/PaymentRefundExecutionAttemptRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/repository/PaymentRefundIntentRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/domain/repository/PaymentRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/CheckoutCreationRequestStore.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoException.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoProperties.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoRestClientAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/OrderCreationRejection.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpOrderRefundResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpOrderRequest.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpOrderResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpPaymentResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpPreferenceRequest.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpPreferenceResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpRefundRequest.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpRefundResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentAttemptRepositoryAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentIncidenceRepositoryAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentRefundExecutionAttemptRepositoryAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentRefundIntentRepositoryAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentRepositoryAdapter.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/entity/PaymentAttemptEntity.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/entity/PaymentEntity.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/entity/PaymentIncidenceEntity.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/entity/PaymentRefundExecutionAttemptEntity.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/entity/PaymentRefundIntentEntity.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentAttemptPersistenceMapper.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentIncidencePersistenceMapper.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentPersistenceMapper.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentRefundPersistenceMapper.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/repository/PaymentAttemptJpaRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/repository/PaymentIncidenceJpaRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/repository/PaymentJpaRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/repository/PaymentRefundExecutionAttemptJpaRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/persistence/repository/PaymentRefundIntentJpaRepository.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/security/MercadoPagoWebhookSignatureValidator.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/controller/AdminOrderInvestigationController.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/controller/MercadoPagoPreferenceController.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/controller/MercadoPagoWebhookController.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/dto/CreatePaymentPreferenceRequest.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/dto/CreatePaymentPreferenceResponse.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/payment/web/dto/MercadoPagoWebhookPayload.java	Mercado Pago / persistencia financiera
+A	backend/src/main/java/com/jaldishop/backend/realtime/application/service/RealtimeNotificationPublisher.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/realtime/infrastructure/listener/OrderDomainEventListener.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompAuthChannelInterceptor.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompDeliveryAuthorizationInterceptor.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompPrincipal.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/realtime/infrastructure/websocket/WebSocketConfig.java	Backend base / inventario / checkout / capacidad / soporte
+R084	backend/src/main/java/com/jaldishop/backend/review/application/CheckReviewEligibilityService.java -> backend/src/main/java/com/jaldishop/backend/review/application/service/CheckReviewEligibilityService.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/main/java/com/jaldishop/backend/review/application/CreateProductReviewService.java -> backend/src/main/java/com/jaldishop/backend/review/application/service/CreateProductReviewService.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/review/application/service/DeleteProductReviewService.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/main/java/com/jaldishop/backend/review/application/GetCustomerReviewsService.java -> backend/src/main/java/com/jaldishop/backend/review/application/service/GetCustomerReviewsService.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/main/java/com/jaldishop/backend/review/application/GetProductPublicReviewsService.java -> backend/src/main/java/com/jaldishop/backend/review/application/service/GetProductPublicReviewsService.java	Backend base / inventario / checkout / capacidad / soporte
+R084	backend/src/main/java/com/jaldishop/backend/review/application/UpdateProductReviewService.java -> backend/src/main/java/com/jaldishop/backend/review/application/service/UpdateProductReviewService.java	Backend base / inventario / checkout / capacidad / soporte
+R052	backend/src/main/java/com/jaldishop/backend/review/domain/ReviewStatus.java -> backend/src/main/java/com/jaldishop/backend/review/domain/enums/ReviewStatus.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/main/java/com/jaldishop/backend/review/domain/Review.java -> backend/src/main/java/com/jaldishop/backend/review/domain/model/Review.java	Backend base / inventario / checkout / capacidad / soporte
+R069	backend/src/main/java/com/jaldishop/backend/review/domain/ReviewRepository.java -> backend/src/main/java/com/jaldishop/backend/review/domain/repository/ReviewRepository.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/review/infrastructure/persistence/adapter/JpaReviewRepositoryAdapter.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/review/infrastructure/persistence/mapper/ReviewPersistenceMapper.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/review/web/controller/PublicProductReviewController.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/config/SchedulingConfig.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/config/TimeConfig.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/domain/model/CustomerSnapshot.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/domain/model/DeliveryAddressSnapshot.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/domain/model/MonetarySummary.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/java/com/jaldishop/backend/shared/domain/model/Money.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/main/java/com/jaldishop/backend/shared/exception/GlobalExceptionHandler.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/shared/exception/RestAccessDeniedHandler.java	HTTP / autenticación / permisos
+M	backend/src/main/java/com/jaldishop/backend/shared/exception/RestAuthenticationEntryPoint.java	HTTP / autenticación / permisos
+A	backend/src/main/java/com/jaldishop/backend/shared/exception/SharedErrorCodes.java	HTTP / autenticación / permisos
+D	backend/src/main/java/com/jaldishop/backend/store/application/CloseStoreResult.java	Tiendas / Merchant Customers / búsqueda
+D	backend/src/main/java/com/jaldishop/backend/store/application/GetAdminStoresQuery.java	Tiendas / Merchant Customers / búsqueda
+R051	backend/src/main/java/com/jaldishop/backend/store/application/ChangeStoreStatusCommand.java -> backend/src/main/java/com/jaldishop/backend/store/application/command/ChangeStoreStatusCommand.java	Tiendas / Merchant Customers / búsqueda
+R070	backend/src/main/java/com/jaldishop/backend/store/application/CloseMyStoreCommand.java -> backend/src/main/java/com/jaldishop/backend/store/application/command/CloseMyStoreCommand.java	Tiendas / Merchant Customers / búsqueda
+R098	backend/src/main/java/com/jaldishop/backend/store/application/CreateStoreCommand.java -> backend/src/main/java/com/jaldishop/backend/store/application/command/CreateStoreCommand.java	Tiendas / Merchant Customers / búsqueda
+R096	backend/src/main/java/com/jaldishop/backend/store/application/UpdateStoreCommand.java -> backend/src/main/java/com/jaldishop/backend/store/application/command/UpdateStoreCommand.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/main/java/com/jaldishop/backend/store/application/query/GetAdminStoresQuery.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/main/java/com/jaldishop/backend/store/application/result/CloseStoreResult.java	Tiendas / Merchant Customers / búsqueda
+R076	backend/src/main/java/com/jaldishop/backend/store/application/ChangeStoreStatusService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/ChangeStoreStatusService.java	Tiendas / Merchant Customers / búsqueda
+R079	backend/src/main/java/com/jaldishop/backend/store/application/CloseMyStoreService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/CloseMyStoreService.java	Tiendas / Merchant Customers / búsqueda
+R069	backend/src/main/java/com/jaldishop/backend/store/application/CreateStoreService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/CreateStoreService.java	Tiendas / Merchant Customers / búsqueda
+R076	backend/src/main/java/com/jaldishop/backend/store/application/GetAdminStoresService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/GetAdminStoresService.java	Tiendas / Merchant Customers / búsqueda
+R079	backend/src/main/java/com/jaldishop/backend/store/application/GetMyStoreService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/GetMyStoreService.java	Tiendas / Merchant Customers / búsqueda
+R082	backend/src/main/java/com/jaldishop/backend/store/application/GetStoreBySlugService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/GetStoreBySlugService.java	Tiendas / Merchant Customers / búsqueda
+R064	backend/src/main/java/com/jaldishop/backend/store/application/GetStoreCategoriesService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/GetStoreCategoriesService.java	Tiendas / Merchant Customers / búsqueda
+R078	backend/src/main/java/com/jaldishop/backend/store/application/GetStoreCustomersService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/GetStoreCustomersService.java	Tiendas / Merchant Customers / búsqueda
+R082	backend/src/main/java/com/jaldishop/backend/store/application/RegisterStoreCustomerService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/RegisterStoreCustomerService.java	Tiendas / Merchant Customers / búsqueda
+R068	backend/src/main/java/com/jaldishop/backend/store/application/SearchPublicStoresService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/SearchPublicStoresService.java	Tiendas / Merchant Customers / búsqueda
+R085	backend/src/main/java/com/jaldishop/backend/store/application/StoreContextService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/StoreContextService.java	Tiendas / Merchant Customers / búsqueda
+R084	backend/src/main/java/com/jaldishop/backend/store/application/StoreProvisioningAdapter.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/StoreProvisioningAdapter.java	Tiendas / Merchant Customers / búsqueda
+R078	backend/src/main/java/com/jaldishop/backend/store/application/UpdateStoreService.java -> backend/src/main/java/com/jaldishop/backend/store/application/service/UpdateStoreService.java	Tiendas / Merchant Customers / búsqueda
+R055	backend/src/main/java/com/jaldishop/backend/store/domain/CloseStoreAction.java -> backend/src/main/java/com/jaldishop/backend/store/domain/enums/CloseStoreAction.java	Tiendas / Merchant Customers / búsqueda
+R055	backend/src/main/java/com/jaldishop/backend/store/domain/StoreCategoryStatus.java -> backend/src/main/java/com/jaldishop/backend/store/domain/enums/StoreCategoryStatus.java	Tiendas / Merchant Customers / búsqueda
+R061	backend/src/main/java/com/jaldishop/backend/store/domain/StoreStatus.java -> backend/src/main/java/com/jaldishop/backend/store/domain/enums/StoreStatus.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/main/java/com/jaldishop/backend/store/domain/model/DeliveryConfiguration.java	Tiendas / Merchant Customers / búsqueda
+R078	backend/src/main/java/com/jaldishop/backend/store/domain/Store.java -> backend/src/main/java/com/jaldishop/backend/store/domain/model/Store.java	Tiendas / Merchant Customers / búsqueda
+R095	backend/src/main/java/com/jaldishop/backend/store/domain/StoreCategory.java -> backend/src/main/java/com/jaldishop/backend/store/domain/model/StoreCategory.java	Tiendas / Merchant Customers / búsqueda
+R092	backend/src/main/java/com/jaldishop/backend/store/domain/StoreCustomerSummary.java -> backend/src/main/java/com/jaldishop/backend/store/domain/model/StoreCustomerSummary.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/main/java/com/jaldishop/backend/store/domain/model/StoreLocation.java	Tiendas / Merchant Customers / búsqueda
+R092	backend/src/main/java/com/jaldishop/backend/store/domain/StoreMediaCleaner.java -> backend/src/main/java/com/jaldishop/backend/store/domain/port/StoreMediaCleaner.java	Tiendas / Merchant Customers / búsqueda
+R064	backend/src/main/java/com/jaldishop/backend/store/domain/StoreCategoryRepository.java -> backend/src/main/java/com/jaldishop/backend/store/domain/repository/StoreCategoryRepository.java	Tiendas / Merchant Customers / búsqueda
+R070	backend/src/main/java/com/jaldishop/backend/store/domain/StoreCustomerRepository.java -> backend/src/main/java/com/jaldishop/backend/store/domain/repository/StoreCustomerRepository.java	Tiendas / Merchant Customers / búsqueda
+R082	backend/src/main/java/com/jaldishop/backend/store/domain/StoreRepository.java -> backend/src/main/java/com/jaldishop/backend/store/domain/repository/StoreRepository.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/adapter/StoreCategoryRepositoryAdapter.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/adapter/StoreCustomerRepositoryAdapter.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/adapter/StoreRepositoryAdapter.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/entity/StoreEntity.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/mapper/StoreCategoryPersistenceMapper.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/mapper/StorePersistenceMapper.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/projection/StoreCustomerProjection.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/repository/StoreJpaRepository.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/controller/AdminStoreController.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/controller/MerchantCustomerController.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreCategoryController.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/AdminStoreDetailResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/AdminStoreSummaryResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/CloseStoreResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/PublicStoreResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/StoreCategoryResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/dto/StoreResponse.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/mapper/AdminStoreResponseMapper.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/java/com/jaldishop/backend/store/web/mapper/StoreCustomerResponseMapper.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/main/resources/application.properties	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/resources/db/migration/V16__add_deduplication_key_to_notifications.sql	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/main/resources/db/migration/V17__expand_payment_persistence_and_attempts.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V18__create_payment_incidences_table.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V19__create_payment_refunds_schema.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V20__add_provider_order_id_to_payment_attempts.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V21__add_unique_constraint_to_provider_order_id_and_checkout_mode.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V22__add_orders_fields_to_refund_intents.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V23__add_reconciliation_lease_to_payment_attempts.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V24__create_checkout_creation_requests.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/migration/V25__add_remote_order_creation_evidence.sql	Mercado Pago / persistencia financiera
+A	backend/src/main/resources/db/seed/seed_e2e_demo_data.sql	Backend base / inventario / checkout / capacidad / soporte
+R052	backend/src/test/java/com/jaldishop/backend/address/application/CreateCustomerAddressServiceTest.java -> backend/src/test/java/com/jaldishop/backend/address/application/service/CreateCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+R092	backend/src/test/java/com/jaldishop/backend/address/application/DeleteCustomerAddressServiceTest.java -> backend/src/test/java/com/jaldishop/backend/address/application/service/DeleteCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+R092	backend/src/test/java/com/jaldishop/backend/address/application/SetDefaultCustomerAddressServiceTest.java -> backend/src/test/java/com/jaldishop/backend/address/application/service/SetDefaultCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+R060	backend/src/test/java/com/jaldishop/backend/address/application/UpdateCustomerAddressServiceTest.java -> backend/src/test/java/com/jaldishop/backend/address/application/service/UpdateCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+M	backend/src/test/java/com/jaldishop/backend/address/web/controller/CustomerAddressControllerTest.java	Direcciones; corrección / refactor previo
+R081	backend/src/test/java/com/jaldishop/backend/capacity/application/availability/GetCapacityAvailabilityServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/availability/service/GetCapacityAvailabilityServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/test/java/com/jaldishop/backend/capacity/application/availability/GetEffectiveCapacityServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/availability/service/GetEffectiveCapacityServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R091	backend/src/test/java/com/jaldishop/backend/capacity/application/availability/ListStoreCapacitySlotsServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/availability/service/ListStoreCapacitySlotsServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityConfigurationServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/service/CreateCapacityConfigurationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R074	backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/CreateCapacityExceptionServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/service/CreateCapacityExceptionServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/UpdateCapacityExceptionServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/configuration/service/UpdateCapacityExceptionServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/CreateCapacityReservationServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/service/CreateCapacityReservationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/GetCapacityReservationServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/service/GetCapacityReservationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R082	backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/ReleaseCapacityReservationServiceTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/service/ReleaseCapacityReservationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/capacity/application/reservation/service/ReleaseCommittedCapacityReservationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/test/java/com/jaldishop/backend/capacity/domain/CapacityConfigurationTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/domain/model/CapacityConfigurationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/test/java/com/jaldishop/backend/capacity/domain/CapacityExceptionTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/domain/model/CapacityExceptionTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/capacity/domain/model/CapacityPeriodTest.java	Backend base / inventario / checkout / capacidad / soporte
+R094	backend/src/test/java/com/jaldishop/backend/capacity/domain/CapacityReservationTest.java -> backend/src/test/java/com/jaldishop/backend/capacity/domain/model/CapacityReservationTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityConfigurationPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityExceptionPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/infrastructure/persistence/mapper/CapacityReservationPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/web/controller/CapacitySlotsControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/capacity/web/controller/EffectiveCapacityControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/test/java/com/jaldishop/backend/cart/application/CartViewAssemblerTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/result/CartViewAssemblerTest.java	Backend base / inventario / checkout / capacidad / soporte
+R084	backend/src/test/java/com/jaldishop/backend/cart/application/AddItemToCartServiceTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/service/AddItemToCartServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R084	backend/src/test/java/com/jaldishop/backend/cart/application/ClearCartServiceTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/service/ClearCartServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/test/java/com/jaldishop/backend/cart/application/GetCartServiceTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/service/GetCartServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R082	backend/src/test/java/com/jaldishop/backend/cart/application/RemoveCartItemServiceTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/service/RemoveCartItemServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/test/java/com/jaldishop/backend/cart/application/UpdateCartItemQuantityServiceTest.java -> backend/src/test/java/com/jaldishop/backend/cart/application/service/UpdateCartItemQuantityServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R086	backend/src/test/java/com/jaldishop/backend/cart/domain/CartItemTest.java -> backend/src/test/java/com/jaldishop/backend/cart/domain/model/CartItemTest.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/test/java/com/jaldishop/backend/cart/domain/CartTest.java -> backend/src/test/java/com/jaldishop/backend/cart/domain/model/CartTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/cart/infrastructure/persistence/adapter/CartRepositoryAdapterTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/cart/infrastructure/persistence/mapper/CartPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/cart/web/controller/CartControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/cart/web/mapper/CartResponseMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/test/java/com/jaldishop/backend/catalog/application/CreateCategoryServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/CreateCategoryServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/test/java/com/jaldishop/backend/catalog/application/CreateProductServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/CreateProductServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/test/java/com/jaldishop/backend/catalog/application/CreateProductVariantServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/CreateProductVariantServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/test/java/com/jaldishop/backend/catalog/application/GetCategoriesServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/GetCategoriesServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R078	backend/src/test/java/com/jaldishop/backend/catalog/application/GetProductVariantsServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/GetProductVariantsServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/test/java/com/jaldishop/backend/catalog/application/GetProductsServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/GetProductsServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R073	backend/src/test/java/com/jaldishop/backend/catalog/application/GetPublicCategoriesServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/GetPublicCategoriesServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/test/java/com/jaldishop/backend/catalog/application/UpdateCategoryServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/UpdateCategoryServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R077	backend/src/test/java/com/jaldishop/backend/catalog/application/UpdateProductServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/UpdateProductServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R053	backend/src/test/java/com/jaldishop/backend/catalog/application/UpdateProductVariantServiceTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/application/service/UpdateProductVariantServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R076	backend/src/test/java/com/jaldishop/backend/catalog/domain/CategoryDomainTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/domain/model/CategoryDomainTest.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/test/java/com/jaldishop/backend/catalog/domain/ProductDomainTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/domain/model/ProductDomainTest.java	Backend base / inventario / checkout / capacidad / soporte
+R072	backend/src/test/java/com/jaldishop/backend/catalog/domain/ProductImageTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/domain/model/ProductImageTest.java	Backend base / inventario / checkout / capacidad / soporte
+R080	backend/src/test/java/com/jaldishop/backend/catalog/domain/ProductVariantDomainTest.java -> backend/src/test/java/com/jaldishop/backend/catalog/domain/model/ProductVariantDomainTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/CategoryPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/ProductPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/infrastructure/persistence/mapper/ProductVariantPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/controller/MerchantProductControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/controller/PublicCategoryControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/controller/PublicProductControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/mapper/CategoryResponseMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/mapper/ProductResponseMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/catalog/web/mapper/ProductVariantResponseMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+D	backend/src/test/java/com/jaldishop/backend/checkout/application/ConfirmPurchaseServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R090	backend/src/test/java/com/jaldishop/backend/checkout/application/CheckoutItemSnapshotAssemblerTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/application/result/CheckoutItemSnapshotAssemblerTest.java	Backend base / inventario / checkout / capacidad / soporte
+R099	backend/src/test/java/com/jaldishop/backend/checkout/application/CheckoutHoldConcurrencyIntegrationTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/application/service/CheckoutHoldConcurrencyIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R098	backend/src/test/java/com/jaldishop/backend/checkout/application/ConfirmPurchaseConcurrencyIntegrationTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/application/service/ConfirmPurchaseConcurrencyIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/checkout/application/service/ConfirmPurchaseServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R091	backend/src/test/java/com/jaldishop/backend/checkout/application/InitiateCheckoutServiceTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/application/service/InitiateCheckoutServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R096	backend/src/test/java/com/jaldishop/backend/checkout/domain/CheckoutPricingTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/domain/model/CheckoutPricingTest.java	Backend base / inventario / checkout / capacidad / soporte
+R092	backend/src/test/java/com/jaldishop/backend/checkout/domain/CheckoutFulfillmentValidatorTest.java -> backend/src/test/java/com/jaldishop/backend/checkout/domain/service/CheckoutFulfillmentValidatorTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/checkout/web/controller/CheckoutControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/e2e/EndToEndBackendFlowValidationIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R088	backend/src/test/java/com/jaldishop/backend/favorite/application/AddFavoriteProductServiceTest.java -> backend/src/test/java/com/jaldishop/backend/favorite/application/service/AddFavoriteProductServiceTest.java	HTTP / autenticación / permisos
+M	backend/src/test/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteControllerTest.java	HTTP / autenticación / permisos
+R083	backend/src/test/java/com/jaldishop/backend/identity/application/ChangeUserStatusServiceTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/ChangeUserStatusServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R086	backend/src/test/java/com/jaldishop/backend/identity/application/GetAdminUsersServiceTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/GetAdminUsersServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R083	backend/src/test/java/com/jaldishop/backend/identity/application/RefreshTokenServiceTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/RefreshTokenServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/test/java/com/jaldishop/backend/identity/application/RegisterMerchantRollbackIntegrationTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/RegisterMerchantRollbackIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/test/java/com/jaldishop/backend/identity/application/RegisterMerchantServiceTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/RegisterMerchantServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R090	backend/src/test/java/com/jaldishop/backend/identity/application/UpdateUserRolesServiceTest.java -> backend/src/test/java/com/jaldishop/backend/identity/application/service/UpdateUserRolesServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/test/java/com/jaldishop/backend/identity/domain/RoleTest.java -> backend/src/test/java/com/jaldishop/backend/identity/domain/model/RoleTest.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/test/java/com/jaldishop/backend/identity/domain/UserTest.java -> backend/src/test/java/com/jaldishop/backend/identity/domain/model/UserTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/identity/infrastructure/persistence/mapper/UserPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/identity/infrastructure/security/JwtAuthenticationFilterTest.java	HTTP / autenticación / permisos
+A	backend/src/test/java/com/jaldishop/backend/identity/infrastructure/security/SecurityUserStatusWebTest.java	HTTP / autenticación / permisos
+M	backend/src/test/java/com/jaldishop/backend/identity/web/controller/AdminUserControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/identity/web/controller/AuthControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/identity/web/controller/UserControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/identity/web/mapper/AdminUserResponseMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/application/service/InventoryConcurrencyUnitTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/application/service/InventoryRealConcurrencyPostgresIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/application/service/InventoryServicesTest.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/test/java/com/jaldishop/backend/inventory/application/ReserveInventoryServiceTest.java -> backend/src/test/java/com/jaldishop/backend/inventory/application/service/ReserveInventoryServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/application/service/RestockInventoryServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/domain/model/InventoryModelTest.java	Backend base / inventario / checkout / capacidad / soporte
+R095	backend/src/test/java/com/jaldishop/backend/inventory/domain/InventoryReservationTest.java -> backend/src/test/java/com/jaldishop/backend/inventory/domain/model/InventoryReservationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/infrastructure/persistence/InventoryJpaRepositorySpringDataTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/infrastructure/persistence/InventoryPostgresIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+R061	backend/src/test/java/com/jaldishop/backend/media/application/GenerateUploadSignatureServiceTest.java -> backend/src/test/java/com/jaldishop/backend/media/application/service/GenerateUploadSignatureServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R091	backend/src/test/java/com/jaldishop/backend/media/application/StoreMediaCleanupAdapterTest.java -> backend/src/test/java/com/jaldishop/backend/media/application/service/StoreMediaCleanupAdapterTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/media/infrastructure/cloudinary/CloudinaryMediaStorageServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/media/web/controller/MediaControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+R071	backend/src/test/java/com/jaldishop/backend/notification/application/CountUnreadNotificationsServiceTest.java -> backend/src/test/java/com/jaldishop/backend/notification/application/service/CountUnreadNotificationsServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R081	backend/src/test/java/com/jaldishop/backend/notification/application/CreateNotificationServiceTest.java -> backend/src/test/java/com/jaldishop/backend/notification/application/service/CreateNotificationServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R075	backend/src/test/java/com/jaldishop/backend/notification/application/ListUserNotificationsServiceTest.java -> backend/src/test/java/com/jaldishop/backend/notification/application/service/ListUserNotificationsServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R079	backend/src/test/java/com/jaldishop/backend/notification/application/MarkNotificationAsReadServiceTest.java -> backend/src/test/java/com/jaldishop/backend/notification/application/service/MarkNotificationAsReadServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R093	backend/src/test/java/com/jaldishop/backend/notification/domain/NotificationTest.java -> backend/src/test/java/com/jaldishop/backend/notification/domain/model/NotificationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/notification/infrastructure/listener/OrderNotificationEventListenerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/notification/infrastructure/persistence/NotificationDeduplicationExceptionClassifierTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/notification/infrastructure/persistence/OrderNotificationPostgresIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/notification/infrastructure/persistence/mapper/NotificationPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/notification/web/controller/NotificationControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/CancelCustomerOrderServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/ChangeOrderStatusConcurrencyIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/ChangeOrderStatusServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/test/java/com/jaldishop/backend/ordering/application/GetCustomerOrderDetailServiceTest.java -> backend/src/test/java/com/jaldishop/backend/ordering/application/service/GetCustomerOrderDetailServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R086	backend/src/test/java/com/jaldishop/backend/ordering/application/GetCustomerOrdersServiceTest.java -> backend/src/test/java/com/jaldishop/backend/ordering/application/service/GetCustomerOrdersServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/GetMerchantOrderDetailServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/ListMerchantOrdersServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/OrderCancellationCompensatorTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/application/service/OrderCancellationPostgresIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R097	backend/src/test/java/com/jaldishop/backend/ordering/domain/OrderTest.java -> backend/src/test/java/com/jaldishop/backend/ordering/domain/model/OrderTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/infrastructure/persistence/OrderPersistenceIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/infrastructure/persistence/adapter/JpaOrderRepositoryAdapterTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/ordering/infrastructure/persistence/mapper/OrderPersistenceMapperTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/ordering/web/controller/CustomerOrderControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderEndToEndIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/payment/application/MercadoPagoOrdersApiEndToEndIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/PaymentFlowEndToEndIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/PaymentSchedulerConditionsIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/gateway/ExternalPaymentReferenceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/gateway/MercadoPagoResourceValidatorTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/investigation/ManualOrderInvestigationPostgresIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/investigation/ManualOrderInvestigationServiceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/preference/CheckoutRequestRetryTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/preference/CreatePaymentPreferenceServiceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/ManualOrderReconciliationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/OrderReconciliationPostgresIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/OrderReferenceReadTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentConfirmationRunnerTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentIncidenceRecorderTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationPostgresIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationProcessorTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationSchedulerTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/PaymentReconciliationServiceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/SingleAttemptIsolatedReconciliationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/refund/PaymentRefundPostgresIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/refund/PaymentRefundProcessorTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/refund/PaymentRefundSchedulerTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/refund/PaymentRefundServiceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/refund/PaymentSchedulerExecutionPostgresIntegrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/webhook/OrdersWebhookCorrelationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/application/webhook/ProcessMercadoPagoWebhookServiceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/domain/model/PaymentAttemptTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/domain/model/PaymentIncidenceTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/domain/model/PaymentRefundIntentTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/domain/model/PaymentTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/domain/model/RemoteOrderCreationStateTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/CheckoutCreationRequestStoreTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoRestClientAdapterTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/OrderCreationRejectionTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpOrderSerializationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/persistence/RemoteOrderCreationMigrationTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/persistence/adapter/JpaPaymentAttemptRepositoryAdapterTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentIncidencePersistenceMapperTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/persistence/mapper/PaymentPersistenceMapperTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/security/MercadoPagoWebhookSignatureValidatorTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/web/controller/AdminOrderInvestigationSecurityTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/web/controller/MercadoPagoPreferenceControllerTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/payment/web/controller/MercadoPagoWebhookControllerTest.java	Mercado Pago / persistencia financiera
+A	backend/src/test/java/com/jaldishop/backend/realtime/application/service/RealtimeNotificationPublisherTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/listener/OrderDomainEventListenerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/listener/OrderDomainEventListenerTransactionalTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompAuthChannelInterceptorTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompDeliveryAuthorizationBrokerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/websocket/StompDeliveryConfigurationTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/realtime/infrastructure/websocket/WebSocketStompRealIntegrationTest.java	Backend base / inventario / checkout / capacidad / soporte
+R085	backend/src/test/java/com/jaldishop/backend/review/application/CheckReviewEligibilityServiceTest.java -> backend/src/test/java/com/jaldishop/backend/review/application/service/CheckReviewEligibilityServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R089	backend/src/test/java/com/jaldishop/backend/review/application/CreateProductReviewServiceTest.java -> backend/src/test/java/com/jaldishop/backend/review/application/service/CreateProductReviewServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/review/application/service/DeleteProductReviewServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+R087	backend/src/test/java/com/jaldishop/backend/review/application/UpdateProductReviewServiceTest.java -> backend/src/test/java/com/jaldishop/backend/review/application/service/UpdateProductReviewServiceTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/review/web/controller/CustomerReviewControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/review/web/controller/PublicProductReviewControllerTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/shared/domain/model/MoneyTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/shared/domain/model/SharedDomainModelTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/shared/exception/GlobalExceptionHandlerTest.java	HTTP / autenticación / permisos
+A	backend/src/test/java/com/jaldishop/backend/shared/exception/RestAccessDeniedHandlerTest.java	HTTP / autenticación / permisos
+A	backend/src/test/java/com/jaldishop/backend/shared/exception/RestAuthenticationEntryPointTest.java	HTTP / autenticación / permisos
+R077	backend/src/test/java/com/jaldishop/backend/store/application/ChangeStoreStatusServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/ChangeStoreStatusServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R091	backend/src/test/java/com/jaldishop/backend/store/application/CloseMyStoreServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/CloseMyStoreServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R058	backend/src/test/java/com/jaldishop/backend/store/application/CreateStoreServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/CreateStoreServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R089	backend/src/test/java/com/jaldishop/backend/store/application/GetAdminStoresServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/GetAdminStoresServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R089	backend/src/test/java/com/jaldishop/backend/store/application/GetMyStoreServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/GetMyStoreServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R093	backend/src/test/java/com/jaldishop/backend/store/application/GetStoreBySlugServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/GetStoreBySlugServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R085	backend/src/test/java/com/jaldishop/backend/store/application/GetStoreCategoriesServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/GetStoreCategoriesServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R090	backend/src/test/java/com/jaldishop/backend/store/application/GetStoreCustomersServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/GetStoreCustomersServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R089	backend/src/test/java/com/jaldishop/backend/store/application/RegisterStoreCustomerServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/RegisterStoreCustomerServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R094	backend/src/test/java/com/jaldishop/backend/store/application/StoreContextServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/StoreContextServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R093	backend/src/test/java/com/jaldishop/backend/store/application/StoreProvisioningAdapterTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/StoreProvisioningAdapterTest.java	Tiendas / Merchant Customers / búsqueda
+R086	backend/src/test/java/com/jaldishop/backend/store/application/UpdateStoreServiceTest.java -> backend/src/test/java/com/jaldishop/backend/store/application/service/UpdateStoreServiceTest.java	Tiendas / Merchant Customers / búsqueda
+R093	backend/src/test/java/com/jaldishop/backend/store/domain/StoreCategoryTest.java -> backend/src/test/java/com/jaldishop/backend/store/domain/model/StoreCategoryTest.java	Tiendas / Merchant Customers / búsqueda
+R089	backend/src/test/java/com/jaldishop/backend/store/domain/StoreTest.java -> backend/src/test/java/com/jaldishop/backend/store/domain/model/StoreTest.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/test/java/com/jaldishop/backend/store/domain/model/StoreValueObjectsTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/infrastructure/persistence/mapper/StorePersistenceMapperTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/controller/AdminStoreControllerTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/controller/MerchantCustomerControllerTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/controller/StoreCategoryControllerTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/controller/StoreControllerTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/mapper/AdminStoreResponseMapperTest.java	Tiendas / Merchant Customers / búsqueda
+M	backend/src/test/java/com/jaldishop/backend/store/web/mapper/StoreCustomerResponseMapperTest.java	Tiendas / Merchant Customers / búsqueda
+A	backend/src/test/java/com/jaldishop/backend/testutil/PostgresTriggerAssertions.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/testutil/PostgresTriggerAssertionsTest.java	Backend base / inventario / checkout / capacidad / soporte
+M	backend/src/test/java/com/jaldishop/backend/testutil/TestPostgresConfig.java	Backend base / inventario / checkout / capacidad / soporte
+A	backend/src/test/java/com/jaldishop/backend/testutil/TestPostgresConfigTest.java	Backend base / inventario / checkout / capacidad / soporte
+A	docs/04-diseno/api-inventario.md	Documentación / evidencia previa
+M	docs/04-diseno/guia-pruebas-postman.md	Documentación / evidencia previa
+D	docs/04-diseno/jaldishop-api.postman_collection.json	Documentación / evidencia previa
+A	docs/05-implementacion/mercadopago-2c2a.md	Documentación / evidencia previa
+A	docs/05-implementacion/mercadopago-2c2b.md	Documentación / evidencia previa
+M	docs/06-scrum/sprint-03.md	Documentación / evidencia previa
+M	frontend-merchant/package-lock.json	Frontend; integración independiente
+M	frontend-merchant/package.json	Frontend; integración independiente
+M	frontend-merchant/src/app/core/models/dashboard.models.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/core/models/order.models.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/core/services/auth-service.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/core/services/order.service.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/core/services/order.service.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/core/services/store.service.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/dashboard-kpis/dashboard-kpis.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/components/orders-kpis/orders-kpis.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/orders.html	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/orders.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/features/orders/orders.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.html	Frontend; integración independiente
+M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.spec.ts	Frontend; integración independiente
+M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.ts	Frontend; integración independiente
+A	postman/README.md	Colecciones / configuración de entornos
+A	postman/jaldishop.postman_collection.json	Colecciones / configuración de entornos
+A	postman/jaldishop.postman_environment.json	Colecciones / configuración de entornos

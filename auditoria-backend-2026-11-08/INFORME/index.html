@@ -1,0 +1,2188 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Auditoría del backend JaldiShop — 8 de noviembre de 2026 - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#auditoria-del-backend-jaldishop-8-de-noviembre-de-2026" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Auditoría del backend JaldiShop — 8 de noviembre de 2026
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-estado-e-inventario-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Estado e inventario Git
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Estado e inventario Git">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#archivos-sensibles-y-artefactos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Archivos sensibles y artefactos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependencia-de-inherited-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependencia de inherited-branch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ejecucion-y-resultados-exactos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Ejecución y resultados exactos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Ejecución y resultados exactos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#causa-demostrada-de-los-20-errores-de-qainheritedbranchtest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causa demostrada de los 20 errores de QaInheritedBranchTest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#los-otros-63-errores-y-las-16-omisiones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Los otros 63 errores y las 16 omisiones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regresion-por-area-en-la-suite-completa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regresión por área en la suite completa
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-cuatro-correcciones-e-integracion-postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Cuatro correcciones e integración PostgreSQL
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Cuatro correcciones e integración PostgreSQL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direcciones-duplicadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direcciones duplicadas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#busqueda-de-tiendas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Búsqueda de tiendas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalizacion-http" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalización HTTP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merchant-customers-e-instant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merchant Customers e Instant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flyway-checksums-y-entorno-desechable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flyway, checksums y entorno desechable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seguridad-de-las-pruebas-y-riesgos-financieros-pendientes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seguridad de las pruebas y riesgos financieros pendientes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-auditoria-admin-exclusivamente-estatica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Auditoría Admin — exclusivamente estática
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Auditoría Admin — exclusivamente estática">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#suspension-activacion-y-permisos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suspensión, activación y permisos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hallazgos-y-trabajo-posterior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hallazgos y trabajo posterior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-decision-y-condiciones-de-salida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Decisión y condiciones de salida
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-organizacion-propuesta-de-commits-y-actualizacion-segura-de-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Organización propuesta de commits y actualización segura de main
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-evidencia-y-preservacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Evidencia y preservación
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="auditoria-del-backend-jaldishop-8-de-noviembre-de-2026">Auditoría del backend JaldiShop — 8 de noviembre de 2026</h1>
+<p><strong>Decisión: BLOQUEADO para integrar el árbol actual en main.</strong> Compila, pero la suite completa contiene errores, el QA experimental es incompatible con V26 y las pruebas críticas de persistencia/concurrencia no pudieron ejecutarse. No se hicieron correcciones de producto ni se modificaron pruebas. No se ejecutaron commit, merge, push, deploy ni operaciones en Neon, Render o Mercado Pago real.</p>
+<h2 id="1-estado-e-inventario-git">1. Estado e inventario Git</h2>
+<ul>
+<li>Repositorio: <code>/home/ijosueeh/Documentos/Proyectos/jaldishop</code>.</li>
+<li>Rama: <code>feature/mercadopago-orders-api</code>.</li>
+<li>HEAD: <code>362e903b922904c032ef56bc00cfe7660e39b4fe</code>.</li>
+<li>main local: <code>e9352eddc4eb42b8e4083a470f482c45924829b9</code> (último commit del 27 de octubre). No se hizo fetch; no se certifica que coincida con el main remoto actual.</li>
+<li>Divergencia <code>main...HEAD</code>: 0 commits exclusivos de main, 28 exclusivos de la rama. Los commits se listan en <a href="../commits.txt">commits.txt</a>.</li>
+<li>Diferencia de archivos rastreados contra main, incluyendo modificaciones locales: <strong>764 archivos, +96.218 / −4.677 líneas</strong>. No incluye archivos nuevos sin seguimiento.</li>
+<li>Estado inicial: <strong>55 archivos rastreados modificados y 115 archivos nuevos: 170 entradas</strong>. Ningún cambio estaba preparado en el índice. De los rastreados modificados, 20 están en backend.</li>
+<li>Hay movimientos de paquetes en todos los módulos, inventario, cancelaciones, E2E y documentación, además de Mercado Pago. No es un diff limitado a las cuatro correcciones.</li>
+</ul>
+<p>Inventarios completos, con una fila por archivo:</p>
+<ul>
+<li><a href="../inventario-local.tsv">inventario-local.tsv</a>: los 170 archivos locales previos a esta auditoría, estado y clasificación.</li>
+<li><a href="../diferencias-main.tsv">diferencias-main.tsv</a>: las 764 diferencias rastreadas contra main, con rutas anteriores/nuevas cuando Git identifica movimientos.</li>
+<li><a href="../diff-check.txt">diff-check.txt</a>: advertencias de espacios finales y líneas vacías al final. <code>git diff --check main</code> no pasa; no se corrigieron.</li>
+</ul>
+<p>Clasificación del estado local inicial:</p>
+<table>
+<thead>
+<tr>
+<th>Grupo</th>
+<th style="text-align: right;">Archivos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direcciones</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr>
+<td>HTTP / seguridad / rutas</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>Mercado Pago y pruebas</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr>
+<td>Tiendas / búsqueda / Merchant Customers / V26</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr>
+<td>QA experimental, scripts, fixtures y colecciones de QA</td>
+<td style="text-align: right;">77</td>
+</tr>
+<tr>
+<td>Frontend Merchant</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr>
+<td>Postman / entornos</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>Documentación previa</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr>
+<td>Temporales / herramientas Postman</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>.gitignore</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>La clasificación indica el ámbito de revisión; no autoriza incluir automáticamente todos los archivos de un grupo en un commit. Este directorio de informe es la única incorporación nueva de la auditoría al repositorio.</p>
+<h3 id="archivos-sensibles-y-artefactos">Archivos sensibles y artefactos</h3>
+<p>Se revisaron archivos rastreados y nuevos no ignorados con patrones de JWT, tokens de Mercado Pago/GitHub, claves privadas y URLs con credenciales, sin imprimir valores. Los dos candidatos encontrados son datos sintéticos negativos de pruebas: JWT deliberadamente inválido en <code>WebSocketStompRealIntegrationTest.java:217</code> y URL de ejemplo en <code>QaRemotePolicyTest.java:81</code>. No se identificaron credenciales reales con esos patrones. Esto no equivale a un escaneo de secretos de todo el historial.</p>
+<p>Los campos de token/password de los tres environments JSON de Postman están vacíos. <code>postman/jaldishop.render.env.json</code> es configuración de destino sensible desde el punto de vista operativo: no se utilizó. Revisar su inclusión separadamente, junto con las URLs de despliegue. <code>.env</code> está ignorado; no se cargó ni se copió a la ejecución aislada. Revisar siempre archivos <code>.env*</code> que no cubra la regla exacta <code>.env</code>.</p>
+<p>Excluir de commits de producto <code>postman/jaldishop.postman_collection.json.bak</code>, logs, <code>target/</code>, clusters temporales y reportes crudos de ejecución. Las herramientas de <code>postman/tools/</code> requieren revisión separada; no son necesariamente basura. Los datos QA y documentos acumulados tampoco deben añadirse con <code>git add .</code>.</p>
+<h3 id="dependencia-de-inherited-branch">Dependencia de inherited-branch</h3>
+<p>El código nuevo <code>shared/config/qa</code>, el perfil <code>application-qa.properties</code> y <code>db/qa</code> están sin seguimiento. Maven los compila/empaqueta desde el árbol actual. Las configuraciones de datasource y seguridad QA tienen <code>@Profile("qa")</code>; no se encontraron imports de esas clases en los módulos funcionales fuera de ese paquete. No se detectó dependencia de arranque ordinario hacia inherited-branch.</p>
+<p>Sí existe acoplamiento accidental en la validación: QA inspecciona el mismo directorio de migraciones de producto y exige un número fijo. Su CLI incluye sanitización/cuarentena; debe tratarse como herramienta operativa independiente y revisarse antes de distribuirse dentro del JAR. No se ejecutó esa CLI.</p>
+<h2 id="2-ejecucion-y-resultados-exactos">2. Ejecución y resultados exactos</h2>
+<p>Entorno: Java Temurin 21.0.13; Spring Boot 4.1.1; Maven offline con dependencias ya disponibles. Se creó una copia de backend bajo <code>/tmp/jaldi-audit-20261108/backend</code>, excluyendo <code>.env*</code> y <code>target</code>. Se compiló desde cero allí: <strong>572 archivos fuente, BUILD SUCCESS</strong>, 8,442 s. El compilador avisa de APIs obsoletas; no impide la compilación.</p>
+<p>Las ejecuciones de pruebas usaron un entorno reducido sin DB_URL/PHASE2A_DB_URL ni credenciales heredadas, <code>spring.config.import=</code> y un javaagent Byte Buddy local. La URL general de Mercado Pago se fijó a loopback puerto 9. Los clientes de pago de las pruebas usan mocks/servidores de prueba; no se habilitó la prueba manual que lee una base persistente. Los JSON <code>*-command.json</code> contienen los argumentos exactos; logs completos y XML originales están en <code>/tmp/jaldi-audit-20261108</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Ejecución</th>
+<th style="text-align: right;">Total reportado</th>
+<th style="text-align: right;">Aprobadas</th>
+<th style="text-align: right;">Fallos de aserción</th>
+<th style="text-align: right;">Errores</th>
+<th style="text-align: right;">Omitidas</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Selección sin clases que requieren DB externa al test</td>
+<td style="text-align: right;">1.346</td>
+<td style="text-align: right;">1.312</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">14</td>
+<td>BUILD FAILURE</td>
+</tr>
+<tr>
+<td><strong>Suite completa, sin filtro de clases</strong></td>
+<td style="text-align: right;"><strong>1.426</strong></td>
+<td style="text-align: right;"><strong>1.327</strong></td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;"><strong>83</strong></td>
+<td style="text-align: right;"><strong>16</strong></td>
+<td><strong>BUILD FAILURE</strong></td>
+</tr>
+<tr>
+<td>Focalizadas: cuatro correcciones + guarda de DB</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>BUILD SUCCESS</td>
+</tr>
+<tr>
+<td>Tres clases JDBC/JPA habilitadas expresamente</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td>BUILD FAILURE de preparación</td>
+</tr>
+<tr>
+<td>Regresión SQL con PostgreSQL 18.6 monousuario</td>
+<td style="text-align: right;">21 casos SQL</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>PASS SQL; no JDBC/JPA</td>
+</tr>
+</tbody>
+</table>
+<p>Los resultados de ejecuciones diferentes se superponen y <strong>no deben sumarse</strong>. Surefire puede reportar un solo error de preparación por clase aunque ésta contenga varios métodos: los tres errores JDBC no significan que tres escenarios de negocio llegaron a ejecutarse.</p>
+<p>La selección inicial excluyó las clases listadas en <a href="../unit-exclusions.json">unit-exclusions.json</a>, incluida <code>TestPostgresConfigTest</code> por la selección conservadora de referencias a configuración. Sus 14 casos sí se ejecutaron en la suite completa y en las focalizadas. Se conserva esta distinción para que la primera selección no se confunda con toda la suite. No se cambiaron anotaciones ni se deshabilitaron pruebas.</p>
+<p>Anexos de resultados por clase: <a href="../full-results.json">suite completa</a>, <a href="../unit-results.json">primera selección</a>, <a href="../focused-results.json">focalizadas</a>, <a href="../postgres-results.json">preparación PostgreSQL</a>.</p>
+<p>La cifra histórica de 1.322 aprobadas, 20 errores y 2 omitidas no se reutilizó como evidencia actual. El árbol y la selección actual incluyen pruebas nuevas y más condiciones de integración.</p>
+<h3 id="causa-demostrada-de-los-20-errores-de-qainheritedbranchtest">Causa demostrada de los 20 errores de QaInheritedBranchTest</h3>
+<ol>
+<li>Hay <strong>25 scripts</strong>: V1–V8 y V10–V26. V9 tampoco existe en main; el salto es histórico y no se añadió en esta auditoría.</li>
+<li><code>QaInheritedSchema.java:32</code> exige <code>expected.size() == 24</code> y presencia de V25.</li>
+<li>V26 incrementa el conjunto de 24 a 25. Los nombres son válidos, no hay versiones duplicadas y los checksums se calcularon sin error con el algoritmo de la versión instalada de Flyway.</li>
+<li>La invocación offline de <code>QaInheritedSchema.expected()</code> reproduce <code>IllegalStateException</code>, sin JDBC; véase <code>/tmp/jaldi-audit-20261108/schema-guard.log</code> y <code>MigrationAudit.java</code>.</li>
+<li>Las trazas de los 20 errores llegan a esa guarda desde <code>prepared()</code> o desde la preparación offline de acciones. Las pruebas usan JDBC mock. No es un fallo de credenciales reales, red ni PostgreSQL.</li>
+</ol>
+<p>Es una incompatibilidad real entre QA experimental y la nueva migración. <strong>No debe borrarse V26, cambiar expectativas o excluir QaInheritedBranchTest para declarar verde el árbol actual.</strong> Corresponde corregir el contrato del componente QA con revisión y pruebas, o definir una entrega de producto que no lo incluya, verificando nuevamente el artefacto resultante. Ninguna de esas modificaciones se realizó aquí.</p>
+<h3 id="los-otros-63-errores-y-las-16-omisiones">Los otros 63 errores y las 16 omisiones</h3>
+<p>Los 63 errores restantes corresponden a preparación JDBC/Spring: faltan DB_URL/PHASE2A_DB_URL y credenciales de bases desechables. Los errores derivados de inicializadores/contextos fallidos no prueban fallos de negocio. No se sustituyeron por credenciales persistentes.</p>
+<p>Las 16 omisiones son: 8 casos de búsqueda PostgreSQL, 3 de Merchant Customers PostgreSQL, 3 de direcciones PostgreSQL, 1 de <code>RemoteOrderCreationMigrationTest</code> condicionado a PHASE2A_DB_URL y 1 de <code>SingleAttemptIsolatedReconciliationTest</code>, condicionado a autorización manual. Se habilitaron después las tres primeras clases, obteniendo los errores de socket descritos abajo. La prueba manual no se autorizó ni ejecutó.</p>
+<h3 id="regresion-por-area-en-la-suite-completa">Regresión por área en la suite completa</h3>
+<table>
+<thead>
+<tr>
+<th>Área</th>
+<th style="text-align: right;">Aprobadas</th>
+<th style="text-align: right;">Errores</th>
+<th style="text-align: right;">Omitidas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identidad / autenticación / permisos</td>
+<td style="text-align: right;">132</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Checkout</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Pagos</td>
+<td style="text-align: right;">330</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>Inventario</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Capacidad</td>
+<td style="text-align: right;">184</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Pedidos</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Realtime / WebSocket</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Direcciones</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>Tiendas / Merchant Customers</td>
+<td style="text-align: right;">103</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11</td>
+</tr>
+</tbody>
+</table>
+<p>Son subconjuntos del total; shared y otros módulos se detallan en el JSON. Los errores de esta tabla son de infraestructura de pruebas. Los 20 de QA están en shared. No se observaron fallos de aserción en lo que logró ejecutarse; queda pendiente la regresión con persistencia real.</p>
+<h2 id="3-cuatro-correcciones-e-integracion-postgresql">3. Cuatro correcciones e integración PostgreSQL</h2>
+<h3 id="direcciones-duplicadas">Direcciones duplicadas</h3>
+<p>La identidad se compara por UBIGEO y calle normalizada por espacios y minúsculas <code>Locale.ROOT</code>; se conserva la distinción de interiores incluida en la calle. Los servicios de creación y actualización verifican duplicados y responden <code>ADDRESS_ALREADY_EXISTS</code>, convertido a HTTP 409. Se permite editar metadatos de duplicados históricos cuando no cambia la ubicación.</p>
+<p>Crear, actualizar, eliminar y cambiar predeterminada toman el bloqueo de la fila del usuario mediante <code>SELECT ... FOR UPDATE</code>, dentro de transacciones. Esto proporciona serialización entre esos caminos de aplicación; <strong>no hay índice único de ubicación normalizada en la base</strong>. El índice único de V15 protege solo una dirección predeterminada por usuario. Escrituras que evadan esos servicios no están cubiertas por la unicidad lógica.</p>
+<p>Las pruebas focalizadas de dominio, servicios y controlador pasan. Las carreras de 8 creaciones iguales, límite de cinco direcciones y única predeterminada existen en <code>CustomerAddressPostgresIntegrationTest</code>, pero <strong>no se ejecutaron</strong> por el bloqueo de sockets. No se afirma que la concurrencia esté certificada.</p>
+<h3 id="busqueda-de-tiendas">Búsqueda de tiendas</h3>
+<p>La consulta JPQL usa <code>public.unaccent</code>, minúsculas y <code>LOCATE</code>, preservando <code>%</code>, <code>_</code> y barra invertida como texto literal. El servicio público filtra ACTIVE. La migración V26 crea la extensión en public sin reescribir nombres/slugs. La validación de la consulta con Hibernate y las pruebas HTTP internas pasan.</p>
+<p>El script existente <code>qa/public-store-search/verify-postgres.py</code> creó un cluster nuevo con <code>initdb</code> y usó <code>postgres --single</code>, sin servidor TCP. Aplicó los 25 scripts ordenados hasta V26 y ejecutó 21 casos SQL, incluyendo reproducción del comportamiento previo, acentos, caracteres literales, estado y límites. Resultado: <strong>exit 0, marcador PASS, sin ERROR/FATAL/PANIC</strong>. Versión real: PostgreSQL 18.6. El CI declara PostgreSQL 16; esta prueba adicional no certifica esa versión ni el SQL emitido por JPA.</p>
+<p>Pendiente: permisos CREATE EXTENSION y que <code>unaccent</code> esté instalado efectivamente en public en el destino. Si una instalación previa lo tiene en otro esquema, <code>IF NOT EXISTS</code> no lo traslada. No se inspeccionó ningún destino persistente.</p>
+<h3 id="normalizacion-http">Normalización HTTP</h3>
+<p>El handler conserva <code>Allow</code> en 405, añade manejo de <code>NoHandlerFoundException</code> y responde 409 a direcciones duplicadas. SecurityConfig añade JSON 400 para rechazo del firewall. Pasan las pruebas de rutas de favoritos, handlers y controladores. La suite de seguridad también ejecuta los casos de autenticación y roles con mocks/MockMvc. HTTP real no quedó validado por la restricción TCP.</p>
+<h3 id="merchant-customers-e-instant">Merchant Customers e Instant</h3>
+<p>La proyección devuelve <code>Instant</code> y el adaptador deja de exigir conversiones desde <code>Timestamp</code>. Pasan la cadena de proyección Spring → adaptador → servicio → controlador protegido → JSON, fechas precisas/null, aislamiento de tienda y permisos en pruebas internas.</p>
+<p>La conversión real de <code>TIMESTAMPTZ</code> a <code>Instant</code> por Hibernate/JDBC está cubierta en la clase PostgreSQL pendiente; no se sustituyó por una afirmación basada solo en mocks. También siguen pendientes las agregaciones y el aislamiento con datos reales de esa prueba. El contrato actual cuenta pedidos cancelados en ordersCount/lastOrderAt pero excluye sus importes de totalSpent; la prueba lo documenta. No se cambió esa semántica.</p>
+<h3 id="flyway-checksums-y-entorno-desechable">Flyway, checksums y entorno desechable</h3>
+<ul>
+<li><a href="../flyway-checksums.csv">flyway-checksums.csv</a>: checksum Flyway offline de cada uno de los 25 scripts. V26: <strong>778257244</strong>.</li>
+<li><a href="../migration-manifest.json">migration-manifest.json</a>: SHA-256 y comparación con HEAD/main. Los scripts históricos presentes en main son idénticos byte a byte; V1–V25 no tienen modificaciones locales frente a HEAD. V16–V25 pertenecen a los commits de la rama; V26 es nueva sin seguimiento.</li>
+<li>Aplicación SQL en cluster nuevo: PASS con PostgreSQL 18.6 monousuario.</li>
+<li><strong>Flyway migrate/validate sobre JDBC y comprobación de <code>flyway_schema_history</code>: PENDIENTE</strong>. La ejecución monousuario no genera historial Flyway ni comprueba checksums contra una base migrada.</li>
+<li>Una prueba directa de socket IPv4 falla con <code>PermissionError errno 1</code>. Se localizaron binarios PostgreSQL 18 disponibles localmente y se habilitaron las tres clases con <code>ADDRESS_TEST_PG_BIN</code>, <code>STORE_SEARCH_TEST_PG_BIN</code> y <code>STORE_CUSTOMERS_TEST_PG_BIN</code>; las tres completan initdb pero fallan en <code>new ServerSocket</code> con <code>java.net.SocketException: Operation not permitted</code> antes de abrir JDBC.</li>
+<li>No se solicitó eludir las restricciones del entorno. Los datos previos de <code>/tmp</code> no se reutilizaron; solo bibliotecas/binarios existentes. Las instancias de validación se crearon en directorios temporales nuevos.</li>
+</ul>
+<h3 id="seguridad-de-las-pruebas-y-riesgos-financieros-pendientes">Seguridad de las pruebas y riesgos financieros pendientes</h3>
+<p>Las pruebas generales usan <code>TestPostgresConfig</code>, que exige loopback, puerto explícito, nombre <code>jaldishop_integration_test</code> o <code>jaldishop_fase2a_test</code>, y rechaza destinos remotos/parámetros. Esa guarda por sí sola <strong>no prueba que una base con ese nombre sea desechable</strong>. Algunas fixtures hacen DELETE/TRUNCATE y requieren control adicional de propiedad/ciclo de vida. En esta ejecución no recibieron conexiones.</p>
+<p>La prueba manual <code>SingleAttemptIsolatedReconciliationTest</code> puede leer configuración persistente si se autoriza explícitamente; quedó omitida. Las tres clases nuevas administran su propio cluster y no leen <code>.env</code>. El único acceso PostgreSQL efectivo fue al cluster monousuario nuevo; <strong>ninguna prueba ejecutada modificó una base persistente</strong>.</p>
+<p>Se revisaron la validación compartida de identidad remota, referencia del intento, rechazo de múltiples pagos ambiguos, preservación de estados financieros y cambios locales del adaptador Orders. Los tests disponibles de conciliación, webhook, investigación y respuesta canónica/legacy pasan en memoria. El nuevo paidAmount se conserva como evidencia; no se observó consumidor financiero de ese campo, por lo que no se afirma una validación adicional del importe efectivamente abonado. Falta demostración de transacciones, leases, idempotencia, compensación de inventario/capacidad y concurrencia con PostgreSQL. No se ejecutaron pagos ni reembolsos reales.</p>
+<p>La validación de collector/live_mode depende de <code>expectedCollectorId</code>/<code>expectedLiveMode</code>, propiedades opcionales: cuando son null esos controles no se aplican. Revisar su configuración explícita en una fase de despliegue autorizada; no se leyeron secretos de destino. <code>spring.flyway.validate-on-migrate</code> tiene default false en la configuración actual: ejecutar la futura validación con true, sin reparar historial automáticamente.</p>
+<h2 id="4-auditoria-admin-exclusivamente-estatica">4. Auditoría Admin — exclusivamente estática</h2>
+<p>Todos los controladores siguientes tienen <code>@PreAuthorize("hasRole('ADMIN')")</code>; la cadena HTTP también exige ADMIN para <code>/api/v1/admin/**</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Ruta base</th>
+<th>Operaciones disponibles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/admin/users</code></td>
+<td>GET lista; GET <code>/{id}</code>; PATCH <code>/{id}/suspend</code>; PATCH <code>/{id}/activate</code>; PATCH <code>/{id}/roles</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/admin/stores</code></td>
+<td>GET lista; GET <code>/{id}</code>; PATCH <code>/{id}/suspend</code>; PATCH <code>/{id}/activate</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/admin/payments/attempts</code></td>
+<td>POST <code>/{attemptId}/reconcile-order</code>; POST <code>/{attemptId}/investigate-order</code></td>
+</tr>
+</tbody>
+</table>
+<p>Los endpoints de pagos son nuevos frente a main y pertenecen a los commits de Mercado Pago. Son una ampliación de superficie administrativa financiera que debe identificarse explícitamente al revisar ese bloque; no son cambios implementados en esta auditoría. Los controladores generales de usuarios/tiendas conservan sus operaciones frente a main; sus diferencias revisadas son cambios de imports por el refactor de paquetes.</p>
+<h3 id="suspension-activacion-y-permisos">Suspensión, activación y permisos</h3>
+<ul>
+<li><code>ChangeUserStatusService</code> y <code>ChangeStoreStatusService</code> son transaccionales y llaman a <code>repository.save</code>: hay persistencia implementada, aunque su ejecución real quedó pendiente.</li>
+<li>Usuario: se impide autosuspensión cuando se identifica al administrador; se rechazan estados ya activos/suspendidos. <code>UpdateUserRolesService</code> impide quitarse el propio rol ADMIN. <code>JwtAuthenticationFilter</code> consulta el usuario y sus roles actuales en cada petición y rechaza usuarios no activos; ante fallo de infraestructura responde 503. Esto evita confiar solo en roles antiguos del JWT para HTTP.</li>
+<li>Tienda: se rechazan suspensiones/activaciones repetidas. Búsqueda pública y lectura pública por slug exigen ACTIVE; checkout y confirmación vuelven a comprobar ACTIVE. La suspensión no elimina el negocio ni compensa automáticamente pedidos/pagos en curso.</li>
+<li><code>StoreContextService</code> valida rol y propiedad, pero no exige ACTIVE de forma general: una tienda suspendida todavía puede acceder a caminos Merchant que solo usan ese contexto. Debe definirse qué operaciones de gestión/atención se permiten en suspensión; no se interpreta todo acceso como vulnerabilidad ni se cambió su política.</li>
+</ul>
+<h3 id="hallazgos-y-trabajo-posterior">Hallazgos y trabajo posterior</h3>
+<ol>
+<li><strong>Configuraciones que aparentan persistir — confirmado.</strong> <code>frontend-merchant/src/app/core/services/admin.service.ts:320</code> actualiza una signal; <code>saveSettings():324</code> solo muestra un toast de éxito. No hay llamada HTTP ni almacenamiento duradero. Registro de merchants, aprobación de tiendas, mantenimiento, tiempo de sesión, 2FA y avisos configurables en esa pantalla no constituyen controles efectivos por guardar ahí. No se encontró controlador backend de configuración de plataforma. No confiar en el toggle 2FA como protección implementada.</li>
+<li><strong>Auditoría administrativa pendiente.</strong> En los servicios revisados no se observa un registro persistente de actor, motivo y antes/después para estos cambios. Activación de usuario y cambios de tienda no reciben actor en sus comandos. Planificar trazabilidad y autorización operativa para los endpoints financieros.</li>
+<li><strong>Política de transiciones pendiente.</strong> Activar asigna ACTIVE desde cualquier estado no ACTIVE; no hay una matriz explícita de reapertura/rehabilitación. Definir cómo tratar CLOSED/INACTIVE y qué efectos debe producir la suspensión en operaciones ya iniciadas.</li>
+<li><strong>Consistencia concurrente pendiente.</strong> Las protecciones locales de autosuspensión/autorretiro de ADMIN no son una garantía global contra dos administradores que se suspendan o retiren roles mutuamente en paralelo. Revisar el invariante de al menos un administrador activo y la concurrencia de cambios de permisos; no se implementó nada.</li>
+<li><strong>Escalabilidad pendiente.</strong> Las listas de usuarios/tiendas devuelven List, sin paginación en esos controladores; las métricas frontend derivadas de esas listas crecerán con el volumen. Planificar paginación y métricas de servidor.</li>
+</ol>
+<p>No se implementaron ajustes Admin, 2FA, persistencia de configuración, endpoints nuevos ni migraciones de administración.</p>
+<h2 id="5-decision-y-condiciones-de-salida">5. Decisión y condiciones de salida</h2>
+<p><strong>BLOQUEADO</strong>, por el estado concreto del candidato actual:</p>
+<ul>
+<li>La suite completa falla. Los 20 errores de QaInheritedBranchTest tienen causa demostrada, pero el defecto sigue presente en código que se compila/empaqueta desde este árbol.</li>
+<li>No se han ejecutado las pruebas críticas JDBC/JPA, concurrencia e historial Flyway. Los mocks y PostgreSQL monousuario aportan evidencia parcial; no bastan para certificar la integración financiera y de reservas.</li>
+<li>El candidato mezcla 28 commits de varios módulos, 170 cambios locales y QA experimental. Se inventarió todo el conjunto y se revisaron estáticamente los caminos críticos descritos, los cambios locales de backend y Admin; <strong>no se certifica revisión línea por línea de las 96.218 líneas añadidas</strong>, ni validación de los 42 archivos locales frontend. Eso debe completarse sobre una entrega delimitada.</li>
+</ul>
+<p>No se etiqueta como APROBADO CON LIMITACIONES porque el candidato incluye una incompatibilidad reproducible de código QA, además de las limitaciones del entorno. Que los fallos sean explicables no convierte la suite en aprobada.</p>
+<p>Para reevaluar:</p>
+<ol>
+<li>Delimitar un árbol de entrega identificable, separar QA experimental y frontend, o corregir el contrato QA con pruebas válidas. Conservar siempre el trabajo existente.</li>
+<li>En un runner con sockets, crear PostgreSQL desechable de la versión objetivo, con directorio/volumen nuevo, identificador de ejecución y credenciales exclusivas; no aceptar solo un nombre de DB como evidencia de aislamiento.</li>
+<li>Crear separadamente las bases general y Phase2A exigidas por las guardas. Forzar <code>FLYWAY_VALIDATE_ON_MIGRATE=true</code>; migrar desde vacío y validar los checksums contra <code>flyway_schema_history</code>. Probar también la actualización del esquema base de main con sus scripts inalterados.</li>
+<li>Ejecutar todos los tests JDBC, E2E HTTP/WebSocket y los 14 casos de las tres clases nuevas. Aportar binarios PG compatibles con la versión objetivo para las clases que crean clusters. Verificar extensión y esquema <code>public.unaccent</code>, Instant real, duplicados y límite/predeterminada bajo concurrencia.</li>
+<li>Ejecutar nuevamente la suite completa sobre el SHA/árbol exacto candidato, con mocks locales de pagos y sin autorización de la prueba manual persistente. Documentar esa prueba fuera de la suite de integración. No aceptar errores ni omisiones críticas sin ejecución alternativa demostrada.</li>
+<li>Completar revisión de diff del candidato y resolver las advertencias de <code>diff --check</code> en una tarea autorizada. La configuración CI incluye <code>continue-on-error</code> para subir reportes, pero tiene un paso posterior que verifica el outcome y falla; no se observó un bypass automático de errores en ese punto.</li>
+</ol>
+<h2 id="6-organizacion-propuesta-de-commits-y-actualizacion-segura-de-main">6. Organización propuesta de commits y actualización segura de main</h2>
+<p><strong>Es una propuesta; no se ejecutó ningún comando de integración.</strong> No reescribir los 28 commits existentes ni hacer staging masivo del árbol actual.</p>
+<p>Para el trabajo local todavía sin confirmar, proponer unidades revisables:</p>
+<ol>
+<li><code>fix(address): reject duplicate customer locations</code>: dominio, creación/actualización, contrato 409 y pruebas de direcciones. El hunk de 409 del handler comparte archivo con el bloque HTTP: preparar por hunk para que cada commit sea coherente.</li>
+<li><code>fix(store): normalize public search with unaccent</code>: consulta, <strong>V26 en el mismo bloque</strong>, pruebas de consulta/controlador/PostgreSQL. No publicar la consulta sin la extensión.</li>
+<li><code>fix(http): preserve routing error contracts</code>: resto del handler, <code>RequestRejectedHandler</code>, rutas y pruebas HTTP. Respetar la dependencia del contrato 409 del bloque de direcciones.</li>
+<li><code>fix(store): map merchant customer timestamps as Instant</code>: proyección, adaptador y pruebas de proyección/HTTP/JDBC.</li>
+<li><code>fix(payment): validate canonical and legacy orders responses</code>: DTOs, normalización y pruebas de investigación, conciliación, webhook y cliente; incluir los fixtures necesarios de <code>src/test/resources/mercadopago</code>. Revisión financiera propia.</li>
+<li><strong>Rama/entrega separada de QA experimental</strong>: <code>shared/config/qa</code>, perfil, fixtures SQL, herramientas y pruebas QA. Separar su incompatibilidad con el catálogo de migraciones; no moverla silenciosamente fuera de la suite para hacer pasar el candidato.</li>
+<li>Frontend Merchant, notificaciones/STOMP y sus dependencias: entrega independiente con su propia validación. Postman/documentación: commits específicos, sin backup, datos sensibles ni resultados crudos. El informe actual puede ir en un commit documental independiente cuando se autorice.</li>
+</ol>
+<p>Los grupos locales dependen de refactors y funcionalidades que ya están en la historia de esta rama. No hacer cherry-pick aislado a main asumiendo que los paquetes/contratos existen allí. Inventario, cancelaciones, capacidades, refactor de paquetes y Mercado Pago deben aparecer como dependencias explícitas en el alcance que se quiera integrar.</p>
+<p>Procedimiento futuro, después de resolver los bloqueos y obtener autorización de la fase de publicación:</p>
+<ol>
+<li>Respaldar y registrar el estado exacto completo, incluidos archivos nuevos, sin reset/clean/stash destructivo. Confirmar los commits aprobados únicamente por rutas/hunks revisados y conservar el resto del trabajo en su rama/checkout.</li>
+<li>Actualizar referencias remotas y comparar de nuevo con el main remoto real; el análisis actual solo conoce el main local del 27 de octubre.</li>
+<li>Crear un worktree limpio de integración desde ese main actualizado. Aplicar el conjunto revisado y su cadena de dependencias; resolver conflictos allí, preservando el checkout con trabajo acumulado.</li>
+<li>Revisar el diff efectivo final, escanear secretos, verificar que QA experimental/temporales no se filtraron al JAR y ejecutar desde cero los gates sobre el commit final en ese worktree.</li>
+<li>Preparar PR con alcance, migraciones, evidencia exacta y pendientes Admin separados. Exigir los checks y revisión humana antes del merge autorizado; si main cambia, repetir las validaciones afectadas sobre el nuevo candidato.</li>
+<li>La aplicación de migraciones, publicación y despliegue requieren la fase independiente anunciada por el usuario. No hacer Flyway repair ni editar checksums/historial para forzar compatibilidad.</li>
+</ol>
+<h2 id="7-evidencia-y-preservacion">7. Evidencia y preservación</h2>
+<ul>
+<li>Los argumentos exactos están en <a href="../full-command.json">full-command.json</a>, <a href="../unit-command.json">unit-command.json</a>, <a href="../focused-command.json">focused-command.json</a> y <a href="../postgres-command.json">postgres-command.json</a>. Maven escribió los reportes en <code>target/surefire-reports</code>; se copiaron por ejecución/clase para conservar evidencia. Los paths de reportDirectory solicitados en los comandos no fueron efectivos con la configuración actual; los anexos proceden del directorio real.</li>
+<li>Logs completos: <code>/tmp/jaldi-audit-20261108/fresh-compile.log</code>, <code>unit.log</code>, <code>full.log</code>, <code>focused.log</code>, <code>postgres.log</code>, <code>single-user-search.log</code>, <code>schema-guard.log</code>. Los XML se preservaron en <code>unit-reports</code>, <code>full-reports</code>, <code>focused-reports</code> y <code>postgres-reports</code> dentro de ese directorio temporal. No se añaden al repositorio.</li>
+<li>Antes de crear este informe, <code>git status</code> y el parche binario de cambios rastreados coincidieron exactamente con las capturas iniciales. Los <strong>923 archivos de backend</strong> copiados, excluyendo target y secretos, se compararon byte a byte con el original: <strong>cero diferencias</strong>. La compilación inicial en el checkout solo actualizó artefactos ignorados de target; las ejecuciones posteriores se realizaron en la copia.</li>
+<li>La única diferencia adicional de fuentes/control documental al cerrar es <code>docs/auditoria-backend-2026-11-08/</code>. Se conserva todo el trabajo previo.</li>
+</ul>
+<p><strong>La auditoría termina aquí. Publicación e integración no autorizadas ni ejecutadas.</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2083 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Auditoría JaldiShop — 7 de noviembre de 2026 - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#auditoria-jaldishop-7-de-noviembre-de-2026" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Auditoría JaldiShop — 7 de noviembre de 2026
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decisiones-y-acciones-prioritarias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decisiones y acciones prioritarias
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entregables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entregables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#estado-e-inventario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estado e inventario
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hallazgos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hallazgos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hallazgos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#f01-p0-defecto-de-seguridad-firma-multimedia-sin-aislamiento-de-tienda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F01 — P0 — DEFECTO DE SEGURIDAD: Firma multimedia sin aislamiento de tienda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f02-p0-defecto-de-seguridad-retirada-de-rol-no-invalida-privilegios-del-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F02 — P0 — DEFECTO DE SEGURIDAD: Retirada de rol no invalida privilegios del token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f03-p1-defecto-funcional-elemento-null-en-attributes-llega-a-nullpointerexception" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F03 — P1 — DEFECTO FUNCIONAL: Elemento null en attributes llega a NullPointerException
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f04-p1-defecto-funcional-longitudes-de-atributo-no-alineadas-con-postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F04 — P1 — DEFECTO FUNCIONAL: Longitudes de atributo no alineadas con PostgreSQL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f05-p1-defecto-funcional-alta-merchant-acepta-nombres-superiores-a-columna-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F05 — P1 — DEFECTO FUNCIONAL: Alta merchant acepta nombres superiores a columna users
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f06-p2-defecto-de-seguridad-diagnostico-detallado-de-salud-expuesto-publicamente" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F06 — P2 — DEFECTO DE SEGURIDAD: Diagnóstico detallado de salud expuesto públicamente
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r01-p0-riesgo-no-confirmado-persistencia-local-falla-despues-de-crear-sesion-remota" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R01 — P0 — RIESGO NO CONFIRMADO: Persistencia local falla después de crear sesión remota
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r02-p2-riesgo-no-confirmado-catalogo-publico-incluye-variantes-inactivas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R02 — P2 — RIESGO NO CONFIRMADO: Catálogo público incluye variantes inactivas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r03-p2-comportamiento-no-verificado-discountcode-aceptado-pero-calculo-no-aplica-descuentos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        R03 — P2 — COMPORTAMIENTO NO VERIFICADO: DiscountCode aceptado pero cálculo no aplica descuentos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contrato-de-errores-identificado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contrato de errores identificado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matriz-interpretada-de-reglas-pruebas-y-pendientes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matriz interpretada de reglas, pruebas y pendientes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integridad-y-limites-de-la-revision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integridad y límites de la revisión
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan-de-correcciones-y-validacion-por-etapas-pendiente-de-autorizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan de correcciones y validación por etapas (pendiente de autorización)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="auditoria-jaldishop-7-de-noviembre-de-2026">Auditoría JaldiShop — 7 de noviembre de 2026</h1>
+<h2 id="decisiones-y-acciones-prioritarias">Decisiones y acciones prioritarias</h2>
+<p>No declarar el backend listo para el martes 10. Esta auditoría identifica contrato y mecanismos estáticos; <strong>cero tests ejecutados y cero endpoints probados funcionalmente durante la auditoría</strong>. No se conectó a PostgreSQL, Render, Neon ni Mercado Pago; no se ejecutó Maven, migraciones, webhooks, reembolsos ni HTTP.</p>
+<ol>
+<li>Autorizar posteriormente correcciones de aislamiento multimedia y revocación de roles (P0).</li>
+<li>Corregir entradas de variantes que pueden producir 500 (P1), antes de pruebas funcionales extensas.</li>
+<li>Revisar límites compatibles con columnas SQL y exposición de diagnóstico (P1/P2).</li>
+<li>Congelar un estado de trabajo reproducible: hay modificaciones previas locales en pagos, tests, frontend y Postman. Los hallazgos corresponden al <strong>working tree</strong>, incluyendo archivos nuevos, no exclusivamente a HEAD. Esta auditoría no modificó esos archivos.</li>
+<li>Tras autorización, ejecutar pruebas aisladas y luego flujos funcionales con fixtures nuevos; conservar <code>jaldishop_test</code>. Incluso <code>jaldishop_integration_test</code> permaneció intacta en esta fase.</li>
+</ol>
+<h2 id="entregables">Entregables</h2>
+<ul>
+<li><a href="../01-inventario/">Inventario completo y matriz Postman</a>: controlador, método, ruta, éxito y cantidad de requests por endpoint.</li>
+<li><a href="../02-evidencia-validaciones/">Evidencia de validaciones y SQL</a>: índice de anotaciones DTO, guardas de dominio/servicio y restricciones de migraciones, con líneas.</li>
+<li><a href="../03-pruebas/">Pruebas localizadas</a>: archivos y métodos candidatos por módulo, sin confundir nombres con aprobación.</li>
+<li><a href="../04-equipo-y-casos/">Contrato por endpoint y asignación</a>: solicitudes, roles, respuestas y orden de ejecución.</li>
+<li>Este documento: hallazgos priorizados, matriz interpretada y etapas de corrección.</li>
+</ul>
+<h2 id="estado-e-inventario">Estado e inventario</h2>
+<p>32 controladores REST propios, 97 endpoints únicos. Postman: 100 requests, 97 firmas distintas; 97/97 firmas presentes, ninguna ruta obsoleta o faltante por método/ruta. Tres requests adicionales no son tres endpoints adicionales: ver duplicados en inventario. Esto no comprueba cuerpos, headers, variables, scripts ni cumplimiento del contrato.</p>
+<p>La configuración real es Java 21 / Spring Boot <strong>4.1.1</strong> (<code>backend/pom.xml:8</code>), no Spring Boot 3. No se propone migrar para esta presentación. La versión importa para binding, validación MVC y ejecución de los slices.</p>
+<p>Postman tiene 36 requests con script local de tipo test, pero solo 24 contienen <code>pm.test</code>; scripts de extracción de variables no equivalen a aserciones. No hay eventos raíz. Los scripts de carpetas deben revisarse antes de concluir qué requests carecen de aserciones heredadas.</p>
+<p>Bruno: no encontrado dentro del repositorio. Sí hay artefactos relacionados accesibles:</p>
+<ul>
+<li><code>/home/ijosueeh/.gemini/antigravity-cli/brain/078c7ee2-cbd6-4c2b-8c34-b7876eba0906/scratch/bruno_imported_test</code>: 86 archivos <code>.bru</code>, con <code>bruno.json</code>.</li>
+<li>Mismo directorio padre, <code>bruno_imported_phase_d</code>: 89 <code>.bru</code>, sin <code>bruno.json</code> localizado en esa carpeta.</li>
+</ul>
+<p>Son copias externas; ni su vigencia ni su ejecución están certificadas. No deben reemplazar Postman automáticamente. Los fixtures Bruno de <code>.npm</code> no son colecciones JaldiShop.</p>
+<h2 id="hallazgos">Hallazgos</h2>
+<p>Clasificación: VALIDACIÓN ESPERADA = rechazo deliberado documentado; DEFECTO FUNCIONAL/SEGURIDAD/INTEGRIDAD = mecanismo demostrado por fuente; RIESGO NO CONFIRMADO = consecuencia depende de ejecución o configuración; COMPORTAMIENTO NO VERIFICADO = sin evidencia suficiente. Prioridad mide impacto, no certeza. “Confirmado estáticamente” no significa reproducido por HTTP.</p>
+<h3 id="f01-p0-defecto-de-seguridad-firma-multimedia-sin-aislamiento-de-tienda">F01 — P0 — DEFECTO DE SEGURIDAD: Firma multimedia sin aislamiento de tienda</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/media/application/service/GenerateUploadSignatureService.java:29</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p><code>execute</code> usa <code>explicitStoreId</code> directamente; solo consulta tienda del usuario cuando falta. <code>MediaController.generateUploadSignature</code> permite branding anónimo con storeId y permite PRODUCT_IMAGE a MERCHANT/ADMIN sin validar que esa tienda le pertenezca. <code>CloudinaryMediaStorageService.generateSignature/resolveFolder</code> firma la carpeta de ese UUID. Un merchant puede obtener firma para carpeta ajena; un visitante puede hacerlo para branding. No demuestra sobrescritura de un recurso existente, pero sí ruptura del aislamiento de subida y abuso de almacenamiento.</p>
+<p>Esperado: permitir pre-registro en espacio temporal y autorizar pertenencia para carpeta de tienda existente. Corrección mínima: validar el contexto antes de firmar, preservando onboarding sin tienda. Prueba: visitante y merchant A piden storeId B → rechazo controlado y cero llamadas al firmador; A con A y branding temporal permitido → 200. El test existente <code>generateSignatureWithExplicitStoreId</code> prueba el comportamiento actual, no su seguridad.</p>
+<h3 id="f02-p0-defecto-de-seguridad-retirada-de-rol-no-invalida-privilegios-del-token">F02 — P0 — DEFECTO DE SEGURIDAD: Retirada de rol no invalida privilegios del token</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/JwtAuthenticationFilter.java:75</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p><code>doFilterInternal</code> consulta al usuario y verifica <code>canAuthenticate()</code>, pero construye authorities desde <code>principal.roles()</code> del JWT; no desde los roles actuales que carga <code>UserRepositoryAdapter.findById</code>. <code>UpdateUserRolesService.execute</code> guarda cambios sin revocar tokens. Un ADMIN activo degradado por otro administrador conserva acceso a <code>/api/v1/admin/**</code> con su token anterior hasta expiración. La suspensión sí se consulta y bloquea; no confundir ambos casos.</p>
+<p>Esperado: retirada de privilegios efectiva para peticiones posteriores según política de seguridad explícita. Corrección mínima: crear principal y authorities desde roles actuales o introducir versión de token; actualizar ambos, porque varios controladores consultan principal.roles directamente. Prueba: emitir token ADMIN, retirarlo con segundo admin, reutilizar token → 403 sin invocar servicio; token CUSTOMER no obtiene acceso admin. No se ejecutó la prueba.</p>
+<h3 id="f03-p1-defecto-funcional-elemento-null-en-attributes-llega-a-nullpointerexception">F03 — P1 — DEFECTO FUNCIONAL: Elemento null en attributes llega a NullPointerException</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java:62</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p><code>createVariant</code> y <code>updateVariant</code> recorren <code>attributes</code> y llaman <code>attr.name()</code>. Los DTO tienen <code>@Valid List&lt;VariantAttributeDto&gt;</code>, sin <code>@NotNull</code> sobre el elemento: cascada ignora null. Un cuerpo por lo demás válido con <code>attributes:[null]</code> supera esas restricciones y provoca NPE; el handler genérico lo traduce a 500. La lista null se admite deliberadamente y no es el problema.</p>
+<p>Esperado: 400 VALIDATION_ERROR. Corrección mínima: restricción de elemento no nulo en ambos DTO. Prueba MockMvc con tienda propia y servicio mock: POST y PUT con elemento null deben dar 400 sin guardar; atributos válidos mantienen 201/200.</p>
+<h3 id="f04-p1-defecto-funcional-longitudes-de-atributo-no-alineadas-con-postgresql">F04 — P1 — DEFECTO FUNCIONAL: Longitudes de atributo no alineadas con PostgreSQL</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/catalog/web/dto/VariantAttributeDto.java:6</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p>Nombre de atributo solo tiene NotBlank; <code>VariantAttribute</code> valida vacío pero no longitud; el mapper transmite el nombre. V1 crea <code>variant_attributes.name VARCHAR(120)</code> y PK <code>(variant_id,name)</code>. Un nombre no vacío de 121 caracteres supera validación y excede el almacenamiento. El handler de integridad solo convierte unique a 409; otras fallas van a 500 o handler genérico según traducción JDBC. El rechazo SQL depende de aplicar el esquema, no se conectó a la base.</p>
+<p>Esperado: 400 antes de persistir, fundado en límite real de 120. Corrección mínima: Size(max=120) en DTO, revisar frontera de dominio para otros llamadores. Prueba de frontera 120/121 y persistencia PostgreSQL real aislada; comprobar rollback sin variantes parciales.</p>
+<h3 id="f05-p1-defecto-funcional-alta-merchant-acepta-nombres-superiores-a-columna-users">F05 — P1 — DEFECTO FUNCIONAL: Alta merchant acepta nombres superiores a columna users</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/identity/web/dto/RegisterMerchantRequest.java:17</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p><code>firstName</code> y <code>lastName</code> solo NotBlank; <code>RegisterMerchantCommand</code> no restringe y <code>User.create</code> valida presencia, no longitud. V1 limita ambos a VARCHAR(100). Un nombre de 101 caracteres alcanza persistencia y puede producir 500. No es razón para imponer mínimos nuevos: el límite proviene de SQL.</p>
+<p>Esperado: 400 de validación y ninguna alta parcial. Corrección mínima: alinear máximos 100; revisar también límites de email contra VARCHAR(254), sin asumir que @Email impone longitud. Prueba 100/101 para ambos nombres, integración de rollback merchant + tienda + roles. Test de rollback existente no demuestra este caso por existir.</p>
+<h3 id="f06-p2-defecto-de-seguridad-diagnostico-detallado-de-salud-expuesto-publicamente">F06 — P2 — DEFECTO DE SEGURIDAD: Diagnóstico detallado de salud expuesto públicamente</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/SecurityConfig.java:48</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p>SecurityConfig permite Actuator anónimo. <code>application.properties:6-7</code> expone health/info y show-details=always. Permite ver detalles de contribuidores de salud según componentes activos; no se afirma exposición de secretos ni que se exponga env, que no está incluido.</p>
+<p>Esperado: resumen público y diagnóstico restringido. Corrección mínima futura: limitar detalles por autorización y revisar allowlist sin alterar seguridad en esta fase. Prueba de configuración/perfil: anónimo solo status; admin ve lo permitido.</p>
+<h3 id="r01-p0-riesgo-no-confirmado-persistencia-local-falla-despues-de-crear-sesion-remota">R01 — P0 — RIESGO NO CONFIRMADO: Persistencia local falla después de crear sesión remota</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/payment/application/preference/CreatePaymentPreferenceService.java:134</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p>Los métodos executeWithPreferencesApi/executeWithOrdersApi separan DB, gateway y DB: el último paso puede fallar después del éxito remoto. Hay idempotencia por intento, evidencia remota, leases y reconciliación en el proyecto; no se demuestra aquí doble cobro ni falta de recuperación. No resolver envolviendo HTTP en una transacción larga.</p>
+<p>Esperado: reintento y recuperación convergen a una sesión/pedido; ningún aprobado sin seguimiento. Acción mínima: probar fallo inyectado después de respuesta remota y antes de guardar, con gateway fake. Incluir dos invocaciones concurrentes, reinicio, webhook duplicado y reconciliación simultánea. PostgreSQL real para locks/unique/leases; no llamar Mercado Pago en esa prueba.</p>
+<h3 id="r02-p2-riesgo-no-confirmado-catalogo-publico-incluye-variantes-inactivas">R02 — P2 — RIESGO NO CONFIRMADO: Catálogo público incluye variantes inactivas</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicProductController.java:74</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p>fetchActiveProducts filtra productos ACTIVE pero pasa todas las variantes al mapper; este incluye todas y, si solo existe una variante, calcula precio aunque esté INACTIVE. No se ha establecido si el contrato público permite exhibir variantes inactivas. Checkout sí rechaza variante inactiva.</p>
+<p>Acción: decidir con equipo si son visibles o deben excluirse; si se excluyen, filtrar en consulta pública y probar producto con variantes mixtas y única inactiva. No cambiar mapper compartido sin revisar merchant.</p>
+<h3 id="r03-p2-comportamiento-no-verificado-discountcode-aceptado-pero-calculo-no-aplica-descuentos">R03 — P2 — COMPORTAMIENTO NO VERIFICADO: DiscountCode aceptado pero cálculo no aplica descuentos</h3>
+<p>Evidencia principal: <code>backend/src/main/java/com/jaldishop/backend/checkout/domain/model/CheckoutPricing.java:36</code>. Confirmación de impacto por ejecución: pendiente.</p>
+<p>InitiateCheckoutRequest/command transportan discountCode, pero calculate fija descuento cero y código null. No hay controlador de descuentos en inventario. No afirmar descuento incorrecto sin regla aprobada ni presentar cupones como funcionalidad disponible.</p>
+<p>Acción: definir si se rechaza código informado o se documenta fuera del alcance; test correspondiente. No implementar motor de descuentos arbitrario.</p>
+<h2 id="contrato-de-errores-identificado">Contrato de errores identificado</h2>
+<p><code>shared/exception/GlobalExceptionHandler</code> y <code>ApiError</code> establecen <code>{code,message,errors}</code>; errors puede ser null u omitirse según serialización. No exigir timestamp/path porque no existen en record. El webhook devuelve éxito <code>{status,processed,message}</code> y errores ApiError; no es una inconsistencia por sí misma.</p>
+<table>
+<thead>
+<tr>
+<th>Entrada o condición</th>
+<th>Resultado por fuente</th>
+<th>Clasificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bean Validation, JSON roto, UUID/enum no convertible, query obligatorio ausente</td>
+<td>400, códigos específicos de handler</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>IllegalArgumentException</td>
+<td>400 INVALID_ARGUMENT</td>
+<td>VALIDACIÓN ESPERADA cuando guarda una entrada inválida</td>
+</tr>
+<tr>
+<td>BusinessRuleException</td>
+<td>422, código de negocio</td>
+<td>VALIDACIÓN ESPERADA; no exigir 400 para toda regla</td>
+</tr>
+<tr>
+<td>ConflictException / unique SQL 23505</td>
+<td>409, código de regla / RESOURCE_CONFLICT</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>Recurso ausente</td>
+<td>404</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>Reserva de otro customer</td>
+<td>404 en Get/ReleaseCapacityReservationService</td>
+<td>VALIDACIÓN ESPERADA; oculta existencia</td>
+</tr>
+<tr>
+<td>Sin JWT válido en ruta protegida</td>
+<td>401 entry point</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>Usuario suspendido/inactivo/no encontrado con JWT</td>
+<td>401; consulta estado en cada request</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>Rol insuficiente / AccessDeniedException</td>
+<td>403</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>JWT válido con fallo de infraestructura al consultar usuario</td>
+<td>503 SERVICE_UNAVAILABLE desde filtro</td>
+<td>Error técnico controlado; no validación del cliente</td>
+</tr>
+<tr>
+<td>Lock optimista/pesimista</td>
+<td>409 CONCURRENT_MODIFICATION</td>
+<td>Conflicto controlado; comprobar postcondición</td>
+</tr>
+<tr>
+<td>Método no soportado</td>
+<td>405</td>
+<td>VALIDACIÓN ESPERADA</td>
+</tr>
+<tr>
+<td>MP timeout / rate limit / indisponible</td>
+<td>504 / 429 / 502</td>
+<td>Error de integración controlado</td>
+</tr>
+<tr>
+<td>MP sin credenciales o no autorizado</td>
+<td>500 PAYMENT_GATEWAY_ERROR</td>
+<td>Error de configuración controlado, no input inválido</td>
+</tr>
+<tr>
+<td>MP parámetros incompatibles</td>
+<td>400 PAYMENT_GATEWAY_ERROR</td>
+<td>Error de integración; no atribuir automáticamente culpa al usuario</td>
+</tr>
+<tr>
+<td>Restricción DB no unique / excepción inesperada</td>
+<td>500 genérico</td>
+<td>Clasificar causa, no convertir todo a validación</td>
+</tr>
+</tbody>
+</table>
+<p>Firma webhook ausente/inválida: 401 INVALID_WEBHOOK_SIGNATURE; parámetros malformados: 400 BAD_WEBHOOK_REQUEST; conflicto 409. HTTP 200 processed=false puede ser notificación ignorada, no prueba de confirmación de pago.</p>
+<p>Refresh requiere JWT autenticado vigente: no hay endpoint público de refresh token independiente; probar el contrato real y no esperar renovar un JWT expirado.</p>
+<h2 id="matriz-interpretada-de-reglas-pruebas-y-pendientes">Matriz interpretada de reglas, pruebas y pendientes</h2>
+<p>El índice 02 contiene campos, máximos y guardas por archivo. Esta tabla resume caminos principales y límites de evidencia; el índice 03 localiza tests para cada módulo. Cobertura exacta de líneas/ramas no calculada; las coincidencias de nombres no certifican escenarios.</p>
+<table>
+<thead>
+<tr>
+<th>Módulo</th>
+<th>Validación implementada / contrato</th>
+<th>Evidencia de tests existente</th>
+<th>Negativos y autorización a cerrar antes de demo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>identity</td>
+<td>email/password/presencia; BCrypt; estado usuario; roles admin; autorretiro admin bloqueado</td>
+<td>JwtAuthenticationFilterTest, SecurityUserStatusWebTest, RegisterMerchantRollbackIntegrationTest, RefreshTokenServiceTest</td>
+<td>roles retirados con token previo; nombres 101; roles [null]; duplicado concurrente; registro parcial</td>
+</tr>
+<tr>
+<td>store</td>
+<td>nombre, geo emparejada/rangos, fee &gt;=0, tax 0..100; StoreContextService para pertenencia</td>
+<td>StoreControllerTest, StoreContextServiceTest, CloseMyStoreServiceTest y status</td>
+<td>tienda ajena; tienda suspendida; cierre con pedidos/pagos pendientes; dependencias Cloudinary no atómicas</td>
+</tr>
+<tr>
+<td>catalog</td>
+<td>categoría/producto de misma tienda; nombres/slugs/SKU con límites; precio &gt;=0.01, moneda tres mayúsculas; unique SKU tienda</td>
+<td>controladores, servicios, modelos y PostgreSQL catalog</td>
+<td>attributes null/121/duplicados; SKU simultáneo; precio excede NUMERIC(12,2); redondeo/escala; categoría ajena</td>
+</tr>
+<tr>
+<td>inventory</td>
+<td>cantidad no negativa; no reducir bajo reservado; flags tracksInventory; reservas/commit</td>
+<td>ReserveInventoryServiceTest, InventoryRealConcurrencyPostgresIntegrationTest, InventoryPostgresIntegrationTest</td>
+<td>última unidad en paralelo; expiración/commit/liberación simultáneos; rollback sin pérdida; tienda ajena</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>rangos horarios, configuración/excepción, solapes, reserva duplicada, capacidad agotada, expiry y ownership</td>
+<td>pruebas disponibilidad/reserva/configuración y PostgreSQL</td>
+<td>último cupo paralelo; cambio configuración mientras reserva; expiración/liberación/commit; fecha pasada según guarda real</td>
+</tr>
+<tr>
+<td>address</td>
+<td>campos DTO, teléfono/ubicación y ownership de customer</td>
+<td>CustomerAddressControllerTest y servicios</td>
+<td>ID ajeno, inexistente, default concurrente; referencia larga; geo incompleta</td>
+</tr>
+<tr>
+<td>favorite</td>
+<td>customer/producto y duplicados según servicio</td>
+<td>CustomerFavoriteControllerTest, AddFavoriteProductServiceTest</td>
+<td>producto inactivo/ajeno a tienda consultada; repetir add/remove; dos usuarios</td>
+</tr>
+<tr>
+<td>cart</td>
+<td>user+store; cantidades; pertenencia y disponibilidad de variante</td>
+<td>CartControllerTest, CartModelTest y servicios</td>
+<td>cantidad cero/negativa/extrema; actualización perdida; cambio de precio/estado antes del checkout; storeId ajeno</td>
+</tr>
+<tr>
+<td>checkout</td>
+<td>tienda ACTIVE, carrito no vacío, variantes activas y de tienda; reserva inventario/capacidad dentro de transacción</td>
+<td>CheckoutControllerTest, CheckoutFulfillmentValidatorTest, InitiateCheckoutServiceTest, ConfirmPurchaseServiceTest</td>
+<td>fallo entre ambas reservas; DTO inválido; reservas vencidas; snapshot alterado; descuento no verificado</td>
+</tr>
+<tr>
+<td>ordering</td>
+<td>customer propietario, merchant tienda esperada; transiciones/cancelación y compensación</td>
+<td>controladores y servicios de pedidos/cancelación</td>
+<td>cancelación vs aprobación/fulfillment; cancelación repetida; transición ilegal; usuario/tienda ajenos</td>
+</tr>
+<tr>
+<td>review</td>
+<td>compra/elegibilidad, rating, contenido y ownership</td>
+<td>Create/Update/DeleteProductReviewServiceTest, CheckReviewEligibilityServiceTest, controladores</td>
+<td>no comprador, compra cancelada, duplicado paralelo, rating límites, editar review ajena</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>reserva/owner/expiry, intento idempotente, estado remoto, correlación, firma, reembolso/reconciliación</td>
+<td>43 archivos *Test.java, mocks y PostgreSQL, ver 03</td>
+<td>éxito remoto/fallo DB; webhook replay/concurrencia; monto/moneda/reference discordantes; refund doble; leases tras crash</td>
+</tr>
+<tr>
+<td>notification</td>
+<td>usuario destino, leído y dedup</td>
+<td>NotificationControllerTest, OrderNotificationPostgresIntegrationTest</td>
+<td>marcar ajena, evento duplicado, rollback de pedido no notifica; paginación si aplica</td>
+</tr>
+<tr>
+<td>media</td>
+<td>tipo y rol producto; branding público intencional</td>
+<td>firma, Cloudinary y cleanup tests</td>
+<td>F01; no filtrar apiSecret en respuesta; fallo externo durante cierre</td>
+</tr>
+<tr>
+<td>realtime</td>
+<td>autenticación STOMP y eventos transaccionales (fuera inventario REST)</td>
+<td>StompAuthChannelInterceptorTest, WebSocketStompRealIntegrationTest, listeners</td>
+<td>suscripción a otro usuario/tienda, token expirado, rollback y duplicados</td>
+</tr>
+<tr>
+<td>shared/database/e2e</td>
+<td>mapeo errores, restricciones y flujo transversal</td>
+<td>GlobalExceptionHandlerTest, PostgreSqlArchitectureIntegrationTest, EndToEndBackendFlowValidationIntegrationTest</td>
+<td>no-unique DB a 500; HTTP media type no soportado; fixture seguro; inspección no demuestra flujo operativo</td>
+</tr>
+</tbody>
+</table>
+<p>Frontend inspeccionado solo en lectura: merchant register exige password mínimo 8 (<code>register-form-panel.ts:49</code>) y backend merchant mínimo 6; frontend exige nombres mínimo 2 y backend presencia. Son divergencias demostrables, no motivo para imponer requisitos nuevos sin decisión de producto. <code>dailyOrderLimit</code> mínimo 1 y horarios en register-step4 no forman parte de RegisterMerchantRequest: comportamiento de onboarding/capacidad por verificar, no asumir que se guarda. Frontend no fue modificado. La búsqueda no localizó <code>frontend-customer/src</code>; la revisión de validaciones exclusivas de todas las interfaces no está certificada.</p>
+<h2 id="integridad-y-limites-de-la-revision">Integridad y límites de la revisión</h2>
+<p>Hay mecanismos importantes: checkout transaccional, inventario con reservas y locks, capacidad bloqueada sobre configuración/excepción, restricciones multitenant V7/V13, exclusión de solapes V14, deduplicación notificaciones V16, intentos e incidencias de pago V17-V18, refunds V19/V22, identificador remoto único V21, leases V23 y solicitudes de creación/evidencia V24-V25. Su existencia reduce riesgos; no demuestra su aplicación en las bases ni ausencia de carreras.</p>
+<p>GetCapacityReservationService hace expireIfDue y save desde GET. Por ello una lectura funcional también puede escribir: mantener prohibición HTTP en esta auditoría y no reutilizar jaldishop_test para “solo consultar” endpoints que materializan estados.</p>
+<p>No se inspeccionaron valores de environments ni secretos. La respuesta de firma incluye apiKey pública de Cloudinary, no apiSecret; no clasificar apiKey pública como filtración de secreto. La ausencia de secretos en todos los DTO/logs no quedó demostrada exhaustivamente. Revisar mensajes de excepciones externas persistidos/logueados con datos de proveedor antes de compartir evidencia.</p>
+<h2 id="plan-de-correcciones-y-validacion-por-etapas-pendiente-de-autorizacion">Plan de correcciones y validación por etapas (pendiente de autorización)</h2>
+<ol>
+<li><strong>Congelar contrato y evidencia</strong>: acordar Boot 4.1.1 real; identificar working tree que se presentará; conservar cambios existentes; acordar códigos para fallos por campo y ownership. No hacer commits desde esta auditoría.</li>
+<li><strong>P0</strong>: corregir F01/F02 y añadir regresiones de aislamiento y rol revocado. Validar recuperación R01 con gateway falso y PostgreSQL desechable. No activar conciliaciones ni reembolsos reales.</li>
+<li><strong>P1</strong>: F03/F04/F05 con fronteras derivadas de SQL; decidir escala/rango monetario a partir de NUMERIC(12,2); confirmar que errores de entrada llegan a 400/422/409 y no 500. No ocultar fallos técnicos convirtiéndolos indiscriminadamente a 400.</li>
+<li><strong>P2 y contrato de producto</strong>: restringir diagnóstico; resolver variantes públicas inactivas, descuento y divergencias frontend documentadas. Mantener fuera de alcance funciones sin contrato aprobado.</li>
+<li><strong>Pruebas automáticas tras permiso</strong>: primero unitarias/slices sin DB ni red; luego PostgreSQL real en jaldishop_integration_test con fixture explícitamente desechable y guardas; revisar TestPostgresConfig y cada test que borre/trunque. Sus guardas existen pero no certifican todos los fixtures. No usar jaldishop_test, Render ni Neon.</li>
+<li><strong>Colecciones y funcionales tras permiso</strong>: aplicar plan del documento 04, capturar resultado esperado/obtenido sin tokens, validar flujo por tres roles y dos tiendas. Probar integración externa solo en entorno de pruebas expresamente autorizado, después de pruebas con fake.</li>
+<li><strong>Criterio de presentación</strong>: ninguna vulneración de tienda/usuario, ningún duplicado financiero, stock/cupo no negativos ni excedidos, recuperación de errores de red demostrada, flujos críticos aprobados y evidencia por endpoint. Una colección con 100% de rutas no satisface este criterio.</li>
+</ol>
+<p>Registro recomendado por caso: endpoint, fixture, rol, contrato identificado, regla implementada, test que realmente afirma la regla, ejecución/fecha/resultado, prueba funcional/resultado y evidencia sin datos sensibles. Todos los resultados nuevos de ejecución están pendientes.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2191 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Cobertura por endpoint y responsable - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cobertura-por-endpoint-y-responsable" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Cobertura por endpoint y responsable
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cobertura-por-endpoint-y-responsable">Cobertura por endpoint y responsable</h1>
+<p>Estado de los 583 casos: PREPARADO, NO EJECUTADO. Los IDs seleccionan exactamente un request con runCase. Esta tabla no certifica exhaustividad: los riesgos del contrato que necesitan fixtures/estado/concurrencia se describen como comprobación manual, no se transforman en clones con HTTP inventado. La matriz auditada enlazada contiene roles, datos y dependencias por endpoint.</p>
+<table>
+<thead>
+<tr>
+<th>Responsable</th>
+<th>Endpoint</th>
+<th>Casos Postman preparados (ID: escenario → HTTP)</th>
+<th>Comprobaciones manuales del contrato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/addresses</code></td>
+<td>M053: VALIDO → 200; M054: SIN_AUTH → 401; M055: ROL_INCORRECTO → 403</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/addresses</code></td>
+<td>M056: VALIDO → 201; M057: SIN_AUTH → 401; M058: ROL_INCORRECTO → 403; M059: AUSENTE_alias → 400; M060: NULO_alias → 400; M061: VACIO_alias → 400; M062: EXCEDE_alias → 400; M063: AUSENTE_recipientName → 400; M064: NULO_recipientName → 400; M065: VACIO_recipientName → 400; M066: EXCEDE_recipientName → 400; M067: AUSENTE_recipientPhone → 400; M068: NULO_recipientPhone → 400; M069: VACIO_recipientPhone → 400; M070: FORMATO_recipientPhone → 400; M071: AUSENTE_streetAddress → 400; M072: NULO_streetAddress → 400; M073: VACIO_streetAddress → 400; M074: EXCEDE_streetAddress → 400; M075: AUSENTE_department → 400; M076: NULO_department → 400; M077: VACIO_department → 400; M078: EXCEDE_department → 400; M079: AUSENTE_province → 400; M080: NULO_province → 400; M081: VACIO_province → 400; M082: EXCEDE_province → 400; M083: AUSENTE_district → 400; M084: NULO_district → 400; M085: VACIO_district → 400; M086: EXCEDE_district → 400; M087: AUSENTE_ubigeoCode → 400; M088: NULO_ubigeoCode → 400; M089: VACIO_ubigeoCode → 400; M090: FORMATO_ubigeoCode → 400; M091: EXCEDE_reference → 400</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/customer/addresses/{id}</code></td>
+<td>M092: VALIDO → 200; M093: SIN_AUTH → 401; M094: ROL_INCORRECTO → 403; M095: UUID_INVALIDO_id → 400; M096: RECURSO_AJENO → 404; M097: INEXISTENTE → 404; M098: AUSENTE_alias → 400; M099: NULO_alias → 400; M100: VACIO_alias → 400; M101: EXCEDE_alias → 400; M102: AUSENTE_recipientName → 400; M103: NULO_recipientName → 400; M104: VACIO_recipientName → 400; M105: EXCEDE_recipientName → 400; M106: AUSENTE_recipientPhone → 400; M107: NULO_recipientPhone → 400; M108: VACIO_recipientPhone → 400; M109: FORMATO_recipientPhone → 400; M110: AUSENTE_streetAddress → 400; M111: NULO_streetAddress → 400; M112: VACIO_streetAddress → 400; M113: EXCEDE_streetAddress → 400; M114: AUSENTE_department → 400; M115: NULO_department → 400; M116: VACIO_department → 400; M117: EXCEDE_department → 400; M118: AUSENTE_province → 400; M119: NULO_province → 400; M120: VACIO_province → 400; M121: EXCEDE_province → 400; M122: AUSENTE_district → 400; M123: NULO_district → 400; M124: VACIO_district → 400; M125: EXCEDE_district → 400; M126: AUSENTE_ubigeoCode → 400; M127: NULO_ubigeoCode → 400; M128: VACIO_ubigeoCode → 400; M129: FORMATO_ubigeoCode → 400; M130: EXCEDE_reference → 400</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/customer/addresses/{id}/default</code></td>
+<td>M131: VALIDO → 200; M132: SIN_AUTH → 401; M133: ROL_INCORRECTO → 403; M134: UUID_INVALIDO_id → 400</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/addresses/{id}</code></td>
+<td>M135: VALIDO → 204; M136: SIN_AUTH → 401; M137: ROL_INCORRECTO → 403; M138: UUID_INVALIDO_id → 400; M139: RECURSO_AJENO → 404; M140: INEXISTENTE → 404</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity-configurations</code></td>
+<td>K236: VALIDO → 201; K237: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity-configurations</code></td>
+<td>K234: VALIDO → 200; K235: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/capacity-configurations/{id}</code></td>
+<td>K238: VALIDO → 200; K239: SIN_AUTH → 401; K240: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-configurations/{id}/activate</code></td>
+<td>K241: VALIDO → 200; K242: SIN_AUTH → 401; K243: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-configurations/{id}/deactivate</code></td>
+<td>K244: VALIDO → 200; K245: SIN_AUTH → 401; K246: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity-exceptions</code></td>
+<td>K249: VALIDO → 201; K250: SIN_AUTH → 401; K251: AUSENTE_serviceDate → 400; K252: NULO_serviceDate → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity-exceptions</code></td>
+<td>K247: VALIDO → 200; K248: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/capacity-exceptions/{id}</code></td>
+<td>K253: VALIDO → 200; K254: SIN_AUTH → 401; K255: UUID_INVALIDO_id → 400; K256: AUSENTE_serviceDate → 400; K257: NULO_serviceDate → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-exceptions/{id}/activate</code></td>
+<td>K258: VALIDO → 200; K259: SIN_AUTH → 401; K260: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-exceptions/{id}/deactivate</code></td>
+<td>K261: VALIDO → 200; K262: SIN_AUTH → 401; K263: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/availability</code></td>
+<td>K007: VALIDO → 200; K008: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity/reservations</code></td>
+<td>K009: VALIDO → 201; K010: SIN_AUTH → 401; K011: AUSENTE_storeId → 400; K012: NULO_storeId → 400; K013: AUSENTE_serviceDate → 400; K014: NULO_serviceDate → 400; K015: AUSENTE_startTime → 400; K016: NULO_startTime → 400; K017: AUSENTE_endTime → 400; K018: NULO_endTime → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/reservations/{id}</code></td>
+<td>K019: VALIDO → 200; K020: SIN_AUTH → 401; K021: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>DELETE /api/v1/capacity/reservations/{id}</code></td>
+<td>K022: VALIDO → 200; K023: SIN_AUTH → 401; K024: UUID_INVALIDO_id → 400</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/slots</code></td>
+<td>K005: VALIDO → 200; K006: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/effective</code></td>
+<td>K264: VALIDO → 200; K265: SIN_AUTH → 401</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/cart</code></td>
+<td>M164: VALIDO → 200; M165: SIN_AUTH → 401</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/cart/items</code></td>
+<td>M166: VALIDO → 201; M167: SIN_AUTH → 401; M168: AUSENTE_storeId → 400; M169: NULO_storeId → 400; M170: AUSENTE_variantId → 400; M171: NULO_variantId → 400</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/cart/items/{variantId}</code></td>
+<td>M172: VALIDO → 200; M173: SIN_AUTH → 401; M174: UUID_INVALIDO_variantId → 400; M175: AUSENTE_storeId → 400; M176: NULO_storeId → 400</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/cart/items/{variantId}</code></td>
+<td>M177: VALIDO → 200; M178: SIN_AUTH → 401; M179: UUID_INVALIDO_variantId → 400</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/cart</code></td>
+<td>M180: VALIDO → 200; M181: SIN_AUTH → 401</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/categories</code></td>
+<td>K095: VALIDO → 201; K096: SIN_AUTH → 401; K097: ROL_INCORRECTO → 403; K098: UUID_INVALIDO_storeId → 400; K099: AUSENTE_name → 400; K100: NULO_name → 400; K101: VACIO_name → 400; K102: EXCEDE_name → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/categories</code></td>
+<td>K091: VALIDO → 200; K092: SIN_AUTH → 401; K093: ROL_INCORRECTO → 403; K094: UUID_INVALIDO_storeId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}</code></td>
+<td>K103: VALIDO → 200; K104: SIN_AUTH → 401; K105: ROL_INCORRECTO → 403; K106: UUID_INVALIDO_storeId → 400; K107: UUID_INVALIDO_categoryId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}</code></td>
+<td>K108: VALIDO → 200; K109: SIN_AUTH → 401; K110: ROL_INCORRECTO → 403; K111: UUID_INVALIDO_storeId → 400; K112: UUID_INVALIDO_categoryId → 400; K113: AUSENTE_name → 400; K114: NULO_name → 400; K115: VACIO_name → 400; K116: EXCEDE_name → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/products</code></td>
+<td>K121: VALIDO → 201; K122: SIN_AUTH → 401; K123: ROL_INCORRECTO → 403; K124: UUID_INVALIDO_storeId → 400; K125: AUSENTE_categoryId → 400; K126: NULO_categoryId → 400; K127: AUSENTE_name → 400; K128: NULO_name → 400; K129: VACIO_name → 400; K130: EXCEDE_name → 400; K131: EXCEDE_slug → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products</code></td>
+<td>K117: VALIDO → 200; K118: SIN_AUTH → 401; K119: ROL_INCORRECTO → 403; K120: UUID_INVALIDO_storeId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}</code></td>
+<td>K132: VALIDO → 200; K133: SIN_AUTH → 401; K134: ROL_INCORRECTO → 403; K135: UUID_INVALIDO_storeId → 400; K136: UUID_INVALIDO_productId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/products/{productId}</code></td>
+<td>K137: VALIDO → 200; K138: SIN_AUTH → 401; K139: ROL_INCORRECTO → 403; K140: UUID_INVALIDO_storeId → 400; K141: UUID_INVALIDO_productId → 400; K142: AUSENTE_categoryId → 400; K143: NULO_categoryId → 400; K144: AUSENTE_name → 400; K145: NULO_name → 400; K146: VACIO_name → 400; K147: EXCEDE_name → 400; K148: EXCEDE_slug → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants</code></td>
+<td>K154: VALIDO → 201; K155: SIN_AUTH → 401; K156: ROL_INCORRECTO → 403; K157: UUID_INVALIDO_storeId → 400; K158: UUID_INVALIDO_productId → 400; K159: AUSENTE_presentationName → 400; K160: NULO_presentationName → 400; K161: VACIO_presentationName → 400; K162: EXCEDE_presentationName → 400; K163: EXCEDE_sku → 400; K164: AUSENTE_priceAmount → 400; K165: NULO_priceAmount → 400; K166: FUERA_DecimalMin_priceAmount → 400; K167: AUSENTE_priceCurrency → 400; K168: NULO_priceCurrency → 400; K169: VACIO_priceCurrency → 400; K170: FORMATO_priceCurrency → 400; K171: ATTR_ELEMENTO_NULO → 400; K172: ATTR_NOMBRE_NULO → 400; K173: ATTR_VALOR_VACIO → 400; K174: ATTR_NOMBRE_121 → 400; K175: ATTR_DUPLICADO_TRIM → 400; K176: ATTR_NOMBRE_120 → 201; K177: ATTR_LISTA_VACIA → 201; K178: ATTR_LISTA_NULA → 201; K179: REPETIR_SKU_EXISTENTE → 409</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants</code></td>
+<td>K149: VALIDO → 200; K150: SIN_AUTH → 401; K151: ROL_INCORRECTO → 403; K152: UUID_INVALIDO_storeId → 400; K153: UUID_INVALIDO_productId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}</code></td>
+<td>K180: VALIDO → 200; K181: SIN_AUTH → 401; K182: ROL_INCORRECTO → 403; K183: UUID_INVALIDO_storeId → 400; K184: UUID_INVALIDO_productId → 400; K185: UUID_INVALIDO_variantId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}</code></td>
+<td>K186: VALIDO → 200; K187: SIN_AUTH → 401; K188: ROL_INCORRECTO → 403; K189: UUID_INVALIDO_storeId → 400; K190: UUID_INVALIDO_productId → 400; K191: UUID_INVALIDO_variantId → 400; K192: AUSENTE_presentationName → 400; K193: NULO_presentationName → 400; K194: VACIO_presentationName → 400; K195: EXCEDE_presentationName → 400; K196: EXCEDE_sku → 400; K197: AUSENTE_priceAmount → 400; K198: NULO_priceAmount → 400; K199: FUERA_DecimalMin_priceAmount → 400; K200: AUSENTE_priceCurrency → 400; K201: NULO_priceCurrency → 400; K202: VACIO_priceCurrency → 400; K203: FORMATO_priceCurrency → 400; K204: ATTR_ELEMENTO_NULO → 400; K205: ATTR_NOMBRE_NULO → 400; K206: ATTR_VALOR_VACIO → 400; K207: ATTR_NOMBRE_121 → 400; K208: ATTR_DUPLICADO_TRIM → 400; K209: ATTR_NOMBRE_120 → 200; K210: ATTR_LISTA_VACIA → 200; K211: ATTR_LISTA_NULA → 200</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/{storeId}/categories</code></td>
+<td>M143: VALIDO → 200; M144: UUID_INVALIDO_storeId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/slug/{slug}/categories</code></td>
+<td>M141: VALIDO → 200</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/{storeId}/products</code></td>
+<td>M145: VALIDO → 200; M146: UUID_INVALIDO_storeId → 400</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/slug/{slug}/products</code></td>
+<td>M142: VALIDO → 200</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout</code></td>
+<td>J002: VALIDO → 201; J003: SIN_AUTH → 401; J004: AUSENTE_storeId → 400; J005: NULO_storeId → 400; J006: AUSENTE_serviceDate → 400; J007: NULO_serviceDate → 400; J008: EXCEDE_customerName → 400; J009: EXCEDE_customerPhone → 400; J010: EXCEDE_customerEmail → 400; J011: EXCEDE_deliveryAddress → 400; J012: EXCEDE_deliveryReference → 400; J013: EXCEDE_discountCode → 400</td>
+<td>carrito vacío, variante inactiva, reservas y rollback; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/favorites/products</code></td>
+<td>M149: VALIDO → 200; M150: SIN_AUTH → 401; M151: ROL_INCORRECTO → 403</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/favorites/products/{productId}</code></td>
+<td>M156: VALIDO → 201; M157: SIN_AUTH → 401; M158: ROL_INCORRECTO → 403; M159: UUID_INVALIDO_productId → 400</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/favorites/products/{productId}</code></td>
+<td>M160: VALIDO → 200; M161: SIN_AUTH → 401; M162: ROL_INCORRECTO → 403; M163: UUID_INVALIDO_productId → 400</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/favorites/products/{productId}/status</code></td>
+<td>M152: VALIDO → 200; M153: SIN_AUTH → 401; M154: ROL_INCORRECTO → 403; M155: UUID_INVALIDO_productId → 400</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/users</code></td>
+<td>J028: VALIDO → 200; J029: SIN_AUTH → 401; J030: ROL_INCORRECTO → 403; J031: ADMIN_REVOCADO_TOKEN_ANTERIOR → 403</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/users/{id}</code></td>
+<td>J032: VALIDO → 200; J033: SIN_AUTH → 401; J034: ROL_INCORRECTO → 403; J035: UUID_INVALIDO_id → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/suspend</code></td>
+<td>J040: VALIDO → 200; J041: SIN_AUTH → 401; J042: ROL_INCORRECTO → 403; J043: UUID_INVALIDO_id → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/activate</code></td>
+<td>J044: VALIDO → 200; J045: SIN_AUTH → 401; J046: ROL_INCORRECTO → 403; J047: UUID_INVALIDO_id → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/roles</code></td>
+<td>J036: VALIDO → 200; J037: SIN_AUTH → 401; J038: ROL_INCORRECTO → 403; J039: UUID_INVALIDO_id → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/register</code></td>
+<td>M039: VALIDO → 201; M040: AUSENTE_email → 400; M041: NULO_email → 400; M042: VACIO_email → 400; M043: FORMATO_email → 400; M044: AUSENTE_password → 400; M045: NULO_password → 400; M046: VACIO_password → 400; M047: AUSENTE_firstName → 400; M048: NULO_firstName → 400; M049: VACIO_firstName → 400; M050: AUSENTE_lastName → 400; M051: NULO_lastName → 400; M052: VACIO_lastName → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/login</code></td>
+<td>M001: VALIDO → 200; M002: AUSENTE_email → 400; M003: NULO_email → 400; M004: VACIO_email → 400; M005: FORMATO_email → 400; M006: AUSENTE_password → 400; M007: NULO_password → 400; M008: VACIO_password → 400; M009: VALIDO → 200; M010: AUSENTE_email → 400; M011: NULO_email → 400; M012: VACIO_email → 400; M013: FORMATO_email → 400; M014: AUSENTE_password → 400; M015: NULO_password → 400; M016: VACIO_password → 400; M017: VALIDO → 200; M018: AUSENTE_email → 400; M019: NULO_email → 400; M020: VACIO_email → 400; M021: FORMATO_email → 400; M022: AUSENTE_password → 400; M023: NULO_password → 400; M024: VACIO_password → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/auth/register/merchant</code></td>
+<td>K025: VALIDO → 201; K026: AUSENTE_email → 400; K027: NULO_email → 400; K028: VACIO_email → 400; K029: FORMATO_email → 400; K030: AUSENTE_password → 400; K031: NULO_password → 400; K032: VACIO_password → 400; K033: AUSENTE_firstName → 400; K034: NULO_firstName → 400; K035: VACIO_firstName → 400; K036: EXCEDE_firstName → 400; K037: AUSENTE_lastName → 400; K038: NULO_lastName → 400; K039: VACIO_lastName → 400; K040: EXCEDE_lastName → 400; K041: AUSENTE_storeName → 400; K042: NULO_storeName → 400; K043: VACIO_storeName → 400; K044: EXCEDE_storeName → 400; K045: FUERA_DecimalMin_latitude → 400; K046: FUERA_DecimalMax_latitude → 400; K047: FUERA_DecimalMin_longitude → 400; K048: FUERA_DecimalMax_longitude → 400; K049: PASSWORD_CORTO → 400; K050: EMAIL_FORMATO → 400; K051: MERCHANT_DUPLICADO → 409; K052: firstName_100 → 201; K053: firstName_101 → 400; K054: lastName_100 → 201; K055: lastName_101 → 400; K056: email_254 → 201; K057: email_255 → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/refresh</code></td>
+<td>M025: VALIDO → 200; M026: SIN_AUTH → 401</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/users/me</code></td>
+<td>M027: VALIDO → 200; M028: SIN_AUTH → 401</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/users/me</code></td>
+<td>M029: VALIDO → 200; M030: SIN_AUTH → 401; M031: AUSENTE_firstName → 400; M032: NULO_firstName → 400; M033: VACIO_firstName → 400; M034: EXCEDE_firstName → 400; M035: AUSENTE_lastName → 400; M036: NULO_lastName → 400; M037: VACIO_lastName → 400; M038: EXCEDE_lastName → 400</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory</code></td>
+<td>K212: VALIDO → 200; K213: SIN_AUTH → 401; K214: ROL_INCORRECTO → 403</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory/variants/{variantId}</code></td>
+<td>K215: VALIDO → 200; K216: SIN_AUTH → 401; K217: ROL_INCORRECTO → 403; K218: UUID_INVALIDO_variantId → 400</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory/low-stock</code></td>
+<td>K231: VALIDO → 200; K232: SIN_AUTH → 401; K233: ROL_INCORRECTO → 403</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/inventory/variants/{variantId}/stock</code></td>
+<td>K219: VALIDO → 200; K220: SIN_AUTH → 401; K221: ROL_INCORRECTO → 403; K222: UUID_INVALIDO_variantId → 400; K223: AUSENTE_quantity → 400; K224: NULO_quantity → 400; K225: FUERA_Min_quantity → 400</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/inventory/variants/{variantId}/threshold</code></td>
+<td>K226: VALIDO → 200; K227: SIN_AUTH → 401; K228: ROL_INCORRECTO → 403; K229: UUID_INVALIDO_variantId → 400; K230: FUERA_Min_lowStockThreshold → 400</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/media/upload-signature</code></td>
+<td>K269: VALIDO → 200; K270: TIENDA_AJENA → 404; K271: PRODUCTO_SIN_AUTH → 403; K272: CUSTOMER_PRODUCTO → 403; K273: BRANDING_TEMPORAL → 200; K274: BRANDING_AJENO_ANONIMO → 404</td>
+<td>tienda ajena, revocación y onboarding temporal; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/notifications</code></td>
+<td>M231: VALIDO → 200; M232: SIN_AUTH → 401</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/notifications/unread/count</code></td>
+<td>M233: VALIDO → 200; M234: SIN_AUTH → 401</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/notifications/{id}/read</code></td>
+<td>M235: VALIDO → 200; M236: SIN_AUTH → 401; M237: UUID_INVALIDO_id → 400</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/orders</code></td>
+<td>M182: VALIDO → 200; M183: SIN_AUTH → 401</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/orders/{orderNumber}</code></td>
+<td>M184: VALIDO → 200; M185: SIN_AUTH → 401</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/customer/orders/{orderNumber}/cancel</code></td>
+<td>M186: VALIDO → 200; M187: SIN_AUTH → 401</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/orders</code></td>
+<td>M217: VALIDO → 200; M218: SIN_AUTH → 401; M219: ROL_INCORRECTO → 403; M220: UUID_INVALIDO_storeId → 400</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/orders/{orderId}</code></td>
+<td>M221: VALIDO → 200; M222: SIN_AUTH → 401; M223: ROL_INCORRECTO → 403; M224: UUID_INVALIDO_storeId → 400; M225: UUID_INVALIDO_orderId → 400</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status</code></td>
+<td>M226: VALIDO → 200; M227: SIN_AUTH → 401; M228: ROL_INCORRECTO → 403; M229: UUID_INVALIDO_storeId → 400; M230: UUID_INVALIDO_orderId → 400</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order</code></td>
+<td>J063: VALIDO → 200; J064: SIN_AUTH → 401; J065: ROL_INCORRECTO → 403; J066: UUID_INVALIDO_attemptId → 400</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order</code></td>
+<td>J067: VALIDO → 200; J068: SIN_AUTH → 401; J069: ROL_INCORRECTO → 403; J070: UUID_INVALIDO_attemptId → 400</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout/mercado-pago/preference</code></td>
+<td>J014: VALIDO → 201; J015: SIN_AUTH → 401; J016: AUSENTE_capacityReservationId → 400; J017: NULO_capacityReservationId → 400; J018: AUSENTE_customerName → 400; J019: NULO_customerName → 400; J020: VACIO_customerName → 400; J021: AUSENTE_customerPhone → 400; J022: NULO_customerPhone → 400; J023: VACIO_customerPhone → 400; J024: AUSENTE_customerEmail → 400; J025: NULO_customerEmail → 400; J026: VACIO_customerEmail → 400; J027: FORMATO_customerEmail → 400</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout/mercado-pago/webhook</code></td>
+<td>J071: VALIDO → 200; J072: VALIDO → 200</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/products/{productId}/reviews/eligibility</code></td>
+<td>M188: VALIDO → 200; M189: SIN_AUTH → 401; M190: ROL_INCORRECTO → 403; M191: UUID_INVALIDO_productId → 400</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/products/{productId}/reviews</code></td>
+<td>M195: VALIDO → 201; M196: SIN_AUTH → 401; M197: ROL_INCORRECTO → 403; M198: UUID_INVALIDO_productId → 400; M199: AUSENTE_rating → 400; M200: NULO_rating → 400; M201: FUERA_Min_rating → 400; M202: FUERA_Max_rating → 400; M203: EXCEDE_comment → 400</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/customer/products/{productId}/reviews</code></td>
+<td>M204: VALIDO → 200; M205: SIN_AUTH → 401; M206: ROL_INCORRECTO → 403; M207: UUID_INVALIDO_productId → 400; M208: AUSENTE_rating → 400; M209: NULO_rating → 400; M210: FUERA_Min_rating → 400; M211: FUERA_Max_rating → 400; M212: EXCEDE_comment → 400</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/products/{productId}/reviews</code></td>
+<td>M213: VALIDO → 204; M214: SIN_AUTH → 401; M215: ROL_INCORRECTO → 403; M216: UUID_INVALIDO_productId → 400</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/reviews</code></td>
+<td>M192: VALIDO → 200; M193: SIN_AUTH → 401; M194: ROL_INCORRECTO → 403</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/products/{productId}/reviews</code></td>
+<td>M147: VALIDO → 200; M148: UUID_INVALIDO_productId → 400</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/health</code></td>
+<td>J001: VALIDO → 200</td>
+<td>disponibilidad local; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/stores</code></td>
+<td>J048: VALIDO → 200; J049: SIN_AUTH → 401; J050: ROL_INCORRECTO → 403</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/stores/{id}</code></td>
+<td>J051: VALIDO → 200; J052: SIN_AUTH → 401; J053: ROL_INCORRECTO → 403; J054: UUID_INVALIDO_id → 400</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/stores/{id}/suspend</code></td>
+<td>J055: VALIDO → 200; J056: SIN_AUTH → 401; J057: ROL_INCORRECTO → 403; J058: UUID_INVALIDO_id → 400</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/stores/{id}/activate</code></td>
+<td>J059: VALIDO → 200; J060: SIN_AUTH → 401; J061: ROL_INCORRECTO → 403; J062: UUID_INVALIDO_id → 400</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchant/customers</code></td>
+<td>K266: VALIDO → 200; K267: SIN_AUTH → 401; K268: ROL_INCORRECTO → 403</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/store-categories</code></td>
+<td>K001: VALIDO → 200</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/stores</code></td>
+<td>K058: VALIDO → 201; K059: SIN_AUTH → 401; K060: AUSENTE_name → 400; K061: NULO_name → 400; K062: VACIO_name → 400; K063: EXCEDE_name → 400; K064: EXCEDE_slug → 400; K065: FUERA_DecimalMin_latitude → 400; K066: FUERA_DecimalMax_latitude → 400; K067: FUERA_DecimalMin_longitude → 400; K068: FUERA_DecimalMax_longitude → 400; K069: FUERA_DecimalMin_deliveryFeeAmount → 400; K070: EXCEDE_deliveryFeeCurrency → 400; K071: FUERA_DecimalMin_taxRate → 400; K072: FUERA_DecimalMax_taxRate → 400</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/me</code></td>
+<td>K073: VALIDO → 200; K074: SIN_AUTH → 401</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/stores/me</code></td>
+<td>K075: VALIDO → 200; K076: SIN_AUTH → 401; K077: AUSENTE_name → 400; K078: NULO_name → 400; K079: VACIO_name → 400; K080: EXCEDE_name → 400; K081: FUERA_DecimalMin_latitude → 400; K082: FUERA_DecimalMax_latitude → 400; K083: FUERA_DecimalMin_longitude → 400; K084: FUERA_DecimalMax_longitude → 400; K085: FUERA_DecimalMin_deliveryFeeAmount → 400; K086: EXCEDE_deliveryFeeCurrency → 400; K087: FUERA_DecimalMin_taxRate → 400; K088: FUERA_DecimalMax_taxRate → 400</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>DELETE /api/v1/stores/me</code></td>
+<td>K089: VALIDO → 200; K090: SIN_AUTH → 401</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/slug/{slug}</code></td>
+<td>K004: VALIDO → 200</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/search</code></td>
+<td>K002: VALIDO → 200</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/featured</code></td>
+<td>K003: VALIDO → 200</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables; ver <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz de contrato</a>.</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

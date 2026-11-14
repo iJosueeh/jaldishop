@@ -1,0 +1,171 @@
+estado_git	archivo	clasificacion
+ M	.gitignore	Configuración de repositorio / CI
+ M	backend/src/main/java/com/jaldishop/backend/address/application/service/CreateCustomerAddressService.java	Direcciones; corrección / refactor previo
+ M	backend/src/main/java/com/jaldishop/backend/address/application/service/UpdateCustomerAddressService.java	Direcciones; corrección / refactor previo
+ M	backend/src/main/java/com/jaldishop/backend/address/domain/model/CustomerAddress.java	Direcciones; corrección / refactor previo
+ M	backend/src/main/java/com/jaldishop/backend/identity/infrastructure/security/SecurityConfig.java	HTTP / autenticación / permisos
+ M	backend/src/main/java/com/jaldishop/backend/payment/application/gateway/dto/OrderQueryResult.java	Mercado Pago / persistencia financiera
+ M	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoRestClientAdapter.java	Mercado Pago / persistencia financiera
+ M	backend/src/main/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/dto/MpOrderResponse.java	Mercado Pago / persistencia financiera
+ M	backend/src/main/java/com/jaldishop/backend/shared/exception/GlobalExceptionHandler.java	HTTP / autenticación / permisos
+ M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/adapter/StoreCustomerRepositoryAdapter.java	Tiendas / Merchant Customers / búsqueda
+ M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/projection/StoreCustomerProjection.java	Tiendas / Merchant Customers / búsqueda
+ M	backend/src/main/java/com/jaldishop/backend/store/infrastructure/persistence/repository/StoreJpaRepository.java	Tiendas / Merchant Customers / búsqueda
+ M	backend/src/test/java/com/jaldishop/backend/address/application/service/CreateCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+ M	backend/src/test/java/com/jaldishop/backend/address/application/service/UpdateCustomerAddressServiceTest.java	Direcciones; corrección / refactor previo
+ M	backend/src/test/java/com/jaldishop/backend/address/web/controller/CustomerAddressControllerTest.java	Direcciones; corrección / refactor previo
+ M	backend/src/test/java/com/jaldishop/backend/payment/application/investigation/ManualOrderInvestigationServiceTest.java	Mercado Pago / persistencia financiera
+ M	backend/src/test/java/com/jaldishop/backend/payment/application/reconciliation/OrderReferenceReadTest.java	Mercado Pago / persistencia financiera
+ M	backend/src/test/java/com/jaldishop/backend/payment/application/webhook/ProcessMercadoPagoWebhookServiceTest.java	Mercado Pago / persistencia financiera
+ M	backend/src/test/java/com/jaldishop/backend/payment/infrastructure/client/mercadopago/MercadoPagoRestClientAdapterTest.java	Mercado Pago / persistencia financiera
+ M	backend/src/test/java/com/jaldishop/backend/shared/exception/GlobalExceptionHandlerTest.java	HTTP / autenticación / permisos
+ M	backend/src/test/java/com/jaldishop/backend/store/web/controller/StoreControllerTest.java	Tiendas / Merchant Customers / búsqueda
+ M	frontend-merchant/package-lock.json	Frontend; integración independiente
+ M	frontend-merchant/package.json	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/models/dashboard.models.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/models/order.models.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/services/auth-service.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/services/order.service.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/services/order.service.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/core/services/store.service.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/dashboard-kpis/dashboard-kpis.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/order-details-drawer/order-details-drawer.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/dashboards/components/priority-orders/priority-orders.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-card/orders-card.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-filter-bar/orders-filter-bar.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-grid/orders-grid.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/components/orders-kpis/orders-kpis.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/orders.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/orders.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/features/orders/orders.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.html	Frontend; integración independiente
+ M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.spec.ts	Frontend; integración independiente
+ M	frontend-merchant/src/app/layouts/merchant-layout/components/header/header.ts	Frontend; integración independiente
+ M	postman/README.md	Colecciones / configuración de entornos
+ M	postman/jaldishop.postman_collection.json	Colecciones / configuración de entornos
+ M	postman/jaldishop.postman_environment.json	Colecciones / configuración de entornos
+??	backend/qa/README.md	QA experimental; separar de entrega
+??	backend/qa/allowlist-inherited.properties.example	QA experimental; separar de entrega
+??	backend/qa/allowlist.properties.example	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/01-Crear direccion.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/02-Repetir POST.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/03-Normalizar espacios y mayusculas.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/04-Crear otro interior.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/05-Mismo domicilio otro usuario.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/06-GET sin duplicados.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/07-PUT a domicilio duplicado.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/08-PUT misma ubicacion.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/09-GET final.bru	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/README.md	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/bruno.json	QA experimental; separar de entrega
+??	backend/qa/customer-address-duplicates/environments/Local disposable.bru	QA experimental; separar de entrega
+??	backend/qa/inherited-selection.properties.example	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/01-Lista y fechas.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/02-Busqueda vacia.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/03-Busqueda filtrada.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/04-Sin pedidos.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/05-Sin coincidencias.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/06-Aislamiento A.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/07-Aislamiento B.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/08-Ignora tienda ajena.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/09-Validacion de query.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/10-Sin autenticacion.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/11-Rol customer.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/12-Merchant sin tienda.bru	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/README.md	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/bruno.json	QA experimental; separar de entrega
+??	backend/qa/merchant-customers/environments/Local disposable.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/01-Sin tilde.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/02-Con tilde.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/03-Mayusculas.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/04-Panaderia.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/05-Panaderia mayusculas.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/06-Dulce.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/07-Slug.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/08-Sin coincidencias.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/09-Porcentaje literal.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/10-Guion bajo literal.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/11-Escape literal.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/12-Simbolos combinados.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/13-Descripcion excluida.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/14-Vacio.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/15-Solo espacios.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/16-Limite cero.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/17-Limite 51.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/18-Limite uno.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/19-Sin q.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/20-Acento combinado.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/21-Texto SQL literal.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/README.md	QA experimental; separar de entrega
+??	backend/qa/public-store-search/bruno.json	QA experimental; separar de entrega
+??	backend/qa/public-store-search/environments/Local disposable.bru	QA experimental; separar de entrega
+??	backend/qa/public-store-search/evidence.txt	QA experimental; separar de entrega
+??	backend/qa/public-store-search/verify-postgres.py	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaArtifactIdentity.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaDataSourceConfiguration.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaDatasetMaintenance.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaIdentityGuard.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaInheritedPolicy.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaInheritedPreparation.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaInheritedSchema.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaPreparation.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaRemotePolicy.java	QA experimental; separar de entrega
+??	backend/src/main/java/com/jaldishop/backend/shared/config/qa/QaWebSecurityConfiguration.java	QA experimental; separar de entrega
+??	backend/src/main/resources/application-qa.properties	QA experimental; separar de entrega
+??	backend/src/main/resources/db/migration/V26__enable_unaccent_for_store_search.sql	Tiendas / Merchant Customers / búsqueda
+??	backend/src/main/resources/db/qa/check_qa_initial_dataset.sql	QA experimental; separar de entrega
+??	backend/src/main/resources/db/qa/seed_qa_demo_data.sql	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/address/application/service/CustomerAddressPostgresIntegrationTest.java	Direcciones; corrección / refactor previo
+??	backend/src/test/java/com/jaldishop/backend/address/domain/model/CustomerAddressTest.java	Direcciones; corrección / refactor previo
+??	backend/src/test/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteHttpRoutingTest.java	HTTP / autenticación / permisos
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaConfigurationTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaDatasetMaintenanceTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaIdentityGuardTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaInheritedBranchTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaPreparationTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaRemotePolicyTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/shared/config/qa/QaWebSecurityConfigurationTest.java	QA experimental; separar de entrega
+??	backend/src/test/java/com/jaldishop/backend/store/infrastructure/persistence/adapter/StoreCustomerRepositoryAdapterTest.java	Tiendas / Merchant Customers / búsqueda
+??	backend/src/test/java/com/jaldishop/backend/store/infrastructure/persistence/repository/StoreCustomerPostgresIntegrationTest.java	Tiendas / Merchant Customers / búsqueda
+??	backend/src/test/java/com/jaldishop/backend/store/infrastructure/persistence/repository/StoreSearchPostgresIntegrationTest.java	Tiendas / Merchant Customers / búsqueda
+??	backend/src/test/java/com/jaldishop/backend/store/infrastructure/persistence/repository/StoreSearchQueryTest.java	Tiendas / Merchant Customers / búsqueda
+??	backend/src/test/java/com/jaldishop/backend/store/web/controller/MerchantCustomerProjectionHttpTest.java	Tiendas / Merchant Customers / búsqueda
+??	backend/src/test/resources/mercadopago/orders/get-order-accredited.json	Mercado Pago / persistencia financiera
+??	docs/auditoria-2026-11-07/00-auditoria.md	Documentación / evidencia previa
+??	docs/auditoria-2026-11-07/01-inventario.md	Documentación / evidencia previa
+??	docs/auditoria-2026-11-07/02-evidencia-validaciones.md	Documentación / evidencia previa
+??	docs/auditoria-2026-11-07/03-pruebas.md	Documentación / evidencia previa
+??	docs/auditoria-2026-11-07/04-equipo-y-casos.md	Documentación / evidencia previa
+??	docs/instancia-desechable-2026-11-07/00-procedimiento.md	Documentación / evidencia previa
+??	docs/preparacion-colecciones-2026-11-07/00-guia.md	Documentación / evidencia previa
+??	docs/preparacion-colecciones-2026-11-07/01-cobertura-casos.md	Documentación / evidencia previa
+??	docs/preparacion-colecciones-2026-11-07/02-diferencias-bruno.md	Documentación / evidencia previa
+??	docs/preparacion-colecciones-2026-11-07/casos.json	Documentación / evidencia previa
+??	docs/verificacion-integracion-2026-11-07/00-resultados.md	Documentación / evidencia previa
+??	docs/verificacion-integracion-2026-11-07/01-matriz-equipo.md	Documentación / evidencia previa
+??	frontend-merchant/src/app/core/adapters/order.adapter.spec.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/adapters/order.adapter.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/models/notification.models.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/services/notification.service.spec.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/services/notification.service.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/services/stomp.service.spec.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/core/services/stomp.service.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/layouts/merchant-layout/components/notification-center/notification-center.css	Frontend; integración independiente
+??	frontend-merchant/src/app/layouts/merchant-layout/components/notification-center/notification-center.html	Frontend; integración independiente
+??	frontend-merchant/src/app/layouts/merchant-layout/components/notification-center/notification-center.spec.ts	Frontend; integración independiente
+??	frontend-merchant/src/app/layouts/merchant-layout/components/notification-center/notification-center.ts	Frontend; integración independiente
+??	postman/jaldishop.local.env.json	Colecciones / configuración de entornos
+??	postman/jaldishop.postman_collection.json.bak	Temporal / herramienta; revisar exclusión
+??	postman/jaldishop.render.env.json	Colecciones / configuración de entornos
+??	postman/tools/preparar_equipo.py	Temporal / herramienta; revisar exclusión
+??	postman/tools/validar_equipo.cjs	Temporal / herramienta; revisar exclusión

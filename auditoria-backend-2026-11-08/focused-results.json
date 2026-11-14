@@ -1,0 +1,109 @@
+{
+  "totals": {
+    "tests": 100,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 100
+  },
+  "classes": [
+    {
+      "class": "com.jaldishop.backend.address.application.service.CreateCustomerAddressServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.address.application.service.UpdateCustomerAddressServiceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.address.domain.model.CustomerAddressTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.address.web.controller.CustomerAddressControllerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.testutil.TestPostgresConfigTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.favorite.web.controller.CustomerFavoriteHttpRoutingTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.shared.exception.GlobalExceptionHandlerTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.application.service.GetStoreCustomersServiceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.infrastructure.persistence.adapter.StoreCustomerRepositoryAdapterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchQueryTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.web.controller.MerchantCustomerControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.web.controller.MerchantCustomerProjectionHttpTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.web.controller.StoreControllerTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.web.mapper.StoreCustomerResponseMapperTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}
