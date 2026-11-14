@@ -347,9 +347,10 @@ export class OrderService implements OnDestroy {
         const currentActiveStoreId = this.storeService.currentStore()?.id;
         if (
           requestId !== this.activeListRequestId ||
-          (currentActiveStoreId && currentActiveStoreId !== storeId)
+          !currentActiveStoreId ||
+          currentActiveStoreId !== storeId
         ) {
-          return; // Descartar respuesta obsoleta o si cambió la tienda activa
+          return; // Descartar respuesta obsoleta o si no hay tienda activa o cambió
         }
         const mapped = (response.content || []).map(mapSummaryToMerchantOrder);
         // Protección de mutaciones en vuelo: preservar el estado en memoria de pedidos en actualización
@@ -374,7 +375,7 @@ export class OrderService implements OnDestroy {
         const currentActiveStoreId = this.storeService.currentStore()?.id;
         if (
           requestId === this.activeListRequestId &&
-          (!currentActiveStoreId || currentActiveStoreId === storeId)
+          currentActiveStoreId === storeId
         ) {
           this.isLoading.set(false);
           this.isLoaded.set(true);
@@ -440,9 +441,9 @@ export class OrderService implements OnDestroy {
 
     return this.http.patch<MerchantOrderDetailResponse>(url, body).pipe(
       tap((response) => {
+        this.applyUpdatedOrder(response, targetStoreId);
         this.clearUpdating(orderId);
         this.clearPendingVerification(orderId);
-        this.applyUpdatedOrder(response, targetStoreId);
         this.toastService.success(`Pedido actualizado a ${this.getStatusLabel(newStatus)}.`);
       }),
       catchError((err) => {
@@ -466,19 +467,35 @@ export class OrderService implements OnDestroy {
       this.selectedOrderDetail.set(mapDetailToDashboardPriorityOrder(detail));
     }
 
-    // 2. Comprobar si el pedido aún pertenece al filtro activo
+    // 2. Actualizar en memoria el pedido para reflejar de inmediato su nuevo estado
+    this.orders.update((list) =>
+      list.map((o) => (o.id === detail.id ? updatedMerchantOrder : o)),
+    );
+
+    // 3. Evaluar si se requiere recarga remota del listado o resolución de carga
     const tab = this.activeTab();
-    if (tab !== 'ALL' && detail.status !== tab) {
-      // El pedido dejó de pertenecer al filtro activo: recargar la página actual del filtro
-      this.loadOrders(this.currentPage(), this.pageSize(), tab, storeId).subscribe();
-    } else {
-      // El pedido sigue perteneciendo al filtro o estamos en 'ALL': actualizar en memoria
-      this.orders.update((list) =>
-        list.map((o) => (o.id === detail.id ? updatedMerchantOrder : o)),
-      );
+    const isOutdatedTab = tab !== 'ALL' && detail.status !== tab;
+
+    // Solo recargar si no hay un debounce de búsqueda activo en curso
+    // (si hay debounce activo, el temporizador disparará la consulta con el término nuevo al expirar)
+    if (this.searchDebounceTimer === null) {
+      if (isOutdatedTab) {
+        this.loadOrders(
+          this.currentPage(),
+          this.pageSize(),
+          tab,
+          storeId,
+          this.appliedSearchQuery(),
+        ).subscribe();
+      } else {
+        // Si el pedido se mantiene en la pestaña y había una petición en vuelo invalidada por
+        // activeListRequestId++, finalizamos el estado de carga para no dejar la UI bloqueada.
+        this.isLoading.set(false);
+        this.isLoaded.set(true);
+      }
     }
 
-    // 3. Refrescar contadores reales confirmados forzando petición fresca tras mutación
+    // 4. Refrescar contadores reales confirmados forzando petición fresca tras mutación
     if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
       this.loadOrderCounts(storeId, true).subscribe();
     }
@@ -627,7 +644,16 @@ export class OrderService implements OnDestroy {
     if (normalized === this.appliedSearchQuery()) {
       if (this.searchDebounceTimer) {
         clearTimeout(this.searchDebounceTimer);
-        this.searchDebounceTimer = null;
+        // Si hay una invalidación previa activa (isLoading es true), programar applySearch
+        // al expirar el debounce para reconciliar los resultados y no dejar isLoading bloqueado.
+        if (this.isLoading()) {
+          this.searchDebounceTimer = setTimeout(() => {
+            this.searchDebounceTimer = null;
+            this.applySearch(normalized);
+          }, 300);
+        } else {
+          this.searchDebounceTimer = null;
+        }
       }
       return;
     }
@@ -928,7 +954,8 @@ export class OrderService implements OnDestroy {
         const currentActiveStoreId = this.storeService.currentStore()?.id;
         if (
           requestId !== this.activeCountsRequestId ||
-          (currentActiveStoreId && currentActiveStoreId !== storeId)
+          !currentActiveStoreId ||
+          currentActiveStoreId !== storeId
         ) {
           return;
         }
@@ -937,7 +964,11 @@ export class OrderService implements OnDestroy {
         this.isCountsLoading.set(false);
       }),
       catchError((err) => {
-        if (requestId === this.activeCountsRequestId) {
+        const currentActiveStoreId = this.storeService.currentStore()?.id;
+        if (
+          requestId === this.activeCountsRequestId &&
+          currentActiveStoreId === storeId
+        ) {
           this.isCountsLoading.set(false);
           this.handleCountsError(err);
         }
@@ -1007,7 +1038,8 @@ export class OrderService implements OnDestroy {
         const currentActiveStoreId = this.storeService.currentStore()?.id;
         if (
           requestId !== this.activeTodayCountsRequestId ||
-          (currentActiveStoreId && currentActiveStoreId !== storeId)
+          !currentActiveStoreId ||
+          currentActiveStoreId !== storeId
         ) {
           return;
         }
@@ -1017,7 +1049,11 @@ export class OrderService implements OnDestroy {
         this.isTodayCountsLoading.set(false);
       }),
       catchError((err) => {
-        if (requestId === this.activeTodayCountsRequestId) {
+        const currentActiveStoreId = this.storeService.currentStore()?.id;
+        if (
+          requestId === this.activeTodayCountsRequestId &&
+          currentActiveStoreId === storeId
+        ) {
           this.isTodayCountsLoading.set(false);
           this.handleTodayCountsError(err);
         }

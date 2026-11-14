@@ -149,8 +149,11 @@ describe('OrderService', () => {
   });
 
   afterEach(() => {
+    service?.ngOnDestroy();
     httpMock.verify();
+    vi.clearAllTimers();
     vi.useRealTimers();
+    TestBed.resetTestingModule();
   });
 
   it('debe crearse correctamente e inicializar vacío', () => {
@@ -1355,6 +1358,196 @@ describe('OrderService', () => {
       expect(service.tabCounts().all).toBe(100);
       expect(service.totalOrdersCount()).toBe(100);
       expect(service.confirmedCount()).toBe(20);
+    });
+
+    it('debe reconciliar la consulta y finalizar isLoading si el usuario escribe y vuelve al término aplicado antes de 300ms (P1 Regresión)', () => {
+      vi.useFakeTimers();
+
+      // 1. Búsqueda aplicada inicial con solicitud en vuelo
+      service.appliedSearchQuery.set('1042');
+      service.searchQuery.set('1042');
+      service.loadOrders(0, 10, 'ALL', 'store-123', '1042').subscribe();
+      const req1 = httpMock.expectOne((r) => r.params.get('search') === '1042');
+      expect(service.isLoading()).toBe(true);
+
+      // 2. Usuario escribe otro término antes de que responda req1
+      service.setSearchQuery('10425');
+      expect(service.searchQuery()).toBe('10425');
+      expect(service.isLoading()).toBe(true);
+
+      // Si req1 responde ahora, fue invalidada por activeListRequestId++
+      req1.flush({
+        ...mockPageResponse,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+      expect(service.orders().length).toBe(0);
+
+      // 3. Usuario borra '5' y vuelve a '1042' antes de 300ms
+      service.setSearchQuery('1042');
+      expect(service.searchQuery()).toBe('1042');
+      expect(service.isLoading()).toBe(true);
+
+      // Avanzar el debounce
+      vi.advanceTimersByTime(300);
+
+      // Debe existir una nueva solicitud vigente para '1042'
+      const req2 = httpMock.expectOne((r) => r.params.get('search') === '1042');
+      req2.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+
+      // El estado de carga debe finalizar correctamente
+      expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].orderNumber).toBe('#1042');
+    });
+
+    it('no debe dejar isLoading bloqueado y debe invalidar listado obsoleto cuando un PATCH completa durante una búsqueda HTTP en vuelo (P1 Regresión)', () => {
+      // 1. Iniciar búsqueda HTTP para 'Carlos'
+      service.appliedSearchQuery.set('Carlos');
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
+      const searchReq1 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
+      expect(service.isLoading()).toBe(true);
+
+      // 2. PATCH de mutación de estado en paralelo
+      service.orders.set([
+        {
+          id: 'ord-1039',
+          orderNumber: '#PED-1039',
+          customerName: 'Valeria Ramos',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
+
+      // 3. Completa el PATCH antes que la búsqueda
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-1039',
+        status: 'IN_PREPARATION',
+      });
+
+      // La mutación actualiza en memoria, incrementa activeListRequestId y finaliza isLoading
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      expect(service.isLoading()).toBe(false);
+
+      // 4. searchReq1 responde después con snapshot desactualizado: debe ser ignorada por obsoleta
+      searchReq1.flush({
+        ...mockPageResponse,
+        content: [{ ...mockPageResponse.content[0], id: 'ord-1039', status: 'CONFIRMED' }],
+      });
+
+      // El estado confirmado en el PATCH se mantiene y isLoading no se reactiva ni se bloquea
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('no debe emitir solicitudes con búsqueda desactualizada cuando un PATCH completa durante un debounce activo (P1 Regresión)', () => {
+      vi.useFakeTimers();
+
+      // 1. Usuario empieza a escribir 'Valeria' (debounce pendiente de 300ms)
+      service.setSearchQuery('Valeria');
+      expect(service.isLoading()).toBe(true);
+
+      // 2. PATCH de mutación se completa durante el debounce
+      service.orders.set([
+        {
+          id: 'ord-200',
+          orderNumber: '#PED-200',
+          customerName: 'Cliente Prueba',
+          deliveryMode: 'PICKUP',
+          deliveryTimeLabel: '14:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 40,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.updateOrderStatus('ord-200', 'READY', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-200/status`,
+      );
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-200',
+        status: 'READY',
+      });
+
+      // No debe haberse emitido ninguna solicitud de listado con el término anterior (vacío)
+      httpMock.expectNone((r) => r.url.includes('/orders') && !r.url.includes('/counts'));
+
+      // 3. Al completarse los 300ms de debounce, se dispara la búsqueda con 'Valeria'
+      vi.advanceTimersByTime(300);
+      const searchReq = httpMock.expectOne((r) => r.params.get('search') === 'Valeria');
+      searchReq.flush(mockPageResponse);
+
+      expect(service.isLoading()).toBe(false);
+      expect(service.appliedSearchQuery()).toBe('Valeria');
+    });
+
+    it('debe descartar la respuesta si la tienda pasa a null mientras la petición estaba en vuelo (P2 Regresión)', () => {
+      service.loadOrders(0, 10, 'ALL', 'store-123', '984552109').subscribe();
+      const req = httpMock.expectOne((r) => r.url.includes('/store-123/orders'));
+
+      // Simular logout o reseteo de tienda a null
+      storeService.clearStore();
+      service.clearOrders();
+
+      // La petición responde después
+      req.flush(mockPageResponse);
+
+      expect(service.orders().length).toBe(0);
+      expect(service.totalElements()).toBe(0);
+      expect(service.isLoaded()).toBe(false);
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('debe mantener la coherencia de filteredOrders, orders y totalElements al cambiar de pestaña con búsqueda activa (P2 Regresión)', () => {
+      service.appliedSearchQuery.set('Carlos');
+      service.activeTab.set('ALL');
+
+      // Cambiar a pestaña READY
+      service.setActiveTab('READY');
+      expect(service.activeTab()).toBe('READY');
+      expect(service.currentPage()).toBe(0);
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.params.get('status') === 'READY' &&
+          r.params.get('search') === 'Carlos' &&
+          r.params.get('page') === '0',
+      );
+
+      req.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            status: 'READY',
+            customerName: 'Carlos Gomez',
+          },
+        ],
+      });
+
+      expect(service.totalElements()).toBe(1);
+      expect(service.orders().length).toBe(1);
+      expect(service.filteredOrders().length).toBe(1);
+      expect(service.filteredOrders()[0].status).toBe('READY');
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(false);
     });
   });
 });
