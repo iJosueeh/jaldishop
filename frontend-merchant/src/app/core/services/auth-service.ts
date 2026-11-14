@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { TokenService } from './token-service';
 import { Router } from '@angular/router';
-import { AuthResult, LoginRequest, RegisterMerchantRequest } from '../models/auth.models';
+import { AuthResult, ForgotPasswordRequest, ForgotPasswordResponse, LoginRequest, RegisterMerchantRequest } from '../models/auth.models';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CapacityService } from './capacity.service';
@@ -70,6 +70,11 @@ export class AuthService {
         this.currentUser.set(result);
       }),
     );
+  }
+
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    const payload: ForgotPasswordRequest = { email };
+    return this.http.post<ForgotPasswordResponse>(`${environment.apiUrl}/auth/forgot-password`, payload);
   }
 
   logout(): void {

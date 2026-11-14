@@ -165,6 +165,24 @@ describe('AuthService', () => {
     });
   });
 
+  describe('forgotPassword()', () => {
+    it('debe enviar solicitud POST a /auth/forgot-password con el correo especificado', () => {
+      const email = 'usuario@tunegocio.com';
+      const mockResponse = {
+        message: 'Si el correo corresponde a una cuenta habilitada, recibirás instrucciones para restablecer la contraseña.',
+      };
+
+      service.forgotPassword(email).subscribe((res) => {
+        expect(res).toEqual(mockResponse);
+      });
+
+      const req = httpTesting.expectOne(`${environment.apiUrl}/auth/forgot-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email });
+      req.flush(mockResponse, { status: 202, statusText: 'Accepted' });
+    });
+  });
+
   describe('logout()', () => {
     it('debe limpiar token, currentUser, cachés de servicios y redirigir a /login', () => {
       const navigateSpy = vi.spyOn(router, 'navigate');

@@ -46,3 +46,11 @@ export interface ApiError {
     message: string;
     errors?: Record<string, string>
 }
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ForgotPasswordResponse {
+    message: string;
+}
