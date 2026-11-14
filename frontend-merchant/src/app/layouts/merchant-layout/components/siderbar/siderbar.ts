@@ -4,6 +4,7 @@ import { AuthService } from '../../../../core/services/auth-service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
+import { OrderService } from '../../../../core/services/order.service';
 import { isValidImageUrl } from '../../../../core/utils/image.utils';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -44,8 +45,11 @@ export class Siderbar implements OnInit {
   private readonly storeService = inject(StoreService);
   private readonly profileService = inject(ProfileService);
   private readonly capacityService = inject(CapacityService);
+  readonly orderService = inject(OrderService);
 
-  readonly activeOrdersCount = signal<number>(0);
+  readonly activeOrdersCount = computed<number>(() => {
+    return this.orderService.activeOrdersTodayCount();
+  });
   readonly capacityOccupied = signal<number | null>(null);
 
   readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
@@ -95,7 +99,10 @@ export class Siderbar implements OnInit {
       };
     }
 
-    if (this.capacityService.isTodayClosed() || this.capacityService.todayEffectiveCapacity() === 0) {
+    if (
+      this.capacityService.isTodayClosed() ||
+      this.capacityService.todayEffectiveCapacity() === 0
+    ) {
       return {
         label: 'Cerrado hoy',
         dotClass: 'bg-stone-400',
@@ -128,6 +135,7 @@ export class Siderbar implements OnInit {
     if (this.capacityService.configurations().length === 0) {
       this.capacityService.getConfigurations().subscribe();
     }
+    this.orderService.loadTodayOrderCounts().subscribe();
   }
 
   handleLogout(): void {

@@ -32,7 +32,12 @@ import { OrderService } from '../../../../core/services/order.service';
 })
 export class DashboardKpis implements OnInit {
   private readonly capacityService = inject(CapacityService);
-  private readonly orderService = inject(OrderService);
+  readonly orderService = inject(OrderService);
+
+  readonly todayOrderCounts = computed(() => this.orderService.todayOrderCounts());
+  readonly isTodayCountsLoading = computed(() => this.orderService.isTodayCountsLoading());
+  readonly todayCountsError = computed(() => this.orderService.todayCountsError());
+  readonly isTodayOutdated = computed(() => this.orderService.isTodayOutdated());
 
   readonly todayException = computed(() => this.capacityService.todayException());
   readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacity());
@@ -62,18 +67,21 @@ export class DashboardKpis implements OnInit {
     return `Horario hoy: ${times}`;
   });
 
-  readonly metrics = computed<DashboardMetrics>(() => ({
-    capacityOccupied: this.capacityOccupied(),
-    capacityTotal: this.capacityTotal(),
-    shiftSchedule: this.shiftSchedule(),
-    totalOrdersToday: this.orderService.totalOrdersCount(),
-    confirmedOrders: this.orderService.confirmedCount(),
-    inPrepOrders: this.orderService.inPrepCount(),
-    readyOrders: this.orderService.readyCount(),
-    completedOrders: this.orderService.completedCount(),
-    operatingRhythmMin: 0,
-    targetRhythmMin: 25,
-  }));
+  readonly metrics = computed<DashboardMetrics>(() => {
+    const counts = this.todayOrderCounts();
+    return {
+      capacityOccupied: this.capacityOccupied(),
+      capacityTotal: this.capacityTotal(),
+      shiftSchedule: this.shiftSchedule(),
+      totalOrdersToday: counts?.all ?? 0,
+      confirmedOrders: counts?.confirmed ?? 0,
+      inPrepOrders: counts?.inPreparation ?? 0,
+      readyOrders: counts?.ready ?? 0,
+      completedOrders: counts?.completed ?? 0,
+      operatingRhythmMin: 0,
+      targetRhythmMin: 25,
+    };
+  });
 
   readonly capacityPercentage = computed<number | null>(() => {
     const occupied = this.capacityOccupied();
@@ -110,5 +118,6 @@ export class DashboardKpis implements OnInit {
     if (this.orderService.orders().length === 0) {
       this.orderService.loadOrders().subscribe();
     }
+    this.orderService.loadTodayOrderCounts().subscribe();
   }
 }

@@ -188,7 +188,9 @@ describe('Orders', () => {
   it('debe formular mensaje de cancelación con restitución para CONFIRMED y sin restitución para IN_PREPARATION', () => {
     component.onCancelOrder(mockOrders[0]); // mockOrders[0] es CONFIRMED
     expect(component.isCancelModalOpen()).toBe(true);
-    expect(component.cancelModalMessage()).toContain('Se liberará el cupo de capacidad y se restituirá el inventario');
+    expect(component.cancelModalMessage()).toContain(
+      'Se liberará el cupo de capacidad y se restituirá el inventario',
+    );
     expect(component.cancelModalMessage()).toContain('PENDING');
 
     const inPrepOrder: MerchantOrder = {
@@ -198,7 +200,9 @@ describe('Orders', () => {
       status: 'IN_PREPARATION',
     };
     component.onCancelOrder(inPrepOrder);
-    expect(component.cancelModalMessage()).toContain('NO se restituirá la capacidad del turno ni el inventario');
+    expect(component.cancelModalMessage()).toContain(
+      'NO se restituirá la capacidad del turno ni el inventario',
+    );
     expect(component.cancelModalMessage()).toContain('PENDING');
   });
 
@@ -211,5 +215,80 @@ describe('Orders', () => {
     orderService['pendingVerificationOrderIds'].set(new Set([mockOrders[0].id]));
     component.onCancelOrder(mockOrders[0]);
     expect(component.isCancelModalOpen()).toBe(false);
+  });
+
+  it('los contadores de pestañas provienen del backend y all incluye cancelados', () => {
+    orderService.orderCounts.set({
+      all: 48,
+      confirmed: 12,
+      inPreparation: 6,
+      ready: 4,
+      outForDelivery: 2,
+      completed: 20,
+      cancelled: 4,
+    });
+    fixture.detectChanges();
+
+    const tabs = orderService.tabCounts();
+    expect(tabs.all).toBe(48);
+    expect(tabs.confirmed).toBe(12);
+    expect(tabs.inPreparation).toBe(6);
+    expect(tabs.ready).toBe(4);
+    expect(tabs.completed).toBe(20);
+    expect(tabs.cancelled).toBe(4);
+  });
+
+  it('los contadores no dependen del tamaño de página ni de la cantidad de pedidos en memoria', () => {
+    // Solo 2 pedidos en memoria (página actual)
+    expect(orderService.orders().length).toBe(2);
+
+    orderService.orderCounts.set({
+      all: 150,
+      confirmed: 30,
+      inPreparation: 15,
+      ready: 10,
+      outForDelivery: 5,
+      completed: 80,
+      cancelled: 10,
+    });
+    fixture.detectChanges();
+
+    expect(orderService.tabCounts().all).toBe(150);
+    expect(orderService.totalOrdersCount()).toBe(150);
+    expect(orderService.confirmedCount()).toBe(30);
+  });
+
+  it('un error en contadores no destruye ni bloquea el listado paginado', () => {
+    orderService.countsError.set('Error al consultar contadores de pedidos');
+    fixture.detectChanges();
+
+    expect(orderService.tabCounts().all).toBe('—');
+    // El listado de pedidos sigue intacto y accesible
+    expect(component.orders().length).toBe(2);
+    expect(component.paginatedOrders().length).toBe(2);
+  });
+
+  it('cambios de estado o cancelación confirmada disparan actualización de contadores', () => {
+    const loadCountsSpy = vi.spyOn(orderService, 'loadOrderCounts').mockReturnValue(of(null));
+    const confirmedOrder = component.orders().find((o) => o.status === 'CONFIRMED')!;
+
+    // Simular que contadores estaban activos
+    orderService.orderCounts.set({
+      all: 48,
+      confirmed: 12,
+      inPreparation: 6,
+      ready: 4,
+      outForDelivery: 2,
+      completed: 20,
+      cancelled: 4,
+    });
+
+    vi.spyOn(orderService, 'updateOrderStatus').mockImplementation(() => {
+      orderService.loadOrderCounts('store-123').subscribe();
+      return of(null);
+    });
+
+    component.onStatusAdvance(confirmedOrder);
+    expect(loadCountsSpy).toHaveBeenCalled();
   });
 });

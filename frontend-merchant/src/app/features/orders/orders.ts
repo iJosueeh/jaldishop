@@ -98,17 +98,15 @@ export class Orders implements OnInit {
     const store = this.storeService.currentStore();
     if (store?.id) {
       this.stompService.connect(store.id);
-      this.orderService
-        .loadOrders(0, this.pageSize(), this.activeTab(), store.id)
-        .subscribe();
+      this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), store.id).subscribe();
+      this.orderService.loadOrderCounts(store.id).subscribe();
     } else {
       this.storeService.getMyStore().subscribe({
         next: (s) => {
           if (s?.id) {
             this.stompService.connect(s.id);
-            this.orderService
-              .loadOrders(0, this.pageSize(), this.activeTab(), s.id)
-              .subscribe();
+            this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), s.id).subscribe();
+            this.orderService.loadOrderCounts(s.id).subscribe();
           }
         },
       });
@@ -120,7 +118,10 @@ export class Orders implements OnInit {
       this.toastService.error(`No se puede cancelar un pedido en estado ${order.status}`);
       return;
     }
-    if (this.orderService.isUpdating(order.id) || this.orderService.isPendingVerification(order.id)) {
+    if (
+      this.orderService.isUpdating(order.id) ||
+      this.orderService.isPendingVerification(order.id)
+    ) {
       return;
     }
     this.orderToCancel.set(order);
