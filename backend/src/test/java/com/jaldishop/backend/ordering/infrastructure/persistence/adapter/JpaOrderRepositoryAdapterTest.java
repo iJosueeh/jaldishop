@@ -253,13 +253,14 @@ class JpaOrderRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("countByStoreIdAndServiceDate: retorna ceros cuando proyección es nula")
-    void shouldReturnEmptyWhenProjectionIsNull() {
+    @DisplayName("countByStoreIdAndServiceDate: propaga IllegalStateException si la proyección de agregación es inesperadamente nula")
+    void shouldThrowIllegalStateExceptionWhenProjectionIsNull() {
         when(jpaRepository.countOrdersByStoreId(storeId)).thenReturn(null);
 
-        OrderStatusCounts counts = adapter.countByStoreIdAndServiceDate(storeId, null);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> adapter.countByStoreIdAndServiceDate(storeId, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("la consulta de agregación de pedidos retornó un resultado nulo inesperado");
 
-        assertThat(counts.all()).isZero();
-        assertThat(counts.confirmed()).isZero();
+        verify(jpaRepository).countOrdersByStoreId(storeId);
     }
 }

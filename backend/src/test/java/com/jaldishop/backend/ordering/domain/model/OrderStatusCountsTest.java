@@ -2,13 +2,16 @@ package com.jaldishop.backend.ordering.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderStatusCountsTest {
 
     @Test
-    @DisplayName("RN-COUNT-02: 'all' debe ser exactamente la suma de todos los estados válidos, incluyendo CANCELLED")
+    @DisplayName("of(): calcula 'all' como la suma de todos los estados válidos, incluyendo CANCELLED (RN-COUNT-02)")
     void shouldComputeAllAsSumOfAllValidStatusesIncludingCancelled() {
         long confirmed = 12;
         long inPreparation = 6;
@@ -32,7 +35,7 @@ class OrderStatusCountsTest {
     }
 
     @Test
-    @DisplayName("RN-COUNT-03: 'activeOrdersCount' debe sumar exclusivamente CONFIRMED + IN_PREPARATION + READY")
+    @DisplayName("activeOrdersCount(): calcula exclusivamente la suma de CONFIRMED + IN_PREPARATION + READY (RN-COUNT-03)")
     void shouldComputeActiveOrdersCountAsConfirmedPlusInPrepPlusReady() {
         OrderStatusCounts counts = OrderStatusCounts.of(
                 10, // confirmed
@@ -47,7 +50,7 @@ class OrderStatusCountsTest {
     }
 
     @Test
-    @DisplayName("empty() debe inicializar todos los contadores en 0")
+    @DisplayName("empty(): inicializa todos los contadores en 0")
     void shouldInitializeAllCountsToZeroOnEmpty() {
         OrderStatusCounts counts = OrderStatusCounts.empty();
 
@@ -59,5 +62,52 @@ class OrderStatusCountsTest {
         assertThat(counts.completed()).isZero();
         assertThat(counts.cancelled()).isZero();
         assertThat(counts.activeOrdersCount()).isZero();
+    }
+
+    @Test
+    @DisplayName("Constructor canónico: permite instanciación válida cuando 'all' equivale exactamente a la suma de estados")
+    void shouldAllowInstantiationWhenAllEqualsSumOfStatuses() {
+        OrderStatusCounts counts = new OrderStatusCounts(15, 3, 2, 1, 4, 3, 2);
+
+        assertThat(counts.all()).isEqualTo(15);
+        assertThat(counts.confirmed()).isEqualTo(3);
+        assertThat(counts.inPreparation()).isEqualTo(2);
+        assertThat(counts.ready()).isEqualTo(1);
+        assertThat(counts.outForDelivery()).isEqualTo(4);
+        assertThat(counts.completed()).isEqualTo(3);
+        assertThat(counts.cancelled()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Constructor canónico: lanza IllegalArgumentException cuando 'all' difiere de la suma de estados")
+    void shouldThrowExceptionWhenAllDoesNotEqualSumOfStatuses() {
+        assertThatThrownBy(() -> new OrderStatusCounts(20, 3, 2, 1, 4, 3, 2)) // suma real = 15
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invariante violada: 'all' (20) debe ser exactamente la suma de los seis estados (15).");
+    }
+
+    @ParameterizedTest(name = "Valores: all={0}, confirmed={1}, inPrep={2}, ready={3}, outForDelivery={4}, completed={5}, cancelled={6}")
+    @CsvSource({
+            "-1,  0, 0, 0, 0, 0, 0",
+            " 0, -1, 0, 0, 0, 0, 0",
+            " 0,  0,-1, 0, 0, 0, 0",
+            " 0,  0, 0,-1, 0, 0, 0",
+            " 0,  0, 0, 0,-1, 0, 0",
+            " 0,  0, 0, 0, 0,-1, 0",
+            " 0,  0, 0, 0, 0, 0,-1"
+    })
+    @DisplayName("Constructor canónico: lanza IllegalArgumentException cuando cualquier contador es negativo")
+    void shouldThrowExceptionWhenAnyCountIsNegative(
+            long all,
+            long confirmed,
+            long inPreparation,
+            long ready,
+            long outForDelivery,
+            long completed,
+            long cancelled
+    ) {
+        assertThatThrownBy(() -> new OrderStatusCounts(all, confirmed, inPreparation, ready, outForDelivery, completed, cancelled))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Los contadores de estado de pedidos no pueden ser negativos.");
     }
 }

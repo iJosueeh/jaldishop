@@ -2,6 +2,8 @@ package com.jaldishop.backend.ordering.application.result;
 
 import com.jaldishop.backend.ordering.domain.model.OrderStatusCounts;
 
+import java.util.Objects;
+
 /**
  * Contrato de respuesta para los contadores de pedidos del comerciante.
  *
@@ -20,9 +22,7 @@ public record MerchantOrderStatusCountsResponse(
         long cancelled
 ) {
     public static MerchantOrderStatusCountsResponse from(OrderStatusCounts counts) {
-        if (counts == null) {
-            return empty();
-        }
+        Objects.requireNonNull(counts, "El objeto OrderStatusCounts no puede ser nulo.");
         return new MerchantOrderStatusCountsResponse(
                 counts.all(),
                 counts.confirmed(),

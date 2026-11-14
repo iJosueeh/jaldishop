@@ -82,8 +82,8 @@ class GetMerchantOrderStatusCountsServiceTest {
     }
 
     @Test
-    @DisplayName("Debe retornar ceros si el repositorio devuelve vacío o null")
-    void shouldReturnZerosWhenRepositoryReturnsEmptyOrNull() {
+    @DisplayName("execute(): retorna contadores en cero cuando el repositorio devuelve OrderStatusCounts.empty()")
+    void shouldReturnZerosWhenRepositoryReturnsEmptyCounts() {
         when(orderRepository.countByStoreIdAndServiceDate(storeId, null)).thenReturn(OrderStatusCounts.empty());
 
         MerchantOrderStatusCountsResponse response = service.execute(storeId, null);
@@ -95,6 +95,20 @@ class GetMerchantOrderStatusCountsServiceTest {
         assertThat(response.outForDelivery()).isZero();
         assertThat(response.completed()).isZero();
         assertThat(response.cancelled()).isZero();
+
+        verify(orderRepository).countByStoreIdAndServiceDate(storeId, null);
+    }
+
+    @Test
+    @DisplayName("execute(): propaga NullPointerException si el repositorio retorna null inesperadamente")
+    void shouldThrowExceptionWhenRepositoryReturnsNull() {
+        when(orderRepository.countByStoreIdAndServiceDate(storeId, null)).thenReturn(null);
+
+        assertThatThrownBy(() -> service.execute(storeId, null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("El objeto OrderStatusCounts no puede ser nulo.");
+
+        verify(orderRepository).countByStoreIdAndServiceDate(storeId, null);
     }
 
     @Test

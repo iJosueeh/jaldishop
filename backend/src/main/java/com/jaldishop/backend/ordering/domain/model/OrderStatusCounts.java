@@ -20,6 +20,19 @@ public record OrderStatusCounts(
         long completed,
         long cancelled
 ) {
+    public OrderStatusCounts {
+        if (all < 0 || confirmed < 0 || inPreparation < 0 || ready < 0 || outForDelivery < 0 || completed < 0 || cancelled < 0) {
+            throw new IllegalArgumentException("Los contadores de estado de pedidos no pueden ser negativos.");
+        }
+        long expectedAll = confirmed + inPreparation + ready + outForDelivery + completed + cancelled;
+        if (all != expectedAll) {
+            throw new IllegalArgumentException(String.format(
+                    "Invariante violada: 'all' (%d) debe ser exactamente la suma de los seis estados (%d).",
+                    all, expectedAll
+            ));
+        }
+    }
+
     public static OrderStatusCounts of(
             long confirmed,
             long inPreparation,

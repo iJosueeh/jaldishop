@@ -114,7 +114,7 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
                 : jpaRepository.countOrdersByStoreId(storeId);
 
         if (projection == null) {
-            return OrderStatusCounts.empty();
+            throw new IllegalStateException("Error de persistencia: la consulta de agregación de pedidos retornó un resultado nulo inesperado para la tienda " + storeId);
         }
 
         return OrderStatusCounts.of(
