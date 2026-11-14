@@ -3,6 +3,7 @@ package com.jaldishop.backend.identity.infrastructure.mail;
 import com.jaldishop.backend.identity.application.port.PasswordResetMail;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,7 +21,7 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
     private final Path mailbox;
     private final RestClient provider;
     private final String from;
-    private final String resetUrlBase;
+    private final URI baseUri;
 
     public ConfiguredPasswordResetMail(Environment env) {
         mode = env.getProperty("app.password-reset.mail.mode", "disabled");
@@ -41,44 +42,68 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
                 throw new IllegalStateException("Remitente de recuperación requerido.");
             if (rawUrlBase.isBlank())
                 throw new IllegalStateException("Falta configuración de URL de recuperación: app.password-reset.mail.reset-url-base");
-            this.resetUrlBase = validateResetUrl(rawUrlBase, true);
+            this.baseUri = validateResetUrl(rawUrlBase, true);
             var factory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(5)).build());
             factory.setReadTimeout(Duration.ofSeconds(5));
             provider = RestClient.builder().baseUrl("https://api.resend.com")
                     .requestFactory(factory).defaultHeader("Authorization", "Bearer " + apiKey).build();
         } else {
-            this.resetUrlBase = rawUrlBase.isBlank() ? "http://localhost:3000/reset-password" : validateResetUrl(rawUrlBase, false);
+            this.baseUri = rawUrlBase.isBlank()
+                    ? URI.create("http://localhost:3000/reset-password")
+                    : validateResetUrl(rawUrlBase, false);
             provider = null;
         }
     }
 
-    private static String validateResetUrl(String rawUrl, boolean requireHttps) {
+    private static URI validateResetUrl(String rawUrl, boolean requireHttps) {
         if (rawUrl.contains("\r") || rawUrl.contains("\n") || rawUrl.contains(" "))
             throw new IllegalStateException("URL de recuperación inválida.");
         URI uri;
         try {
             uri = URI.create(rawUrl);
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("URL de recuperación con sintaxis inválida: " + rawUrl);
+            throw new IllegalStateException("URL de recuperación con sintaxis inválida.");
         }
+
+        if (!uri.isAbsolute())
+            throw new IllegalStateException("La URL de recuperación debe ser absoluta.");
+
+        if (uri.getUserInfo() != null)
+            throw new IllegalStateException("La URL de recuperación no debe contener credenciales de usuario.");
+
+        if (uri.getRawQuery() != null)
+            throw new IllegalStateException("La URL de recuperación no debe contener parámetros de consulta preexistentes.");
+
+        if (uri.getRawFragment() != null)
+            throw new IllegalStateException("La URL de recuperación no debe contener fragmentos.");
+
         String scheme = uri.getScheme();
         if (scheme == null)
             throw new IllegalStateException("URL de recuperación sin protocolo.");
+
+        String path = uri.getPath();
+        if (path == null || !"/reset-password".equals(path))
+            throw new IllegalStateException("La ruta de la URL de recuperación debe corresponder exactamente a /reset-password.");
+
+        String host = uri.getHost();
+        if (host == null || host.isBlank())
+            throw new IllegalStateException("URL de recuperación sin host válido.");
+
         if (requireHttps) {
             if (!"https".equalsIgnoreCase(scheme))
                 throw new IllegalStateException("La entrega real de correo requiere HTTPS en la URL de recuperación.");
-            String host = uri.getHost();
-            if (host == null || host.isBlank())
-                throw new IllegalStateException("URL de recuperación sin host válido.");
             String lowerHost = host.toLowerCase();
-            if (lowerHost.equals("localhost") || lowerHost.equals("127.0.0.1") || lowerHost.endsWith(".local") || lowerHost.endsWith(".localhost"))
-                throw new IllegalStateException("La entrega real de correo no permite URL de recuperación en localhost.");
+            if (lowerHost.equals("localhost") || lowerHost.equals("127.0.0.1") || lowerHost.equals("::1")
+                    || lowerHost.endsWith(".local") || lowerHost.endsWith(".localhost") || lowerHost.endsWith(".internal")
+                    || lowerHost.endsWith(".lan") || lowerHost.endsWith(".test") || lowerHost.endsWith(".example")
+                    || lowerHost.endsWith(".invalid"))
+                throw new IllegalStateException("La entrega real de correo no permite URL de recuperación en localhost o redes locales.");
         } else {
             if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme))
                 throw new IllegalStateException("Protocolo de URL de recuperación no admitido.");
         }
-        return rawUrl;
+        return uri;
     }
 
     // RestClient DEBUG logs call toString() on the outgoing body.
@@ -95,7 +120,13 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
     public void send(String recipient, String token, Instant expiresAt) {
         if (mode.equals("disabled")) return;
         if (recipient.contains("\r") || recipient.contains("\n")) throw new IllegalArgumentException("Destinatario inválido.");
-        String resetLink = resetUrlBase + (resetUrlBase.contains("?") ? "&token=" : "?token=") + token;
+
+        URI resetUri = UriComponentsBuilder.fromUri(baseUri)
+                .replaceQueryParam("token", token)
+                .build(true)
+                .toUri();
+        String resetLink = resetUri.toASCIIString();
+
         String body = "Hola,\n\n"
                 + "Recibimos una solicitud para restablecer la contraseña de tu cuenta en JaldiShop.\n\n"
                 + "Para crear una nueva contraseña, ingresa al siguiente enlace:\n"

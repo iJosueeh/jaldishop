@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ResetPasswordForm } from './ResetPasswordForm';
 import { customerAuthService } from '../services/customerAuthService';
+import { ApiException } from '@/core/api/apiClient';
 
 let mockSearchParams = new URLSearchParams();
 
@@ -174,53 +175,140 @@ describe('ResetPasswordForm Component', () => {
     ).toHaveAttribute('href', '/login');
   });
 
-  it('transitions to invalid/expired token view when backend responds with 422', async () => {
-    window.history.pushState({}, '', `/reset-password?token=${validToken}`);
-    mockSearchParams = new URLSearchParams(`token=${validToken}`);
-    vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
-      new Error('INVALID_PASSWORD_RESET_TOKEN: El token de recuperación no es válido o ha vencido.')
-    );
+  describe('Structured Error Classification via ApiException', () => {
+    it('transitions to invalid/expired token view when backend responds with structured 422', async () => {
+      window.history.pushState({}, '', `/reset-password?token=${validToken}`);
+      mockSearchParams = new URLSearchParams(`token=${validToken}`);
+      vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
+        new ApiException(422, 'Unprocessable Entity', {
+          code: 'INVALID_PASSWORD_RESET_TOKEN',
+          message: 'El token de recuperación no es válido o ha vencido.',
+        })
+      );
 
-    render(<ResetPasswordForm />);
+      render(<ResetPasswordForm />);
 
-    fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
-      target: { value: 'NuevaContrasena2026' },
+      fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reset-password-invalid-token')).toBeInTheDocument();
+        expect(
+          screen.getByRole('heading', { name: /Enlace vencido o inválido/i })
+        ).toBeInTheDocument();
+      });
     });
-    fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
-      target: { value: 'NuevaContrasena2026' },
-    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+    it('preserves form and displays validation message when backend responds with structured 400', async () => {
+      window.history.pushState({}, '', `/reset-password?token=${validToken}`);
+      mockSearchParams = new URLSearchParams(`token=${validToken}`);
+      vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
+        new ApiException(400, 'Bad Request', {
+          code: 'VALIDATION_ERROR',
+          message: 'La contraseña debe contener al menos 8 caracteres y como máximo 72 bytes UTF-8.',
+        })
+      );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('reset-password-invalid-token')).toBeInTheDocument();
+      render(<ResetPasswordForm />);
+
+      fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+
       expect(
-        screen.getByRole('heading', { name: /Enlace vencido o inválido/i })
+        await screen.findByText('La contraseña debe contener al menos 8 caracteres y como máximo 72 bytes UTF-8.')
       ).toBeInTheDocument();
-    });
-  });
-
-  it('displays error alert when a general error occurs', async () => {
-    window.history.pushState({}, '', `/reset-password?token=${validToken}`);
-    mockSearchParams = new URLSearchParams(`token=${validToken}`);
-    vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
-      new Error('Servicio no disponible temporalmente.')
-    );
-
-    render(<ResetPasswordForm />);
-
-    fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
-      target: { value: 'NuevaContrasena2026' },
-    });
-    fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
-      target: { value: 'NuevaContrasena2026' },
+      expect(screen.queryByTestId('reset-password-invalid-token')).not.toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+    it('preserves form and displays rate limit message when backend responds with structured 429', async () => {
+      window.history.pushState({}, '', `/reset-password?token=${validToken}`);
+      mockSearchParams = new URLSearchParams(`token=${validToken}`);
+      vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
+        new ApiException(429, 'Too Many Requests', {
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Demasiadas solicitudes. Por favor, espera antes de reintentar.',
+        })
+      );
 
-    expect(
-      await screen.findByText('Servicio no disponible temporalmente.')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('reset-password-success')).not.toBeInTheDocument();
+      render(<ResetPasswordForm />);
+
+      fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+
+      expect(
+        await screen.findByText('Demasiadas solicitudes. Por favor, espera antes de reintentar.')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('reset-password-invalid-token')).not.toBeInTheDocument();
+    });
+
+    it('preserves form and displays service unavailable message when backend responds with structured 503', async () => {
+      window.history.pushState({}, '', `/reset-password?token=${validToken}`);
+      mockSearchParams = new URLSearchParams(`token=${validToken}`);
+      vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
+        new ApiException(503, 'Service Unavailable', {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'No pudimos conectar con el servicio.',
+        })
+      );
+
+      render(<ResetPasswordForm />);
+
+      fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+
+      expect(
+        await screen.findByText(/El servicio no se encuentra disponible temporalmente/i)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('reset-password-invalid-token')).not.toBeInTheDocument();
+    });
+
+    it('does NOT treat a generic Error containing the string "422" as an invalid token', async () => {
+      window.history.pushState({}, '', `/reset-password?token=${validToken}`);
+      mockSearchParams = new URLSearchParams(`token=${validToken}`);
+      vi.mocked(customerAuthService.resetPassword).mockRejectedValue(
+        new Error('Unexpected error occurred at step 422 in processing pipeline.')
+      );
+
+      render(<ResetPasswordForm />);
+
+      fireEvent.change(screen.getByLabelText(/^Nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+      fireEvent.change(screen.getByLabelText(/^Confirmar nueva contraseña$/i), {
+        target: { value: 'NuevaContrasena2026' },
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/i }));
+
+      expect(
+        await screen.findByText('Unexpected error occurred at step 422 in processing pipeline.')
+      ).toBeInTheDocument();
+      // Verifies form is preserved and is NOT treated as an invalid token!
+      expect(screen.queryByTestId('reset-password-invalid-token')).not.toBeInTheDocument();
+    });
   });
 });

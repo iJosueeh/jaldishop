@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
+import { ApiException } from '@/core/api/apiClient';
 import { customerAuthService } from '../services/customerAuthService';
 import {
   isValidResetToken,
@@ -23,6 +24,18 @@ import {
   validateConfirmPassword,
 } from '../utils/validation';
 
+/**
+ * Token Security Notes:
+ * 1. The token is extracted from the URL query parameter (?token=...) upon entry.
+ * 2. On component mount, the address bar is cleaned via `window.history.replaceState`.
+ *    NOTE: While `replaceState` removes the token from the browser address bar, UI and
+ *    subsequent navigations (mitigating referrer leaks, shoulder surfing, and browser history persistence),
+ *    it CANNOT erase records of already-completed HTTP requests from network/CDN access logs
+ *    or server access logs of the initial GET request.
+ * 3. Token is kept exclusively in transient React component memory; never stored in localStorage,
+ *    sessionStorage, cookies, or sent to telemetry/analytics.
+ * 4. The page route enforces `Referrer-Policy: no-referrer` in Next.js page metadata.
+ */
 export function ResetPasswordForm() {
   const searchParams = useSearchParams();
 
@@ -101,21 +114,53 @@ export function ResetPasswordForm() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
-      const errorStr = err instanceof Error ? err.message : String(err);
-      if (
-        errorStr.includes('INVALID_PASSWORD_RESET_TOKEN') ||
-        errorStr.includes('vencido') ||
-        errorStr.includes('no es válido') ||
-        errorStr.includes('422')
-      ) {
-        setIsTokenInvalid(true);
-      } else {
+      if (err instanceof ApiException) {
+        if (
+          err.status === 422 &&
+          (err.errorData?.code === 'INVALID_PASSWORD_RESET_TOKEN' ||
+            err.errorData?.code === undefined)
+        ) {
+          setIsTokenInvalid(true);
+          return;
+        }
+
+        if (err.status === 400) {
+          setErrorMessage(
+            err.errorData?.message ||
+              err.message ||
+              'Los datos enviados no son válidos. Verifica los requisitos de la contraseña.'
+          );
+          return;
+        }
+
+        if (err.status === 429) {
+          setErrorMessage(
+            err.errorData?.message ||
+              'Demasiados intentos. Por favor, espera unos minutos antes de reintentar.'
+          );
+          return;
+        }
+
+        if (err.status === 503 || err.status === 408) {
+          setErrorMessage(
+            'El servicio no se encuentra disponible temporalmente. Conserva tus datos y vuelve a intentarlo en unos instantes.'
+          );
+          return;
+        }
+
         setErrorMessage(
-          err instanceof Error
-            ? err.message
-            : 'Ocurrió un error inesperado al actualizar la contraseña.'
+          err.errorData?.message ||
+            err.message ||
+            'Ocurrió un error al procesar tu solicitud.'
         );
+        return;
       }
+
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Ocurrió un error inesperado al actualizar la contraseña.';
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
