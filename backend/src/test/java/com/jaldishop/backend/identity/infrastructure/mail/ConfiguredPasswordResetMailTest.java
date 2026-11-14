@@ -55,13 +55,14 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password");
 
         assertThatCode(() -> new ConfiguredPasswordResetMail(env)).doesNotThrowAnyException();
     }
 
     @Test void authorizedPublicDomainAccepted() {
-        // Default authorized domains (jaldishop.pe, jaldishop.net, etc.)
+        String allowed = "jaldishop.pe,www.jaldishop.pe,jaldishop.net,www.jaldishop.net,jaldishop.com";
         for (String validUrl : java.util.List.of(
                 "https://jaldishop.pe/reset-password",
                 "https://www.jaldishop.pe/reset-password",
@@ -74,6 +75,7 @@ class ConfiguredPasswordResetMailTest {
                     .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                     .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                     .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                    .withProperty("app.password-reset.mail.allowed-hosts", allowed)
                     .withProperty("app.password-reset.mail.reset-url-base", validUrl);
             assertThatCode(() -> new ConfiguredPasswordResetMail(env)).doesNotThrowAnyException();
         }
@@ -87,6 +89,67 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.allowed-hosts", "marketplace.custom.org")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://marketplace.custom.org/reset-password");
         assertThatCode(() -> new ConfiguredPasswordResetMail(customEnv)).doesNotThrowAnyException();
+    }
+
+    @Test void wildcardsAndPermissivePatternsRejectedAndSubdomainsNotAutoAuthorized() {
+        // Rejects wildcard "*"
+        var envWildcard = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "*")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envWildcard))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("La lista de hosts autorizados no admite comodines ni patrones permisivos.");
+
+        // Rejects wildcard prefix "*.domain"
+        var envWildcardSub = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "*.jaldishop.net")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envWildcardSub))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("La lista de hosts autorizados no admite comodines ni patrones permisivos.");
+
+        // Rejects dot prefix ".domain"
+        var envDotPrefix = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", ".jaldishop.net")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envDotPrefix))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("La lista de hosts autorizados no admite comodines ni patrones permisivos.");
+
+        // Subdomains are NOT automatically authorized (exact match required)
+        var envSubdomain = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://sub.jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envSubdomain))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("El dominio de la URL de recuperación no está autorizado.");
+
+        // Real delivery requires explicit non-empty allowed-hosts list
+        var envEmptyHosts = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envEmptyHosts))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("La entrega real de correo requiere una lista explícita de hosts autorizados.");
     }
 
     @Test void ipv4PrivateAndLoopbackRejected() {
@@ -111,6 +174,7 @@ class ConfiguredPasswordResetMailTest {
                     .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                     .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                     .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                    .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                     .withProperty("app.password-reset.mail.reset-url-base", url);
 
             assertThatThrownBy(() -> new ConfiguredPasswordResetMail(env))
@@ -134,6 +198,7 @@ class ConfiguredPasswordResetMailTest {
                     .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                     .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                     .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                    .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                     .withProperty("app.password-reset.mail.reset-url-base", url);
 
             assertThatThrownBy(() -> new ConfiguredPasswordResetMail(env))
@@ -153,6 +218,7 @@ class ConfiguredPasswordResetMailTest {
                     .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                     .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                     .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                    .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.pe,jaldishop.net")
                     .withProperty("app.password-reset.mail.reset-url-base", unauthorizedUrl);
 
             assertThatThrownBy(() -> new ConfiguredPasswordResetMail(env))
@@ -173,6 +239,7 @@ class ConfiguredPasswordResetMailTest {
                     .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                     .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                     .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                    .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.pe,www.jaldishop.net")
                     .withProperty("app.password-reset.mail.reset-url-base", httpUrl);
 
             assertThatThrownBy(() -> new ConfiguredPasswordResetMail(env))
@@ -230,11 +297,22 @@ class ConfiguredPasswordResetMailTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Falta configuración de URL de recuperación");
 
+        var envNoAllowedHosts = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.net/reset-password");
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envNoAllowedHosts))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("requiere una lista explícita de hosts autorizados");
+
         var envLocalhost = new MockEnvironment()
                 .withProperty("app.password-reset.mail.mode", "resend")
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "http://localhost:3000/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envLocalhost))
                 .isInstanceOf(IllegalStateException.class)
@@ -245,6 +323,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://localhost/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envHttpsLocalhost))
                 .isInstanceOf(IllegalStateException.class)
@@ -255,6 +334,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://127.0.0.1/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envHttpsIpLoopback))
                 .isInstanceOf(IllegalStateException.class)
@@ -265,6 +345,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://jaldishop.internal/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envHttpsLocalDomain))
                 .isInstanceOf(IllegalStateException.class)
@@ -275,6 +356,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "http://jaldishop.net/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envHttpProduction))
                 .isInstanceOf(IllegalStateException.class)
@@ -282,18 +364,13 @@ class ConfiguredPasswordResetMailTest {
     }
 
     @Test void strictUrlValidationRejectsUserInfoQueryFragmentAndWrongPath() {
-        var baseEnv = new MockEnvironment()
-                .withProperty("app.password-reset.mail.mode", "resend")
-                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
-                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
-                .withProperty("app.password-reset.mail.api-key", "re_test_key");
-
         // User info rejected
         var envUserInfo = new MockEnvironment()
                 .withProperty("app.password-reset.mail.mode", "resend")
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://admin:secret@jaldishop.net/reset-password");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envUserInfo))
                 .isInstanceOf(IllegalStateException.class)
@@ -305,6 +382,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password?preexisting=param");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envQuery))
                 .isInstanceOf(IllegalStateException.class)
@@ -316,6 +394,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password#anchor");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envFragment))
                 .isInstanceOf(IllegalStateException.class)
@@ -327,6 +406,7 @@ class ConfiguredPasswordResetMailTest {
                 .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
                 .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
                 .withProperty("app.password-reset.mail.api-key", "re_test_key")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
                 .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/other-target");
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envWrongPath))
                 .isInstanceOf(IllegalStateException.class)

@@ -36,8 +36,7 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
             throw new IllegalStateException("El buzón de desarrollo requiere el perfil local o test.");
 
         String rawUrlBase = env.getProperty("app.password-reset.mail.reset-url-base", "");
-        String rawAllowedHosts = env.getProperty("app.password-reset.mail.allowed-hosts",
-                "jaldishop.net,www.jaldishop.net,jaldishop.pe,www.jaldishop.pe,jaldishop.com,www.jaldishop.com");
+        String rawAllowedHosts = env.getProperty("app.password-reset.mail.allowed-hosts", "");
         Set<String> allowedHosts = parseAllowedHosts(rawAllowedHosts);
 
         if (mode.equals("resend")) {
@@ -48,6 +47,8 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
                 throw new IllegalStateException("Remitente de recuperación requerido.");
             if (rawUrlBase.isBlank())
                 throw new IllegalStateException("Falta configuración de URL de recuperación: app.password-reset.mail.reset-url-base");
+            if (allowedHosts.isEmpty())
+                throw new IllegalStateException("La entrega real de correo requiere una lista explícita de hosts autorizados.");
             this.baseUri = validateResetUrl(rawUrlBase, true, allowedHosts);
             var factory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(5)).build());
@@ -116,24 +117,19 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
         Set<String> hosts = new HashSet<>();
         for (String part : raw.split(",")) {
             String trimmed = part.trim().toLowerCase();
-            if (!trimmed.isEmpty()) {
-                hosts.add(trimmed);
+            if (trimmed.isEmpty()) continue;
+            if (trimmed.contains("*") || trimmed.contains("?") || trimmed.contains("/") || trimmed.contains(":")
+                    || trimmed.startsWith(".") || trimmed.endsWith(".")) {
+                throw new IllegalStateException("La lista de hosts autorizados no admite comodines ni patrones permisivos.");
             }
+            hosts.add(trimmed);
         }
         return Collections.unmodifiableSet(hosts);
     }
 
     private static boolean isHostAuthorized(String host, Set<String> allowedHosts) {
-        if (allowedHosts == null || allowedHosts.isEmpty()) return false;
-        for (String allowed : allowedHosts) {
-            if (allowed.equals("*")) return true;
-            if (allowed.startsWith(".")) {
-                if (host.endsWith(allowed)) return true;
-            } else if (host.equals(allowed) || host.endsWith("." + allowed)) {
-                return true;
-            }
-        }
-        return false;
+        if (allowedHosts == null || allowedHosts.isEmpty() || host == null) return false;
+        return allowedHosts.contains(host);
     }
 
     private static boolean isLocalHost(String lowerHost) {
