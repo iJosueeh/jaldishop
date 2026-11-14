@@ -123,6 +123,41 @@ describe('Orders', () => {
     expect(orderService.isCreateModalOpen()).toBe(true);
   });
 
+  it('debe manejar flujo de cancelación con modal de confirmación', () => {
+    const updateSpy = vi.spyOn(orderService, 'updateOrderStatus').mockReturnValue(of(null));
+    const confirmedOrder = component.orders().find((o) => o.status === 'CONFIRMED')!;
+
+    component.onCancelOrder(confirmedOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+    expect(component.orderToCancel()?.id).toBe(confirmedOrder.id);
+
+    component.onConfirmCancel();
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(component.orderToCancel()).toBeNull();
+    expect(updateSpy).toHaveBeenCalledWith(confirmedOrder.id, 'CANCELLED');
+  });
+
+  it('debe rechazar intento de cancelación si el estado no es CONFIRMED ni IN_PREPARATION', () => {
+    const toastSpy = vi.spyOn(TestBed.inject(ToastService), 'error');
+    const updateSpy = vi.spyOn(orderService, 'updateOrderStatus');
+    const readyOrder = component.orders().find((o) => o.status === 'READY')!;
+
+    component.onCancelOrder(readyOrder);
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(toastSpy).toHaveBeenCalledWith(expect.stringContaining('No se puede cancelar'));
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('debe descartar cancelación con onDismissCancel', () => {
+    const confirmedOrder = component.orders().find((o) => o.status === 'CONFIRMED')!;
+    component.onCancelOrder(confirmedOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+
+    component.onDismissCancel();
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(component.orderToCancel()).toBeNull();
+  });
+
   it('debe entregar la página directamente en paginatedOrders sin aplicar slice secundario', () => {
     expect(component.paginatedOrders().length).toBe(2);
     expect(component.paginatedOrders()).toEqual(component.orders());

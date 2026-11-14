@@ -38,8 +38,9 @@ export class DashboardKpis implements OnInit {
   readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacity());
   readonly isClosedToday = computed(() => this.capacityService.isTodayClosed());
 
-  readonly capacityOccupied = computed(() => {
-    return this.orderService.orders().filter((o) => o.status !== 'CANCELLED').length;
+  readonly capacityOccupied = computed<number | null>(() => {
+    // No presentar como ocupada la cantidad de pedidos de la página en memoria (Fase 1)
+    return null;
   });
 
   readonly shiftSchedule = computed(() => {
@@ -62,7 +63,7 @@ export class DashboardKpis implements OnInit {
   });
 
   readonly metrics = computed<DashboardMetrics>(() => ({
-    capacityOccupied: this.capacityOccupied(),
+    capacityOccupied: this.capacityOccupied() ?? 0,
     capacityTotal: this.capacityTotal(),
     shiftSchedule: this.shiftSchedule(),
     totalOrdersToday: this.orderService.totalOrdersCount(),
@@ -74,20 +75,24 @@ export class DashboardKpis implements OnInit {
     targetRhythmMin: 25,
   }));
 
-  readonly capacityPercentage = computed(() => {
+  readonly capacityPercentage = computed<number | null>(() => {
+    const occupied = this.capacityOccupied();
     const total = this.capacityTotal();
-    if (total <= 0) return 0;
-    return Math.round((this.capacityOccupied() / total) * 100);
+    if (occupied === null || total <= 0) return null;
+    return Math.round((occupied / total) * 100);
   });
 
-  readonly availableCapacity = computed(() => {
-    return Math.max(0, this.capacityTotal() - this.capacityOccupied());
+  readonly availableCapacity = computed<number | null>(() => {
+    const occupied = this.capacityOccupied();
+    const total = this.capacityTotal();
+    if (occupied === null) return null;
+    return Math.max(0, total - occupied);
   });
 
   readonly capacityBlocks = computed(() => {
     const occupied = this.capacityOccupied();
     const total = this.capacityTotal();
-    const percentage = total > 0 ? (occupied / total) * 10 : 0;
+    const percentage = occupied !== null && total > 0 ? (occupied / total) * 10 : 0;
 
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,

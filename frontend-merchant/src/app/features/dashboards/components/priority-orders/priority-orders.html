@@ -166,16 +166,31 @@
     }
   </div>
 
-  <!-- Panel Lateral Slide-Over -->
+  <!-- Panel Lateral Slide-Over con carga real desde el servidor -->
   <app-order-details-drawer
     [order]="selectedOrder()"
     [isOpen]="isDrawerOpen()"
+    [isLoading]="orderService.isDetailLoading()"
+    [errorMessage]="orderService.detailError()"
     [isUpdating]="isDrawerUpdating()"
     [isPendingVerification]="isDrawerPendingVerification()"
     (closeDrawer)="closeDrawer()"
     (statusChange)="onStatusChange($event)"
+    (cancelOrder)="onCancelOrder($event)"
     (notifyCustomer)="onNotifyCustomer($event)"
     (verifyStatus)="onVerifyStatus($event)"
+  />
+
+  <!-- Modal de Confirmación de Cancelación -->
+  <app-confirm-modal
+    [isOpen]="isCancelModalOpen()"
+    title="¿Cancelar este pedido?"
+    [message]="'¿Estás seguro de cancelar el pedido ' + (orderToCancel()?.orderNumber || '') + '? Esta acción revertirá el pedido según las reglas de negocio.'"
+    confirmText="Sí, cancelar pedido"
+    cancelText="Volver"
+    [isDanger]="true"
+    (confirm)="onConfirmCancel()"
+    (cancel)="onDismissCancel()"
   />
 </div>
 

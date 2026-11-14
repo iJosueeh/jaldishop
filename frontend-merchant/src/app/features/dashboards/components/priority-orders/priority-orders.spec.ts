@@ -135,4 +135,57 @@ describe('PriorityOrders', () => {
     const updated = component.orders().find((o) => o.id === order.id);
     expect(updated?.status).toBe('READY');
   });
+
+  it('debe consultar el detalle real del pedido al backend al abrir el drawer', () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    const order = component.orders()[0];
+
+    component.openDrawer(order);
+
+    const req = httpMock.expectOne((r) => r.method === 'GET' && r.url.endsWith('/orders/ord-test-1'));
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      id: 'ord-test-1',
+      orderNumber: '#ORD-0001',
+      storeId: 'store-1',
+      customerUserId: 'usr-1',
+      paymentId: 'pay-1',
+      capacityReservationId: 'cap-1',
+      status: 'IN_PREPARATION',
+      deliveryMode: 'DELIVERY',
+      serviceDate: '2026-09-25',
+      serviceStartTime: '10:00:00',
+      serviceEndTime: '11:30:00',
+      customerName: 'María García Detalle Actualizado',
+      customerPhone: '987654321',
+      customerEmail: 'maria@example.com',
+      deliveryAddress: 'Av. Larco 123',
+      deliveryReference: 'Piso 4',
+      deliveryLatitude: null,
+      deliveryLongitude: null,
+      currency: 'PEN',
+      productsSubtotalAmount: 45.0,
+      discountAmount: 0,
+      discountCode: null,
+      deliveryFeeAmount: 0,
+      includedTaxAmount: 0,
+      totalAmount: 45.0,
+      confirmedAt: '2026-09-25T10:00:00Z',
+      updatedAt: '2026-09-25T10:00:00Z',
+      items: [
+        {
+          id: 'item-1',
+          variantId: 'var-1',
+          productName: 'Torta de Chocolate',
+          variantName: 'Porción personal',
+          quantity: 1,
+          unitPriceAmount: 45.0,
+          subtotalAmount: 45.0,
+        },
+      ],
+      statusHistory: [],
+    });
+
+    expect(component.selectedOrder()?.customerName).toBe('María García Detalle Actualizado');
+  });
 });

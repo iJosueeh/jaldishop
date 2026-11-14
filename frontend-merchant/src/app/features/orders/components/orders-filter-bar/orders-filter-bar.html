@@ -107,18 +107,14 @@
       />
     </div>
 
-    <!-- Selector de Canal -->
-    <div class="relative shrink-0">
+    <!-- Selector de Canal (Deshabilitado: el backend actual no clasifica pedidos por canal en Fase 1) -->
+    <div class="relative shrink-0" title="Filtro por canal no disponible por el momento (backend no soporta canales)">
       <select
-        [value]="selectedChannel()"
-        (change)="onChannelSelect($event)"
-        class="appearance-none px-3 py-1.5 pr-8 rounded-xl bg-surface-container-lowest text-on-surface text-xs font-bold shadow-2xs border border-outline-variant/30 focus:outline-none cursor-pointer"
+        [value]="'ALL'"
+        [disabled]="true"
+        class="appearance-none px-3 py-1.5 pr-8 rounded-xl bg-surface-container-low text-on-surface-variant text-xs font-semibold shadow-2xs border border-outline-variant/20 focus:outline-none cursor-not-allowed opacity-70"
       >
         <option value="ALL">Canal: Todos</option>
-        <option value="WHATSAPP">WhatsApp</option>
-        <option value="COUNTER">Mostrador</option>
-        <option value="INSTAGRAM">Instagram</option>
-        <option value="WEB_STORE">Tienda Web</option>
       </select>
       <ng-icon name="matArrowDropDownOutline" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none" />
     </div>

@@ -20,6 +20,7 @@ import {
   matAttachmentOutline,
   matSendOutline,
   matInventory2Outline,
+  matCancelOutline,
 } from '@ng-icons/material-symbols/outline';
 import { DeliveryMode, MerchantOrder, OrderStatus } from '../../../../core/models/order.models';
 
@@ -46,6 +47,7 @@ import { DeliveryMode, MerchantOrder, OrderStatus } from '../../../../core/model
       matAttachmentOutline,
       matSendOutline,
       matInventory2Outline,
+      matCancelOutline,
     }),
   ],
   selector: 'app-orders-card',
@@ -58,9 +60,14 @@ export class OrdersCard {
   readonly isPendingVerification = input<boolean>(false);
 
   readonly statusAdvance = output<MerchantOrder>();
+  readonly cancelOrder = output<MerchantOrder>();
   readonly whatsAppClick = output<MerchantOrder>();
   readonly openDetails = output<MerchantOrder>();
   readonly verifyStatus = output<MerchantOrder>();
+
+  canCancel(status: OrderStatus): boolean {
+    return status === 'CONFIRMED' || status === 'IN_PREPARATION';
+  }
 
   getNextActionLabel(status: OrderStatus, deliveryMode?: DeliveryMode): string {
     switch (status) {

@@ -323,61 +323,7 @@ export class CreateOrderModal {
   }
 
   onSubmit(): void {
-    if (this.orderForm.invalid) {
-      this.orderForm.markAllAsTouched();
-      return;
-    }
-
-    const formVal = this.orderForm.value;
-    const orderNum = `#PED-${Math.floor(1000 + Math.random() * 9000)}`;
-    const items = (formVal.items as Array<{ name: string; quantity: number; unitPrice: number }>).map((it) => ({
-      name: it.name,
-      quantity: Number(it.quantity),
-      unitPrice: Number(it.unitPrice),
-      totalPrice: Number(it.quantity) * Number(it.unitPrice),
-    }));
-
-    const totalAmount = this.calculateGrandTotal();
-
-    const channelMap: Record<OrderChannel, string> = {
-      WHATSAPP: 'WhatsApp',
-      COUNTER: 'Mostrador / Taller',
-      INSTAGRAM: 'Instagram Direct',
-      WEB_STORE: 'Tienda Web',
-    };
-
-    const paymentMap: Record<PaymentMethod, string> = {
-      YAPE: 'Yape',
-      PLIN: 'Plin',
-      BCP: 'BCP Transferencia',
-      EFECTIVO: 'Efectivo',
-      TRANSFERENCIA: 'Transferencia Bancaria',
-      TARJETA: 'Tarjeta POS',
-    };
-
-    const newOrder: MerchantOrder = {
-      id: `ord-${Date.now()}`,
-      orderNumber: orderNum,
-      customerName: formVal.customerName,
-      customerPhone: formVal.customerPhone,
-      channel: formVal.channel,
-      channelLabel: channelMap[formVal.channel as OrderChannel] || formVal.channel,
-      deliveryMode: formVal.deliveryMode,
-      deliveryAddress: formVal.deliveryMode === 'DELIVERY' ? formVal.deliveryAddress : 'Recojo en local / taller',
-      deliveryReference: formVal.deliveryReference,
-      scheduledTime: formVal.scheduledTime,
-      deliveryTimeLabel: `Programado: ${formVal.scheduledTime}`,
-      isUrgent: false,
-      status: 'CONFIRMED',
-      paymentMethod: formVal.paymentMethod,
-      paymentLabel: paymentMap[formVal.paymentMethod as PaymentMethod] || formVal.paymentMethod,
-      totalAmount,
-      notes: formVal.notes,
-      items,
-      createdAt: new Date().toISOString(),
-    };
-
-    this.orderCreated.emit(newOrder);
+    // La creación manual está deshabilitada en Fase 1 para no generar pedidos ficticios
     this.onClose();
   }
 }

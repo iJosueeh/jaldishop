@@ -57,10 +57,32 @@ describe('OrdersCard', () => {
       emitted = order;
     });
 
-    const advanceBtn = fixture.nativeElement.querySelectorAll('button')[2];
+    const advanceBtn = fixture.nativeElement.querySelector('button[title*="Avanzar"]') as HTMLButtonElement;
     advanceBtn.click();
 
     expect(emitted).toEqual(mockOrder);
+  });
+
+  it('debe emitir cancelOrder al presionar el botón de cancelar', () => {
+    let emitted: MerchantOrder | null = null;
+    component.cancelOrder.subscribe((order) => {
+      emitted = order;
+    });
+
+    const cancelBtn = fixture.nativeElement.querySelector('button[title="Cancelar pedido"]') as HTMLButtonElement;
+    expect(cancelBtn).toBeTruthy();
+    cancelBtn.click();
+
+    expect(emitted).toEqual(mockOrder);
+  });
+
+  it('debe verificar estados en canCancel', () => {
+    expect(component.canCancel('CONFIRMED')).toBe(true);
+    expect(component.canCancel('IN_PREPARATION')).toBe(true);
+    expect(component.canCancel('READY')).toBe(false);
+    expect(component.canCancel('OUT_FOR_DELIVERY')).toBe(false);
+    expect(component.canCancel('COMPLETED')).toBe(false);
+    expect(component.canCancel('CANCELLED')).toBe(false);
   });
 
   it('debe emitir whatsAppClick al presionar el botón de WhatsApp', () => {
@@ -105,7 +127,7 @@ describe('OrdersCard', () => {
     fixture.componentRef.setInput('isUpdating', true);
     fixture.detectChanges();
 
-    const advanceBtn = fixture.nativeElement.querySelectorAll('button')[2] as HTMLButtonElement;
+    const advanceBtn = fixture.nativeElement.querySelector('button[title*="Avanzar"]') as HTMLButtonElement;
     expect(advanceBtn.disabled).toBe(true);
     expect(advanceBtn.classList.contains('disabled:opacity-50')).toBe(true);
   });
@@ -122,7 +144,7 @@ describe('OrdersCard', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Verificar');
 
-    const verifyBtn = fixture.nativeElement.querySelectorAll('button')[2] as HTMLButtonElement;
+    const verifyBtn = fixture.nativeElement.querySelector('button[title*="Verificación"]') as HTMLButtonElement;
     verifyBtn.click();
 
     expect(emitted).toEqual(mockOrder);

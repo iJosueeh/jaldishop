@@ -18,7 +18,7 @@
   <!-- 3. Indicadores de Ritmo y Métricas Rápidas -->
   <app-orders-kpis
     [capacityTotal]="capacityService.todayEffectiveCapacity()"
-    [capacityOccupied]="orderService.totalOrdersCount()"
+    [capacityOccupied]="null"
     [remainingDeliveries]="orderService.remainingDeliveriesCount()"
     [inPrepCount]="orderService.inPrepCount()"
     [readyCount]="orderService.readyCount()"
@@ -50,6 +50,7 @@
     [updatingOrderIds]="orderService.updatingOrderIds()"
     [pendingVerificationOrderIds]="orderService.pendingVerificationOrderIds()"
     (statusAdvance)="onStatusAdvance($event)"
+    (cancelOrder)="onCancelOrder($event)"
     (whatsAppClick)="onWhatsAppClick($event)"
     (openDetails)="onOpenDetails($event)"
     (verifyStatus)="onVerifyStatus($event)"
@@ -78,6 +79,19 @@
     [isPendingVerification]="orderService.isPendingVerification(drawerOrder()?.id ?? '')"
     (closeDrawer)="onCloseDrawer()"
     (statusChange)="onDrawerStatusChange($event)"
+    (cancelOrder)="onCancelOrder($event)"
     (verifyStatus)="onVerifyStatus($event)"
+  />
+
+  <!-- 8. Modal de Confirmación de Cancelación de Pedido -->
+  <app-confirm-modal
+    [isOpen]="isCancelModalOpen()"
+    title="¿Cancelar este pedido?"
+    [message]="'¿Estás seguro de cancelar el pedido ' + (orderToCancel()?.orderNumber || '') + '? Esta acción revertirá el pedido según las reglas de negocio.'"
+    confirmText="Sí, cancelar pedido"
+    cancelText="Volver"
+    [isDanger]="true"
+    (confirm)="onConfirmCancel()"
+    (cancel)="onDismissCancel()"
   />
 </div>

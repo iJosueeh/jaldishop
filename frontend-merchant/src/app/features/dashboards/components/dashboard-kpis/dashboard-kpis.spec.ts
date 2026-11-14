@@ -29,7 +29,7 @@ describe('DashboardKpis', () => {
 
   it('debe calcular la capacidad disponible y bloques correctamente', () => {
     expect(component.capacityTotal()).toBeGreaterThanOrEqual(0);
-    expect(component.availableCapacity()).toBeGreaterThanOrEqual(0);
+    expect(component.availableCapacity()).toBeNull();
     expect(component.capacityBlocks().length).toBe(10);
     expect(component.shiftSchedule()).toBeDefined();
   });

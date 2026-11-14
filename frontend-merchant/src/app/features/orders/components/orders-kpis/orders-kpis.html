@@ -6,7 +6,11 @@
         Cupos de Hoy
       </span>
       <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary-container font-bold text-xs">
-        {{ capacityOccupied() }} de {{ capacityTotal() > 0 ? capacityTotal() : 10 }}
+        @if (hasCapacityOccupied()) {
+          {{ capacityOccupied() }} de {{ capacityTotal() > 0 ? capacityTotal() : 10 }}
+        } @else {
+          — de {{ capacityTotal() > 0 ? capacityTotal() : '—' }}
+        }
       </span>
     </div>
 
@@ -22,7 +26,11 @@
     </div>
 
     <p class="text-xs text-on-surface-variant font-medium">
-      {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
+      @if (hasCapacityOccupied()) {
+        {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
+      } @else {
+        Capacidad configurada: {{ capacityTotal() > 0 ? capacityTotal() + ' cupos' : 'Sin franjas' }} (ocupación en desarrollo)
+      }
     </p>
   </div>
 

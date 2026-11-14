@@ -106,6 +106,7 @@
         [isUpdating]="updatingOrderIds().has(order.id)"
         [isPendingVerification]="pendingVerificationOrderIds().has(order.id)"
         (statusAdvance)="statusAdvance.emit($event)"
+        (cancelOrder)="cancelOrder.emit($event)"
         (whatsAppClick)="whatsAppClick.emit($event)"
         (openDetails)="openDetails.emit($event)"
         (verifyStatus)="verifyStatus.emit($event)"

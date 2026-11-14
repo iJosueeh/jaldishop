@@ -713,6 +713,57 @@ describe('OrderService', () => {
       // 5. La respuesta del listado debe haber sido descartada y el estado confirmado se mantiene
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
     });
+
+    it('debe enviar PATCH con status CANCELLED y actualizar el estado', () => {
+      service.orders.set([
+        {
+          id: 'ord-123',
+          orderNumber: '#PED-0001',
+          customerName: 'Cliente Prueba',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '10:00 - 11:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+
+      service.updateOrderStatus('ord-123', 'CANCELLED', 'store-123').subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/merchants/stores/store-123/orders/ord-123/status`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ status: 'CANCELLED' });
+
+      req.flush({
+        ...mockDetailResponse,
+        id: 'ord-123',
+        status: 'CANCELLED',
+      });
+
+      expect(service.orders()[0].status).toBe('CANCELLED');
+      expect(toastMock.success).toHaveBeenCalledWith('Pedido actualizado a cancelado.');
+    });
+
+    it('addOrder no debe agregar pedidos ficticios en memoria (Fase 1)', () => {
+      const initialCount = service.orders().length;
+      service.addOrder({
+        id: 'fake-1',
+        orderNumber: '#FAKE-001',
+        customerName: 'Fake',
+        deliveryMode: 'PICKUP',
+        deliveryTimeLabel: '10:00',
+        isUrgent: false,
+        status: 'CONFIRMED',
+        totalAmount: 10,
+        items: [],
+        createdAt: new Date().toISOString(),
+      });
+
+      expect(service.orders().length).toBe(initialCount);
+      expect(toastMock.info).toHaveBeenCalledWith('La creación manual de pedidos estará disponible próximamente.');
+    });
   });
 
   describe('Integración de Tiempo Real STOMP con OrderService', () => {

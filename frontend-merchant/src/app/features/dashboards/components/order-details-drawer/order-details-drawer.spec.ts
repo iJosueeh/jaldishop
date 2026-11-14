@@ -218,5 +218,30 @@ describe('OrderDetailsDrawer', () => {
 
     expect(emitted).toEqual(mockOrder);
   });
+
+  it('debe emitir cancelOrder al presionar botón Cancelar en estados permitidos', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', mockOrder);
+    fixture.detectChanges();
+
+    let emitted: DashboardPriorityOrder | null = null;
+    component.cancelOrder.subscribe((order) => {
+      emitted = order;
+    });
+
+    const cancelBtn = fixture.nativeElement.querySelector('aside button[title="Cancelar pedido"]') as HTMLButtonElement;
+    expect(cancelBtn).toBeTruthy();
+    cancelBtn.click();
+
+    expect(emitted).toEqual(mockOrder);
+  });
+
+  it('debe validar canCancel para cada estado', () => {
+    expect(component.canCancel('CONFIRMED')).toBe(true);
+    expect(component.canCancel('IN_PREPARATION')).toBe(true);
+    expect(component.canCancel('READY')).toBe(false);
+    expect(component.canCancel('COMPLETED')).toBe(false);
+    expect(component.canCancel('CANCELLED')).toBe(false);
+  });
 });
 

@@ -28,7 +28,7 @@
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline justify-between">
         <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
-          {{ capacityOccupied() }}
+          {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}
           <span class="text-base sm:text-lg font-bold text-stone-400">
             / {{ capacityTotal() > 0 ? capacityTotal() : 0 }} Cupos
           </span>
@@ -43,7 +43,13 @@
           [class.text-emerald-800]="!isClosedToday()"
           [class.border-emerald-200]="!isClosedToday()"
         >
-          {{ isClosedToday() ? 'Cerrado' : capacityPercentage() + '% ocupado' }}
+          @if (isClosedToday()) {
+            Cerrado
+          } @else if (capacityPercentage() !== null) {
+            {{ capacityPercentage() }}% ocupado
+          } @else {
+            Capacidad: {{ capacityTotal() }} cupos
+          }
         </span>
       </div>
 
@@ -74,8 +80,10 @@
       >
         @if (isClosedToday()) {
           Sin recepción de pedidos hoy
-        } @else if (capacityTotal() > 0) {
+        } @else if (availableCapacity() !== null) {
           Quedan {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
+        } @else if (capacityTotal() > 0) {
+          Capacidad configurada para el turno
         } @else {
           Sin franjas configuradas
         }
