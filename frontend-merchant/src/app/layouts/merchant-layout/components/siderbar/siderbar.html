@@ -135,11 +135,20 @@
         } @else if (orderService.todayCountsError() && !orderService.todayOrderCounts()) {
           <!-- Error sin datos previos: no mostrar cifras ficticias ni ceros -->
         } @else if (activeOrdersCount() > 0) {
-          <span
-            class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold"
-          >
-            {{ activeOrdersCount() }} hoy
-          </span>
+          @if (orderService.isTodayOutdated()) {
+            <span
+              class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold"
+              title="Datos desactualizados: fallo de actualización o cambio de fecha operativa"
+            >
+              {{ activeOrdersCount() }} hoy (desactualizado)
+            </span>
+          } @else {
+            <span
+              class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold"
+            >
+              {{ activeOrdersCount() }} hoy
+            </span>
+          }
         }
       </a>
 

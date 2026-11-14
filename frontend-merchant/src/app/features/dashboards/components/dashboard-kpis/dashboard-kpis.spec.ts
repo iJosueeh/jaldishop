@@ -166,4 +166,39 @@ describe('DashboardKpis', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Desactualizado');
   });
+
+  it('debe renderizar Ritmo Operativo como no disponible sin métricas ni metas ficticias', () => {
+    expect(component.metrics().operatingRhythmMin).toBeNull();
+    expect(component.metrics().targetRhythmMin).toBeNull();
+
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Ritmo Operativo');
+    expect(compiled.textContent).toContain('No disponible');
+    expect(compiled.textContent).toContain('Sin métrica calculada');
+    expect(compiled.textContent).not.toContain('25 min');
+    expect(compiled.textContent).not.toContain('Operación ágil');
+  });
+
+  it('debe advertir visualmente que se muestran datos previos si falla un refresco diario', () => {
+    const orderService = TestBed.inject(OrderService);
+    orderService.todayOrderCounts.set({
+      all: 8,
+      confirmed: 3,
+      inPreparation: 2,
+      ready: 1,
+      outForDelivery: 0,
+      completed: 2,
+      cancelled: 0,
+    });
+    orderService.todayOperatingDate.set('2026-11-14');
+    orderService.todayCountsError.set('Error de red al actualizar');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('8 pedidos');
+    expect(compiled.textContent).toContain('No se pudo actualizar: mostrando datos previos.');
+    expect(compiled.textContent).toContain('Desactualizado');
+  });
 });

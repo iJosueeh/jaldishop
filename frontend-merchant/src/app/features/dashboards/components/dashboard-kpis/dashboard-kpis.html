@@ -162,6 +162,11 @@
             {{ metrics().completedOrders }} completados
           </span>
         </div>
+        @if (todayCountsError() && todayOrderCounts()) {
+          <div class="text-[11px] text-amber-700 font-medium pt-1">
+            No se pudo actualizar: mostrando datos previos.
+          </div>
+        }
       }
     </div>
 
@@ -188,7 +193,7 @@
         Ritmo Operativo
       </span>
       <span
-        class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-emerald-800 flex items-center justify-center shrink-0"
+        class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-stone-400 flex items-center justify-center shrink-0"
       >
         <ng-icon name="matTimerOutline" class="text-[18px]" />
       </span>
@@ -197,18 +202,20 @@
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline gap-2">
         <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
-          {{ metrics().operatingRhythmMin }}
+          {{ metrics().operatingRhythmMin !== null ? metrics().operatingRhythmMin : '—' }}
         </span>
-        <span class="text-xs sm:text-sm font-semibold text-stone-500">min / pedido</span>
+        @if (metrics().operatingRhythmMin !== null) {
+          <span class="text-xs sm:text-sm font-semibold text-stone-500">min / pedido</span>
+        }
       </div>
       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
         <span
-          class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md"
+          class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-medium text-stone-500 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-md"
         >
-          <ng-icon name="matCheckCircleOutline" class="text-[15px]" />
-          {{ metrics().operatingRhythmMin > 0 ? 'Dentro del ritmo' : 'Sin registros' }}
+          <ng-icon name="matTimerOutline" class="text-[15px]" />
+          No disponible
         </span>
-        @if (metrics().targetRhythmMin > 0) {
+        @if (metrics().targetRhythmMin !== null && metrics().targetRhythmMin! > 0) {
           <span
             class="text-[11px] sm:text-xs text-stone-600 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-md font-mono"
           >
@@ -220,9 +227,7 @@
 
     <div class="flex items-center justify-between pt-2.5 border-t border-[#e7e0d6] text-xs">
       <span class="text-stone-500">Promedio de preparación</span>
-      <span class="font-bold text-emerald-800">
-        {{ metrics().operatingRhythmMin > 0 ? 'Operación ágil' : 'Pendiente' }}
-      </span>
+      <span class="font-medium text-stone-400"> Sin métrica calculada </span>
     </div>
   </div>
 </section>

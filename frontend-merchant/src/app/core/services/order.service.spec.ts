@@ -968,7 +968,7 @@ describe('OrderService', () => {
         `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
       );
 
-      service.loadOrderCounts('store-123').subscribe();
+      service.loadOrderCounts('store-123', true).subscribe();
       const req2 = httpMock.expectOne(
         `${environment.apiUrl}/merchants/stores/store-123/orders/counts`,
       );
@@ -980,6 +980,96 @@ describe('OrderService', () => {
       // req2 responde con datos vigentes
       req2.flush({ ...mockCountsResponse, all: 50 });
       expect(service.orderCounts()?.all).toBe(50);
+    });
+
+    it('debe deduplicar peticiones concurrentes en vuelo para la misma tienda y fecha', () => {
+      let emission1: MerchantOrderStatusCounts | null = null;
+      let emission2: MerchantOrderStatusCounts | null = null;
+
+      // Dos invocaciones concurrentes (ej. Dashboard y Sidebar simultáneos)
+      service.loadTodayOrderCounts('store-123').subscribe((counts) => (emission1 = counts));
+      service.loadTodayOrderCounts('store-123').subscribe((counts) => (emission2 = counts));
+
+      const todayLima = service.currentOperatingDate();
+      // Solo debe existir UNA petición HTTP en curso
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+      expect(req.request.method).toBe('GET');
+
+      req.flush(mockCountsResponse);
+
+      // Ambas suscripciones reciben el mismo resultado deduplicado
+      expect(emission1).toEqual(mockCountsResponse);
+      expect(emission2).toEqual(mockCountsResponse);
+    });
+
+    it('debe permitir forzar un refresco (force=true) tras mutación sin usar caché en vuelo', () => {
+      service.loadTodayOrderCounts('store-123').subscribe();
+      const todayLima = service.currentOperatingDate();
+      const req1 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+
+      // Refresco forzado explícito (ej. después de mutación)
+      service.loadTodayOrderCounts('store-123', true).subscribe();
+      const req2 = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+
+      req1.flush(mockCountsResponse);
+      req2.flush({ ...mockCountsResponse, confirmed: 15 });
+
+      expect(service.todayOrderCounts()?.confirmed).toBe(15);
+    });
+
+    it('debe preservar datos previos y activar isTodayOutdated si falla una actualización diaria', () => {
+      // Estado previo válido
+      service.todayOrderCounts.set(mockCountsResponse);
+      service.todayOperatingDate.set(service.currentOperatingDate());
+      service.todayCountsError.set(null);
+      expect(service.isTodayOutdated()).toBe(false);
+
+      // Intento de refresco que falla
+      service.loadTodayOrderCounts('store-123', true).subscribe();
+      const todayLima = service.currentOperatingDate();
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=${todayLima}`,
+      );
+      req.flush({ message: 'Error temporal' }, { status: 500, statusText: 'Server Error' });
+
+      // Los datos previos no son destruidos pero quedan marcados como desactualizados
+      expect(service.todayOrderCounts()).toEqual(mockCountsResponse);
+      expect(service.todayCountsError()).toBe('Error al consultar contadores del día');
+      expect(service.isTodayOutdated()).toBe(true);
+    });
+
+    it('debe detectar cruce de medianoche en Lima, invalidar contadores previos y refrescar', () => {
+      service.todayOrderCounts.set(mockCountsResponse);
+      service.todayOperatingDate.set('2026-11-14');
+      service.currentOperatingDate.set('2026-11-14');
+
+      // Simular transición a nuevo día operativo
+      (service as any).handleOperatingDateTransition('2026-11-15');
+
+      expect(service.currentOperatingDate()).toBe('2026-11-15');
+      // Contadores del día anterior son invalidados
+      expect(service.todayOrderCounts()).toBeNull();
+      expect(service.todayOperatingDate()).toBeNull();
+
+      // Refresco automático solicitado para la nueva fecha
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/counts?date=2026-11-15`,
+      );
+      req.flush({ ...mockCountsResponse, all: 5, confirmed: 2, ready: 0, inPreparation: 1 });
+
+      expect(service.todayOrderCounts()?.all).toBe(5);
+      expect(service.todayOperatingDate()).toBe('2026-11-15');
+    });
+
+    it('debe limpiar el temporizador de medianoche al llamar a ngOnDestroy', () => {
+      service.ngOnDestroy();
+      expect((service as any).midnightTimerId).toBeNull();
     });
 
     it('debe descartar respuesta de contadores si la tienda activa cambió mientras estaba en vuelo', () => {

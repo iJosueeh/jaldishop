@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   ChangeOrderStatusRequest,
@@ -20,24 +20,36 @@ import { SettingsService } from './settings.service';
 import { StoreService } from './store.service';
 import { StompService } from './stomp.service';
 import { WhatsAppTemplateId } from '../models/settings.models';
-import { getOperatingDateLima } from '../utils/date.utils';
-import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { getMsUntilNextMidnightLima, getOperatingDateLima } from '../utils/date.utils';
+import {
+  catchError,
+  finalize,
+  Observable,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class OrderService {
+export class OrderService implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly toastService = inject(ToastService);
   private readonly settingsService = inject(SettingsService);
   private readonly storeService = inject(StoreService);
   private readonly stompService = inject(StompService);
+  private readonly destroyRef = inject(DestroyRef, { optional: true });
 
   private readonly baseUrl = `${environment.apiUrl}/merchants/stores`;
 
   constructor() {
     this.initRealtimeSubscriptions();
+    this.scheduleMidnightCheck();
+    this.destroyRef?.onDestroy(() => this.ngOnDestroy());
   }
 
   // Listado y Paginación
@@ -83,12 +95,22 @@ export class OrderService {
   readonly isTodayCountsLoading = signal<boolean>(false);
   readonly todayCountsError = signal<string | null>(null);
 
+  // Fecha operativa actual reactiva en Lima
+  readonly currentOperatingDate = signal<string>(getOperatingDateLima());
+  private midnightTimerId: any = null;
+
+  // Control de solicitudes concurrentes en vuelo (deduplicación)
+  private inFlightCounts$: Observable<MerchantOrderStatusCounts | null> | null = null;
+  private inFlightCountsStoreId: string | null = null;
+  private inFlightTodayCounts$: Observable<MerchantOrderStatusCounts | null> | null = null;
+  private inFlightTodayCountsKey: string | null = null;
+
   // Indicador de obsolescencia de contadores de hoy (por error HTTP o cambio de fecha operativa)
   readonly isTodayOutdated = computed(() => {
     if (this.todayCountsError()) return true;
     const recordedDate = this.todayOperatingDate();
     if (!recordedDate) return false;
-    return recordedDate !== getOperatingDateLima();
+    return recordedDate !== this.currentOperatingDate();
   });
 
   // KPIs derivados exclusivamente de los contadores agregados reales del backend
@@ -235,7 +257,7 @@ export class OrderService {
       this.toastService.info(`Nuevo pedido recibido: ${event.orderNumber}`);
       this.loadOrders(this.currentPage(), this.pageSize(), this.activeTab()).subscribe();
       if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-        this.loadOrderCounts(currentStoreId).subscribe();
+        this.loadOrderCounts(currentStoreId, true).subscribe();
       }
       if (
         this.todayOrderCounts() !== null ||
@@ -243,7 +265,7 @@ export class OrderService {
         this.todayCountsError() !== null ||
         this.isTodayOutdated()
       ) {
-        this.loadTodayOrderCounts(currentStoreId).subscribe();
+        this.loadTodayOrderCounts(currentStoreId, true).subscribe();
       }
     });
 
@@ -252,7 +274,7 @@ export class OrderService {
       if (currentStoreId) {
         this.loadOrders(this.currentPage(), this.pageSize(), this.activeTab()).subscribe();
         if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-          this.loadOrderCounts(currentStoreId).subscribe();
+          this.loadOrderCounts(currentStoreId, true).subscribe();
         }
         if (
           this.todayOrderCounts() !== null ||
@@ -260,7 +282,7 @@ export class OrderService {
           this.todayCountsError() !== null ||
           this.isTodayOutdated()
         ) {
-          this.loadTodayOrderCounts(currentStoreId).subscribe();
+          this.loadTodayOrderCounts(currentStoreId, true).subscribe();
         }
       }
     });
@@ -439,9 +461,9 @@ export class OrderService {
       );
     }
 
-    // 3. Refrescar contadores reales confirmados si están activos
+    // 3. Refrescar contadores reales confirmados forzando petición fresca tras mutación
     if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-      this.loadOrderCounts(storeId).subscribe();
+      this.loadOrderCounts(storeId, true).subscribe();
     }
     if (
       this.todayOrderCounts() !== null ||
@@ -449,7 +471,7 @@ export class OrderService {
       this.todayCountsError() !== null ||
       this.isTodayOutdated()
     ) {
-      this.loadTodayOrderCounts(storeId).subscribe();
+      this.loadTodayOrderCounts(storeId, true).subscribe();
     }
   }
 
@@ -678,6 +700,10 @@ export class OrderService {
   resetCounts(): void {
     this.activeCountsRequestId++;
     this.activeTodayCountsRequestId++;
+    this.inFlightCounts$ = null;
+    this.inFlightCountsStoreId = null;
+    this.inFlightTodayCounts$ = null;
+    this.inFlightTodayCountsKey = null;
     this.orderCounts.set(null);
     this.isCountsLoading.set(false);
     this.countsError.set(null);
@@ -685,6 +711,59 @@ export class OrderService {
     this.todayOperatingDate.set(null);
     this.isTodayCountsLoading.set(false);
     this.todayCountsError.set(null);
+  }
+
+  /**
+   * Mecanismo para detectar el cruce de medianoche en Lima durante una sesión activa.
+   */
+  checkOperatingDateChange(): boolean {
+    const freshDate = getOperatingDateLima();
+    if (freshDate !== this.currentOperatingDate()) {
+      this.handleOperatingDateTransition(freshDate);
+      return true;
+    }
+    return false;
+  }
+
+  private handleOperatingDateTransition(newDate: string): void {
+    this.currentOperatingDate.set(newDate);
+    // Invalidar datos del día anterior para no presentarlos como vigentes
+    this.todayOrderCounts.set(null);
+    this.todayOperatingDate.set(null);
+    this.todayCountsError.set(null);
+    this.inFlightTodayCounts$ = null;
+    this.inFlightTodayCountsKey = null;
+
+    // Refrescar contadores diarios para la nueva fecha si hay tienda activa
+    const currentStoreId = this.storeService.currentStore()?.id;
+    if (currentStoreId) {
+      this.loadTodayOrderCounts(currentStoreId, true).subscribe();
+    }
+  }
+
+  private scheduleMidnightCheck(): void {
+    if (this.midnightTimerId) {
+      clearTimeout(this.midnightTimerId);
+      this.midnightTimerId = null;
+    }
+    const ms = getMsUntilNextMidnightLima();
+    // Añadir holgura de 200ms para asegurar que el reloj sobrepasó el segundo 00:00:00
+    this.midnightTimerId = setTimeout(
+      () => {
+        this.checkOperatingDateChange();
+        this.scheduleMidnightCheck();
+      },
+      Math.max(200, ms + 200),
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.midnightTimerId) {
+      clearTimeout(this.midnightTimerId);
+      this.midnightTimerId = null;
+    }
+    this.inFlightCounts$ = null;
+    this.inFlightTodayCounts$ = null;
   }
 
   getOrderStatusCounts(storeId?: string, date?: string): Observable<MerchantOrderStatusCounts> {
@@ -702,7 +781,7 @@ export class OrderService {
     return this.http.get<MerchantOrderStatusCounts>(url, { params });
   }
 
-  loadOrderCounts(storeId?: string): Observable<MerchantOrderStatusCounts | null> {
+  loadOrderCounts(storeId?: string, force = false): Observable<MerchantOrderStatusCounts | null> {
     const targetStoreId = storeId ?? this.storeService.currentStore()?.id;
     if (!targetStoreId) {
       return this.storeService.getMyStore().pipe(
@@ -711,7 +790,7 @@ export class OrderService {
             this.isCountsLoading.set(false);
             return of(null);
           }
-          return this.fetchCountsHttp(store.id);
+          return this.fetchCountsDeduplicated(store.id, force);
         }),
         catchError((err) => {
           this.isCountsLoading.set(false);
@@ -721,7 +800,28 @@ export class OrderService {
       );
     }
 
-    return this.fetchCountsHttp(targetStoreId);
+    return this.fetchCountsDeduplicated(targetStoreId, force);
+  }
+
+  private fetchCountsDeduplicated(
+    storeId: string,
+    force: boolean,
+  ): Observable<MerchantOrderStatusCounts | null> {
+    if (!force && this.inFlightCounts$ && this.inFlightCountsStoreId === storeId) {
+      return this.inFlightCounts$;
+    }
+
+    this.inFlightCountsStoreId = storeId;
+    this.inFlightCounts$ = this.fetchCountsHttp(storeId).pipe(
+      shareReplay({ bufferSize: 1, refCount: true }),
+      finalize(() => {
+        if (this.inFlightCountsStoreId === storeId) {
+          this.inFlightCounts$ = null;
+          this.inFlightCountsStoreId = null;
+        }
+      }),
+    );
+    return this.inFlightCounts$;
   }
 
   private fetchCountsHttp(storeId: string): Observable<MerchantOrderStatusCounts | null> {
@@ -751,7 +851,10 @@ export class OrderService {
     );
   }
 
-  loadTodayOrderCounts(storeId?: string): Observable<MerchantOrderStatusCounts | null> {
+  loadTodayOrderCounts(
+    storeId?: string,
+    force = false,
+  ): Observable<MerchantOrderStatusCounts | null> {
     const targetStoreId = storeId ?? this.storeService.currentStore()?.id;
     if (!targetStoreId) {
       return this.storeService.getMyStore().pipe(
@@ -760,7 +863,7 @@ export class OrderService {
             this.isTodayCountsLoading.set(false);
             return of(null);
           }
-          return this.fetchTodayCountsHttp(store.id);
+          return this.fetchTodayCountsDeduplicated(store.id, force);
         }),
         catchError((err) => {
           this.isTodayCountsLoading.set(false);
@@ -770,13 +873,39 @@ export class OrderService {
       );
     }
 
-    return this.fetchTodayCountsHttp(targetStoreId);
+    return this.fetchTodayCountsDeduplicated(targetStoreId, force);
   }
 
-  private fetchTodayCountsHttp(storeId: string): Observable<MerchantOrderStatusCounts | null> {
+  private fetchTodayCountsDeduplicated(
+    storeId: string,
+    force: boolean,
+  ): Observable<MerchantOrderStatusCounts | null> {
+    const todayLima = this.currentOperatingDate();
+    const key = `${storeId}:${todayLima}`;
+
+    if (!force && this.inFlightTodayCounts$ && this.inFlightTodayCountsKey === key) {
+      return this.inFlightTodayCounts$;
+    }
+
+    this.inFlightTodayCountsKey = key;
+    this.inFlightTodayCounts$ = this.fetchTodayCountsHttp(storeId, todayLima).pipe(
+      shareReplay({ bufferSize: 1, refCount: true }),
+      finalize(() => {
+        if (this.inFlightTodayCountsKey === key) {
+          this.inFlightTodayCounts$ = null;
+          this.inFlightTodayCountsKey = null;
+        }
+      }),
+    );
+    return this.inFlightTodayCounts$;
+  }
+
+  private fetchTodayCountsHttp(
+    storeId: string,
+    todayLima = this.currentOperatingDate(),
+  ): Observable<MerchantOrderStatusCounts | null> {
     const requestId = ++this.activeTodayCountsRequestId;
     this.isTodayCountsLoading.set(true);
-    const todayLima = getOperatingDateLima();
 
     return this.getOrderStatusCounts(storeId, todayLima).pipe(
       tap((counts) => {

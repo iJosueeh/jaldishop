@@ -61,6 +61,6 @@ export interface DashboardMetrics {
   inPrepOrders: number;
   readyOrders: number;
   completedOrders: number;
-  operatingRhythmMin: number;
-  targetRhythmMin: number;
+  operatingRhythmMin: number | null;
+  targetRhythmMin: number | null;
 }

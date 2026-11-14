@@ -78,8 +78,8 @@ export class DashboardKpis implements OnInit {
       inPrepOrders: counts?.inPreparation ?? 0,
       readyOrders: counts?.ready ?? 0,
       completedOrders: counts?.completed ?? 0,
-      operatingRhythmMin: 0,
-      targetRhythmMin: 25,
+      operatingRhythmMin: null,
+      targetRhythmMin: null,
     };
   });
 

@@ -143,4 +143,27 @@ describe('Siderbar', () => {
     orderService.loadTodayOrderCounts('store-2');
     expect(loadSpy).toHaveBeenCalledWith('store-2');
   });
+
+  it('debe advertir en el badge si existen datos previos pero la actualización falló o está desactualizada', () => {
+    orderService.todayOrderCounts.set({
+      all: 10,
+      confirmed: 3,
+      inPreparation: 2,
+      ready: 1,
+      outForDelivery: 0,
+      completed: 4,
+      cancelled: 0,
+    });
+    orderService.todayOperatingDate.set('2026-11-14');
+    orderService.todayCountsError.set('Error de red');
+    fixture.detectChanges();
+
+    expect(component.activeOrdersCount()).toBe(6);
+    expect(orderService.isTodayOutdated()).toBe(true);
+
+    const ordersLink = (fixture.nativeElement as HTMLElement).querySelector(
+      'a[routerLink="/orders"]',
+    );
+    expect(ordersLink?.textContent).toContain('6 hoy (desactualizado)');
+  });
 });
