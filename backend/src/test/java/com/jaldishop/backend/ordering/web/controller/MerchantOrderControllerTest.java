@@ -2,10 +2,12 @@ package com.jaldishop.backend.ordering.web.controller;
 
 import com.jaldishop.backend.ordering.application.service.ChangeOrderStatusService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderDetailService;
+import com.jaldishop.backend.ordering.application.service.GetMerchantOrderStatusCountsService;
 import com.jaldishop.backend.ordering.application.service.ListMerchantOrdersService;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderDetailResponse;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderItemResponse;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderPageResponse;
+import com.jaldishop.backend.ordering.application.result.MerchantOrderStatusCountsResponse;
 import com.jaldishop.backend.ordering.application.result.MerchantOrderSummaryResponse;
 import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
@@ -66,6 +68,9 @@ class MerchantOrderControllerTest {
     @Mock
     private ChangeOrderStatusService changeOrderStatusService;
 
+    @Mock
+    private GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService;
+
     private MockMvc mockMvc;
     private UUID storeId;
     private UUID merchantUserId;
@@ -81,7 +86,8 @@ class MerchantOrderControllerTest {
                 storeContextService,
                 listMerchantOrdersService,
                 getMerchantOrderDetailService,
-                changeOrderStatusService
+                changeOrderStatusService,
+                getMerchantOrderStatusCountsService
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -411,5 +417,90 @@ class MerchantOrderControllerTest {
         verifyNoInteractions(changeOrderStatusService);
         verifyNoInteractions(getMerchantOrderDetailService);
         verifyNoInteractions(listMerchantOrdersService);
+        verifyNoInteractions(getMerchantOrderStatusCountsService);
+    }
+
+    @Test
+    @DisplayName("13. Consulta de contadores: devuelve histórico completo cuando date no se envía")
+    void shouldReturnHistoricalCountsWhenDateNotProvided() throws Exception {
+        MerchantOrderStatusCountsResponse expectedResponse = new MerchantOrderStatusCountsResponse(
+                48L, 12L, 6L, 4L, 2L, 20L, 4L
+        );
+
+        when(getMerchantOrderStatusCountsService.execute(storeId, null)).thenReturn(expectedResponse);
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders/counts", storeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.all").value(48))
+                .andExpect(jsonPath("$.confirmed").value(12))
+                .andExpect(jsonPath("$.inPreparation").value(6))
+                .andExpect(jsonPath("$.ready").value(4))
+                .andExpect(jsonPath("$.outForDelivery").value(2))
+                .andExpect(jsonPath("$.completed").value(20))
+                .andExpect(jsonPath("$.cancelled").value(4));
+
+        verify(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        verify(getMerchantOrderStatusCountsService).execute(storeId, null);
+    }
+
+    @Test
+    @DisplayName("14. Consulta de contadores: devuelve desglose diario cuando date es provisto")
+    void shouldReturnDailyCountsWhenDateProvided() throws Exception {
+        LocalDate serviceDate = LocalDate.of(2026, 11, 14);
+        MerchantOrderStatusCountsResponse expectedResponse = new MerchantOrderStatusCountsResponse(
+                10L, 4L, 3L, 2L, 0L, 1L, 0L
+        );
+
+        when(getMerchantOrderStatusCountsService.execute(storeId, serviceDate)).thenReturn(expectedResponse);
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders/counts", storeId)
+                        .param("date", "2026-11-14"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.all").value(10))
+                .andExpect(jsonPath("$.confirmed").value(4))
+                .andExpect(jsonPath("$.inPreparation").value(3))
+                .andExpect(jsonPath("$.ready").value(2))
+                .andExpect(jsonPath("$.outForDelivery").value(0))
+                .andExpect(jsonPath("$.completed").value(1))
+                .andExpect(jsonPath("$.cancelled").value(0));
+
+        verify(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        verify(getMerchantOrderStatusCountsService).execute(storeId, serviceDate);
+    }
+
+    @Test
+    @DisplayName("15. Consulta de contadores: retorna 403 Forbidden si la tienda no pertenece al Merchant")
+    void shouldReturnForbiddenWhenStoreNotOwnedForCounts() throws Exception {
+        UUID alienStoreId = UUID.randomUUID();
+        doThrow(new AccessDeniedException("No tiene permisos para operar sobre una tienda ajena."))
+                .when(storeContextService).validateStoreOwnership(alienStoreId, currentPrincipal);
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders/counts", alienStoreId))
+                .andExpect(status().isForbidden());
+
+        verify(storeContextService).validateStoreOwnership(alienStoreId, currentPrincipal);
+        verifyNoInteractions(getMerchantOrderStatusCountsService);
+    }
+
+    @Test
+    @DisplayName("16. Consulta de contadores: retorna 401 Unauthorized si principal es nulo")
+    void shouldReturnUnauthorizedWhenPrincipalNullForCounts() throws Exception {
+        currentPrincipal = null;
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders/counts", storeId))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(storeContextService);
+        verifyNoInteractions(getMerchantOrderStatusCountsService);
+    }
+
+    @Test
+    @DisplayName("17. Consulta de contadores: retorna 400 Bad Request si date tiene formato inválido")
+    void shouldReturnBadRequestWhenDateFormatIsInvalid() throws Exception {
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders/counts", storeId)
+                        .param("date", "14-11-2026"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(getMerchantOrderStatusCountsService);
     }
 }

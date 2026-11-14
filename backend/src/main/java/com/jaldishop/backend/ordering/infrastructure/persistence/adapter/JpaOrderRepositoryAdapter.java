@@ -1,15 +1,18 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.adapter;
 
 import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.model.OrderStatusCounts;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPersistenceMapper;
+import com.jaldishop.backend.ordering.infrastructure.persistence.projection.OrderStatusAggregationProjection;
 import com.jaldishop.backend.ordering.infrastructure.persistence.repository.OrderJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,5 +102,28 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     public Optional<Order> findByOrderNumberAndStoreId(String orderNumber, UUID storeId) {
         return jpaRepository.findByOrderNumberAndStoreId(orderNumber, storeId)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public OrderStatusCounts countByStoreIdAndServiceDate(UUID storeId, LocalDate serviceDate) {
+        if (storeId == null) {
+            throw new IllegalArgumentException("El identificador de la tienda es obligatorio.");
+        }
+        OrderStatusAggregationProjection projection = (serviceDate != null)
+                ? jpaRepository.countOrdersByStoreIdAndServiceDate(storeId, serviceDate)
+                : jpaRepository.countOrdersByStoreId(storeId);
+
+        if (projection == null) {
+            return OrderStatusCounts.empty();
+        }
+
+        return OrderStatusCounts.of(
+                projection.getConfirmed(),
+                projection.getInPreparation(),
+                projection.getReady(),
+                projection.getOutForDelivery(),
+                projection.getCompleted(),
+                projection.getCancelled()
+        );
     }
 }

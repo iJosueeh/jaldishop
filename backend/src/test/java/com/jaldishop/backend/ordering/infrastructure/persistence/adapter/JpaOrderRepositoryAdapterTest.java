@@ -2,9 +2,11 @@ package com.jaldishop.backend.ordering.infrastructure.persistence.adapter;
 
 import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.model.Order;
+import com.jaldishop.backend.ordering.domain.model.OrderStatusCounts;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPersistenceMapper;
+import com.jaldishop.backend.ordering.infrastructure.persistence.projection.OrderStatusAggregationProjection;
 import com.jaldishop.backend.ordering.infrastructure.persistence.repository.OrderJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -183,5 +185,81 @@ class JpaOrderRepositoryAdapterTest {
 
         assertThat(result).isPresent().contains(domainOrder);
         verify(jpaRepository).findByIdForUpdate(orderId);
+    }
+
+    @Test
+    @DisplayName("countByStoreIdAndServiceDate: delega en countOrdersByStoreId cuando fecha es nula")
+    void shouldDelegateToCountOrdersByStoreIdWhenDateIsNull() {
+        OrderStatusAggregationProjection mockProjection = mock(OrderStatusAggregationProjection.class);
+        when(mockProjection.getConfirmed()).thenReturn(12L);
+        when(mockProjection.getInPreparation()).thenReturn(6L);
+        when(mockProjection.getReady()).thenReturn(4L);
+        when(mockProjection.getOutForDelivery()).thenReturn(2L);
+        when(mockProjection.getCompleted()).thenReturn(20L);
+        when(mockProjection.getCancelled()).thenReturn(4L);
+
+        when(jpaRepository.countOrdersByStoreId(storeId)).thenReturn(mockProjection);
+
+        OrderStatusCounts counts = adapter.countByStoreIdAndServiceDate(storeId, null);
+
+        assertThat(counts.all()).isEqualTo(48);
+        assertThat(counts.confirmed()).isEqualTo(12);
+        assertThat(counts.inPreparation()).isEqualTo(6);
+        assertThat(counts.ready()).isEqualTo(4);
+        assertThat(counts.outForDelivery()).isEqualTo(2);
+        assertThat(counts.completed()).isEqualTo(20);
+        assertThat(counts.cancelled()).isEqualTo(4);
+
+        verify(jpaRepository).countOrdersByStoreId(storeId);
+        verify(jpaRepository, never()).countOrdersByStoreIdAndServiceDate(any(), any());
+    }
+
+    @Test
+    @DisplayName("countByStoreIdAndServiceDate: delega en countOrdersByStoreIdAndServiceDate cuando fecha es provista")
+    void shouldDelegateToCountOrdersByStoreIdAndServiceDateWhenDateIsProvided() {
+        LocalDate serviceDate = LocalDate.of(2026, 11, 14);
+        OrderStatusAggregationProjection mockProjection = mock(OrderStatusAggregationProjection.class);
+        when(mockProjection.getConfirmed()).thenReturn(4L);
+        when(mockProjection.getInPreparation()).thenReturn(3L);
+        when(mockProjection.getReady()).thenReturn(2L);
+        when(mockProjection.getOutForDelivery()).thenReturn(0L);
+        when(mockProjection.getCompleted()).thenReturn(1L);
+        when(mockProjection.getCancelled()).thenReturn(0L);
+
+        when(jpaRepository.countOrdersByStoreIdAndServiceDate(storeId, serviceDate)).thenReturn(mockProjection);
+
+        OrderStatusCounts counts = adapter.countByStoreIdAndServiceDate(storeId, serviceDate);
+
+        assertThat(counts.all()).isEqualTo(10);
+        assertThat(counts.confirmed()).isEqualTo(4);
+        assertThat(counts.inPreparation()).isEqualTo(3);
+        assertThat(counts.ready()).isEqualTo(2);
+        assertThat(counts.outForDelivery()).isEqualTo(0);
+        assertThat(counts.completed()).isEqualTo(1);
+        assertThat(counts.cancelled()).isEqualTo(0);
+
+        verify(jpaRepository).countOrdersByStoreIdAndServiceDate(storeId, serviceDate);
+        verify(jpaRepository, never()).countOrdersByStoreId(any());
+    }
+
+    @Test
+    @DisplayName("countByStoreIdAndServiceDate: lanza IllegalArgumentException si storeId es nulo")
+    void shouldThrowExceptionWhenStoreIdIsNullInAdapter() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> adapter.countByStoreIdAndServiceDate(null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El identificador de la tienda es obligatorio.");
+
+        verifyNoInteractions(jpaRepository);
+    }
+
+    @Test
+    @DisplayName("countByStoreIdAndServiceDate: retorna ceros cuando proyección es nula")
+    void shouldReturnEmptyWhenProjectionIsNull() {
+        when(jpaRepository.countOrdersByStoreId(storeId)).thenReturn(null);
+
+        OrderStatusCounts counts = adapter.countByStoreIdAndServiceDate(storeId, null);
+
+        assertThat(counts.all()).isZero();
+        assertThat(counts.confirmed()).isZero();
     }
 }
