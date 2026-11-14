@@ -70,6 +70,23 @@ Forgot responde siempre: `Si el correo corresponde a una cuenta habilitada, reci
 
 El correo admite hasta 254 caracteres. La contraseña nueva exige al menos 8 caracteres y un máximo de 72 bytes UTF-8, compatible con el límite de BCrypt. El login conserva su contrato y sigue verificando contraseñas existentes.
 
+## Destino del enlace (Marketplace vs Merchant) y Cuentas con Múltiples Roles
+
+Para dirigir al usuario a la interfaz correcta (`frontend-marketplace` o `frontend-merchant`), el backend resuelve el destino combinando datos confiables del backend (roles autoritativos en base de datos) y validación estricta de hosts autorizados:
+
+1. **Datos autoritativos del backend (Roles):**
+   - Cuentas con solo rol `CUSTOMER`: El enlace siempre se genera hacia `PASSWORD_RESET_URL_BASE` (`/reset-password` de Marketplace). Aunque una petición intente falsificar un origen de Merchant, una cuenta puramente cliente no es dirigida a la plataforma operativa.
+   - Cuentas con rol `MERCHANT` o `ADMIN`: Por defecto son dirigidas a `MERCHANT_PASSWORD_RESET_URL_BASE` (`/reset-password` de Merchant).
+2. **Cuentas con múltiples roles (`CUSTOMER` + `MERCHANT` o `CUSTOMER` + `ADMIN`):**
+   - En JaldiShop, todo comerciante posee también rol `CUSTOMER` (creado contextualmente durante el registro).
+   - Si la solicitud incluye un header `Origin` verificado dentro de la lista explícita de `app.password-reset.mail.allowed-hosts`, se respeta el contexto desde el cual el usuario solicitó la recuperación:
+     - Solicitud desde Marketplace (`jaldishop.net` o `localhost:3000`): Genera enlace a la pantalla de recuperación de Marketplace.
+     - Solicitud desde Merchant Portal (`negocios-jaldishop.pages.dev` o `localhost:4200`): Genera enlace a la pantalla de recuperación de Merchant.
+   - Si no se provee `Origin` o el host no está autorizado, se prioriza el perfil de mayor privilegio (`MERCHANT`/`ADMIN`), dirigiéndolo a `frontend-merchant`.
+   - Dado que el backend maneja una única contraseña por cuenta en la tabla `users`, el restablecimiento en cualquiera de las dos aplicaciones actualiza las credenciales e incrementa `credentials_version` de forma global e instantánea.
+3. **Compatibilidad con Render:**
+   - La propiedad `app.password-reset.mail.merchant-reset-url-base=${MERCHANT_PASSWORD_RESET_URL_BASE:}` es opcional en despliegues existentes. Si no está definida en Render, el sistema utiliza de manera segura `PASSWORD_RESET_URL_BASE` sin interrumpir el arranque del servicio.
+
 ## Límites de solicitudes
 
 Se reutiliza el mecanismo de ventanas fijas y capacidad acotada existente:

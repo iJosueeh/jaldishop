@@ -1,6 +1,7 @@
 package com.jaldishop.backend.identity.infrastructure.mail;
 
 import com.jaldishop.backend.identity.application.port.PasswordResetMail;
+import com.jaldishop.backend.identity.domain.enums.RoleName;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,6 +25,8 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
     private final RestClient provider;
     private final String from;
     private final URI baseUri;
+    private final URI merchantBaseUri;
+    private final Set<String> allowedHosts;
 
     public ConfiguredPasswordResetMail(Environment env) {
         mode = env.getProperty("app.password-reset.mail.mode", "disabled");
@@ -36,8 +39,10 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
             throw new IllegalStateException("El buzón de desarrollo requiere el perfil local o test.");
 
         String rawUrlBase = env.getProperty("app.password-reset.mail.reset-url-base", "");
+        String rawMerchantUrlBase = env.getProperty("app.password-reset.mail.merchant-reset-url-base", "");
         String rawAllowedHosts = env.getProperty("app.password-reset.mail.allowed-hosts", "");
         Set<String> allowedHosts = parseAllowedHosts(rawAllowedHosts);
+        this.allowedHosts = allowedHosts;
 
         if (mode.equals("resend")) {
             if (!env.getProperty("app.password-reset.mail.real-delivery-enabled", Boolean.class, false))
@@ -50,6 +55,9 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
             if (allowedHosts.isEmpty())
                 throw new IllegalStateException("La entrega real de correo requiere una lista explícita de hosts autorizados.");
             this.baseUri = validateResetUrl(rawUrlBase, true, allowedHosts);
+            this.merchantBaseUri = rawMerchantUrlBase.isBlank()
+                    ? this.baseUri
+                    : validateResetUrl(rawMerchantUrlBase, true, allowedHosts);
             var factory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(5)).build());
             factory.setReadTimeout(Duration.ofSeconds(5));
@@ -59,6 +67,9 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
             this.baseUri = rawUrlBase.isBlank()
                     ? URI.create("http://localhost:3000/reset-password")
                     : validateResetUrl(rawUrlBase, false, allowedHosts);
+            this.merchantBaseUri = rawMerchantUrlBase.isBlank()
+                    ? URI.create("http://localhost:4200/reset-password")
+                    : validateResetUrl(rawMerchantUrlBase, false, allowedHosts);
             provider = null;
         }
     }
@@ -214,11 +225,87 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
         return value;
     }
 
+    URI resolveBaseUri(Set<RoleName> roles, String origin) {
+        boolean hasMerchantOrAdmin = roles != null && (roles.contains(RoleName.MERCHANT) || roles.contains(RoleName.ADMIN));
+        boolean hasCustomer = roles != null && roles.contains(RoleName.CUSTOMER);
+        boolean isMultiRole = hasCustomer && hasMerchantOrAdmin;
+
+        // 1. Merchant o Admin puro: siempre enlace Merchant
+        if (hasMerchantOrAdmin && !hasCustomer) {
+            return merchantBaseUri;
+        }
+
+        // 2. Customer puro: siempre enlace Customer
+        if (hasCustomer && !hasMerchantOrAdmin) {
+            return baseUri;
+        }
+
+        // 3. Multirrol (CUSTOMER + MERCHANT/ADMIN): se guía por Origin autorizado
+        if (isMultiRole && origin != null && !origin.isBlank()) {
+            URI originUri = tryParseOrigin(origin);
+            if (originUri != null && isOriginAuthorized(originUri)) {
+                if (isSameOrigin(originUri, baseUri)) {
+                    return baseUri;
+                }
+                if (isSameOrigin(originUri, merchantBaseUri)) {
+                    return merchantBaseUri;
+                }
+            }
+        }
+
+        // Fallback: rol comercial o admin -> portal merchant; si no -> customer
+        return hasMerchantOrAdmin ? merchantBaseUri : baseUri;
+    }
+
+    private URI tryParseOrigin(String origin) {
+        try {
+            URI uri = URI.create(origin);
+            if (uri.getHost() != null && !uri.getHost().isBlank()) {
+                return uri;
+            }
+        } catch (IllegalArgumentException ignored) {}
+        return null;
+    }
+
+    private boolean isOriginAuthorized(URI originUri) {
+        String host = originUri.getHost();
+        if (host == null) return false;
+        String lowerHost = host.toLowerCase(Locale.ROOT);
+        if ("resend".equals(mode)) {
+            return isHostAuthorized(lowerHost, allowedHosts);
+        }
+        if (!allowedHosts.isEmpty()) {
+            return isHostAuthorized(lowerHost, allowedHosts);
+        }
+        return isHostMatching(lowerHost, baseUri) || isHostMatching(lowerHost, merchantBaseUri);
+    }
+
+    private static boolean isHostMatching(String host, URI target) {
+        return target != null && target.getHost() != null && target.getHost().equalsIgnoreCase(host);
+    }
+
+    private static boolean isSameOrigin(URI originUri, URI baseUri) {
+        if (originUri == null || baseUri == null) return false;
+        String host1 = originUri.getHost();
+        String host2 = baseUri.getHost();
+        if (host1 == null || host2 == null || !host1.equalsIgnoreCase(host2)) return false;
+        int port1 = originUri.getPort() != -1 ? originUri.getPort() : ("https".equalsIgnoreCase(originUri.getScheme()) ? 443 : 80);
+        int port2 = baseUri.getPort() != -1 ? baseUri.getPort() : ("https".equalsIgnoreCase(baseUri.getScheme()) ? 443 : 80);
+        return port1 == port2;
+    }
+
+    @Override
     public void send(String recipient, String token, Instant expiresAt) {
+        send(recipient, token, expiresAt, Set.of(), null);
+    }
+
+    @Override
+    public void send(String recipient, String token, Instant expiresAt, Set<RoleName> roles, String origin) {
         if (mode.equals("disabled")) return;
         if (recipient.contains("\r") || recipient.contains("\n")) throw new IllegalArgumentException("Destinatario inválido.");
 
-        URI resetUri = UriComponentsBuilder.fromUri(baseUri)
+        URI targetBase = resolveBaseUri(roles, origin);
+        URI resetUri = UriComponentsBuilder.fromUri(targetBase)
                 .replaceQueryParam("token", token)
                 .build(true)
                 .toUri();

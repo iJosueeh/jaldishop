@@ -165,6 +165,45 @@ describe('AuthService', () => {
     });
   });
 
+  describe('forgotPassword()', () => {
+    it('debe enviar solicitud POST a /auth/forgot-password con el correo especificado', () => {
+      const email = 'usuario@tunegocio.com';
+      const mockResponse = {
+        message:
+          'Si el correo corresponde a una cuenta habilitada, recibirás instrucciones para restablecer la contraseña.',
+      };
+
+      service.forgotPassword(email).subscribe((res) => {
+        expect(res).toEqual(mockResponse);
+      });
+
+      const req = httpTesting.expectOne(`${environment.apiUrl}/auth/forgot-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email });
+      req.flush(mockResponse, { status: 202, statusText: 'Accepted' });
+    });
+  });
+
+  describe('resetPassword()', () => {
+    it('debe enviar solicitud POST a /auth/reset-password con token y newPassword', () => {
+      const payload = {
+        token: 'A'.repeat(43),
+        newPassword: 'new-valid-password-123',
+      };
+      let completed = false;
+
+      service.resetPassword(payload).subscribe(() => {
+        completed = true;
+      });
+
+      const req = httpTesting.expectOne(`${environment.apiUrl}/auth/reset-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(payload);
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      expect(completed).toBe(true);
+    });
+  });
+
   describe('logout()', () => {
     it('debe limpiar token, currentUser, cachés de servicios y redirigir a /login', () => {
       const navigateSpy = vi.spyOn(router, 'navigate');

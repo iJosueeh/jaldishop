@@ -74,6 +74,8 @@ class PasswordRecoveryWebSocketIntegrationTest {
         previousJwt = login.execute(new LoginCommand(email, "old-password")).token();
         doAnswer(invocation -> { recoveryTokens.offer(invocation.getArgument(1)); return null; })
                 .when(mail).send(eq(email), any(), any());
+        doAnswer(invocation -> { recoveryTokens.offer(invocation.getArgument(1)); return null; })
+                .when(mail).send(eq(email), any(), any(), any(), any());
     }
     @AfterEach void cleanup() {
         clients.forEach(WebSocketStompClient::stop);

@@ -21,8 +21,10 @@ public class PasswordRecoveryController {
         this.resetPasswordService = resetPasswordService;
     }
     @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, String>> forgot(@Valid @RequestBody ForgotPasswordRequest request) {
-        forgotPasswordService.execute(new ForgotPasswordCommand(request.email()));
+    public ResponseEntity<Map<String, String>> forgot(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            @RequestHeader(value = "Origin", required = false) String origin) {
+        forgotPasswordService.execute(new ForgotPasswordCommand(request.email(), origin));
         return ResponseEntity.accepted().header("Cache-Control", "no-store").body(Map.of("message",
                 "Si el correo corresponde a una cuenta habilitada, recibirás instrucciones para restablecer la contraseña."));
     }

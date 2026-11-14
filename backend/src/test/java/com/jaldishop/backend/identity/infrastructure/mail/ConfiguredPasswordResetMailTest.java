@@ -1,8 +1,10 @@
 package com.jaldishop.backend.identity.infrastructure.mail;
 
+import com.jaldishop.backend.identity.domain.enums.RoleName;
 import java.nio.file.*;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.env.MockEnvironment;
@@ -446,5 +448,116 @@ class ConfiguredPasswordResetMailTest {
         assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envBadSyntax))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("URL de recuperación con sintaxis inválida.");
+    }
+
+    @Test void destinationSelectionMatchesRolesAndOrigin() throws Exception {
+        var env = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "local")
+                .withProperty("app.password-reset.mail.local-directory", temporary.resolve("dest-test").toString());
+        env.setActiveProfiles("local");
+        var mailer = new ConfiguredPasswordResetMail(env);
+
+        // 1. Pure customer -> always customer URL (3000)
+        mailer.send("cust@example.test", "tok-1", Instant.now(), Set.of(RoleName.CUSTOMER), null);
+        // 2. Pure customer with merchant origin -> still customer URL (3000)
+        mailer.send("cust2@example.test", "tok-2", Instant.now(), Set.of(RoleName.CUSTOMER), "http://localhost:4200");
+        // 3. Merchant without origin -> merchant URL (4200)
+        mailer.send("merch@example.test", "tok-3", Instant.now(), Set.of(RoleName.MERCHANT), null);
+        // 3b. Pure merchant with customer origin -> still merchant URL (4200)
+        mailer.send("merch2@example.test", "tok-3b", Instant.now(), Set.of(RoleName.MERCHANT), "http://localhost:3000");
+        // 4. Admin without origin -> merchant URL (4200)
+        mailer.send("admin@example.test", "tok-4", Instant.now(), Set.of(RoleName.ADMIN), null);
+        // 4b. Pure admin with customer origin -> still merchant URL (4200)
+        mailer.send("admin2@example.test", "tok-4b", Instant.now(), Set.of(RoleName.ADMIN), "http://localhost:3000");
+        // 5. Multi-role (CUSTOMER + MERCHANT) without origin -> merchant URL (4200)
+        mailer.send("multi@example.test", "tok-5", Instant.now(), Set.of(RoleName.CUSTOMER, RoleName.MERCHANT), null);
+        // 6. Multi-role with marketplace origin (3000) -> customer URL (3000)
+        mailer.send("multi2@example.test", "tok-6", Instant.now(), Set.of(RoleName.CUSTOMER, RoleName.MERCHANT), "http://localhost:3000");
+        // 7. Multi-role with merchant origin (4200) -> merchant URL (4200)
+        mailer.send("multi3@example.test", "tok-7", Instant.now(), Set.of(RoleName.CUSTOMER, RoleName.MERCHANT), "http://localhost:4200");
+        // 8. Multi-role with untrusted origin -> fallback to merchant URL (4200)
+        mailer.send("multi4@example.test", "tok-8", Instant.now(), Set.of(RoleName.CUSTOMER, RoleName.MERCHANT), "https://evil-phishing.com");
+
+        Path dir = temporary.resolve("dest-test");
+        try (var files = Files.list(dir)) {
+            for (Path file : files.toList()) {
+                String content = Files.readString(file);
+                if (content.contains("To: cust@example.test")) {
+                    assertThat(content).contains("http://localhost:3000/reset-password?token=tok-1");
+                } else if (content.contains("To: cust2@example.test")) {
+                    assertThat(content).contains("http://localhost:3000/reset-password?token=tok-2");
+                } else if (content.contains("To: merch@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-3");
+                } else if (content.contains("To: merch2@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-3b");
+                } else if (content.contains("To: admin@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-4");
+                } else if (content.contains("To: admin2@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-4b");
+                } else if (content.contains("To: multi@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-5");
+                } else if (content.contains("To: multi2@example.test")) {
+                    assertThat(content).contains("http://localhost:3000/reset-password?token=tok-6");
+                } else if (content.contains("To: multi3@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-7");
+                } else if (content.contains("To: multi4@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-8");
+                }
+            }
+        }
+    }
+
+    @Test void productionMerchantUrlValidation() {
+        // Valid HTTPS merchant URL in allowed hosts
+        var envValid = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net,negocios-jaldishop.pages.dev")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password")
+                .withProperty("app.password-reset.mail.merchant-reset-url-base", "https://negocios-jaldishop.pages.dev/reset-password");
+
+        assertThatCode(() -> new ConfiguredPasswordResetMail(envValid)).doesNotThrowAnyException();
+
+        // Backward-compatibility: blank merchant URL in production defaults safely to customerBaseUri
+        var envBlankMerchant = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password")
+                .withProperty("app.password-reset.mail.merchant-reset-url-base", "");
+
+        assertThatCode(() -> new ConfiguredPasswordResetMail(envBlankMerchant)).doesNotThrowAnyException();
+
+        // Rejects non-HTTPS merchant URL in production
+        var envHttpMerchant = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net,negocios-jaldishop.pages.dev")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password")
+                .withProperty("app.password-reset.mail.merchant-reset-url-base", "http://negocios-jaldishop.pages.dev/reset-password");
+
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envHttpMerchant))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("HTTPS");
+
+        // Rejects unauthorized merchant host in production
+        var envUnauthorizedMerchant = new MockEnvironment()
+                .withProperty("app.password-reset.mail.mode", "resend")
+                .withProperty("app.password-reset.mail.real-delivery-enabled", "true")
+                .withProperty("app.password-reset.mail.from", "soporte@jaldishop.net")
+                .withProperty("app.password-reset.mail.api-key", "re_test_key_123")
+                .withProperty("app.password-reset.mail.allowed-hosts", "www.jaldishop.net")
+                .withProperty("app.password-reset.mail.reset-url-base", "https://www.jaldishop.net/reset-password")
+                .withProperty("app.password-reset.mail.merchant-reset-url-base", "https://unauthorized-merchant.com/reset-password");
+
+        assertThatThrownBy(() -> new ConfiguredPasswordResetMail(envUnauthorizedMerchant))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("no está autorizado");
     }
 }
