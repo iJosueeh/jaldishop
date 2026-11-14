@@ -149,7 +149,11 @@ describe('OrderService', () => {
   });
 
   afterEach(() => {
+    service?.ngOnDestroy();
     httpMock.verify();
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    TestBed.resetTestingModule();
   });
 
   it('debe crearse correctamente e inicializar vacío', () => {
@@ -371,39 +375,41 @@ describe('OrderService', () => {
     expect(service.currentPage()).toBe(3);
   });
 
-  it('debe realizar búsqueda local en la página actual sin modificar totalElements', () => {
-    service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
-    const req = httpMock.expectOne((r) => r.url.includes('/orders'));
-    req.flush({
-      ...mockPageResponse,
-      totalElements: 50,
-      content: [
-        mockPageResponse.content[0],
-        {
-          ...mockPageResponse.content[0],
-          id: 'ord-2',
-          orderNumber: '#PED-2000',
-          customerName: 'Carlos Gomez',
-        },
-      ],
-    });
+  it('debe enviar el parámetro search cuando appliedSearchQuery o el argumento search contiene texto', () => {
+    service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
 
-    expect(service.orders().length).toBe(2);
-    expect(service.totalElements()).toBe(50);
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('search') === 'Carlos',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
+  });
 
-    // Búsqueda local por "Carlos"
-    service.setSearchQuery('Carlos');
-    expect(service.filteredOrders().length).toBe(1);
-    expect(service.filteredOrders()[0].customerName).toBe('Carlos Gomez');
-    // totalElements no debe ser afectado por la búsqueda local
-    expect(service.totalElements()).toBe(50);
-    expect(service.isSearchEmpty()).toBe(false);
+  it('no debe enviar el parámetro search si el término es vacío o solo contiene espacios', () => {
+    service.loadOrders(0, 10, 'ALL', 'store-123', '   ').subscribe();
 
-    // Búsqueda sin coincidencias en esta página
-    service.setSearchQuery('Inexistente');
-    expect(service.filteredOrders().length).toBe(0);
-    expect(service.isSearchEmpty()).toBe(true);
-    expect(service.totalElements()).toBe(50);
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        !r.params.has('search'),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
+  });
+
+  it('debe recortar el parámetro search a un máximo de 100 caracteres', () => {
+    const longQuery = 'A'.repeat(120);
+    service.loadOrders(0, 10, 'ALL', 'store-123', longQuery).subscribe();
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('search') === 'A'.repeat(100),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
   });
 
   describe('updateOrderStatus (PATCH)', () => {
@@ -715,6 +721,9 @@ describe('OrderService', () => {
       });
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
 
+      // Se emite la petición de reconciliación porque había una consulta de listado en vuelo
+      const reconReq = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+
       // 4. Ahora llega la respuesta retrasada del listado con el snapshot antiguo CONFIRMED
       listReq.flush({
         ...mockPageResponse,
@@ -729,6 +738,20 @@ describe('OrderService', () => {
 
       // 5. La respuesta del listado debe haber sido descartada y el estado confirmado se mantiene
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
+
+      // 6. Responde la reconciliación y confirma estado final
+      reconReq.flush({
+        ...mockPageResponse,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-1039',
+            status: 'IN_PREPARATION',
+          },
+        ],
+      });
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      expect(service.isLoading()).toBe(false);
     });
 
     it('debe enviar PATCH con status CANCELLED y actualizar el estado', () => {
@@ -1135,6 +1158,590 @@ describe('OrderService', () => {
       expect(service.todayOrderCounts()).toBeNull();
       expect(service.countsError()).toBeNull();
       expect(service.todayCountsError()).toBeNull();
+    });
+  });
+
+  describe('Búsqueda Global Remota y Pipeline de Filtros', () => {
+    it('debe aplicar debounce de 300ms e invalidar peticiones en vuelo previas inmediatamente al cambiar texto', () => {
+      vi.useFakeTimers();
+
+      // Petición inicial en vuelo
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
+      const initialReq = httpMock.expectOne((r) => r.url.includes('/orders'));
+
+      // Usuario ingresa texto
+      service.setSearchQuery('1042');
+      expect(service.searchQuery()).toBe('1042');
+      expect(service.appliedSearchQuery()).toBe('');
+      expect(service.isLoading()).toBe(true);
+
+      // Si la petición inicial responde durante el debounce, debe ser descartada por requestId viejo
+      initialReq.flush({
+        ...mockPageResponse,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#PED-OLD' }],
+      });
+      expect(service.orders().length).toBe(0);
+
+      // Avanzar el reloj 299ms: aún no debe haberse enviado la petición
+      vi.advanceTimersByTime(299);
+      httpMock.expectNone((r) => r.params.has('search'));
+
+      // Completar los 300ms
+      vi.advanceTimersByTime(1);
+      expect(service.appliedSearchQuery()).toBe('1042');
+      expect(service.currentPage()).toBe(0);
+
+      const searchReq = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('search') === '1042' &&
+          r.params.get('page') === '0',
+      );
+      searchReq.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].orderNumber).toBe('#1042');
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('debe limpiar la búsqueda de inmediato y recargar página 0 sin search con clearSearch', () => {
+      vi.useFakeTimers();
+      service.appliedSearchQuery.set('1042');
+      service.searchQuery.set('1042');
+
+      service.clearSearch();
+
+      expect(service.searchQuery()).toBe('');
+      expect(service.appliedSearchQuery()).toBe('');
+      expect(service.currentPage()).toBe(0);
+
+      const req = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && !r.params.has('search') && r.params.get('page') === '0',
+      );
+      req.flush(mockPageResponse);
+    });
+
+    it('debe conservar appliedSearchQuery al cambiar de página con setPage', () => {
+      service.appliedSearchQuery.set('Valeria');
+      service.setPage(2);
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('page') === '2' &&
+          r.params.get('search') === 'Valeria',
+      );
+      req.flush({ ...mockPageResponse, page: 2 });
+      expect(service.currentPage()).toBe(2);
+    });
+
+    it('debe conservar appliedSearchQuery y reiniciar página a 0 al cambiar de pestaña con setActiveTab', () => {
+      service.appliedSearchQuery.set('984552109');
+      service.currentPage.set(3);
+
+      service.setActiveTab('IN_PREPARATION');
+
+      expect(service.currentPage()).toBe(0);
+      expect(service.activeTab()).toBe('IN_PREPARATION');
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('page') === '0' &&
+          r.params.get('status') === 'IN_PREPARATION' &&
+          r.params.get('search') === '984552109',
+      );
+      req.flush(mockPageResponse);
+    });
+
+    it('debe descartar la respuesta si la tienda activa cambió mientras la petición estaba en vuelo', () => {
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'Burger').subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/store-123/orders'));
+
+      // Cambiar tienda activa en StoreService
+      storeService.currentStore.set({
+        ...storeService.currentStore()!,
+        id: 'store-otra',
+      });
+
+      req.flush(mockPageResponse);
+
+      expect(service.orders().length).toBe(0);
+      expect(service.isLoaded()).toBe(false);
+    });
+
+    it('no debe recargar el listado de pedidos por evento STOMP si hay un debounce de búsqueda activo', () => {
+      vi.useFakeTimers();
+      const stompService = TestBed.inject(StompService);
+
+      // Iniciar escritura (debounce activo de 300ms)
+      service.setSearchQuery('Nuevo');
+
+      // Llega evento STOMP mientras el debounce está activo
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-101',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-stomp',
+        orderNumber: '#PED-STOMP',
+        storeId: 'store-123',
+        totalAmount: 50.0,
+        currency: 'PEN',
+        occurredAt: '2026-11-14T12:00:00Z',
+      });
+
+      expect(toastMock.info).toHaveBeenCalledWith('Nuevo pedido recibido: #PED-STOMP');
+      // No debe haberse disparado solicitud HTTP para la lista aún
+      httpMock.expectNone((r) => r.url.includes('/orders') && !r.url.includes('/counts'));
+
+      // Al cumplirse el debounce, se dispara la búsqueda del usuario
+      vi.advanceTimersByTime(300);
+      const searchReq = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && r.params.get('search') === 'Nuevo',
+      );
+      searchReq.flush(mockPageResponse);
+    });
+
+    it('debe recargar el listado incluyendo search en evento STOMP cuando no hay debounce activo', () => {
+      const stompService = TestBed.inject(StompService);
+      service.appliedSearchQuery.set('Activo');
+
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-102',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-stomp-2',
+        orderNumber: '#PED-STOMP-2',
+        storeId: 'store-123',
+        totalAmount: 60.0,
+        currency: 'PEN',
+        occurredAt: '2026-11-14T12:00:00Z',
+      });
+
+      const listReq = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && r.params.get('search') === 'Activo',
+      );
+      listReq.flush(mockPageResponse);
+    });
+
+    it('debe evaluar correctamente los estados vacíos con búsqueda remota', () => {
+      // 1. Estado vacío global de tienda (sin pedidos en absoluto)
+      service.totalElements.set(0);
+      service.isLoaded.set(true);
+      service.isLoading.set(false);
+      service.activeTab.set('ALL');
+      service.appliedSearchQuery.set('');
+
+      expect(service.isEmptyOrders()).toBe(true);
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(false);
+
+      // 2. Estado vacío de filtro por pestaña
+      service.activeTab.set('CONFIRMED');
+      expect(service.isEmptyOrders()).toBe(false);
+      expect(service.isFilterEmpty()).toBe(true);
+      expect(service.isSearchEmpty()).toBe(false);
+
+      // 3. Estado vacío de búsqueda (prioritario sobre estado y tienda)
+      service.appliedSearchQuery.set('TérminoSinCoincidencias');
+      expect(service.isEmptyOrders()).toBe(false);
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(true);
+    });
+
+    it('los contadores agregados reales no deben verse afectados por la búsqueda remota', () => {
+      service.orderCounts.set({
+        all: 100,
+        confirmed: 20,
+        inPreparation: 10,
+        ready: 5,
+        outForDelivery: 5,
+        completed: 55,
+        cancelled: 5,
+      });
+
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'TerminoFiltro').subscribe();
+      const req = httpMock.expectOne((r) => r.params.get('search') === 'TerminoFiltro');
+      req.flush({
+        ...mockPageResponse,
+        totalElements: 2, // Solo 2 coinciden con la búsqueda
+      });
+
+      // El totalElements de la búsqueda es 2, pero los contadores de la tienda se mantienen en 100
+      expect(service.totalElements()).toBe(2);
+      expect(service.tabCounts().all).toBe(100);
+      expect(service.totalOrdersCount()).toBe(100);
+      expect(service.confirmedCount()).toBe(20);
+    });
+
+    it('debe reconciliar la consulta y finalizar isLoading si el usuario escribe y vuelve al término aplicado antes de 300ms (P1 Regresión)', () => {
+      vi.useFakeTimers();
+
+      // 1. Búsqueda aplicada inicial con solicitud en vuelo
+      service.appliedSearchQuery.set('1042');
+      service.searchQuery.set('1042');
+      service.loadOrders(0, 10, 'ALL', 'store-123', '1042').subscribe();
+      const req1 = httpMock.expectOne((r) => r.params.get('search') === '1042');
+      expect(service.isLoading()).toBe(true);
+
+      // 2. Usuario escribe otro término antes de que responda req1
+      service.setSearchQuery('10425');
+      expect(service.searchQuery()).toBe('10425');
+      expect(service.isLoading()).toBe(true);
+
+      // Si req1 responde ahora, fue invalidada por activeListRequestId++
+      req1.flush({
+        ...mockPageResponse,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+      expect(service.orders().length).toBe(0);
+
+      // 3. Usuario borra '5' y vuelve a '1042' antes de 300ms
+      service.setSearchQuery('1042');
+      expect(service.searchQuery()).toBe('1042');
+      expect(service.isLoading()).toBe(true);
+
+      // Avanzar el debounce
+      vi.advanceTimersByTime(300);
+
+      // Debe existir una nueva solicitud vigente para '1042'
+      const req2 = httpMock.expectOne((r) => r.params.get('search') === '1042');
+      req2.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+
+      // El estado de carga debe finalizar correctamente
+      expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].orderNumber).toBe('#1042');
+    });
+
+    it('debe reconciliar la búsqueda remota y no finalizar isLoading prematuramente cuando un PATCH completa durante una búsqueda HTTP en vuelo (P1 Regresión)', () => {
+      // 1. Mantener en memoria pedidos y metadatos de una página anterior
+      service.orders.set([
+        {
+          id: 'ord-1039',
+          orderNumber: '#PED-1039',
+          customerName: 'Valeria Ramos',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.totalElements.set(25);
+      service.totalPages.set(3);
+      service.currentPage.set(0);
+
+      // 2. Iniciar búsqueda HTTP para 'Carlos'
+      service.appliedSearchQuery.set('Carlos');
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
+      const searchReq1 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
+      expect(service.isLoading()).toBe(true);
+
+      // 3. Ejecutar PATCH en paralelo para ord-1039
+      service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
+
+      // 4. Completa el PATCH mientras searchReq1 está pendiente
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-1039',
+        status: 'IN_PREPARATION',
+      });
+
+      // La mutación actualiza ord-1039 en memoria, detecta búsqueda activa en vuelo,
+      // NO finaliza isLoading prematuramente y despacha reconciliación remota válida
+      expect(service.isLoading()).toBe(true);
+      const searchReq2 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
+
+      // 5. Simular respuestas HTTP fuera de orden: searchReq1 responde con retraso
+      searchReq1.flush({
+        ...mockPageResponse,
+        totalElements: 99,
+        totalPages: 10,
+        content: [{ ...mockPageResponse.content[0], id: 'ord-stale-search', customerName: 'Viejo Carlos' }],
+      });
+      // searchReq1 fue invalidada: no debe reemplazar pedidos ni metadatos, e isLoading sigue en true
+      expect(service.orders().find((o) => o.id === 'ord-stale-search')).toBeUndefined();
+      expect(service.isLoading()).toBe(true);
+
+      // 6. searchReq2 (reconciliación fresca) responde con los resultados vigentes
+      searchReq2.flush({
+        ...mockPageResponse,
+        page: 0,
+        size: 10,
+        totalElements: 1,
+        totalPages: 1,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-carlos-1',
+            customerName: 'Carlos Gomez',
+            status: 'IN_PREPARATION',
+          },
+        ],
+      });
+
+      // 7. Confirma que isLoading finaliza solo tras la consulta válida y metadatos son coherentes
+      expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-carlos-1');
+      expect(service.orders()[0].customerName).toBe('Carlos Gomez');
+      expect(service.totalElements()).toBe(1);
+      expect(service.totalPages()).toBe(1);
+      expect(service.currentPage()).toBe(0);
+    });
+
+    it('debe reconciliar el listado remoto con search omitido y no finalizar isLoading prematuramente cuando un PATCH completa durante una carga HTTP sin búsqueda activa (P1 Regresión)', () => {
+      // 1. Pestaña ALL y búsqueda vacía
+      service.activeTab.set('ALL');
+      service.appliedSearchQuery.set('');
+      service.searchQuery.set('');
+
+      // 2. Página con datos previamente cargados (ej. página 1 con 50 elementos)
+      service.orders.set([
+        {
+          id: 'ord-prev',
+          orderNumber: '#PED-PREV',
+          customerName: 'Cliente Previo',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.totalElements.set(50);
+      service.totalPages.set(5);
+      service.currentPage.set(1);
+
+      // 3. Nueva petición HTTP de listado en vuelo para página 1
+      service.loadOrders(1, 10, 'ALL', 'store-123').subscribe();
+      const listReq = httpMock.expectOne((r) => {
+        return (
+          r.url.endsWith('/orders') &&
+          r.params.get('page') === '1' &&
+          r.params.get('size') === '10' &&
+          !r.params.has('search') &&
+          !r.params.has('status')
+        );
+      });
+      expect(service.isLoading()).toBe(true);
+
+      // 4. PATCH de mutación completado antes de la respuesta
+      service.updateOrderStatus('ord-prev', 'READY', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-prev/status`,
+      );
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-prev',
+        status: 'READY',
+      });
+
+      // La mutación actualiza en memoria, pero isLoading NO finaliza prematuramente:
+      // se emite la reconciliación HTTP con search omitido
+      expect(service.isLoading()).toBe(true);
+      const reconReq = httpMock.expectOne((r) => {
+        return (
+          r.url.endsWith('/orders') &&
+          r.params.get('page') === '1' &&
+          r.params.get('size') === '10' &&
+          !r.params.has('search') &&
+          !r.params.has('status')
+        );
+      });
+
+      // 5. Respuesta antigua retrasada responde y es descartada
+      listReq.flush({
+        ...mockPageResponse,
+        page: 1,
+        totalElements: 999,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-stale-page',
+            status: 'CONFIRMED',
+          },
+        ],
+      });
+      expect(service.orders().find((o) => o.id === 'ord-stale-page')).toBeUndefined();
+      expect(service.isLoading()).toBe(true);
+
+      // 6. Reconciliación HTTP responde con datos válidos
+      reconReq.flush({
+        ...mockPageResponse,
+        page: 1,
+        size: 10,
+        totalElements: 50,
+        totalPages: 5,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-prev',
+            status: 'READY',
+          },
+        ],
+      });
+
+      // 7. Verificación final de orders, totalElements, totalPages, currentPage e isLoading
+      expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-prev');
+      expect(service.orders()[0].status).toBe('READY');
+      expect(service.totalElements()).toBe(50);
+      expect(service.totalPages()).toBe(5);
+      expect(service.currentPage()).toBe(1);
+    });
+
+    it('debe impedir que un PATCH perteneciente a una tienda anterior modifique el listado de la tienda activa', () => {
+      // 1. Tienda activa inicial es store-123 con un pedido en memoria
+      service.orders.set([
+        {
+          id: 'ord-current-store',
+          orderNumber: '#PED-100',
+          customerName: 'Cliente Tienda Actual',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      expect(service.orders().length).toBe(1);
+
+      // 2. Iniciar un PATCH explícito para una tienda anterior 'store-old'
+      service.updateOrderStatus('ord-old-store', 'READY', 'store-old').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-old/orders/ord-old-store/status`,
+      );
+
+      // 3. El PATCH responde pero la tienda activa sigue siendo store-123
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-old-store',
+        storeId: 'store-old',
+        status: 'READY',
+      });
+
+      // 4. El listado de la tienda activa store-123 no debe modificarse
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-current-store');
+      expect(service.orders().find((o) => o.id === 'ord-old-store')).toBeUndefined();
+      // No debe haberse disparado ninguna recarga HTTP hacia store-old ni store-123
+      httpMock.expectNone((r) => r.url.includes('/orders'));
+    });
+
+    it('no debe emitir solicitudes con búsqueda desactualizada cuando un PATCH completa durante un debounce activo (P1 Regresión)', () => {
+      vi.useFakeTimers();
+
+      // 1. Usuario empieza a escribir 'Valeria' (debounce pendiente de 300ms)
+      service.setSearchQuery('Valeria');
+      expect(service.isLoading()).toBe(true);
+
+      // 2. PATCH de mutación se completa durante el debounce
+      service.orders.set([
+        {
+          id: 'ord-200',
+          orderNumber: '#PED-200',
+          customerName: 'Cliente Prueba',
+          deliveryMode: 'PICKUP',
+          deliveryTimeLabel: '14:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 40,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      service.updateOrderStatus('ord-200', 'READY', 'store-123').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-200/status`,
+      );
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-200',
+        status: 'READY',
+      });
+
+      // No debe haberse emitido ninguna solicitud de listado con el término anterior (vacío)
+      httpMock.expectNone((r) => r.url.includes('/orders') && !r.url.includes('/counts'));
+
+      // 3. Al completarse los 300ms de debounce, se dispara la búsqueda con 'Valeria'
+      vi.advanceTimersByTime(300);
+      const searchReq = httpMock.expectOne((r) => r.params.get('search') === 'Valeria');
+      searchReq.flush(mockPageResponse);
+
+      expect(service.isLoading()).toBe(false);
+      expect(service.appliedSearchQuery()).toBe('Valeria');
+    });
+
+    it('debe descartar la respuesta si la tienda pasa a null mientras la petición estaba en vuelo (P2 Regresión)', () => {
+      service.loadOrders(0, 10, 'ALL', 'store-123', '984552109').subscribe();
+      const req = httpMock.expectOne((r) => r.url.includes('/store-123/orders'));
+
+      // Simular logout o reseteo de tienda a null
+      storeService.clearStore();
+      service.clearOrders();
+
+      // La petición responde después
+      req.flush(mockPageResponse);
+
+      expect(service.orders().length).toBe(0);
+      expect(service.totalElements()).toBe(0);
+      expect(service.isLoaded()).toBe(false);
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('debe mantener la coherencia de filteredOrders, orders y totalElements al cambiar de pestaña con búsqueda activa (P2 Regresión)', () => {
+      service.appliedSearchQuery.set('Carlos');
+      service.activeTab.set('ALL');
+
+      // Cambiar a pestaña READY
+      service.setActiveTab('READY');
+      expect(service.activeTab()).toBe('READY');
+      expect(service.currentPage()).toBe(0);
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.params.get('status') === 'READY' &&
+          r.params.get('search') === 'Carlos' &&
+          r.params.get('page') === '0',
+      );
+
+      req.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            status: 'READY',
+            customerName: 'Carlos Gomez',
+          },
+        ],
+      });
+
+      expect(service.totalElements()).toBe(1);
+      expect(service.orders().length).toBe(1);
+      expect(service.filteredOrders().length).toBe(1);
+      expect(service.filteredOrders()[0].status).toBe('READY');
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(false);
     });
   });
 });

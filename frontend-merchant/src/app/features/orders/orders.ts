@@ -171,6 +171,14 @@ export class Orders implements OnInit {
     this.orderService.setSearchQuery(query);
   }
 
+  onClearSearch(): void {
+    this.orderService.clearSearch();
+  }
+
+  onResetFilters(): void {
+    this.orderService.resetFilters();
+  }
+
   onChannelChange(channel: string): void {
     this.orderService.setChannelFilter(channel);
   }

@@ -3,6 +3,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matScheduleOutline,
   matSearchOutline,
+  matCloseOutline,
   matFilterListOutline,
   matArrowDropDownOutline,
 } from '@ng-icons/material-symbols/outline';
@@ -14,6 +15,7 @@ import { OrderFilterTab } from '../../../../core/models/order.models';
     provideIcons({
       matScheduleOutline,
       matSearchOutline,
+      matCloseOutline,
       matFilterListOutline,
       matArrowDropDownOutline,
     }),
@@ -35,10 +37,15 @@ export class OrdersFilterBar {
   readonly tabChange = output<OrderFilterTab>();
   readonly searchChange = output<string>();
   readonly channelChange = output<string>();
+  readonly clearSearch = output<void>();
 
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchChange.emit(value);
+  }
+
+  onClearSearch(): void {
+    this.clearSearch.emit();
   }
 
   onChannelSelect(event: Event): void {

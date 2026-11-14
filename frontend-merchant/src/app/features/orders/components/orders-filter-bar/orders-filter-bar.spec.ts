@@ -62,4 +62,26 @@ describe('OrdersFilterBar', () => {
     expect(select.disabled).toBe(true);
     expect(select.value).toBe('ALL');
   });
+
+  it('debe emitir clearSearch al presionar el botón de limpiar búsqueda', () => {
+    fixture.componentRef.setInput('searchQuery', '1042');
+    fixture.detectChanges();
+
+    let cleared = false;
+    component.clearSearch.subscribe(() => {
+      cleared = true;
+    });
+
+    const clearBtn = fixture.nativeElement.querySelector('button[aria-label="Limpiar búsqueda"]') as HTMLButtonElement;
+    expect(clearBtn).toBeTruthy();
+    clearBtn.click();
+
+    expect(cleared).toBe(true);
+  });
+
+  it('el input de búsqueda debe tener límite de 100 caracteres y placeholder informativo', () => {
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(input.getAttribute('maxlength')).toBe('100');
+    expect(input.placeholder).toBe('Buscar por N°, cliente o teléfono...');
+  });
 });
