@@ -108,8 +108,8 @@ export class OrderService {
       if (tab === 'READY' && order.status !== 'READY') return false;
       if (tab === 'COMPLETED' && order.status !== 'COMPLETED') return false;
 
-      // 2. Filtro local por canal (solo si el canal está explícitamente asignado y no es ALL)
-      if (channel !== 'ALL' && order.channel && order.channel !== channel) return false;
+      // 2. Filtro local por canal: inactivo en Fase 1 mientras el backend no soporte canales.
+      // Garantiza que ningún valor residual pueda generar resultados ambiguos o filtrar pedidos válidos.
 
       // 3. Búsqueda local en la página actual
       if (query) {
@@ -483,8 +483,9 @@ export class OrderService {
     this.searchQuery.set(query);
   }
 
-  setChannelFilter(channel: string): void {
-    this.channelFilter.set(channel);
+  setChannelFilter(_channel: string): void {
+    // El backend no soporta canales en Fase 1; mantener siempre en 'ALL' para evitar filtros residuales
+    this.channelFilter.set('ALL');
   }
 
   clearFilters(): void {

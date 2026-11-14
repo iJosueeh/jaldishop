@@ -188,4 +188,73 @@ describe('PriorityOrders', () => {
 
     expect(component.selectedOrder()?.customerName).toBe('María García Detalle Actualizado');
   });
+
+  it('no debe atribuir canal WhatsApp cuando el backend no proporciona channelLabel', () => {
+    orderService.orders.set([
+      {
+        ...mockOrder,
+        id: 'ord-no-channel',
+        channel: undefined,
+        channelLabel: undefined,
+      },
+    ]);
+    fixture.detectChanges();
+
+    const mapped = component.orders()[0];
+    expect(mapped.channelLabel).toBeUndefined();
+    expect(mapped.channelIcon).toBeUndefined();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).not.toContain('WhatsApp');
+  });
+
+  it('debe generar mensaje de cancelación con restitución de inventario y capacidad para estado CONFIRMED', () => {
+    const confirmedOrder = {
+      ...component.orders()[0],
+      status: 'CONFIRMED' as const,
+    };
+    component.onCancelOrder(confirmedOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+
+    const msg = component.cancelModalMessage();
+    expect(msg).toContain('Se liberará el cupo de capacidad');
+    expect(msg).toContain('se restituirá el inventario');
+    expect(msg).toContain('RN-ORD-13');
+    expect(msg).toContain('PENDING');
+  });
+
+  it('debe generar mensaje de cancelación sin restitución para estado IN_PREPARATION', () => {
+    const inPrepOrder = {
+      ...component.orders()[0],
+      status: 'IN_PREPARATION' as const,
+    };
+    component.onCancelOrder(inPrepOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+
+    const msg = component.cancelModalMessage();
+    expect(msg).toContain('NO se restituirá la capacidad');
+    expect(msg).toContain('ni el inventario consumido en cocina');
+    expect(msg).toContain('RN-ORD-13');
+    expect(msg).toContain('PENDING');
+  });
+
+  it('no debe permitir cancelar pedidos en estados no autorizados (READY, COMPLETED)', () => {
+    const readyOrder = {
+      ...component.orders()[0],
+      status: 'READY' as const,
+    };
+    component.onCancelOrder(readyOrder);
+    expect(component.isCancelModalOpen()).toBe(false);
+  });
+
+  it('no debe abrir modal de cancelación si el pedido está en actualización o pendiente de verificación', () => {
+    orderService['updatingOrderIds'].set(new Set([mockOrder.id]));
+    component.onCancelOrder(component.orders()[0]);
+    expect(component.isCancelModalOpen()).toBe(false);
+
+    orderService['updatingOrderIds'].set(new Set());
+    orderService['pendingVerificationOrderIds'].set(new Set([mockOrder.id]));
+    component.onCancelOrder(component.orders()[0]);
+    expect(component.isCancelModalOpen()).toBe(false);
+  });
 });

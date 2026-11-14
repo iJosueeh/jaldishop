@@ -87,7 +87,7 @@
   <app-confirm-modal
     [isOpen]="isCancelModalOpen()"
     title="¿Cancelar este pedido?"
-    [message]="'¿Estás seguro de cancelar el pedido ' + (orderToCancel()?.orderNumber || '') + '? Esta acción revertirá el pedido según las reglas de negocio.'"
+    [message]="cancelModalMessage()"
     confirmText="Sí, cancelar pedido"
     cancelText="Volver"
     [isDanger]="true"

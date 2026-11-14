@@ -764,6 +764,29 @@ describe('OrderService', () => {
       expect(service.orders().length).toBe(initialCount);
       expect(toastMock.info).toHaveBeenCalledWith('La creación manual de pedidos estará disponible próximamente.');
     });
+
+    it('debe mantener channelFilter bloqueado en ALL y no descartar pedidos por canales no soportados', () => {
+      service.orders.set([
+        {
+          id: 'ord-channel-test',
+          orderNumber: '#PED-CH-1',
+          customerName: 'Cliente Canal',
+          deliveryMode: 'PICKUP',
+          deliveryTimeLabel: '10:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+          channel: undefined,
+          channelLabel: undefined,
+        },
+      ]);
+
+      service.setChannelFilter('WHATSAPP');
+      expect(service.channelFilter()).toBe('ALL');
+      expect(service.filteredOrders().length).toBe(1);
+    });
   });
 
   describe('Integración de Tiempo Real STOMP con OrderService', () => {

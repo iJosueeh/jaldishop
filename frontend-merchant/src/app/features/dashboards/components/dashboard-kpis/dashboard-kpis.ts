@@ -63,7 +63,7 @@ export class DashboardKpis implements OnInit {
   });
 
   readonly metrics = computed<DashboardMetrics>(() => ({
-    capacityOccupied: this.capacityOccupied() ?? 0,
+    capacityOccupied: this.capacityOccupied(),
     capacityTotal: this.capacityTotal(),
     shiftSchedule: this.shiftSchedule(),
     totalOrdersToday: this.orderService.totalOrdersCount(),

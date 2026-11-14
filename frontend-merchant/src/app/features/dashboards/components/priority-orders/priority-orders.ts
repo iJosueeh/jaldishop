@@ -119,15 +119,38 @@ export class PriorityOrders implements OnInit {
   }
 
   onCancelOrder(order: DashboardPriorityOrder): void {
+    if (order.status !== 'CONFIRMED' && order.status !== 'IN_PREPARATION') {
+      return;
+    }
+    if (this.orderService.isUpdating(order.id) || this.orderService.isPendingVerification(order.id)) {
+      return;
+    }
     this.orderToCancel.set(order);
     this.isCancelModalOpen.set(true);
   }
+
+  readonly cancelModalMessage = computed(() => {
+    const order = this.orderToCancel();
+    if (!order) return '';
+    if (order.status === 'CONFIRMED') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Se liberará el cupo de capacidad y se restituirá el inventario de los productos según RN-ORD-13. Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    if (order.status === 'IN_PREPARATION') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en cocina (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+  });
 
   onConfirmCancel(): void {
     const order = this.orderToCancel();
     this.isCancelModalOpen.set(false);
     this.orderToCancel.set(null);
-    if (order) {
+    if (
+      order &&
+      (order.status === 'CONFIRMED' || order.status === 'IN_PREPARATION') &&
+      !this.orderService.isUpdating(order.id) &&
+      !this.orderService.isPendingVerification(order.id)
+    ) {
       this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe();
     }
   }
@@ -173,14 +196,14 @@ export class PriorityOrders implements OnInit {
       customerName: o.customerName,
       customerPhone: o.customerPhone,
       channel: o.channel,
-      channelLabel: o.channelLabel || 'WhatsApp',
-      channelIcon: 'matChatOutline',
+      channelLabel: o.channelLabel,
+      channelIcon: o.channelLabel ? 'matChatOutline' : undefined,
       icon: 'matRestaurantOutline',
       itemSummary,
       itemDetails,
       deliveryMode: o.deliveryMode,
-      scheduledTime: o.scheduledTime || '10:00:00',
-      deliveryTimeLabel: o.deliveryTimeLabel || '10:00 - 11:30',
+      scheduledTime: o.scheduledTime || '00:00',
+      deliveryTimeLabel: o.deliveryTimeLabel,
       isUrgent: o.isUrgent,
       status: o.status,
       totalAmount: o.totalAmount,

@@ -53,7 +53,7 @@ export interface StockAlertItem {
 }
 
 export interface DashboardMetrics {
-  capacityOccupied: number;
+  capacityOccupied: number | null;
   capacityTotal: number;
   shiftSchedule: string;
   totalOrdersToday: number;

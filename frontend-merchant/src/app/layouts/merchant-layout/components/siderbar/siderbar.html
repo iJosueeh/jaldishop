@@ -46,7 +46,7 @@
           Capacidad Hoy
         </span>
         <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
-          {{ capacityOccupied() }}/{{ capacityTotal() > 0 ? capacityTotal() : 0 }}
+          {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}/{{ capacityTotal() > 0 ? capacityTotal() : 0 }}
         </span>
       </div>
 
@@ -64,8 +64,10 @@
 
       <div class="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
         <span>
-          @if (capacityTotal() > 0) {
-            Quedan <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied() }}</strong> {{ (capacityTotal() - capacityOccupied()) === 1 ? 'cupo' : 'cupos' }}
+          @if (capacityOccupied() !== null && capacityTotal() > 0) {
+            Quedan <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied()! }}</strong> {{ (capacityTotal() - capacityOccupied()!) === 1 ? 'cupo' : 'cupos' }}
+          } @else if (capacityTotal() > 0) {
+            Capacidad: <strong class="text-stone-200">{{ capacityTotal() }}</strong> cupos
           } @else {
             Sin límite fijo
           }
