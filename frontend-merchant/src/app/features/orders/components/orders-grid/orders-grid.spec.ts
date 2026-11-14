@@ -91,8 +91,8 @@ describe('OrdersGrid', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Sin coincidencias en esta página');
-    expect(compiled.textContent).toContain('No hay pedidos en la página actual que coincidan con la búsqueda');
+    expect(compiled.textContent).toContain('Sin coincidencias para tu búsqueda');
+    expect(compiled.textContent).toContain('No se encontraron pedidos que coincidan con los criterios ingresados');
   });
 
   it('debe mostrar mensaje de no hay pedidos registrados cuando isEmptyOrders es true', () => {

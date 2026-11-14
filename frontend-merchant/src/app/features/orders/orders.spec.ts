@@ -291,4 +291,19 @@ describe('Orders', () => {
     component.onStatusAdvance(confirmedOrder);
     expect(loadCountsSpy).toHaveBeenCalled();
   });
+
+  it('debe delegar la búsqueda, limpieza y reinicio de filtros a OrderService', () => {
+    const searchSpy = vi.spyOn(orderService, 'setSearchQuery');
+    const clearSpy = vi.spyOn(orderService, 'clearSearch');
+    const resetSpy = vi.spyOn(orderService, 'resetFilters');
+
+    component.onSearchChange('1042');
+    expect(searchSpy).toHaveBeenCalledWith('1042');
+
+    component.onClearSearch();
+    expect(clearSpy).toHaveBeenCalled();
+
+    component.onResetFilters();
+    expect(resetSpy).toHaveBeenCalled();
+  });
 });

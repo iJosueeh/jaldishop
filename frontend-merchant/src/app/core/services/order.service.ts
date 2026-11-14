@@ -66,7 +66,9 @@ export class OrderService implements OnDestroy {
   // Filtros y Búsqueda
   readonly activeTab = signal<OrderFilterTab>('ALL');
   readonly searchQuery = signal<string>('');
+  readonly appliedSearchQuery = signal<string>('');
   readonly channelFilter = signal<string>('ALL');
+  private searchDebounceTimer: any = null;
 
   // Detalle y Drawer
   readonly selectedOrder = signal<MerchantOrder | null>(null);
@@ -161,35 +163,13 @@ export class OrderService implements OnDestroy {
     return null;
   });
 
-  // Lista Filtrada Reactiva (local a la página cargada)
+  // Lista Filtrada Reactiva: la respuesta paginada del backend es la fuente de verdad
   readonly filteredOrders = computed(() => {
     const tab = this.activeTab();
-    const query = this.searchQuery().toLowerCase().trim();
-    const channel = this.channelFilter();
-
-    return this.orders().filter((order) => {
-      // 1. Filtro local por estado
-      if (tab === 'CONFIRMED' && order.status !== 'CONFIRMED') return false;
-      if (tab === 'IN_PREPARATION' && order.status !== 'IN_PREPARATION') return false;
-      if (tab === 'READY' && order.status !== 'READY') return false;
-      if (tab === 'COMPLETED' && order.status !== 'COMPLETED') return false;
-
-      // 2. Filtro local por canal: inactivo en Fase 1 mientras el backend no soporte canales.
-      // Garantiza que ningún valor residual pueda generar resultados ambiguos o filtrar pedidos válidos.
-
-      // 3. Búsqueda local en la página actual
-      if (query) {
-        const matchNumber = order.orderNumber.toLowerCase().includes(query);
-        const matchCustomer = order.customerName.toLowerCase().includes(query);
-        const matchPhone = order.customerPhone?.includes(query);
-        const matchItems = order.items.some((i) => i.name.toLowerCase().includes(query));
-        if (!matchNumber && !matchCustomer && !matchPhone && !matchItems) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    if (tab === 'ALL') {
+      return this.orders();
+    }
+    return this.orders().filter((order) => order.status === tab);
   });
 
   // Estados Vacíos
@@ -198,7 +178,8 @@ export class OrderService implements OnDestroy {
       !this.isLoading() &&
       this.isLoaded() &&
       this.totalElements() === 0 &&
-      this.activeTab() === 'ALL'
+      this.activeTab() === 'ALL' &&
+      !this.appliedSearchQuery().trim()
     );
   });
 
@@ -207,7 +188,8 @@ export class OrderService implements OnDestroy {
       !this.isLoading() &&
       this.isLoaded() &&
       this.totalElements() === 0 &&
-      this.activeTab() !== 'ALL'
+      this.activeTab() !== 'ALL' &&
+      !this.appliedSearchQuery().trim()
     );
   });
 
@@ -215,8 +197,8 @@ export class OrderService implements OnDestroy {
     return (
       !this.isLoading() &&
       this.isLoaded() &&
-      this.orders().length > 0 &&
-      this.filteredOrders().length === 0
+      this.totalElements() === 0 &&
+      this.appliedSearchQuery().trim().length > 0
     );
   });
 
@@ -255,7 +237,15 @@ export class OrderService implements OnDestroy {
         return; // Ignorar eventos de tiendas inactivas o ajenas
       }
       this.toastService.info(`Nuevo pedido recibido: ${event.orderNumber}`);
-      this.loadOrders(this.currentPage(), this.pageSize(), this.activeTab()).subscribe();
+      if (this.searchDebounceTimer === null) {
+        this.loadOrders(
+          this.currentPage(),
+          this.pageSize(),
+          this.activeTab(),
+          currentStoreId,
+          this.appliedSearchQuery(),
+        ).subscribe();
+      }
       if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
         this.loadOrderCounts(currentStoreId, true).subscribe();
       }
@@ -272,7 +262,15 @@ export class OrderService implements OnDestroy {
     this.stompService.reconnected$.subscribe(() => {
       const currentStoreId = this.storeService.currentStore()?.id;
       if (currentStoreId) {
-        this.loadOrders(this.currentPage(), this.pageSize(), this.activeTab()).subscribe();
+        if (this.searchDebounceTimer === null) {
+          this.loadOrders(
+            this.currentPage(),
+            this.pageSize(),
+            this.activeTab(),
+            currentStoreId,
+            this.appliedSearchQuery(),
+          ).subscribe();
+        }
         if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
           this.loadOrderCounts(currentStoreId, true).subscribe();
         }
@@ -293,6 +291,7 @@ export class OrderService implements OnDestroy {
     size = this.pageSize(),
     status = this.activeTab(),
     storeId?: string,
+    search = this.appliedSearchQuery(),
   ): Observable<MerchantOrderPageResponse | null> {
     const targetStoreId = storeId ?? this.storeService.currentStore()?.id;
     if (!targetStoreId) {
@@ -303,7 +302,7 @@ export class OrderService implements OnDestroy {
             this.isLoaded.set(true);
             return of(null);
           }
-          return this.fetchOrdersHttp(store.id, page, size, status);
+          return this.fetchOrdersHttp(store.id, page, size, status, search);
         }),
         catchError((err) => {
           this.handleHttpError(err);
@@ -312,7 +311,7 @@ export class OrderService implements OnDestroy {
       );
     }
 
-    return this.fetchOrdersHttp(targetStoreId, page, size, status);
+    return this.fetchOrdersHttp(targetStoreId, page, size, status, search);
   }
 
   private fetchOrdersHttp(
@@ -320,6 +319,7 @@ export class OrderService implements OnDestroy {
     page: number,
     size: number,
     status: OrderFilterTab,
+    search?: string,
   ): Observable<MerchantOrderPageResponse | null> {
     const requestId = ++this.activeListRequestId;
     this.isLoading.set(true);
@@ -331,12 +331,25 @@ export class OrderService implements OnDestroy {
       params = params.set('status', status);
     }
 
+    const effectiveSearch = (
+      search !== undefined ? search : this.appliedSearchQuery()
+    )
+      .trim()
+      .slice(0, 100);
+    if (effectiveSearch.length > 0) {
+      params = params.set('search', effectiveSearch);
+    }
+
     const url = `${this.baseUrl}/${storeId}/orders`;
 
     return this.http.get<MerchantOrderPageResponse>(url, { params }).pipe(
       tap((response) => {
-        if (requestId !== this.activeListRequestId) {
-          return; // Descartar respuesta obsoleta
+        const currentActiveStoreId = this.storeService.currentStore()?.id;
+        if (
+          requestId !== this.activeListRequestId ||
+          (currentActiveStoreId && currentActiveStoreId !== storeId)
+        ) {
+          return; // Descartar respuesta obsoleta o si cambió la tienda activa
         }
         const mapped = (response.content || []).map(mapSummaryToMerchantOrder);
         // Protección de mutaciones en vuelo: preservar el estado en memoria de pedidos en actualización
@@ -358,7 +371,11 @@ export class OrderService implements OnDestroy {
         this.error.set(null);
       }),
       catchError((err) => {
-        if (requestId === this.activeListRequestId) {
+        const currentActiveStoreId = this.storeService.currentStore()?.id;
+        if (
+          requestId === this.activeListRequestId &&
+          (!currentActiveStoreId || currentActiveStoreId === storeId)
+        ) {
           this.isLoading.set(false);
           this.isLoaded.set(true);
           this.handleHttpError(err);
@@ -573,22 +590,82 @@ export class OrderService implements OnDestroy {
   }
 
   setActiveTab(tab: OrderFilterTab): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+      this.appliedSearchQuery.set(this.searchQuery().trim().slice(0, 100));
+    }
     this.activeTab.set(tab);
     this.currentPage.set(0);
-    this.loadOrders(0, this.pageSize(), tab).subscribe({
+    this.loadOrders(0, this.pageSize(), tab, undefined, this.appliedSearchQuery()).subscribe({
       error: () => {},
     });
   }
 
   setPage(pageIndex: number): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+      this.appliedSearchQuery.set(this.searchQuery().trim().slice(0, 100));
+    }
     this.currentPage.set(pageIndex);
-    this.loadOrders(pageIndex, this.pageSize(), this.activeTab()).subscribe({
+    this.loadOrders(
+      pageIndex,
+      this.pageSize(),
+      this.activeTab(),
+      undefined,
+      this.appliedSearchQuery(),
+    ).subscribe({
       error: () => {},
     });
   }
 
   setSearchQuery(query: string): void {
     this.searchQuery.set(query);
+
+    const normalized = query.trim().slice(0, 100);
+    if (normalized === this.appliedSearchQuery()) {
+      if (this.searchDebounceTimer) {
+        clearTimeout(this.searchDebounceTimer);
+        this.searchDebounceTimer = null;
+      }
+      return;
+    }
+
+    // Invalida inmediatamente solicitudes de listado en vuelo previas
+    this.activeListRequestId++;
+    this.isLoading.set(true);
+
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+
+    this.searchDebounceTimer = setTimeout(() => {
+      this.searchDebounceTimer = null;
+      this.applySearch(normalized);
+    }, 300);
+  }
+
+  private applySearch(normalizedSearch: string): void {
+    this.appliedSearchQuery.set(normalizedSearch);
+    this.currentPage.set(0);
+    this.loadOrders(0, this.pageSize(), this.activeTab(), undefined, normalizedSearch).subscribe({
+      error: () => {},
+    });
+  }
+
+  clearSearch(): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+    }
+    this.searchQuery.set('');
+    this.appliedSearchQuery.set('');
+    this.currentPage.set(0);
+    this.activeListRequestId++;
+    this.loadOrders(0, this.pageSize(), this.activeTab(), undefined, '').subscribe({
+      error: () => {},
+    });
   }
 
   setChannelFilter(_channel: string): void {
@@ -597,9 +674,23 @@ export class OrderService implements OnDestroy {
   }
 
   clearFilters(): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+    }
     this.activeTab.set('ALL');
     this.searchQuery.set('');
+    this.appliedSearchQuery.set('');
     this.channelFilter.set('ALL');
+    this.currentPage.set(0);
+  }
+
+  resetFilters(): void {
+    this.clearFilters();
+    this.activeListRequestId++;
+    this.loadOrders(0, this.pageSize(), 'ALL', undefined, '').subscribe({
+      error: () => {},
+    });
   }
 
   openCreateModal(): void {
@@ -761,6 +852,10 @@ export class OrderService implements OnDestroy {
     if (this.midnightTimerId) {
       clearTimeout(this.midnightTimerId);
       this.midnightTimerId = null;
+    }
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
     }
     this.inFlightCounts$ = null;
     this.inFlightTodayCounts$ = null;

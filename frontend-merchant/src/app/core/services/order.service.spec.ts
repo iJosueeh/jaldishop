@@ -150,6 +150,7 @@ describe('OrderService', () => {
 
   afterEach(() => {
     httpMock.verify();
+    vi.useRealTimers();
   });
 
   it('debe crearse correctamente e inicializar vacío', () => {
@@ -371,39 +372,41 @@ describe('OrderService', () => {
     expect(service.currentPage()).toBe(3);
   });
 
-  it('debe realizar búsqueda local en la página actual sin modificar totalElements', () => {
-    service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
-    const req = httpMock.expectOne((r) => r.url.includes('/orders'));
-    req.flush({
-      ...mockPageResponse,
-      totalElements: 50,
-      content: [
-        mockPageResponse.content[0],
-        {
-          ...mockPageResponse.content[0],
-          id: 'ord-2',
-          orderNumber: '#PED-2000',
-          customerName: 'Carlos Gomez',
-        },
-      ],
-    });
+  it('debe enviar el parámetro search cuando appliedSearchQuery o el argumento search contiene texto', () => {
+    service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
 
-    expect(service.orders().length).toBe(2);
-    expect(service.totalElements()).toBe(50);
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('search') === 'Carlos',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
+  });
 
-    // Búsqueda local por "Carlos"
-    service.setSearchQuery('Carlos');
-    expect(service.filteredOrders().length).toBe(1);
-    expect(service.filteredOrders()[0].customerName).toBe('Carlos Gomez');
-    // totalElements no debe ser afectado por la búsqueda local
-    expect(service.totalElements()).toBe(50);
-    expect(service.isSearchEmpty()).toBe(false);
+  it('no debe enviar el parámetro search si el término es vacío o solo contiene espacios', () => {
+    service.loadOrders(0, 10, 'ALL', 'store-123', '   ').subscribe();
 
-    // Búsqueda sin coincidencias en esta página
-    service.setSearchQuery('Inexistente');
-    expect(service.filteredOrders().length).toBe(0);
-    expect(service.isSearchEmpty()).toBe(true);
-    expect(service.totalElements()).toBe(50);
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        !r.params.has('search'),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
+  });
+
+  it('debe recortar el parámetro search a un máximo de 100 caracteres', () => {
+    const longQuery = 'A'.repeat(120);
+    service.loadOrders(0, 10, 'ALL', 'store-123', longQuery).subscribe();
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url === `${environment.apiUrl}/merchants/stores/store-123/orders` &&
+        r.params.get('search') === 'A'.repeat(100),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPageResponse);
   });
 
   describe('updateOrderStatus (PATCH)', () => {
@@ -1135,6 +1138,223 @@ describe('OrderService', () => {
       expect(service.todayOrderCounts()).toBeNull();
       expect(service.countsError()).toBeNull();
       expect(service.todayCountsError()).toBeNull();
+    });
+  });
+
+  describe('Búsqueda Global Remota y Pipeline de Filtros', () => {
+    it('debe aplicar debounce de 300ms e invalidar peticiones en vuelo previas inmediatamente al cambiar texto', () => {
+      vi.useFakeTimers();
+
+      // Petición inicial en vuelo
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
+      const initialReq = httpMock.expectOne((r) => r.url.includes('/orders'));
+
+      // Usuario ingresa texto
+      service.setSearchQuery('1042');
+      expect(service.searchQuery()).toBe('1042');
+      expect(service.appliedSearchQuery()).toBe('');
+      expect(service.isLoading()).toBe(true);
+
+      // Si la petición inicial responde durante el debounce, debe ser descartada por requestId viejo
+      initialReq.flush({
+        ...mockPageResponse,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#PED-OLD' }],
+      });
+      expect(service.orders().length).toBe(0);
+
+      // Avanzar el reloj 299ms: aún no debe haberse enviado la petición
+      vi.advanceTimersByTime(299);
+      httpMock.expectNone((r) => r.params.has('search'));
+
+      // Completar los 300ms
+      vi.advanceTimersByTime(1);
+      expect(service.appliedSearchQuery()).toBe('1042');
+      expect(service.currentPage()).toBe(0);
+
+      const searchReq = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('search') === '1042' &&
+          r.params.get('page') === '0',
+      );
+      searchReq.flush({
+        ...mockPageResponse,
+        totalElements: 1,
+        content: [{ ...mockPageResponse.content[0], orderNumber: '#1042' }],
+      });
+
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].orderNumber).toBe('#1042');
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('debe limpiar la búsqueda de inmediato y recargar página 0 sin search con clearSearch', () => {
+      vi.useFakeTimers();
+      service.appliedSearchQuery.set('1042');
+      service.searchQuery.set('1042');
+
+      service.clearSearch();
+
+      expect(service.searchQuery()).toBe('');
+      expect(service.appliedSearchQuery()).toBe('');
+      expect(service.currentPage()).toBe(0);
+
+      const req = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && !r.params.has('search') && r.params.get('page') === '0',
+      );
+      req.flush(mockPageResponse);
+    });
+
+    it('debe conservar appliedSearchQuery al cambiar de página con setPage', () => {
+      service.appliedSearchQuery.set('Valeria');
+      service.setPage(2);
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('page') === '2' &&
+          r.params.get('search') === 'Valeria',
+      );
+      req.flush({ ...mockPageResponse, page: 2 });
+      expect(service.currentPage()).toBe(2);
+    });
+
+    it('debe conservar appliedSearchQuery y reiniciar página a 0 al cambiar de pestaña con setActiveTab', () => {
+      service.appliedSearchQuery.set('984552109');
+      service.currentPage.set(3);
+
+      service.setActiveTab('IN_PREPARATION');
+
+      expect(service.currentPage()).toBe(0);
+      expect(service.activeTab()).toBe('IN_PREPARATION');
+
+      const req = httpMock.expectOne(
+        (r) =>
+          r.url.includes('/orders') &&
+          r.params.get('page') === '0' &&
+          r.params.get('status') === 'IN_PREPARATION' &&
+          r.params.get('search') === '984552109',
+      );
+      req.flush(mockPageResponse);
+    });
+
+    it('debe descartar la respuesta si la tienda activa cambió mientras la petición estaba en vuelo', () => {
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'Burger').subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/store-123/orders'));
+
+      // Cambiar tienda activa en StoreService
+      storeService.currentStore.set({
+        ...storeService.currentStore()!,
+        id: 'store-otra',
+      });
+
+      req.flush(mockPageResponse);
+
+      expect(service.orders().length).toBe(0);
+      expect(service.isLoaded()).toBe(false);
+    });
+
+    it('no debe recargar el listado de pedidos por evento STOMP si hay un debounce de búsqueda activo', () => {
+      vi.useFakeTimers();
+      const stompService = TestBed.inject(StompService);
+
+      // Iniciar escritura (debounce activo de 300ms)
+      service.setSearchQuery('Nuevo');
+
+      // Llega evento STOMP mientras el debounce está activo
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-101',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-stomp',
+        orderNumber: '#PED-STOMP',
+        storeId: 'store-123',
+        totalAmount: 50.0,
+        currency: 'PEN',
+        occurredAt: '2026-11-14T12:00:00Z',
+      });
+
+      expect(toastMock.info).toHaveBeenCalledWith('Nuevo pedido recibido: #PED-STOMP');
+      // No debe haberse disparado solicitud HTTP para la lista aún
+      httpMock.expectNone((r) => r.url.includes('/orders') && !r.url.includes('/counts'));
+
+      // Al cumplirse el debounce, se dispara la búsqueda del usuario
+      vi.advanceTimersByTime(300);
+      const searchReq = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && r.params.get('search') === 'Nuevo',
+      );
+      searchReq.flush(mockPageResponse);
+    });
+
+    it('debe recargar el listado incluyendo search en evento STOMP cuando no hay debounce activo', () => {
+      const stompService = TestBed.inject(StompService);
+      service.appliedSearchQuery.set('Activo');
+
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-102',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-stomp-2',
+        orderNumber: '#PED-STOMP-2',
+        storeId: 'store-123',
+        totalAmount: 60.0,
+        currency: 'PEN',
+        occurredAt: '2026-11-14T12:00:00Z',
+      });
+
+      const listReq = httpMock.expectOne(
+        (r) => r.url.includes('/orders') && r.params.get('search') === 'Activo',
+      );
+      listReq.flush(mockPageResponse);
+    });
+
+    it('debe evaluar correctamente los estados vacíos con búsqueda remota', () => {
+      // 1. Estado vacío global de tienda (sin pedidos en absoluto)
+      service.totalElements.set(0);
+      service.isLoaded.set(true);
+      service.isLoading.set(false);
+      service.activeTab.set('ALL');
+      service.appliedSearchQuery.set('');
+
+      expect(service.isEmptyOrders()).toBe(true);
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(false);
+
+      // 2. Estado vacío de filtro por pestaña
+      service.activeTab.set('CONFIRMED');
+      expect(service.isEmptyOrders()).toBe(false);
+      expect(service.isFilterEmpty()).toBe(true);
+      expect(service.isSearchEmpty()).toBe(false);
+
+      // 3. Estado vacío de búsqueda (prioritario sobre estado y tienda)
+      service.appliedSearchQuery.set('TérminoSinCoincidencias');
+      expect(service.isEmptyOrders()).toBe(false);
+      expect(service.isFilterEmpty()).toBe(false);
+      expect(service.isSearchEmpty()).toBe(true);
+    });
+
+    it('los contadores agregados reales no deben verse afectados por la búsqueda remota', () => {
+      service.orderCounts.set({
+        all: 100,
+        confirmed: 20,
+        inPreparation: 10,
+        ready: 5,
+        outForDelivery: 5,
+        completed: 55,
+        cancelled: 5,
+      });
+
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'TerminoFiltro').subscribe();
+      const req = httpMock.expectOne((r) => r.params.get('search') === 'TerminoFiltro');
+      req.flush({
+        ...mockPageResponse,
+        totalElements: 2, // Solo 2 coinciden con la búsqueda
+      });
+
+      // El totalElements de la búsqueda es 2, pero los contadores de la tienda se mantienen en 100
+      expect(service.totalElements()).toBe(2);
+      expect(service.tabCounts().all).toBe(100);
+      expect(service.totalOrdersCount()).toBe(100);
+      expect(service.confirmedCount()).toBe(20);
     });
   });
 });

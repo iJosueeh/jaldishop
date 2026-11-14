@@ -38,6 +38,7 @@
     (tabChange)="onTabChange($event)"
     (searchChange)="onSearchChange($event)"
     (channelChange)="onChannelChange($event)"
+    (clearSearch)="onClearSearch()"
   />
 
   <!-- 5. Área de Pedidos / Comandas Modulares con Skeletons y Estados Vacíos -->
@@ -54,7 +55,7 @@
     (whatsAppClick)="onWhatsAppClick($event)"
     (openDetails)="onOpenDetails($event)"
     (verifyStatus)="onVerifyStatus($event)"
-    (resetFilter)="onTabChange('ALL')"
+    (resetFilter)="onResetFilters()"
     (createNewOrder)="onNewOrder()"
   />
 

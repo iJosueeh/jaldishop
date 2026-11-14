@@ -102,9 +102,21 @@
         type="text"
         [value]="searchQuery()"
         (input)="onSearchInput($event)"
-        placeholder="Buscar en esta página..."
+        maxlength="100"
+        placeholder="Buscar por N°, cliente o teléfono..."
         class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant focus:outline-none text-xs font-medium"
       />
+      @if (searchQuery()) {
+        <button
+          type="button"
+          (click)="onClearSearch()"
+          class="text-on-surface-variant hover:text-on-surface p-0.5 rounded cursor-pointer transition-colors"
+          title="Limpiar búsqueda"
+          aria-label="Limpiar búsqueda"
+        >
+          <ng-icon name="matCloseOutline" class="text-[16px]" />
+        </button>
+      }
     </div>
 
     <!-- Selector de Canal (Deshabilitado: el backend actual no clasifica pedidos por canal en Fase 1) -->
