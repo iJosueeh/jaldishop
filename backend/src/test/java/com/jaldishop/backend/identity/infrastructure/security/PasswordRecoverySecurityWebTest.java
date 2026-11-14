@@ -63,6 +63,13 @@ class PasswordRecoverySecurityWebTest {
                 .andReturn().getResponse().getContentAsString();
         assertThat(response).doesNotContain("token", "a@example.com");
         verify(requests).execute(new ForgotPasswordCommand("a@example.com"));
+
+        mvc.perform(post("/api/v1/auth/forgot-password").contentType("application/json")
+                .header("Origin", "http://localhost:4200")
+                .content("{\"email\":\"merchant@example.com\"}"))
+                .andExpect(status().isAccepted());
+        verify(requests).execute(new ForgotPasswordCommand("merchant@example.com", "http://localhost:4200"));
+
         mvc.perform(post("/api/v1/auth/reset-password").contentType("application/json")
                 .content("{\"token\":\"" + "A".repeat(43) + "\",\"newPassword\":\"new-password\"}"))
                 .andExpect(status().isNoContent()).andExpect(content().string(""));

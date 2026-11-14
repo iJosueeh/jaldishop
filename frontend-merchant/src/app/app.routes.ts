@@ -21,6 +21,11 @@ export const routes: Routes = [
       import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
   },
   {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: 'unauthorized',
     loadComponent: () =>
       import('./shared/components/unauthorized/unauthorized').then((m) => m.Unauthorized),
@@ -31,8 +36,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    loadComponent: () =>
-      import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
+    loadComponent: () => import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     canActivate: [adminGuard],
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },

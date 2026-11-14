@@ -50,12 +50,12 @@ class ForgotPasswordServiceTest {
         when(repository.lockByEmail(user.getEmail())).thenReturn(Optional.of(user));
         service(Runnable::run).execute(new ForgotPasswordCommand(" USER@EXAMPLE.COM "));
         var raw = ArgumentCaptor.forClass(String.class);
-        verify(mail).send(eq(user.getEmail()), raw.capture(), eq(now.plusSeconds(900)));
+        verify(mail).send(eq(user.getEmail()), raw.capture(), eq(now.plusSeconds(900)), eq(Set.of(RoleName.CUSTOMER)), isNull());
         assertThat(raw.getValue()).matches("[A-Za-z0-9_-]{43}");
         verify(repository).replaceToken(user.getId(), tokens.hash(raw.getValue()), now.plusSeconds(900));
         var order = inOrder(manager, mail);
         order.verify(manager).commit(any());
-        order.verify(mail).send(any(), any(), any());
+        order.verify(mail).send(any(), any(), any(), any(), any());
         assertThat(tokens.generate()).isNotEqualTo(tokens.generate());
     }
     @Test void unknownAndInactiveUsersNeverReceiveMail() {
@@ -84,8 +84,8 @@ class ForgotPasswordServiceTest {
         jobs.forEach(Runnable::run);
         verify(repository, times(3)).lockByEmail("known@example.com");
         verify(repository, times(3)).lockByEmail("unknown@example.com");
-        verify(mail, times(3)).send(eq(known.getEmail()), any(), any());
-        verify(mail, never()).send(eq("unknown@example.com"), any(), any());
+        verify(mail, times(3)).send(eq(known.getEmail()), any(), any(), any(), any());
+        verify(mail, never()).send(eq("unknown@example.com"), any(), any(), any(), any());
     }
     @Test void queueCapacityReturnsRateLimitAndProviderFailureDoesNotReachHttpCaller() {
         TaskExecutor full = task -> { throw new TaskRejectedException("full"); };
@@ -95,10 +95,27 @@ class ForgotPasswordServiceTest {
         transactions();
         User user = user("user@example.com");
         when(repository.lockByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        doThrow(new IllegalStateException("provider failure")).when(mail).send(any(), any(), any());
+        doThrow(new IllegalStateException("provider failure")).when(mail).send(any(), any(), any(), any(), any());
         assertThatCode(() -> service(Runnable::run).execute(new ForgotPasswordCommand(user.getEmail())))
                 .doesNotThrowAnyException();
         verify(repository).replaceToken(eq(user.getId()), any(), any());
         verify(manager).commit(any());
+    }
+
+    @Test void passesRolesAndOriginToMailer() {
+        transactions();
+        User merchantUser = User.create("merchant@example.com", "encoded-pwd", "Merchant", "User", null,
+                Set.of(new Role((short) 1, RoleName.CUSTOMER), new Role((short) 2, RoleName.MERCHANT)));
+        when(repository.lockByEmail(merchantUser.getEmail())).thenReturn(Optional.of(merchantUser));
+
+        service(Runnable::run).execute(new ForgotPasswordCommand("merchant@example.com", "http://localhost:4200"));
+
+        verify(mail).send(
+                eq("merchant@example.com"),
+                anyString(),
+                eq(now.plusSeconds(900)),
+                eq(Set.of(RoleName.CUSTOMER, RoleName.MERCHANT)),
+                eq("http://localhost:4200")
+        );
     }
 }
