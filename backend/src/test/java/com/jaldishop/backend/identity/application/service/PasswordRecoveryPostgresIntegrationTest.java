@@ -80,6 +80,7 @@ class PasswordRecoveryPostgresIntegrationTest {
                 Set.of(new Role(customerId, RoleName.CUSTOMER)));
         id = users.save(user).getId();
         doAnswer(invocation -> { token = invocation.getArgument(1); return null; }).when(mail).send(eq(email), any(), any());
+        doAnswer(invocation -> { token = invocation.getArgument(1); return null; }).when(mail).send(eq(email), any(), any(), any(), any());
     }
     @AfterEach void cleanup() {
         if (id == null) return;
@@ -152,6 +153,8 @@ class PasswordRecoveryPostgresIntegrationTest {
         var delivered = new java.util.concurrent.CopyOnWriteArrayList<String>();
         doAnswer(invocation -> { delivered.add(invocation.getArgument(1)); return null; })
                 .when(mail).send(eq(email), any(), any());
+        doAnswer(invocation -> { delivered.add(invocation.getArgument(1)); return null; })
+                .when(mail).send(eq(email), any(), any(), any(), any());
         var ready = new CountDownLatch(2); var start = new CountDownLatch(1);
         try (var pool = Executors.newFixedThreadPool(2)) {
             Callable<Void> issue = () -> {

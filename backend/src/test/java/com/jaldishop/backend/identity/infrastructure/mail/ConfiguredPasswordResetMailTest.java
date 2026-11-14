@@ -463,8 +463,12 @@ class ConfiguredPasswordResetMailTest {
         mailer.send("cust2@example.test", "tok-2", Instant.now(), Set.of(RoleName.CUSTOMER), "http://localhost:4200");
         // 3. Merchant without origin -> merchant URL (4200)
         mailer.send("merch@example.test", "tok-3", Instant.now(), Set.of(RoleName.MERCHANT), null);
+        // 3b. Pure merchant with customer origin -> still merchant URL (4200)
+        mailer.send("merch2@example.test", "tok-3b", Instant.now(), Set.of(RoleName.MERCHANT), "http://localhost:3000");
         // 4. Admin without origin -> merchant URL (4200)
         mailer.send("admin@example.test", "tok-4", Instant.now(), Set.of(RoleName.ADMIN), null);
+        // 4b. Pure admin with customer origin -> still merchant URL (4200)
+        mailer.send("admin2@example.test", "tok-4b", Instant.now(), Set.of(RoleName.ADMIN), "http://localhost:3000");
         // 5. Multi-role (CUSTOMER + MERCHANT) without origin -> merchant URL (4200)
         mailer.send("multi@example.test", "tok-5", Instant.now(), Set.of(RoleName.CUSTOMER, RoleName.MERCHANT), null);
         // 6. Multi-role with marketplace origin (3000) -> customer URL (3000)
@@ -484,8 +488,12 @@ class ConfiguredPasswordResetMailTest {
                     assertThat(content).contains("http://localhost:3000/reset-password?token=tok-2");
                 } else if (content.contains("To: merch@example.test")) {
                     assertThat(content).contains("http://localhost:4200/reset-password?token=tok-3");
+                } else if (content.contains("To: merch2@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-3b");
                 } else if (content.contains("To: admin@example.test")) {
                     assertThat(content).contains("http://localhost:4200/reset-password?token=tok-4");
+                } else if (content.contains("To: admin2@example.test")) {
+                    assertThat(content).contains("http://localhost:4200/reset-password?token=tok-4b");
                 } else if (content.contains("To: multi@example.test")) {
                     assertThat(content).contains("http://localhost:4200/reset-password?token=tok-5");
                 } else if (content.contains("To: multi2@example.test")) {

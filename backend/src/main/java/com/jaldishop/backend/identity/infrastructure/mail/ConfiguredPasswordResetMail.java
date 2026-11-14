@@ -226,19 +226,35 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
     }
 
     URI resolveBaseUri(Set<RoleName> roles, String origin) {
-        boolean isMerchantOrAdmin = roles != null && (roles.contains(RoleName.MERCHANT) || roles.contains(RoleName.ADMIN));
-        if (origin != null && !origin.isBlank()) {
+        boolean hasMerchantOrAdmin = roles != null && (roles.contains(RoleName.MERCHANT) || roles.contains(RoleName.ADMIN));
+        boolean hasCustomer = roles != null && roles.contains(RoleName.CUSTOMER);
+        boolean isMultiRole = hasCustomer && hasMerchantOrAdmin;
+
+        // 1. Merchant o Admin puro: siempre enlace Merchant
+        if (hasMerchantOrAdmin && !hasCustomer) {
+            return merchantBaseUri;
+        }
+
+        // 2. Customer puro: siempre enlace Customer
+        if (hasCustomer && !hasMerchantOrAdmin) {
+            return baseUri;
+        }
+
+        // 3. Multirrol (CUSTOMER + MERCHANT/ADMIN): se guía por Origin autorizado
+        if (isMultiRole && origin != null && !origin.isBlank()) {
             URI originUri = tryParseOrigin(origin);
             if (originUri != null && isOriginAuthorized(originUri)) {
-                if (isSameOrigin(originUri, merchantBaseUri) && isMerchantOrAdmin) {
-                    return merchantBaseUri;
-                }
                 if (isSameOrigin(originUri, baseUri)) {
                     return baseUri;
                 }
+                if (isSameOrigin(originUri, merchantBaseUri)) {
+                    return merchantBaseUri;
+                }
             }
         }
-        return isMerchantOrAdmin ? merchantBaseUri : baseUri;
+
+        // Fallback: rol comercial o admin -> portal merchant; si no -> customer
+        return hasMerchantOrAdmin ? merchantBaseUri : baseUri;
     }
 
     private URI tryParseOrigin(String origin) {
