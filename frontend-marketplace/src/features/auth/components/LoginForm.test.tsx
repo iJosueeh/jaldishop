@@ -58,6 +58,10 @@ describe('LoginForm Component', () => {
     expect(screen.getByLabelText(/^Contraseña$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Iniciar Sesión' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Regístrate aquí/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /¿Olvidaste tu contraseña\?/i })).toHaveAttribute(
+      'href',
+      '/forgot-password'
+    );
   });
 
   it('toggles password visibility between text and password', () => {

@@ -321,6 +321,12 @@ export function LoginForm() {
                 >
                   Contraseña
                 </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-semibold text-[#005141] hover:text-[#00382e] hover:underline transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
               <div className="relative">
                 <div

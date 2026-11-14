@@ -4,6 +4,7 @@ import com.jaldishop.backend.identity.application.port.PasswordResetMail;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
@@ -19,6 +20,8 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
     private final Path mailbox;
     private final RestClient provider;
     private final String from;
+    private final String resetUrlBase;
+
     public ConfiguredPasswordResetMail(Environment env) {
         mode = env.getProperty("app.password-reset.mail.mode", "disabled");
         mailbox = Path.of(env.getProperty("app.password-reset.mail.local-directory", ".local/password-reset-mail"));
@@ -28,21 +31,56 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
             throw new IllegalStateException("Modo de correo de recuperación inválido.");
         if (mode.equals("local") && !env.matchesProfiles("local", "test"))
             throw new IllegalStateException("El buzón de desarrollo requiere el perfil local o test.");
+
+        String rawUrlBase = env.getProperty("app.password-reset.mail.reset-url-base", "");
         if (mode.equals("resend")) {
             if (!env.getProperty("app.password-reset.mail.real-delivery-enabled", Boolean.class, false))
                 throw new IllegalStateException("La entrega real de correo requiere habilitación explícita.");
             String apiKey = required(env, "app.password-reset.mail.api-key");
             if (from.isBlank() || from.contains("\r") || from.contains("\n"))
                 throw new IllegalStateException("Remitente de recuperación requerido.");
+            if (rawUrlBase.isBlank())
+                throw new IllegalStateException("Falta configuración de URL de recuperación: app.password-reset.mail.reset-url-base");
+            this.resetUrlBase = validateResetUrl(rawUrlBase, true);
             var factory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(5)).build());
             factory.setReadTimeout(Duration.ofSeconds(5));
             provider = RestClient.builder().baseUrl("https://api.resend.com")
                     .requestFactory(factory).defaultHeader("Authorization", "Bearer " + apiKey).build();
         } else {
+            this.resetUrlBase = rawUrlBase.isBlank() ? "http://localhost:3000/reset-password" : validateResetUrl(rawUrlBase, false);
             provider = null;
         }
     }
+
+    private static String validateResetUrl(String rawUrl, boolean requireHttps) {
+        if (rawUrl.contains("\r") || rawUrl.contains("\n") || rawUrl.contains(" "))
+            throw new IllegalStateException("URL de recuperación inválida.");
+        URI uri;
+        try {
+            uri = URI.create(rawUrl);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("URL de recuperación con sintaxis inválida: " + rawUrl);
+        }
+        String scheme = uri.getScheme();
+        if (scheme == null)
+            throw new IllegalStateException("URL de recuperación sin protocolo.");
+        if (requireHttps) {
+            if (!"https".equalsIgnoreCase(scheme))
+                throw new IllegalStateException("La entrega real de correo requiere HTTPS en la URL de recuperación.");
+            String host = uri.getHost();
+            if (host == null || host.isBlank())
+                throw new IllegalStateException("URL de recuperación sin host válido.");
+            String lowerHost = host.toLowerCase();
+            if (lowerHost.equals("localhost") || lowerHost.equals("127.0.0.1") || lowerHost.endsWith(".local") || lowerHost.endsWith(".localhost"))
+                throw new IllegalStateException("La entrega real de correo no permite URL de recuperación en localhost.");
+        } else {
+            if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme))
+                throw new IllegalStateException("Protocolo de URL de recuperación no admitido.");
+        }
+        return rawUrl;
+    }
+
     // RestClient DEBUG logs call toString() on the outgoing body.
     record MailPayload(String from, List<String> to, String subject, String text) {
         @Override public String toString() { return "PasswordResetMail[REDACTED]"; }
@@ -53,11 +91,17 @@ public class ConfiguredPasswordResetMail implements PasswordResetMail {
         if (value == null || value.isBlank()) throw new IllegalStateException("Falta configuración de correo: " + key);
         return value;
     }
+
     public void send(String recipient, String token, Instant expiresAt) {
         if (mode.equals("disabled")) return;
         if (recipient.contains("\r") || recipient.contains("\n")) throw new IllegalArgumentException("Destinatario inválido.");
-        String body = "Restablece tu contraseña con POST /api/v1/auth/reset-password.\n"
-                + "Token: " + token + "\nVence: " + expiresAt + "\nSi no solicitaste el cambio, ignora este correo.\n";
+        String resetLink = resetUrlBase + (resetUrlBase.contains("?") ? "&token=" : "?token=") + token;
+        String body = "Hola,\n\n"
+                + "Recibimos una solicitud para restablecer la contraseña de tu cuenta en JaldiShop.\n\n"
+                + "Para crear una nueva contraseña, ingresa al siguiente enlace:\n"
+                + resetLink + "\n\n"
+                + "Este enlace es de uso único y vencerá en 15 minutos (a las " + expiresAt + ").\n\n"
+                + "Si tú no solicitaste este cambio, puedes ignorar este mensaje de forma segura; tu contraseña actual no cambiará.\n";
         if (mode.equals("local")) {
             try {
                 Files.createDirectories(mailbox, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
