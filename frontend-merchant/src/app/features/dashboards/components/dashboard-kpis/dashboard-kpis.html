@@ -28,7 +28,7 @@
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline justify-between">
         <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
-          {{ capacityOccupied() }}
+          {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}
           <span class="text-base sm:text-lg font-bold text-stone-400">
             / {{ capacityTotal() > 0 ? capacityTotal() : 0 }} Cupos
           </span>
@@ -43,24 +43,36 @@
           [class.text-emerald-800]="!isClosedToday()"
           [class.border-emerald-200]="!isClosedToday()"
         >
-          {{ isClosedToday() ? 'Cerrado' : capacityPercentage() + '% ocupado' }}
+          @if (isClosedToday()) {
+            Cerrado
+          } @else if (capacityPercentage() !== null) {
+            {{ capacityPercentage() }}% ocupado
+          } @else {
+            Capacidad: {{ capacityTotal() }} cupos
+          }
         </span>
       </div>
 
       <!-- Barra dinámica de 10 bloques escalables -->
-      <div class="flex items-center gap-1 pt-1">
-        @for (block of capacityBlocks(); track block.index) {
-          <span
-            class="h-3 sm:h-3.5 flex-1 rounded-xs transition-all duration-300"
-            [class.bg-[#005141]]="block.isFilled && !isClosedToday()"
-            [class.shadow-2xs]="block.isFilled && !isClosedToday()"
-            [class.bg-rose-500]="block.isFilled && isClosedToday()"
-            [class.bg-stone-100]="!block.isFilled"
-            [class.border]="!block.isFilled"
-            [class.border-stone-200]="!block.isFilled"
-          ></span>
-        }
-      </div>
+      @if (capacityOccupied() !== null) {
+        <div class="flex items-center gap-1 pt-1">
+          @for (block of capacityBlocks(); track block.index) {
+            <span
+              class="h-3 sm:h-3.5 flex-1 rounded-xs transition-all duration-300"
+              [class.bg-[#005141]]="block.isFilled && !isClosedToday()"
+              [class.shadow-2xs]="block.isFilled && !isClosedToday()"
+              [class.bg-rose-500]="block.isFilled && isClosedToday()"
+              [class.bg-stone-100]="!block.isFilled"
+              [class.border]="!block.isFilled"
+              [class.border-stone-200]="!block.isFilled"
+            ></span>
+          }
+        </div>
+      } @else {
+        <div class="pt-1 text-[11px] text-stone-400 font-medium">
+          Medición de ocupación en desarrollo
+        </div>
+      }
     </div>
 
     <div class="flex flex-col gap-1 pt-2.5 border-t border-[#e7e0d6] text-xs">
@@ -74,8 +86,10 @@
       >
         @if (isClosedToday()) {
           Sin recepción de pedidos hoy
-        } @else if (capacityTotal() > 0) {
+        } @else if (availableCapacity() !== null) {
           Quedan {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
+        } @else if (capacityTotal() > 0) {
+          Capacidad configurada para el turno
         } @else {
           Sin franjas configuradas
         }

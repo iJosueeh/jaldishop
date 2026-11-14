@@ -108,8 +108,8 @@ export class OrderService {
       if (tab === 'READY' && order.status !== 'READY') return false;
       if (tab === 'COMPLETED' && order.status !== 'COMPLETED') return false;
 
-      // 2. Filtro local por canal
-      if (channel !== 'ALL' && order.channel !== channel) return false;
+      // 2. Filtro local por canal: inactivo en Fase 1 mientras el backend no soporte canales.
+      // Garantiza que ningún valor residual pueda generar resultados ambiguos o filtrar pedidos válidos.
 
       // 3. Búsqueda local en la página actual
       if (query) {
@@ -483,8 +483,9 @@ export class OrderService {
     this.searchQuery.set(query);
   }
 
-  setChannelFilter(channel: string): void {
-    this.channelFilter.set(channel);
+  setChannelFilter(_channel: string): void {
+    // El backend no soporta canales en Fase 1; mantener siempre en 'ALL' para evitar filtros residuales
+    this.channelFilter.set('ALL');
   }
 
   clearFilters(): void {
@@ -501,12 +502,9 @@ export class OrderService {
     this.isCreateModalOpen.set(false);
   }
 
-  addOrder(order: MerchantOrder): void {
-    this.orders.update((list) => [order, ...list]);
-    this.totalElements.update((count) => count + 1);
-    this.isLoaded.set(true);
-    this.settingsService.playNotificationSound();
-    this.toastService.success(`Pedido ${order.orderNumber} registrado exitosamente.`);
+  addOrder(_order: MerchantOrder): void {
+    // La creación manual está deshabilitada hasta implementar el endpoint real en backend (Fase 1)
+    this.toastService.info('La creación manual de pedidos estará disponible próximamente.');
   }
 
   openDrawer(order: MerchantOrder): void {

@@ -46,12 +46,14 @@
               <span class="text-xs text-stone-700 font-mono font-bold bg-[#faf7f2] px-2 py-0.5 rounded-md border border-[#e7e0d6]">
                 {{ order.orderNumber }}
               </span>
-              <span
-                class="px-2 py-0.5 rounded-md bg-[#faf7f2] text-stone-600 border border-[#e7e0d6] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
-              >
-                <ng-icon name="matChatOutline" class="text-[12px] text-emerald-700" />
-                {{ order.channelLabel }}
-              </span>
+              @if (order.channelLabel) {
+                <span
+                  class="px-2 py-0.5 rounded-md bg-[#faf7f2] text-stone-600 border border-[#e7e0d6] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                >
+                  <ng-icon name="matChatOutline" class="text-[12px] text-emerald-700" />
+                  {{ order.channelLabel }}
+                </span>
+              }
             </div>
 
             <!-- 2. Nombre del Cliente -->
@@ -166,16 +168,31 @@
     }
   </div>
 
-  <!-- Panel Lateral Slide-Over -->
+  <!-- Panel Lateral Slide-Over con carga real desde el servidor -->
   <app-order-details-drawer
     [order]="selectedOrder()"
     [isOpen]="isDrawerOpen()"
+    [isLoading]="orderService.isDetailLoading()"
+    [errorMessage]="orderService.detailError()"
     [isUpdating]="isDrawerUpdating()"
     [isPendingVerification]="isDrawerPendingVerification()"
     (closeDrawer)="closeDrawer()"
     (statusChange)="onStatusChange($event)"
+    (cancelOrder)="onCancelOrder($event)"
     (notifyCustomer)="onNotifyCustomer($event)"
     (verifyStatus)="onVerifyStatus($event)"
+  />
+
+  <!-- Modal de Confirmación de Cancelación -->
+  <app-confirm-modal
+    [isOpen]="isCancelModalOpen()"
+    title="¿Cancelar este pedido?"
+    [message]="cancelModalMessage()"
+    confirmText="Sí, cancelar pedido"
+    cancelText="Volver"
+    [isDanger]="true"
+    (confirm)="onConfirmCancel()"
+    (cancel)="onDismissCancel()"
   />
 </div>
 

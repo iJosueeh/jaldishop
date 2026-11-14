@@ -33,6 +33,7 @@ export class OrdersGrid {
   pendingVerificationOrderIds = input<Set<string>>(new Set<string>());
 
   statusAdvance = output<MerchantOrder>();
+  cancelOrder = output<MerchantOrder>();
   whatsAppClick = output<MerchantOrder>();
   openDetails = output<MerchantOrder>();
   verifyStatus = output<MerchantOrder>();

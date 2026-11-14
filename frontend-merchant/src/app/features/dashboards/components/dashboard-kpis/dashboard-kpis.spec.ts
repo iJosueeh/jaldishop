@@ -29,9 +29,13 @@ describe('DashboardKpis', () => {
 
   it('debe calcular la capacidad disponible y bloques correctamente', () => {
     expect(component.capacityTotal()).toBeGreaterThanOrEqual(0);
-    expect(component.availableCapacity()).toBeGreaterThanOrEqual(0);
+    expect(component.availableCapacity()).toBeNull();
+    expect(component.metrics().capacityOccupied).toBeNull();
     expect(component.capacityBlocks().length).toBe(10);
     expect(component.shiftSchedule()).toBeDefined();
+
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Medición de ocupación en desarrollo');
   });
 
   it('debe reflejar estado de cierre cuando hay una excepción con capacidad 0 hoy', () => {

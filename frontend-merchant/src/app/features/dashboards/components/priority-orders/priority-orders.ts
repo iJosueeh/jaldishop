@@ -16,9 +16,10 @@ import {
 } from '@ng-icons/material-symbols/outline';
 import { OrderService } from '../../../../core/services/order.service';
 import { OrderDetailsDrawer } from '../order-details-drawer/order-details-drawer';
+import { ConfirmModal } from '../../../../shared/components/confirm-modal/confirm-modal';
 
 @Component({
-  imports: [RouterLink, NgIcon, OrderDetailsDrawer],
+  imports: [RouterLink, NgIcon, OrderDetailsDrawer, ConfirmModal],
   providers: [
     provideIcons({
       matArrowForwardOutline,
@@ -37,10 +38,18 @@ import { OrderDetailsDrawer } from '../order-details-drawer/order-details-drawer
   templateUrl: './priority-orders.html',
 })
 export class PriorityOrders implements OnInit {
-  private readonly orderService = inject(OrderService);
+  readonly orderService = inject(OrderService);
 
-  readonly selectedOrder = signal<DashboardPriorityOrder | null>(null);
-  readonly isDrawerOpen = signal<boolean>(false);
+  readonly isDrawerOpen = computed(() => this.orderService.isDrawerOpen());
+  readonly selectedOrder = computed<DashboardPriorityOrder | null>(() => {
+    const detail = this.orderService.selectedOrderDetail();
+    if (detail) return detail;
+    const selected = this.orderService.selectedOrder();
+    return selected ? this.mapToDashboardOrder(selected) : null;
+  });
+
+  readonly isCancelModalOpen = signal<boolean>(false);
+  readonly orderToCancel = signal<DashboardPriorityOrder | null>(null);
 
   readonly isDrawerUpdating = computed(() =>
     this.selectedOrder() ? this.orderService.isUpdating(this.selectedOrder()!.id) : false,
@@ -78,13 +87,77 @@ export class PriorityOrders implements OnInit {
   }
 
   openDrawer(order: DashboardPriorityOrder): void {
-    this.selectedOrder.set(order);
-    this.isDrawerOpen.set(true);
+    const rawOrder = this.orderService.orders().find((o) => o.id === order.id);
+    if (rawOrder) {
+      this.orderService.openDrawer(rawOrder);
+    } else {
+      const fallback: MerchantOrder = {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        channel: order.channel,
+        channelLabel: order.channelLabel,
+        deliveryMode: order.deliveryMode,
+        deliveryAddress: order.deliveryAddress,
+        deliveryReference: order.deliveryReference,
+        scheduledTime: order.scheduledTime,
+        deliveryTimeLabel: order.deliveryTimeLabel,
+        isUrgent: order.isUrgent,
+        status: order.status,
+        totalAmount: order.totalAmount ?? 0,
+        notes: order.notes,
+        items: order.items || [],
+        createdAt: new Date().toISOString(),
+      };
+      this.orderService.openDrawer(fallback);
+    }
   }
 
   closeDrawer(): void {
-    this.isDrawerOpen.set(false);
-    this.selectedOrder.set(null);
+    this.orderService.closeDrawer();
+  }
+
+  onCancelOrder(order: DashboardPriorityOrder): void {
+    if (order.status !== 'CONFIRMED' && order.status !== 'IN_PREPARATION') {
+      return;
+    }
+    if (this.orderService.isUpdating(order.id) || this.orderService.isPendingVerification(order.id)) {
+      return;
+    }
+    this.orderToCancel.set(order);
+    this.isCancelModalOpen.set(true);
+  }
+
+  readonly cancelModalMessage = computed(() => {
+    const order = this.orderToCancel();
+    if (!order) return '';
+    if (order.status === 'CONFIRMED') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Se liberará el cupo de capacidad y se restituirá el inventario de los productos según RN-ORD-13. Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    if (order.status === 'IN_PREPARATION') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en cocina (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+  });
+
+  onConfirmCancel(): void {
+    const order = this.orderToCancel();
+    this.isCancelModalOpen.set(false);
+    this.orderToCancel.set(null);
+    if (
+      order &&
+      (order.status === 'CONFIRMED' || order.status === 'IN_PREPARATION') &&
+      !this.orderService.isUpdating(order.id) &&
+      !this.orderService.isPendingVerification(order.id)
+    ) {
+      this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe();
+    }
+  }
+
+  onDismissCancel(): void {
+    this.isCancelModalOpen.set(false);
+    this.orderToCancel.set(null);
   }
 
   onStatusChange(event: { order: DashboardPriorityOrder; newStatus: OrderStatus }): void {
@@ -123,14 +196,14 @@ export class PriorityOrders implements OnInit {
       customerName: o.customerName,
       customerPhone: o.customerPhone,
       channel: o.channel,
-      channelLabel: o.channelLabel || 'WhatsApp',
-      channelIcon: 'matChatOutline',
+      channelLabel: o.channelLabel,
+      channelIcon: o.channelLabel ? 'matChatOutline' : undefined,
       icon: 'matRestaurantOutline',
       itemSummary,
       itemDetails,
       deliveryMode: o.deliveryMode,
-      scheduledTime: o.scheduledTime || '10:00:00',
-      deliveryTimeLabel: o.deliveryTimeLabel || '10:00 - 11:30',
+      scheduledTime: o.scheduledTime || '00:00',
+      deliveryTimeLabel: o.deliveryTimeLabel,
       isUrgent: o.isUrgent,
       status: o.status,
       totalAmount: o.totalAmount,

@@ -55,4 +55,11 @@ describe('OrdersFilterBar', () => {
     expect(compiled.textContent).toContain('15');
     expect(compiled.textContent).toContain('—');
   });
+
+  it('debe mantener deshabilitado el selector de canal para evitar filtros no respaldados por backend (Fase 1)', () => {
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    expect(select).toBeTruthy();
+    expect(select.disabled).toBe(true);
+    expect(select.value).toBe('ALL');
+  });
 });

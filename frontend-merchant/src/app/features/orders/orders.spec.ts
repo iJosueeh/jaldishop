@@ -123,6 +123,41 @@ describe('Orders', () => {
     expect(orderService.isCreateModalOpen()).toBe(true);
   });
 
+  it('debe manejar flujo de cancelación con modal de confirmación', () => {
+    const updateSpy = vi.spyOn(orderService, 'updateOrderStatus').mockReturnValue(of(null));
+    const confirmedOrder = component.orders().find((o) => o.status === 'CONFIRMED')!;
+
+    component.onCancelOrder(confirmedOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+    expect(component.orderToCancel()?.id).toBe(confirmedOrder.id);
+
+    component.onConfirmCancel();
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(component.orderToCancel()).toBeNull();
+    expect(updateSpy).toHaveBeenCalledWith(confirmedOrder.id, 'CANCELLED');
+  });
+
+  it('debe rechazar intento de cancelación si el estado no es CONFIRMED ni IN_PREPARATION', () => {
+    const toastSpy = vi.spyOn(TestBed.inject(ToastService), 'error');
+    const updateSpy = vi.spyOn(orderService, 'updateOrderStatus');
+    const readyOrder = component.orders().find((o) => o.status === 'READY')!;
+
+    component.onCancelOrder(readyOrder);
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(toastSpy).toHaveBeenCalledWith(expect.stringContaining('No se puede cancelar'));
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('debe descartar cancelación con onDismissCancel', () => {
+    const confirmedOrder = component.orders().find((o) => o.status === 'CONFIRMED')!;
+    component.onCancelOrder(confirmedOrder);
+    expect(component.isCancelModalOpen()).toBe(true);
+
+    component.onDismissCancel();
+    expect(component.isCancelModalOpen()).toBe(false);
+    expect(component.orderToCancel()).toBeNull();
+  });
+
   it('debe entregar la página directamente en paginatedOrders sin aplicar slice secundario', () => {
     expect(component.paginatedOrders().length).toBe(2);
     expect(component.paginatedOrders()).toEqual(component.orders());
@@ -148,5 +183,33 @@ describe('Orders', () => {
 
     expect(component.drawerOrder()?.id).toBe('ord-1-detail');
     expect(component.drawerOrder()?.customerName).toBe('Cliente Detalle');
+  });
+
+  it('debe formular mensaje de cancelación con restitución para CONFIRMED y sin restitución para IN_PREPARATION', () => {
+    component.onCancelOrder(mockOrders[0]); // mockOrders[0] es CONFIRMED
+    expect(component.isCancelModalOpen()).toBe(true);
+    expect(component.cancelModalMessage()).toContain('Se liberará el cupo de capacidad y se restituirá el inventario');
+    expect(component.cancelModalMessage()).toContain('PENDING');
+
+    const inPrepOrder: MerchantOrder = {
+      ...mockOrders[0],
+      id: 'ord-in-prep',
+      orderNumber: '#PED-IN-PREP',
+      status: 'IN_PREPARATION',
+    };
+    component.onCancelOrder(inPrepOrder);
+    expect(component.cancelModalMessage()).toContain('NO se restituirá la capacidad del turno ni el inventario');
+    expect(component.cancelModalMessage()).toContain('PENDING');
+  });
+
+  it('no debe abrir cancelación si el pedido está en updating o pendingVerification', () => {
+    orderService['updatingOrderIds'].set(new Set([mockOrders[0].id]));
+    component.onCancelOrder(mockOrders[0]);
+    expect(component.isCancelModalOpen()).toBe(false);
+
+    orderService['updatingOrderIds'].set(new Set());
+    orderService['pendingVerificationOrderIds'].set(new Set([mockOrders[0].id]));
+    component.onCancelOrder(mockOrders[0]);
+    expect(component.isCancelModalOpen()).toBe(false);
   });
 });

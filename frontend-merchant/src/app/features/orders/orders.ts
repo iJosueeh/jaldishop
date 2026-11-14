@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { OrderService } from '../../core/services/order.service';
 import { CapacityService } from '../../core/services/capacity.service';
 import { StoreService } from '../../core/services/store.service';
@@ -12,6 +12,8 @@ import { OrdersFilterBar } from './components/orders-filter-bar/orders-filter-ba
 import { OrdersGrid } from './components/orders-grid/orders-grid';
 import { Pagination } from '../../shared/components/pagination/pagination';
 import { OrderDetailsDrawer } from '../dashboards/components/order-details-drawer/order-details-drawer';
+import { ConfirmModal } from '../../shared/components/confirm-modal/confirm-modal';
+import { DashboardPriorityOrder } from '../../core/models/dashboard.models';
 
 @Component({
   imports: [
@@ -22,6 +24,7 @@ import { OrderDetailsDrawer } from '../dashboards/components/order-details-drawe
     OrdersGrid,
     Pagination,
     OrderDetailsDrawer,
+    ConfirmModal,
   ],
   selector: 'app-orders',
   styleUrl: './orders.css',
@@ -33,6 +36,9 @@ export class Orders implements OnInit {
   readonly storeService = inject(StoreService);
   readonly stompService = inject(StompService);
   private readonly toastService = inject(ToastService);
+
+  readonly isCancelModalOpen = signal<boolean>(false);
+  readonly orderToCancel = signal<MerchantOrder | DashboardPriorityOrder | null>(null);
 
   readonly orders = computed(() => this.orderService.filteredOrders());
   readonly activeTab = computed(() => this.orderService.activeTab());
@@ -59,7 +65,7 @@ export class Orders implements OnInit {
       customerPhone: selected.customerPhone,
       channel: selected.channel,
       channelLabel: selected.channelLabel,
-      channelIcon: 'matChatOutline',
+      channelIcon: selected.channelLabel ? 'matChatOutline' : undefined,
       icon: 'matRestaurantOutline',
       itemSummary: selected.items.map((i) => `${i.quantity}x ${i.name}`).join(', '),
       deliveryMode: selected.deliveryMode,
@@ -82,6 +88,13 @@ export class Orders implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.capacityService.configurations().length === 0) {
+      this.capacityService.getConfigurations().subscribe();
+    }
+    if (this.capacityService.exceptions().length === 0) {
+      this.capacityService.getExceptions().subscribe();
+    }
+
     const store = this.storeService.currentStore();
     if (store?.id) {
       this.stompService.connect(store.id);
@@ -100,6 +113,49 @@ export class Orders implements OnInit {
         },
       });
     }
+  }
+
+  onCancelOrder(order: MerchantOrder | DashboardPriorityOrder): void {
+    if (order.status !== 'CONFIRMED' && order.status !== 'IN_PREPARATION') {
+      this.toastService.error(`No se puede cancelar un pedido en estado ${order.status}`);
+      return;
+    }
+    if (this.orderService.isUpdating(order.id) || this.orderService.isPendingVerification(order.id)) {
+      return;
+    }
+    this.orderToCancel.set(order);
+    this.isCancelModalOpen.set(true);
+  }
+
+  readonly cancelModalMessage = computed(() => {
+    const order = this.orderToCancel();
+    if (!order) return '';
+    if (order.status === 'CONFIRMED') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Se liberará el cupo de capacidad y se restituirá el inventario de los productos según RN-ORD-13. Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    if (order.status === 'IN_PREPARATION') {
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en cocina (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+    }
+    return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+  });
+
+  onConfirmCancel(): void {
+    const order = this.orderToCancel();
+    this.isCancelModalOpen.set(false);
+    this.orderToCancel.set(null);
+    if (
+      order &&
+      (order.status === 'CONFIRMED' || order.status === 'IN_PREPARATION') &&
+      !this.orderService.isUpdating(order.id) &&
+      !this.orderService.isPendingVerification(order.id)
+    ) {
+      this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe();
+    }
+  }
+
+  onDismissCancel(): void {
+    this.isCancelModalOpen.set(false);
+    this.orderToCancel.set(null);
   }
 
   onVerifyStatus(order: { id: string }): void {

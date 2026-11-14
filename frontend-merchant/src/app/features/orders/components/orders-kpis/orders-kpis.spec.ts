@@ -17,7 +17,8 @@ describe('OrdersKpis', () => {
 
   it('debe crearse correctamente con valores por defecto y sin ritmo promedio', () => {
     expect(component).toBeTruthy();
-    expect(component.availableCapacity()).toBe(0);
+    expect(component.availableCapacity()).toBeNull();
+    expect(component.hasCapacityOccupied()).toBe(false);
     expect(component.capacityBlocks().length).toBe(10);
     expect(component.hasAveragePace()).toBe(false);
   });

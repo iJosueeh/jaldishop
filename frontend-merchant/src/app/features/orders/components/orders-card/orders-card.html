@@ -170,6 +170,19 @@
         <ng-icon name="matReceiptOutline" class="text-[16px] text-on-surface-variant" />
       </button>
 
+      <!-- Cancelar Pedido (solo para CONFIRMED o IN_PREPARATION) -->
+      @if (canCancel(order().status)) {
+        <button
+          type="button"
+          [disabled]="isUpdating() || isPendingVerification()"
+          (click)="cancelOrder.emit(order())"
+          class="w-8 h-8 rounded-xl bg-surface-container hover:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Cancelar pedido"
+        >
+          <ng-icon name="matCancelOutline" class="text-[16px]" />
+        </button>
+      }
+
       <!-- Botón de Avance de Estado o Verificación Pendiente -->
       @if (isPendingVerification()) {
         <button

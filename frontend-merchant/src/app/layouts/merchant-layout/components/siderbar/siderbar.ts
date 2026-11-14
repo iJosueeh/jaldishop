@@ -46,7 +46,7 @@ export class Siderbar implements OnInit {
   private readonly capacityService = inject(CapacityService);
 
   readonly activeOrdersCount = signal<number>(0);
-  readonly capacityOccupied = signal<number>(0);
+  readonly capacityOccupied = signal<number | null>(null);
 
   readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
 
@@ -72,10 +72,10 @@ export class Siderbar implements OnInit {
   readonly capacityBlocks = computed(() => {
     const total = this.capacityTotal();
     const occupied = this.capacityOccupied();
-    const percentage = total > 0 ? (occupied / total) * 10 : 0;
+    const percentage = occupied !== null && total > 0 ? (occupied / total) * 10 : 0;
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,
-      isFilled: i < Math.round(percentage),
+      isFilled: occupied !== null && i < Math.round(percentage),
     }));
   });
 
@@ -107,7 +107,7 @@ export class Siderbar implements OnInit {
     const occupied = this.capacityOccupied();
     const capacity = this.capacityService.todayEffectiveCapacity();
 
-    if (capacity > 0 && occupied >= capacity) {
+    if (occupied !== null && capacity > 0 && occupied >= capacity) {
       return {
         label: 'Lleno por hoy',
         dotClass: 'bg-amber-500',

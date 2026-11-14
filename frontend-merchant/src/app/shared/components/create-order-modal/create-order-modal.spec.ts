@@ -93,7 +93,7 @@ describe('CreateOrderModal', () => {
     expect(component.orderForm.get('deliveryFee')?.value).toBe(0);
   });
 
-  it('debe emitir orderCreated con datos válidos al enviar formulario', () => {
+  it('no debe emitir orderCreated al invocar onSubmit por estar deshabilitada la creación ficticia (Fase 1)', () => {
     componentRef.setInput('isOpen', true);
     fixture.detectChanges();
 
@@ -112,10 +112,12 @@ describe('CreateOrderModal', () => {
     });
 
     component.onSubmit();
-    expect(orderSpy).toHaveBeenCalled();
-    const emittedOrder = orderSpy.mock.calls[0][0];
-    expect(emittedOrder.customerName).toBe('Lucía Méndez');
-    expect(emittedOrder.status).toBe('CONFIRMED');
+    expect(orderSpy).not.toHaveBeenCalled();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Función en desarrollo');
+    const submitBtn = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
+    expect(submitBtn.disabled).toBe(true);
   });
 
   it('debe emitir closeModal al invocar onClose', () => {
