@@ -270,6 +270,69 @@ class MerchantOrderEndToEndIntegrationTest {
 
     @Test
     @org.junit.jupiter.api.Order(3)
+    @DisplayName("E2E HTTP: Búsqueda global paginada por término y combinación con estado")
+    void shouldSearchOrdersOverHttp() throws Exception {
+        // 1. Búsqueda por número de pedido de la tienda A
+        HttpRequest searchRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders?search=E2E-A&page=0&size=10"))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> searchResponse = httpClient.send(searchRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(searchResponse.statusCode()).isEqualTo(200);
+        JsonNode searchRoot = jsonMapper.readTree(searchResponse.body());
+        assertThat(searchRoot.get("totalElements").asInt()).isGreaterThanOrEqualTo(25);
+        for (JsonNode item : searchRoot.get("content")) {
+            assertThat(item.get("storeId").asText()).isEqualTo(STORE_A_ID.toString());
+            assertThat(item.get("orderNumber").asText()).containsIgnoringCase("E2E-A");
+        }
+
+        // 2. Búsqueda combinada con estado
+        HttpRequest searchStatusRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders?search=E2E-A&status=IN_PREPARATION&size=10"))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> searchStatusResponse = httpClient.send(searchStatusRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(searchStatusResponse.statusCode()).isEqualTo(200);
+        JsonNode statusRoot = jsonMapper.readTree(searchStatusResponse.body());
+        for (JsonNode item : statusRoot.get("content")) {
+            assertThat(item.get("status").asText()).isEqualTo("IN_PREPARATION");
+        }
+
+        // 3. Término excesivo (> 100 caracteres) retorna 400 Bad Request
+        String excessiveSearch = "x".repeat(101);
+        HttpRequest invalidSearchRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders?search=" + excessiveSearch))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> invalidResponse = httpClient.send(invalidSearchRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(invalidResponse.statusCode()).isEqualTo(400);
+
+        // 4. Aislamiento estricto: buscar en Tienda A un término exclusivo de Tienda B ("E2E-B") retorna 0 resultados
+        HttpRequest crossStoreSearchRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/merchants/stores/" + STORE_A_ID + "/orders?search=E2E-B"))
+                .header("Authorization", "Bearer " + merchantAToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> crossSearchResponse = httpClient.send(crossStoreSearchRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(crossSearchResponse.statusCode()).isEqualTo(200);
+        JsonNode crossRoot = jsonMapper.readTree(crossSearchResponse.body());
+        assertThat(crossRoot.get("totalElements").asInt()).isZero();
+        assertThat(crossRoot.get("content").size()).isZero();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(4)
     @DisplayName("E2E HTTP: Detalle completo de un pedido existente dentro de la tienda")
     void shouldGetOrderDetailOverHttp() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()

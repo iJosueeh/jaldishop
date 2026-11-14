@@ -198,4 +198,66 @@ class ListMerchantOrdersServiceTest {
         assertThat(response.first()).isFalse();
         assertThat(response.last()).isTrue();
     }
+
+    @Test
+    @DisplayName("Búsqueda con término activo: normaliza y delega a orderRepository.searchOrders")
+    void shouldDelegateToSearchOrdersWhenSearchTermIsProvided() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Order> domainPage = new PageImpl<>(List.of(sampleOrder), pageable, 1);
+        String rawSearch = "  María   López  ";
+        String expectedPattern = "%maría lópez%";
+
+        when(orderRepository.searchOrders(storeId, null, expectedPattern, pageable))
+                .thenReturn(domainPage);
+
+        MerchantOrderPageResponse response = listMerchantOrdersService.execute(storeId, null, rawSearch, pageable);
+
+        assertThat(response).isNotNull();
+        assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.content().get(0).customerName()).isEqualTo("María López");
+
+        verify(orderRepository).searchOrders(storeId, null, expectedPattern, pageable);
+        verify(orderRepository, never()).findByStoreId(any(), any());
+        verify(orderRepository, never()).findByStoreIdAndStatus(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Búsqueda combinada con estado: delega a searchOrders preservando el estado")
+    void shouldDelegateToSearchOrdersWithStatusWhenBothProvided() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> domainPage = new PageImpl<>(List.of(sampleOrder), pageable, 1);
+        String rawSearch = "987654";
+        String expectedPattern = "%987654%";
+
+        when(orderRepository.searchOrders(storeId, OrderStatus.CONFIRMED, expectedPattern, pageable))
+                .thenReturn(domainPage);
+
+        MerchantOrderPageResponse response = listMerchantOrdersService.execute(storeId, OrderStatus.CONFIRMED, rawSearch, pageable);
+
+        assertThat(response).isNotNull();
+        assertThat(response.totalElements()).isEqualTo(1);
+
+        verify(orderRepository).searchOrders(storeId, OrderStatus.CONFIRMED, expectedPattern, pageable);
+        verify(orderRepository, never()).findByStoreIdAndStatus(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Búsqueda con término en blanco o nulo: retrocede a findByStoreId o findByStoreIdAndStatus")
+    void shouldFallbackWhenSearchTermIsBlankOrNull() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Order> domainPage = new PageImpl<>(List.of(sampleOrder), pageable, 1);
+
+        when(orderRepository.findByStoreId(storeId, pageable)).thenReturn(domainPage);
+        when(orderRepository.findByStoreIdAndStatus(storeId, OrderStatus.READY, pageable)).thenReturn(domainPage);
+
+        // Caso 1: Cadena vacía o espacios en blanco
+        listMerchantOrdersService.execute(storeId, null, "   ", pageable);
+        verify(orderRepository).findByStoreId(storeId, pageable);
+
+        // Caso 2: Cadena nula con estado
+        listMerchantOrdersService.execute(storeId, OrderStatus.READY, null, pageable);
+        verify(orderRepository).findByStoreIdAndStatus(storeId, OrderStatus.READY, pageable);
+
+        verify(orderRepository, never()).searchOrders(any(), any(), any(), any());
+    }
 }

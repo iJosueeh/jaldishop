@@ -93,6 +93,12 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     }
 
     @Override
+    public Page<Order> searchOrders(UUID storeId, OrderStatus status, String searchPattern, Pageable pageable) {
+        return jpaRepository.searchOrders(storeId, status, searchPattern, pageable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<Order> findByIdAndStoreId(UUID id, UUID storeId) {
         return jpaRepository.findByIdAndStoreId(id, storeId)
                 .map(mapper::toDomain);
