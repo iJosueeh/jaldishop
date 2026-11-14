@@ -441,6 +441,11 @@ export class OrderService implements OnDestroy {
 
     return this.http.patch<MerchantOrderDetailResponse>(url, body).pipe(
       tap((response) => {
+        const currentActiveStoreId = this.storeService.currentStore()?.id;
+        if (!currentActiveStoreId || currentActiveStoreId !== targetStoreId) {
+          this.clearUpdating(orderId);
+          return;
+        }
         this.applyUpdatedOrder(response, targetStoreId);
         this.clearUpdating(orderId);
         this.clearPendingVerification(orderId);
@@ -455,6 +460,14 @@ export class OrderService implements OnDestroy {
   }
 
   private applyUpdatedOrder(detail: MerchantOrderDetailResponse, storeId: string): void {
+    const currentActiveStoreId = this.storeService.currentStore()?.id;
+    if (!currentActiveStoreId || currentActiveStoreId !== storeId) {
+      return;
+    }
+
+    const hadInFlightQuery = this.isLoading();
+    const hasActiveSearch = this.appliedSearchQuery().trim().length > 0;
+
     // Invalidar cualquier petición de listado en vuelo anterior para que no sobreescriba esta actualización confirmada
     this.activeListRequestId++;
     const updatedMerchantOrder = mapDetailToMerchantOrder(detail);
@@ -475,11 +488,12 @@ export class OrderService implements OnDestroy {
     // 3. Evaluar si se requiere recarga remota del listado o resolución de carga
     const tab = this.activeTab();
     const isOutdatedTab = tab !== 'ALL' && detail.status !== tab;
+    const requiresRemoteReload = isOutdatedTab || (hadInFlightQuery && hasActiveSearch);
 
     // Solo recargar si no hay un debounce de búsqueda activo en curso
     // (si hay debounce activo, el temporizador disparará la consulta con el término nuevo al expirar)
     if (this.searchDebounceTimer === null) {
-      if (isOutdatedTab) {
+      if (requiresRemoteReload) {
         this.loadOrders(
           this.currentPage(),
           this.pageSize(),
@@ -487,9 +501,9 @@ export class OrderService implements OnDestroy {
           storeId,
           this.appliedSearchQuery(),
         ).subscribe();
-      } else {
-        // Si el pedido se mantiene en la pestaña y había una petición en vuelo invalidada por
-        // activeListRequestId++, finalizamos el estado de carga para no dejar la UI bloqueada.
+      } else if (hadInFlightQuery) {
+        // Si el pedido se mantiene en la pestaña y no había búsqueda activa en vuelo,
+        // la actualización en memoria es suficiente y finalizamos isLoading para no dejarlo bloqueado.
         this.isLoading.set(false);
         this.isLoaded.set(true);
       }

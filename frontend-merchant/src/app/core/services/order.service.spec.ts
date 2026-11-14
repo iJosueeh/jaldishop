@@ -1404,14 +1404,8 @@ describe('OrderService', () => {
       expect(service.orders()[0].orderNumber).toBe('#1042');
     });
 
-    it('no debe dejar isLoading bloqueado y debe invalidar listado obsoleto cuando un PATCH completa durante una búsqueda HTTP en vuelo (P1 Regresión)', () => {
-      // 1. Iniciar búsqueda HTTP para 'Carlos'
-      service.appliedSearchQuery.set('Carlos');
-      service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
-      const searchReq1 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
-      expect(service.isLoading()).toBe(true);
-
-      // 2. PATCH de mutación de estado en paralelo
+    it('debe reconciliar la búsqueda remota y no finalizar isLoading prematuramente cuando un PATCH completa durante una búsqueda HTTP en vuelo (P1 Regresión)', () => {
+      // 1. Mantener en memoria pedidos y metadatos de una página anterior
       service.orders.set([
         {
           id: 'ord-1039',
@@ -1426,31 +1420,110 @@ describe('OrderService', () => {
           createdAt: new Date().toISOString(),
         },
       ]);
+      service.totalElements.set(25);
+      service.totalPages.set(3);
+      service.currentPage.set(0);
+
+      // 2. Iniciar búsqueda HTTP para 'Carlos'
+      service.appliedSearchQuery.set('Carlos');
+      service.loadOrders(0, 10, 'ALL', 'store-123', 'Carlos').subscribe();
+      const searchReq1 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
+      expect(service.isLoading()).toBe(true);
+
+      // 3. Ejecutar PATCH en paralelo para ord-1039
       service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
       const patchReq = httpMock.expectOne(
         `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
       );
 
-      // 3. Completa el PATCH antes que la búsqueda
+      // 4. Completa el PATCH mientras searchReq1 está pendiente
       patchReq.flush({
         ...mockDetailResponse,
         id: 'ord-1039',
         status: 'IN_PREPARATION',
       });
 
-      // La mutación actualiza en memoria, incrementa activeListRequestId y finaliza isLoading
-      expect(service.orders()[0].status).toBe('IN_PREPARATION');
-      expect(service.isLoading()).toBe(false);
+      // La mutación actualiza ord-1039 en memoria, detecta búsqueda activa en vuelo,
+      // NO finaliza isLoading prematuramente y despacha reconciliación remota válida
+      expect(service.isLoading()).toBe(true);
+      const searchReq2 = httpMock.expectOne((r) => r.params.get('search') === 'Carlos');
 
-      // 4. searchReq1 responde después con snapshot desactualizado: debe ser ignorada por obsoleta
+      // 5. Simular respuestas HTTP fuera de orden: searchReq1 responde con retraso
       searchReq1.flush({
         ...mockPageResponse,
-        content: [{ ...mockPageResponse.content[0], id: 'ord-1039', status: 'CONFIRMED' }],
+        totalElements: 99,
+        totalPages: 10,
+        content: [{ ...mockPageResponse.content[0], id: 'ord-stale-search', customerName: 'Viejo Carlos' }],
+      });
+      // searchReq1 fue invalidada: no debe reemplazar pedidos ni metadatos, e isLoading sigue en true
+      expect(service.orders().find((o) => o.id === 'ord-stale-search')).toBeUndefined();
+      expect(service.isLoading()).toBe(true);
+
+      // 6. searchReq2 (reconciliación fresca) responde con los resultados vigentes
+      searchReq2.flush({
+        ...mockPageResponse,
+        page: 0,
+        size: 10,
+        totalElements: 1,
+        totalPages: 1,
+        content: [
+          {
+            ...mockPageResponse.content[0],
+            id: 'ord-carlos-1',
+            customerName: 'Carlos Gomez',
+            status: 'IN_PREPARATION',
+          },
+        ],
       });
 
-      // El estado confirmado en el PATCH se mantiene y isLoading no se reactiva ni se bloquea
-      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      // 7. Confirma que isLoading finaliza solo tras la consulta válida y metadatos son coherentes
       expect(service.isLoading()).toBe(false);
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-carlos-1');
+      expect(service.orders()[0].customerName).toBe('Carlos Gomez');
+      expect(service.totalElements()).toBe(1);
+      expect(service.totalPages()).toBe(1);
+      expect(service.currentPage()).toBe(0);
+    });
+
+    it('debe impedir que un PATCH perteneciente a una tienda anterior modifique el listado de la tienda activa', () => {
+      // 1. Tienda activa inicial es store-123 con un pedido en memoria
+      service.orders.set([
+        {
+          id: 'ord-current-store',
+          orderNumber: '#PED-100',
+          customerName: 'Cliente Tienda Actual',
+          deliveryMode: 'DELIVERY',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50,
+          items: [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      expect(service.orders().length).toBe(1);
+
+      // 2. Iniciar un PATCH explícito para una tienda anterior 'store-old'
+      service.updateOrderStatus('ord-old-store', 'READY', 'store-old').subscribe();
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-old/orders/ord-old-store/status`,
+      );
+
+      // 3. El PATCH responde pero la tienda activa sigue siendo store-123
+      patchReq.flush({
+        ...mockDetailResponse,
+        id: 'ord-old-store',
+        storeId: 'store-old',
+        status: 'READY',
+      });
+
+      // 4. El listado de la tienda activa store-123 no debe modificarse
+      expect(service.orders().length).toBe(1);
+      expect(service.orders()[0].id).toBe('ord-current-store');
+      expect(service.orders().find((o) => o.id === 'ord-old-store')).toBeUndefined();
+      // No debe haberse disparado ninguna recarga HTTP hacia store-old ni store-123
+      httpMock.expectNone((r) => r.url.includes('/orders'));
     });
 
     it('no debe emitir solicitudes con búsqueda desactualizada cuando un PATCH completa durante un debounce activo (P1 Regresión)', () => {
