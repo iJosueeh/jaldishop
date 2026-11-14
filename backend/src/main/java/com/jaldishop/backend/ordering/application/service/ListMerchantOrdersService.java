@@ -5,6 +5,7 @@ import com.jaldishop.backend.ordering.application.result.MerchantOrderSummaryRes
 import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
+import com.jaldishop.backend.shared.util.SearchQueryUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,11 @@ public class ListMerchantOrdersService {
 
     @Transactional(readOnly = true)
     public MerchantOrderPageResponse execute(UUID storeId, OrderStatus status, Pageable pageable) {
+        return execute(storeId, status, null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public MerchantOrderPageResponse execute(UUID storeId, OrderStatus status, String search, Pageable pageable) {
         if (storeId == null) {
             throw new IllegalArgumentException("El identificador de la tienda es obligatorio.");
         }
@@ -34,9 +40,16 @@ public class ListMerchantOrdersService {
                 ? pageable
                 : PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
-        Page<Order> orderPage = (status != null)
-                ? orderRepository.findByStoreIdAndStatus(storeId, status, effectivePageable)
-                : orderRepository.findByStoreId(storeId, effectivePageable);
+        String searchPattern = SearchQueryUtils.toSqlLikeContainsPattern(search);
+
+        Page<Order> orderPage;
+        if (searchPattern != null) {
+            orderPage = orderRepository.searchOrders(storeId, status, searchPattern, effectivePageable);
+        } else if (status != null) {
+            orderPage = orderRepository.findByStoreIdAndStatus(storeId, status, effectivePageable);
+        } else {
+            orderPage = orderRepository.findByStoreId(storeId, effectivePageable);
+        }
 
         Page<MerchantOrderSummaryResponse> summaryPage = orderPage.map(MerchantOrderSummaryResponse::from);
 

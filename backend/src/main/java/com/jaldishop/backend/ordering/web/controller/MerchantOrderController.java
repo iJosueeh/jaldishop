@@ -14,6 +14,7 @@ import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -80,19 +81,23 @@ public class MerchantOrderController {
     }
 
     /**
-     * Consulta paginada de pedidos de la tienda, con filtro opcional por estado.
+     * Consulta paginada de pedidos de la tienda, con filtros opcionales por estado y búsqueda textual.
      */
     @GetMapping
     public ResponseEntity<MerchantOrderPageResponse> listOrders(
             @AuthenticationPrincipal JwtPrincipal principal,
             @PathVariable UUID storeId,
             @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) @Size(max = 100, message = "El término de búsqueda no puede superar los 100 caracteres") String search,
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "El número de página no puede ser negativo") int page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "El tamaño de página debe ser al menos 1")
                                                @Max(value = 100, message = "El tamaño de página no puede ser mayor a 100") int size
     ) {
         validatePrincipal(principal);
         storeContextService.validateStoreOwnership(storeId, principal);
+        if (search != null && search.length() > 100) {
+            throw new IllegalArgumentException("El término de búsqueda no puede superar los 100 caracteres");
+        }
         if (page < 0) {
             throw new IllegalArgumentException("El número de página no puede ser negativo");
         }
@@ -100,7 +105,7 @@ public class MerchantOrderController {
             throw new IllegalArgumentException("El tamaño de página debe estar entre 1 y 100");
         }
         Pageable pageable = PageRequest.of(page, size);
-        MerchantOrderPageResponse response = listMerchantOrdersService.execute(storeId, status, pageable);
+        MerchantOrderPageResponse response = listMerchantOrdersService.execute(storeId, status, search, pageable);
         return ResponseEntity.ok(response);
     }
 

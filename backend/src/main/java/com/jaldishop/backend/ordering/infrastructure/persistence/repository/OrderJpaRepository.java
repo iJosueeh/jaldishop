@@ -50,6 +50,33 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
 
     Page<OrderEntity> findByStoreIdAndStatusOrderByConfirmedAtDescIdDesc(UUID storeId, OrderStatus status, Pageable pageable);
 
+    @Query(value = """
+        SELECT o FROM OrderEntity o
+        WHERE o.storeId = :storeId
+          AND (:status IS NULL OR o.status = :status)
+          AND (
+            LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+            OR LOWER(o.customerName) LIKE :searchPattern ESCAPE '\\'
+            OR LOWER(o.customerPhone) LIKE :searchPattern ESCAPE '\\'
+          )
+        ORDER BY o.confirmedAt DESC, o.id DESC
+    """, countQuery = """
+        SELECT COUNT(o) FROM OrderEntity o
+        WHERE o.storeId = :storeId
+          AND (:status IS NULL OR o.status = :status)
+          AND (
+            LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+            OR LOWER(o.customerName) LIKE :searchPattern ESCAPE '\\'
+            OR LOWER(o.customerPhone) LIKE :searchPattern ESCAPE '\\'
+          )
+    """)
+    Page<OrderEntity> searchOrders(
+            @Param("storeId") UUID storeId,
+            @Param("status") OrderStatus status,
+            @Param("searchPattern") String searchPattern,
+            Pageable pageable
+    );
+
     Optional<OrderEntity> findByIdAndStoreId(UUID id, UUID storeId);
 
     Optional<OrderEntity> findByOrderNumberAndStoreId(String orderNumber, UUID storeId);

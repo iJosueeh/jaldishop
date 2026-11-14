@@ -263,4 +263,25 @@ class JpaOrderRepositoryAdapterTest {
 
         verify(jpaRepository).countOrdersByStoreId(storeId);
     }
+
+    @Test
+    @DisplayName("searchOrders: delega en jpaRepository.searchOrders y mapea entidades a dominio")
+    void shouldSearchOrdersAndMapToDomain() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderEntity> entityPage = new PageImpl<>(List.of(orderEntity), pageable, 1);
+        String searchPattern = "%carlos%";
+
+        when(jpaRepository.searchOrders(storeId, OrderStatus.CONFIRMED, searchPattern, pageable))
+                .thenReturn(entityPage);
+        when(mapper.toDomain(orderEntity)).thenReturn(domainOrder);
+
+        Page<Order> result = adapter.searchOrders(storeId, OrderStatus.CONFIRMED, searchPattern, pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).containsExactly(domainOrder);
+
+        verify(jpaRepository).searchOrders(storeId, OrderStatus.CONFIRMED, searchPattern, pageable);
+        verify(mapper).toDomain(orderEntity);
+    }
 }

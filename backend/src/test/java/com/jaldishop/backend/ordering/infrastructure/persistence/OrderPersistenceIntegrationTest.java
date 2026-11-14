@@ -360,6 +360,62 @@ class OrderPersistenceIntegrationTest {
         assertThat(nonExistent).isEmpty();
     }
 
+    @Test
+    @org.junit.jupiter.api.Order(7)
+    @DisplayName("Búsqueda global por número de pedido: sensible a coincidencias parciales y multi-tenant")
+    void shouldSearchOrdersByOrderNumberWithStrictStoreIsolation() {
+        // 1. Coincidencia parcial insensible a mayúsculas
+        Page<Order> pageA = orderRepository.searchOrders(storeAId, null, "%persist-a-001%", PageRequest.of(0, 10));
+        assertThat(pageA.getTotalElements()).isEqualTo(1);
+        assertThat(pageA.getContent().get(0).getOrderNumber()).isEqualTo("JAL-PERSIST-A-001");
+
+        // 2. Aislamiento estricto: buscar pedido de Tienda B en Tienda A no retorna nada
+        Page<Order> crossTenant = orderRepository.searchOrders(storeAId, null, "%persist-b%", PageRequest.of(0, 10));
+        assertThat(crossTenant.getTotalElements()).isZero();
+        assertThat(crossTenant.getContent()).isEmpty();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(8)
+    @DisplayName("Búsqueda global combinada con estado y paginación")
+    void shouldSearchOrdersCombinedWithStatusAndPagination() {
+        // En Tienda A hay 4 pedidos READY
+        Page<Order> readyPage = orderRepository.searchOrders(storeAId, OrderStatus.READY, "%persist-a%", PageRequest.of(0, 10));
+        assertThat(readyPage.getTotalElements()).isEqualTo(4);
+        assertThat(readyPage.getContent()).allMatch(o -> o.getStatus() == OrderStatus.READY);
+
+        // Paginación de todos los 25 pedidos de Tienda A
+        Page<Order> allPage0 = orderRepository.searchOrders(storeAId, null, "%persist-a%", PageRequest.of(0, 20));
+        assertThat(allPage0.getTotalElements()).isEqualTo(25);
+        assertThat(allPage0.getContent()).hasSize(20);
+        assertThat(allPage0.hasNext()).isTrue();
+
+        Page<Order> allPage1 = orderRepository.searchOrders(storeAId, null, "%persist-a%", PageRequest.of(1, 20));
+        assertThat(allPage1.getContent()).hasSize(5);
+
+        // Estabilidad de orden confirmedAt DESC
+        Instant prev = allPage0.getContent().get(0).getConfirmedAt();
+        for (Order o : allPage0.getContent()) {
+            assertThat(o.getConfirmedAt()).isBeforeOrEqualTo(prev);
+            prev = o.getConfirmedAt();
+        }
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(9)
+    @DisplayName("Búsqueda por teléfono y nombre de cliente con coincidencias vacías ante no existentes")
+    void shouldSearchByCustomerDetailsAndHandleNoMatches() {
+        Page<Order> byPhone = orderRepository.searchOrders(storeAId, null, "%987654321%", PageRequest.of(0, 10));
+        assertThat(byPhone.getTotalElements()).isEqualTo(25);
+
+        Page<Order> byName = orderRepository.searchOrders(storeAId, null, "%cliente test%", PageRequest.of(0, 10));
+        assertThat(byName.getTotalElements()).isEqualTo(25);
+
+        Page<Order> noMatch = orderRepository.searchOrders(storeAId, null, "%inexistente_xyz%", PageRequest.of(0, 10));
+        assertThat(noMatch.getTotalElements()).isZero();
+        assertThat(noMatch.getContent()).isEmpty();
+    }
+
     private static void seedOrder(UUID orderId, String orderNumber, UUID userId, UUID storeId,
                                   OrderStatus status, Instant confirmedAt) throws SQLException {
         UUID capResId = UUID.randomUUID();

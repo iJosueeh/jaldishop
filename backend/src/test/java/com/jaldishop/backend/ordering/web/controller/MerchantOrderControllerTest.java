@@ -157,7 +157,7 @@ class MerchantOrderControllerTest {
         );
 
         doNothing().when(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
-        when(listMerchantOrdersService.execute(eq(storeId), isNull(), any(Pageable.class)))
+        when(listMerchantOrdersService.execute(eq(storeId), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders", storeId)
@@ -175,7 +175,7 @@ class MerchantOrderControllerTest {
                 .andExpect(jsonPath("$.content[0].items[0].productName").value("Pie de Manzana"));
 
         verify(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
-        verify(listMerchantOrdersService).execute(eq(storeId), isNull(), eq(PageRequest.of(0, 20)));
+        verify(listMerchantOrdersService).execute(eq(storeId), isNull(), isNull(), eq(PageRequest.of(0, 20)));
     }
 
     @Test
@@ -186,7 +186,7 @@ class MerchantOrderControllerTest {
         );
 
         doNothing().when(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
-        when(listMerchantOrdersService.execute(eq(storeId), eq(OrderStatus.IN_PREPARATION), any(Pageable.class)))
+        when(listMerchantOrdersService.execute(eq(storeId), eq(OrderStatus.IN_PREPARATION), isNull(), any(Pageable.class)))
                 .thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders", storeId)
@@ -200,7 +200,48 @@ class MerchantOrderControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(15))
                 .andExpect(jsonPath("$.totalPages").value(2));
 
-        verify(listMerchantOrdersService).execute(eq(storeId), eq(OrderStatus.IN_PREPARATION), eq(PageRequest.of(1, 10)));
+        verify(listMerchantOrdersService).execute(eq(storeId), eq(OrderStatus.IN_PREPARATION), isNull(), eq(PageRequest.of(1, 10)));
+    }
+
+    @Test
+    @DisplayName("2b. Búsqueda global con término y status: GET / con search, status y paginación")
+    void shouldListOrdersWithSearchTermAndStatus() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        MerchantOrderSummaryResponse summary = createSampleSummary(orderId);
+        MerchantOrderPageResponse pageResponse = new MerchantOrderPageResponse(
+                List.of(summary), 0, 10, 1, 1, true, true
+        );
+
+        doNothing().when(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        when(listMerchantOrdersService.execute(eq(storeId), eq(OrderStatus.CONFIRMED), eq("Carlos"), any(Pageable.class)))
+                .thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders", storeId)
+                        .param("status", "CONFIRMED")
+                        .param("search", "Carlos")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].customerName").value("Carlos Mendoza"));
+
+        verify(listMerchantOrdersService).execute(eq(storeId), eq(OrderStatus.CONFIRMED), eq("Carlos"), eq(PageRequest.of(0, 10)));
+    }
+
+    @Test
+    @DisplayName("2c. Rechaza término de búsqueda con más de 100 caracteres con HTTP 400")
+    void shouldReturnBadRequestWhenSearchExceeds100Chars() throws Exception {
+        doNothing().when(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        String excessiveSearch = "a".repeat(101);
+
+        mockMvc.perform(get("/api/v1/merchants/stores/{storeId}/orders", storeId)
+                        .param("search", excessiveSearch)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ARGUMENT"));
+
+        verifyNoInteractions(listMerchantOrdersService);
     }
 
     @Test
