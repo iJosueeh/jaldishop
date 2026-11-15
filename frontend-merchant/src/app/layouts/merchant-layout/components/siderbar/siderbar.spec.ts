@@ -8,6 +8,7 @@ import { OrderService } from '../../../../core/services/order.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { AuthService } from '../../../../core/services/auth-service';
+import { getOperatingDateLima } from '../../../../core/utils/date.utils';
 import { of } from 'rxjs';
 
 describe('Siderbar', () => {
@@ -171,7 +172,7 @@ describe('Siderbar', () => {
     const capacityService = TestBed.inject(CapacityService);
     capacityService.dailyOccupancy.set({
       storeId: 'store-1',
-      date: '2026-11-15',
+      date: getOperatingDateLima(),
       isClosed: false,
       effectiveCapacity: 20,
       occupiedCapacity: 12,
@@ -198,7 +199,7 @@ describe('Siderbar', () => {
     const capacityService = TestBed.inject(CapacityService);
     capacityService.dailyOccupancy.set({
       storeId: 'store-1',
-      date: '2026-11-15',
+      date: getOperatingDateLima(),
       isClosed: false,
       effectiveCapacity: 10,
       occupiedCapacity: 16,

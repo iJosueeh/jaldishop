@@ -3,6 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CapacityService } from './capacity.service';
 import { StoreService } from './store.service';
+import { OrderService } from './order.service';
+import { getLimaTimeParts, getOperatingDateLima } from '../utils/date.utils';
 import {
   CapacityConfiguration,
   CreateCapacityConfigRequest,
@@ -31,7 +33,7 @@ describe('CapacityService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CapacityService, StoreService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [CapacityService, StoreService, OrderService, provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(CapacityService);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -298,11 +300,10 @@ describe('CapacityService', () => {
     });
 
     it('debe priorizar excepción activa del día sobre la capacidad base', () => {
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-      // Configuración base (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
-      const todayDayOfWeek = today.getDay();
+      const todayStr = getOperatingDateLima();
+      const parts = getLimaTimeParts(new Date());
+      const limaDate = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12, 0, 0));
+      const todayDayOfWeek = limaDate.getUTCDay();
       const baseConfig: CapacityConfiguration = {
         id: 'cfg-today',
         storeId: 'store-1',
@@ -550,7 +551,7 @@ describe('CapacityService', () => {
       // Simular que dailyOccupancy tiene datos retenidos de store-A
       service.dailyOccupancy.set({
         storeId: 'store-A',
-        date: '2026-11-15',
+        date: getOperatingDateLima(),
         isClosed: false,
         effectiveCapacity: 30,
         occupiedCapacity: 15,
@@ -565,6 +566,62 @@ describe('CapacityService', () => {
       expect(service.todayOccupied()).toBeNull();
       expect(service.todayAvailable()).toBeNull();
       expect(service.todayOccupancyPercentage()).toBeNull();
+    });
+
+    it('debe refrescar ocupación tras mutación confirmada (orderMutated$) cuando hay datos en memoria', () => {
+      const orderService = TestBed.inject(OrderService);
+      const storeService = TestBed.inject(StoreService);
+      storeService.currentStore.set({
+        id: 'store-1',
+        merchantUserId: 'usr-1',
+        name: 'Tienda 1',
+        slug: 'tienda-1',
+        pickupEnabled: true,
+        deliveryEnabled: true,
+        status: 'ACTIVE',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+      service.dailyOccupancy.set({
+        storeId: 'store-1',
+        date: getOperatingDateLima(),
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 10,
+        availableCapacity: 10,
+        reservedCapacity: 2,
+        committedCapacity: 8,
+        occupancyPercentage: 50,
+        slots: [],
+      });
+
+      // Mutación de cancelación (CONFIRMED -> CANCELLED)
+      (orderService as any).orderMutatedSubject.next({
+        storeId: 'store-1',
+        orderId: 'ord-123',
+        status: 'CANCELLED',
+      });
+
+      const req = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy'),
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush({
+        storeId: 'store-1',
+        date: getOperatingDateLima(),
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 9,
+        availableCapacity: 11,
+        reservedCapacity: 2,
+        committedCapacity: 7,
+        occupancyPercentage: 45,
+        slots: [],
+      });
+
+      expect(service.todayOccupied()).toBe(9);
+      expect(service.todayAvailable()).toBe(11);
     });
   });
 });

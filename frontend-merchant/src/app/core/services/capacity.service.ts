@@ -12,6 +12,7 @@ import {
 } from '../models/capacity.models';
 import { StoreService } from './store.service';
 import { StompService } from './stomp.service';
+import { OrderService } from './order.service';
 import { getLimaTimeParts, getOperatingDateLima } from '../utils/date.utils';
 import { catchError, finalize, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 
@@ -22,6 +23,7 @@ export class CapacityService {
   private readonly http = inject(HttpClient);
   private readonly storeService = inject(StoreService);
   private readonly stompService = inject(StompService, { optional: true });
+  private readonly orderService = inject(OrderService, { optional: true });
 
   private readonly baseUrl = `${environment.apiUrl}/capacity-configurations`;
   private readonly exceptionsUrl = `${environment.apiUrl}/capacity-exceptions`;
@@ -96,22 +98,34 @@ export class CapacityService {
   }
 
   private initRealtimeSubscriptions(): void {
-    if (!this.stompService) return;
-
-    this.stompService.orderConfirmed$.subscribe((event) => {
-      const currentStoreId = this.storeService.currentStore()?.id;
-      if (!currentStoreId || event.storeId !== currentStoreId) {
-        return;
-      }
-      this.loadDailyOccupancy(currentStoreId, undefined, true).subscribe();
-    });
-
-    this.stompService.reconnected$.subscribe(() => {
-      const currentStoreId = this.storeService.currentStore()?.id;
-      if (currentStoreId) {
+    if (this.stompService) {
+      this.stompService.orderConfirmed$.subscribe((event) => {
+        const currentStoreId = this.storeService.currentStore()?.id;
+        if (!currentStoreId || event.storeId !== currentStoreId) {
+          return;
+        }
         this.loadDailyOccupancy(currentStoreId, undefined, true).subscribe();
-      }
-    });
+      });
+
+      this.stompService.reconnected$.subscribe(() => {
+        const currentStoreId = this.storeService.currentStore()?.id;
+        if (currentStoreId) {
+          this.loadDailyOccupancy(currentStoreId, undefined, true).subscribe();
+        }
+      });
+    }
+
+    if (this.orderService) {
+      this.orderService.orderMutated$.subscribe((event) => {
+        const currentStoreId = this.storeService.currentStore()?.id;
+        if (!currentStoreId || event.storeId !== currentStoreId) {
+          return;
+        }
+        if (this.dailyOccupancy() !== null || this.isLoadingOccupancy()) {
+          this.loadDailyOccupancy(currentStoreId, undefined, true).subscribe();
+        }
+      });
+    }
   }
 
   readonly todayConfigurations = computed(() => {

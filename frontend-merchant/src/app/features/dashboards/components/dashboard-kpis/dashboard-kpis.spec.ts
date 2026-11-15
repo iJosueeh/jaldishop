@@ -4,6 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardKpis } from './dashboard-kpis';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { OrderService } from '../../../../core/services/order.service';
+import { getOperatingDateLima } from '../../../../core/utils/date.utils';
 
 describe('DashboardKpis', () => {
   let component: DashboardKpis;
@@ -39,7 +40,7 @@ describe('DashboardKpis', () => {
     const capacityService = TestBed.inject(CapacityService);
     capacityService.dailyOccupancy.set({
       storeId: 'store-1',
-      date: '2026-11-15',
+      date: getOperatingDateLima(),
       isClosed: false,
       effectiveCapacity: 10,
       occupiedCapacity: 7,
@@ -70,7 +71,7 @@ describe('DashboardKpis', () => {
     const capacityService = TestBed.inject(CapacityService);
     capacityService.dailyOccupancy.set({
       storeId: 'store-1',
-      date: '2026-11-15',
+      date: getOperatingDateLima(),
       isClosed: false,
       effectiveCapacity: 10,
       occupiedCapacity: 14,
@@ -99,8 +100,7 @@ describe('DashboardKpis', () => {
 
   it('debe reflejar estado de cierre cuando hay una excepción con capacidad 0 hoy', () => {
     const capacityService = TestBed.inject(CapacityService);
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayStr = getOperatingDateLima();
 
     capacityService.exceptions.set([
       {
@@ -129,8 +129,7 @@ describe('DashboardKpis', () => {
 
   it('debe reflejar capacidad especial cuando hay una excepción con cupos hoy', () => {
     const capacityService = TestBed.inject(CapacityService);
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayStr = getOperatingDateLima();
 
     capacityService.exceptions.set([
       {

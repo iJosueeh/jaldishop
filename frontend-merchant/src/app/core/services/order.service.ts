@@ -19,7 +19,6 @@ import { ToastService } from './toast.service';
 import { SettingsService } from './settings.service';
 import { StoreService } from './store.service';
 import { StompService } from './stomp.service';
-import { CapacityService } from './capacity.service';
 import { WhatsAppTemplateId } from '../models/settings.models';
 import { getMsUntilNextMidnightLima, getOperatingDateLima } from '../utils/date.utils';
 import {
@@ -28,6 +27,7 @@ import {
   Observable,
   of,
   shareReplay,
+  Subject,
   switchMap,
   tap,
   throwError,
@@ -43,8 +43,14 @@ export class OrderService implements OnDestroy {
   private readonly settingsService = inject(SettingsService);
   private readonly storeService = inject(StoreService);
   private readonly stompService = inject(StompService);
-  private readonly capacityService = inject(CapacityService, { optional: true });
   private readonly destroyRef = inject(DestroyRef, { optional: true });
+
+  private readonly orderMutatedSubject = new Subject<{
+    storeId: string;
+    orderId: string;
+    status: OrderStatus;
+  }>();
+  readonly orderMutated$ = this.orderMutatedSubject.asObservable();
 
   private readonly baseUrl = `${environment.apiUrl}/merchants/stores`;
 
@@ -524,13 +530,12 @@ export class OrderService implements OnDestroy {
       this.loadTodayOrderCounts(storeId, true).subscribe();
     }
 
-    // 5. Refrescar ocupación real de capacidad si hay servicio disponible y suscriptores activos
-    if (
-      this.capacityService?.dailyOccupancy() !== null ||
-      this.capacityService?.isLoadingOccupancy()
-    ) {
-      this.capacityService?.loadDailyOccupancy(storeId, undefined, true).subscribe();
-    }
+    // 5. Emitir evento reactivo de mutación de pedido para consumidores externos (ej. CapacityService)
+    this.orderMutatedSubject.next({
+      storeId,
+      orderId: detail.id,
+      status: detail.status,
+    });
   }
 
   private handlePatchError(
