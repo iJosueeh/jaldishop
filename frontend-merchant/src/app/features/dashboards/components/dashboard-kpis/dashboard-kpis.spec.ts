@@ -4,6 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardKpis } from './dashboard-kpis';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { OrderService } from '../../../../core/services/order.service';
+import { getOperatingDateLima } from '../../../../core/utils/date.utils';
 
 describe('DashboardKpis', () => {
   let component: DashboardKpis;
@@ -32,13 +33,74 @@ describe('DashboardKpis', () => {
     expect(component.shiftSchedule()).toBeDefined();
 
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Medición de ocupación en desarrollo');
+    expect(fixture.nativeElement.textContent).toContain('Medición de ocupación no disponible');
+  });
+
+  it('debe reflejar ocupación real, porcentaje y bloques llenos cuando se cargan los datos', () => {
+    const capacityService = TestBed.inject(CapacityService);
+    capacityService.dailyOccupancy.set({
+      storeId: 'store-1',
+      date: getOperatingDateLima(),
+      isClosed: false,
+      effectiveCapacity: 10,
+      occupiedCapacity: 7,
+      availableCapacity: 3,
+      reservedCapacity: 2,
+      committedCapacity: 5,
+      occupancyPercentage: 70,
+      slots: [],
+    });
+
+    fixture.detectChanges();
+
+    expect(component.capacityOccupied()).toBe(7);
+    expect(component.capacityTotal()).toBe(10);
+    expect(component.availableCapacity()).toBe(3);
+    expect(component.capacityPercentage()).toBe(70);
+    expect(component.isOverCapacity()).toBe(false);
+
+    const filledBlocks = component.capacityBlocks().filter((b) => b.isFilled);
+    expect(filledBlocks.length).toBe(7);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('70% ocupado');
+    expect(compiled.textContent).toContain('Quedan 3 cupos');
+  });
+
+  it('debe reflejar sobrecapacidad limitando visualmente los bloques a 10 e informando el exceso real', () => {
+    const capacityService = TestBed.inject(CapacityService);
+    capacityService.dailyOccupancy.set({
+      storeId: 'store-1',
+      date: getOperatingDateLima(),
+      isClosed: false,
+      effectiveCapacity: 10,
+      occupiedCapacity: 14,
+      availableCapacity: 0,
+      reservedCapacity: 4,
+      committedCapacity: 10,
+      occupancyPercentage: 140,
+      slots: [],
+    });
+
+    fixture.detectChanges();
+
+    expect(component.capacityOccupied()).toBe(14);
+    expect(component.capacityTotal()).toBe(10);
+    expect(component.availableCapacity()).toBe(0);
+    expect(component.capacityPercentage()).toBe(140);
+    expect(component.isOverCapacity()).toBe(true);
+
+    const filledBlocks = component.capacityBlocks().filter((b) => b.isFilled);
+    expect(filledBlocks.length).toBe(10);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('140% sobrecapacidad');
+    expect(compiled.textContent).toContain('Sobrecapacidad: 4 cupos sobre el límite');
   });
 
   it('debe reflejar estado de cierre cuando hay una excepción con capacidad 0 hoy', () => {
     const capacityService = TestBed.inject(CapacityService);
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayStr = getOperatingDateLima();
 
     capacityService.exceptions.set([
       {
@@ -67,8 +129,7 @@ describe('DashboardKpis', () => {
 
   it('debe reflejar capacidad especial cuando hay una excepción con cupos hoy', () => {
     const capacityService = TestBed.inject(CapacityService);
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayStr = getOperatingDateLima();
 
     capacityService.exceptions.set([
       {

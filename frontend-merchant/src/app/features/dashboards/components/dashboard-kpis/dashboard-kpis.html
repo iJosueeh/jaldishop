@@ -43,16 +43,18 @@
         </span>
         <span
           class="text-[11px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
-          [class.bg-rose-50]="isClosedToday()"
-          [class.text-rose-700]="isClosedToday()"
+          [class.bg-rose-50]="isClosedToday() || isOverCapacity()"
+          [class.text-rose-700]="isClosedToday() || isOverCapacity()"
           [class.border]="true"
-          [class.border-rose-200]="isClosedToday()"
-          [class.bg-emerald-50]="!isClosedToday()"
-          [class.text-emerald-800]="!isClosedToday()"
-          [class.border-emerald-200]="!isClosedToday()"
+          [class.border-rose-200]="isClosedToday() || isOverCapacity()"
+          [class.bg-emerald-50]="!isClosedToday() && !isOverCapacity()"
+          [class.text-emerald-800]="!isClosedToday() && !isOverCapacity()"
+          [class.border-emerald-200]="!isClosedToday() && !isOverCapacity()"
         >
           @if (isClosedToday()) {
             Cerrado
+          } @else if (isOverCapacity()) {
+            {{ capacityPercentage() }}% sobrecapacidad
           } @else if (capacityPercentage() !== null) {
             {{ capacityPercentage() }}% ocupado
           } @else {
@@ -67,9 +69,9 @@
           @for (block of capacityBlocks(); track block.index) {
             <span
               class="h-3 sm:h-3.5 flex-1 rounded-xs transition-all duration-300"
-              [class.bg-[#005141]]="block.isFilled && !isClosedToday()"
+              [class.bg-[#005141]]="block.isFilled && !isClosedToday() && !isOverCapacity()"
               [class.shadow-2xs]="block.isFilled && !isClosedToday()"
-              [class.bg-rose-500]="block.isFilled && isClosedToday()"
+              [class.bg-rose-500]="block.isFilled && (isClosedToday() || isOverCapacity())"
               [class.bg-stone-100]="!block.isFilled"
               [class.border]="!block.isFilled"
               [class.border-stone-200]="!block.isFilled"
@@ -78,7 +80,11 @@
         </div>
       } @else {
         <div class="pt-1 text-[11px] text-stone-400 font-medium">
-          Medición de ocupación en desarrollo
+          @if (isOccupancyLoading()) {
+            Cargando ocupación de hoy...
+          } @else {
+            Medición de ocupación no disponible
+          }
         </div>
       }
     </div>
@@ -89,11 +95,13 @@
       </span>
       <span
         class="font-bold"
-        [class.text-rose-700]="isClosedToday()"
-        [class.text-emerald-800]="!isClosedToday()"
+        [class.text-rose-700]="isClosedToday() || isOverCapacity()"
+        [class.text-emerald-800]="!isClosedToday() && !isOverCapacity()"
       >
         @if (isClosedToday()) {
           Sin recepción de pedidos hoy
+        } @else if (isOverCapacity()) {
+          Sobrecapacidad: {{ capacityOccupied()! - capacityTotal() }} cupos sobre el límite
         } @else if (availableCapacity() !== null) {
           Quedan {{ availableCapacity() }} {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
         } @else if (capacityTotal() > 0) {

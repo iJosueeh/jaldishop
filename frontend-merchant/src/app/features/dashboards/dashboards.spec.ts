@@ -19,9 +19,18 @@ describe('Dashboards', () => {
       exceptions: signal([]),
       todayException: signal(null),
       todayEffectiveCapacity: signal(0),
+      todayEffectiveCapacityReal: signal(0),
       isTodayClosed: signal(false),
+      isTodayClosedReal: signal(false),
+      todayOccupied: signal(null),
+      todayAvailable: signal(null),
+      todayOccupancyPercentage: signal(null),
+      isLoadingOccupancy: signal(false),
+      occupancyError: signal(null),
+      isOccupancyOutdated: signal(false),
       getConfigurations: () => of([]),
       getExceptions: () => of([]),
+      loadDailyOccupancy: () => of(null),
     };
 
     await TestBed.configureTestingModule({

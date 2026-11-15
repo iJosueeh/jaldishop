@@ -100,6 +100,7 @@ export class Orders implements OnInit {
       this.stompService.connect(store.id);
       this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), store.id).subscribe();
       this.orderService.loadOrderCounts(store.id).subscribe();
+      this.capacityService.loadDailyOccupancy(store.id).subscribe();
     } else {
       this.storeService.getMyStore().subscribe({
         next: (s) => {
@@ -107,6 +108,7 @@ export class Orders implements OnInit {
             this.stompService.connect(s.id);
             this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), s.id).subscribe();
             this.orderService.loadOrderCounts(s.id).subscribe();
+            this.capacityService.loadDailyOccupancy(s.id).subscribe();
           }
         },
       });

@@ -50,9 +50,14 @@ export class Siderbar implements OnInit {
   readonly activeOrdersCount = computed<number>(() => {
     return this.orderService.activeOrdersTodayCount();
   });
-  readonly capacityOccupied = signal<number | null>(null);
-
-  readonly capacityTotal = computed(() => this.capacityService.todayTotalCapacity());
+  readonly capacityOccupied = computed(() => this.capacityService.todayOccupied());
+  readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacityReal());
+  readonly availableCapacity = computed(() => this.capacityService.todayAvailable());
+  readonly isOverCapacity = computed(() => {
+    const occupied = this.capacityOccupied();
+    const total = this.capacityTotal();
+    return occupied !== null && total > 0 && occupied > total;
+  });
 
   readonly isOpen = input<boolean>(false);
   readonly closeSidebar = output<void>();
@@ -79,7 +84,7 @@ export class Siderbar implements OnInit {
     const percentage = occupied !== null && total > 0 ? (occupied / total) * 10 : 0;
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,
-      isFilled: occupied !== null && i < Math.round(percentage),
+      isFilled: occupied !== null && i < Math.min(10, Math.round(percentage)),
     }));
   });
 
@@ -100,8 +105,8 @@ export class Siderbar implements OnInit {
     }
 
     if (
-      this.capacityService.isTodayClosed() ||
-      this.capacityService.todayEffectiveCapacity() === 0
+      this.capacityService.isTodayClosedReal() ||
+      this.capacityService.todayEffectiveCapacityReal() === 0
     ) {
       return {
         label: 'Cerrado hoy',
@@ -112,7 +117,7 @@ export class Siderbar implements OnInit {
     }
 
     const occupied = this.capacityOccupied();
-    const capacity = this.capacityService.todayEffectiveCapacity();
+    const capacity = this.capacityTotal();
 
     if (occupied !== null && capacity > 0 && occupied >= capacity) {
       return {
@@ -135,6 +140,7 @@ export class Siderbar implements OnInit {
     if (this.capacityService.configurations().length === 0) {
       this.capacityService.getConfigurations().subscribe();
     }
+    this.capacityService.loadDailyOccupancy().subscribe();
     this.orderService.loadTodayOrderCounts().subscribe();
   }
 

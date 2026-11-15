@@ -40,12 +40,11 @@ export class DashboardKpis implements OnInit {
   readonly isTodayOutdated = computed(() => this.orderService.isTodayOutdated());
 
   readonly todayException = computed(() => this.capacityService.todayException());
-  readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacity());
-  readonly isClosedToday = computed(() => this.capacityService.isTodayClosed());
+  readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacityReal());
+  readonly isClosedToday = computed(() => this.capacityService.isTodayClosedReal());
 
   readonly capacityOccupied = computed<number | null>(() => {
-    // No presentar como ocupada la cantidad de pedidos de la página en memoria (Fase 1)
-    return null;
+    return this.capacityService.todayOccupied();
   });
 
   readonly shiftSchedule = computed(() => {
@@ -84,27 +83,32 @@ export class DashboardKpis implements OnInit {
   });
 
   readonly capacityPercentage = computed<number | null>(() => {
-    const occupied = this.capacityOccupied();
-    const total = this.capacityTotal();
-    if (occupied === null || total <= 0) return null;
-    return Math.round((occupied / total) * 100);
+    return this.capacityService.todayOccupancyPercentage();
   });
 
   readonly availableCapacity = computed<number | null>(() => {
+    return this.capacityService.todayAvailable();
+  });
+
+  readonly isOverCapacity = computed(() => {
     const occupied = this.capacityOccupied();
     const total = this.capacityTotal();
-    if (occupied === null) return null;
-    return Math.max(0, total - occupied);
+    return occupied !== null && total > 0 && occupied > total;
   });
+
+  readonly isOccupancyLoading = computed(() => this.capacityService.isLoadingOccupancy());
 
   readonly capacityBlocks = computed(() => {
     const occupied = this.capacityOccupied();
     const total = this.capacityTotal();
-    const percentage = occupied !== null && total > 0 ? (occupied / total) * 10 : 0;
+    const percentage =
+      occupied !== null && occupied !== undefined && total > 0
+        ? (occupied / total) * 10
+        : 0;
 
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,
-      isFilled: i < Math.round(percentage),
+      isFilled: i < Math.min(10, Math.round(percentage)),
     }));
   });
 
@@ -115,6 +119,7 @@ export class DashboardKpis implements OnInit {
     if (this.capacityService.exceptions().length === 0) {
       this.capacityService.getExceptions().subscribe();
     }
+    this.capacityService.loadDailyOccupancy().subscribe();
     if (this.orderService.orders().length === 0) {
       this.orderService.loadOrders().subscribe();
     }

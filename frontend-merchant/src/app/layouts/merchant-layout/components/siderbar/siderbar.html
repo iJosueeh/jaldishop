@@ -61,7 +61,13 @@
           Capacidad Hoy
         </span>
         <span
-          class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30"
+          class="text-xs font-mono font-bold px-2 py-0.5 rounded-md border"
+          [class.text-emerald-300]="!isOverCapacity()"
+          [class.bg-emerald-950/70]="!isOverCapacity()"
+          [class.border-emerald-500/30]="!isOverCapacity()"
+          [class.text-rose-300]="isOverCapacity()"
+          [class.bg-rose-950/70]="isOverCapacity()"
+          [class.border-rose-500/30]="isOverCapacity()"
         >
           {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}/{{
             capacityTotal() > 0 ? capacityTotal() : 0
@@ -74,8 +80,10 @@
         @for (block of capacityBlocks(); track block.index) {
           <span
             class="h-2.5 flex-1 rounded-xs transition-all duration-300"
-            [class.bg-emerald-500]="block.isFilled"
-            [class.shadow-[0_0_8px_rgba(16,185,129,0.4)]]="block.isFilled"
+            [class.bg-emerald-500]="block.isFilled && !isOverCapacity()"
+            [class.shadow-[0_0_8px_rgba(16,185,129,0.4)]]="block.isFilled && !isOverCapacity()"
+            [class.bg-rose-500]="block.isFilled && isOverCapacity()"
+            [class.shadow-[0_0_8px_rgba(244,63,94,0.4)]]="block.isFilled && isOverCapacity()"
             [class.bg-white/10]="!block.isFilled"
           ></span>
         }
@@ -83,10 +91,12 @@
 
       <div class="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
         <span>
-          @if (capacityOccupied() !== null && capacityTotal() > 0) {
+          @if (isOverCapacity()) {
+            <span class="text-rose-400 font-bold">Sobrecapacidad (+{{ capacityOccupied()! - capacityTotal() }})</span>
+          } @else if (availableCapacity() !== null && capacityTotal() > 0) {
             Quedan
-            <strong class="text-stone-200">{{ capacityTotal() - capacityOccupied()! }}</strong>
-            {{ capacityTotal() - capacityOccupied()! === 1 ? 'cupo' : 'cupos' }}
+            <strong class="text-stone-200">{{ availableCapacity() }}</strong>
+            {{ availableCapacity() === 1 ? 'cupo' : 'cupos' }}
           } @else if (capacityTotal() > 0) {
             Capacidad: <strong class="text-stone-200">{{ capacityTotal() }}</strong> cupos
           } @else {

@@ -58,6 +58,47 @@ public interface CapacityReservationJpaRepository extends JpaRepository<Capacity
             @Param("endTime") LocalTime endTime);
 
     @Query("""
+            SELECT COUNT(r) FROM CapacityReservationEntity r
+            WHERE r.storeId = :storeId
+              AND r.serviceDate = :serviceDate
+              AND (
+                   (r.status = 'ACTIVE' AND r.expiresAt > :now)
+                OR (r.status = 'PAYMENT_PROTECTED' AND r.paymentProtectionExpiresAt IS NOT NULL AND r.paymentProtectionExpiresAt > :now)
+              )
+            """)
+    long countDailyReserved(
+            @Param("storeId") UUID storeId,
+            @Param("serviceDate") LocalDate serviceDate,
+            @Param("now") Instant now);
+
+    @Query("""
+            SELECT COUNT(r) FROM CapacityReservationEntity r
+            WHERE r.storeId = :storeId
+              AND r.serviceDate = :serviceDate
+              AND r.status = 'COMMITTED'
+            """)
+    long countDailyCommitted(
+            @Param("storeId") UUID storeId,
+            @Param("serviceDate") LocalDate serviceDate);
+
+    @Query("""
+            SELECT DISTINCT r.startTime, r.endTime
+            FROM CapacityReservationEntity r
+            WHERE r.storeId = :storeId
+              AND r.serviceDate = :serviceDate
+              AND (
+                   (r.status = 'ACTIVE' AND r.expiresAt > :now)
+                OR (r.status = 'PAYMENT_PROTECTED' AND r.paymentProtectionExpiresAt IS NOT NULL AND r.paymentProtectionExpiresAt > :now)
+                OR r.status = 'COMMITTED'
+              )
+            ORDER BY r.startTime ASC, r.endTime ASC
+            """)
+    java.util.List<Object[]> findOccupiedTimeRanges(
+            @Param("storeId") UUID storeId,
+            @Param("serviceDate") LocalDate serviceDate,
+            @Param("now") Instant now);
+
+    @Query("""
             SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
             FROM CapacityReservationEntity r
             WHERE r.storeId = :storeId

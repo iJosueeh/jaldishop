@@ -27,6 +27,7 @@ import {
   Observable,
   of,
   shareReplay,
+  Subject,
   switchMap,
   tap,
   throwError,
@@ -43,6 +44,13 @@ export class OrderService implements OnDestroy {
   private readonly storeService = inject(StoreService);
   private readonly stompService = inject(StompService);
   private readonly destroyRef = inject(DestroyRef, { optional: true });
+
+  private readonly orderMutatedSubject = new Subject<{
+    storeId: string;
+    orderId: string;
+    status: OrderStatus;
+  }>();
+  readonly orderMutated$ = this.orderMutatedSubject.asObservable();
 
   private readonly baseUrl = `${environment.apiUrl}/merchants/stores`;
 
@@ -521,6 +529,13 @@ export class OrderService implements OnDestroy {
     ) {
       this.loadTodayOrderCounts(storeId, true).subscribe();
     }
+
+    // 5. Emitir evento reactivo de mutación de pedido para consumidores externos (ej. CapacityService)
+    this.orderMutatedSubject.next({
+      storeId,
+      orderId: detail.id,
+      status: detail.status,
+    });
   }
 
   private handlePatchError(

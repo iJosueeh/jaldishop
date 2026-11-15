@@ -42,6 +42,12 @@ export class OrdersKpis {
     return Math.max(0, this.capacityTotal() - occupied);
   });
 
+  readonly isOverCapacity = computed(() => {
+    const occupied = this.capacityOccupied();
+    const total = this.capacityTotal();
+    return occupied !== null && total > 0 && occupied > total;
+  });
+
   readonly capacityBlocks = computed(() => {
     const occupied = this.capacityOccupied();
     const total = this.capacityTotal();
@@ -52,7 +58,7 @@ export class OrdersKpis {
 
     return Array.from({ length: 10 }, (_, i) => ({
       index: i,
-      isFilled: i < Math.round(percentage),
+      isFilled: i < Math.min(10, Math.round(percentage)),
     }));
   });
 }

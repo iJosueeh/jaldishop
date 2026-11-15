@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CapacityService } from './capacity.service';
+import { StoreService } from './store.service';
+import { OrderService } from './order.service';
+import { getLimaTimeParts, getOperatingDateLima } from '../utils/date.utils';
 import {
   CapacityConfiguration,
   CreateCapacityConfigRequest,
@@ -30,7 +33,7 @@ describe('CapacityService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CapacityService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [CapacityService, StoreService, OrderService, provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(CapacityService);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -297,11 +300,10 @@ describe('CapacityService', () => {
     });
 
     it('debe priorizar excepción activa del día sobre la capacidad base', () => {
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-      // Configuración base (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
-      const todayDayOfWeek = today.getDay();
+      const todayStr = getOperatingDateLima();
+      const parts = getLimaTimeParts(new Date());
+      const limaDate = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12, 0, 0));
+      const todayDayOfWeek = limaDate.getUTCDay();
       const baseConfig: CapacityConfiguration = {
         id: 'cfg-today',
         storeId: 'store-1',
@@ -347,6 +349,279 @@ describe('CapacityService', () => {
       service.exceptions.set([specialException]);
       expect(service.todayEffectiveCapacity()).toBe(30);
       expect(service.isTodayClosed()).toBe(false);
+    });
+
+    it('debe cargar ocupación diaria real y actualizar señales computadas', () => {
+      const mockOccupancy = {
+        storeId: 'store-1',
+        date: '2026-11-15',
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 14,
+        availableCapacity: 6,
+        reservedCapacity: 4,
+        committedCapacity: 10,
+        occupancyPercentage: 70,
+        slots: [
+          {
+            startTime: '09:00:00',
+            endTime: '14:00:00',
+            effectiveCapacity: 20,
+            occupiedCapacity: 14,
+            availableCapacity: 6,
+            reservedCapacity: 4,
+            committedCapacity: 10,
+            occupancyPercentage: 70,
+          },
+        ],
+      };
+
+      service.loadDailyOccupancy('store-1', '2026-11-15').subscribe((res) => {
+        expect(res).toEqual(mockOccupancy);
+      });
+
+      const req = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy'),
+      );
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('date')).toBe('2026-11-15');
+      req.flush(mockOccupancy);
+
+      expect(service.dailyOccupancy()).toEqual(mockOccupancy);
+      expect(service.todayOccupied()).toBe(14);
+      expect(service.todayAvailable()).toBe(6);
+      expect(service.todayOccupancyPercentage()).toBe(70);
+      expect(service.todayEffectiveCapacityReal()).toBe(20);
+      expect(service.isTodayClosedReal()).toBe(false);
+    });
+
+    it('debe reutilizar petición en vuelo (deduplicación) cuando se llama concurrentemente', () => {
+      const mockOccupancy = {
+        storeId: 'store-1',
+        date: '2026-11-15',
+        isClosed: false,
+        effectiveCapacity: 15,
+        occupiedCapacity: 5,
+        availableCapacity: 10,
+        reservedCapacity: 2,
+        committedCapacity: 3,
+        occupancyPercentage: 33,
+        slots: [],
+      };
+
+      let res1: any = null;
+      let res2: any = null;
+      service.loadDailyOccupancy('store-1', '2026-11-15').subscribe((r) => (res1 = r));
+      service.loadDailyOccupancy('store-1', '2026-11-15').subscribe((r) => (res2 = r));
+
+      const reqs = httpTesting.match((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy'),
+      );
+      expect(reqs.length).toBe(1);
+      reqs[0].flush(mockOccupancy);
+
+      expect(res1).toEqual(mockOccupancy);
+      expect(res2).toEqual(mockOccupancy);
+    });
+
+    it('debe registrar error y reiniciar estado de carga ante fallo HTTP', () => {
+      let errRes: any = null;
+      service.loadDailyOccupancy('store-1', '2026-11-15').subscribe((r) => (errRes = r));
+
+      const req = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy'),
+      );
+      req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+
+      expect(errRes).toBeNull();
+      expect(service.isLoadingOccupancy()).toBe(false);
+      expect(service.occupancyError()).toContain('500');
+    });
+
+    it('debe descartar respuestas fuera de orden cuando se dispara una nueva petición', () => {
+      // 1. Petición inicial para fecha 1
+      service.loadDailyOccupancy('store-1', '2026-11-15', true).subscribe();
+      const req1 = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy') && r.params.get('date') === '2026-11-15',
+      );
+
+      // 2. Nueva petición posterior para fecha 2 (incrementa activeOccupancyRequestId)
+      service.loadDailyOccupancy('store-1', '2026-11-16', true).subscribe();
+      const req2 = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy') && r.params.get('date') === '2026-11-16',
+      );
+
+      // 3. Responder fecha 1 tarde (debe ser descartada por requestId obsoleto)
+      req1.flush({
+        storeId: 'store-1',
+        date: '2026-11-15',
+        isClosed: false,
+        effectiveCapacity: 10,
+        occupiedCapacity: 9,
+        availableCapacity: 1,
+        reservedCapacity: 0,
+        committedCapacity: 9,
+        occupancyPercentage: 90,
+        slots: [],
+      });
+
+      // 4. Responder fecha 2 (la más reciente)
+      req2.flush({
+        storeId: 'store-1',
+        date: '2026-11-16',
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 5,
+        availableCapacity: 15,
+        reservedCapacity: 0,
+        committedCapacity: 5,
+        occupancyPercentage: 25,
+        slots: [],
+      });
+
+      // El estado final debe pertenecer a fecha 2
+      expect(service.dailyOccupancy()?.date).toBe('2026-11-16');
+      expect(service.todayOccupied()).toBe(5);
+    });
+
+    it('debe descartar respuestas si la tienda activa cambió antes de recibir la respuesta', () => {
+      const storeService = TestBed.inject(StoreService);
+      storeService.currentStore.set({
+        id: 'store-A',
+        merchantUserId: 'usr-1',
+        name: 'Tienda A',
+        slug: 'tienda-a',
+        pickupEnabled: true,
+        deliveryEnabled: true,
+        status: 'ACTIVE',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+      service.loadDailyOccupancy('store-A', '2026-11-15').subscribe();
+      const req = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-A/capacity/occupancy'),
+      );
+
+      // El comerciante cambia a Tienda B mientras la respuesta de Tienda A estaba en vuelo
+      storeService.currentStore.set({
+        id: 'store-B',
+        merchantUserId: 'usr-1',
+        name: 'Tienda B',
+        slug: 'tienda-b',
+        pickupEnabled: true,
+        deliveryEnabled: true,
+        status: 'ACTIVE',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+      req.flush({
+        storeId: 'store-A',
+        date: '2026-11-15',
+        isClosed: false,
+        effectiveCapacity: 50,
+        occupiedCapacity: 35,
+        availableCapacity: 15,
+        reservedCapacity: 5,
+        committedCapacity: 30,
+        occupancyPercentage: 70,
+        slots: [],
+      });
+
+      // La respuesta de Store A fue descartada porque no coincide con la tienda activa
+      expect(service.dailyOccupancy()).toBeNull();
+      expect(service.todayOccupied()).toBeNull();
+    });
+
+    it('debe aislar métricas computadas si el dailyOccupancy no coincide con la tienda activa', () => {
+      const storeService = TestBed.inject(StoreService);
+      storeService.currentStore.set({
+        id: 'store-B',
+        merchantUserId: 'usr-1',
+        name: 'Tienda B',
+        slug: 'tienda-b',
+        pickupEnabled: true,
+        deliveryEnabled: true,
+        status: 'ACTIVE',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+      // Simular que dailyOccupancy tiene datos retenidos de store-A
+      service.dailyOccupancy.set({
+        storeId: 'store-A',
+        date: getOperatingDateLima(),
+        isClosed: false,
+        effectiveCapacity: 30,
+        occupiedCapacity: 15,
+        availableCapacity: 15,
+        reservedCapacity: 5,
+        committedCapacity: 10,
+        occupancyPercentage: 50,
+        slots: [],
+      });
+
+      // Para Tienda B, las métricas deben reportar null y no filtrar datos de Tienda A
+      expect(service.todayOccupied()).toBeNull();
+      expect(service.todayAvailable()).toBeNull();
+      expect(service.todayOccupancyPercentage()).toBeNull();
+    });
+
+    it('debe refrescar ocupación tras mutación confirmada (orderMutated$) cuando hay datos en memoria', () => {
+      const orderService = TestBed.inject(OrderService);
+      const storeService = TestBed.inject(StoreService);
+      storeService.currentStore.set({
+        id: 'store-1',
+        merchantUserId: 'usr-1',
+        name: 'Tienda 1',
+        slug: 'tienda-1',
+        pickupEnabled: true,
+        deliveryEnabled: true,
+        status: 'ACTIVE',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      });
+
+      service.dailyOccupancy.set({
+        storeId: 'store-1',
+        date: getOperatingDateLima(),
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 10,
+        availableCapacity: 10,
+        reservedCapacity: 2,
+        committedCapacity: 8,
+        occupancyPercentage: 50,
+        slots: [],
+      });
+
+      // Mutación de cancelación (CONFIRMED -> CANCELLED)
+      (orderService as any).orderMutatedSubject.next({
+        storeId: 'store-1',
+        orderId: 'ord-123',
+        status: 'CANCELLED',
+      });
+
+      const req = httpTesting.expectOne((r) =>
+        r.url.includes('/merchants/stores/store-1/capacity/occupancy'),
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush({
+        storeId: 'store-1',
+        date: getOperatingDateLima(),
+        isClosed: false,
+        effectiveCapacity: 20,
+        occupiedCapacity: 9,
+        availableCapacity: 11,
+        reservedCapacity: 2,
+        committedCapacity: 7,
+        occupancyPercentage: 45,
+        slots: [],
+      });
+
+      expect(service.todayOccupied()).toBe(9);
+      expect(service.todayAvailable()).toBe(11);
     });
   });
 });
