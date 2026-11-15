@@ -1,0 +1,1973 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>00 procedimiento - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#postgresql-desechable-y-primera-ronda-http-preparacion-7-de-noviembre-de-2026" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              00 procedimiento
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-evidencia-actual-y-condiciones-de-parada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Evidencia actual y condiciones de parada
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-diseno" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Diseño
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-inspeccion-previa-sin-creacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Inspección previa, sin creación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-creacion-futura-solamente-despues-de-autorizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Creación futura, solamente después de autorización
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-identidad-de-servidor-antes-de-migraciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Identidad de servidor antes de migraciones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-aislamiento-de-integraciones-condicion-anterior-al-jvm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Aislamiento de integraciones: condición anterior al JVM
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-construccion-y-arranque-posteriores-con-aislamiento-demostrado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Construcción y arranque posteriores, con aislamiento demostrado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-httppostman-posterior-cuatro-casos-no-coleccion-completa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. HTTP/Postman posterior: cuatro casos, no colección completa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-limpieza-exclusivamente-por-identidad-de-ejecucion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Limpieza exclusivamente por identidad de ejecución
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-bloqueos-pendientes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Bloqueos pendientes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<blockquote>
+<p><strong>CANCELADO — 8 de noviembre de 2026.</strong> Este procedimiento Fedora/Podman no se ejecutará ni forma parte del flujo del equipo. Se conserva únicamente como historial. Usar <a href="../../backend/README.md">la guía local del backend</a>. No ejecutar sus comandos de creación, red o limpieza.</p>
+</blockquote>
+<h1 id="postgresql-desechable-y-primera-ronda-http-preparacion-7-de-noviembre-de-2026">PostgreSQL desechable y primera ronda HTTP — preparación, 7 de noviembre de 2026</h1>
+<p><strong>Estado: BLOCKED para ejecución. Solo diagnóstico y documentación realizados. Todos los comandos de creación, compilación, SQL, arranque, HTTP y limpieza que siguen son propuestas para una autorización posterior; ninguno fue ejecutado.</strong></p>
+<p>Referencias: <a href="../../verificacion-integracion-2026-11-07/00-resultados/">resultados</a>, <a href="../../preparacion-colecciones-2026-11-07/00-guia/">guía Postman</a>, <a href="../../verificacion-integracion-2026-11-07/01-matriz-equipo/">matriz</a>.</p>
+<h2 id="1-evidencia-actual-y-condiciones-de-parada">1. Evidencia actual y condiciones de parada</h2>
+<ul>
+<li>Podman está instalado, pero incluso --version/ps/images/network ls/volume ls fallan: <code>Failed to obtain podman configuration ... /run/user/1000/libpod: read-only file system</code>. No se pudo conocer versión operativa, contenedores, imágenes, redes o volúmenes. No se intentó reparar permisos.</li>
+<li>ss -ltn falla con <code>Cannot open netlink socket: Operation not permitted</code>. No hay evidencia de puertos disponibles. El resultado no significa ausencia de servicios.</li>
+<li>DB_URL, DB_USERNAME, DB_PASSWORD, SPRING_PROFILES_ACTIVE, SPRING_DATASOURCE_URL, SPRING_FLYWAY_URL, JWT_SECRET, MERCADOPAGO_ACCESS_TOKEN y CLOUDINARY_API_SECRET no están definidos en el proceso inspeccionado. No se publicaron valores.</li>
+<li>backend/.env existe. Spring importa .env y BackendApplication usa Dotenv: busca backend/.env o .env desde el directorio actual y transforma entradas en propiedades cuando no existe la variable de entorno. NO arrancar desde el repositorio con valores por defecto. No se cargó ese archivo en un proceso ni se mostraron sus secretos.</li>
+<li>Un solo application.properties localizado; no hay perfil de integración aislado. Java 21 / Spring Boot 4.1.1. Flyway habilitado, classpath:db/migration, validación deshabilitada por defecto. Hibernate ddl-auto=none.</li>
+<li>24 archivos SQL en el directorio de migraciones, hasta V25. Flyway elige los pendientes según su historial, no según el último número solamente. Algunas migraciones incluyen datos demo. Revisar todos antes de autorizarlas sobre la instancia nueva.</li>
+<li>Mercado Pago tiene URL real por defecto. Cloudinary usa cliente externo. Los schedulers financieros tienen default false, sin que eso certifique valores efectivos de otro proceso. Una URL localhost que rechaza conexiones NO es un fake funcional.</li>
+<li>systemd-run, systemctl, Podman, psql y openssl están en PATH; bpftool no. La capacidad efectiva de filtrar egress no se ha verificado.</li>
+<li>Se conservó el working tree con cambios anteriores. Solo se añade este documento; no se ejecutaron DB, HTTP, Spring Boot, migraciones, Postman o pagos.</li>
+</ul>
+<p><strong>Parar si falla cualquier inspección, hay duda sobre un recurso, no se demuestra el servidor o no se demuestra el aislamiento de red del backend.</strong> No usar sudo para sortear restricciones de esta sesión. Las comprobaciones siguientes se ejecutarán posteriormente en una terminal Fedora autorizada y operativa.</p>
+<h2 id="2-diseno">2. Diseño</h2>
+<p>Contenedor nuevo con nombre aleatorio y label de ejecución; imagen PostgreSQL 16 local identificada por ID inmutable; puerto 55432 ligado solo a 127.0.0.1; PGDATA en tmpfs, sin volumen ni bind mount existente. Base jaldishop_integration_test y usuario jaldi_it_owner creados solo dentro de esa instancia. El rol bootstrap es superusuario dentro del contenedor aislado: no se reutiliza en servidores existentes. Para una ronda posterior más amplia, separar rol migrador y rol de aplicación.</p>
+<p>Credenciales aleatorias en memoria y archivo privado de una ejecución en /tmp, nunca en Git ni environments compartidos. Usar directorio de ejecución vacío para backend y env -i; pin explícito de datasource y Flyway. El backend solo escucha 127.0.0.1:8080. Ningún recurso existente se reutiliza, elimina o limpia. tmpfs pierde los datos al detener el contenedor: recrear otra instancia para reiniciar fixtures, no reanudar esperando conservarlos.</p>
+<p>No se crea una red adicional: se inspecciona la red efectiva asignada por Podman después del run y se registra. La publicación loopback y una base nueva aíslan el acceso/datos, pero NO bloquean salida a Internet del JVM. El filtro de egress del apartado 6 es una condición independiente.</p>
+<h2 id="3-inspeccion-previa-sin-creacion">3. Inspección previa, sin creación</h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/home/ijosueeh/Documentos/Proyectos/jaldishop
+podman<span class="w"> </span>--version
+podman<span class="w"> </span>ps<span class="w"> </span>-a<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Names}} {{.Image}} {{.Status}} {{.Ports}}'</span>
+podman<span class="w"> </span>images<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Repository}}:{{.Tag}} {{.ID}}'</span>
+podman<span class="w"> </span>network<span class="w"> </span>ls
+podman<span class="w"> </span>volume<span class="w"> </span>ls
+ss<span class="w"> </span>-ltn
+</code></pre></div>
+<p>Todos deben funcionar. No usar inspect completo: el JSON de contenedores puede contener secretos. Confirmar puertos 55432/8080 libres tanto en IPv4 como IPv6; conservar la salida como evidencia privada. No asumir que hay una imagen postgres:16 instalada. Comprobarla sin descargar:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>image<span class="w"> </span>exists<span class="w"> </span>docker.io/library/postgres:16
+podman<span class="w"> </span>image<span class="w"> </span>inspect<span class="w"> </span>docker.io/library/postgres:16<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Id}} {{.RepoDigests}}'</span>
+</code></pre></div>
+<p>Si falta, parar: adquisición de imagen queda como paso separado, autorizado y verificado; no cambiar silenciosamente de versión.</p>
+<h2 id="4-creacion-futura-solamente-despues-de-autorizacion">4. Creación futura, solamente después de autorización</h2>
+<p>Ejecutar los bloques de esta guía en una sesión Bash dedicada. Las variables se mantienen en esa sesión; si se pierde, recuperar solo desde el directorio privado de esta ejecución, no buscar credenciales en otros environments. No activar set -x.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+<span class="nb">umask</span><span class="w"> </span><span class="m">077</span>
+<span class="nv">jaldi_project</span><span class="o">=</span>/home/ijosueeh/Documentos/Proyectos/jaldishop
+<span class="nv">jaldi_run_dir</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="w"> </span>/tmp/jaldi-disposable.XXXXXXXX<span class="k">)</span>
+<span class="nv">jaldi_run_id</span><span class="o">=</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">8</span><span class="k">)</span>
+<span class="nv">jaldi_container</span><span class="o">=</span><span class="s2">"jaldi-it-</span><span class="si">${</span><span class="nv">jaldi_run_id</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">jaldi_unit</span><span class="o">=</span><span class="s2">"jaldi-it-</span><span class="si">${</span><span class="nv">jaldi_run_id</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">jaldi_image</span><span class="o">=</span><span class="k">$(</span>podman<span class="w"> </span>image<span class="w"> </span>inspect<span class="w"> </span>docker.io/library/postgres:16<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Id}}'</span><span class="k">)</span>
+<span class="nv">jaldi_password</span><span class="o">=</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">32</span><span class="k">)</span>
+<span class="nv">jaldi_jwt</span><span class="o">=</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-hex<span class="w"> </span><span class="m">32</span><span class="k">)</span>
+
+<span class="c1"># Una lista exitosa distingue ausencia de colisiones de error de Podman.</span>
+podman<span class="w"> </span>ps<span class="w"> </span>-a<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Names}}'</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-names.txt"</span>
+<span class="k">if</span><span class="w"> </span>grep<span class="w"> </span>-Fxq<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-names.txt"</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">'Colisión de nombre: detener'</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+<span class="c1"># Comprobación activa sin HTTP. Debe conseguir bind en ambos puertos.</span>
+python3<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;'PY'</span>
+<span class="s">import socket</span>
+<span class="s">sockets=[]</span>
+<span class="s">try:</span>
+<span class="s">    for port in (55432, 8080):</span>
+<span class="s">        s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span>
+<span class="s">        sockets.append(s)</span>
+<span class="s">        s.bind(('127.0.0.1', port))</span>
+<span class="s">finally:</span>
+<span class="s">    for s in sockets: s.close()</span>
+<span class="s">PY</span>
+<span class="c1"># Hay una carrera tras liberar el puerto: si run/arranque falla, no escoger</span>
+<span class="c1"># otro servidor ni otro puerto automáticamente.</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_id</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/run-id"</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-name"</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/unit-name"</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_image</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/image-id"</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_password</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/db-password"</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_jwt</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/jwt-secret"</span>
+
+<span class="nv">POSTGRES_PASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_password</span><span class="s2">"</span><span class="w"> </span>podman<span class="w"> </span>run<span class="w"> </span>--detach<span class="w"> </span>--pull<span class="o">=</span>never<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--label<span class="w"> </span><span class="s2">"io.jaldishop.disposable-run=</span><span class="nv">$jaldi_run_id</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--publish<span class="w"> </span><span class="m">127</span>.0.0.1:55432:5432<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tmpfs<span class="w"> </span>/var/lib/postgresql/data:rw,size<span class="o">=</span>1g<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--env<span class="w"> </span><span class="nv">POSTGRES_DB</span><span class="o">=</span>jaldishop_integration_test<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--env<span class="w"> </span><span class="nv">POSTGRES_USER</span><span class="o">=</span>jaldi_it_owner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--env<span class="w"> </span>POSTGRES_PASSWORD<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">"</span><span class="nv">$jaldi_image</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-id"</span>
+</code></pre></div>
+<p>No se solicita volumen nombrado; no existe colisión de volumen nuevo. El tmpfs tiene capacidad limitada: si la inicialización o Flyway agotan espacio, parar y crear otra ejecución autorizada. El password de bootstrap se conserva en metadata de este contenedor hasta eliminarlo; no publicar inspect/logs completos.</p>
+<h2 id="5-identidad-de-servidor-antes-de-migraciones">5. Identidad de servidor antes de migraciones</h2>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--format<span class="w"> </span><span class="s1">'{{.Id}} {{.Image}} {{.State.Status}} {{index .Config.Labels "io.jaldishop.disposable-run"}}'</span>
+podman<span class="w"> </span>port<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span>
+podman<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .NetworkSettings.Networks}}'</span>
+podman<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .HostConfig.Tmpfs}}'</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>pg_isready<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-U<span class="w"> </span>jaldi_it_owner<span class="w"> </span>-d<span class="w"> </span>jaldishop_integration_test
+</code></pre></div>
+<p>Si aún inicia, repetir pg_isready manualmente; no avanzar con error. Verificar mismo ID/imagen/label, estado running, tmpfs esperado, y únicamente 127.0.0.1:55432. La siguiente consulta viaja por EL MISMO host/puerto que usará Spring; no basta consultar solo por socket dentro del contenedor:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PGPASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_password</span><span class="s2">"</span><span class="w"> </span>psql<span class="w"> </span>-X<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-h<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>-p<span class="w"> </span><span class="m">55432</span><span class="w"> </span>-U<span class="w"> </span>jaldi_it_owner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span>jaldishop_integration_test<span class="w"> </span>-v<span class="w"> </span><span class="nv">ON_ERROR_STOP</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s2">"SELECT current_database(), current_user, inet_server_addr(),</span>
+<span class="s2">             inet_server_port(), current_setting('server_version'),</span>
+<span class="s2">             current_setting('data_directory'), pg_is_in_recovery();"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s1">'SELECT system_identifier FROM pg_control_system();'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s2">"SELECT schemaname, tablename FROM pg_tables</span>
+<span class="s2">      WHERE schemaname NOT IN ('pg_catalog','information_schema');"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/server-before.txt"</span>
+
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>psql<span class="w"> </span>-X<span class="w"> </span>-U<span class="w"> </span>jaldi_it_owner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span>jaldishop_integration_test<span class="w"> </span>-v<span class="w"> </span><span class="nv">ON_ERROR_STOP</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s1">'SELECT system_identifier FROM pg_control_system();'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/server-inside.txt"</span>
+</code></pre></div>
+<p>Comparar ambos system_identifier y archivar: deben coincidir, current_database debe ser jaldishop_integration_test y current_user jaldi_it_owner. No debe haber tablas de aplicación ni historial Flyway antes del primer arranque. El puerto del servidor en SQL será 5432 (interno); el publicado es 55432. Ante tablas inesperadas o identidad distinta: detener, sin borrar datos.</p>
+<p>Inventario exacto de migraciones a revisar:</p>
+<div class="highlight"><pre><span></span><code>find<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_project</span><span class="s2">/backend/src/main/resources/db/migration"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">'*.sql'</span><span class="w"> </span>-print<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-V<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/migrations.txt"</span>
+sha256sum<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_project</span><span class="s2">"</span>/backend/src/main/resources/db/migration/*.sql<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/migrations.sha256"</span>
+</code></pre></div>
+<p>Revisar SQL, incluidos seeds, antes de autorizar Flyway. Contra base nueva sin historial serán candidatas todas las migraciones de versión válidas del directorio. Confirmar luego los realmente aplicados; no afirmar que se ejecutaron por existir en el repositorio.</p>
+<h2 id="6-aislamiento-de-integraciones-condicion-anterior-al-jvm">6. Aislamiento de integraciones: condición anterior al JVM</h2>
+<p>Para estos cuatro casos no se necesita Mercado Pago ni Cloudinary. Mantener endpoints financieros, webhooks, conciliación, reembolsos y multimedia fuera de ejecución. Deshabilitar explícitamente schedulers y eliminar credenciales efectivas. Además bloquear salida de red no-loopback del proceso Java.</p>
+<p>Una opción en Fedora es systemd con IPAddressDeny=any/IPAddressAllow=localhost. Requiere soporte cgroup/BPF efectivo, que <strong>NO está verificado aquí</strong>. Una propiedad visible en systemctl NO prueba por sí sola que el kernel la aplica. Un administrador debe confirmar el filtro aplicado al cgroup y ausencia de avisos de soporte deshabilitado. bpftool no está disponible en PATH de esta sesión. Si no puede demostrar la restricción, NO iniciar el backend; preparar primero aislamiento de red verificable. No instalar herramientas ni alterar firewall durante esta fase.</p>
+<p>No permitir acceso a Internet para “probar” si un proveedor funciona. No usar Render/Neon como comprobaciones. No equiparar URL 127.0.0.1:9 con fake: solo es un destino local de fallo, no implementa el contrato de Mercado Pago.</p>
+<h2 id="7-construccion-y-arranque-posteriores-con-aislamiento-demostrado">7. Construcción y arranque posteriores, con aislamiento demostrado</h2>
+<p>Construir el código actual, después de autorización; el JAR previo puede estar desactualizado. No activa Spring ni DB, pero sí modifica target:</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_project</span><span class="s2">/backend"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-o<span class="w"> </span>-DskipTests<span class="w"> </span>package<span class="o">)</span>
+mkdir<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/app"</span>
+cp<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_project</span><span class="s2">/backend/target/backend-0.0.1-SNAPSHOT.jar"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/app/backend.jar"</span>
+sha256sum<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/app/backend.jar"</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/backend.sha256"</span>
+</code></pre></div>
+<p>El siguiente bloque <strong>habilita Flyway y modifica solo la DB ya verificada</strong>. Requiere autorización posterior y el control efectivo de egress del apartado 6. Se usa entorno limpio, directorio vacío y argumentos de mayor precedencia para impedir redirecciones mediante configuración heredada. No elegir un perfil ficticio como garantía de aislamiento.</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span>
+<span class="w">  </span><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/app"</span>
+<span class="w">  </span>env<span class="w"> </span>-i<span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/usr/bin:/bin<span class="w"> </span><span class="nv">XDG_RUNTIME_DIR</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">XDG_RUNTIME_DIR</span><span class="p">:?</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>systemd-run<span class="w"> </span>--user<span class="w"> </span>--unit<span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">"</span><span class="w"> </span>--collect<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--property<span class="o">=</span><span class="s2">"WorkingDirectory=</span><span class="nv">$jaldi_run_dir</span><span class="s2">/app"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--property<span class="o">=</span><span class="nv">IPAddressDeny</span><span class="o">=</span>any<span class="w"> </span>--property<span class="o">=</span><span class="nv">IPAddressAllow</span><span class="o">=</span>localhost<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/usr/bin/env<span class="w"> </span>-i<span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/usr/bin:/bin<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">DB_URL</span><span class="o">=</span>jdbc:postgresql://127.0.0.1:55432/jaldishop_integration_test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">DB_USERNAME</span><span class="o">=</span>jaldi_it_owner<span class="w"> </span><span class="nv">DB_PASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_password</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">JWT_SECRET</span><span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_jwt</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/usr/lib/jvm/java-21-temurin-jdk/bin/java<span class="w"> </span>-jar<span class="w"> </span>./backend.jar<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.config.import<span class="o">=</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.datasource.url<span class="o">=</span>jdbc:postgresql://127.0.0.1:55432/jaldishop_integration_test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.datasource.username<span class="o">=</span>jaldi_it_owner<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s1">'--spring.datasource.password=${DB_PASSWORD}'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.datasource.hikari.jdbc-url<span class="o">=</span>jdbc:postgresql://127.0.0.1:55432/jaldishop_integration_test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.datasource.hikari.username<span class="o">=</span>jaldi_it_owner<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s1">'--spring.datasource.hikari.password=${DB_PASSWORD}'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.datasource.hikari.data-source-properties.ApplicationName<span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_run_id</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.flyway.url<span class="o">=</span>jdbc:postgresql://127.0.0.1:55432/jaldishop_integration_test<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.flyway.user<span class="o">=</span>jaldi_it_owner<span class="w"> </span><span class="s1">'--spring.flyway.password=${DB_PASSWORD}'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.flyway.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--spring.flyway.validate-on-migrate<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.flyway.locations<span class="o">=</span>classpath:db/migration<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--spring.jpa.hibernate.ddl-auto<span class="o">=</span>none<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--server.address<span class="o">=</span><span class="m">127</span>.0.0.1<span class="w"> </span>--server.port<span class="o">=</span><span class="m">8080</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--app.payment.reconciliation.enabled<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--app.payment.reconciliation.orders-enabled<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--payments.mercadopago.refund-scheduler-enabled<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.base-url<span class="o">=</span>http://127.0.0.1:9<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.access-token<span class="o">=</span><span class="w"> </span>--mercadopago.webhook-secret<span class="o">=</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.notification-url<span class="o">=</span>http://127.0.0.1:8080/disabled<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.back-url-success<span class="o">=</span>http://127.0.0.1:8080/disabled<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.back-url-failure<span class="o">=</span>http://127.0.0.1:8080/disabled<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mercadopago.back-url-pending<span class="o">=</span>http://127.0.0.1:8080/disabled<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cloudinary.cloud-name<span class="o">=</span>demo<span class="w"> </span>--cloudinary.api-key<span class="o">=</span>demo<span class="w"> </span>--cloudinary.api-secret<span class="o">=</span>demo
+<span class="o">)</span>
+</code></pre></div>
+<p>Advertencia de privacidad del comando futuro: systemd registra argv del servicio; el entorno de <code>/usr/bin/env</code> aparece en argv e incluye secretos locales desechables. No publicar el estado/inspección completa del servicio o su D-Bus. Una instalación persistente debe emplear credenciales systemd/archivos protegidos y no este mecanismo temporal. Aquí no son secretos productivos y se eliminan al terminar.</p>
+<p>Si systemd no permite filtros efectivos, no sustituir por java directo ni eliminar las propiedades para lograr el arranque. Evitar abrir Actuator env/configprops; no son necesarios para demostrar destino.</p>
+<p>Verificación real después del arranque:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>--user<span class="w"> </span>is-active<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">.service"</span>
+systemctl<span class="w"> </span>--user<span class="w"> </span>show<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">.service"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span>IPAddressDeny<span class="w"> </span>-p<span class="w"> </span>IPAddressAllow<span class="w"> </span>-p<span class="w"> </span>ControlGroup
+<span class="c1"># Consultar logs privadamente; no compartir cuerpos de seed o diagnósticos con secretos.</span>
+journalctl<span class="w"> </span>--user<span class="w"> </span>-u<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">.service"</span><span class="w"> </span>--no-pager
+<span class="nv">PGPASSWORD</span><span class="o">=</span><span class="s2">"</span><span class="nv">$jaldi_password</span><span class="s2">"</span><span class="w"> </span>psql<span class="w"> </span>-X<span class="w"> </span>-h<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>-p<span class="w"> </span><span class="m">55432</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-U<span class="w"> </span>jaldi_it_owner<span class="w"> </span>-d<span class="w"> </span>jaldishop_integration_test<span class="w"> </span>-v<span class="w"> </span><span class="nv">ON_ERROR_STOP</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s2">"SELECT datname, usename, application_name, client_addr, state</span>
+<span class="s2">      FROM pg_stat_activity WHERE application_name = '</span><span class="nv">$jaldi_run_id</span><span class="s2">';"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s1">'SELECT installed_rank, version, description, script, checksum, success</span>
+<span class="s1">      FROM flyway_schema_history ORDER BY installed_rank;'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/server-after.txt"</span>
+</code></pre></div>
+<p>Debe haber conexión Hikari con application_name de esta ejecución, DB/usuario correctos, migraciones esperadas y success=true, mismo system_identifier y solo escucha loopback. La configuración propuesta no equivale a conexión efectiva: estas evidencias son obligatorias.</p>
+<h2 id="8-httppostman-posterior-cuatro-casos-no-coleccion-completa">8. HTTP/Postman posterior: cuatro casos, no colección completa</h2>
+<p>Solo después de autorización de HTTP y pasos anteriores:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--noproxy<span class="w"> </span><span class="s1">'*'</span><span class="w"> </span>--max-time<span class="w"> </span><span class="m">10</span><span class="w"> </span>--fail-with-body<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-D<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/health.headers"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/health.json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8080/api/v1/health
+</code></pre></div>
+<p>Esta es una solicitud adicional al caso J001 si luego se repite desde Postman. No ejecutar ahora. Health de este controlador no prueba por sí solo DB: usar también SQL anterior.</p>
+<p>Importar postman/jaldishop.postman_collection.json en Postman moderno con skipRequest. Crear environment PRIVADO nuevo, sin reutilizar los existentes. baseUrl=http://127.0.0.1:8080; disposableFixturesReady=true solo después de la evidencia de aislamiento; runCase exactamente un ID. financialFakeReady vacío; allowPaymentOperations vacío. Sin tokens para esta ronda. Confirmar proxies deshabilitados para loopback, redirects deshabilitados y URL resuelta local antes de Send. No Run Collection.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Caso</th>
+<th>Esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>J001</td>
+<td>GET /api/v1/health</td>
+<td>200</td>
+</tr>
+<tr>
+<td>K002</td>
+<td>GET /api/v1/stores/search</td>
+<td>200, lista puede estar vacía</td>
+</tr>
+<tr>
+<td>M028</td>
+<td>GET /api/v1/users/me sin autenticación</td>
+<td>401</td>
+</tr>
+<tr>
+<td>J029</td>
+<td>GET /api/v1/admin/users sin autenticación</td>
+<td>401</td>
+</tr>
+</tbody>
+</table>
+<p>K002 puede requerir storeSearchQuery por la plantilla; usar texto de fixture como jaldi, no un secreto. Las migraciones pueden crear datos demo: estos cuatro casos no requieren registrar usuarios. No ejecutar logins financieros ni crear pedidos/reservas.</p>
+<p>Por cada solicitud registrar ID, fecha, SHA del JAR, ID contenedor/system_identifier, base/usuario, URL sin credenciales, HTTP esperado/obtenido, aserciones y evidencia. No exportar environments poblados. Éxito de esta ronda no certifica 97 endpoints ni 583 escenarios.</p>
+<h2 id="9-limpieza-exclusivamente-por-identidad-de-ejecucion">9. Limpieza exclusivamente por identidad de ejecución</h2>
+<p>Solo después de revisar y conservar resultados sin secretos. Estos comandos también requieren autorización posterior. Primero comprobar que las variables provienen del directorio privado de ESTA ejecución; si se perdieron, no seleccionar por prefijo ni por nombre de base.</p>
+<div class="highlight"><pre><span></span><code>:<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">jaldi_run_dir</span><span class="p">:?</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">jaldi_run_id</span><span class="p">:?</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">jaldi_container</span><span class="p">:?</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">jaldi_unit</span><span class="p">:?</span><span class="si">}</span><span class="s2">"</span>
+<span class="nb">test</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/run-id"</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_id</span><span class="s2">"</span>
+<span class="nb">test</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-name"</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span>
+<span class="nb">test</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/unit-name"</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">"</span>
+<span class="nb">test</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>podman<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Id}}'</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/container-id"</span><span class="k">)</span><span class="s2">"</span>
+<span class="nb">test</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>podman<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{index .Config.Labels "io.jaldishop.disposable-run"}}'</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_id</span><span class="s2">"</span>
+
+<span class="c1"># Verificar la unidad registrada antes de detenerla; no usar pkill/java/puerto.</span>
+systemctl<span class="w"> </span>--user<span class="w"> </span>stop<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_unit</span><span class="s2">.service"</span>
+podman<span class="w"> </span>stop<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span>
+podman<span class="w"> </span>rm<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_container</span><span class="s2">"</span>
+<span class="nb">unset</span><span class="w"> </span>jaldi_password<span class="w"> </span>jaldi_jwt
+<span class="c1"># Retirar únicamente los dos archivos de credenciales registrados.</span>
+rm<span class="w"> </span>--<span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/db-password"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$jaldi_run_dir</span><span class="s2">/jwt-secret"</span>
+</code></pre></div>
+<p>Si el servicio nunca llegó a existir o ya se recolectó, comprobarlo manualmente antes de continuar; no sustituir el nombre. Si cualquier test de identidad falla, parar. No <code>podman prune</code>, <code>volume rm</code>, <code>rm -rf</code>, <code>DROP DATABASE</code>, <code>TRUNCATE</code> ni borrar por patrón. No existe volumen nombrado que limpiar. Detener tmpfs destruye los fixtures de esta instancia; no afecta a otras bases. Conservar el resto del directorio privado como evidencia y revisar su contenido antes de compartirlo.</p>
+<h2 id="10-bloqueos-pendientes">10. Bloqueos pendientes</h2>
+<ol>
+<li>Terminal con Podman y sockets operativos; inventario de recursos y colisiones comprobado.</li>
+<li>Imagen local PostgreSQL 16 revisada y fijada por ID.</li>
+<li>Autorización para crear la instancia y aplicar SQL/Flyway exclusivamente sobre ella.</li>
+<li>Filtro de egress del JVM aplicado y demostrado; la disponibilidad de systemd-run por sí sola no basta.</li>
+<li>Autorización separada para arrancar backend y hacer las cuatro solicitudes HTTP.</li>
+</ol>
+<p>Nada de esto se resolvió ejecutando comandos de mutación en esta fase. La guía es reproducible bajo sus precondiciones, pero no se declara validada en ejecución.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

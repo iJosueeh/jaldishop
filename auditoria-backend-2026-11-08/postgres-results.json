@@ -1,0 +1,32 @@
+{
+  "totals": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 3,
+    "skipped": 0,
+    "passed": 0
+  },
+  "classes": [
+    {
+      "class": "com.jaldishop.backend.address.application.service.CustomerAddressPostgresIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreCustomerPostgresIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    {
+      "class": "com.jaldishop.backend.store.infrastructure.persistence.repository.StoreSearchPostgresIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    }
+  ]
+}

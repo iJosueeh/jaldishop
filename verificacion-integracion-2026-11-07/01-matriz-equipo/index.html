@@ -1,0 +1,2519 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Plataforma de Gestión de Pedidos y Control Inteligente de Capacidad para MYPE">
+      
+      
+        <meta name="author" content="Equipo JaldiShop">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>Matriz definitiva de pruebas funcionales — 7 de noviembre de 2026 - JaldiShop Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#matriz-definitiva-de-pruebas-funcionales-7-de-noviembre-de-2026" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="JaldiShop Docs" class="md-header__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JaldiShop Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Matriz definitiva de pruebas funcionales — 7 de noviembre de 2026
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-producto/propuesta/" class="md-tabs__link">
+          
+  
+  
+  01 Producto
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-investigacion/caso-a-pasteleria/" class="md-tabs__link">
+          
+  
+  
+  02 Investigación
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-requisitos/alcance-mvp/" class="md-tabs__link">
+          
+  
+  
+  03 Requisitos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-diseno/as-is-to-be/" class="md-tabs__link">
+          
+  
+  
+  04 Diseño & Persistencia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-arquitectura/arquitectura-sistema/" class="md-tabs__link">
+          
+  
+  
+  05 Arquitectura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-scrum/sprint-01/" class="md-tabs__link">
+          
+  
+  
+  06 Scrum & Sprints
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="JaldiShop Docs" class="md-nav__button md-logo" aria-label="JaldiShop Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    JaldiShop Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/iJosueeh/jaldishop" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    iJosueeh/jaldishop
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01 Producto
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    01 Producto
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/propuesta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propuesta
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/modelo-capacidad-v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Capacidad v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-producto/decisiones-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones de Producto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02 Investigación
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    02 Investigación
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-a-pasteleria/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso A (Pastelería)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-b-dark-kitchen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso B (Dark Kitchen)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/caso-c-logistica/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caso C (Logística)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-investigacion/matriz-consolidacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de Consolidación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03 Requisitos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    03 Requisitos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/alcance-mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alcance MVP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/reglas-negocio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reglas de Negocio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/historia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Historias de Usuario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-requisitos/modelo-dominio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo de Dominio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04 Diseño & Persistencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    04 Diseño & Persistencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/as-is-to-be/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AS-IS vs TO-BE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/modelo-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modelo Entidad-Relación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/diagrama-er/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrama ER
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/contrato-api-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contrato API de Errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Configuración de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-capacity-exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Excepciones de Capacidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-diseno/api-notificaciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Notificaciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05 Arquitectura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    05 Arquitectura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/arquitectura-sistema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitectura del Sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-arquitectura/decisiones-frontend-signals-iconos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisiones Frontend (Signals & Iconos)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06 Scrum & Sprints
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    06 Scrum & Sprints
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-01/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 01 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-02/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 02 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-03/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 03 (Completado)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/sprint-04/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint 04 (En Progreso)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-scrum/backlog-harden-seguridad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog Seguridad HARDEN (Propuesto)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#carga-y-orden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Carga y orden
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="matriz-definitiva-de-pruebas-funcionales-7-de-noviembre-de-2026">Matriz definitiva de pruebas funcionales — 7 de noviembre de 2026</h1>
+<p>97 endpoints únicos del inventario auditado; los duplicados de login/webhook en Postman no suman endpoints. Responsable significa ejecución coordinada; Josue revisa seguridad transversal de todos. Los roles y checks se enlazan al contrato original; «aplica SecurityConfig» no afirma un rol universal.</p>
+<p>Estado por endpoint: <strong>BLOCKED HTTP local</strong> en esta sesión; ninguna fila equivale a endpoint funcionalmente aprobado. Pruebas internas seleccionadas se registran por clase en el informe de resultados.</p>
+<p>Negativos comunes: JSON/UUID inválido → 400 cuando el endpoint recibe ese dato; validación DTO → 400 VALIDATION_ERROR; sin autenticación → 401 en rutas protegidas; rol insuficiente → 403 donde exista restricción. Recurso ausente → 404 si se consulta individualmente; colección vacía puede devolver 200. Ownership puede ocultar existencia con 404 o responder 403 según servicio: comprobar evidencia, sin imponer un resultado universal. BusinessRuleException → 422; ConflictException/unique → 409. Cada fila hereda solo los casos aplicables a sus parámetros.</p>
+<p>Datos comunes: identidades A/B de cada rol, tiendas separadas y UUID nuevos, nunca fixtures productivos. Dependencia base: entorno local aislado, migraciones verificadas y repositorio de fixtures desechables. No ejecutar pagos ni conciliaciones/reembolsos; filas payment solo se habilitan con gateway fake.</p>
+<table>
+<thead>
+<tr>
+<th>Responsable</th>
+<th>Endpoint</th>
+<th>Positivo / HTTP</th>
+<th>Rol y evidencia</th>
+<th>Datos / dependencias</th>
+<th>Negativos específicos y riesgo</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/addresses</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java#L38">getAddresses</a></td>
+<td>customer A/B, dirección propia y ajena; fixtures previos del módulo</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/addresses</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java#L45">createAddress</a></td>
+<td>customer A/B, dirección propia y ajena; fixtures previos del módulo</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/customer/addresses/{id}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java#L53">updateAddress</a></td>
+<td>customer A/B, dirección propia y ajena; fixtures previos del módulo</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/customer/addresses/{id}/default</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java#L62">setDefaultAddress</a></td>
+<td>customer A/B, dirección propia y ajena; fixtures previos del módulo</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/addresses/{id}</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 204; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/address/web/controller/CustomerAddressController.java#L70">deleteAddress</a></td>
+<td>customer A/B, dirección propia y ajena; fixtures previos del módulo</td>
+<td>dirección ajena, default concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity-configurations</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java#L52">create</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity-configurations</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java#L66">list</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/capacity-configurations/{id}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java#L79">update</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-configurations/{id}/activate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java#L94">activate</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-configurations/{id}/deactivate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityConfigurationController.java#L105">deactivate</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity-exceptions</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java#L47">create</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity-exceptions</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java#L62">list</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/capacity-exceptions/{id}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java#L74">update</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-exceptions/{id}/activate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java#L89">activate</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/capacity-exceptions/{id}/deactivate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityExceptionController.java#L99">deactivate</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/availability</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationController.java#L46">getAvailability</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/capacity/reservations</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationController.java#L62">create</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/reservations/{id}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationController.java#L79">get</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>DELETE /api/v1/capacity/reservations/{id}</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacityReservationController.java#L91">release</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/slots</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/CapacitySlotsController.java#L40">getSlots</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/capacity/effective</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/capacity/web/controller/EffectiveCapacityController.java#L34">getEffectiveCapacity</a></td>
+<td>tienda A/B, horarios futuros Lima, cupo 1 y suficiente; fixtures previos del módulo</td>
+<td>solapes, cupo agotado, reserva vencida, concurrencia; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/cart</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java#L54">getCart</a></td>
+<td>customer A/B, tienda, variante activa, stock; fixtures previos del módulo</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/cart/items</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java#L63">addItem</a></td>
+<td>customer A/B, tienda, variante activa, stock; fixtures previos del módulo</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/cart/items/{variantId}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java#L78">updateItem</a></td>
+<td>customer A/B, tienda, variante activa, stock; fixtures previos del módulo</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/cart/items/{variantId}</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java#L94">removeItem</a></td>
+<td>customer A/B, tienda, variante activa, stock; fixtures previos del módulo</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/cart</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/cart/web/controller/CartController.java#L109">clearCart</a></td>
+<td>customer A/B, tienda, variante activa, stock; fixtures previos del módulo</td>
+<td>cantidad &lt;=0, variante ajena/inactiva, precio cambiado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/categories</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryController.java#L50">createCategory</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/categories</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryController.java#L66">getCategories</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryController.java#L79">getCategory</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantCategoryController.java#L90">updateCategory</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/products</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductController.java#L58">createProduct</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductController.java#L77">getProducts</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductController.java#L108">getProduct</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/products/{productId}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductController.java#L125">updateProduct</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java#L52">createVariant</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java#L81">getVariants</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java#L95">getVariant</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/MerchantProductVariantController.java#L107">updateVariant</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/{storeId}/categories</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicCategoryController.java#L32">getCategories</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/slug/{slug}/categories</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicCategoryController.java#L37">getCategoriesBySlug</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/{storeId}/products</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicProductController.java#L45">getStoreProducts</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/stores/slug/{slug}/products</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/catalog/web/controller/PublicProductController.java#L53">getStoreProductsBySlug</a></td>
+<td>tiendas A/B, categorías y productos activos/inactivos, variantes; fixtures previos del módulo</td>
+<td>atributos [null], nombre 120/121, duplicados tras trim, SKU duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/checkout/web/controller/CheckoutController.java#L31">initiateCheckout</a></td>
+<td>customer A/B, carrito, dirección, stock y cupo; catálogo y reservas preparados; gateway fake</td>
+<td>carrito vacío, variante inactiva, reservas y rollback; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/favorites/products</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteController.java#L39">getFavoriteProducts</a></td>
+<td>customer A/B y producto activo/inactivo; fixtures previos del módulo</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/favorites/products/{productId}</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteController.java#L46">addFavoriteProduct</a></td>
+<td>customer A/B y producto activo/inactivo; fixtures previos del módulo</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/favorites/products/{productId}</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteController.java#L54">removeFavoriteProduct</a></td>
+<td>customer A/B y producto activo/inactivo; fixtures previos del módulo</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/favorites/products/{productId}/status</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/favorite/web/controller/CustomerFavoriteController.java#L62">checkFavoriteProductStatus</a></td>
+<td>customer A/B y producto activo/inactivo; fixtures previos del módulo</td>
+<td>duplicado y producto no disponible; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/users</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java#L50">listUsers</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/users/{id}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java#L64">getUserById</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/suspend</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java#L70">suspendUser</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/activate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java#L80">activateUser</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/users/{id}/roles</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AdminUserController.java#L86">updateUserRoles</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/register</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AuthController.java#L44">register</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/login</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AuthController.java#L68">login</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/auth/register/merchant</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AuthController.java#L76">registerMerchant</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/auth/refresh</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/AuthController.java#L102">refresh</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/users/me</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/UserController.java#L27">getMyProfile</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/users/me</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/identity/web/controller/UserController.java#L35">updateProfile</a></td>
+<td>admin A/B, customer A/B, merchant A/B; correos nuevos; fixtures previos del módulo</td>
+<td>nombres 100/101, email 254/255, rol revocado, estado inactivo; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java#L60">getStoreInventory</a></td>
+<td>variantes con inventario, stock 1 y suficiente, reservas; fixtures previos del módulo</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory/variants/{variantId}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java#L73">getVariantInventory</a></td>
+<td>variantes con inventario, stock 1 y suficiente, reservas; fixtures previos del módulo</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/inventory/low-stock</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java#L87">getLowStockInventory</a></td>
+<td>variantes con inventario, stock 1 y suficiente, reservas; fixtures previos del módulo</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/inventory/variants/{variantId}/stock</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java#L100">updateStock</a></td>
+<td>variantes con inventario, stock 1 y suficiente, reservas; fixtures previos del módulo</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PATCH /api/v1/inventory/variants/{variantId}/threshold</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/inventory/web/controller/MerchantInventoryController.java#L115">updateThreshold</a></td>
+<td>variantes con inventario, stock 1 y suficiente, reservas; fixtures previos del módulo</td>
+<td>stock negativo, reservado &gt; disponible, última unidad concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/media/upload-signature</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/media/web/controller/MediaController.java#L31">generateUploadSignature</a></td>
+<td>merchant A/B, tiendas A/B; firmador fake; fixtures previos del módulo</td>
+<td>tienda ajena, revocación y onboarding temporal; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/notifications</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/notification/web/controller/NotificationController.java#L39">listNotifications</a></td>
+<td>notificación propia/ajena, leída/no leída; fixtures previos del módulo</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/notifications/unread/count</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/notification/web/controller/NotificationController.java#L55">countUnread</a></td>
+<td>notificación propia/ajena, leída/no leída; fixtures previos del módulo</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/notifications/{id}/read</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/notification/web/controller/NotificationController.java#L62">markAsRead</a></td>
+<td>notificación propia/ajena, leída/no leída; fixtures previos del módulo</td>
+<td>notificación ajena y deduplicación; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/orders</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/CustomerOrderController.java#L45">getMyOrders</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/orders/{orderNumber}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/CustomerOrderController.java#L54">getOrderDetail</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/customer/orders/{orderNumber}/cancel</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/CustomerOrderController.java#L64">cancelOrder</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/orders</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'; "hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderController.java#L61">listOrders</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/merchants/stores/{storeId}/orders/{orderId}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'; "hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderController.java#L86">getOrderDetail</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'; "hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/ordering/web/controller/MerchantOrderController.java#L102">changeOrderStatus</a></td>
+<td>pedido propio/ajeno y estados preparados con gateway fake; catálogo y reservas preparados; gateway fake</td>
+<td>transición inválida y cancelación concurrente; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/payment/web/controller/AdminOrderInvestigationController.java#L24">reconcile</a></td>
+<td>intento/reserva local y gateway fake obligatorio; catálogo y reservas preparados; gateway fake</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/payment/web/controller/AdminOrderInvestigationController.java#L29">investigate</a></td>
+<td>intento/reserva local y gateway fake obligatorio; catálogo y reservas preparados; gateway fake</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout/mercado-pago/preference</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/payment/web/controller/MercadoPagoPreferenceController.java#L28">createPreference</a></td>
+<td>intento/reserva local y gateway fake obligatorio; catálogo y reservas preparados; gateway fake</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>POST /api/v1/checkout/mercado-pago/webhook</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/payment/web/controller/MercadoPagoWebhookController.java#L32">receiveWebhook</a></td>
+<td>intento/reserva local y gateway fake obligatorio; catálogo y reservas preparados; gateway fake</td>
+<td>reintentos, doble operación, fallo remoto/local; ejecución financiera bloqueada; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/products/{productId}/reviews/eligibility</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java#L46">checkEligibility</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>POST /api/v1/customer/products/{productId}/reviews</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java#L54">createReview</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>PUT /api/v1/customer/products/{productId}/reviews</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java#L63">updateReview</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>DELETE /api/v1/customer/products/{productId}/reviews</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 204; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java#L72">deleteReview</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/customer/reviews</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('CUSTOMER'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/CustomerReviewController.java#L80">getCustomerReviews</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Mia</td>
+<td><code>GET /api/v1/products/{productId}/reviews</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/review/web/controller/PublicProductReviewController.java#L23">getProductReviews</a></td>
+<td>compra elegible, customer A/B, producto; catálogo y reservas preparados; gateway fake</td>
+<td>sin compra elegible, rating fuera de rango, duplicado; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/health</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/shared/web/HealthController.java#L12">health</a></td>
+<td>sin fixtures; fixtures previos del módulo</td>
+<td>disponibilidad local; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/stores</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/AdminStoreController.java#L41">listStores</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>GET /api/v1/admin/stores/{id}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/AdminStoreController.java#L54">getStoreById</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/stores/{id}/suspend</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/AdminStoreController.java#L60">suspendStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Josue</td>
+<td><code>PATCH /api/v1/admin/stores/{id}/activate</code></td>
+<td>Aplicar operación sobre fixture en estado permitido → 200; verificar postcondición</td>
+<td>"hasRole('ADMIN'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/AdminStoreController.java#L66">activateStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/merchant/customers</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>"hasRole('MERCHANT'. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/MerchantCustomerController.java#L42">listCustomers</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/store-categories</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreCategoryController.java#L22">getAllActiveCategories</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>POST /api/v1/stores</code></td>
+<td>Crear/ejecutar con cuerpo válido y precondiciones cumplidas → 201; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L51">createStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/me</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L86">getMyStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>PUT /api/v1/stores/me</code></td>
+<td>Actualizar fixture propio con cuerpo válido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L94">updateStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>DELETE /api/v1/stores/me</code></td>
+<td>Eliminar/cerrar fixture propio permitido → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L125">closeMyStore</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/slug/{slug}</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L135">getStoreBySlug</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/search</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L143">searchPublicStores</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+<tr>
+<td>Katherine</td>
+<td><code>GET /api/v1/stores/featured</code></td>
+<td>Consultar fixture propio o lista con filtros válidos → 200; verificar postcondición</td>
+<td>aplica SecurityConfig y checks de servicio. <a href="../../auditoria-2026-11-07/04-equipo-y-casos/">Contrato</a>; <a href="../../backend/src/main/java/com/jaldishop/backend/store/web/controller/StoreController.java#L158">getFeaturedStores</a></td>
+<td>merchant A/B, tienda activa/inactiva, categorías globales; fixtures previos del módulo</td>
+<td>tienda ajena, cierre con operaciones pendientes; negativos comunes aplicables</td>
+<td>BLOCKED HTTP</td>
+</tr>
+</tbody>
+</table>
+<h2 id="carga-y-orden">Carga y orden</h2>
+<p>Pesos orientativos por endpoint: 4 reservas/inventario/checkout/pagos, 2 identidad/tiendas/pedidos/media, 1 resto. No representan horas ni cobertura certificada.
+- Mia: 38 endpoints; 49 puntos.
+- Katherine: 44 endpoints; 118 puntos.
+- Josue: 15 endpoints; 39 puntos.</p>
+<p>Katherine concentra más endpoints y capacidad/inventario. Para equilibrar la carga sin cambiar propietarios, Josue prepara y ejecuta con Katherine las pruebas transversales de concurrencia/rollback de capacidad e inventario; Mia prepara fixtures comunes y verifica las lecturas públicas de catálogo. Registrar tiempo de primera ronda y reasignar casos, no duplicar endpoints.</p>
+<ol>
+<li>Josue verifica aislamiento, roles y errores. Mia prepara identidades y Katherine registra merchant/tiendas.</li>
+<li>Katherine prepara categorías/productos/variantes, stock y cupos; Mia prueba catálogo público, direcciones, favoritos y carrito.</li>
+<li>Josue valida checkout con fake; Mia pedidos customer, Katherine operación merchant.</li>
+<li>Mia prueba reseñas y notificaciones. Josue y Katherine verifican concurrencia e integridad; todo el equipo repite negativos de aislamiento.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
