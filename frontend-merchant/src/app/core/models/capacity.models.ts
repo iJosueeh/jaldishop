@@ -74,3 +74,27 @@ export interface UpdateCapacityExceptionRequest {
   reason?: string | null;
 }
 
+export interface MerchantCapacitySlotOccupancy {
+  startTime: string;
+  endTime: string;
+  effectiveCapacity: number;
+  occupiedCapacity: number;
+  availableCapacity: number;
+  reservedCapacity: number;
+  committedCapacity: number;
+  occupancyPercentage: number;
+}
+
+export interface MerchantStoreCapacityOccupancy {
+  storeId: string;
+  date: string;
+  isClosed: boolean;
+  effectiveCapacity: number;
+  occupiedCapacity: number;
+  availableCapacity: number;
+  reservedCapacity: number;
+  committedCapacity: number;
+  occupancyPercentage: number;
+  slots: MerchantCapacitySlotOccupancy[];
+}
+

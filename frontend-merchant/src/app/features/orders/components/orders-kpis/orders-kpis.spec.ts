@@ -34,6 +34,20 @@ describe('OrdersKpis', () => {
     expect(component.hasAveragePace()).toBe(true);
   });
 
+  it('debe detectar sobrecapacidad y limitar bloques visuales a 10', () => {
+    fixture.componentRef.setInput('capacityTotal', 10);
+    fixture.componentRef.setInput('capacityOccupied', 15);
+    fixture.detectChanges();
+
+    expect(component.isOverCapacity()).toBe(true);
+    expect(component.availableCapacity()).toBe(0);
+    const filledBlocks = component.capacityBlocks().filter((b) => b.isFilled);
+    expect(filledBlocks.length).toBe(10);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Sobrecapacidad: 5 cupos sobre el límite');
+  });
+
   it('debe detectar ausencia de promedio cuando averagePaceMin es null o 0', () => {
     fixture.componentRef.setInput('averagePaceMin', null);
     fixture.detectChanges();

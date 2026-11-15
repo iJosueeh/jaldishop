@@ -14,6 +14,9 @@ public interface CapacityReservationRepository {
     Optional<CapacityReservation> findByIdForUpdate(UUID id);
     int countReserved(UUID storeId, LocalDate serviceDate, LocalTime startTime, LocalTime endTime, Instant now);
     int countCommitted(UUID storeId, LocalDate serviceDate, LocalTime startTime, LocalTime endTime);
+    int countDailyReserved(UUID storeId, LocalDate serviceDate, Instant now);
+    int countDailyCommitted(UUID storeId, LocalDate serviceDate);
+    java.util.List<CapacityPeriod> findOccupiedWindows(UUID storeId, LocalDate serviceDate, Instant now);
     boolean existsReservedByUserAndWindow(UUID userId, UUID storeId, LocalDate serviceDate,
                                           LocalTime startTime, LocalTime endTime, Instant now);
     CapacityReservation save(CapacityReservation reservation);

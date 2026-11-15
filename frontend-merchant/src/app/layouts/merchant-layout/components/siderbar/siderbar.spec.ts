@@ -166,4 +166,57 @@ describe('Siderbar', () => {
     );
     expect(ordersLink?.textContent).toContain('6 hoy (desactualizado)');
   });
+
+  it('debe reflejar ocupación real de capacidad en el módulo del sidebar', () => {
+    const capacityService = TestBed.inject(CapacityService);
+    capacityService.dailyOccupancy.set({
+      storeId: 'store-1',
+      date: '2026-11-15',
+      isClosed: false,
+      effectiveCapacity: 20,
+      occupiedCapacity: 12,
+      availableCapacity: 8,
+      reservedCapacity: 4,
+      committedCapacity: 8,
+      occupancyPercentage: 60,
+      slots: [],
+    });
+
+    fixture.detectChanges();
+
+    expect(component.capacityOccupied()).toBe(12);
+    expect(component.capacityTotal()).toBe(20);
+    expect(component.availableCapacity()).toBe(8);
+    expect(component.isOverCapacity()).toBe(false);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('12/20');
+    expect(compiled.textContent).toContain('Quedan 8 cupos');
+  });
+
+  it('debe reflejar sobrecapacidad en el módulo del sidebar y advertir el exceso', () => {
+    const capacityService = TestBed.inject(CapacityService);
+    capacityService.dailyOccupancy.set({
+      storeId: 'store-1',
+      date: '2026-11-15',
+      isClosed: false,
+      effectiveCapacity: 10,
+      occupiedCapacity: 16,
+      availableCapacity: 0,
+      reservedCapacity: 6,
+      committedCapacity: 10,
+      occupancyPercentage: 160,
+      slots: [],
+    });
+
+    fixture.detectChanges();
+
+    expect(component.capacityOccupied()).toBe(16);
+    expect(component.capacityTotal()).toBe(10);
+    expect(component.isOverCapacity()).toBe(true);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('16/10');
+    expect(compiled.textContent).toContain('Sobrecapacidad (+6)');
+  });
 });

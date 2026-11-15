@@ -47,6 +47,29 @@ public class CapacityReservationRepositoryAdapter implements CapacityReservation
     }
 
     @Override
+    public int countDailyReserved(UUID storeId, LocalDate serviceDate, Instant now) {
+        return (int) jpaRepository.countDailyReserved(storeId, serviceDate, now);
+    }
+
+    @Override
+    public int countDailyCommitted(UUID storeId, LocalDate serviceDate) {
+        return (int) jpaRepository.countDailyCommitted(storeId, serviceDate);
+    }
+
+    @Override
+    public java.util.List<com.jaldishop.backend.capacity.domain.model.CapacityPeriod> findOccupiedWindows(
+            UUID storeId, LocalDate serviceDate, Instant now) {
+        java.util.List<Object[]> rows = jpaRepository.findOccupiedTimeRanges(storeId, serviceDate, now);
+        java.util.List<com.jaldishop.backend.capacity.domain.model.CapacityPeriod> windows = new java.util.ArrayList<>(rows.size());
+        for (Object[] row : rows) {
+            LocalTime start = (LocalTime) row[0];
+            LocalTime end = (LocalTime) row[1];
+            windows.add(com.jaldishop.backend.capacity.domain.model.CapacityPeriod.of(start, end));
+        }
+        return windows;
+    }
+
+    @Override
     public boolean existsReservedByUserAndWindow(UUID userId, UUID storeId, LocalDate serviceDate,
                                                  LocalTime startTime, LocalTime endTime, Instant now) {
         return jpaRepository.existsReservedByUserAndWindow(userId, storeId, serviceDate, startTime, endTime, now);

@@ -25,7 +25,8 @@
       @for (block of capacityBlocks(); track block.index) {
         <span
           class="flex-1 h-3 rounded-xs transition-colors"
-          [class.bg-primary-container]="block.isFilled"
+          [class.bg-primary-container]="block.isFilled && !isOverCapacity()"
+          [class.bg-rose-500]="block.isFilled && isOverCapacity()"
           [class.bg-surface-container-highest]="!block.isFilled"
         ></span>
       }
@@ -33,12 +34,15 @@
 
     <p class="text-xs text-on-surface-variant font-medium">
       @if (hasCapacityOccupied()) {
-        {{ availableCapacity() }}
-        {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
+        @if (isOverCapacity()) {
+          <strong class="text-rose-600 font-bold">Sobrecapacidad: {{ capacityOccupied()! - capacityTotal() }} cupos sobre el límite</strong>
+        } @else {
+          {{ availableCapacity() }}
+          {{ availableCapacity() === 1 ? 'cupo disponible' : 'cupos disponibles' }} para el turno
+        }
       } @else {
         Capacidad configurada:
-        {{ capacityTotal() > 0 ? capacityTotal() + ' cupos' : 'Sin franjas' }} (ocupación en
-        desarrollo)
+        {{ capacityTotal() > 0 ? capacityTotal() + ' cupos' : 'Sin franjas' }}
       }
     </p>
   </div>
