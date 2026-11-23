@@ -184,8 +184,8 @@ class StoreSearchPostgresIntegrationTest {
     private void store(String name, String slug, String status, int order) {
         jdbc.update("""
                 INSERT INTO stores (id, owner_user_id, name, slug, description, pickup_enabled,
-                    delivery_enabled, status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, 'busquedasecreta', true, false, ?,
+                    delivery_enabled, status, can_issue_invoices, tax_id_type, tax_regime, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 'busquedasecreta', true, false, ?, false, 'DNI', 'RUS',
                     TIMESTAMPTZ '2026-01-01 00:00:00+00' + ? * INTERVAL '1 second', now())
                 """, UUID.randomUUID(), UUID.randomUUID(), name, slug, status, order);
     }

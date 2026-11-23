@@ -135,14 +135,14 @@ class OrderTest {
     }
 
     @Test
-    @DisplayName("RN-ORD-09: los montos no pueden ser negativos")
+    @DisplayName("RN-ORD-14: los montos no pueden ser negativos")
     void shouldRejectNegativeAmounts() {
         assertRuleCode(() -> Order.createConfirmed(
-                withTotalAmount(validCreateData(), new BigDecimal("-1.00")), "JAL-2026-000001"), "RN-ORD-09");
+                withTotalAmount(validCreateData(), new BigDecimal("-1.00")), "JAL-2026-000001"), "RN-ORD-14");
     }
 
     @Test
-    @DisplayName("RN-ORD-10: el descuento no puede superar el subtotal")
+    @DisplayName("RN-ORD-15: el descuento no puede superar el subtotal")
     void shouldRejectDiscountAboveSubtotal() {
         Order.CreateData data = new Order.CreateData(
                 USER_ID, STORE_ID, PAYMENT_ID, RESERVATION_ID, DeliveryMode.PICKUP,
@@ -153,7 +153,7 @@ class OrderTest {
                 BigDecimal.ZERO, new BigDecimal("3.05"), new BigDecimal("20.00"),
                 validCreateData().items()
         );
-        assertRuleCode(() -> Order.createConfirmed(data, "JAL-2026-000001"), "RN-ORD-10");
+        assertRuleCode(() -> Order.createConfirmed(data, "JAL-2026-000001"), "RN-ORD-15");
     }
 
     @Test
