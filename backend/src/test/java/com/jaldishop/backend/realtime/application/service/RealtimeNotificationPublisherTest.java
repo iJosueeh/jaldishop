@@ -61,8 +61,8 @@ class RealtimeNotificationPublisherTest {
     }
 
     @Test
-    @DisplayName("publishOrderStatusChanged: Debe enviar el evento a la cola privada del cliente /queue/orders mediante convertAndSendToUser")
-    void publishOrderStatusChangedSendsToCustomerQueue() {
+    @DisplayName("publishOrderStatusChanged: Debe enviar el evento a la cola privada del cliente /queue/orders y al tópico de tienda /topic/stores/{storeId}/orders")
+    void publishOrderStatusChangedSendsToCustomerQueueAndStoreTopic() {
         UUID orderId = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
         UUID storeId = UUID.randomUUID();
@@ -77,18 +77,31 @@ class RealtimeNotificationPublisherTest {
 
         publisher.publishOrderStatusChanged(event);
 
-        ArgumentCaptor<OrderStatusChangedDomainEvent> payloadCaptor = ArgumentCaptor.forClass(OrderStatusChangedDomainEvent.class);
+        ArgumentCaptor<OrderStatusChangedDomainEvent> customerCaptor = ArgumentCaptor.forClass(OrderStatusChangedDomainEvent.class);
         verify(messagingTemplate).convertAndSendToUser(
                 org.mockito.ArgumentMatchers.eq(customerId.toString()),
                 org.mockito.ArgumentMatchers.eq("/queue/orders"),
-                payloadCaptor.capture()
+                customerCaptor.capture()
         );
 
-        OrderStatusChangedDomainEvent captured = payloadCaptor.getValue();
-        assertEquals(orderId, captured.orderId());
-        assertEquals(customerId, captured.customerId());
-        assertEquals(OrderStatus.CONFIRMED, captured.previousStatus());
-        assertEquals(OrderStatus.IN_PREPARATION, captured.newStatus());
+        OrderStatusChangedDomainEvent capturedCustomer = customerCaptor.getValue();
+        assertEquals(orderId, capturedCustomer.orderId());
+        assertEquals(customerId, capturedCustomer.customerId());
+        assertEquals(OrderStatus.CONFIRMED, capturedCustomer.previousStatus());
+        assertEquals(OrderStatus.IN_PREPARATION, capturedCustomer.newStatus());
+
+        String expectedStoreTopic = "/topic/stores/" + storeId + "/orders";
+        ArgumentCaptor<OrderStatusChangedDomainEvent> storeCaptor = ArgumentCaptor.forClass(OrderStatusChangedDomainEvent.class);
+        verify(messagingTemplate).convertAndSend(
+                org.mockito.ArgumentMatchers.eq(expectedStoreTopic),
+                storeCaptor.capture()
+        );
+
+        OrderStatusChangedDomainEvent capturedStore = storeCaptor.getValue();
+        assertEquals(orderId, capturedStore.orderId());
+        assertEquals(storeId, capturedStore.storeId());
+        assertEquals(OrderStatus.CONFIRMED, capturedStore.previousStatus());
+        assertEquals(OrderStatus.IN_PREPARATION, capturedStore.newStatus());
     }
 
 }

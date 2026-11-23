@@ -26,6 +26,7 @@ public class PaymentReconciliationService {
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final PaymentReconciliationProcessor processor;
     private final PaymentOrderReconciliationProcessor orderProcessor;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
     private final int gracePeriodSeconds;
     private final int batchSize;
     private boolean ordersReconciliationEnabled;
@@ -39,6 +40,7 @@ public class PaymentReconciliationService {
             PaymentAttemptRepository paymentAttemptRepository,
             PaymentReconciliationProcessor processor,
             PaymentOrderReconciliationProcessor orderProcessor,
+            org.springframework.jdbc.core.JdbcTemplate jdbcTemplate,
             @Value("${app.payment.reconciliation.grace-period-seconds:600}") int gracePeriodSeconds,
             @Value("${app.payment.reconciliation.batch-size:50}") int batchSize,
             @Value("${app.payment.reconciliation.orders-enabled:false}") boolean ordersReconciliationEnabled,
@@ -50,6 +52,7 @@ public class PaymentReconciliationService {
         this.paymentAttemptRepository = paymentAttemptRepository;
         this.processor = processor;
         this.orderProcessor = orderProcessor;
+        this.jdbcTemplate = jdbcTemplate;
         this.gracePeriodSeconds = gracePeriodSeconds;
         this.batchSize = batchSize;
         this.ordersReconciliationEnabled = ordersReconciliationEnabled;
@@ -60,11 +63,27 @@ public class PaymentReconciliationService {
 
     public PaymentReconciliationService(
             PaymentRepository paymentRepository,
+            PaymentAttemptRepository paymentAttemptRepository,
+            PaymentReconciliationProcessor processor,
+            PaymentOrderReconciliationProcessor orderProcessor,
+            int gracePeriodSeconds,
+            int batchSize,
+            boolean ordersReconciliationEnabled,
+            int ordersGracePeriodSeconds,
+            int ordersBatchSize,
+            int ordersLeaseDurationSeconds
+    ) {
+        this(paymentRepository, paymentAttemptRepository, processor, orderProcessor, null,
+                gracePeriodSeconds, batchSize, ordersReconciliationEnabled, ordersGracePeriodSeconds, ordersBatchSize, ordersLeaseDurationSeconds);
+    }
+
+    public PaymentReconciliationService(
+            PaymentRepository paymentRepository,
             PaymentReconciliationProcessor processor,
             int gracePeriodSeconds,
             int batchSize
     ) {
-        this(paymentRepository, null, processor, null, gracePeriodSeconds, batchSize, false, 120, 20, 300);
+        this(paymentRepository, null, processor, null, null, gracePeriodSeconds, batchSize, false, 120, 20, 300);
     }
 
     public ReconciliationBatchSummary reconcileOrphanApprovedPayments() {
@@ -185,5 +204,51 @@ public class PaymentReconciliationService {
 
     public boolean isOrdersReconciliationEnabled() {
         return ordersReconciliationEnabled;
+    }
+
+    public List<com.jaldishop.backend.payment.web.dto.ReconciliationCandidateItemResponse> findOrphanCandidates(int limit) {
+        if (jdbcTemplate == null) {
+            return List.of();
+        }
+        int effectiveLimit = Math.max(1, Math.min(limit, 50));
+        String sql = """
+            SELECT
+                COALESCE(pa.id, p.id) AS attempt_id,
+                p.id AS payment_id,
+                pa.provider_order_id,
+                pa.provider_payment_id,
+                p.amount,
+                p.currency,
+                COALESCE(pa.payment_method, 'CARD') AS payment_method,
+                COALESCE(s.name, 'Tienda Desconocida') AS store_name,
+                COALESCE(u.email, 'Sin correo') AS customer_email,
+                COALESCE(TRIM(CONCAT(u.first_name, ' ', u.last_name)), 'Cliente') AS customer_name,
+                p.approved_at,
+                'ORPHAN_APPROVED' AS incidence_type
+            FROM payments p
+            LEFT JOIN payment_attempts pa ON pa.payment_id = p.id
+            LEFT JOIN capacity_reservations cr ON cr.id = p.capacity_reservation_id
+            LEFT JOIN stores s ON s.id = cr.store_id
+            LEFT JOIN users u ON u.id = cr.user_id
+            WHERE p.status = 'APPROVED'
+              AND NOT EXISTS (SELECT 1 FROM orders o WHERE o.payment_id = p.id)
+            ORDER BY p.approved_at DESC NULLS LAST, p.created_at DESC
+            LIMIT ?
+            """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new com.jaldishop.backend.payment.web.dto.ReconciliationCandidateItemResponse(
+                (UUID) rs.getObject("attempt_id"),
+                (UUID) rs.getObject("payment_id"),
+                rs.getString("provider_order_id"),
+                rs.getString("provider_payment_id"),
+                rs.getBigDecimal("amount"),
+                rs.getString("currency"),
+                rs.getString("payment_method"),
+                rs.getString("store_name"),
+                rs.getString("customer_email"),
+                rs.getString("customer_name"),
+                rs.getTimestamp("approved_at") != null ? rs.getTimestamp("approved_at").toInstant() : null,
+                rs.getString("incidence_type")
+        ), effectiveLimit);
     }
 }

@@ -26,7 +26,7 @@ describe('OrdersHeader', () => {
     });
 
     const buttons = fixture.nativeElement.querySelectorAll('button');
-    buttons[2].click();
+    buttons[1].click();
 
     expect(emitted).toBe(true);
   });

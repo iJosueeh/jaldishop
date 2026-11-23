@@ -72,9 +72,13 @@ public class OrderCancellationCompensator {
                 log.info("Cupo de capacidad {} liberado por cancelación de pedido {}",
                         order.getCapacityReservationId(), order.getOrderNumber());
 
-                // B. Restituir inventario físico
+                // B. Restituir inventario físico de reserva
                 restockInventoryService.execute(order.getStoreId(), order.getCapacityReservationId());
-                log.info("Inventario restituido por cancelación de pedido {}", order.getOrderNumber());
+                log.info("Inventario restituido por reserva para cancelación de pedido {}", order.getOrderNumber());
+            } else if (order.getItems() != null && !order.getItems().isEmpty()) {
+                // C. Restituir inventario físico directo para pedidos de comerciante sin capacityReservationId
+                restockInventoryService.restockDirectOrderItems(order.getStoreId(), order.getItems());
+                log.info("Inventario restituido directamente para pedido de comerciante {}", order.getOrderNumber());
             }
         } else {
             log.info("Cancelación de pedido {} ocurrida en estado {}. No se restituye capacidad ni inventario según RN-ORD-13.",

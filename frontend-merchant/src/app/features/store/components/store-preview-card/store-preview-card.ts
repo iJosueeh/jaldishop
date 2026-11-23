@@ -22,6 +22,7 @@ import { DecimalPipe } from '@angular/common';
 import { ToastService } from '../../../../core/services/toast.service';
 import { StoreResponse } from '../../../../core/models/store.models';
 import { isValidImageUrl } from '../../../../core/utils/image.utils';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   imports: [NgIcon, DecimalPipe],
@@ -185,7 +186,7 @@ export class StorePreviewCard {
   readonly slug = computed(() => this.store()?.slug || 'mi-tienda');
 
   copyLink(): void {
-    const url = `https://jaldishop.pe/tienda/${this.slug()}`;
+    const url = `${environment.marketplaceUrl}/tienda/${this.slug()}`;
     navigator.clipboard.writeText(url).then(() => {
       this.isCopied.set(true);
       setTimeout(() => this.isCopied.set(false), 2000);

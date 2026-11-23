@@ -38,7 +38,7 @@
       </span>
     </button>
 
-    <!-- Tab 3: En cocina -->
+    <!-- Tab 3: En preparación -->
     <button
       type="button"
       (click)="tabChange.emit('IN_PREPARATION')"
@@ -48,7 +48,7 @@
       [class.text-on-surface-variant]="activeTab() !== 'IN_PREPARATION'"
       class="px-3.5 py-2 rounded-xl font-bold text-xs shrink-0 transition-colors shadow-2xs cursor-pointer active:scale-98 flex items-center gap-1.5"
     >
-      <span>En cocina</span>
+      <span>En preparación</span>
       <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold" [class.bg-white/20]="activeTab() === 'IN_PREPARATION'" [class.bg-surface-container-high]="activeTab() !== 'IN_PREPARATION'">
         {{ inPrepCount() }}
       </span>
@@ -88,13 +88,7 @@
   </div>
 
   <!-- Controles de Búsqueda y Filtro de Turno / Canal -->
-  <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-    <!-- Chip Turno Actual -->
-    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold shrink-0">
-      <ng-icon name="matScheduleOutline" class="text-[16px] text-primary-container" />
-      <span>Turno Activo</span>
-    </div>
-
+  <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-1 justify-end">
     <!-- Buscador en tiempo real -->
     <div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-xl shadow-2xs border border-outline-variant/30 flex-1 sm:w-64 min-w-[200px]">
       <ng-icon name="matSearchOutline" class="text-[18px] text-on-surface-variant shrink-0" />
@@ -119,8 +113,8 @@
       }
     </div>
 
-    <!-- Selector de Canal (Deshabilitado: el backend actual no clasifica pedidos por canal en Fase 1) -->
-    <div class="relative shrink-0" title="Filtro por canal no disponible por el momento (backend no soporta canales)">
+    <!-- Selector de Canal (oculto: remoción de Dead UI en pantalla de mostrador) -->
+    <div class="hidden" aria-hidden="true" title="Filtro por canal no disponible por el momento (backend no soporta canales)">
       <select
         [value]="'ALL'"
         [disabled]="true"

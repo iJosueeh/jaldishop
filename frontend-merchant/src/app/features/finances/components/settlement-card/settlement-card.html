@@ -1,0 +1,152 @@
+<div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#005141]/5 via-card to-card border border-[#005141]/20 shadow-xs flex flex-col gap-6 font-sans">
+  <!-- Cabecera de la Tarjeta -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-[#005141]/10 text-[#005141] flex items-center justify-center shrink-0">
+        <ng-icon name="matAccountBalanceWalletOutline" class="text-2xl" />
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-foreground">Liquidaciones & Balance Disponible</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">
+          Fondos netos recaudados por ventas online en JaldiShop. Los pedidos manuales y contra entrega los cobras directamente en mano.
+        </p>
+      </div>
+    </div>
+
+    <!-- Indicador de Cuenta Vinculada -->
+    @if (destination(); as dest) {
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/80 text-xs">
+        <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center">
+          <ng-icon name="matCheckCircleOutline" class="text-xs" />
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            @if (dest.payoutChannel === 'YAPE_PHONE') {
+              <span class="w-3.5 h-3.5 rounded-full bg-[#742284] text-[#00d4aa] flex items-center justify-center text-[9px] font-black shrink-0">Y</span>
+              <span class="font-semibold text-foreground">Yape</span>
+            } @else {
+              <span class="font-semibold text-foreground">
+                {{ dest.bankName || 'Cuenta Bancaria' }}
+              </span>
+            }
+          </div>
+          <span class="text-[10px] text-muted-foreground font-mono">
+            {{ dest.payoutChannel === 'BANK_TRANSFER_CCI' ? (dest.accountCci ? 'CCI ***' + dest.accountCci.slice(-4) : 'CCI Registrado') : (dest.phoneNumber ? 'Cel. ***' + dest.phoneNumber.slice(-4) : 'Yape Registrado') }}
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="onConfigureAccount()"
+          class="ml-2 text-xs font-semibold text-[#005141] hover:underline cursor-pointer"
+        >
+          Editar
+        </button>
+      </div>
+    } @else {
+      <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs">
+        <ng-icon name="matInfoOutline" class="text-base shrink-0" />
+        <span>Falta configurar cuenta de abono</span>
+        <button
+          type="button"
+          (click)="onConfigureAccount()"
+          class="ml-1 font-bold underline cursor-pointer hover:text-amber-800"
+        >
+          Configurar
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Métricas de Balances -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- 1. Saldo Disponible -->
+    <div class="p-4 rounded-xl bg-card border border-border flex flex-col justify-between gap-2 shadow-2xs">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Saldo Disponible</span>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">Retirable</span>
+      </div>
+      <div>
+        <div class="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+          S/ {{ availableBalance().toFixed(2) }}
+        </div>
+        <p class="text-[11px] text-muted-foreground mt-1">
+          Mínimo para retiro: S/ {{ minThreshold().toFixed(2) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. Saldo en Proceso de Desembolso -->
+    <div class="p-4 rounded-xl bg-card border border-border flex flex-col justify-between gap-2 shadow-2xs">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">En Proceso</span>
+        <div class="w-6 h-6 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center">
+          <ng-icon name="matPendingActionsOutline" class="text-sm" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+          S/ {{ lockedBalance().toFixed(2) }}
+        </div>
+        <p class="text-[11px] text-muted-foreground mt-1">
+          En transferencia interbancaria activa
+        </p>
+      </div>
+    </div>
+
+    <!-- 3. Total Liquidado Acumulado -->
+    <div class="p-4 rounded-xl bg-card border border-border flex flex-col justify-between gap-2 shadow-2xs">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Liquidado</span>
+        <div class="w-6 h-6 rounded-md bg-stone-500/10 text-stone-600 flex items-center justify-center">
+          <ng-icon name="matCheckCircleOutline" class="text-sm" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+          S/ {{ totalPaidOut().toFixed(2) }}
+        </div>
+        <p class="text-[11px] text-muted-foreground mt-1">
+          Desembolsado históricamente a tu cuenta
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de Acción y Condiciones -->
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+    <div class="text-xs text-muted-foreground">
+      @if (availableBalance() < minThreshold()) {
+        <span class="text-amber-600 font-medium flex items-center gap-1.5">
+          <ng-icon name="matInfoOutline" class="text-sm" />
+          Acumula al menos S/ {{ minThreshold().toFixed(2) }} en ventas online para habilitar el retiro.
+        </span>
+      } @else if (!destination()) {
+        <span class="text-amber-600 font-medium flex items-center gap-1.5">
+          <ng-icon name="matInfoOutline" class="text-sm" />
+          Registra tu cuenta de destino (CCI o Yape) para procesar el desembolso.
+        </span>
+      } @else {
+        <span class="text-emerald-600 font-medium flex items-center gap-1.5">
+          <ng-icon name="matCheckCircleOutline" class="text-sm" />
+          Listo para transferir a tu cuenta sin comisiones adicionales por retiro.
+        </span>
+      }
+    </div>
+
+    <button
+      type="button"
+      (click)="onRequestPayout()"
+      [disabled]="!canRequest() || isRequesting()"
+      class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#005141] text-white font-bold text-sm shadow-sm hover:bg-[#003d31] transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+    >
+      @if (isRequesting()) {
+        <ng-icon name="matSyncOutline" class="text-base animate-spin" />
+        <span>Procesando...</span>
+      } @else {
+        <ng-icon name="matAccountBalanceOutline" class="text-base" />
+        <span>Solicitar Liquidación</span>
+        <ng-icon name="matArrowForwardOutline" class="text-xs" />
+      }
+    </button>
+  </div>
+</div>

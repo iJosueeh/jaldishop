@@ -21,4 +21,8 @@ export interface Toast {
     message: string;
     durationMs?: number;
     dismissing?: boolean;
+    action?: {
+      label: string;
+      run: () => void;
+    };
 }

@@ -21,9 +21,7 @@ import {
 })
 export class ProductsAlertBanner {
   attentionCount = input<number>(0);
-  attentionMessage = input<string>(
-    '1 producto pausado automáticamente por falta de insumos (Cheesecake de Maracuyá requiere pulpa) y 2 productos con cupos limitados para el turno tarde.',
-  );
+  attentionMessage = input<string>('');
 
   viewDetails = output<void>();
 }

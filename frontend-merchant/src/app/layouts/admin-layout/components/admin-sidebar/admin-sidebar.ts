@@ -1,5 +1,6 @@
-import { Component, inject, input, OnInit, output } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AdminService } from '../../../../core/services/admin.service';
 import { AuthService } from '../../../../core/services/auth-service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -11,7 +12,17 @@ import {
   matSettingsOutline,
   matCloseOutline,
   matLogoutOutline,
+  matAnalyticsOutline,
+  matBoltOutline,
+  matKeyboardArrowDownOutline,
 } from '@ng-icons/material-symbols/outline';
+
+export interface AdminSidebarSections {
+  supervision: boolean;
+  ecosystem: boolean;
+  finances: boolean;
+  governance: boolean;
+}
 
 @Component({
   imports: [RouterLink, RouterLinkActive, NgIcon],
@@ -24,6 +35,9 @@ import {
       matSettingsOutline,
       matCloseOutline,
       matLogoutOutline,
+      matAnalyticsOutline,
+      matBoltOutline,
+      matKeyboardArrowDownOutline,
     }),
   ],
   selector: 'app-admin-sidebar',
@@ -33,9 +47,25 @@ import {
 export class AdminSidebar implements OnInit {
   readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly isOpen = input<boolean>(false);
   readonly closeSidebar = output<void>();
+
+  // Secciones Colapsables del Sidebar con interfaz tipada explícita
+  readonly openSections = signal<AdminSidebarSections>({
+    supervision: true,
+    ecosystem: true,
+    finances: true,
+    governance: true,
+  });
+
+  toggleSection(sectionKey: keyof AdminSidebarSections): void {
+    this.openSections.update((prev) => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey],
+    }));
+  }
 
   ngOnInit(): void {
     if (this.adminService.users().length === 0) {
@@ -43,6 +73,28 @@ export class AdminSidebar implements OnInit {
     }
     if (this.adminService.stores().length === 0) {
       this.adminService.loadStores().subscribe();
+    }
+
+    this.autoExpandActiveSection(this.router.url);
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.autoExpandActiveSection(event.urlAfterRedirects || event.url);
+      });
+  }
+
+  private autoExpandActiveSection(url: string): void {
+    if (url.includes('/admin/analytics') || url.includes('/admin/dashboard')) {
+      this.openSections.update((s) => ({ ...s, supervision: true }));
+    }
+    if (url.includes('/admin/users') || url.includes('/admin/stores') || url.includes('/admin/merchants')) {
+      this.openSections.update((s) => ({ ...s, ecosystem: true }));
+    }
+    if (url.includes('/admin/reconciliation')) {
+      this.openSections.update((s) => ({ ...s, finances: true }));
+    }
+    if (url.includes('/admin/settings')) {
+      this.openSections.update((s) => ({ ...s, governance: true }));
     }
   }
 

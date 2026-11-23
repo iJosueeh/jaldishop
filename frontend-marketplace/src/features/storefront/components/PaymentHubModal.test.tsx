@@ -129,4 +129,42 @@ describe('PaymentHubModal Component', () => {
       );
     });
   });
+
+  describe('Dual Method Switching', () => {
+    it('allows customer to switch to WhatsApp method and invoke onProceedToWhatsApp', () => {
+      const handlePayWithMP = vi.fn();
+      const handleWhatsApp = vi.fn();
+      render(
+        <PaymentHubModal
+          isOpen={true}
+          onClose={vi.fn()}
+          onPayWithMercadoPago={handlePayWithMP}
+          onProceedToWhatsApp={handleWhatsApp}
+          total={50}
+          storeName="Pastelería Dulce"
+        />
+      );
+
+      // Initially Mercado Pago is active
+      expect(screen.getByText('Pagar con Mercado Pago')).toBeInTheDocument();
+
+      // Click WhatsApp tab in dual method selector
+      const waTab = screen.getByRole('button', { name: /seleccionar coordinación por whatsapp/i });
+      fireEvent.click(waTab);
+
+      // Now WhatsApp details & CTA should be active
+      expect(screen.getByText('Coordinar Pedido por WhatsApp')).toBeInTheDocument();
+      expect(screen.getByText('Coordinación directa')).toBeInTheDocument();
+
+      // Click CTA
+      fireEvent.click(screen.getByText('Coordinar Pedido por WhatsApp'));
+      expect(handleWhatsApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          total: 50,
+          method: 'yape',
+        })
+      );
+      expect(handlePayWithMP).not.toHaveBeenCalled();
+    });
+  });
 });

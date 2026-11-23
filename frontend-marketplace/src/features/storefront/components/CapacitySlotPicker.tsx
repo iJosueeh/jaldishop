@@ -30,6 +30,8 @@ export interface CapacitySlotPickerProps {
   error?: string | null;
   onRetry?: () => void;
   minDate?: string;
+  deliveryEnabled?: boolean;
+  pickupEnabled?: boolean;
 }
 
 export function CapacitySlotPicker({
@@ -44,6 +46,8 @@ export function CapacitySlotPicker({
   error = null,
   onRetry,
   minDate,
+  deliveryEnabled = true,
+  pickupEnabled = true,
 }: CapacitySlotPickerProps) {
   // Controlled vs uncontrolled: when controlledSelectedId is passed (even as null), respect it strictly without auto-selecting
   const defaultSlot = controlledSelectedId !== undefined ? null : (slots.find((s) => s.status !== 'sold_out') || slots[0]);
@@ -102,8 +106,12 @@ export function CapacitySlotPicker({
           <button
             type="button"
             onClick={() => onFulfillmentTypeChange?.('DELIVERY')}
+            disabled={!deliveryEnabled}
+            title={!deliveryEnabled ? 'Delivery no habilitado por este comercio' : undefined}
             className={`flex-1 py-2 px-3.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              fulfillmentType === 'DELIVERY'
+              !deliveryEnabled
+                ? 'opacity-40 cursor-not-allowed text-stone-400 pointer-events-none'
+                : fulfillmentType === 'DELIVERY'
                 ? 'bg-[#005141] text-white shadow-xs'
                 : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
             }`}
@@ -115,8 +123,12 @@ export function CapacitySlotPicker({
           <button
             type="button"
             onClick={() => onFulfillmentTypeChange?.('PICKUP')}
+            disabled={!pickupEnabled}
+            title={!pickupEnabled ? 'Retiro en tienda no habilitado por este comercio' : undefined}
             className={`flex-1 py-2 px-3.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              fulfillmentType === 'PICKUP'
+              !pickupEnabled
+                ? 'opacity-40 cursor-not-allowed text-stone-400 pointer-events-none'
+                : fulfillmentType === 'PICKUP'
                 ? 'bg-[#005141] text-white shadow-xs'
                 : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
             }`}

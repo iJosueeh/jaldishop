@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,10 +25,24 @@ import {
   matBoltOutline,
   matTimerOutline,
 } from '@ng-icons/material-symbols/outline';
-import { MerchantOrder, OrderChannel, PaymentMethod } from '../../../core/models/order.models';
+import {
+  CreateMerchantOrderItemRequest,
+  CreateMerchantOrderRequest,
+  MerchantOrder,
+  OrderChannel,
+  PaymentMethod,
+} from '../../../core/models/order.models';
+import { ProductService } from '../../../core/services/product.service';
+import { StoreService } from '../../../core/services/store.service';
+import { OrderService } from '../../../core/services/order.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { mapDetailToMerchantOrder } from '../../../core/adapters/order.adapter';
+import { getOperatingDateLima } from '../../../core/utils/date.utils';
 
 export interface CatalogProductItem {
   id: string;
+  variantId: string;
+  productId: string;
   name: string;
   price: number;
   category: string;
@@ -67,6 +81,10 @@ export interface CatalogProductItem {
 })
 export class CreateOrderModal {
   private readonly fb = inject(FormBuilder);
+  readonly productService = inject(ProductService);
+  readonly storeService = inject(StoreService);
+  readonly orderService = inject(OrderService);
+  readonly toastService = inject(ToastService);
   readonly Number = Number;
 
   isOpen = input<boolean>(false);
@@ -76,26 +94,66 @@ export class CreateOrderModal {
   readonly activeMobileTab = signal<'DATA' | 'ITEMS'>('DATA');
   readonly productSearchQuery = signal<string>('');
   readonly isSearchDropdownOpen = signal<boolean>(false);
+  readonly isSubmitting = signal<boolean>(false);
 
-  readonly catalogProducts = signal<CatalogProductItem[]>([
-    { id: 'p1', name: 'Torta de Chocolate (12 porc.)', price: 78.0, category: 'Tortas' },
-    { id: 'p2', name: 'Caja Brownies Melcochosos x6', price: 36.0, category: 'Postres' },
-    { id: 'p3', name: 'Galletas de Avena con Chispas x4', price: 22.0, category: 'Galletas' },
-    { id: 'p4', name: 'Pie de Limón Artesanal Mediano', price: 65.0, category: 'Pies' },
-    { id: 'p5', name: 'Cheesecake de Frutos Rojos', price: 72.0, category: 'Tortas' },
-    { id: 'p6', name: 'Empanada de Carne Artesanal', price: 8.5, category: 'Salados' },
-    { id: 'p7', name: 'Alfajores de Maicena x12', price: 28.0, category: 'Postres' },
-    { id: 'p8', name: 'Cinnamon Rolls con Glaseado x4', price: 24.0, category: 'Postres' },
-    { id: 'p9', name: 'Velita Dorada Especial', price: 6.0, category: 'Complementos' },
-    { id: 'p10', name: 'Tarjeta de Dedicatoria', price: 4.0, category: 'Complementos' },
-  ]);
+  constructor() {
+    effect(() => {
+      const open = this.isOpen();
+      if (open) {
+        const storeId = this.storeService.currentStore()?.id;
+        if (storeId && this.productService.products().length === 0) {
+          this.productService.loadProducts(storeId).subscribe();
+        }
+      }
+    });
+  }
+
+  readonly catalogProducts = computed<CatalogProductItem[]>(() => {
+    const products = this.productService.products();
+    if (!products || products.length === 0) {
+      return [];
+    }
+    const items: CatalogProductItem[] = [];
+    for (const p of products) {
+      if (p.status !== 'ACTIVE') continue;
+      const categoryName = p.categoryName || 'General';
+
+      if (p.variants && p.variants.length > 0) {
+        const activeVariants = p.variants.filter((v) => v.status === 'ACTIVE');
+        const targetVariants = activeVariants.length > 0 ? activeVariants : p.variants;
+        for (const v of targetVariants) {
+          items.push({
+            id: v.id,
+            variantId: v.id,
+            productId: p.id,
+            name: targetVariants.length > 1 && v.presentationName
+              ? `${p.name} (${v.presentationName})`
+              : p.name,
+            price: v.priceAmount,
+            category: categoryName,
+          });
+        }
+      } else {
+        items.push({
+          id: p.id,
+          variantId: p.id,
+          productId: p.id,
+          name: p.name,
+          price: p.minPrice || 0,
+          category: categoryName,
+        });
+      }
+    }
+    return items;
+  });
 
   readonly filteredCatalogProducts = computed(() => {
     const q = this.productSearchQuery().trim().toLowerCase();
+    const list = this.catalogProducts();
     if (!q) {
-      return this.catalogProducts().slice(0, 4);
+      return list.slice(0, 4);
     }
-    return this.catalogProducts()
+    return list
       .filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
       .slice(0, 4);
   });
@@ -115,17 +173,18 @@ export class CreateOrderModal {
     scheduledTime: [this.getDefaultScheduledTime(), [Validators.required]],
     paymentMethod: ['YAPE' as PaymentMethod, [Validators.required]],
     notes: [''],
-    items: this.fb.array([
-      this.createItemFormGroup('Torta de Chocolate (12 porc.)', 1, 78.0),
-    ]),
+    items: this.fb.array([], (control) => {
+      return (control as FormArray).length > 0 ? null : { required: true };
+    }),
   });
 
   get itemsFormArray(): FormArray {
     return this.orderForm.get('items') as FormArray;
   }
 
-  createItemFormGroup(name = '', quantity = 1, unitPrice = 0): FormGroup {
+  createItemFormGroup(name = '', quantity = 1, unitPrice = 0, variantId = ''): FormGroup {
     return this.fb.group({
+      variantId: [variantId],
       name: [name, [Validators.required, Validators.minLength(2)]],
       quantity: [quantity, [Validators.required, Validators.min(1)]],
       unitPrice: [unitPrice, [Validators.required, Validators.min(0)]],
@@ -216,16 +275,20 @@ export class CreateOrderModal {
 
   selectProductFromSearch(product: CatalogProductItem): void {
     const controls = this.itemsFormArray.controls;
-    
+
     // Si ya existe en la lista, aumentamos su cantidad
     const existingIndex = controls.findIndex(
-      (ctrl) => ctrl.get('name')?.value?.trim().toLowerCase() === product.name.trim().toLowerCase()
+      (ctrl) =>
+        (ctrl.get('variantId')?.value && ctrl.get('variantId')?.value === product.variantId) ||
+        ctrl.get('name')?.value?.trim().toLowerCase() === product.name.trim().toLowerCase(),
     );
 
     if (existingIndex >= 0) {
       this.incrementQuantity(existingIndex);
     } else {
-      this.itemsFormArray.push(this.createItemFormGroup(product.name, 1, product.price));
+      this.itemsFormArray.push(
+        this.createItemFormGroup(product.name, 1, product.price, product.variantId),
+      );
     }
 
     this.productSearchQuery.set('');
@@ -233,30 +296,41 @@ export class CreateOrderModal {
   }
 
   addCustomItem(): void {
-    const query = this.productSearchQuery().trim().toLowerCase();
-    if (!query) {
-      const available = this.catalogProducts().find(
-        (p) => !this.itemsFormArray.controls.some((ctrl) => ctrl.get('name')?.value?.toLowerCase() === p.name.toLowerCase())
-      ) || this.catalogProducts()[1] || this.catalogProducts()[0];
-      
-      this.itemsFormArray.push(this.createItemFormGroup(available.name, 1, available.price));
+    const catalog = this.catalogProducts();
+    if (catalog.length === 0) {
+      this.toastService.warning('Tu tienda no tiene productos activos en el catálogo');
       return;
     }
 
-    const matchedProduct = this.catalogProducts().find(
-      (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+    const query = this.productSearchQuery().trim().toLowerCase();
+    if (!query) {
+      const available =
+        catalog.find(
+          (p) =>
+            !this.itemsFormArray.controls.some(
+              (ctrl) => ctrl.get('variantId')?.value === p.variantId,
+            ),
+        ) || catalog[0];
+
+      if (available) {
+        this.selectProductFromSearch(available);
+      }
+      return;
+    }
+
+    const matchedProduct = catalog.find(
+      (p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query),
     );
 
     if (matchedProduct) {
       this.selectProductFromSearch(matchedProduct);
     } else {
-      const fallback = this.filteredCatalogProducts()[0] || this.catalogProducts()[0];
-      this.selectProductFromSearch(fallback);
+      this.toastService.warning('El producto no pertenece al catálogo de tu tienda');
     }
   }
 
   removeItem(index: number): void {
-    if (this.itemsFormArray.length > 1) {
+    if (this.itemsFormArray.length > 0) {
       this.itemsFormArray.removeAt(index);
     }
   }
@@ -314,8 +388,19 @@ export class CreateOrderModal {
     this.orderForm.patchValue({ channel });
   }
 
+  readonly isClosing = signal<boolean>(false);
+
   setPaymentMethod(paymentMethod: PaymentMethod): void {
     this.orderForm.patchValue({ paymentMethod });
+  }
+
+  handleClose(): void {
+    if (this.isClosing()) return;
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.isClosing.set(false);
+      this.onClose();
+    }, 200);
   }
 
   onClose(): void {
@@ -323,7 +408,102 @@ export class CreateOrderModal {
   }
 
   onSubmit(): void {
-    // La creación manual está deshabilitada en Fase 1 para no generar pedidos ficticios
-    this.onClose();
+    if (this.orderForm.invalid || this.itemsFormArray.length === 0 || this.isSubmitting()) {
+      this.orderForm.markAllAsTouched();
+      return;
+    }
+
+    const store = this.storeService.currentStore();
+    if (!store?.id) {
+      this.toastService.error('No se ha detectado una tienda activa');
+      return;
+    }
+
+    const rawItems = this.itemsFormArray.value as Array<{
+      variantId?: string;
+      name: string;
+      quantity: number;
+      unitPrice: number;
+    }>;
+
+    const catalog = this.catalogProducts();
+    const orderItems: CreateMerchantOrderItemRequest[] = [];
+
+    for (const item of rawItems) {
+      let vId = item.variantId;
+      if (!vId) {
+        const found = catalog.find((c) => c.name.toLowerCase() === item.name.trim().toLowerCase());
+        vId = found?.variantId || found?.id;
+      }
+      if (!vId) {
+        this.toastService.error(`El producto "${item.name}" no está vinculado a una variante activa del catálogo`);
+        return;
+      }
+      orderItems.push({
+        variantId: vId,
+        quantity: Number(item.quantity) || 1,
+        unitPriceAmount: Number(item.unitPrice) || 0,
+      });
+    }
+
+    const formVal = this.orderForm.value;
+    const timeStr = formVal.scheduledTime || this.getDefaultScheduledTime();
+    let startTime: string | undefined;
+    let endTime: string | undefined;
+
+    if (timeStr && typeof timeStr === 'string' && timeStr.includes(':')) {
+      const [h, m] = timeStr.split(':');
+      startTime = `${h.padStart(2, '0')}:${m.padStart(2, '0')}:00`;
+      const endTotal = (parseInt(h, 10) * 60 + parseInt(m, 10) + 30) % (24 * 60);
+      const eh = Math.floor(endTotal / 60).toString().padStart(2, '0');
+      const em = (endTotal % 60).toString().padStart(2, '0');
+      endTime = `${eh}:${em}:00`;
+    }
+
+    const request: CreateMerchantOrderRequest = {
+      deliveryMode: formVal.deliveryMode,
+      customerName: formVal.customerName.trim(),
+      customerPhone: formVal.customerPhone.trim(),
+      customerEmail: undefined,
+      deliveryAddress: formVal.deliveryMode === 'DELIVERY' ? formVal.deliveryAddress?.trim() : undefined,
+      deliveryReference: formVal.deliveryMode === 'DELIVERY' ? formVal.deliveryReference?.trim() : undefined,
+      deliveryFeeAmount: formVal.deliveryMode === 'DELIVERY' ? Number(formVal.deliveryFee) || 0 : 0,
+      paymentMethod: formVal.paymentMethod,
+      serviceDate: getOperatingDateLima(),
+      serviceStartTime: startTime,
+      serviceEndTime: endTime,
+      notes: formVal.notes ? formVal.notes.trim() : undefined,
+      items: orderItems,
+    };
+
+    this.isSubmitting.set(true);
+    this.orderService.createMerchantOrder(store.id, request).subscribe({
+      next: (createdDetail) => {
+        this.isSubmitting.set(false);
+        const mappedOrder = mapDetailToMerchantOrder(createdDetail);
+        this.orderCreated.emit(mappedOrder);
+        this.resetForm();
+        this.closeModal.emit();
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+      },
+    });
+  }
+
+  resetForm(): void {
+    this.orderForm.reset({
+      customerName: '',
+      customerPhone: '',
+      channel: 'WHATSAPP',
+      deliveryMode: 'DELIVERY',
+      deliveryAddress: '',
+      deliveryReference: '',
+      deliveryFee: 5.0,
+      scheduledTime: this.getDefaultScheduledTime(),
+      paymentMethod: 'YAPE',
+      notes: '',
+    });
+    this.itemsFormArray.clear();
   }
 }

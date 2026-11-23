@@ -1,7 +1,7 @@
 <section class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- Métrica 1: Cupos de Hoy -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span
@@ -10,7 +10,7 @@
         Cupos de Hoy
       </span>
       <span
-        class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary-container font-bold text-xs"
+        class="px-2 py-0.5 rounded-md bg-surface-container-high text-primary-container font-bold text-xs tabular-nums"
       >
         @if (hasCapacityOccupied()) {
           {{ capacityOccupied() }} de {{ capacityTotal() > 0 ? capacityTotal() : 10 }}
@@ -49,7 +49,7 @@
 
   <!-- Métrica 2: Despachos Restantes -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span
@@ -65,7 +65,7 @@
     </div>
 
     <div class="flex items-baseline gap-1.5">
-      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+      <span class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight font-mono tabular-nums">
         {{ remainingDeliveries() }} {{ remainingDeliveries() === 1 ? 'pedido' : 'pedidos' }}
       </span>
       <span class="text-xs text-on-surface-variant font-medium">por salir</span>
@@ -79,7 +79,7 @@
 
   <!-- Métrica 3: Tiempo promedio -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3"
+    class="p-4 sm:p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span

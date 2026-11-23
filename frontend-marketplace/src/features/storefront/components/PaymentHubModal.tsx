@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -9,9 +9,11 @@ import {
   ShieldCheck,
   Clock,
   Lock,
+  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { formatCurrency } from '@/shared/utils/formatters';
+import { cn } from '@/shared/utils/cn';
 
 export type PaymentMethod = 'yape' | 'plin' | 'transferencia';
 
@@ -42,11 +44,36 @@ export function PaymentHubModal({
   slotTime = '10:00 - 11:00 AM',
   countdownSeconds = 600,
 }: PaymentHubModalProps) {
-  const isMercadoPago = Boolean(onPayWithMercadoPago);
+  const hasMercadoPago = Boolean(onPayWithMercadoPago);
+  const hasWhatsApp = Boolean(onProceedToWhatsApp);
+
+  const [activeMethod, setActiveMethod] = useState<'MERCADO_PAGO' | 'WHATSAPP'>(() => {
+    return hasMercadoPago ? 'MERCADO_PAGO' : 'WHATSAPP';
+  });
+
+  useEffect(() => {
+    if (hasMercadoPago) {
+      setActiveMethod('MERCADO_PAGO');
+    } else if (hasWhatsApp) {
+      setActiveMethod('WHATSAPP');
+    }
+  }, [hasMercadoPago, hasWhatsApp, isOpen]);
+
+  const isMercadoPago = activeMethod === 'MERCADO_PAGO' && hasMercadoPago;
 
   const minutes = Math.floor(countdownSeconds / 60);
   const seconds = countdownSeconds % 60;
   const formattedCountdown = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  const handleWhatsAppProceed = () => {
+    if (onProceedToWhatsApp) {
+      onProceedToWhatsApp({
+        method: 'yape',
+        receiptFile: null,
+        total,
+      });
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -73,8 +100,17 @@ export function PaymentHubModal({
             {/* Modal Header */}
             <div className="p-5 sm:p-6 pb-4 border-b border-stone-200 flex items-center justify-between bg-white sticky top-0 z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[8px] bg-[#005141] text-white flex items-center justify-center shadow-xs">
-                  <CreditCard className="w-5 h-5" />
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-[8px] text-white flex items-center justify-center shadow-xs transition-colors',
+                    isMercadoPago ? 'bg-[#005141]' : 'bg-[#128c7e]'
+                  )}
+                >
+                  {isMercadoPago ? (
+                    <CreditCard className="w-5 h-5" />
+                  ) : (
+                    <MessageCircle className="w-5 h-5" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-stone-900 tracking-tight">
@@ -121,6 +157,55 @@ export function PaymentHubModal({
 
             {/* Scrollable Body */}
             <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
+              {/* Dual Method Selector Tabs (when both options exist) */}
+              {hasMercadoPago && hasWhatsApp && (
+                <div className="grid grid-cols-2 gap-2.5 p-1 bg-stone-100 rounded-2xl border border-stone-200">
+                  <button
+                    type="button"
+                    aria-label="Seleccionar pago con Mercado Pago"
+                    onClick={() => setActiveMethod('MERCADO_PAGO')}
+                    className={cn(
+                      'p-2.5 sm:p-3 rounded-xl text-left transition-all flex flex-col justify-between cursor-pointer',
+                      activeMethod === 'MERCADO_PAGO'
+                        ? 'bg-white shadow-xs border border-emerald-200 ring-2 ring-[#005141]'
+                        : 'hover:bg-white/60 text-stone-600'
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-stone-900">Mercado Pago</span>
+                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                        Online
+                      </span>
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] text-stone-500 mt-1">
+                      Tarjetas, Yape QR, Banca
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Seleccionar coordinación por WhatsApp"
+                    onClick={() => setActiveMethod('WHATSAPP')}
+                    className={cn(
+                      'p-2.5 sm:p-3 rounded-xl text-left transition-all flex flex-col justify-between cursor-pointer',
+                      activeMethod === 'WHATSAPP'
+                        ? 'bg-white shadow-xs border border-emerald-200 ring-2 ring-[#005141]'
+                        : 'hover:bg-white/60 text-stone-600'
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-stone-900">WhatsApp</span>
+                      <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                        Directo
+                      </span>
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] text-stone-500 mt-1">
+                      Contraentrega o coordina
+                    </span>
+                  </button>
+                </div>
+              )}
+
               {isMercadoPago ? (
                 /* Real Mercado Pago flow - Only legitimate gateway presentation, no mock details */
                 <div className="p-4 rounded-2xl bg-[#faf7f2] border border-stone-200/90 space-y-3.5">
@@ -204,19 +289,20 @@ export function PaymentHubModal({
                   variant="terracotta"
                   size="md"
                   onClick={() => {
-                    if (onPayWithMercadoPago) {
+                    if (isMercadoPago && onPayWithMercadoPago) {
                       onPayWithMercadoPago();
-                    } else if (onProceedToWhatsApp) {
-                      onProceedToWhatsApp({
-                        method: 'yape',
-                        receiptFile: null,
-                        total,
-                      });
+                    } else {
+                      handleWhatsAppProceed();
                     }
                   }}
                   isLoading={isPaying}
                   disabled={isPaying}
-                  className="w-full sm:flex-1 py-3.5 rounded-full font-black text-xs shadow-md shadow-[#ea580c]/25 cursor-pointer border-0 bg-[#ea580c] hover:bg-[#c2410c] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  className={cn(
+                    'w-full sm:flex-1 py-3.5 rounded-full font-black text-xs shadow-md cursor-pointer border-0 flex items-center justify-center gap-2 active:scale-95 transition-all text-white',
+                    isMercadoPago
+                      ? 'bg-[#ea580c] hover:bg-[#c2410c] shadow-[#ea580c]/25'
+                      : 'bg-[#128c7e] hover:bg-[#075e54] shadow-[#128c7e]/25'
+                  )}
                 >
                   <span>{isMercadoPago ? 'Pagar con Mercado Pago' : 'Coordinar Pedido por WhatsApp'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -227,13 +313,7 @@ export function PaymentHubModal({
                 <div className="text-center pt-1">
                   <button
                     type="button"
-                    onClick={() =>
-                      onProceedToWhatsApp({
-                        method: 'yape',
-                        receiptFile: null,
-                        total,
-                      })
-                    }
+                    onClick={handleWhatsAppProceed}
                     disabled={isPaying}
                     className="text-[11px] font-semibold text-stone-500 hover:text-stone-700 underline cursor-pointer disabled:opacity-50"
                   >

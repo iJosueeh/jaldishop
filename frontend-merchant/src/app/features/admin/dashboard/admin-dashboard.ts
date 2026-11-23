@@ -8,8 +8,13 @@ import { AdminQuickUsers } from './components/admin-quick-users/admin-quick-user
 import { AdminQuickStores } from './components/admin-quick-stores/admin-quick-stores';
 import { AdminUserDrawer } from '../users/components/admin-user-drawer/admin-user-drawer';
 import { AdminStoreDrawer } from '../stores/components/admin-store-drawer/admin-store-drawer';
+import { PaymentReconciliationModal } from './components/payment-reconciliation-modal/payment-reconciliation-modal';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { matRefreshOutline } from '@ng-icons/material-symbols/outline';
+import {
+  matRefreshOutline,
+  matPictureAsPdfOutline,
+  matBoltOutline,
+} from '@ng-icons/material-symbols/outline';
 
 @Component({
   imports: [
@@ -19,9 +24,16 @@ import { matRefreshOutline } from '@ng-icons/material-symbols/outline';
     AdminQuickStores,
     AdminUserDrawer,
     AdminStoreDrawer,
+    PaymentReconciliationModal,
     NgIcon,
   ],
-  providers: [provideIcons({ matRefreshOutline })],
+  providers: [
+    provideIcons({
+      matRefreshOutline,
+      matPictureAsPdfOutline,
+      matBoltOutline,
+    }),
+  ],
   selector: 'app-admin-dashboard',
   styleUrl: './admin-dashboard.css',
   templateUrl: './admin-dashboard.html',
@@ -36,6 +48,8 @@ export class AdminDashboard implements OnInit {
   readonly drawerStore = signal<AdminStoreSummary | null>(null);
   readonly isStoreDrawerOpen = signal<boolean>(false);
 
+  readonly isReconciliationModalOpen = signal<boolean>(false);
+
   readonly recentUsers = computed(() => {
     return this.adminService.users().slice(0, 5);
   });
@@ -47,11 +61,25 @@ export class AdminDashboard implements OnInit {
   ngOnInit(): void {
     this.adminService.loadUsers().subscribe();
     this.adminService.loadStores().subscribe();
+    this.adminService.loadAnalyticsSummary().subscribe();
   }
 
   refreshData(): void {
     this.adminService.loadUsers(true).subscribe();
     this.adminService.loadStores(true).subscribe();
+    this.adminService.loadAnalyticsSummary().subscribe();
+  }
+
+  exportPdf(): void {
+    this.adminService.exportAnalyticsPdf();
+  }
+
+  openReconciliationModal(): void {
+    this.isReconciliationModalOpen.set(true);
+  }
+
+  closeReconciliationModal(): void {
+    this.isReconciliationModalOpen.set(false);
   }
 
   onSelectUser(user: AdminUserSummary): void {

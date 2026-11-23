@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { environment } from '../../../../../environments/environment';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matShareOutline,
@@ -47,8 +48,8 @@ export class DashboardHeader {
     const store = this.storeService.currentStore();
     const slug = store?.slug;
     const url = slug
-      ? `${window.location.origin}/store/${slug}`
-      : window.location.origin;
+      ? `${environment.marketplaceUrl}/tienda/${slug}`
+      : environment.marketplaceUrl;
 
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(url).then(() => {

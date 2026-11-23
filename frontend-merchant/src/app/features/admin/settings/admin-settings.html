@@ -57,7 +57,21 @@
       [class.hover:bg-surface-container]="currentTab() !== 'system'"
     >
       <ng-icon name="matInfoOutline" class="text-[16px]" />
-      <span>Sistema & Versión</span>
+      <span>Sistema & Plataforma</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('audit')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="currentTab() === 'audit'"
+      [class.text-on-primary]="currentTab() === 'audit'"
+      [class.shadow-2xs]="currentTab() === 'audit'"
+      [class.text-on-surface-variant]="currentTab() !== 'audit'"
+      [class.hover:bg-surface-container]="currentTab() !== 'audit'"
+    >
+      <ng-icon name="matHistoryEduOutline" class="text-[16px]" />
+      <span>Pistas de Auditoría</span>
     </button>
   </div>
 
@@ -83,7 +97,13 @@
         />
       }
       @case ('system') {
-        <app-admin-settings-system-tab [settings]="adminService.settings()" />
+        <app-admin-settings-system-tab
+          [settings]="adminService.settings()"
+          (settingsChange)="onUpdateSettings($event)"
+        />
+      }
+      @case ('audit') {
+        <app-admin-settings-audit-tab />
       }
     }
   </div>

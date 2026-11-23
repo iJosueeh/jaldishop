@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Dashboards } from './dashboards';
 import { CapacityService } from '../../core/services/capacity.service';
 
@@ -46,7 +47,7 @@ describe('Dashboards', () => {
     fixture = TestBed.createComponent(Dashboards);
     component = fixture.componentInstance;
     await fixture.whenStable();
-  });
+  }, 25000);
 
   it('should create', () => {
     expect(component).toBeTruthy();

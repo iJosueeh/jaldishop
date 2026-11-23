@@ -16,8 +16,8 @@
     @if (currentStep() == 2) {
       <app-register-step2-brand
         class="hidden lg:flex lg:w-1/2 h-full flex-col"
-        [storeName]="step2Data()?.name || 'Dulces Clara'"
-        [businessType]="step2Data()?.businessType || 'Restaurantes y Cafeterías'"
+        [storeName]="step2Data()?.name || 'Comercial Los Andes'"
+        [businessType]="step2Data()?.businessType || 'Comercio Minorista / Tienda'"
         [contactPhone]="step2Data()?.contactPhone || '999999999'"
         [pickupEnabled]="step2Data()?.pickupEnabled ?? true"
         [deliveryEnabled]="step2Data()?.deliveryEnabled ?? true"

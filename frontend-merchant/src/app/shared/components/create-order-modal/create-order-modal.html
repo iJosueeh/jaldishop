@@ -1,9 +1,13 @@
 @if (isOpen()) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200 font-sans"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto font-sans"
+    [class.animate-fade-in]="!isClosing()"
+    [class.animate-fade-out]="isClosing()"
   >
     <div
       class="relative w-full max-w-4xl lg:max-w-5xl bg-surface-container-lowest rounded-3xl shadow-2xl border border-outline-variant/30 flex flex-col max-h-[92vh] overflow-hidden my-auto"
+      [class.animate-scale-up]="!isClosing()"
+      [class.modal-dialog-exit]="isClosing()"
     >
       <!-- Cabecera Principal del Modal -->
       <header
@@ -17,29 +21,29 @@
           </div>
           <div>
             <div class="flex items-center gap-2.5">
-              <h3 class="text-sm sm:text-base font-bold text-on-surface">Nueva Comanda Operativa</h3>
+              <h3 class="text-sm sm:text-base font-bold text-on-surface">Comanda Mostrador / Directa</h3>
               <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold tracking-wide uppercase border border-emerald-500/20">
-                Turno en Vivo
+                Mostrador / Local
               </span>
             </div>
-            <p class="text-xs text-on-surface-variant mt-0.5">Búsqueda rápida de productos y registro de comanda</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">Registro de comanda directa de mostrador, WhatsApp y teléfono para control de preparación y ticket de despacho</p>
           </div>
         </div>
         <button
           type="button"
-          (click)="onClose()"
-          class="w-9 h-9 rounded-full hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors cursor-pointer"
+          (click)="handleClose()"
+          class="w-9 h-9 rounded-full hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors cursor-pointer btn-press focus-ring"
           aria-label="Cerrar modal"
         >
           <ng-icon name="matCloseOutline" class="text-[22px]" />
         </button>
       </header>
 
-      <!-- Banner de Advertencia: Función en Desarrollo (Fase 1) -->
-      <div class="px-5 sm:px-7 py-2.5 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2.5 text-amber-800 text-xs shrink-0">
-        <ng-icon name="matTimerOutline" class="text-[18px] text-amber-600 shrink-0" />
+      <!-- Banner Informativo: Registro Directo Conectado -->
+      <div class="px-5 sm:px-7 py-2.5 bg-primary/10 border-b border-primary/20 flex items-center gap-2.5 text-primary text-xs shrink-0">
+        <ng-icon name="matCheckOutline" class="text-[18px] text-primary shrink-0" />
         <span class="font-medium">
-          <strong>Función en desarrollo:</strong> El registro manual de comandas estará disponible próximamente conectado a base de datos. Por ahora, las órdenes ingresan automáticamente desde la tienda online.
+          <strong>Registro en vivo:</strong> Las órdenes creadas descontarán inventario atómicamente y generarán una comanda operativa en el turno.
         </span>
       </div>
 
@@ -382,7 +386,7 @@
           </div>
         </div>
 
-        <!-- COLUMNA DERECHA (5/12 en Desktop): Ticket de Cocina con Combobox de Búsqueda -->
+        <!-- COLUMNA DERECHA (5/12 en Desktop): Resumen de Pedido y Despacho con Combobox de Búsqueda -->
         <div
           [class.hidden]="activeMobileTab() !== 'ITEMS'"
           class="lg:!flex lg:col-span-5 p-5 sm:p-7 bg-surface-container-low/40 flex-col justify-between overflow-hidden rounded-b-3xl lg:rounded-bl-none lg:rounded-r-3xl"
@@ -409,7 +413,7 @@
                   (input)="onSearchInput($event)"
                   (focus)="onSearchFocus()"
                   (blur)="onSearchBlur()"
-                  placeholder="Escribe para buscar plato o producto..."
+                  placeholder="Escribe para buscar artículo o producto..."
                   autocomplete="off"
                   class="w-full pl-9 pr-22 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 focus:border-primary text-xs font-bold text-on-surface outline-none shadow-2xs transition-all"
                 />
@@ -423,36 +427,60 @@
               </div>
 
               <!-- Dropdown de sugerencias filtradas (máximo 4 sugerencias) -->
-              @if (isSearchDropdownOpen() && filteredCatalogProducts().length > 0) {
-                <div
-                  class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-1.5 space-y-1 animate-in fade-in duration-100"
-                >
-                  <div class="px-2 py-0.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                    Sugerencias del catálogo ({{ filteredCatalogProducts().length }}):
-                  </div>
-                  @for (prod of filteredCatalogProducts(); track prod.id) {
-                    <button
-                      type="button"
-                      (mousedown)="selectProductFromSearch(prod)"
-                      class="w-full px-2.5 py-1.5 rounded-xl text-left hover:bg-surface-container-high transition-colors flex items-center justify-between gap-2 cursor-pointer group"
-                    >
-                      <div class="truncate">
-                        <span class="text-xs font-bold text-on-surface group-hover:text-primary">{{ prod.name }}</span>
-                        <span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant font-medium">
-                          {{ prod.category }}
+              @if (isSearchDropdownOpen()) {
+                @if (filteredCatalogProducts().length > 0) {
+                  <div
+                    class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-1.5 space-y-1 animate-in fade-in duration-100"
+                  >
+                    <div class="px-2 py-0.5 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                      Sugerencias del catálogo ({{ filteredCatalogProducts().length }}):
+                    </div>
+                    @for (prod of filteredCatalogProducts(); track prod.id) {
+                      <button
+                        type="button"
+                        (mousedown)="selectProductFromSearch(prod)"
+                        class="w-full px-2.5 py-1.5 rounded-xl text-left hover:bg-surface-container-high transition-colors flex items-center justify-between gap-2 cursor-pointer group"
+                      >
+                        <div class="truncate">
+                          <span class="text-xs font-bold text-on-surface group-hover:text-primary">{{ prod.name }}</span>
+                          <span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant font-medium">
+                            {{ prod.category }}
+                          </span>
+                        </div>
+                        <span class="text-xs font-extrabold text-primary shrink-0">
+                          S/ {{ prod.price | number: '1.2-2' }}
                         </span>
-                      </div>
-                      <span class="text-xs font-extrabold text-primary shrink-0">
-                        S/ {{ prod.price | number: '1.2-2' }}
-                      </span>
-                    </button>
-                  }
-                </div>
+                      </button>
+                    }
+                  </div>
+                } @else if (catalogProducts().length === 0) {
+                  <div
+                    class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-3 text-center space-y-1 animate-in fade-in duration-100"
+                  >
+                    <p class="text-xs font-bold text-on-surface">Sin productos en catálogo</p>
+                    <p class="text-[11px] text-on-surface-variant">Tu tienda no tiene productos activos registrados aún.</p>
+                  </div>
+                } @else if (productSearchQuery().trim().length > 0) {
+                  <div
+                    class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-3 text-center space-y-1 animate-in fade-in duration-100"
+                  >
+                    <p class="text-xs font-medium text-on-surface-variant">No se encontraron productos para "{{ productSearchQuery() }}"</p>
+                  </div>
+                }
               }
             </div>
 
             <!-- Lista Optimizada con Scroll para Múltiples Ítems de la Comanda -->
             <div formArrayName="items" class="flex-1 overflow-y-auto overflow-x-hidden space-y-2 pr-1 min-h-[150px] max-h-[250px] sm:max-h-[300px]">
+              @if (itemsFormArray.length === 0) {
+                <div class="p-6 rounded-2xl border border-dashed border-outline-variant/40 bg-surface-container-lowest text-center flex flex-col items-center justify-center gap-2 h-full">
+                  <ng-icon name="matShoppingBagOutline" class="text-3xl text-on-surface-variant/60" />
+                  <p class="text-xs font-semibold text-on-surface">No has agregado productos a la comanda</p>
+                  <p class="text-[11px] text-on-surface-variant max-w-[260px]">
+                    Busca en tu catálogo superior y selecciona los productos que solicitó el cliente.
+                  </p>
+                </div>
+              }
               @for (item of itemsFormArray.controls; track $index; let idx = $index) {
                 <div [formGroupName]="idx" class="p-2.5 sm:p-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 hover:border-outline-variant/60 shadow-2xs transition-all flex items-center justify-between gap-2.5 overflow-hidden">
                   <!-- Nombre del Producto y Precio Unitario -->
@@ -497,8 +525,6 @@
                     <button
                       type="button"
                       (click)="removeItem(idx)"
-                      [disabled]="itemsFormArray.length <= 1"
-                      [class.opacity-20]="itemsFormArray.length <= 1"
                       class="p-1 rounded-lg text-on-surface-variant hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer"
                       aria-label="Eliminar producto"
                     >
@@ -582,12 +608,15 @@
               </button>
               <button
                 type="submit"
-                [disabled]="true"
-                class="flex-1 py-3.5 px-5 rounded-2xl bg-surface-container-high text-on-surface-variant font-bold text-xs sm:text-sm transition-all shadow-none cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
-                title="Función en desarrollo. Estará disponible próximamente."
+                [disabled]="orderForm.invalid || isSubmitting() || itemsFormArray.length === 0"
+                class="flex-1 py-3.5 px-5 rounded-2xl bg-primary hover:bg-primary-container text-white font-bold text-xs sm:text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary flex items-center justify-center gap-2 cursor-pointer"
               >
-                <ng-icon name="matTimerOutline" class="text-[20px]" />
-                <span>Próximamente disponible</span>
+                @if (isSubmitting()) {
+                  <span>Registrando comanda...</span>
+                } @else {
+                  <ng-icon name="matCheckOutline" class="text-[20px]" />
+                  <span>Registrar Comanda (S/ {{ calculateGrandTotal() | number: '1.2-2' }})</span>
+                }
               </button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.infrastructure.persistence.repository.Produ
 import com.jaldishop.backend.inventory.infrastructure.persistence.entity.InventoryEntity;
 import com.jaldishop.backend.inventory.infrastructure.persistence.repository.InventoryJpaRepository;
 import com.jaldishop.backend.inventory.infrastructure.persistence.repository.StoreVariantInventoryProjection;
+import com.jaldishop.backend.inventory.infrastructure.persistence.repository.VariantReservedQuantityProjection;
 import com.jaldishop.backend.inventory.web.dto.InventoryResponse;
 import com.jaldishop.backend.inventory.web.mapper.InventoryResponseMapper;
 import com.jaldishop.backend.shared.exception.BusinessRuleException;
@@ -74,13 +75,17 @@ class InventoryServicesTest {
     }
 
     @Test
-    @DisplayName("GetStoreInventory: mapea correctamente variantes configuradas y no configuradas")
+    @DisplayName("GetStoreInventory: mapea correctamente variantes configuradas y no configuradas con consulta por lote")
     void testGetStoreInventory() {
         StoreVariantInventoryProjection projConfigured = createProjection(true, 10, 3);
         when(inventoryJpaRepository.findAllVariantInventoriesByStoreId(storeId))
                 .thenReturn(List.of(projConfigured));
-        when(inventoryJpaRepository.sumActiveReservedQuantity(eq(storeId), eq(variantId), any()))
-                .thenReturn(2);
+        VariantReservedQuantityProjection resProj = new VariantReservedQuantityProjection() {
+            @Override public UUID getVariantId() { return variantId; }
+            @Override public Integer getReservedQuantity() { return 2; }
+        };
+        when(inventoryJpaRepository.sumActiveReservedQuantitiesByStoreIdAndVariantIds(eq(storeId), eq(List.of(variantId)), any()))
+                .thenReturn(List.of(resProj));
 
         List<InventoryResponse> result = getStoreInventoryService.execute(storeId);
 
@@ -91,6 +96,30 @@ class InventoryServicesTest {
         assertThat(resp.reservedQuantity()).isEqualTo(2);
         assertThat(resp.availableQuantity()).isEqualTo(8);
         assertThat(resp.isLowStock()).isFalse();
+    }
+
+    @Test
+    @DisplayName("GetLowStockInventory: mapea existencias con consulta por lote sin N+1")
+    void testGetLowStockInventory() {
+        StoreVariantInventoryProjection proj = createProjection(true, 3, 5);
+        when(inventoryJpaRepository.findLowStockVariantsByStoreId(storeId))
+                .thenReturn(List.of(proj));
+        VariantReservedQuantityProjection resProj = new VariantReservedQuantityProjection() {
+            @Override public UUID getVariantId() { return variantId; }
+            @Override public Integer getReservedQuantity() { return 1; }
+        };
+        when(inventoryJpaRepository.sumActiveReservedQuantitiesByStoreIdAndVariantIds(eq(storeId), eq(List.of(variantId)), any()))
+                .thenReturn(List.of(resProj));
+
+        List<InventoryResponse> result = getLowStockInventoryService.execute(storeId);
+
+        assertThat(result).hasSize(1);
+        InventoryResponse resp = result.get(0);
+        assertThat(resp.inventoryStatus()).isEqualTo("CONFIGURED");
+        assertThat(resp.physicalQuantity()).isEqualTo(3);
+        assertThat(resp.reservedQuantity()).isEqualTo(1);
+        assertThat(resp.availableQuantity()).isEqualTo(2);
+        assertThat(resp.isLowStock()).isTrue();
     }
 
     @Test

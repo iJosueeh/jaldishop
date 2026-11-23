@@ -55,8 +55,8 @@
           <input
             type="email"
             readonly
-            [value]="email() || 'comercio@ejemplo.pe'"
-            placeholder="comercio@ejemplo.pe"
+            [value]="email() || 'comercio@ejemplo.net'"
+            placeholder="comercio@ejemplo.net"
             class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface-container-high/60 text-on-surface text-xs sm:text-sm border border-outline-variant/30 font-medium cursor-not-allowed focus:outline-none"
           />
         </div>
@@ -102,7 +102,13 @@
           <span class="text-xs text-on-surface-variant">Avisar inmediatamente al recibir pedidos directos por WhatsApp o tienda online.</span>
         </div>
         <label class="relative inline-flex items-center cursor-pointer shrink-0">
-          <input type="checkbox" checked class="sr-only peer" />
+          <input
+            type="checkbox"
+            #orderAlertInput
+            [checked]="settingsService.settings().orderSoundAlert"
+            (change)="onToggleOrderSoundAlert(orderAlertInput.checked)"
+            class="sr-only peer"
+          />
           <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
         </label>
       </div>
@@ -113,7 +119,13 @@
           <span class="text-xs text-on-surface-variant">Notificación antes de llegar al límite diario para no saturar tus operaciones.</span>
         </div>
         <label class="relative inline-flex items-center cursor-pointer shrink-0">
-          <input type="checkbox" checked class="sr-only peer" />
+          <input
+            type="checkbox"
+            #capacityAlertInput
+            [checked]="settingsService.settings().lowStockVisualAlert"
+            (change)="onToggleCapacityAlert(capacityAlertInput.checked)"
+            class="sr-only peer"
+          />
           <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
         </label>
       </div>
@@ -138,29 +150,15 @@
           <div class="text-xs font-bold text-on-surface">Contraseña</div>
           <div class="text-xs text-on-surface-variant">Protegida y encriptada</div>
         </div>
-        <button
-          type="button"
+        <a
+          routerLink="/forgot-password"
           class="px-3 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container-high text-on-surface text-xs font-bold shadow-xs transition-colors cursor-pointer"
         >
           Cambiar
-        </button>
+        </a>
       </div>
 
-      <div class="p-4 rounded-xl bg-surface-container-low flex items-center justify-between gap-3">
-        <div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-bold text-on-surface">Doble Factor (2FA)</span>
-            <span class="px-2 py-0.5 rounded-md bg-primary-fixed text-primary text-[10px] font-bold">Activo</span>
-          </div>
-          <div class="text-xs text-on-surface-variant">Vía SMS / WhatsApp</div>
-        </div>
-        <button
-          type="button"
-          class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-xs font-bold shadow-xs transition-colors cursor-pointer"
-        >
-          Gestionar
-        </button>
-      </div>
+
     </div>
   </div>
 
@@ -168,7 +166,7 @@
   <div class="pt-1 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-on-surface-variant px-1">
     <span>¿Necesitas ayuda con la titularidad de tu cuenta?</span>
     <a
-      href="mailto:soporte@jaldishop.pe"
+      href="mailto:soporte@jaldishop.net"
       class="inline-flex items-center gap-1 text-primary-container hover:text-primary font-bold transition-colors cursor-pointer"
     >
       <ng-icon name="matSupportAgentOutline" class="text-[16px]" />
@@ -176,4 +174,3 @@
     </a>
   </div>
 </div>
-

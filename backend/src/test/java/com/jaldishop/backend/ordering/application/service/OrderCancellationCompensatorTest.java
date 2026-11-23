@@ -118,6 +118,45 @@ class OrderCancellationCompensatorTest {
         verify(restockInventoryService).execute(storeId, capacityReservationId);
     }
 
+    @Test
+    @DisplayName("Compensación orden directa comerciante: sin capacidad, restituye ítems físicamente mediante restockDirectOrderItems")
+    void shouldRestockDirectOrderItemsWhenCancelledFromConfirmedWithoutCapacityReservation() {
+        Order order = Order.createMerchantDirect(
+                new Order.MerchantDirectData(
+                        customerId,
+                        storeId,
+                        DeliveryMode.PICKUP,
+                        LocalDate.now(),
+                        LocalTime.of(10, 0),
+                        LocalTime.of(10, 30),
+                        "Cliente Mostrador",
+                        "987654321",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "PEN",
+                        new BigDecimal("50.00"),
+                        BigDecimal.ZERO,
+                        null,
+                        BigDecimal.ZERO,
+                        new BigDecimal("7.63"),
+                        new BigDecimal("50.00"),
+                        "CASH",
+                        "Nota mostrador",
+                        List.of(new Order.ItemData(variantId, "Torta Chocolate", "Porción", 2, new BigDecimal("25.00")))
+                ),
+                "ORD-00000099"
+        );
+
+        compensator.compensate(order, OrderStatus.CONFIRMED, "Cancelado por comerciante");
+
+        verify(releaseCapacityService, never()).execute(any());
+        verify(restockInventoryService, never()).execute(any(), any());
+        verify(restockInventoryService).restockDirectOrderItems(eq(storeId), eq(order.getItems()));
+    }
+
     private Order createSampleConfirmedOrder() {
         return Order.createConfirmed(
                 new Order.CreateData(

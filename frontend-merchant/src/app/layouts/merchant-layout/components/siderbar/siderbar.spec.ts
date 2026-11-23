@@ -8,6 +8,7 @@ import { OrderService } from '../../../../core/services/order.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { AuthService } from '../../../../core/services/auth-service';
+import { InventoryService } from '../../../../core/services/inventory.service';
 import { getOperatingDateLima } from '../../../../core/utils/date.utils';
 import { of } from 'rxjs';
 
@@ -29,6 +30,7 @@ describe('Siderbar', () => {
         CapacityService,
         ProfileService,
         AuthService,
+        InventoryService,
       ],
     }).compileComponents();
 

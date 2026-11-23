@@ -1,5 +1,6 @@
 package com.jaldishop.backend.store.web.dto;
 
+import com.jaldishop.backend.billing.web.dto.MerchantPayoutDestinationResponse;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
 
 import java.math.BigDecimal;
@@ -30,8 +31,74 @@ public record AdminStoreDetailResponse(
         StoreStatus status,
         Instant createdAt,
         Instant updatedAt,
-        AdminStoreOwnerResponse merchant
+        AdminStoreOwnerResponse merchant,
+        String legalBusinessName,
+        String taxIdType,
+        String taxIdNumber,
+        String taxRegime,
+        Boolean canIssueInvoices,
+        MerchantPayoutDestinationResponse payoutDestination
 ) {
+    public AdminStoreDetailResponse(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt,
+            AdminStoreOwnerResponse merchant
+    ) {
+        this(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                status,
+                createdAt,
+                updatedAt,
+                merchant,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null
+        );
+    }
+
     public AdminStoreDetailResponse(
             UUID id,
             UUID merchantUserId,
@@ -77,7 +144,13 @@ public record AdminStoreDetailResponse(
                 status,
                 createdAt,
                 updatedAt,
-                merchant
+                merchant,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null
         );
     }
 }

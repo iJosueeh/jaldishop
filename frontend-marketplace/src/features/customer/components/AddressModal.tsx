@@ -6,10 +6,9 @@ import {
   getDepartments,
   getProvinces,
   getDistricts,
-  findUbigeoByCode,
 } from '@/shared/utils/ubigeo';
 import { Button } from '@/shared/components/ui/Button';
-import { X, MapPin, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddressModalProps {
@@ -24,7 +23,8 @@ interface AddressModalProps {
     province: string;
     district: string;
     ubigeoCode: string;
-    addressLine: string;
+    streetAddress: string;
+    addressLine?: string;
     reference?: string | null;
     isDefault?: boolean;
   }) => Promise<void>;
@@ -74,7 +74,7 @@ export function AddressModal({
         setProvince(addressToEdit.province || '');
         setDistrict(addressToEdit.district || '');
         setUbigeoCode(addressToEdit.ubigeoCode || '');
-        setAddressLine(addressToEdit.addressLine || '');
+        setAddressLine(addressToEdit.streetAddress || addressToEdit.addressLine || '');
         setReference(addressToEdit.reference || '');
         setIsDefault(addressToEdit.isDefault);
       } else {
@@ -184,6 +184,7 @@ export function AddressModal({
         province,
         district,
         ubigeoCode,
+        streetAddress: addressLine.trim(),
         addressLine: addressLine.trim(),
         reference: reference.trim() || null,
         isDefault: isFirstAddress ? true : isDefault,

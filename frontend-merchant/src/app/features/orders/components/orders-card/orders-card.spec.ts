@@ -97,6 +97,19 @@ describe('OrdersCard', () => {
     expect(emitted).toEqual(mockOrder);
   });
 
+  it('debe emitir printTicket al presionar el botón de imprimir ticket', () => {
+    let emitted: MerchantOrder | null = null;
+    component.printTicket.subscribe((order) => {
+      emitted = order;
+    });
+
+    const printBtn = fixture.nativeElement.querySelector('button[aria-label="Imprimir Boleta / Ticket de Venta"]') as HTMLButtonElement;
+    expect(printBtn).toBeTruthy();
+    printBtn.click();
+
+    expect(emitted).toEqual(mockOrder);
+  });
+
   it('no debe renderizar badge de pago ni badge de canal cuando no están disponibles', () => {
     const orderWithoutPaymentOrChannel: MerchantOrder = {
       ...mockOrder,
@@ -116,7 +129,7 @@ describe('OrdersCard', () => {
   });
 
   it('debe adaptar la acción rápida a la modalidad PICKUP y DELIVERY', () => {
-    expect(component.getNextActionLabel('CONFIRMED', 'DELIVERY')).toBe('Aceptar');
+    expect(component.getNextActionLabel('CONFIRMED', 'DELIVERY')).toBe('Preparar');
     expect(component.getNextActionLabel('IN_PREPARATION', 'DELIVERY')).toBe('Listo');
     expect(component.getNextActionLabel('READY', 'DELIVERY')).toBe('Despachar');
     expect(component.getNextActionLabel('READY', 'PICKUP')).toBe('Entregar');

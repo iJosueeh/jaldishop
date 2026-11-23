@@ -42,6 +42,28 @@ public class StorePersistenceMapper {
                 entity.getTaxRate()
         );
 
+        com.jaldishop.backend.store.domain.enums.TaxIdType taxIdType = com.jaldishop.backend.store.domain.enums.TaxIdType.DNI;
+        try {
+            if (entity.getTaxIdType() != null) {
+                taxIdType = com.jaldishop.backend.store.domain.enums.TaxIdType.valueOf(entity.getTaxIdType());
+            }
+        } catch (Exception ignored) {}
+
+        com.jaldishop.backend.store.domain.enums.TaxRegime taxRegime = com.jaldishop.backend.store.domain.enums.TaxRegime.RUS;
+        try {
+            if (entity.getTaxRegime() != null) {
+                taxRegime = com.jaldishop.backend.store.domain.enums.TaxRegime.valueOf(entity.getTaxRegime());
+            }
+        } catch (Exception ignored) {}
+
+        com.jaldishop.backend.store.domain.model.StoreTaxProfile taxProfile = new com.jaldishop.backend.store.domain.model.StoreTaxProfile(
+                entity.getLegalBusinessName(),
+                taxIdType,
+                entity.getTaxIdNumber(),
+                taxRegime,
+                entity.isCanIssueInvoices()
+        );
+
         return Store.reconstitute(
                 entity.getId(),
                 entity.getOwnerUserId(),
@@ -59,7 +81,8 @@ public class StorePersistenceMapper {
                 categoryIds,
                 entity.getStatus(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                taxProfile
         );
     }
 
@@ -67,7 +90,7 @@ public class StorePersistenceMapper {
         if (domain == null) {
             return null;
         }
-        return new StoreEntity(
+        StoreEntity entity = new StoreEntity(
                 domain.getId(),
                 domain.getOwnerUserId(),
                 domain.getName(),
@@ -92,6 +115,12 @@ public class StorePersistenceMapper {
                 domain.getCreatedAt(),
                 domain.getUpdatedAt()
         );
+        entity.setLegalBusinessName(domain.getLegalBusinessName());
+        entity.setTaxIdType(domain.getTaxIdType() != null ? domain.getTaxIdType().name() : "DNI");
+        entity.setTaxIdNumber(domain.getTaxIdNumber());
+        entity.setTaxRegime(domain.getTaxRegime() != null ? domain.getTaxRegime().name() : "RUS");
+        entity.setCanIssueInvoices(domain.isCanIssueInvoices());
+        return entity;
     }
 
 }

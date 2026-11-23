@@ -72,3 +72,16 @@ export async function updateReview(
 
   return response.json();
 }
+
+export async function deleteReview(productId: string): Promise<void> {
+  const response = await fetch(`/api/customer/products/${encodeURIComponent(productId)}/reviews`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Error al eliminar la calificación');
+  }
+}

@@ -32,6 +32,8 @@ export class ProductsGrid {
   editProduct = output<Product>();
   adjustQuota = output<Product>();
   toggleStatus = output<Product>();
+  viewInventory = output<Product>();
+  openPreview = output<Product>();
   createNewProduct = output<void>();
   clearFilters = output<void>();
 }

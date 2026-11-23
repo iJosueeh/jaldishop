@@ -1,3 +1,6 @@
+export type TaxIdType = 'DNI' | 'RUC_10' | 'RUC_20';
+export type TaxRegime = 'NONE' | 'RUS' | 'RER' | 'MYPE' | 'GENERAL';
+
 export interface StoreResponse {
     id: string;
     merchantUserId: string;
@@ -21,6 +24,11 @@ export interface StoreResponse {
     whatsappNumber?: string;
     categoryIds?: string[];
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
+    legalBusinessName?: string;
+    taxIdType?: TaxIdType;
+    taxIdNumber?: string;
+    taxRegime?: TaxRegime;
+    canIssueInvoices?: boolean;
     createdAt: string;
     updatedAt: string; 
 }
@@ -53,9 +61,22 @@ export interface CreateStoreRequest {
     facebookUrl?: string;
     whatsappNumber?: string;
     categoryIds?: string[];
+    legalBusinessName?: string;
+    taxIdType?: TaxIdType;
+    taxIdNumber?: string;
+    taxRegime?: TaxRegime;
+    canIssueInvoices?: boolean;
 }
 
 export type UpdateStoreRequest = Omit<CreateStoreRequest, 'slug'>;
+
+export interface UpdateStoreTaxProfileRequest {
+    legalBusinessName?: string;
+    taxIdType: TaxIdType;
+    taxIdNumber: string;
+    taxRegime: TaxRegime;
+    canIssueInvoices: boolean;
+}
 
 export interface CloseStoreRequest {
     reason?: string;

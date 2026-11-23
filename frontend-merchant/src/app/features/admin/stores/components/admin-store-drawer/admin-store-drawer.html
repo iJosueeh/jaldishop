@@ -1,5 +1,6 @@
 @if (isOpen() && store()) {
   @let s = store()!;
+  @let detail = storeDetail();
   <div class="fixed inset-0 z-50 overflow-hidden flex justify-end">
     <!-- Backdrop oscuro -->
     <div
@@ -101,10 +102,214 @@
           </div>
         </section>
 
-        <!-- Tarjeta: Datos de la Tienda -->
+        <!-- Tarjeta: Métricas Comerciales de la Tienda -->
+        @if (storeAnalytics(); as a) {
+          <section class="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <ng-icon name="matPaymentsOutline" class="text-[15px]" />
+                Volumen Comercial & Ventas
+              </span>
+              <span class="text-[10px] font-bold text-primary font-mono tabular-nums">
+                {{ a.commercial.completedOrdersCount }} órdenes
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 flex flex-col">
+                <span class="text-[10px] text-on-surface-variant font-medium">Ventas Brutas (GMV)</span>
+                <span class="text-sm font-extrabold text-on-surface font-mono tabular-nums">
+                  S/ {{ a.commercial.historicalConfirmedGmv | number:'1.2-2' }}
+                </span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 flex flex-col">
+                <span class="text-[10px] text-on-surface-variant font-medium">Ticket Promedio</span>
+                <span class="text-sm font-extrabold text-on-surface font-mono tabular-nums">
+                  S/ {{ a.commercial.averageTicket | number:'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- Tarjeta: Perfil Fiscal SUNAT & Facturación Electrónica -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              <ng-icon name="matReceiptLongOutline" class="text-[16px] text-primary" />
+              Perfil Fiscal SUNAT
+            </span>
+            <span
+              class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase"
+              [class.bg-emerald-500/10]="detail?.canIssueInvoices"
+              [class.text-emerald-700]="detail?.canIssueInvoices"
+              [class.dark:text-emerald-400]="detail?.canIssueInvoices"
+              [class.bg-surface-container-high]="!detail?.canIssueInvoices"
+              [class.text-on-surface-variant]="!detail?.canIssueInvoices"
+            >
+              {{ detail?.canIssueInvoices ? 'Facturación Electrónica' : 'Solo Boletas' }}
+            </span>
+          </div>
+
+          @if (isLoadingDetail()) {
+            <div class="space-y-2 animate-pulse">
+              <div class="h-3 bg-surface-container-high rounded-full w-3/4"></div>
+              <div class="h-3 bg-surface-container-high rounded-full w-1/2"></div>
+            </div>
+          } @else {
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-on-surface-variant font-medium">Razón Social:</span>
+                <span class="font-bold text-on-surface truncate max-w-[200px]">
+                  {{ detail?.legalBusinessName || s.name }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-on-surface-variant font-medium">Identificador Fiscal:</span>
+                <span class="font-bold text-on-surface font-mono tabular-nums">
+                  @if (detail?.taxIdNumber) {
+                    {{ detail?.taxIdType || 'RUC' }}: {{ detail?.taxIdNumber }}
+                  } @else {
+                    <span class="text-on-surface-variant italic font-normal">Sin registrar</span>
+                  }
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-on-surface-variant font-medium">Régimen Tributario:</span>
+                <span class="px-2 py-0.5 rounded-md bg-surface-container text-[11px] font-bold text-on-surface font-mono">
+                  {{ detail?.taxRegime || 'No especificado' }}
+                </span>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Tarjeta: Cuentas de Liquidación & Desembolsos -->
+        <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+              @if (detail?.payoutDestination?.payoutChannel === 'YAPE_PHONE' || detail?.payoutDestination?.payoutChannel === 'YAPE') {
+                <div class="w-4 h-4 rounded-full bg-[#742284] flex items-center justify-center text-[10px] text-[#00d4aa] font-black leading-none shrink-0 shadow-2xs">
+                  Y
+                </div>
+                <span>Cuenta de Liquidación (Yape)</span>
+              } @else if (detail?.payoutDestination?.payoutChannel === 'PLIN_PHONE' || detail?.payoutDestination?.payoutChannel === 'PLIN') {
+                <div class="w-4 h-4 rounded-full bg-cyan-600 flex items-center justify-center text-[10px] text-white font-black leading-none shrink-0 shadow-2xs">
+                  P
+                </div>
+                <span>Cuenta de Liquidación (Plin)</span>
+              } @else {
+                <ng-icon name="matAccountBalanceOutline" class="text-[16px] text-secondary" />
+                <span>Cuenta de Liquidación Bancaria</span>
+              }
+            </span>
+            @if (isLoadingDetail()) {
+              <div class="h-4 w-16 bg-surface-container-high rounded animate-pulse"></div>
+            } @else if (detail?.payoutDestination) {
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary-container/20 text-secondary text-[10px] font-extrabold uppercase" title="Dato financiero enmascarado por política de seguridad y privacidad">
+                <ng-icon name="matLockOutline" class="text-xs" />
+                {{ detail?.payoutDestination?.isVerified ? 'Verificada' : 'Registrada' }}
+              </span>
+            } @else {
+              <span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant text-[10px] font-bold uppercase">
+                Sin Configurar
+              </span>
+            }
+          </div>
+
+          <div class="space-y-2 text-xs">
+            @if (isLoadingDetail()) {
+              <div class="space-y-2 animate-pulse">
+                <div class="h-3 bg-surface-container-high rounded-full w-3/4"></div>
+                <div class="h-3 bg-surface-container-high rounded-full w-1/2"></div>
+              </div>
+            } @else if (detail?.payoutDestination; as payout) {
+              <div class="flex items-center justify-between">
+                <span class="text-on-surface-variant font-medium">Canal de Desembolso:</span>
+                @if (payout.payoutChannel === 'YAPE_PHONE' || payout.payoutChannel === 'YAPE') {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#742284]/15 text-[#742284] dark:text-[#c084fc] font-bold text-xs">
+                    <span class="w-3.5 h-3.5 rounded-full bg-[#742284] text-[#00d4aa] flex items-center justify-center text-[9px] font-black">Y</span>
+                    Billetera Móvil Yape
+                  </span>
+                } @else if (payout.payoutChannel === 'PLIN_PHONE' || payout.payoutChannel === 'PLIN') {
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-bold text-xs">
+                    Billetera Móvil Plin
+                  </span>
+                } @else {
+                  <span class="font-bold text-on-surface">
+                    Transferencia Bancaria (CCI)
+                  </span>
+                }
+              </div>
+
+              @if (payout.payoutChannel === 'YAPE_PHONE' || payout.payoutChannel === 'YAPE') {
+                <div class="flex items-center justify-between">
+                  <span class="text-on-surface-variant font-medium flex items-center gap-1">
+                    <span>Celular de Liquidación:</span>
+                    <span class="text-[10px] text-on-surface-variant/70" title="Enmascarado por seguridad financiera">(Enmascarado)</span>
+                  </span>
+                  <span class="font-mono tabular-nums font-bold text-on-surface text-[12px] flex items-center gap-1">
+                    <ng-icon name="matCallOutline" class="text-sm text-[#742284] dark:text-[#c084fc]" />
+                    @if (payout.phoneNumber) {
+                      •••• {{ payout.phoneNumber.slice(-4) }}
+                    } @else {
+                      No registrado
+                    }
+                  </span>
+                </div>
+              } @else {
+                @if (payout.bankName) {
+                  <div class="flex items-center justify-between">
+                    <span class="text-on-surface-variant font-medium">Entidad Financiera:</span>
+                    <span class="font-bold text-on-surface">{{ payout.bankName }}</span>
+                  </div>
+                }
+
+                @if (payout.accountCci) {
+                  <div class="flex items-center justify-between">
+                    <span class="text-on-surface-variant font-medium flex items-center gap-1">
+                      <span>CCI de Liquidación:</span>
+                      <span class="text-[10px] text-on-surface-variant/70" title="Enmascarado por seguridad financiera">(Enmascarado)</span>
+                    </span>
+                    <span class="font-mono tabular-nums font-bold text-on-surface text-[11px]">
+                      •••• •••• •••• {{ payout.accountCci.slice(-4) }}
+                    </span>
+                  </div>
+                }
+              }
+
+              @if (payout.accountHolderName) {
+                <div class="flex items-center justify-between">
+                  <span class="text-on-surface-variant font-medium">Titular del Abono:</span>
+                  <span class="font-bold text-on-surface">{{ payout.accountHolderName }}</span>
+                </div>
+              }
+
+              @if (payout.accountHolderDocNumber) {
+                <div class="flex items-center justify-between">
+                  <span class="text-on-surface-variant font-medium flex items-center gap-1">
+                    <span>Doc. Identidad Titular:</span>
+                    <span class="text-[10px] text-on-surface-variant/70" title="Enmascarado por privacidad (LPDP)">(Enmascarado)</span>
+                  </span>
+                  <span class="font-mono text-on-surface font-semibold text-[11px] tabular-nums">
+                    {{ payout.accountHolderDocType || 'DNI' }}: ••••{{ payout.accountHolderDocNumber.slice(-4) }}
+                  </span>
+                </div>
+              }
+            } @else {
+              <div class="py-2 text-center text-on-surface-variant text-xs italic">
+                El comercio no tiene configurada cuenta de liquidación.
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Tarjeta: Identificación de la Tienda -->
         <section class="p-4 rounded-2xl bg-surface-container/30 border border-outline-variant/20 space-y-3.5">
           <span class="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
-            Identificación de la Tienda
+            Identificación Comercial de la Tienda
           </span>
 
           <!-- ID UUID -->
@@ -128,9 +333,9 @@
           <div class="flex items-center justify-between text-xs">
             <span class="text-on-surface-variant flex items-center gap-1.5 font-medium">
               <ng-icon name="matCallOutline" class="text-[16px]" />
-              Teléfono Tienda
+              Teléfono de Contacto Público
             </span>
-            <span class="font-bold text-on-surface font-mono">
+            <span class="font-bold text-on-surface font-mono tabular-nums">
               {{ s.contactPhone || 'No registrado' }}
             </span>
           </div>
@@ -141,7 +346,7 @@
               <ng-icon name="matCalendarMonthOutline" class="text-[16px]" />
               Registrada el
             </span>
-            <span class="font-bold text-on-surface">
+            <span class="font-bold text-on-surface font-mono tabular-nums">
               {{ s.createdAt ? (s.createdAt | date: 'dd/MM/yyyy, HH:mm') : '--' }}
             </span>
           </div>
@@ -230,7 +435,7 @@
                   {{ s.merchant.email }}
                 </span>
                 @if (s.merchant.phone) {
-                  <span class="text-[11px] text-on-surface-variant font-mono mt-0.5">
+                  <span class="text-[11px] text-on-surface-variant font-mono tabular-nums mt-0.5">
                     📞 {{ s.merchant.phone }}
                   </span>
                 }

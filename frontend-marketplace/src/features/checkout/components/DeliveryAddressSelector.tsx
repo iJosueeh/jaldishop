@@ -16,11 +16,9 @@ import {
   MapPin,
   CheckCircle2,
   AlertCircle,
-  Plus,
   Compass,
   User,
   Phone,
-  BookmarkCheck,
   ShieldCheck,
   Truck,
   RotateCcw,
@@ -37,7 +35,6 @@ export interface DeliveryAddressSelectorProps {
 
 export function DeliveryAddressSelector({
   store,
-  value,
   onChange,
   disabled = false,
 }: DeliveryAddressSelectorProps) {
@@ -123,7 +120,7 @@ export function DeliveryAddressSelector({
           province: activeAddr.province,
           district: activeAddr.district,
           ubigeoCode: activeAddr.ubigeoCode,
-          addressLine: activeAddr.addressLine,
+          addressLine: activeAddr.streetAddress || activeAddr.addressLine || '',
           reference: activeAddr.reference,
           latitude: activeAddr.latitude,
           longitude: activeAddr.longitude,

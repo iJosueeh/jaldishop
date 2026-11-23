@@ -160,4 +160,34 @@ describe('CapacitySlotPicker Component', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('disables delivery button when deliveryEnabled is false', () => {
+    render(
+      <CapacitySlotPicker
+        slots={TEST_SLOTS}
+        deliveryEnabled={false}
+        pickupEnabled={true}
+        fulfillmentType="PICKUP"
+      />
+    );
+    const deliveryButton = screen.getByRole('button', { name: /Delivery a Domicilio/i });
+    expect(deliveryButton).toBeDisabled();
+    const pickupButton = screen.getByRole('button', { name: /Retiro en Tienda/i });
+    expect(pickupButton).not.toBeDisabled();
+  });
+
+  it('disables pickup button when pickupEnabled is false', () => {
+    render(
+      <CapacitySlotPicker
+        slots={TEST_SLOTS}
+        deliveryEnabled={true}
+        pickupEnabled={false}
+        fulfillmentType="DELIVERY"
+      />
+    );
+    const pickupButton = screen.getByRole('button', { name: /Retiro en Tienda/i });
+    expect(pickupButton).toBeDisabled();
+    const deliveryButton = screen.getByRole('button', { name: /Delivery a Domicilio/i });
+    expect(deliveryButton).not.toBeDisabled();
+  });
 });

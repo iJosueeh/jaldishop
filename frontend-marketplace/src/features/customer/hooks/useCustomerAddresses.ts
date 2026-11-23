@@ -28,7 +28,8 @@ export function useCustomerAddresses() {
   );
 
   const total = addresses.length;
-  const canAddAddress = total < 5;
+  const maxAllowed = query.data?.maxAllowed ?? 5;
+  const canAddAddress = total < maxAllowed;
   const defaultAddress = useMemo(
     () => addresses.find((a) => a.isDefault) ?? null,
     [addresses]
@@ -76,6 +77,7 @@ export function useCustomerAddresses() {
   return {
     addresses,
     total,
+    maxAllowed,
     canAddAddress,
     defaultAddress,
     isLoading: query.isLoading,

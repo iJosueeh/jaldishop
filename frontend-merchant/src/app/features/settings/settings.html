@@ -2,115 +2,72 @@
   <!-- Header -->
   <app-settings-header />
 
-  <!-- Tabs Navigation -->
-  <div class="flex items-center gap-2 border-b border-outline-variant/30 overflow-x-auto pb-px no-scrollbar">
+  <!-- Tabs Navigation (3 Pestañas Claras y Sin Bloat) -->
+  <nav class="flex items-center gap-2 border-b border-outline-variant/30 overflow-x-auto pb-px no-scrollbar" role="tablist">
+    <!-- Tab 1: Cobros y Despacho -->
     <button
       type="button"
-      (click)="setTab('whatsapp')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'whatsapp'"
-      [class.text-primary-container]="currentTab() === 'whatsapp'"
-      [class.border-transparent]="currentTab() !== 'whatsapp'"
-      [class.text-on-surface-variant]="currentTab() !== 'whatsapp'"
-      [class.hover:text-on-surface]="currentTab() !== 'whatsapp'"
-    >
-      <ng-icon name="matChatOutline" class="text-lg" />
-      <span>Plantillas de WhatsApp</span>
-    </button>
-
-    <button
-      type="button"
+      role="tab"
+      [attr.aria-selected]="currentTab() === 'payments'"
       (click)="setTab('payments')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'payments'"
-      [class.text-primary-container]="currentTab() === 'payments'"
+      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0 duration-200"
+      [class.border-primary]="currentTab() === 'payments'"
+      [class.text-primary]="currentTab() === 'payments'"
       [class.border-transparent]="currentTab() !== 'payments'"
       [class.text-on-surface-variant]="currentTab() !== 'payments'"
       [class.hover:text-on-surface]="currentTab() !== 'payments'"
     >
       <ng-icon name="matPaymentsOutline" class="text-lg" />
-      <span>Métodos de Pago</span>
+      <span>Cobros y Despacho</span>
     </button>
 
+    <!-- Tab 2: Políticas y Checkout -->
     <button
       type="button"
-      (click)="setTab('orders')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'orders'"
-      [class.text-primary-container]="currentTab() === 'orders'"
-      [class.border-transparent]="currentTab() !== 'orders'"
-      [class.text-on-surface-variant]="currentTab() !== 'orders'"
-      [class.hover:text-on-surface]="currentTab() !== 'orders'"
-    >
-      <ng-icon name="matShoppingBagOutline" class="text-lg" />
-      <span>Preferencias de Pedido</span>
-    </button>
-
-    <button
-      type="button"
-      (click)="setTab('notifications')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'notifications'"
-      [class.text-primary-container]="currentTab() === 'notifications'"
-      [class.border-transparent]="currentTab() !== 'notifications'"
-      [class.text-on-surface-variant]="currentTab() !== 'notifications'"
-      [class.hover:text-on-surface]="currentTab() !== 'notifications'"
-    >
-      <ng-icon name="matNotificationsOutline" class="text-lg" />
-      <span>Notificaciones y Sonidos</span>
-    </button>
-
-    <button
-      type="button"
+      role="tab"
+      [attr.aria-selected]="currentTab() === 'policies'"
       (click)="setTab('policies')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'policies'"
-      [class.text-primary-container]="currentTab() === 'policies'"
+      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0 duration-200"
+      [class.border-primary]="currentTab() === 'policies'"
+      [class.text-primary]="currentTab() === 'policies'"
       [class.border-transparent]="currentTab() !== 'policies'"
       [class.text-on-surface-variant]="currentTab() !== 'policies'"
       [class.hover:text-on-surface]="currentTab() !== 'policies'"
     >
       <ng-icon name="matGavelOutline" class="text-lg" />
-      <span>Políticas y Términos</span>
+      <span>Políticas y Checkout</span>
     </button>
 
+    <!-- Tab 3: Alertas y Sonidos -->
     <button
       type="button"
-      (click)="setTab('general')"
-      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-      [class.border-primary-container]="currentTab() === 'general'"
-      [class.text-primary-container]="currentTab() === 'general'"
-      [class.border-transparent]="currentTab() !== 'general'"
-      [class.text-on-surface-variant]="currentTab() !== 'general'"
-      [class.hover:text-on-surface]="currentTab() !== 'general'"
+      role="tab"
+      [attr.aria-selected]="currentTab() === 'alerts'"
+      (click)="setTab('alerts')"
+      class="px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 shrink-0 duration-200"
+      [class.border-primary]="currentTab() === 'alerts'"
+      [class.text-primary]="currentTab() === 'alerts'"
+      [class.border-transparent]="currentTab() !== 'alerts'"
+      [class.text-on-surface-variant]="currentTab() !== 'alerts'"
+      [class.hover:text-on-surface]="currentTab() !== 'alerts'"
     >
-      <ng-icon name="matTuneOutline" class="text-lg" />
-      <span>General y Región</span>
+      <ng-icon name="matNotificationsOutline" class="text-lg" />
+      <span>Alertas y Sonidos</span>
     </button>
-  </div>
+  </nav>
 
-  <!-- Tabs Content -->
+  <!-- Tabs Content con transición fluida -->
   <main class="w-full">
     @switch (currentTab()) {
-      @case ('whatsapp') {
-        <app-settings-whatsapp-tab />
-      }
       @case ('payments') {
-        <app-settings-payments-tab />
-      }
-      @case ('orders') {
-        <app-settings-orders-tab />
-      }
-      @case ('notifications') {
-        <app-settings-notifications-tab />
+        <app-settings-payments-delivery-tab />
       }
       @case ('policies') {
         <app-settings-policies-tab />
       }
-      @case ('general') {
-        <app-settings-general-tab />
+      @case ('alerts') {
+        <app-settings-alerts-tab />
       }
     }
   </main>
 </div>
-

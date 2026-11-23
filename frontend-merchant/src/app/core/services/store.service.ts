@@ -1,20 +1,25 @@
-import { computed, inject, Service, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   CloseStoreResponse,
   CreateStoreRequest,
   StoreCategory,
   StoreResponse,
   UpdateStoreRequest,
+  UpdateStoreTaxProfileRequest,
 } from '../models/store.models';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { StompService } from './stomp.service';
+import { InvalidationBusService } from './invalidation-bus.service';
 
-@Service()
+@Injectable({
+  providedIn: 'root',
+})
 export class StoreService {
   private readonly http = inject(HttpClient);
   private readonly stompService = inject(StompService);
+  private readonly invalidationBus = inject(InvalidationBusService, { optional: true });
   private readonly baseUrl = `${environment.apiUrl}/stores`;
   private readonly categoriesUrl = `${environment.apiUrl}/store-categories`;
 
@@ -26,6 +31,7 @@ export class StoreService {
 
   readonly hasStore = computed(() => !!this.currentStore());
   readonly storeName = computed(() => this.currentStore()?.name ?? 'Mi tienda');
+  readonly storeSlug = computed(() => this.currentStore()?.slug ?? '');
   readonly storeStatus = computed(() => this.currentStore()?.status ?? 'INACTIVE');
 
   getStoreCategories(forceRefresh = false): Observable<StoreCategory[]> {
@@ -93,6 +99,28 @@ export class StoreService {
       tap((updateStore) => {
         this.currentStore.set(updateStore);
         this.isLoading.set(false);
+        if (updateStore.id) {
+          this.invalidationBus?.dispatchStoreProfileMutated({ storeId: updateStore.id });
+          this.invalidationBus?.dispatchCacheInvalidated({ storeId: updateStore.id, module: 'STORE' });
+        }
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  updateTaxProfile(request: UpdateStoreTaxProfileRequest): Observable<StoreResponse> {
+    this.isLoading.set(true);
+    return this.http.put<StoreResponse>(`${this.baseUrl}/me/tax-profile`, request).pipe(
+      tap((updatedStore) => {
+        this.currentStore.set(updatedStore);
+        this.isLoading.set(false);
+        if (updatedStore.id) {
+          this.invalidationBus?.dispatchStoreProfileMutated({ storeId: updatedStore.id });
+          this.invalidationBus?.dispatchCacheInvalidated({ storeId: updatedStore.id, module: 'STORE' });
+        }
       }),
       catchError((error) => {
         this.isLoading.set(false);

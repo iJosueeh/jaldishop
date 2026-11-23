@@ -55,6 +55,7 @@
     (whatsAppClick)="onWhatsAppClick($event)"
     (openDetails)="onOpenDetails($event)"
     (verifyStatus)="onVerifyStatus($event)"
+    (printTicket)="onPrintSingleTicket($event)"
     (resetFilter)="onResetFilters()"
     (createNewOrder)="onNewOrder()"
   />
@@ -82,6 +83,7 @@
     (statusChange)="onDrawerStatusChange($event)"
     (cancelOrder)="onCancelOrder($event)"
     (verifyStatus)="onVerifyStatus($event)"
+    (printTicket)="onPrintSingleTicket($event)"
   />
 
   <!-- 8. Modal de Confirmación de Cancelación de Pedido -->
@@ -94,5 +96,20 @@
     [isDanger]="true"
     (confirm)="onConfirmCancel()"
     (cancel)="onDismissCancel()"
+  />
+
+  <!-- 9. Modal de Creación Manual de Pedidos / Comanda Directa -->
+  <app-create-order-modal
+    [isOpen]="orderService.isCreateModalOpen()"
+    (closeModal)="orderService.closeCreateModal()"
+  />
+
+  <!-- 10. Modal de Impresión Térmica ASCII (80mm / 58mm) -->
+  <app-thermal-ticket-modal
+    [isOpen]="isTicketModalOpen()"
+    [order]="ticketOrder()"
+    [orders]="ticketOrdersBatch()"
+    [storeName]="currentStoreName()"
+    (closeModal)="onCloseTicketModal()"
   />
 </div>

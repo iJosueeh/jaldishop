@@ -136,7 +136,7 @@ export class PriorityOrders implements OnInit {
       return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Se liberará el cupo de capacidad y se restituirá el inventario de los productos según RN-ORD-13. Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
     }
     if (order.status === 'IN_PREPARATION') {
-      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en cocina (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en preparación o empaque (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
     }
     return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
   });
@@ -151,7 +151,8 @@ export class PriorityOrders implements OnInit {
       !this.orderService.isUpdating(order.id) &&
       !this.orderService.isPendingVerification(order.id)
     ) {
-      this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe();
+      const reason = 'Cancelado por el comercio desde el panel operativo';
+      this.orderService.updateOrderStatus(order.id, 'CANCELLED', undefined, reason).subscribe();
     }
   }
 

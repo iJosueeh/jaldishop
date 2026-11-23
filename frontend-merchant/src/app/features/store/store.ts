@@ -4,6 +4,7 @@ import { StoreDeliveryCard } from './components/store-delivery-card/store-delive
 import { StoreLocationCard } from './components/store-location-card/store-location-card';
 import { StorePreviewCard } from './components/store-preview-card/store-preview-card';
 import { StoreDangerZoneCard } from './components/store-danger-zone-card/store-danger-zone-card';
+import { StoreTaxCard } from './components/store-tax-card/store-tax-card';
 import { ConfirmModal } from '../../shared/components/confirm-modal/confirm-modal';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { StoreService } from '../../core/services/store.service';
@@ -23,6 +24,7 @@ import {
 @Component({
   imports: [
     StoreIdentityCard,
+    StoreTaxCard,
     StoreDeliveryCard,
     StoreLocationCard,
     StorePreviewCard,

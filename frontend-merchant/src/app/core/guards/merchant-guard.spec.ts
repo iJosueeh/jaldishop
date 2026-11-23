@@ -39,6 +39,15 @@ describe('merchantGuard', () => {
     expect(result).toBe(true);
   });
 
+  it('permite el acceso si el usuario tiene roles duales (MERCHANT y PLATFORM_ADMIN)', () => {
+    authServiceMock.isMerchant.mockReturnValue(true);
+    authServiceMock.isAdmin.mockReturnValue(true);
+
+    const result = TestBed.runInInjectionContext(() => merchantGuard({} as any, {} as any));
+
+    expect(result).toBe(true);
+  });
+
   it('redirige a /admin/dashboard si el usuario es ADMIN y no MERCHANT', () => {
     authServiceMock.isMerchant.mockReturnValue(false);
     authServiceMock.isAdmin.mockReturnValue(true);

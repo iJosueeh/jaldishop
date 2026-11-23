@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matAddOutline,
-  matMoreHorizOutline,
   matTuneOutline,
 } from '@ng-icons/material-symbols/outline';
 
@@ -14,7 +13,6 @@ import {
   viewProviders: [
     provideIcons({
       matAddOutline,
-      matMoreHorizOutline,
       matTuneOutline,
     }),
   ],

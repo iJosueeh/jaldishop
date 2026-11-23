@@ -2,10 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getWebSocketUrl, StompService } from './stomp.service';
 import { TokenService } from './token-service';
-import { OrderConfirmedDomainEvent } from '../models/order.models';
+import { InvalidationBusService } from './invalidation-bus.service';
+import { OrderConfirmedDomainEvent, OrderStatusChangedDomainEvent } from '../models/order.models';
 
 describe('StompService', () => {
   let service: StompService;
+  let invalidationBus: InvalidationBusService;
   let tokenServiceMock: {
     getToken: ReturnType<typeof vi.fn>;
     isTokenExpired: ReturnType<typeof vi.fn>;
@@ -20,11 +22,13 @@ describe('StompService', () => {
     TestBed.configureTestingModule({
       providers: [
         StompService,
+        InvalidationBusService,
         { provide: TokenService, useValue: tokenServiceMock },
       ],
     });
 
     service = TestBed.inject(StompService);
+    invalidationBus = TestBed.inject(InvalidationBusService);
   });
 
   describe('getWebSocketUrl', () => {
@@ -144,7 +148,9 @@ describe('StompService', () => {
       client.onConnect?.({} as any);
 
       const receivedEvents: OrderConfirmedDomainEvent[] = [];
+      const busEvents: any[] = [];
       service.orderConfirmed$.subscribe((event) => receivedEvents.push(event));
+      invalidationBus.orderCreated$.subscribe((event) => busEvents.push(event));
 
       const eventPayload: OrderConfirmedDomainEvent = {
         eventId: 'evt-1',
@@ -162,6 +168,62 @@ describe('StompService', () => {
       expect(receivedEvents.length).toBe(1);
       expect(receivedEvents[0].orderNumber).toBe('#PED-999');
       expect(receivedEvents[0].totalAmount).toBe(145.0);
+      expect(busEvents.length).toBe(1);
+      expect(busEvents[0]).toEqual({
+        storeId: 'store-uuid-abc',
+        orderId: 'ord-999',
+        orderNumber: '#PED-999',
+        origin: undefined,
+        source: 'WEBSOCKET',
+      });
+    });
+
+    it('debe recibir y emitir eventos ORDER_STATUS_CHANGED para la tienda activa', () => {
+      tokenServiceMock.getToken.mockReturnValue('valid.jwt.token');
+      tokenServiceMock.isTokenExpired.mockReturnValue(false);
+
+      service.connect('store-uuid-abc');
+      const client = service.getClient()!;
+      Object.defineProperty(client, 'connected', { value: true, configurable: true });
+
+      let messageCallback: (msg: any) => void = () => {};
+      vi.spyOn(client, 'subscribe').mockImplementation((_dest, cb) => {
+        messageCallback = cb as any;
+        return { id: 'sub-1', unsubscribe: vi.fn() };
+      });
+
+      client.onConnect?.({} as any);
+
+      const receivedEvents: OrderStatusChangedDomainEvent[] = [];
+      const busEvents: any[] = [];
+      service.orderStatusChanged$.subscribe((event) => receivedEvents.push(event));
+      invalidationBus.orderMutated$.subscribe((event) => busEvents.push(event));
+
+      const eventPayload: OrderStatusChangedDomainEvent = {
+        eventId: 'evt-200',
+        eventType: 'ORDER_STATUS_CHANGED',
+        orderId: 'ord-100',
+        orderNumber: '#PED-100',
+        customerId: 'cust-1',
+        storeId: 'store-uuid-abc',
+        previousStatus: 'CONFIRMED',
+        newStatus: 'IN_PREPARATION',
+        occurredAt: '2026-10-31T12:05:00Z',
+      };
+
+      messageCallback({ body: JSON.stringify(eventPayload) });
+
+      expect(receivedEvents.length).toBe(1);
+      expect(receivedEvents[0].orderNumber).toBe('#PED-100');
+      expect(receivedEvents[0].newStatus).toBe('IN_PREPARATION');
+      expect(busEvents.length).toBe(1);
+      expect(busEvents[0]).toEqual({
+        storeId: 'store-uuid-abc',
+        orderId: 'ord-100',
+        status: 'IN_PREPARATION',
+        previousStatus: 'CONFIRMED',
+        source: 'WEBSOCKET',
+      });
     });
 
     it('debe descartar eventos con storeId ajeno a la tienda activa', () => {
@@ -208,11 +270,14 @@ describe('StompService', () => {
       vi.spyOn(client, 'subscribe').mockReturnValue({ id: 'sub-1', unsubscribe: vi.fn() });
 
       let reconnectedCount = 0;
+      let busReconnectedCount = 0;
       service.reconnected$.subscribe(() => reconnectedCount++);
+      invalidationBus.reconnected$.subscribe(() => busReconnectedCount++);
 
       // Primera conexión
       client.onConnect?.({} as any);
       expect(reconnectedCount).toBe(0);
+      expect(busReconnectedCount).toBe(0);
 
       // Desconexión temporal y reconexión
       client.onWebSocketClose?.({} as any);
@@ -221,6 +286,7 @@ describe('StompService', () => {
       client.onConnect?.({} as any);
       expect(service.connectionState()).toBe('CONNECTED');
       expect(reconnectedCount).toBe(1);
+      expect(busReconnectedCount).toBe(1);
     });
 
     it('debe detener la reconexión y transicionar a AUTH_ERROR si el backend envía error de permisos o credenciales', () => {

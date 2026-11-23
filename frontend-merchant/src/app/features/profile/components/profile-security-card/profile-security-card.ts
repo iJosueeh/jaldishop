@@ -4,7 +4,6 @@ import { DatePipe } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth-service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  matPhotoCameraOutline,
   matCheckCircleOutline,
   matChatOutline,
   matPhoneDisabledOutline,
@@ -15,7 +14,6 @@ import {
   imports: [DatePipe, NgIcon],
   providers: [
     provideIcons({
-      matPhotoCameraOutline,
       matCheckCircleOutline,
       matChatOutline,
       matPhoneDisabledOutline,
@@ -37,4 +35,3 @@ export class ProfileSecurityCard {
     this.authService.logout();
   }
 }
-

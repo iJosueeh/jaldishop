@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Header } from './header';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { OrderService } from '../../../../core/services/order.service';
+import { AuthService } from '../../../../core/services/auth-service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -15,6 +16,7 @@ describe('Header', () => {
     await TestBed.configureTestingModule({
       imports: [Header],
       providers: [
+        AuthService,
         ProfileService,
         OrderService,
         provideHttpClient(),

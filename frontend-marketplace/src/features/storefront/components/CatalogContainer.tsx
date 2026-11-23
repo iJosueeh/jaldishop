@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, ArrowRight, ShoppingBag } from 'lucide-react';
 import { CapacitySlotPicker, CapacitySlot } from './CapacitySlotPicker';
 import { StorefrontNav } from './StorefrontNav';
 import {
   ProductGrid,
   CatalogFilterBar,
   CatalogEmptyState,
+  ProductDetailModal,
 } from './catalog';
 import { ProductItem, ProductVariantItem, CartItem, PublicStore } from '../types/storefront.types';
 import { StorefrontBadges } from './StorefrontBadges';
 import { useStorefrontCart } from '../cart/StorefrontCartProvider';
+import { useCustomerFavorites } from '@/features/customer/hooks/useCustomerFavorites';
 import { DeliveryAddressSelector } from '@/features/checkout/components/DeliveryAddressSelector';
 import { DeliveryFormData, CheckoutResponse, InitiateCheckoutPayload } from '@/features/checkout/types/checkout.types';
 import { checkoutService } from '@/features/checkout/services/checkoutService';
@@ -67,7 +69,14 @@ export function CatalogContainer({
 
   const totalCartCount = cartStore?.id === store?.id ? count : 0;
   useEffect(() => {
-    if (store) selectStore({ id: store.id, name: store.name, slug: store.slug });
+    if (store) {
+      selectStore({ id: store.id, name: store.name, slug: store.slug });
+      if (store.deliveryEnabled === false && store.pickupEnabled) {
+        setFulfillment('PICKUP');
+      } else if (store.pickupEnabled === false && store.deliveryEnabled) {
+        setFulfillment('DELIVERY');
+      }
+    }
   }, [store, selectStore]);
 
   const [selectedDate, setSelectedDate] = useState<string>(() => getBusinessTodayDate());
@@ -80,6 +89,29 @@ export function CatalogContainer({
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
   const [isDeliveryValid, setIsDeliveryValid] = useState(false);
   const [retryCounter, setRetryCounter] = useState(0);
+
+  const [detailProduct, setDetailProduct] = useState<ProductItem | null>(null);
+  const { isFavorite, toggleFavorite } = useCustomerFavorites();
+
+  const handleToggleFavorite = useCallback(
+    async (productId: string) => {
+      if (!authenticated) {
+        toast.error('Inicia sesión para guardar productos en tus favoritos');
+        return;
+      }
+      try {
+        const added = await toggleFavorite(productId);
+        if (added) {
+          toast.success('Producto añadido a tus favoritos');
+        } else {
+          toast.info('Producto eliminado de tus favoritos');
+        }
+      } catch {
+        toast.error('No se pudo actualizar favoritos');
+      }
+    },
+    [authenticated, toggleFavorite]
+  );
 
   // Reset selected slot whenever selected date or store changes to enforce explicit customer choice
   const handleDateChange = useCallback((newDate: string) => {
@@ -254,6 +286,7 @@ export function CatalogContainer({
             province: deliveryData.province,
             district: deliveryData.district,
             ubigeoCode: deliveryData.ubigeoCode,
+            streetAddress: deliveryData.addressLine,
             addressLine: deliveryData.addressLine,
             reference: deliveryData.reference,
           });
@@ -468,6 +501,9 @@ export function CatalogContainer({
                 }}
                 isFiltering={isFiltering}
                 pending={pending || loading || cartStore?.id !== store?.id}
+                onOpenDetail={(p) => setDetailProduct(p)}
+                isFavorite={(productId) => isFavorite(productId)}
+                onToggleFavorite={handleToggleFavorite}
               />
             </div>
           </>
@@ -518,6 +554,8 @@ export function CatalogContainer({
                   onSelectSlot={setSelectedSlot}
                   fulfillmentType={fulfillment}
                   onFulfillmentTypeChange={setFulfillment}
+                  deliveryEnabled={store?.deliveryEnabled}
+                  pickupEnabled={store?.pickupEnabled}
                 />
               ) : (
                 <section className="rounded-[12px] border border-stone-200/90 bg-white p-6 sm:p-8 shadow-2xs">
@@ -558,6 +596,8 @@ export function CatalogContainer({
                 error={slotsError}
                 onRetry={handleRetryCapacity}
                 minDate={getBusinessTodayDate()}
+                deliveryEnabled={store?.deliveryEnabled}
+                pickupEnabled={store?.pickupEnabled}
               />
             ))}
 
@@ -669,6 +709,51 @@ export function CatalogContainer({
         deliveryFee={deliveryFee}
         reservationId={checkoutResponse?.reservationId}
       />
+
+      {/* Modal de Detalle de Producto y Variantes */}
+      <ProductDetailModal
+        isOpen={Boolean(detailProduct)}
+        onClose={() => setDetailProduct(null)}
+        product={detailProduct}
+        onAdd={(p, qty = 1) => changeQuantity(p, qty)}
+        isFavorite={detailProduct ? isFavorite(detailProduct.id) : false}
+        onToggleFavorite={() => {
+          if (detailProduct) {
+            void handleToggleFavorite(detailProduct.id);
+          }
+        }}
+        currency={currency}
+        pending={pending || loading}
+      />
+
+      {/* Sticky Mobile Checkout Bar */}
+      {totalCartCount > 0 && (
+        <aside
+          aria-label="Resumen móvil del pedido"
+          className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 backdrop-blur-md border-t border-stone-200 px-4 py-3 shadow-lg flex items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-full bg-emerald-50 text-[#005141] flex items-center justify-center font-bold text-xs border border-emerald-200">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                {totalCartCount} {totalCartCount === 1 ? 'producto' : 'productos'}
+              </span>
+              <span className="font-mono text-sm font-black text-[#005141]">
+                {formatCurrency(totalAmount, currency)}
+              </span>
+            </div>
+          </div>
+          <a
+            href="#entrega"
+            className="px-4 py-2 rounded-full bg-[#005141] hover:bg-[#00382d] text-white font-bold text-xs shadow-md shadow-[#005141]/20 flex items-center gap-1.5 active:scale-95 transition-all"
+          >
+            <span>{selectedSlot ? 'Finalizar pedido' : 'Elegir horario'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </aside>
+      )}
     </div>
   );
 }

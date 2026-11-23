@@ -6,7 +6,8 @@ import {
   matEditOutline,
   matFilterAltOffOutline,
   matInventory2Outline,
-  matMoreVertOutline,
+  matOpenInNewOutline,
+  matTuneOutline,
   matVisibilityOffOutline,
   matVisibilityOutline,
 } from '@ng-icons/material-symbols/outline';
@@ -22,7 +23,8 @@ import { Product } from '../../../../core/models/product.models';
       matEditOutline,
       matFilterAltOffOutline,
       matInventory2Outline,
-      matMoreVertOutline,
+      matOpenInNewOutline,
+      matTuneOutline,
       matVisibilityOffOutline,
       matVisibilityOutline,
     }),
@@ -37,9 +39,36 @@ export class ProductsList {
   isFilterEmpty = input<boolean>(false);
 
   editProduct = output<Product>();
+  adjustQuota = output<Product>();
   toggleStatus = output<Product>();
+  viewInventory = output<Product>();
+  openPreview = output<Product>();
   createNewProduct = output<void>();
   clearFilters = output<void>();
+
+  onRowClick(product: Product): void {
+    this.editProduct.emit(product);
+  }
+
+  onEdit(product: Product, event?: Event): void {
+    event?.stopPropagation();
+    this.editProduct.emit(product);
+  }
+
+  onAdjustQuota(product: Product, event?: Event): void {
+    event?.stopPropagation();
+    this.adjustQuota.emit(product);
+  }
+
+  onToggleStatus(product: Product, event?: Event): void {
+    event?.stopPropagation();
+    this.toggleStatus.emit(product);
+  }
+
+  onOpenPreview(product: Product, event?: Event): void {
+    event?.stopPropagation();
+    this.openPreview.emit(product);
+  }
 
   getPrice(p: Product): string {
     if (p.minPrice != null && p.maxPrice != null && p.minPrice !== p.maxPrice) {
@@ -59,12 +88,16 @@ export class ProductsList {
     return 'S/ 0.00';
   }
 
-  getImageUrl(p: Product): string | null {
+  getPrimaryImage(p: Product): string | null {
     if (p.imageUrl) return p.imageUrl;
     if (p.images && p.images.length > 0) {
       const primary = p.images.find((img) => img.isPrimary);
       return primary ? primary.imageUrl : p.images[0].imageUrl;
     }
     return null;
+  }
+
+  hasTrackingVariant(p: Product): boolean {
+    return !!p.variants?.some((v) => v.tracksInventory);
   }
 }

@@ -7,6 +7,7 @@ import { AdminUsersTable } from './components/admin-users-table/admin-users-tabl
 import { AdminUserDrawer } from './components/admin-user-drawer/admin-user-drawer';
 import { UserStatusModal } from './components/user-status-modal/user-status-modal';
 import { UserRoleModal } from './components/user-role-modal/user-role-modal';
+import { InviteAdminModal } from './components/invite-admin-modal/invite-admin-modal';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 
 @Component({
@@ -17,6 +18,7 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
     AdminUserDrawer,
     UserStatusModal,
     UserRoleModal,
+    InviteAdminModal,
     Pagination,
   ],
   selector: 'app-admin-users',
@@ -29,6 +31,7 @@ export class AdminUsers implements OnInit {
   readonly selectedUser = signal<AdminUserSummary | null>(null);
   readonly isModalOpen = signal<boolean>(false);
   readonly isDrawerOpen = signal<boolean>(false);
+  readonly isInviteModalOpen = signal<boolean>(false);
 
   // Modal de Seguridad de Cambio de Rol
   readonly isRoleModalOpen = signal<boolean>(false);
@@ -53,6 +56,14 @@ export class AdminUsers implements OnInit {
 
   onRefresh(): void {
     this.adminService.loadUsers(true).subscribe();
+  }
+
+  onOpenInviteModal(): void {
+    this.isInviteModalOpen.set(true);
+  }
+
+  onCloseInviteModal(): void {
+    this.isInviteModalOpen.set(false);
   }
 
   onPageChange(page: number): void {
@@ -149,4 +160,3 @@ export class AdminUsers implements OnInit {
     }
   }
 }
-

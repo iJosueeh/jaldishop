@@ -12,8 +12,8 @@ import { isValidImageUrl } from '../../../../../core/utils/image.utils';
   templateUrl: './register-step4-brand.html',
 })
 export class RegisterStep4Brand {
-  readonly storeName = input<string>('Dulces Clara');
-  readonly businessType = input<string>('Repostería y pastelería');
+  readonly storeName = input<string>('Comercial Los Andes');
+  readonly businessType = input<string>('Comercio Minorista / Tienda');
   readonly logoUrl = input<string | undefined>('');
   readonly bannerUrl = input<string | undefined>('');
   readonly dailyOrderLimit = input<number | null>(12);

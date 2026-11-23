@@ -1,60 +1,46 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { SettingsHeader } from './components/settings-header/settings-header';
-import { SettingsWhatsappTab } from './components/settings-whatsapp-tab/settings-whatsapp-tab';
-import { SettingsPaymentsTab } from './components/settings-payments-tab/settings-payments-tab';
-import { SettingsOrdersTab } from './components/settings-orders-tab/settings-orders-tab';
-import { SettingsNotificationsTab } from './components/settings-notifications-tab/settings-notifications-tab';
+import { SettingsPaymentsDeliveryTab } from './components/settings-payments-delivery-tab/settings-payments-delivery-tab';
 import { SettingsPoliciesTab } from './components/settings-policies-tab/settings-policies-tab';
-import { SettingsGeneralTab } from './components/settings-general-tab/settings-general-tab';
+import { SettingsAlertsTab } from './components/settings-alerts-tab/settings-alerts-tab';
+import { SettingsService } from '../../core/services/settings.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  matChatOutline,
   matPaymentsOutline,
-  matShoppingBagOutline,
-  matNotificationsOutline,
   matGavelOutline,
-  matTuneOutline,
+  matNotificationsOutline,
 } from '@ng-icons/material-symbols/outline';
 
-export type SettingsTabType =
-  | 'whatsapp'
-  | 'payments'
-  | 'orders'
-  | 'notifications'
-  | 'policies'
-  | 'general';
+export type SettingsTabType = 'payments' | 'policies' | 'alerts';
 
 @Component({
   imports: [
     SettingsHeader,
-    SettingsWhatsappTab,
-    SettingsPaymentsTab,
-    SettingsOrdersTab,
-    SettingsNotificationsTab,
+    SettingsPaymentsDeliveryTab,
     SettingsPoliciesTab,
-    SettingsGeneralTab,
+    SettingsAlertsTab,
     NgIcon,
   ],
   providers: [
     provideIcons({
-      matChatOutline,
       matPaymentsOutline,
-      matShoppingBagOutline,
-      matNotificationsOutline,
       matGavelOutline,
-      matTuneOutline,
+      matNotificationsOutline,
     }),
   ],
   selector: 'app-settings',
   styleUrl: './settings.css',
   templateUrl: './settings.html',
 })
-export class Settings {
-  readonly currentTab = signal<SettingsTabType>('whatsapp');
+export class Settings implements OnInit {
+  private readonly settingsService = inject(SettingsService);
+  readonly currentTab = signal<SettingsTabType>('payments');
+
+  ngOnInit(): void {
+    this.settingsService.loadSettings();
+  }
 
   setTab(tab: SettingsTabType): void {
     this.currentTab.set(tab);
   }
 }
-
-

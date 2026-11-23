@@ -106,7 +106,20 @@ export const checkoutService = {
       throw err;
     }
 
-    return res.json();
+    const data: CheckoutResponse = await res.json();
+    if (Array.isArray(data.items)) {
+      data.items = data.items.map((item) => {
+        const pName = item.presentationName || item.variantName || null;
+        return {
+          ...item,
+          id: item.id || item.variantId || item.productId,
+          presentationName: pName,
+          variantName: pName,
+        };
+      });
+    }
+
+    return data;
   },
 
   /**

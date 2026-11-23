@@ -10,8 +10,8 @@ import { isValidImageUrl } from '../../../../../core/utils/image.utils';
   templateUrl: './register-step2-brand.html',
 })
 export class RegisterStep2Brand {
-  readonly storeName = input<string>('Dulces Clara');
-  readonly businessType = input<string>('Reposteria y pasteleria');
+  readonly storeName = input<string>('Comercial Los Andes');
+  readonly businessType = input<string>('Comercio Minorista / Tienda');
   readonly contactPhone = input<string>('999 999 999');
   readonly pickupEnabled = input<boolean>(true);
   readonly deliveryEnabled = input<boolean>(true);

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { StorePreviewCard } from './store-preview-card';
+import { environment } from '../../../../../environments/environment';
 
 describe('StorePreviewCard', () => {
   let component: StorePreviewCard;
@@ -58,5 +59,18 @@ describe('StorePreviewCard', () => {
     expect(component.contactPhone()).toBe('912345678');
     expect(component.deliveryFeeAmount()).toBe(10.0);
     expect(component.taxRate()).toBe(10.0);
+  });
+
+  it('debe copiar el enlace del catalogo usando environment.marketplaceUrl y el slug', async () => {
+    const writeTextSpy = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: { writeText: writeTextSpy },
+    });
+
+    component.copyLink();
+
+    expect(writeTextSpy).toHaveBeenCalledWith(`${environment.marketplaceUrl}/tienda/mi-tienda`);
+    await Promise.resolve();
+    expect(component.isCopied()).toBe(true);
   });
 });

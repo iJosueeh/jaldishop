@@ -13,6 +13,10 @@ interface ProductGridProps {
   onResetFilters: () => void;
   isFiltering?: boolean;
   pending?: boolean;
+  onOpenDetail?: (product: ProductItem) => void;
+  isFavorite?: (productId: string) => boolean;
+  onToggleFavorite?: (productId: string) => void;
+  isTogglingFavorite?: boolean;
 }
 
 export function ProductGrid({
@@ -23,6 +27,10 @@ export function ProductGrid({
   onResetFilters,
   isFiltering = false,
   pending = false,
+  onOpenDetail,
+  isFavorite,
+  onToggleFavorite,
+  isTogglingFavorite = false,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -47,6 +55,10 @@ export function ProductGrid({
           onAdd={onAdd}
           currentQuantity={quantities.get(product.id) || 0}
           pending={pending}
+          onOpenDetail={onOpenDetail}
+          isFavorite={isFavorite ? isFavorite(product.id) : false}
+          onToggleFavorite={onToggleFavorite}
+          isTogglingFavorite={isTogglingFavorite}
         />
       ))}
     </div>

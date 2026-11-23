@@ -5,7 +5,9 @@ import { OrderService } from './order.service';
 import { ToastService } from './toast.service';
 import { StoreService } from './store.service';
 import { StompService } from './stomp.service';
+import { InvalidationBusService } from './invalidation-bus.service';
 import {
+  CreateMerchantOrderRequest,
   MerchantOrderDetailResponse,
   MerchantOrderPageResponse,
   MerchantOrder,
@@ -18,6 +20,7 @@ describe('OrderService', () => {
   let service: OrderService;
   let httpMock: HttpTestingController;
   let storeService: StoreService;
+  let invalidationBus: InvalidationBusService;
   let toastMock: any;
 
   const mockPageResponse: MerchantOrderPageResponse = {
@@ -133,6 +136,7 @@ describe('OrderService', () => {
     service = TestBed.inject(OrderService);
     httpMock = TestBed.inject(HttpTestingController);
     storeService = TestBed.inject(StoreService);
+    invalidationBus = TestBed.inject(InvalidationBusService);
 
     // Configurar tienda activa por defecto
     storeService.currentStore.set({
@@ -433,13 +437,13 @@ describe('OrderService', () => {
       service.totalElements.set(1);
     });
 
-    it('debe enviar PATCH con URL y body { status } y actualizar estado solo tras HTTP 200', () => {
+    it('debe enviar PATCH con URL y body { status } aplicando mutación optimista y confirmando tras HTTP 200', () => {
       expect(service.orders()[0].status).toBe('CONFIRMED');
 
       service.updateOrderStatus('ord-1039', 'IN_PREPARATION', 'store-123').subscribe();
 
-      // No debe haber mutación optimista antes de la respuesta HTTP
-      expect(service.orders()[0].status).toBe('CONFIRMED');
+      // Debe reflejar mutación optimista inmediata en memoria (< 5ms) mientras sincroniza
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
       expect(service.isUpdating('ord-1039')).toBe(true);
 
       const patchReq = httpMock.expectOne(
@@ -457,6 +461,52 @@ describe('OrderService', () => {
       expect(service.orders()[0].status).toBe('IN_PREPARATION');
       expect(service.isUpdating('ord-1039')).toBe(false);
       expect(toastMock.success).toHaveBeenCalledWith('Pedido actualizado a en preparación.');
+    });
+
+    it('debe revertir (rollback) el estado optimista local al estado anterior si el backend retorna error 422', () => {
+      expect(service.orders()[0].status).toBe('CONFIRMED');
+
+      service.updateOrderStatus('ord-1039', 'READY', 'store-123').subscribe();
+
+      // Inmediatamente optimista
+      expect(service.orders()[0].status).toBe('READY');
+
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
+      patchReq.flush(
+        {
+          code: 'RN-ORD-07',
+          message: 'Transición inválida de estado: no se puede pasar de CONFIRMED a READY',
+        },
+        { status: 422, statusText: 'Unprocessable Entity' },
+      );
+
+      // Tras el error, debe haberse revertido al estado anterior
+      expect(service.orders()[0].status).toBe('CONFIRMED');
+      expect(service.isUpdating('ord-1039')).toBe(false);
+      expect(toastMock.error).toHaveBeenCalledWith(
+        'Transición inválida de estado: no se puede pasar de CONFIRMED a READY',
+      );
+    });
+
+    it('debe enviar motivo de cancelación en el payload PATCH cuando se proporciona', () => {
+      service.updateOrderStatus('ord-1039', 'CANCELLED', 'store-123', 'Insumos agotados').subscribe();
+
+      const patchReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders/ord-1039/status`,
+      );
+      expect(patchReq.request.method).toBe('PATCH');
+      expect(patchReq.request.body).toEqual({
+        status: 'CANCELLED',
+        reason: 'Insumos agotados',
+      });
+
+      patchReq.flush({
+        ...mockDetailResponse,
+        status: 'CANCELLED',
+      });
+      expect(toastMock.success).toHaveBeenCalledWith('Pedido actualizado a cancelado.');
     });
 
     it('debe evitar peticiones duplicadas ante clics repetidos mientras la operación esté en vuelo', () => {
@@ -687,8 +737,8 @@ describe('OrderService', () => {
         ],
       });
 
-      // El pedido en vuelo no debe haber sido pisoteado
-      expect(service.orders()[0].status).toBe('CONFIRMED');
+      // El pedido en vuelo optimista no debe haber sido pisoteado
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
 
       // Ahora el PATCH responde exitosamente
       const patchReq = httpMock.expectOne(
@@ -852,6 +902,52 @@ describe('OrderService', () => {
       expect(toastMock.info).toHaveBeenCalledWith('Nuevo pedido recibido: #PED-2026');
 
       // Debe consultar el listado actualizado al servidor
+      const req = httpMock.expectOne((r) => r.url.includes('/orders'));
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPageResponse);
+    });
+
+    it('debe actualizar orden localmente y recargar datos cuando StompService emite ORDER_STATUS_CHANGED para la tienda activa', () => {
+      const stompService = TestBed.inject(StompService);
+
+      service.orders.set([
+        {
+          id: 'ord-status-1',
+          orderNumber: '#PED-STATUS',
+          customerName: 'Cliente Test',
+          deliveryMode: 'PICKUP',
+          deliveryTimeLabel: '12:00',
+          isUrgent: false,
+          status: 'CONFIRMED',
+          totalAmount: 50.0,
+          items: [],
+          createdAt: '2026-10-31T12:00:00Z',
+        },
+      ]);
+
+      let mutatedEvent: any = null;
+      service.orderMutated$.subscribe((e) => (mutatedEvent = e));
+
+      (stompService as any).orderStatusChangedSubject.next({
+        eventId: 'evt-status-change',
+        eventType: 'ORDER_STATUS_CHANGED',
+        orderId: 'ord-status-1',
+        orderNumber: '#PED-STATUS',
+        customerId: 'cust-1',
+        storeId: 'store-123',
+        previousStatus: 'CONFIRMED',
+        newStatus: 'IN_PREPARATION',
+        occurredAt: '2026-10-31T12:10:00Z',
+      });
+
+      expect(toastMock.info).toHaveBeenCalledWith('Pedido #PED-STATUS cambió a En Preparación');
+      expect(service.orders()[0].status).toBe('IN_PREPARATION');
+      expect(mutatedEvent).toEqual({
+        storeId: 'store-123',
+        orderId: 'ord-status-1',
+        status: 'IN_PREPARATION',
+      });
+
       const req = httpMock.expectOne((r) => r.url.includes('/orders'));
       expect(req.request.method).toBe('GET');
       req.flush(mockPageResponse);
@@ -1742,6 +1838,214 @@ describe('OrderService', () => {
       expect(service.filteredOrders()[0].status).toBe('READY');
       expect(service.isFilterEmpty()).toBe(false);
       expect(service.isSearchEmpty()).toBe(false);
+    });
+  });
+
+  describe('createMerchantOrder (POST)', () => {
+    const mockCreateRequest: CreateMerchantOrderRequest = {
+      deliveryMode: 'DELIVERY',
+      customerName: 'Lucía Méndez',
+      customerPhone: '987654321',
+      paymentMethod: 'YAPE',
+      serviceDate: '2026-11-20',
+      serviceStartTime: '15:00:00',
+      serviceEndTime: '15:30:00',
+      items: [{ variantId: 'v-p1', quantity: 2, unitPriceAmount: 20 }],
+    };
+
+    const mockDetailResponse: MerchantOrderDetailResponse = {
+      id: 'ord-created-1',
+      orderNumber: '#ORD-00000001',
+      storeId: 'store-123',
+      customerUserId: 'usr-1',
+      paymentId: '',
+      capacityReservationId: '',
+      status: 'CONFIRMED',
+      deliveryMode: 'DELIVERY',
+      serviceDate: '2026-11-20',
+      serviceStartTime: '15:00:00',
+      serviceEndTime: '15:30:00',
+      customerName: 'Lucía Méndez',
+      customerPhone: '987654321',
+      customerEmail: null,
+      deliveryAddress: null,
+      deliveryReference: null,
+      deliveryLatitude: null,
+      deliveryLongitude: null,
+      currency: 'PEN',
+      productsSubtotalAmount: 40,
+      discountAmount: 0,
+      discountCode: null,
+      deliveryFeeAmount: 0,
+      includedTaxAmount: 0,
+      totalAmount: 40,
+      confirmedAt: '2026-11-20T15:00:00Z',
+      updatedAt: '2026-11-20T15:00:00Z',
+      items: [],
+      statusHistory: [],
+    };
+
+    it('debe enviar POST a /merchants/stores/{storeId}/orders y refrescar listado y contadores al responder 201', () => {
+      service.openCreateModal();
+      expect(service.isCreateModalOpen()).toBe(true);
+
+      const busEvents: any[] = [];
+      invalidationBus.orderCreated$.subscribe((e) => busEvents.push(e));
+
+      let createdResponse: MerchantOrderDetailResponse | null = null;
+      service.createMerchantOrder('store-123', mockCreateRequest).subscribe((res) => {
+        createdResponse = res;
+      });
+
+      const postReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders`,
+      );
+      expect(postReq.request.method).toBe('POST');
+      expect(postReq.request.body).toEqual(mockCreateRequest);
+
+      postReq.flush(mockDetailResponse);
+
+      expect(createdResponse).toEqual(mockDetailResponse);
+      expect(service.isCreateModalOpen()).toBe(false);
+      expect(toastMock.success).toHaveBeenCalledWith(
+        'Comanda #ORD-00000001 creada con éxito',
+      );
+      expect(busEvents.length).toBe(1);
+      expect(busEvents[0]).toEqual({
+        storeId: 'store-123',
+        orderId: 'ord-created-1',
+        orderNumber: '#ORD-00000001',
+        origin: undefined,
+        source: 'LOCAL_MERCHANT',
+      });
+
+      // Debe disparar refresco de órdenes y contadores
+      const listReq = httpMock.expectOne((r) => r.url.endsWith('/orders') && r.method === 'GET');
+      listReq.flush(mockPageResponse);
+
+      const countsReq = httpMock.expectOne(
+        (r) => r.url.endsWith('/orders/counts') && !r.params.has('date'),
+      );
+      countsReq.flush({ all: 1, confirmed: 1, inPreparation: 0, ready: 0, outForDelivery: 0, completed: 0, cancelled: 0 });
+
+      const todayCountsReq = httpMock.expectOne(
+        (r) => r.url.endsWith('/orders/counts') && r.params.has('date'),
+      );
+      todayCountsReq.flush({ all: 1, confirmed: 1, inPreparation: 0, ready: 0, outForDelivery: 0, completed: 0, cancelled: 0 });
+    });
+
+    it('debe manejar error al registrar comanda y mostrar toast', () => {
+      let errorOccurred = false;
+      service.createMerchantOrder('store-123', mockCreateRequest).subscribe({
+        error: () => {
+          errorOccurred = true;
+        },
+      });
+
+      const postReq = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/store-123/orders`,
+      );
+      postReq.flush(
+        { message: 'Stock insuficiente para la variante' },
+        { status: 409, statusText: 'Conflict' },
+      );
+
+      expect(errorOccurred).toBe(true);
+      expect(toastMock.error).toHaveBeenCalledWith('Stock insuficiente para la variante');
+    });
+  });
+
+  describe('Estrategia Cache-First y Optimización de Consultas', () => {
+    it('debe aplicar Cache-First en loadOrders evitando peticiones HTTP repetidas', () => {
+      // 1. Primera consulta: debe realizar petición HTTP
+      let firstResponse: any = null;
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe((res) => {
+        firstResponse = res;
+      });
+
+      const req1 = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+      req1.flush(mockPageResponse);
+
+      expect(firstResponse).toBeTruthy();
+      expect(service.orders().length).toBe(1);
+      expect(service.isLoaded()).toBe(true);
+
+      // 2. Segunda consulta con mismos parámetros y forceRefresh = false (por defecto): debe devolver datos en memoria sin HTTP
+      let secondResponse: any = null;
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe((res) => {
+        secondResponse = res;
+      });
+
+      // No debe haber ninguna petición HTTP en vuelo
+      httpMock.expectNone((r) => r.url.endsWith('/orders'));
+      expect(secondResponse).toBeTruthy();
+      expect(secondResponse.totalElements).toBe(mockPageResponse.totalElements);
+
+      // 3. Tercera consulta con forceRefresh = true: debe forzar nueva petición HTTP
+      let thirdResponse: any = null;
+      service.loadOrders(0, 10, 'ALL', 'store-123', undefined, true).subscribe((res) => {
+        thirdResponse = res;
+      });
+
+      const req3 = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+      req3.flush(mockPageResponse);
+      expect(thirdResponse).toBeTruthy();
+    });
+
+    it('debe aplicar Cache-First en loadOrderCounts evitando peticiones HTTP repetidas', () => {
+      // 1. Primera llamada: realiza HTTP
+      service.loadOrderCounts('store-123').subscribe();
+      const req1 = httpMock.expectOne((r) => r.url.endsWith('/orders/counts') && !r.params.has('date'));
+      req1.flush({ all: 5, confirmed: 2, inPreparation: 1, ready: 1, outForDelivery: 0, completed: 1, cancelled: 0 });
+
+      expect(service.orderCounts()?.all).toBe(5);
+
+      // 2. Segunda llamada con force = false: usa caché en memoria
+      service.loadOrderCounts('store-123').subscribe();
+      httpMock.expectNone((r) => r.url.endsWith('/orders/counts'));
+
+      // 3. Tercera llamada con force = true: fuerza HTTP
+      service.loadOrderCounts('store-123', true).subscribe();
+      const req3 = httpMock.expectOne((r) => r.url.endsWith('/orders/counts') && !r.params.has('date'));
+      req3.flush({ all: 6, confirmed: 3, inPreparation: 1, ready: 1, outForDelivery: 0, completed: 1, cancelled: 0 });
+      expect(service.orderCounts()?.all).toBe(6);
+    });
+
+    it('debe aplicar Cache-First en loadTodayOrderCounts evitando peticiones HTTP repetidas', () => {
+      // 1. Primera llamada: realiza HTTP
+      service.loadTodayOrderCounts('store-123').subscribe();
+      const req1 = httpMock.expectOne((r) => r.url.endsWith('/orders/counts') && r.params.has('date'));
+      req1.flush({ all: 3, confirmed: 1, inPreparation: 1, ready: 1, outForDelivery: 0, completed: 0, cancelled: 0 });
+
+      expect(service.todayOrderCounts()?.all).toBe(3);
+
+      // 2. Segunda llamada con force = false: usa caché en memoria
+      service.loadTodayOrderCounts('store-123').subscribe();
+      httpMock.expectNone((r) => r.url.endsWith('/orders/counts'));
+
+      // 3. Tercera llamada con force = true: fuerza HTTP
+      service.loadTodayOrderCounts('store-123', true).subscribe();
+      const req3 = httpMock.expectOne((r) => r.url.endsWith('/orders/counts') && r.params.has('date'));
+      req3.flush({ all: 4, confirmed: 2, inPreparation: 1, ready: 1, outForDelivery: 0, completed: 0, cancelled: 0 });
+      expect(service.todayOrderCounts()?.all).toBe(4);
+    });
+
+    it('debe limpiar la memoria y la caché al llamar clearCache()', () => {
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
+      const req = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+      req.flush(mockPageResponse);
+      expect(service.isLoaded()).toBe(true);
+
+      service.clearCache();
+
+      expect(service.isLoaded()).toBe(false);
+      expect(service.orders().length).toBe(0);
+      expect(service.orderCounts()).toBeNull();
+
+      // Tras clearCache, una nueva llamada debe requerir HTTP
+      service.loadOrders(0, 10, 'ALL', 'store-123').subscribe();
+      const newReq = httpMock.expectOne((r) => r.url.endsWith('/orders'));
+      newReq.flush(mockPageResponse);
     });
   });
 });

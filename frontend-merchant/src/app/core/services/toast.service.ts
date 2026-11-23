@@ -28,6 +28,24 @@ export class ToastService {
     return this.show('error', message, title, 5000);
   }
 
+  errorWithAction(
+    message: string,
+    action: { label: string; run: () => void },
+    title: string = 'Ocurrió un error',
+    durationMs: number = 7000,
+  ): string {
+    const id = crypto.randomUUID();
+    const newToast: Toast = { id, type: 'error', title, message, durationMs, dismissing: false, action };
+
+    this.toasts.update((current) => [...current, newToast]);
+
+    if (durationMs > 0) {
+      setTimeout(() => this.dismiss(id), durationMs);
+    }
+
+    return id;
+  }
+
   warning(message: string, title: string = 'Atención'): string {
     return this.show('warning', message, title);
   }

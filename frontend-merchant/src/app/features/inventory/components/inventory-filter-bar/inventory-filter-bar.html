@@ -1,0 +1,126 @@
+<div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-surface-bright border border-outline-variant shadow-2xs font-sans overflow-x-auto scrollbar-none">
+  <!-- Buscador en tiempo real -->
+  <div class="relative flex-1 min-w-[180px] sm:min-w-[220px] max-w-xs">
+    <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-on-surface-variant/60">
+      <ng-icon name="matSearchOutline" class="text-[16px]" />
+    </span>
+    <input
+      type="text"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      placeholder="Buscar por producto, presentación o SKU..."
+      class="w-full pl-8 pr-8 py-1.5 rounded-lg bg-surface border border-outline-variant text-xs font-medium text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface-bright transition-all"
+      aria-label="Buscar variante o SKU"
+    />
+    @if (searchQuery().length > 0) {
+      <button
+        type="button"
+        (click)="onClearSearch()"
+        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-on-surface-variant/70 hover:text-on-surface cursor-pointer"
+        aria-label="Limpiar búsqueda"
+      >
+        <ng-icon name="matCloseOutline" class="text-[14px]" />
+      </button>
+    }
+  </div>
+
+  <!-- Filtros de estado por Chips / Tabs -->
+  <div class="flex items-center gap-1.5 shrink-0">
+    <button
+      type="button"
+      (click)="filterChange.emit('ALL')"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-primary]="selectedFilter() === 'ALL'"
+      [class.text-white]="selectedFilter() === 'ALL'"
+      [class.shadow-xs]="selectedFilter() === 'ALL'"
+      [class.bg-surface]="selectedFilter() !== 'ALL'"
+      [class.text-on-surface-variant]="selectedFilter() !== 'ALL'"
+      [class.hover:bg-surface-dim]="selectedFilter() !== 'ALL'"
+    >
+      Todos
+    </button>
+
+    <button
+      type="button"
+      (click)="filterChange.emit('CONFIGURED')"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+      [class.bg-primary]="selectedFilter() === 'CONFIGURED'"
+      [class.text-white]="selectedFilter() === 'CONFIGURED'"
+      [class.shadow-xs]="selectedFilter() === 'CONFIGURED'"
+      [class.bg-surface]="selectedFilter() !== 'CONFIGURED'"
+      [class.text-on-surface-variant]="selectedFilter() !== 'CONFIGURED'"
+      [class.hover:bg-surface-dim]="selectedFilter() !== 'CONFIGURED'"
+    >
+      <span>Configurados</span>
+      @if (configuredCount() > 0) {
+        <span
+          class="px-1.5 py-0.2 rounded-md text-[10px] font-mono"
+          [class.bg-white/20]="selectedFilter() === 'CONFIGURED'"
+          [class.bg-stone-200]="selectedFilter() !== 'CONFIGURED'"
+        >
+          {{ configuredCount() }}
+        </span>
+      }
+    </button>
+
+    <button
+      type="button"
+      (click)="filterChange.emit('NOT_CONFIGURED')"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+      [class.bg-amber-600]="selectedFilter() === 'NOT_CONFIGURED'"
+      [class.text-white]="selectedFilter() === 'NOT_CONFIGURED'"
+      [class.shadow-xs]="selectedFilter() === 'NOT_CONFIGURED'"
+      [class.bg-surface]="selectedFilter() !== 'NOT_CONFIGURED'"
+      [class.text-amber-800]="selectedFilter() !== 'NOT_CONFIGURED'"
+      [class.hover:bg-amber-50]="selectedFilter() !== 'NOT_CONFIGURED'"
+    >
+      <span>Sin configurar</span>
+      @if (notConfiguredCount() > 0) {
+        <span
+          class="px-1.5 py-0.2 rounded-md text-[10px] font-mono"
+          [class.bg-white/20]="selectedFilter() === 'NOT_CONFIGURED'"
+          [class.bg-amber-200/60]="selectedFilter() !== 'NOT_CONFIGURED'"
+        >
+          {{ notConfiguredCount() }}
+        </span>
+      }
+    </button>
+
+    <button
+      type="button"
+      (click)="filterChange.emit('LOW_STOCK')"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+      [class.bg-rose-600]="selectedFilter() === 'LOW_STOCK'"
+      [class.text-white]="selectedFilter() === 'LOW_STOCK'"
+      [class.shadow-xs]="selectedFilter() === 'LOW_STOCK'"
+      [class.bg-surface]="selectedFilter() !== 'LOW_STOCK'"
+      [class.text-rose-700]="selectedFilter() !== 'LOW_STOCK'"
+      [class.hover:bg-rose-50]="selectedFilter() !== 'LOW_STOCK'"
+    >
+      <span>Stock bajo</span>
+      @if (lowStockCount() > 0) {
+        <span
+          class="px-1.5 py-0.2 rounded-md text-[10px] font-mono"
+          [class.bg-white/20]="selectedFilter() === 'LOW_STOCK'"
+          [class.bg-rose-200/60]="selectedFilter() !== 'LOW_STOCK'"
+        >
+          {{ lowStockCount() }}
+        </span>
+      }
+    </button>
+
+    <button
+      type="button"
+      (click)="filterChange.emit('NOT_TRACKED')"
+      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer"
+      [class.bg-stone-700]="selectedFilter() === 'NOT_TRACKED'"
+      [class.text-white]="selectedFilter() === 'NOT_TRACKED'"
+      [class.shadow-xs]="selectedFilter() === 'NOT_TRACKED'"
+      [class.bg-surface]="selectedFilter() !== 'NOT_TRACKED'"
+      [class.text-on-surface-variant]="selectedFilter() !== 'NOT_TRACKED'"
+      [class.hover:bg-surface-dim]="selectedFilter() !== 'NOT_TRACKED'"
+    >
+      A pedido
+    </button>
+  </div>
+</div>

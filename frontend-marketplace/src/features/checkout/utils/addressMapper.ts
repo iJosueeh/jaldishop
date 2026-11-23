@@ -1,13 +1,13 @@
 import { CustomerAddress } from '@/features/customer/types/customer.types';
 import { DeliveryFormData } from '../types/checkout.types';
 
-export const MAX_DELIVERY_ADDRESS_LENGTH = 500;
+export const MAX_DELIVERY_ADDRESS_LENGTH = 300;
 export const MAX_DELIVERY_REFERENCE_LENGTH = 300;
 
 /**
  * Normalizes full address line into the format required by backend checkout snapshot.
- * Format: "Calle / Av / Nro, Distrito, Provincia, Departamento" (máx 500 caracteres).
- * Throws an explicit error if the formatted address exceeds 500 characters instead of truncating silently.
+ * Format: "Calle / Av / Nro, Distrito, Provincia, Departamento" (máx 300 caracteres según Backend @Size(max=300)).
+ * Throws an explicit error if the formatted address exceeds 300 characters instead of truncating silently.
  */
 export function formatDeliveryAddressString(
   addressLine: string,
@@ -96,9 +96,10 @@ export function parseSlotTimeRange(timeRange?: string): { startTime?: string; en
  * Maps a saved CustomerAddress directly to the fields expected by InitiateCheckoutRequest.
  */
 export function mapCustomerAddressToCheckoutFields(address: CustomerAddress) {
+  const street = address.streetAddress || address.addressLine || '';
   return {
     deliveryAddress: formatDeliveryAddressString(
-      address.addressLine,
+      street,
       address.district,
       address.province,
       address.department

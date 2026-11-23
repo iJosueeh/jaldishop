@@ -43,19 +43,10 @@
     </button>
   </div>
 
-  <!-- Lado Derecho: Accesos Rápidos, Perfil y Cerrar Sesión -->
-  <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-    <!-- Switch a Panel de Tienda si el usuario también es Merchant -->
-    @if (authService.isMerchant()) {
-      <a
-        routerLink="/dashboard"
-        class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors"
-        title="Cambiar a la vista de tu tienda"
-      >
-        <ng-icon name="matStorefrontOutline" class="text-[16px]" />
-        <span>Vista Comerciante</span>
-      </a>
-    }
+  <!-- Lado Derecho: Accesos Rápidos, Selector de Entorno, Perfil y Cerrar Sesión -->
+  <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+    <!-- Context Switcher entre Comercio y Control Plane -->
+    <app-context-switcher />
 
     <!-- Avatar y Perfil Admin -->
     <div class="flex items-center gap-2.5 pl-2 border-l border-outline-variant/30">

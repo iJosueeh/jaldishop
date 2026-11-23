@@ -40,11 +40,20 @@ public class OrderEntity {
     @Column(name = "store_id", nullable = false)
     private UUID storeId;
 
-    @Column(name = "payment_id", nullable = false)
+    @Column(name = "payment_id")
     private UUID paymentId;
 
-    @Column(name = "capacity_reservation_id", nullable = false)
+    @Column(name = "capacity_reservation_id")
     private UUID capacityReservationId;
+
+    @Column(name = "origin", nullable = false, length = 20)
+    private String origin = "ONLINE";
+
+    @Column(name = "payment_method", length = 30)
+    private String paymentMethod;
+
+    @Column(name = "notes")
+    private String notes;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
@@ -216,6 +225,12 @@ public class OrderEntity {
     public void setConfirmedAt(Instant confirmedAt) { this.confirmedAt = confirmedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getOrigin() { return origin; }
+    public void setOrigin(String origin) { this.origin = origin != null ? origin : "ONLINE"; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
     public List<OrderItemEntity> getItems() { return items; }
     public void setItems(List<OrderItemEntity> items) { this.items = items != null ? items : new ArrayList<>(); }
     public List<OrderStatusHistoryEntity> getStatusHistory() { return statusHistory; }

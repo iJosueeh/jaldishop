@@ -1,3 +1,4 @@
+<!-- impeccable-disable broken-image -->
 @if (isLoading()) {
   <!-- Loading skeleton table -->
   <div
@@ -31,7 +32,7 @@
     </div>
     <h3 class="font-bold text-lg text-on-surface">Tu catálogo está vacío</h3>
     <p class="text-sm text-on-surface-variant mt-1.5 max-w-md">
-      Aún no has registrado ningún producto en tu tienda. Comienza creando tus recetas o artículos
+      Aún no has registrado ningún producto en tu tienda. Comienza creando tus productos o artículos
       para habilitar ventas por WhatsApp y catálogo web.
     </p>
     <button
@@ -66,56 +67,75 @@
     </button>
   </div>
 } @else {
-  <!-- Table View -->
+  <!-- Tabla de Productos -->
   <div
-    class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-xs overflow-hidden"
+    class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-xs overflow-visible"
   >
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs text-on-surface">
-        <thead
-          class="bg-surface-container-low text-on-surface-variant uppercase font-semibold text-[11px] border-b border-outline-variant/20"
-        >
-          <tr>
-            <th class="px-4 py-3">Producto</th>
-            <th class="px-4 py-3">Precio</th>
-            <th class="px-4 py-3">Disponibilidad</th>
-            <th class="px-4 py-3">Estado</th>
-            <th class="px-4 py-3 text-right">Acciones</th>
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="border-b border-outline-variant/20 bg-surface-container-low/40">
+            <th class="px-4 py-3 font-semibold text-on-surface-variant">Producto</th>
+            <th class="px-4 py-3 font-semibold text-on-surface-variant">Categoría</th>
+            <th class="px-4 py-3 font-semibold text-on-surface-variant">Precio Base</th>
+            <th class="px-4 py-3 font-semibold text-on-surface-variant">Disponibilidad</th>
+            <th class="px-4 py-3 font-semibold text-on-surface-variant">Estado</th>
+            <th class="px-4 py-3 font-semibold text-on-surface-variant text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/15">
           @for (prod of products(); track prod.id) {
-            <tr class="hover:bg-surface-container-high/40 transition-colors">
+            <tr
+              (click)="onRowClick(prod)"
+              class="hover:bg-surface-container-low/50 transition-colors cursor-pointer"
+            >
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container shrink-0 flex items-center justify-center"
+                    class="w-10 h-10 rounded-lg bg-surface-container-low overflow-hidden shrink-0 flex items-center justify-center border border-outline-variant/20"
                   >
-                    @if (getImageUrl(prod)) {
-                      <img [src]="getImageUrl(prod)" [alt]="prod.name" class="w-full h-full object-cover" />
+                    @if (getPrimaryImage(prod)) {
+                      <img
+                        [src]="getPrimaryImage(prod)"
+                        [alt]="prod.name"
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     } @else {
-                      <ng-icon name="matInventory2Outline" class="text-lg text-primary"></ng-icon>
+                      <ng-icon
+                        name="matInventory2Outline"
+                        class="text-primary text-base"
+                      ></ng-icon>
                     }
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="font-bold text-sm text-on-surface truncate">{{ prod.name }}</span>
+                    <span class="font-bold text-on-surface truncate">{{ prod.name }}</span>
                     <span class="text-[11px] text-on-surface-variant truncate">
                       {{ prod.description || 'Sin descripción' }}
                     </span>
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-3 font-extrabold text-sm whitespace-nowrap">
+              <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">
+                {{ prod.categoryName || 'Sin categoría' }}
+              </td>
+              <td class="px-4 py-3 font-bold text-on-surface whitespace-nowrap font-mono tabular-nums">
                 {{ getPrice(prod) }}
               </td>
-              <td class="px-4 py-3 whitespace-nowrap">
-                @if (prod.hasStockIssue) {
-                  <span class="text-red-700 dark:text-red-400 font-semibold text-xs">
-                    {{ prod.stockIssueMessage || 'Sin stock' }}
+              <td class="px-4 py-3 whitespace-nowrap text-on-surface-variant">
+                @if (prod.hasStockIssue || (prod.stockCount !== undefined && prod.stockCount <= 0)) {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20">
+                    Agotado
                   </span>
+                } @else if (prod.stockCount != null) {
+                  <span class="font-semibold text-on-surface">{{ prod.stockCount }} disponibles</span>
+                } @else if (prod.preparedCount != null) {
+                  <span class="font-semibold text-on-surface">{{ prod.preparedCount }} disponibles</span>
+                } @else if (hasTrackingVariant(prod)) {
+                  <span class="font-semibold text-on-surface">Con stock</span>
                 } @else {
-                  <span class="text-on-surface text-xs">
-                    {{ prod.leadTimeText || 'Inmediato' }}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container-high text-on-surface-variant">
+                    Bajo pedido / Sin límite
                   </span>
                 }
               </td>
@@ -133,35 +153,50 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
-                <div class="inline-flex items-center gap-1">
+                <div class="inline-flex items-center gap-1.5">
                   <button
                     type="button"
-                    (click)="editProduct.emit(prod)"
-                    class="w-7 h-7 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-                    title="Editar"
+                    (click)="onEdit(prod, $event)"
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors cursor-pointer"
+                    title="Editar producto y detalles"
                   >
                     <ng-icon name="matEditOutline" class="text-sm"></ng-icon>
+                    <span class="hidden sm:inline">Editar</span>
                   </button>
+
+                  @if (prod.variants && prod.variants.length > 1) {
+                    <button
+                      type="button"
+                      (click)="onAdjustQuota(prod, $event)"
+                      class="w-7 h-7 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+                      title="Ajustar variantes y precios"
+                    >
+                      <ng-icon name="matTuneOutline" class="text-sm"></ng-icon>
+                    </button>
+                  }
+
                   <button
                     type="button"
-                    (click)="toggleStatus.emit(prod)"
+                    (click)="onOpenPreview(prod, $event)"
+                    class="w-7 h-7 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors cursor-pointer"
+                    title="Ver en Catálogo Web"
+                  >
+                    <ng-icon name="matOpenInNewOutline" class="text-sm"></ng-icon>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="onToggleStatus(prod, $event)"
                     class="w-7 h-7 rounded-lg hover:bg-surface-container flex items-center justify-center transition-colors cursor-pointer"
                     [class.text-red-600]="prod.status === 'INACTIVE'"
                     [class.text-on-surface-variant]="prod.status !== 'INACTIVE'"
                     [class.hover:text-primary]="prod.status !== 'INACTIVE'"
-                    [title]="prod.status === 'INACTIVE' ? 'Reactivar' : 'Pausar'"
+                    [title]="prod.status === 'INACTIVE' ? 'Reactivar producto' : 'Pausar producto'"
                   >
                     <ng-icon
                       [name]="prod.status === 'INACTIVE' ? 'matVisibilityOffOutline' : 'matVisibilityOutline'"
                       class="text-sm"
                     ></ng-icon>
-                  </button>
-                  <button
-                    type="button"
-                    class="w-7 h-7 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-                    title="Más opciones"
-                  >
-                    <ng-icon name="matMoreVertOutline" class="text-sm"></ng-icon>
                   </button>
                 </div>
               </td>

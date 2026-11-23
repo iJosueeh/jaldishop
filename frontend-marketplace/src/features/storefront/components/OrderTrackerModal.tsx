@@ -122,7 +122,7 @@ export function OrderTrackerModal({
   const handleCopyLink = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(
-        `${window.location.origin}/pedido/${orderId}?status=${currentStep.toLowerCase()}`
+        `${window.location.origin}/mi-jaldishop/pedidos/${orderId}`
       );
       setCopiedLink(true);
       toast.success('Enlace de seguimiento copiado', {

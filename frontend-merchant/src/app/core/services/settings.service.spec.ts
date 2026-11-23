@@ -1,79 +1,113 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { SettingsService } from './settings.service';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { SettingsService, DEFAULT_SETTINGS } from './settings.service';
 import { ToastService } from './toast.service';
-import { vi } from 'vitest';
+import { InvalidationBusService } from './invalidation-bus.service';
+import { environment } from '../../../environments/environment';
+import { MerchantSettings } from '../models/settings.models';
 
 describe('SettingsService', () => {
   let service: SettingsService;
-  let toastMock: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+  let httpTesting: HttpTestingController;
+  let mockToastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let mockBusService: { dispatchCacheInvalidated: ReturnType<typeof vi.fn> };
+
+  const testUrl = `${environment.apiUrl}/api/v1/stores/me/settings`;
 
   beforeEach(() => {
-    localStorage.clear();
-    toastMock = {
+    mockToastService = {
       success: vi.fn(),
       error: vi.fn(),
-      info: vi.fn(),
+    };
+
+    mockBusService = {
+      dispatchCacheInvalidated: vi.fn(),
     };
 
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         SettingsService,
-        { provide: ToastService, useValue: toastMock },
+        { provide: ToastService, useValue: mockToastService },
+        { provide: InvalidationBusService, useValue: mockBusService },
       ],
     });
 
     service = TestBed.inject(SettingsService);
+    httpTesting = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    localStorage.clear();
+    httpTesting.verify();
   });
 
-  it('should be created with default settings', () => {
-    expect(service).toBeTruthy();
-    const settings = service.settings();
-    expect(settings.whatsappTemplates.length).toBe(3);
-    expect(settings.notifications.orderSoundAlert).toBe(true);
-    expect(settings.general.currency).toBe('PEN');
+  it('debe inicializarse con DEFAULT_SETTINGS', () => {
+    expect(service.settings()).toEqual(DEFAULT_SETTINGS);
   });
 
-  it('should update whatsapp template message and save', () => {
-    service.updateWhatsAppTemplate('in_preparation', 'Mensaje actualizado');
-    const updated = service.settings().whatsappTemplates.find((t) => t.id === 'in_preparation');
-    expect(updated?.message).toBe('Mensaje actualizado');
-    expect(toastMock.success).toHaveBeenCalled();
+  it('debe cargar configuración vía GET /api/v1/stores/me/settings', () => {
+    const mockData: MerchantSettings = {
+      ...DEFAULT_SETTINGS,
+      soundVolume: 95,
+      minDeliveryAmount: 25.5,
+    };
+
+    service.loadSettings();
+    expect(service.isLoading()).toBe(true);
+
+    const req = httpTesting.expectOne(testUrl);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockData);
+
+    expect(service.isLoading()).toBe(false);
+    expect(service.settings().soundVolume).toBe(95);
+    expect(service.settings().minDeliveryAmount).toBe(25.5);
   });
 
-  it('should update notifications preferences', () => {
-    service.updateNotifications({ orderSoundAlert: false, soundVolume: 50 });
-    const notifs = service.settings().notifications;
-    expect(notifs.orderSoundAlert).toBe(false);
-    expect(notifs.soundVolume).toBe(50);
+  it('debe guardar configuración optimista, llamar PUT y disparar InvalidationBus', () => {
+    const newSettings: MerchantSettings = {
+      ...DEFAULT_SETTINGS,
+      requireCustomerDni: true,
+      estimatedPrepTimeMinutes: 45,
+    };
+
+    service.saveSettings(newSettings, 'store-123');
+
+    // Optimista
+    expect(service.settings().requireCustomerDni).toBe(true);
+    expect(service.isSaving()).toBe(true);
+
+    const req = httpTesting.expectOne(testUrl);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(newSettings);
+    req.flush(newSettings);
+
+    expect(service.isSaving()).toBe(false);
+    expect(mockToastService.success).toHaveBeenCalledWith('Configuración guardada correctamente.');
+    expect(mockBusService.dispatchCacheInvalidated).toHaveBeenCalledWith({
+      storeId: 'store-123',
+      module: 'STORE',
+    });
   });
 
-  it('should update order preferences', () => {
-    service.updateOrderPreferences({ minDeliveryAmount: 25.0 });
-    expect(service.settings().orderPreferences.minDeliveryAmount).toBe(25.0);
-  });
+  it('debe hacer rollback al estado anterior si la llamada PUT falla', () => {
+    const originalSettings = { ...service.settings() };
+    const failingSettings: MerchantSettings = {
+      ...DEFAULT_SETTINGS,
+      soundVolume: 20,
+    };
 
-  it('should update payment methods', () => {
-    service.updatePaymentMethods({ yapePlin: { enabled: true, phoneNumber: '999888777', accountHolder: 'Nuevo Titular', instructions: 'Instrucciones' } });
-    expect(service.settings().paymentMethods.yapePlin.phoneNumber).toBe('999888777');
-    expect(toastMock.success).toHaveBeenCalled();
-  });
+    service.saveSettings(failingSettings, 'store-123');
+    expect(service.settings().soundVolume).toBe(20);
 
-  it('should update policies', () => {
-    service.updatePolicies({ requireCustomerDni: true });
-    expect(service.settings().policies.requireCustomerDni).toBe(true);
-    expect(toastMock.success).toHaveBeenCalled();
-  });
+    const req = httpTesting.expectOne(testUrl);
+    req.flush('Error de servidor', { status: 500, statusText: 'Internal Server Error' });
 
-  it('should reset whatsapp templates to default', () => {
-    service.updateWhatsAppTemplate('ready', 'Custom ready');
-    service.resetWhatsAppTemplates();
-    const ready = service.settings().whatsappTemplates.find((t) => t.id === 'ready');
-    expect(ready?.message).toContain('¡Buenas noticias');
-    expect(toastMock.info).toHaveBeenCalled();
+    expect(service.isSaving()).toBe(false);
+    expect(service.settings().soundVolume).toBe(originalSettings.soundVolume);
+    expect(mockToastService.error).toHaveBeenCalled();
   });
 });
-

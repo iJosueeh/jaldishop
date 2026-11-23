@@ -25,15 +25,19 @@ export interface CheckoutCustomerInfo {
 }
 
 export interface CheckoutItem {
-  id: string;
+  id?: string;
   productId: string;
   variantId?: string | null;
   productName: string;
+  presentationName?: string | null;
   variantName?: string | null;
+  sku?: string | null;
+  imageUrl?: string | null;
   quantity: number;
   unitPriceAmount: number;
   subtotalAmount: number;
   currency: string;
+  tracksInventory?: boolean;
 }
 
 export interface CheckoutPricing {
@@ -42,6 +46,7 @@ export interface CheckoutPricing {
   discountAmount: number;
   discountCode?: string | null;
   deliveryFeeAmount: number;
+  taxRate?: number | null;
   includedTaxAmount: number;
   totalAmount: number;
 }
@@ -112,7 +117,16 @@ export interface PendingPaymentCorrelation {
 
 export interface CustomerPaymentStatusResponse {
   paymentId: string;
-  paymentStatus: 'PENDING' | 'APPROVED' | 'FAILED' | 'PROCESSING';
+  paymentStatus:
+    | 'PENDING'
+    | 'APPROVED'
+    | 'FAILED'
+    | 'PROCESSING'
+    | 'IN_PROCESS'
+    | 'REJECTED'
+    | 'CANCELLED'
+    | 'REFUNDED'
+    | string;
   orderCreated: boolean;
   orderNumber: string | null;
   orderStatus: string | null;

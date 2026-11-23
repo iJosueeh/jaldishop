@@ -1,0 +1,256 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs font-sans animate-fade-in">
+    <div
+      class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-6 shadow-xl border border-outline-variant/30 flex flex-col gap-5 max-h-[90vh] overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="payout-dest-title"
+    >
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <ng-icon name="matAccountBalanceOutline" class="text-xl" />
+          </div>
+          <div>
+            <h3 id="payout-dest-title" class="text-base font-bold text-on-surface">
+              Cuenta de Abono para Liquidaciones
+            </h3>
+            <p class="text-xs text-on-surface-variant">Donde JaldiShop desembolsará tus ventas netas</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isSubmitting()"
+          class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+          aria-label="Cerrar modal"
+        >
+          <ng-icon name="matCloseOutline" class="text-lg" />
+        </button>
+      </div>
+
+      <!-- Alerta general de error (resumen del backend) -->
+      @if (generalError()) {
+        <div class="p-3 rounded-xl bg-error-container/40 border border-error/30 text-error text-xs flex items-center gap-2">
+          <ng-icon name="matInfoOutline" class="text-base shrink-0" />
+          <span>{{ generalError() }}</span>
+        </div>
+      }
+
+      <!-- Banner inteligente de Autocompletado con datos del titular -->
+      @if (hasAutofillData()) {
+        <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <ng-icon name="matWandStarsOutline" class="text-primary text-lg shrink-0" />
+            <div class="flex flex-col text-xs">
+              <span class="font-bold text-on-surface">Datos del titular detectados</span>
+              <span class="text-on-surface-variant text-[11px]">
+                {{ autofillSummary().name }}@if (autofillSummary().doc) { · {{ autofillSummary().doc }} }
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="autofillFromProfile()"
+            class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shrink-0 cursor-pointer shadow-2xs"
+          >
+            Autocompletar
+          </button>
+        </div>
+      }
+
+      <!-- Selector de Tipo de Canal -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+          Canal de Desembolso
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            (click)="channel.set('BANK_TRANSFER_CCI')"
+            class="p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-1.5"
+            [class.border-primary]="channel() === 'BANK_TRANSFER_CCI'"
+            [class.bg-primary/5]="channel() === 'BANK_TRANSFER_CCI'"
+            [class.text-primary]="channel() === 'BANK_TRANSFER_CCI'"
+            [class.border-outline-variant/40]="channel() !== 'BANK_TRANSFER_CCI'"
+            [class.text-on-surface-variant]="channel() !== 'BANK_TRANSFER_CCI'"
+          >
+            <ng-icon name="matAccountBalanceOutline" class="text-xl" />
+            <span>Transferencia CCI</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="channel.set('YAPE_PHONE')"
+            class="p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-1.5"
+            [class.border-[#742284]]="channel() === 'YAPE_PHONE'"
+            [class.bg-[#742284]/10]="channel() === 'YAPE_PHONE'"
+            [class.text-[#742284]]="channel() === 'YAPE_PHONE'"
+            [class.dark:text-[#c084fc]]="channel() === 'YAPE_PHONE'"
+            [class.border-outline-variant/40]="channel() !== 'YAPE_PHONE'"
+            [class.text-on-surface-variant]="channel() !== 'YAPE_PHONE'"
+          >
+            <div class="w-6 h-6 rounded-lg bg-[#742284] flex items-center justify-center text-[#00d4aa] text-xs font-black shadow-xs">
+              Y
+            </div>
+            <span>Billetera Yape</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campos según canal -->
+      @if (channel() === 'BANK_TRANSFER_CCI') {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1 sm:col-span-2">
+            <label class="text-xs font-bold text-on-surface-variant">Banco</label>
+            <select
+              [ngModel]="bankName()"
+              (ngModelChange)="bankName.set($event)"
+              class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="BCP">Banco de Crédito del Perú (BCP)</option>
+              <option value="BBVA">BBVA Perú</option>
+              <option value="Interbank">Interbank</option>
+              <option value="Scotiabank">Scotiabank</option>
+              <option value="BanBif">BanBif</option>
+              <option value="Banco de la Nación">Banco de la Nación</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1 sm:col-span-2">
+            <label class="text-xs font-bold text-on-surface-variant">Código de Cuenta Interbancario (CCI 20 dígitos)</label>
+            <input
+              type="text"
+              maxlength="20"
+              [ngModel]="cci()"
+              (ngModelChange)="cci.set($event)"
+              placeholder="00219400123456789012"
+              class="w-full px-3 py-2 rounded-xl bg-surface-container-low border text-xs font-mono font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+              [class.border-error]="fieldErrors()['accountCci']"
+              [class.border-outline-variant]="!fieldErrors()['accountCci']"
+            />
+            @if (fieldErrors()['accountCci']) {
+              <span class="text-[11px] text-error font-medium">{{ fieldErrors()['accountCci'] }}</span>
+            }
+          </div>
+
+          <div class="flex flex-col gap-1 sm:col-span-2">
+            <label class="text-xs font-bold text-on-surface-variant">Número de Cuenta Interno (Opcional)</label>
+            <input
+              type="text"
+              [ngModel]="accountNumber()"
+              (ngModelChange)="accountNumber.set($event)"
+              placeholder="194-12345678-0-12"
+              class="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant text-xs font-mono text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-bold text-on-surface-variant">Número de Celular Afiliado (9 dígitos)</label>
+          <input
+            type="text"
+            maxlength="9"
+            [ngModel]="phoneNumber()"
+            (ngModelChange)="phoneNumber.set($event)"
+            placeholder="987654321"
+            class="w-full px-3 py-2 rounded-xl bg-surface-container-low border text-xs font-mono font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+            [class.border-error]="fieldErrors()['phoneNumber']"
+            [class.border-outline-variant]="!fieldErrors()['phoneNumber']"
+          />
+          @if (fieldErrors()['phoneNumber']) {
+            <span class="text-[11px] text-error font-medium">{{ fieldErrors()['phoneNumber'] }}</span>
+          }
+        </div>
+      }
+
+      <!-- Titular y Documento Legal -->
+      <div class="pt-2 border-t border-outline-variant/20 flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-on-surface-variant">Nombre Completo o Razón Social del Titular</label>
+            <span class="text-[10px] text-on-surface-variant/70">Nombre legal, no comercial</span>
+          </div>
+          <input
+            type="text"
+            [ngModel]="accountHolderName()"
+            (ngModelChange)="accountHolderName.set($event)"
+            placeholder="Ej. Juan Pérez López o Mi Empresa S.A.C."
+            class="w-full px-3 py-2 rounded-xl bg-surface-container-low border text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+            [class.border-error]="fieldErrors()['accountHolderName']"
+            [class.border-outline-variant]="!fieldErrors()['accountHolderName']"
+          />
+          @if (fieldErrors()['accountHolderName']) {
+            <span class="text-[11px] text-error font-medium">{{ fieldErrors()['accountHolderName'] }}</span>
+          } @else {
+            <span class="text-[10px] text-on-surface-variant/70">
+              Debe coincidir exactamente con el titular de la cuenta bancaria o Yape para evitar rechazos en las transferencias.
+            </span>
+          }
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-1 flex flex-col gap-1">
+            <label class="text-xs font-bold text-on-surface-variant">Doc.</label>
+            <select
+              [ngModel]="docType()"
+              (ngModelChange)="docType.set($event)"
+              class="w-full px-2 py-2 rounded-xl bg-surface-container-low border border-outline-variant text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="DNI">DNI</option>
+              <option value="RUC">RUC</option>
+              <option value="CE">CE</option>
+            </select>
+          </div>
+
+          <div class="col-span-2 flex flex-col gap-1">
+            <label class="text-xs font-bold text-on-surface-variant">N° Documento</label>
+            <input
+              type="text"
+              maxlength="11"
+              [ngModel]="docNumber()"
+              (ngModelChange)="docNumber.set($event)"
+              placeholder="12345678"
+              class="w-full px-3 py-2 rounded-xl bg-surface-container-low border text-xs font-mono font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+              [class.border-error]="fieldErrors()['accountHolderDocNumber']"
+              [class.border-outline-variant]="!fieldErrors()['accountHolderDocNumber']"
+            />
+            @if (fieldErrors()['accountHolderDocNumber']) {
+              <span class="text-[11px] text-error font-medium">{{ fieldErrors()['accountHolderDocNumber'] }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones del Modal -->
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/20">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isSubmitting()"
+          class="px-4 py-2 rounded-xl border border-outline-variant text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          (click)="onSave()"
+          [disabled]="isSubmitting()"
+          class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+        >
+          @if (isSubmitting()) {
+            <ng-icon name="matSyncOutline" class="text-sm animate-spin" />
+            <span>Guardando...</span>
+          } @else {
+            <ng-icon name="matSaveOutline" class="text-sm" />
+            <span>Guardar Cuenta</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

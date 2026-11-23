@@ -2,6 +2,7 @@ import { Component, computed, inject, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth-service';
 import { ProfileService } from '../../../../core/services/profile.service';
+import { ContextSwitcher } from '../../../../shared/components/context-switcher/context-switcher';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matMenuOutline,
@@ -13,7 +14,7 @@ import {
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [RouterLink, NgIcon],
+  imports: [NgIcon, ContextSwitcher],
   providers: [
     provideIcons({
       matMenuOutline,

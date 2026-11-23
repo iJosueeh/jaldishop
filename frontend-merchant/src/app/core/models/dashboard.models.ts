@@ -1,3 +1,5 @@
+import { OrderPaymentBreakdownResponse } from './billing.models';
+
 export type OrderStatus =
   'CONFIRMED' | 'IN_PREPARATION' | 'READY' | 'OUT_FOR_DELIVERY' | 'COMPLETED' | 'CANCELLED';
 
@@ -33,6 +35,7 @@ export interface DashboardPriorityOrder {
   deliveryReference?: string;
   notes?: string;
   totalAmount?: number;
+  paymentBreakdown?: OrderPaymentBreakdownResponse;
   items?: OrderItemDetail[];
 }
 

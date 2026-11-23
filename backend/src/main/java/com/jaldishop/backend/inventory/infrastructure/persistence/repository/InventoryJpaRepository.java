@@ -40,6 +40,42 @@ public interface InventoryJpaRepository extends JpaRepository<InventoryEntity, U
             @Param("storeId") UUID storeId,
             @Param("variantId") UUID variantId,
             @Param("now") Instant now);
+
+    @Query("""
+            SELECT ir.variantId AS variantId, COALESCE(SUM(ir.quantity), 0) AS reservedQuantity
+            FROM InventoryReservationEntity ir, CapacityReservationEntity cr
+            WHERE ir.capacityReservationId = cr.id
+              AND ir.storeId = cr.storeId
+              AND ir.storeId = :storeId
+              AND ir.variantId IN :variantIds
+              AND ir.status = 'ACTIVE'
+              AND (
+                   (cr.status = 'ACTIVE' AND cr.expiresAt > :now)
+                OR (cr.status = 'PAYMENT_PROTECTED' AND cr.paymentProtectionExpiresAt IS NOT NULL AND cr.paymentProtectionExpiresAt > :now)
+              )
+            GROUP BY ir.variantId
+            """)
+    List<VariantReservedQuantityProjection> sumActiveReservedQuantitiesByStoreIdAndVariantIds(
+            @Param("storeId") UUID storeId,
+            @Param("variantIds") List<UUID> variantIds,
+            @Param("now") Instant now);
+
+    @Query("""
+            SELECT ir.variantId AS variantId, COALESCE(SUM(ir.quantity), 0) AS reservedQuantity
+            FROM InventoryReservationEntity ir, CapacityReservationEntity cr
+            WHERE ir.capacityReservationId = cr.id
+              AND ir.storeId = cr.storeId
+              AND ir.storeId = :storeId
+              AND ir.status = 'ACTIVE'
+              AND (
+                   (cr.status = 'ACTIVE' AND cr.expiresAt > :now)
+                OR (cr.status = 'PAYMENT_PROTECTED' AND cr.paymentProtectionExpiresAt IS NOT NULL AND cr.paymentProtectionExpiresAt > :now)
+              )
+            GROUP BY ir.variantId
+            """)
+    List<VariantReservedQuantityProjection> sumActiveReservedQuantitiesByStoreId(
+            @Param("storeId") UUID storeId,
+            @Param("now") Instant now);
     @Query("""
             SELECT COALESCE(SUM(ir.quantity), 0)
             FROM InventoryReservationEntity ir, CapacityReservationEntity cr

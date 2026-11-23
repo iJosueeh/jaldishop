@@ -233,7 +233,7 @@ describe('PriorityOrders', () => {
 
     const msg = component.cancelModalMessage();
     expect(msg).toContain('NO se restituirá la capacidad');
-    expect(msg).toContain('ni el inventario consumido en cocina');
+    expect(msg).toContain('ni el inventario consumido en preparación o empaque');
     expect(msg).toContain('RN-ORD-13');
     expect(msg).toContain('PENDING');
   });

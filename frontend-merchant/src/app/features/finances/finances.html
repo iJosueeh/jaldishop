@@ -1,0 +1,76 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-10">
+  <!-- Cabecera de Página -->
+  <app-finances-header />
+
+  <!-- Estado de Error Severo -->
+  @if (error() && !summary()) {
+    <div class="p-6 rounded-2xl bg-destructive/10 border border-destructive/20 flex flex-col items-center text-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-destructive/20 text-destructive flex items-center justify-center">
+        <ng-icon name="matErrorOutline" class="text-2xl" />
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-foreground">Error al cargar datos financieros</h3>
+        <p class="text-sm text-muted-foreground mt-1">{{ error() }}</p>
+      </div>
+      <button
+        type="button"
+        (click)="retry()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive text-destructive-foreground font-semibold text-xs hover:bg-destructive/90 transition-colors cursor-pointer"
+      >
+        <ng-icon name="matRefreshOutline" class="text-base" />
+        <span>Reintentar</span>
+      </button>
+    </div>
+  }
+
+  <!-- Estado de Carga Inicial -->
+  @if (isLoading() && !summary()) {
+    <div class="flex flex-col gap-6 animate-pulse">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="h-28 rounded-2xl bg-muted/50 border border-border"></div>
+        }
+      </div>
+      <div class="h-64 rounded-2xl bg-muted/50 border border-border"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="h-48 rounded-2xl bg-muted/50 border border-border"></div>
+        <div class="h-48 rounded-2xl bg-muted/50 border border-border"></div>
+      </div>
+    </div>
+  }
+
+  <!-- Contenido Principal cuando hay Datos -->
+  @if (summary()) {
+    <div class="flex flex-col gap-6">
+      <!-- 1. Tarjeta Principal de Liquidaciones & Saldo Disponible -->
+      <app-settlement-card
+        (openRequestModal)="isPayoutModalOpen.set(true)"
+        (openConfigDestination)="isDestinationModalOpen.set(true)"
+      />
+
+      <!-- 2. Tarjetas de KPIs Financieros & Comerciales -->
+      <app-finances-kpis />
+
+      <!-- 3. Ranking de Productos Más Vendidos -->
+      <app-top-products-card />
+
+      <!-- 4. Desglose Operativo & Transparencia Legal -->
+      <app-commercial-breakdown />
+
+      <!-- 5. Historial de Liquidaciones & Transferencias -->
+      <app-payout-batches-table />
+    </div>
+  }
+
+  <!-- Modal de Confirmación de Liquidación -->
+  <app-payout-request-modal
+    [isOpen]="isPayoutModalOpen()"
+    (closeModal)="isPayoutModalOpen.set(false)"
+  />
+
+  <!-- Modal de Configuración de Cuenta de Abono (Directo en Finanzas) -->
+  <app-payout-destination-modal
+    [isOpen]="isDestinationModalOpen()"
+    (closeModal)="onDestinationModalClosed()"
+  />
+</div>

@@ -42,7 +42,7 @@ describe('ProductService', () => {
       categoryId: 'cat-1',
       name: 'Cheesecake de Maracuyá',
       slug: 'cheesecake-maracuya',
-      description: 'Sin stock de pulpa',
+      description: 'Sin existencias en tienda',
       status: 'INACTIVE',
       minPrice: 72,
       hasStockIssue: true,
@@ -164,6 +164,18 @@ describe('ProductService', () => {
     expect(service.products().length).toBe(0);
     expect(service.categories().length).toBe(0);
     expect(service.searchQuery()).toBe('');
+  });
+
+  it('should compute attentionRequiredProducts, attentionMessage and ATTENTION filter', () => {
+    service.products.set(mockProducts);
+
+    expect(service.attentionRequiredProducts().length).toBe(1);
+    expect(service.attentionMessage()).toContain('1 producto pausado');
+    expect(service.attentionMessage()).toContain('Cheesecake de Maracuyá');
+
+    service.setStatusFilter('ATTENTION');
+    expect(service.filteredProducts().length).toBe(1);
+    expect(service.filteredProducts()[0].id).toBe('prod-3');
   });
 
   describe('createCategory()', () => {
@@ -558,6 +570,135 @@ describe('ProductService', () => {
       expect(updated?.minPrice).toBe(15.0);
       expect(updated?.maxPrice).toBe(70.0);
       expect(updated?.variants?.length).toBe(2);
+    });
+
+    it('getProductVariants debe aplicar Cache-First y no repetir petición si ya están en memoria', () => {
+      const mockVariants = [
+        {
+          id: 'v1',
+          productId: 'prod-1',
+          presentationName: 'Porción',
+          sku: 'P-01',
+          priceAmount: 12.0,
+          priceCurrency: 'PEN',
+          tracksInventory: false,
+          status: 'ACTIVE' as const,
+        },
+      ];
+
+      // Primera llamada: realiza petición HTTP
+      service.getProductVariants(mockStoreId, 'prod-1').subscribe((res) => {
+        expect(res).toEqual(mockVariants);
+      });
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/prod-1/variants`,
+      );
+      req.flush(mockVariants);
+
+      // Segunda llamada: debe retornar de caché sin llamadas HTTP
+      service.getProductVariants(mockStoreId, 'prod-1').subscribe((res) => {
+        expect(res).toEqual(mockVariants);
+      });
+      httpMock.expectNone(
+        `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/prod-1/variants`,
+      );
+    });
+
+    it('updateProduct debe aplicar actualización optimista inmediata y revertir si falla la red', () => {
+      service.products.set([
+        {
+          id: 'prod-opt',
+          storeId: mockStoreId,
+          categoryId: 'cat-1',
+          name: 'Polo Algodón Original',
+          slug: 'polo-algodon',
+          status: 'ACTIVE',
+        },
+      ]);
+
+      const updatePayload = {
+        name: 'Polo Algodón Modificado',
+        status: 'INACTIVE' as const,
+      };
+
+      service.updateProduct(mockStoreId, 'prod-opt', updatePayload).subscribe({
+        error: () => {},
+      });
+
+      // 0ms Optimistic Update: La señal ya debe reflejar el nuevo nombre y estado
+      expect(service.products().find((p) => p.id === 'prod-opt')?.name).toBe(
+        'Polo Algodón Modificado',
+      );
+      expect(service.products().find((p) => p.id === 'prod-opt')?.status).toBe('INACTIVE');
+
+      // Simulamos fallo en servidor
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/prod-opt`,
+      );
+      expect(req.request.method).toBe('PUT');
+      req.error(new ProgressEvent('Network error'));
+
+      // Rollback: El estado se restablece al original
+      expect(service.products().find((p) => p.id === 'prod-opt')?.name).toBe(
+        'Polo Algodón Original',
+      );
+      expect(service.products().find((p) => p.id === 'prod-opt')?.status).toBe('ACTIVE');
+    });
+
+    it('updateProductVariant debe aplicar actualización optimista inmediata y rollback en error', () => {
+      service.products.set([
+        {
+          id: 'prod-var-opt',
+          storeId: mockStoreId,
+          name: 'Aceite Vegetal 1L',
+          slug: 'aceite-vegetal-1l',
+          status: 'ACTIVE',
+          variants: [
+            {
+              id: 'var-opt-1',
+              productId: 'prod-var-opt',
+              presentationName: 'Botella 1L',
+              sku: 'ACE-01',
+              priceAmount: 10.0,
+              priceCurrency: 'PEN',
+              tracksInventory: true,
+              status: 'ACTIVE',
+            },
+          ],
+        },
+      ]);
+
+      // Consultar para poblar cache
+      service.getProductVariants(mockStoreId, 'prod-var-opt').subscribe();
+      // Ya vino de mock product o cache, no network
+
+      const updatePayload = {
+        presentationName: 'Botella 1L Promoción',
+        priceAmount: 8.5,
+        priceCurrency: 'PEN',
+        tracksInventory: true,
+      };
+
+      service
+        .updateProductVariant(mockStoreId, 'prod-var-opt', 'var-opt-1', updatePayload)
+        .subscribe({
+          error: () => {},
+        });
+
+      // 0ms Optimistic Update
+      const cached = service.getCachedVariants('prod-var-opt');
+      expect(cached?.[0].presentationName).toBe('Botella 1L Promoción');
+      expect(cached?.[0].priceAmount).toBe(8.5);
+
+      const req = httpMock.expectOne(
+        `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/prod-var-opt/variants/var-opt-1`,
+      );
+      req.error(new ProgressEvent('Network error'));
+
+      // Rollback
+      const rolledBack = service.getCachedVariants('prod-var-opt');
+      expect(rolledBack?.[0].presentationName).toBe('Botella 1L');
+      expect(rolledBack?.[0].priceAmount).toBe(10.0);
     });
   });
 });

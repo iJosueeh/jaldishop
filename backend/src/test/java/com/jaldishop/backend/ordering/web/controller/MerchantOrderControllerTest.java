@@ -1,6 +1,7 @@
 package com.jaldishop.backend.ordering.web.controller;
 
 import com.jaldishop.backend.ordering.application.service.ChangeOrderStatusService;
+import com.jaldishop.backend.ordering.application.service.CreateMerchantOrderService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderDetailService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderStatusCountsService;
 import com.jaldishop.backend.ordering.application.service.ListMerchantOrdersService;
@@ -50,6 +51,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,6 +73,9 @@ class MerchantOrderControllerTest {
     @Mock
     private GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService;
 
+    @Mock
+    private CreateMerchantOrderService createMerchantOrderService;
+
     private MockMvc mockMvc;
     private UUID storeId;
     private UUID merchantUserId;
@@ -87,7 +92,8 @@ class MerchantOrderControllerTest {
                 listMerchantOrdersService,
                 getMerchantOrderDetailService,
                 changeOrderStatusService,
-                getMerchantOrderStatusCountsService
+                getMerchantOrderStatusCountsService,
+                createMerchantOrderService
         );
 
         HandlerMethodArgumentResolver authPrincipalResolver = new HandlerMethodArgumentResolver() {
@@ -357,6 +363,30 @@ class MerchantOrderControllerTest {
     }
 
     @Test
+    @DisplayName("8b. PATCH con motivo: invoca servicio de aplicación pasando motivo de cancelación")
+    void shouldChangeOrderStatusWithReasonSuccessfully() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        MerchantOrderDetailResponse updatedDetail = createSampleDetail(orderId, OrderStatus.CANCELLED);
+
+        doNothing().when(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        doNothing().when(changeOrderStatusService).execute(orderId, OrderStatus.CANCELLED, storeId, "Insumos agotados");
+        when(getMerchantOrderDetailService.execute(orderId, storeId)).thenReturn(updatedDetail);
+
+        String body = "{\"status\":\"CANCELLED\",\"reason\":\"Insumos agotados\"}";
+
+        mockMvc.perform(patch("/api/v1/merchants/stores/{storeId}/orders/{orderId}/status", storeId, orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(orderId.toString()))
+                .andExpect(jsonPath("$.status").value("CANCELLED"));
+
+        verify(changeOrderStatusService).execute(orderId, OrderStatus.CANCELLED, storeId, "Insumos agotados");
+        verify(getMerchantOrderDetailService).execute(orderId, storeId);
+    }
+
+    @Test
     @DisplayName("9. PATCH idempotente: repetir el estado actual retorna 200 OK con detalle sin error")
     void shouldHandleIdempotentStatusChange() throws Exception {
         UUID orderId = UUID.randomUUID();
@@ -543,5 +573,103 @@ class MerchantOrderControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(getMerchantOrderStatusCountsService);
+    }
+
+    @Test
+    @DisplayName("18. Creación de pedido directo: retorna 201 Created cuando el payload es válido")
+    void shouldCreateOrderSuccessfully() throws Exception {
+        UUID variantId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        String jsonPayload = """
+            {
+                "deliveryMode": "PICKUP",
+                "customerName": "Juan Pérez",
+                "customerPhone": "987654321",
+                "customerEmail": "juan@example.com",
+                "paymentMethod": "CASH",
+                "items": [
+                    {
+                        "variantId": "%s",
+                        "quantity": 2,
+                        "unitPriceAmount": 25.50
+                    }
+                ]
+            }
+            """.formatted(variantId);
+
+        MerchantOrderDetailResponse mockDetail = new MerchantOrderDetailResponse(
+                orderId, "ORD-00000001", storeId, merchantUserId, null, null,
+                OrderStatus.CONFIRMED, DeliveryMode.PICKUP, LocalDate.now(), null, null,
+                "Juan Pérez", "987654321", "juan@example.com", null, null, null, null,
+                "PEN", new BigDecimal("51.00"), BigDecimal.ZERO, null, BigDecimal.ZERO,
+                BigDecimal.ZERO, new BigDecimal("51.00"), Instant.now(), Instant.now(),
+                List.of(), List.of()
+        );
+
+        when(createMerchantOrderService.execute(eq(storeId), eq(merchantUserId), any()))
+                .thenReturn(mockDetail);
+
+        mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/orders", storeId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPayload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(orderId.toString()))
+                .andExpect(jsonPath("$.orderNumber").value("ORD-00000001"))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andExpect(jsonPath("$.totalAmount").value(51.00));
+
+        verify(storeContextService).validateStoreOwnership(storeId, currentPrincipal);
+        verify(createMerchantOrderService).execute(eq(storeId), eq(merchantUserId), any());
+    }
+
+    @Test
+    @DisplayName("19. Creación de pedido directo: retorna 400 Bad Request si faltan campos obligatorios")
+    void shouldReturnBadRequestWhenCreateOrderPayloadIsInvalid() throws Exception {
+        String invalidJson = """
+            {
+                "customerName": "",
+                "customerPhone": "invalido",
+                "items": []
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/orders", storeId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(createMerchantOrderService);
+    }
+
+    @Test
+    @DisplayName("20. Creación de pedido directo: retorna 403 Forbidden si la tienda no pertenece al Merchant")
+    void shouldReturnForbiddenWhenStoreNotOwnedForCreateOrder() throws Exception {
+        UUID alienStoreId = UUID.randomUUID();
+        UUID variantId = UUID.randomUUID();
+        String jsonPayload = """
+            {
+                "deliveryMode": "PICKUP",
+                "customerName": "Juan Pérez",
+                "customerPhone": "987654321",
+                "paymentMethod": "CASH",
+                "items": [
+                    {
+                        "variantId": "%s",
+                        "quantity": 1
+                    }
+                ]
+            }
+            """.formatted(variantId);
+
+        doThrow(new AccessDeniedException("No tiene permisos para operar sobre una tienda ajena."))
+                .when(storeContextService).validateStoreOwnership(alienStoreId, currentPrincipal);
+
+        mockMvc.perform(post("/api/v1/merchants/stores/{storeId}/orders", alienStoreId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPayload))
+                .andExpect(status().isForbidden());
+
+        verify(storeContextService).validateStoreOwnership(alienStoreId, currentPrincipal);
+        verifyNoInteractions(createMerchantOrderService);
     }
 }

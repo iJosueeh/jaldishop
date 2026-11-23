@@ -142,6 +142,7 @@ export function mapDetailToDashboardPriorityOrder(
     status: detail.status,
     notes: undefined,
     totalAmount: typeof detail.totalAmount === 'number' ? detail.totalAmount : Number(detail.totalAmount) || 0,
+    paymentBreakdown: detail.paymentBreakdown,
     items,
   };
 }

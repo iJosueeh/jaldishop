@@ -1,0 +1,159 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+    <!-- Backdrop oscuro con blur -->
+    <div
+      (click)="dismiss()"
+      class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+    ></div>
+
+    <!-- Contenedor del Modal -->
+    <div
+      class="relative w-full max-w-lg rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xl z-10 overflow-hidden font-sans space-y-5 p-6"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Cabecera -->
+      <div class="flex items-start justify-between gap-4 border-b border-outline-variant/20 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+            <ng-icon name="matBoltOutline" class="text-[20px]" />
+          </div>
+          <div>
+            <h3 class="font-black text-base text-on-surface">
+              Conciliación & Diagnóstico de Pagos
+            </h3>
+            <p class="text-xs text-on-surface-variant font-medium">
+              Investiga transacciones huérfanas en Mercado Pago y fuerza la sincronización de órdenes
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+          aria-label="Cerrar modal"
+        >
+          <ng-icon name="matCloseOutline" class="text-[20px]" />
+        </button>
+      </div>
+
+      <!-- Formulario de Entrada -->
+      <div class="space-y-3">
+        <label for="attemptIdInput" class="block text-xs font-bold text-on-surface">
+          ID de Intento de Pago (Attempt ID UUID):
+        </label>
+        <div class="relative">
+          <input
+            id="attemptIdInput"
+            type="text"
+            [ngModel]="attemptId()"
+            (ngModelChange)="attemptId.set($event)"
+            placeholder="ej. e63f25c8-89c2-4a0b-93f4-123456789abc"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/40 text-xs font-mono font-bold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary transition-colors"
+          />
+        </div>
+        <p class="text-[11px] text-on-surface-variant">
+          Pega el identificador del intento de pago reportado con desfase entre pasarela y pedido.
+        </p>
+
+        @if (errorMessage()) {
+          <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+            <ng-icon name="matWarningOutline" class="text-[16px] shrink-0" />
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Resultado de Investigación -->
+      @if (investigationResult(); as inv) {
+        <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/30 space-y-2.5 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-[11px] uppercase tracking-wider text-on-surface-variant">
+              Diagnóstico en Pasarela
+            </span>
+            <span
+              class="px-2 py-0.5 rounded-md font-mono font-bold text-[10px] uppercase"
+              [class.bg-emerald-500/10]="inv.status === 'SUCCESS_CONFIRMED' || inv.providerStatus === 'approved'"
+              [class.text-emerald-700]="inv.status === 'SUCCESS_CONFIRMED' || inv.providerStatus === 'approved'"
+              [class.bg-amber-500/10]="inv.status !== 'SUCCESS_CONFIRMED'"
+              [class.text-amber-700]="inv.status !== 'SUCCESS_CONFIRMED'"
+            >
+              {{ inv.status || 'PENDIENTE' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-on-surface font-medium">
+            <div>
+              <span class="text-on-surface-variant text-[11px] block">Estado Pasarela:</span>
+              <span class="font-bold">{{ inv.providerStatus || 'Sin respuesta' }}</span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant text-[11px] block">Monto Capturado:</span>
+              <span class="font-mono font-bold">{{ inv.currency || 'PEN' }} {{ inv.amount || '--' }}</span>
+            </div>
+          </div>
+
+          @if (inv.detail) {
+            <p class="text-xs text-on-surface bg-surface-container-high/40 p-2.5 rounded-xl border border-outline-variant/20 font-mono">
+              {{ inv.detail }}
+            </p>
+          }
+        </div>
+      }
+
+      <!-- Resultado de Conciliación Exitosa -->
+      @if (reconciliationResult(); as rec) {
+        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1.5">
+          <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-extrabold text-sm">
+            <ng-icon name="matCheckCircleOutline" class="text-[18px]" />
+            <span>{{ rec.status }}</span>
+          </div>
+          <p class="text-emerald-800 dark:text-emerald-300 font-medium">
+            {{ rec.detail }}
+          </p>
+        </div>
+      }
+
+      <!-- Acciones de Pie -->
+      <div class="flex items-center justify-between gap-3 pt-2 border-t border-outline-variant/20">
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors cursor-pointer"
+        >
+          Cerrar
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            (click)="onInvestigate()"
+            [disabled]="!attemptId().trim() || isInvestigating() || isReconciling()"
+            class="px-3.5 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest disabled:opacity-40 text-on-surface text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon
+              name="matSearchOutline"
+              class="text-[16px]"
+              [class.animate-spin]="isInvestigating()"
+            />
+            <span>{{ isInvestigating() ? 'Investigando...' : 'Diagnosticar' }}</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="onReconcile()"
+            [disabled]="!attemptId().trim() || isReconciling() || isInvestigating()"
+            class="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-40 text-on-primary text-xs font-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <ng-icon
+              name="matBoltOutline"
+              class="text-[16px]"
+              [class.animate-spin]="isReconciling()"
+            />
+            <span>{{ isReconciling() ? 'Conciliando...' : 'Forzar Conciliación' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

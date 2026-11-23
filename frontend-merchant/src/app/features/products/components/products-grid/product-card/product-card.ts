@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matAlarmOutline,
-  matCookieOutline,
   matEditOutline,
   matInventory2Outline,
-  matMoreVertOutline,
+  matOpenInNewOutline,
   matScheduleOutline,
   matTakeoutDiningOutline,
   matTuneOutline,
@@ -23,10 +22,9 @@ import { Product } from '../../../../../core/models/product.models';
   viewProviders: [
     provideIcons({
       matAlarmOutline,
-      matCookieOutline,
       matEditOutline,
       matInventory2Outline,
-      matMoreVertOutline,
+      matOpenInNewOutline,
       matScheduleOutline,
       matTakeoutDiningOutline,
       matTuneOutline,
@@ -44,6 +42,49 @@ export class ProductCard {
   editProduct = output<Product>();
   adjustQuota = output<Product>();
   toggleStatus = output<Product>();
+  viewInventory = output<Product>();
+  openPreview = output<Product>();
+
+  onCardClick(): void {
+    this.editProduct.emit(this.product());
+  }
+
+  onOpenPreview(event?: Event): void {
+    event?.stopPropagation();
+    this.openPreview.emit(this.product());
+  }
+
+  onToggleStatus(event?: Event): void {
+    event?.stopPropagation();
+    this.toggleStatus.emit(this.product());
+  }
+
+  onAdjustQuota(event?: Event): void {
+    event?.stopPropagation();
+    this.adjustQuota.emit(this.product());
+  }
+
+  onEdit(event?: Event): void {
+    event?.stopPropagation();
+    this.editProduct.emit(this.product());
+  }
+
+  readonly capacityBars = computed(() => {
+    const p = this.product();
+    if (p.quotaToday && p.quotaToday.total > 0) {
+      const ratio = Math.max(0, Math.min(1, p.quotaToday.current / p.quotaToday.total));
+      const filled = Math.round(ratio * 4);
+      return [1, 2, 3, 4].map((bar) => ({
+        active: bar <= filled,
+        warning: ratio >= 0.8,
+      }));
+    }
+    const isAvailable = p.status === 'ACTIVE' && !p.hasStockIssue;
+    return [1, 2, 3, 4].map(() => ({
+      active: isAvailable,
+      warning: false,
+    }));
+  });
 
   readonly displayPrice = computed(() => {
     const p = this.product();
@@ -67,6 +108,56 @@ export class ProductCard {
   });
 
   readonly isPaused = computed(() => this.product().status === 'INACTIVE');
+
+  readonly stockInfo = computed(() => {
+    const p = this.product();
+    if (p.hasStockIssue) {
+      return {
+        isOutOfStock: true,
+        isControlled: true,
+        label: 'Agotado',
+        detail: p.stockIssueMessage || 'Sin existencias en tienda',
+      };
+    }
+
+    const tracksStock =
+      (p.variants && p.variants.some((v) => v.tracksInventory)) || p.stockCount !== undefined;
+
+    if (tracksStock) {
+      const qty = p.stockCount ?? p.preparedCount ?? 0;
+      if (qty <= 0) {
+        return {
+          isOutOfStock: true,
+          isControlled: true,
+          label: 'Agotado',
+          detail: 'Sin existencias en tienda',
+        };
+      }
+      return {
+        isOutOfStock: false,
+        isControlled: true,
+        label: `${qty} disponibles`,
+        detail: 'Existencias físicas en tienda',
+        count: qty,
+      };
+    }
+
+    if (p.quotaToday && p.quotaToday.total > 0) {
+      return {
+        isOutOfStock: false,
+        isControlled: true,
+        label: `Cupo hoy: ${p.quotaToday.current} de ${p.quotaToday.total}`,
+        detail: 'Capacidad diaria programada',
+      };
+    }
+
+    return {
+      isOutOfStock: false,
+      isControlled: false,
+      label: 'Bajo pedido / Sin límite',
+      detail: 'Disponible para venta continua',
+    };
+  });
 
   readonly mainImageUrl = computed(() => {
     const p = this.product();

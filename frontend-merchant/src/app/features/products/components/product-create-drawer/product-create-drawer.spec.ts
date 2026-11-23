@@ -8,6 +8,7 @@ import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
+import { VariantInventoryCoordinatorService } from '../../../../core/services/variant-inventory-coordinator.service';
 import { of, throwError } from 'rxjs';
 import { Product, ProductCategory } from '../../../../core/models/product.models';
 import { provideHttpClient } from '@angular/common/http';
@@ -30,6 +31,11 @@ describe('ProductCreateDrawer', () => {
     uploadPendingImages: ReturnType<typeof vi.fn>;
     validateImageFile: ReturnType<typeof vi.fn>;
   };
+  let coordinatorMock: {
+    createVariantWithInventory: ReturnType<typeof vi.fn>;
+    initializePendingInventory: ReturnType<typeof vi.fn>;
+    validateInventoryParameters: ReturnType<typeof vi.fn>;
+  };
 
   const mockCategories: ProductCategory[] = [
     { id: 'cat-1', name: 'Tortas' },
@@ -51,6 +57,11 @@ describe('ProductCreateDrawer', () => {
       uploadPendingImages: vi.fn().mockImplementation((imgs) => of(imgs)),
       validateImageFile: vi.fn().mockReturnValue({ valid: true }),
     };
+    coordinatorMock = {
+      createVariantWithInventory: vi.fn(),
+      initializePendingInventory: vi.fn().mockReturnValue(of({ success: true })),
+      validateInventoryParameters: vi.fn().mockReturnValue({ valid: true, error: null }),
+    };
 
     await TestBed.configureTestingModule({
       imports: [ProductCreateDrawer],
@@ -61,6 +72,7 @@ describe('ProductCreateDrawer', () => {
         { provide: StoreService, useValue: storeServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: MediaUploadService, useValue: mediaUploadServiceMock },
+        { provide: VariantInventoryCoordinatorService, useValue: coordinatorMock },
       ],
     }).compileComponents();
 
@@ -179,6 +191,7 @@ describe('ProductCreateDrawer', () => {
     component.priceAmount.set(18.0);
     component.description.set('Base crocante de galleta');
     component.tracksInventory.set(true);
+    component.initialStock.set(20);
 
     component.onSubmit();
 
@@ -189,6 +202,7 @@ describe('ProductCreateDrawer', () => {
         name: 'Cheesecake de Frutos Rojos',
         priceAmount: 18.0,
         tracksInventory: true,
+        initialStock: 20,
         sku: 'CHEE-FRUT-ROJO-01',
       }),
     );
@@ -302,5 +316,126 @@ describe('ProductCreateDrawer', () => {
     expect(component.formVariants().length).toBe(1);
     component.removeVariantOption(0);
     expect(component.formVariants().length).toBe(1);
+  });
+
+  it('debe rechazar canSubmit si tracksInventory=true y el stock inicial es nulo, negativo o decimal', () => {
+    component.onNameChange('Pan Ciabatta');
+    component.selectedCategoryId.set('cat-1');
+    component.priceAmount.set(5.0);
+    component.tracksInventory.set(true);
+
+    // Stock nulo
+    component.initialStock.set(null);
+    expect(component.canSubmit()).toBe(false);
+
+    // Stock negativo
+    component.initialStock.set(-2);
+    expect(component.canSubmit()).toBe(false);
+
+    // Stock decimal
+    component.initialStock.set(3.5);
+    expect(component.canSubmit()).toBe(false);
+
+    // Stock entero cero o positivo -> válido
+    component.initialStock.set(0);
+    expect(component.canSubmit()).toBe(true);
+
+    component.initialStock.set(15);
+    expect(component.canSubmit()).toBe(true);
+  });
+
+  it('debe aceptar umbral de stock cero o nulo y rechazar umbral negativo o decimal', () => {
+    component.onNameChange('Pan Ciabatta');
+    component.selectedCategoryId.set('cat-1');
+    component.priceAmount.set(5.0);
+    component.tracksInventory.set(true);
+    component.initialStock.set(10);
+
+    // Umbral nulo -> válido
+    component.lowStockThreshold.set(null);
+    expect(component.canSubmit()).toBe(true);
+
+    // Umbral cero -> válido
+    component.lowStockThreshold.set(0);
+    expect(component.canSubmit()).toBe(true);
+
+    // Umbral positivo -> válido
+    component.lowStockThreshold.set(5);
+    expect(component.canSubmit()).toBe(true);
+
+    // Umbral negativo -> inválido
+    component.lowStockThreshold.set(-1);
+    expect(component.canSubmit()).toBe(false);
+
+    // Umbral decimal -> inválido
+    component.lowStockThreshold.set(2.5);
+    expect(component.canSubmit()).toBe(false);
+  });
+
+  it('debe manejar fallo en inicialización de stock conservando el producto y permitir reintento sin duplicación', () => {
+    const createdProduct: Product = {
+      id: 'prod-stock-fail',
+      storeId: 'store-uuid-1',
+      name: 'Torta de Fresa',
+      slug: 'torta-de-fresa',
+      status: 'ACTIVE',
+      variants: [
+        {
+          id: 'var-1',
+          productId: 'prod-stock-fail',
+          presentationName: 'Unidad Estándar',
+          sku: 'TORT-FRES-01',
+          priceAmount: 40.0,
+          priceCurrency: 'PEN',
+          tracksInventory: true,
+          status: 'ACTIVE',
+        },
+      ],
+    };
+
+    productServiceMock.createProductWithDefaultVariant.mockReturnValue(of(createdProduct));
+    // Simular que el inventario falla en la primera llamada
+    coordinatorMock.initializePendingInventory.mockReturnValue(
+      of({
+        success: false,
+        variant: createdProduct.variants![0],
+        inventory: null,
+        stepFailed: 'STOCK',
+        errorMessage: 'Fallo al conectar con inventario',
+      }),
+    );
+
+    component.onNameChange('Torta de Fresa');
+    component.selectedCategoryId.set('cat-1');
+    component.priceAmount.set(40.0);
+    component.tracksInventory.set(true);
+    component.initialStock.set(10);
+
+    component.onSubmit();
+
+    expect(component.pendingCreatedProduct()).toEqual(createdProduct);
+    expect(toastServiceMock.error).toHaveBeenCalled();
+
+    // Reintento: productService.createProductWithDefaultVariant NO debe volver a llamarse
+    productServiceMock.createProductWithDefaultVariant.mockClear();
+    coordinatorMock.initializePendingInventory.mockReturnValue(
+      of({
+        success: true,
+        variant: createdProduct.variants![0],
+        inventory: { physicalQuantity: 10 } as any,
+        stepFailed: null,
+        errorMessage: null,
+      }),
+    );
+
+    component.retryPendingProductInventory();
+
+    expect(productServiceMock.createProductWithDefaultVariant).not.toHaveBeenCalled();
+    expect(coordinatorMock.initializePendingInventory).toHaveBeenCalledWith(
+      createdProduct.variants![0],
+      10,
+      null,
+    );
+    expect(component.pendingCreatedProduct()).toBeNull();
   });
 });

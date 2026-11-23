@@ -19,6 +19,7 @@ describe('addressMapper', () => {
     province: 'LIMA',
     district: 'MIRAFLORES',
     ubigeoCode: '150122',
+    streetAddress: 'Av. Larco 1234, Dpto 402',
     addressLine: 'Av. Larco 1234, Dpto 402',
     reference: 'Frente al parque Kennedy',
     latitude: -12.1215,
@@ -48,11 +49,11 @@ describe('addressMapper', () => {
     expect(formatted).toBe('Calle Sol 100, OLLANTAYTAMBO, URUBAMBA, CUSCO');
   });
 
-  it('throws an explicit error without silent truncation when address exceeds 500 characters', () => {
-    const hugeLine = 'A'.repeat(510);
+  it('throws an explicit error without silent truncation when address exceeds 300 characters', () => {
+    const hugeLine = 'A'.repeat(310);
     expect(() =>
       formatDeliveryAddressString(hugeLine, 'MIRAFLORES', 'LIMA', 'LIMA')
-    ).toThrow(/excede el límite máximo permitido de 500 caracteres/i);
+    ).toThrow(/excede el límite máximo permitido de 300 caracteres/i);
   });
 
   it('throws an explicit error without silent truncation when reference exceeds 300 characters', () => {

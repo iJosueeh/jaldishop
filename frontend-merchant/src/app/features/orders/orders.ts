@@ -4,6 +4,7 @@ import { CapacityService } from '../../core/services/capacity.service';
 import { StoreService } from '../../core/services/store.service';
 import { StompService } from '../../core/services/stomp.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ProductService } from '../../core/services/product.service';
 import { MerchantOrder, OrderFilterTab, OrderStatus } from '../../core/models/order.models';
 import { OrdersHeader } from './components/orders-header/orders-header';
 import { OrdersAlertBanner } from './components/orders-alert-banner/orders-alert-banner';
@@ -13,6 +14,8 @@ import { OrdersGrid } from './components/orders-grid/orders-grid';
 import { Pagination } from '../../shared/components/pagination/pagination';
 import { OrderDetailsDrawer } from '../dashboards/components/order-details-drawer/order-details-drawer';
 import { ConfirmModal } from '../../shared/components/confirm-modal/confirm-modal';
+import { CreateOrderModal } from '../../shared/components/create-order-modal/create-order-modal';
+import { ThermalTicketModal } from '../../shared/components/thermal-ticket-modal/thermal-ticket-modal';
 import { DashboardPriorityOrder } from '../../core/models/dashboard.models';
 
 @Component({
@@ -25,6 +28,8 @@ import { DashboardPriorityOrder } from '../../core/models/dashboard.models';
     Pagination,
     OrderDetailsDrawer,
     ConfirmModal,
+    CreateOrderModal,
+    ThermalTicketModal,
   ],
   selector: 'app-orders',
   styleUrl: './orders.css',
@@ -35,10 +40,16 @@ export class Orders implements OnInit {
   readonly capacityService = inject(CapacityService);
   readonly storeService = inject(StoreService);
   readonly stompService = inject(StompService);
+  private readonly productService = inject(ProductService);
   private readonly toastService = inject(ToastService);
 
   readonly isCancelModalOpen = signal<boolean>(false);
   readonly orderToCancel = signal<MerchantOrder | DashboardPriorityOrder | null>(null);
+
+  readonly isTicketModalOpen = signal<boolean>(false);
+  readonly ticketOrder = signal<any | null>(null);
+  readonly ticketOrdersBatch = signal<any[]>([]);
+  readonly currentStoreName = computed(() => this.storeService.currentStore()?.name || 'MI TIENDA');
 
   readonly orders = computed(() => this.orderService.filteredOrders());
   readonly activeTab = computed(() => this.orderService.activeTab());
@@ -101,6 +112,7 @@ export class Orders implements OnInit {
       this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), store.id).subscribe();
       this.orderService.loadOrderCounts(store.id).subscribe();
       this.capacityService.loadDailyOccupancy(store.id).subscribe();
+      this.productService.loadProducts(store.id).subscribe();
     } else {
       this.storeService.getMyStore().subscribe({
         next: (s) => {
@@ -109,6 +121,7 @@ export class Orders implements OnInit {
             this.orderService.loadOrders(0, this.pageSize(), this.activeTab(), s.id).subscribe();
             this.orderService.loadOrderCounts(s.id).subscribe();
             this.capacityService.loadDailyOccupancy(s.id).subscribe();
+            this.productService.loadProducts(s.id).subscribe();
           }
         },
       });
@@ -137,7 +150,7 @@ export class Orders implements OnInit {
       return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Se liberará el cupo de capacidad y se restituirá el inventario de los productos según RN-ORD-13. Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
     }
     if (order.status === 'IN_PREPARATION') {
-      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en cocina (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
+      return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Al encontrarse en preparación, NO se restituirá la capacidad del turno ni el inventario consumido en preparación o empaque (RN-ORD-13). Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
     }
     return `¿Estás seguro de cancelar el pedido ${order.orderNumber}? Si contaba con pago aprobado, se registrará la solicitud de reembolso en estado PENDING (sujeto a procesamiento, no inmediato).`;
   });
@@ -152,7 +165,8 @@ export class Orders implements OnInit {
       !this.orderService.isUpdating(order.id) &&
       !this.orderService.isPendingVerification(order.id)
     ) {
-      this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe();
+      const reason = 'Cancelado por el comercio desde el panel operativo';
+      this.orderService.updateOrderStatus(order.id, 'CANCELLED', undefined, reason).subscribe();
     }
   }
 
@@ -227,10 +241,29 @@ export class Orders implements OnInit {
   }
 
   onAdjustPace(): void {
-    this.toastService.info('Ajuste de ritmo de cocina disponible en Próximas Mejoras.');
+    this.toastService.info('Ajuste de ritmo operativo disponible en Próximas Mejoras.');
   }
 
   onPrintOrders(): void {
-    window.print();
+    const list = this.orders();
+    if (!list || list.length === 0) {
+      this.toastService.warning('No hay pedidos en la vista actual para imprimir.');
+      return;
+    }
+    this.ticketOrder.set(null);
+    this.ticketOrdersBatch.set(list);
+    this.isTicketModalOpen.set(true);
+  }
+
+  onPrintSingleTicket(order: any): void {
+    this.ticketOrdersBatch.set([]);
+    this.ticketOrder.set(order);
+    this.isTicketModalOpen.set(true);
+  }
+
+  onCloseTicketModal(): void {
+    this.isTicketModalOpen.set(false);
+    this.ticketOrder.set(null);
+    this.ticketOrdersBatch.set([]);
   }
 }
