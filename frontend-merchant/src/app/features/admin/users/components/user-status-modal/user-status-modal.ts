@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { AdminUserSummary } from '../../../../../core/models/admin.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -23,7 +23,17 @@ import {
 export class UserStatusModal {
   readonly isOpen = input<boolean>(false);
   readonly user = input<AdminUserSummary | null>(null);
+  readonly isClosing = signal<boolean>(false);
 
   readonly confirm = output<AdminUserSummary>();
   readonly cancel = output<void>();
+
+  handleCancel(): void {
+    if (this.isClosing()) return;
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.isClosing.set(false);
+      this.cancel.emit();
+    }, 200);
+  }
 }

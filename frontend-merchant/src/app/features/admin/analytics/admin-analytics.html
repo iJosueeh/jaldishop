@@ -1,0 +1,228 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans">
+  <!-- Encabezado de Analíticas & Métricas -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">
+        Analíticas & Reportes Globales
+      </h1>
+      <p class="text-xs sm:text-sm text-on-surface-variant font-medium mt-0.5">
+        Volumen transaccional, descomposición de ingresos y rendimiento del marketplace
+      </p>
+    </div>
+
+    <!-- Controles de Período y Exportación -->
+    <div class="flex items-center gap-2.5 flex-wrap self-start md:self-auto">
+      <!-- Selector de Rango (Pills) -->
+      <div class="flex items-center gap-1 p-1 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs">
+        <button
+          type="button"
+          (click)="setRange('7D')"
+          class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '7D'"
+          [class.text-on-primary]="selectedRange() === '7D'"
+          [class.text-on-surface-variant]="selectedRange() !== '7D'"
+        >
+          7 Días
+        </button>
+        <button
+          type="button"
+          (click)="setRange('30D')"
+          class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '30D'"
+          [class.text-on-primary]="selectedRange() === '30D'"
+          [class.text-on-surface-variant]="selectedRange() !== '30D'"
+        >
+          30 Días
+        </button>
+        <button
+          type="button"
+          (click)="setRange('90D')"
+          class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '90D'"
+          [class.text-on-primary]="selectedRange() === '90D'"
+          [class.text-on-surface-variant]="selectedRange() !== '90D'"
+        >
+          90 Días
+        </button>
+      </div>
+
+      <!-- Exportar Reporte Ejecutivo PDF -->
+      <button
+        type="button"
+        (click)="exportPdf()"
+        [disabled]="adminService.isExportingPdf()"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:opacity-50 text-on-surface text-xs font-bold border border-outline-variant/30 transition-colors shadow-2xs cursor-pointer"
+        title="Descargar reporte oficial en PDF"
+      >
+        <ng-icon
+          name="matPictureAsPdfOutline"
+          class="text-[16px] text-rose-600"
+          [class.animate-pulse]="adminService.isExportingPdf()"
+        />
+        <span>{{ adminService.isExportingPdf() ? 'Generando...' : 'Exportar PDF' }}</span>
+      </button>
+
+      <!-- Sincronizar Datos -->
+      <button
+        type="button"
+        (click)="loadData()"
+        [disabled]="adminService.isLoadingAnalytics()"
+        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-50 text-xs font-bold transition-colors shadow-2xs cursor-pointer"
+        title="Actualizar métricas"
+      >
+        <ng-icon
+          name="matRefreshOutline"
+          class="text-[16px]"
+          [class.animate-spin]="adminService.isLoadingAnalytics()"
+        />
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Métricas Rápidas Consolidadas -->
+  @let analytics = adminService.analyticsSummary();
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- GMV Histórico -->
+    <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">GMV Transaccionado</span>
+        <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+          <ng-icon name="matTrendingUpOutline" class="text-[18px]" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-on-surface font-mono tabular-nums">
+          S/ {{ (analytics?.commercial?.historicalConfirmedGmv || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+        <p class="text-xs text-on-surface-variant mt-1">
+          <span class="font-bold text-on-surface">{{ analytics?.commercial?.historicalConfirmedOrdersCount || 0 }}</span> pedidos confirmados
+        </p>
+      </div>
+    </div>
+
+    <!-- Ingresos Netos de Pasarela -->
+    <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Flujo Financiero Neto</span>
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+          <ng-icon name="matAccountBalanceWalletOutline" class="text-[18px]" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-on-surface font-mono tabular-nums">
+          S/ {{ (analytics?.financial?.netFinancialInflow || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+        <p class="text-xs text-on-surface-variant mt-1">
+          <span class="font-bold text-emerald-600">{{ analytics?.financial?.approvedPaymentsCount || 0 }}</span> cobros aprobados
+        </p>
+      </div>
+    </div>
+
+    <!-- Ticket Promedio -->
+    <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ticket Promedio</span>
+        <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+          <ng-icon name="matAttachMoneyOutline" class="text-[18px]" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-on-surface font-mono tabular-nums">
+          S/ {{ (analytics?.commercial?.averageTicket || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+        <p class="text-xs text-on-surface-variant mt-1">
+          Promedio por pedido confirmado
+        </p>
+      </div>
+    </div>
+
+    <!-- Envíos y Logística -->
+    <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tarifas de Delivery</span>
+        <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <ng-icon name="matLocalShippingOutline" class="text-[18px]" />
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-on-surface font-mono tabular-nums">
+          S/ {{ (analytics?.commercial?.totalDeliveryFees || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+        <p class="text-xs text-on-surface-variant mt-1">
+          Volumen logístico acumulado
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila de Gráficos Dinámicos (Área + Donut) -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <!-- Gráfico 1: Evolución Temporal GMV (2 columnas) -->
+    <div class="lg:col-span-2 p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-base font-bold text-on-surface">Evolución Transaccional del Período</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Volumen de ventas brutas (GMV) vs Flujo neto</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="flex items-center gap-1.5 font-medium text-on-surface-variant">
+            <span class="w-3 h-3 rounded-full bg-indigo-600"></span> GMV Bruto
+          </span>
+          <span class="flex items-center gap-1.5 font-medium text-on-surface-variant">
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Flujo Neto
+          </span>
+        </div>
+      </div>
+
+      <app-area-trend-chart [data]="trendChartData()" />
+    </div>
+
+    <!-- Gráfico 2: Desglose Proporcional (1 columna) -->
+    <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between">
+      <div class="mb-4">
+        <h2 class="text-base font-bold text-on-surface">Distribución de Ingresos</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">Comercios vs Envíos vs JaldiShop</p>
+      </div>
+
+      <app-donut-distribution-chart
+        [segments]="distributionSegments()"
+        title="Volumen"
+      />
+    </div>
+  </div>
+
+  <!-- Fila de Ranking de Tiendas por Ventas -->
+  <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+          <ng-icon name="matStorefrontOutline" class="text-[20px]" />
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-on-surface">Rendimiento por Tiendas Líderes</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Top comercios clasificados por volumen de ventas transaccionado</p>
+        </div>
+      </div>
+    </div>
+
+    @if (storeRankingItems().length > 0) {
+      <app-horizontal-bar-chart
+        [items]="storeRankingItems()"
+        metricName="GMV Total"
+        (selectItem)="onSelectStoreById($event)"
+      />
+    } @else {
+      <div class="py-12 text-center text-on-surface-variant text-xs">
+        No hay datos de ranking de tiendas disponibles para este rango.
+      </div>
+    }
+  </div>
+
+  <!-- Drawer de Detalle de Tienda (Drilldown) -->
+  <app-admin-store-drawer
+    [isOpen]="isDrawerOpen()"
+    [store]="selectedStore()"
+    (close)="closeDrawer()"
+  />
+</div>

@@ -8,7 +8,7 @@ import { AddressModal } from './AddressModal';
 import { DeleteAddressModal } from './DeleteAddressModal';
 import { Button } from '@/shared/components/ui/Button';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { MapPin, Plus, AlertCircle, Sparkles, ShieldCheck } from 'lucide-react';
+import { MapPin, Plus, AlertCircle, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AddressesView() {

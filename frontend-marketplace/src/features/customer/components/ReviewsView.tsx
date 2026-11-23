@@ -8,18 +8,35 @@ import {
   Star,
   Store as StoreIcon,
   Pencil,
+  Trash2,
+  AlertTriangle,
+  Loader2,
   ShieldCheck,
   Package,
   Sparkles,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCustomerReviews } from '../hooks/useCustomerReviews';
 import { ReviewModal } from './ReviewModal';
 import type { CustomerReview } from '../types/customer.types';
 import { cn } from '@/shared/utils/cn';
 
 export function ReviewsView() {
-  const { reviews, isLoading, isError, refetch } = useCustomerReviews();
+  const { reviews, isLoading, isError, refetch, deleteReview, isDeleting } = useCustomerReviews();
   const [editingReview, setEditingReview] = useState<CustomerReview | null>(null);
+  const [reviewToDelete, setReviewToDelete] = useState<CustomerReview | null>(null);
+
+  const handleConfirmDelete = async () => {
+    if (!reviewToDelete) return;
+    try {
+      await deleteReview(reviewToDelete.productId);
+      toast.success('Reseña eliminada correctamente');
+      setReviewToDelete(null);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'No se pudo eliminar la reseña';
+      toast.error(msg);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -151,15 +168,27 @@ export function ReviewsView() {
                   </div>
                 </div>
 
-                {/* Edit Button */}
-                <button
-                  type="button"
-                  onClick={() => setEditingReview(review)}
-                  className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-stone-400" />
-                  <span>Editar opinión</span>
-                </button>
+                {/* Action Buttons: Edit and Delete */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingReview(review)}
+                    className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors cursor-pointer"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-stone-400" />
+                    <span>Editar opinión</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setReviewToDelete(review)}
+                    aria-label={`Eliminar opinión de ${review.productName}`}
+                    className="self-start inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-rose-200 text-xs font-semibold text-rose-700 hover:bg-rose-50 hover:text-rose-900 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                    <span className="hidden sm:inline">Eliminar</span>
+                  </button>
+                </div>
               </div>
 
               {/* Rating & Date */}
@@ -218,6 +247,56 @@ export function ReviewsView() {
           isEditing={true}
           onSuccess={() => refetch()}
         />
+      )}
+
+      {/* Delete Review Confirmation Dialog */}
+      {reviewToDelete && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-review-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs animate-in fade-in duration-150"
+        >
+          <div className="bg-white rounded-2xl border border-stone-200 shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 id="delete-review-dialog-title" className="text-base font-bold text-stone-900">
+                  ¿Eliminar opinión?
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-stone-600 leading-relaxed">
+              ¿Estás seguro de que deseas eliminar tu valoración sobre <strong>{reviewToDelete.productName}</strong>?
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setReviewToDelete(null)}
+                disabled={isDeleting}
+                className="px-3.5 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{isDeleting ? 'Eliminando...' : 'Sí, eliminar'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

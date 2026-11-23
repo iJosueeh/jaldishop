@@ -28,6 +28,9 @@ describe('AdminSettings', () => {
   beforeEach(async () => {
     adminServiceMock = {
       settings: signal(initialSettings),
+      auditLogs: signal([]),
+      auditLogsLoading: signal(false),
+      loadAuditLogs: vi.fn(),
       updateSettings: vi.fn(),
       saveSettings: vi.fn(),
     };
@@ -64,6 +67,9 @@ describe('AdminSettings', () => {
 
     component.setTab('system');
     expect(component.currentTab()).toBe('system');
+
+    component.setTab('audit');
+    expect(component.currentTab()).toBe('audit');
   });
 
   it('debe delegar la actualización de configuración a AdminService', () => {

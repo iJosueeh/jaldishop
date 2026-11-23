@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { Products } from './products';
 import { ProductService } from '../../core/services/product.service';
 import { StoreService } from '../../core/services/store.service';
@@ -16,6 +17,7 @@ describe('Products', () => {
   let storeService: StoreService;
   let toastService: ToastService;
   let httpMock: HttpTestingController;
+  let router: Router;
 
   const mockCategories: ProductCategory[] = [
     { id: 'cat-1', name: 'Tortas & Pasteles' },
@@ -52,6 +54,7 @@ describe('Products', () => {
         ProductService,
         StoreService,
         ToastService,
+        provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -61,6 +64,7 @@ describe('Products', () => {
     storeService = TestBed.inject(StoreService);
     toastService = TestBed.inject(ToastService);
     httpMock = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
 
     // Pre-establecer tienda actual para evitar llamada asíncrona a stores/me
     storeService.currentStore.set({
@@ -153,15 +157,54 @@ describe('Products', () => {
     initComponentWithData();
     expect(component.isEditDrawerOpen()).toBe(false);
     expect(component.selectedProductForEdit()).toBeNull();
+    expect(component.editDrawerInitialTab()).toBe('general');
 
     const productToEdit = mockProducts[0];
     component.onEditProduct(productToEdit);
 
     expect(component.isEditDrawerOpen()).toBe(true);
     expect(component.selectedProductForEdit()).toEqual(productToEdit);
+    expect(component.editDrawerInitialTab()).toBe('general');
 
     component.onCloseEditDrawer();
     expect(component.isEditDrawerOpen()).toBe(false);
     expect(component.selectedProductForEdit()).toBeNull();
+  });
+
+  it('should open edit drawer on variants tab when adjusting quota', () => {
+    initComponentWithData();
+    const productToAdjust = mockProducts[1];
+    component.onAdjustQuota(productToAdjust);
+
+    expect(component.isEditDrawerOpen()).toBe(true);
+    expect(component.selectedProductForEdit()).toEqual(productToAdjust);
+    expect(component.editDrawerInitialTab()).toBe('variants');
+  });
+
+  it('should navigate to capacity when onAdjustAvailability is called', () => {
+    const navSpy = vi.spyOn(router, 'navigate');
+    component.onAdjustAvailability();
+    expect(navSpy).toHaveBeenCalledWith(['/capacity']);
+  });
+
+  it('should navigate to inventory with search query when onViewInventory is called', () => {
+    const navSpy = vi.spyOn(router, 'navigate');
+    const product = mockProducts[0];
+    component.onViewInventory(product);
+    expect(navSpy).toHaveBeenCalledWith(['/inventory'], {
+      queryParams: { q: 'Torta Chocolate Tradicional' },
+    });
+  });
+
+  it('should open store preview in new window when onOpenStorePreview is called', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const product = mockProducts[0];
+    component.onOpenStorePreview(product);
+    expect(openSpy).toHaveBeenCalledWith(
+      `${environment.marketplaceUrl}/tienda/dulces-clara`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
   });
 });

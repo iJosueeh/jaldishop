@@ -90,7 +90,7 @@ export function AddressCard({
         {/* Address & Ubigeo */}
         <div className="space-y-1">
           <p className="text-sm sm:text-base font-bold text-stone-900 leading-snug break-words">
-            {address.addressLine}
+            {address.streetAddress || address.addressLine}
           </p>
           <p className="text-xs sm:text-sm font-medium text-stone-600">
             {locationLabel}

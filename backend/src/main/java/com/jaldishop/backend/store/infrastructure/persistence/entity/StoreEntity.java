@@ -77,6 +77,21 @@ public class StoreEntity {
     @Enumerated(EnumType.STRING)
     private StoreStatus status;
 
+    @Column(name = "legal_business_name", length = 200)
+    private String legalBusinessName;
+
+    @Column(name = "tax_id_type", length = 20, nullable = false)
+    private String taxIdType = "DNI";
+
+    @Column(name = "tax_id_number", length = 11)
+    private String taxIdNumber;
+
+    @Column(name = "tax_regime", length = 20, nullable = false)
+    private String taxRegime = "RUS";
+
+    @Column(name = "can_issue_invoices", nullable = false)
+    private boolean canIssueInvoices = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -228,4 +243,43 @@ public class StoreEntity {
         this.categories = categories != null ? categories : new HashSet<>();
     }
 
+    public String getLegalBusinessName() {
+        return legalBusinessName;
+    }
+
+    public void setLegalBusinessName(String legalBusinessName) {
+        this.legalBusinessName = legalBusinessName;
+    }
+
+    public String getTaxIdType() {
+        return taxIdType;
+    }
+
+    public void setTaxIdType(String taxIdType) {
+        this.taxIdType = taxIdType != null ? taxIdType : "DNI";
+    }
+
+    public String getTaxIdNumber() {
+        return taxIdNumber;
+    }
+
+    public void setTaxIdNumber(String taxIdNumber) {
+        this.taxIdNumber = taxIdNumber;
+    }
+
+    public String getTaxRegime() {
+        return taxRegime;
+    }
+
+    public void setTaxRegime(String taxRegime) {
+        this.taxRegime = taxRegime != null ? taxRegime : "RUS";
+    }
+
+    public boolean isCanIssueInvoices() {
+        return canIssueInvoices;
+    }
+
+    public void setCanIssueInvoices(boolean canIssueInvoices) {
+        this.canIssueInvoices = canIssueInvoices;
+    }
 }

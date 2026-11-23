@@ -47,8 +47,13 @@ describe('AdminSidebar', () => {
     expect(adminServiceMock.loadStores).toHaveBeenCalled();
   });
 
-  it('debe llamar a logout() al presionar el botón de cerrar sesión', () => {
-    component.logout();
-    expect(authServiceMock.logout).toHaveBeenCalled();
+  it('debe permitir colapsar y expandir secciones del acordeón', () => {
+    expect(component.openSections()['supervision']).toBe(true);
+
+    component.toggleSection('supervision');
+    expect(component.openSections()['supervision']).toBe(false);
+
+    component.toggleSection('supervision');
+    expect(component.openSections()['supervision']).toBe(true);
   });
 });

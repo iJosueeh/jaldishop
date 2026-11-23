@@ -4,8 +4,12 @@ import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
+import { InventoryService } from '../../../../core/services/inventory.service';
+import { TokenService } from '../../../../core/services/token-service';
+import { VariantInventoryCoordinatorService } from '../../../../core/services/variant-inventory-coordinator.service';
 import { of, throwError } from 'rxjs';
 import { Product, ProductCategory, ProductVariant } from '../../../../core/models/product.models';
+import { InventoryResponse } from '../../../../core/models/inventory.models';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -30,6 +34,16 @@ describe('ProductEditDrawer', () => {
   let mediaUploadServiceMock: {
     uploadPendingImages: ReturnType<typeof vi.fn>;
     validateImageFile: ReturnType<typeof vi.fn>;
+  };
+  let tokenServiceMock: {
+    getUserId: ReturnType<typeof vi.fn>;
+    getToken: ReturnType<typeof vi.fn>;
+    hasValidToken: ReturnType<typeof vi.fn>;
+  };
+  let coordinatorMock: {
+    createVariantWithInventory: ReturnType<typeof vi.fn>;
+    initializePendingInventory: ReturnType<typeof vi.fn>;
+    validateInventoryParameters: ReturnType<typeof vi.fn>;
   };
 
   const mockCategories: ProductCategory[] = [
@@ -82,6 +96,18 @@ describe('ProductEditDrawer', () => {
       uploadPendingImages: vi.fn().mockImplementation((imgs) => of(imgs)),
       validateImageFile: vi.fn().mockReturnValue({ valid: true }),
     };
+    coordinatorMock = {
+      createVariantWithInventory: vi.fn(),
+      initializePendingInventory: vi.fn().mockReturnValue(of({ success: true })),
+      validateInventoryParameters: vi.fn().mockReturnValue({ valid: true, error: null }),
+    };
+    tokenServiceMock = {
+      getUserId: vi.fn().mockReturnValue('user-1'),
+      getToken: vi.fn().mockReturnValue('valid-token'),
+      hasValidToken: vi.fn().mockReturnValue(true),
+    };
+
+    vi.spyOn(InventoryService.prototype, 'getStoreInventory').mockReturnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [ProductEditDrawer],
@@ -92,6 +118,9 @@ describe('ProductEditDrawer', () => {
         { provide: StoreService, useValue: storeServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: MediaUploadService, useValue: mediaUploadServiceMock },
+        { provide: VariantInventoryCoordinatorService, useValue: coordinatorMock },
+        { provide: TokenService, useValue: tokenServiceMock },
+        InventoryService,
       ],
     }).compileComponents();
 
@@ -113,6 +142,29 @@ describe('ProductEditDrawer', () => {
     expect(component.variants().length).toBe(1);
   });
 
+  it('debe aplicar Cache-First y no llamar a getProductVariants si el producto ya tiene variantes precargadas', async () => {
+    productServiceMock.getProductVariants.mockClear();
+    const productWithVariants: Product = {
+      ...mockProduct,
+      id: 'prod-cached-99',
+      variants: mockVariants,
+    };
+    fixture.componentRef.setInput('product', productWithVariants);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(productServiceMock.getProductVariants).not.toHaveBeenCalled();
+    expect(component.variants().length).toBe(1);
+  });
+
+  it('debe respetar el input initialTab cuando se define como variants', async () => {
+    fixture.componentRef.setInput('initialTab', 'variants');
+    fixture.componentRef.setInput('isOpen', true);
+    await fixture.whenStable();
+    expect(component.activeTab()).toBe('variants');
+  });
+
   it('debe permitir cambiar de pestaña entre información general y variantes', () => {
     expect(component.activeTab()).toBe('general');
     component.setActiveTab('variants');
@@ -132,6 +184,7 @@ describe('ProductEditDrawer', () => {
 
     component.name.set('Torta de Lúcuma Premium');
     component.description.set('Edición especial');
+    component.singleVariantPrice.set(12.0); // mismo precio que var-1
     component.saveGeneralInfo();
 
     expect(productServiceMock.updateProduct).toHaveBeenCalledWith(
@@ -146,7 +199,24 @@ describe('ProductEditDrawer', () => {
     expect(emitSpy).toHaveBeenCalledWith(updatedProduct);
   });
 
-  it('debe agregar un nuevo formato/variante exitosamente', () => {
+  it('debe actualizar el precio de la variante única directamente desde la pestaña general si cambia', () => {
+    const updatedProduct = { ...mockProduct };
+    productServiceMock.updateProduct.mockReturnValue(of(updatedProduct));
+    productServiceMock.updateProductVariant.mockReturnValue(of({ ...mockVariants[0], priceAmount: 18.0 }));
+
+    component.singleVariantPrice.set(18.0);
+    component.saveGeneralInfo();
+
+    expect(productServiceMock.updateProduct).toHaveBeenCalled();
+    expect(productServiceMock.updateProductVariant).toHaveBeenCalledWith(
+      'store-1',
+      'prod-123',
+      'var-1',
+      expect.objectContaining({ priceAmount: 18.0 }),
+    );
+  });
+
+  it('debe agregar un nuevo formato/variante exitosamente usando el coordinador', () => {
     component.setActiveTab('variants');
     expect(component.isAddingVariant()).toBe(false);
 
@@ -167,11 +237,19 @@ describe('ProductEditDrawer', () => {
       tracksInventory: false,
       status: 'ACTIVE',
     };
-    productServiceMock.createProductVariant.mockReturnValue(of(newCreatedVariant));
+    coordinatorMock.createVariantWithInventory.mockReturnValue(
+      of({
+        success: true,
+        variant: newCreatedVariant,
+        inventory: null,
+        stepFailed: null,
+        errorMessage: null,
+      }),
+    );
 
     component.submitNewVariant();
 
-    expect(productServiceMock.createProductVariant).toHaveBeenCalledWith(
+    expect(coordinatorMock.createVariantWithInventory).toHaveBeenCalledWith(
       'store-1',
       'prod-123',
       expect.objectContaining({
@@ -184,6 +262,66 @@ describe('ProductEditDrawer', () => {
     expect(productServiceMock.syncProductVariants).toHaveBeenCalled();
     expect(component.isAddingVariant()).toBe(false);
     expect(toastServiceMock.success).toHaveBeenCalled();
+  });
+
+  it('debe conservar pendingCreatedVariant y reintentar inventario sin duplicar variante', () => {
+    component.setActiveTab('variants');
+    component.toggleAddVariant();
+    component.onNewVariantNameChange('Porción Grande');
+    component.newVariantPrice.set(20.0);
+    component.newVariantTracksInventory.set(true);
+    component.newVariantInitialStock.set(10);
+
+    const createdVariant: ProductVariant = {
+      id: 'var-partial-1',
+      productId: 'prod-123',
+      presentationName: 'Porción Grande',
+      sku: 'TORT-LUC-GRAN',
+      priceAmount: 20.0,
+      priceCurrency: 'PEN',
+      tracksInventory: true,
+      status: 'ACTIVE',
+    };
+
+    // Simular fallo en paso de stock
+    coordinatorMock.createVariantWithInventory.mockReturnValue(
+      of({
+        success: false,
+        variant: createdVariant,
+        inventory: null,
+        stepFailed: 'STOCK',
+        errorMessage: 'Variante creada en catálogo, pero falló stock físico',
+      }),
+    );
+
+    component.submitNewVariant();
+
+    expect(component.pendingCreatedVariant()).toEqual(createdVariant);
+    expect(component.pendingInventoryStep()).toBe('STOCK');
+    expect(toastServiceMock.error).toHaveBeenCalled();
+
+    // Reintento: debe llamar a initializePendingInventory sin llamar de nuevo a createVariantWithInventory
+    coordinatorMock.createVariantWithInventory.mockClear();
+    coordinatorMock.initializePendingInventory.mockReturnValue(
+      of({
+        success: true,
+        variant: createdVariant,
+        inventory: { physicalQuantity: 10 } as any,
+        stepFailed: null,
+        errorMessage: null,
+      }),
+    );
+
+    component.submitNewVariant();
+
+    expect(coordinatorMock.createVariantWithInventory).not.toHaveBeenCalled();
+    expect(coordinatorMock.initializePendingInventory).toHaveBeenCalledWith(
+      createdVariant,
+      10,
+      null,
+    );
+    expect(component.pendingCreatedVariant()).toBeNull();
+    expect(component.isAddingVariant()).toBe(false);
   });
 
   it('debe pausar o reactivar una variante específica', () => {
@@ -269,5 +407,103 @@ describe('ProductEditDrawer', () => {
     expect(component.images().length).toBe(1);
     expect(component.images()[0].imageUrl).toBe('https://res.cloudinary.com/demo/image/upload/torta.jpg');
     expect(component.images()[0].isPrimary).toBe(true);
+  });
+
+  it('debe validar newVariantInitialStock al crear nueva variante con tracksInventory=true', () => {
+    component.toggleAddVariant();
+    component.newVariantName.set('Porción Familiar');
+    component.newVariantPrice.set(30.0);
+    component.newVariantTracksInventory.set(true);
+
+    // Sin stock inicial -> inválido
+    component.newVariantInitialStock.set(null);
+    expect(component.isNewVariantValid()).toBe(false);
+
+    // Stock negativo -> inválido
+    component.newVariantInitialStock.set(-5);
+    expect(component.isNewVariantValid()).toBe(false);
+
+    // Stock decimal -> inválido
+    component.newVariantInitialStock.set(4.2);
+    expect(component.isNewVariantValid()).toBe(false);
+
+    // Stock entero cero o positivo -> válido
+    component.newVariantInitialStock.set(0);
+    expect(component.isNewVariantValid()).toBe(true);
+
+    component.newVariantInitialStock.set(12);
+    expect(component.isNewVariantValid()).toBe(true);
+  });
+
+  it('debe mapear existencias de InventoryService distinguiendo CONFIGURED y NOT_CONFIGURED', () => {
+    const invService = TestBed.inject(InventoryService);
+    const mockInventoryList: InventoryResponse[] = [
+      {
+        variantId: 'var-1',
+        productId: 'prod-123',
+        productName: 'Torta de Lúcuma',
+        presentationName: 'Porción',
+        sku: 'TORT-LUC-PORC',
+        tracksInventory: true,
+        status: 'ACTIVE',
+        inventoryStatus: 'CONFIGURED',
+        physicalQuantity: 24,
+        reservedQuantity: 4,
+        availableQuantity: 20,
+        lowStockThreshold: 5,
+        isLowStock: false,
+        updatedAt: '2026-11-16T10:00:00Z',
+      },
+    ];
+
+    invService.inventory.set(mockInventoryList);
+    fixture.detectChanges();
+
+    const inv = component.inventoryMap().get('var-1');
+    expect(inv).toBeDefined();
+    expect(inv?.inventoryStatus).toBe('CONFIGURED');
+    expect(inv?.physicalQuantity).toBe(24);
+    expect(inv?.availableQuantity).toBe(20);
+
+    // Variante sin inventario en lista -> NOT_CONFIGURED
+    const missingInv = component.inventoryMap().get('var-missing');
+    expect(missingInv).toBeUndefined();
+  });
+
+  it('debe editar nombre y precio de una variante sin alterar accidentalmente su stock físico', () => {
+    const targetVariant = mockVariants[0];
+    component.startEditVariant(targetVariant);
+    component.editVariantName.set('Porción Grande');
+    component.editVariantPrice.set(15.0);
+
+    const updatedVariant: ProductVariant = {
+      ...targetVariant,
+      presentationName: 'Porción Grande',
+      priceAmount: 15.0,
+    };
+    productServiceMock.updateProductVariant.mockReturnValue(of(updatedVariant));
+
+    component.saveEditVariant(targetVariant);
+
+    // Debe llamar a updateProductVariant con los datos de catálogo sin enviar ni tocar stock
+    expect(productServiceMock.updateProductVariant).toHaveBeenCalledWith(
+      'store-1',
+      'prod-123',
+      'var-1',
+      expect.objectContaining({
+        presentationName: 'Porción Grande',
+        priceAmount: 15.0,
+      }),
+    );
+    expect(coordinatorMock.initializePendingInventory).not.toHaveBeenCalled();
+  });
+
+  it('debe limpiar pendingCreatedVariant al cancelar y no bloquear el drawer', () => {
+    component.pendingCreatedVariant.set(mockVariants[0]);
+    component.pendingInventoryStep.set('STOCK');
+
+    component.toggleAddVariant(); // Cierra formulario
+    expect(component.pendingCreatedVariant()).toBeNull();
+    expect(component.pendingInventoryStep()).toBeNull();
   });
 });

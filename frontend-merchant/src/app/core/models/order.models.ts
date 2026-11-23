@@ -1,3 +1,5 @@
+import { OrderPaymentBreakdownResponse } from './billing.models';
+
 export type OrderStatus =
   'CONFIRMED' | 'IN_PREPARATION' | 'READY' | 'OUT_FOR_DELIVERY' | 'COMPLETED' | 'CANCELLED';
 
@@ -93,6 +95,7 @@ export interface MerchantOrderSummaryResponse {
   totalItems: number;
   confirmedAt: string;
   updatedAt: string;
+  origin?: string;
   items: MerchantOrderItemResponse[];
 }
 
@@ -126,8 +129,10 @@ export interface MerchantOrderDetailResponse {
   deliveryFeeAmount: number;
   includedTaxAmount: number;
   totalAmount: number;
+  paymentBreakdown?: OrderPaymentBreakdownResponse;
   confirmedAt: string;
   updatedAt: string;
+  origin?: string;
   items: MerchantOrderItemResponse[];
   statusHistory: MerchantOrderStatusHistoryResponse[];
 }
@@ -152,6 +157,7 @@ export interface MerchantOrderPageResponse {
  */
 export interface ChangeOrderStatusRequest {
   status: OrderStatus;
+  reason?: string;
 }
 
 /**
@@ -193,3 +199,52 @@ export interface OrderConfirmedDomainEvent {
   currency: string;
   occurredAt: string;
 }
+
+/**
+ * Evento ligero de dominio emitido por el backend al transicionar el estado de un pedido.
+ * Equivalente a {@code OrderStatusChangedDomainEvent.java} en /topic/stores/{storeId}/orders.
+ */
+export interface OrderStatusChangedDomainEvent {
+  eventId: string;
+  eventType: 'ORDER_STATUS_CHANGED';
+  orderId: string;
+  orderNumber: string;
+  customerId: string;
+  storeId: string;
+  previousStatus: OrderStatus;
+  newStatus: OrderStatus;
+  occurredAt: string;
+}
+
+/**
+ * Línea de producto para la creación manual de comanda por el comerciante.
+ * Equivalente a {@code CreateMerchantOrderItemRequest.java}.
+ */
+export interface CreateMerchantOrderItemRequest {
+  variantId: string;
+  quantity: number;
+  unitPriceAmount?: number;
+}
+
+/**
+ * Payload para registro directo de pedidos por el comerciante (POST).
+ * Equivalente a {@code CreateMerchantOrderRequest.java}.
+ */
+export interface CreateMerchantOrderRequest {
+  deliveryMode: DeliveryMode;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  deliveryAddress?: string;
+  deliveryReference?: string;
+  deliveryLatitude?: number;
+  deliveryLongitude?: number;
+  deliveryFeeAmount?: number;
+  paymentMethod: string;
+  serviceDate?: string;
+  serviceStartTime?: string;
+  serviceEndTime?: string;
+  notes?: string;
+  items: CreateMerchantOrderItemRequest[];
+}
+

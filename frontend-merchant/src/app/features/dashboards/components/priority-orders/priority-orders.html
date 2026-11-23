@@ -29,12 +29,12 @@
     @for (order of orders(); track order.id) {
       <article
         (click)="openDrawer(order)"
-        class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs hover:border-[#005141]/30 transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
+        class="p-4 sm:p-5 rounded-2xl bg-surface-bright shadow-2xs border border-outline-variant hover:shadow-xs hover:border-primary/30 transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
         <div class="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
           <!-- Icono de pedido -->
           <div
-            class="w-11 h-11 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] flex items-center justify-center shrink-0 text-emerald-800 mt-0.5"
+            class="w-11 h-11 rounded-xl bg-surface border border-outline-variant flex items-center justify-center shrink-0 text-primary mt-0.5"
           >
             <ng-icon name="matRestaurantOutline" class="text-[24px]" />
           </div>
@@ -43,14 +43,14 @@
           <div class="flex flex-col gap-1.5 min-w-0 flex-1">
             <!-- 1. Fila de Identificador y Canal -->
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xs text-stone-700 font-mono font-bold bg-[#faf7f2] px-2 py-0.5 rounded-md border border-[#e7e0d6]">
+              <span class="text-xs text-on-surface font-mono font-bold bg-surface px-2 py-0.5 rounded-md border border-outline-variant">
                 {{ order.orderNumber }}
               </span>
               @if (order.channelLabel) {
                 <span
-                  class="px-2 py-0.5 rounded-md bg-[#faf7f2] text-stone-600 border border-[#e7e0d6] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                  class="px-2 py-0.5 rounded-md bg-surface text-on-surface-variant border border-outline-variant text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
                 >
-                  <ng-icon name="matChatOutline" class="text-[12px] text-emerald-700" />
+                  <ng-icon name="matChatOutline" class="text-[12px] text-primary" />
                   {{ order.channelLabel }}
                 </span>
               }
@@ -84,7 +84,7 @@
                 <span>{{ order.deliveryTimeLabel }}</span>
               </div>
               <span class="w-1 h-1 rounded-full bg-stone-300"></span>
-              <span class="font-medium bg-[#faf7f2] px-2 py-0.5 rounded border border-[#e7e0d6]/60 text-[11px] text-stone-600">
+              <span class="font-medium bg-surface px-2 py-0.5 rounded border border-outline-variant/60 text-[11px] text-on-surface-variant">
                 {{ order.deliveryMode === 'DELIVERY' ? 'Delivery' : 'Recojo en local' }}
               </span>
             </div>
@@ -93,7 +93,7 @@
 
         <!-- Bloque de Estado y Botones de Acción -->
         <div
-          class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-[#e7e0d6]"
+          class="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-outline-variant"
         >
           <!-- Badge de Estado según el modelo backend -->
           @if (order.status === 'IN_PREPARATION') {
@@ -107,7 +107,7 @@
               type="button"
               [disabled]="isOrderUpdating(order.id) || isOrderPendingVerification(order.id)"
               (click)="onMarkAsReady(order, $event)"
-              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#005141] text-white hover:bg-[#003d31] transition-all text-xs font-bold shadow-2xs cursor-pointer active:scale-98 shadow-emerald-950/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-white hover:bg-primary-hover transition-all text-xs font-bold shadow-2xs cursor-pointer active:scale-98 shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               @if (isOrderUpdating(order.id)) {
                 <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -126,9 +126,9 @@
             <button
               type="button"
               (click)="onNotifyCustomer(order, $event)"
-              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-stone-800 hover:bg-[#faf7f2] transition-all text-xs font-bold shadow-2xs border border-[#e7e0d6] cursor-pointer"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-bright text-on-surface hover:bg-surface transition-all text-xs font-bold shadow-2xs border border-outline-variant cursor-pointer"
             >
-              <ng-icon name="matSendOutline" class="text-[16px] text-emerald-800" />
+              <ng-icon name="matSendOutline" class="text-[16px] text-primary" />
               <span>Avisar</span>
             </button>
           } @else {
@@ -140,7 +140,7 @@
             <button
               type="button"
               (click)="openDrawer(order)"
-              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-stone-700 hover:bg-[#faf7f2] border border-[#e7e0d6] transition-all text-xs font-semibold cursor-pointer shadow-2xs"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-surface-bright text-on-surface-variant hover:bg-surface border border-outline-variant transition-all text-xs font-semibold cursor-pointer shadow-2xs"
             >
               <ng-icon name="matVisibilityOutline" class="text-[16px]" />
               <span>Ver</span>
@@ -151,7 +151,7 @@
     } @empty {
       <!-- ESTADO VACÍO (@empty): Bandeja al día -->
       <div
-        class="p-8 rounded-2xl bg-white border border-[#e7e0d6] text-center space-y-3 shadow-2xs"
+        class="p-8 rounded-2xl bg-surface-bright border border-outline-variant text-center space-y-3 shadow-2xs"
       >
         <div
           class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200/60 mx-auto flex items-center justify-center"

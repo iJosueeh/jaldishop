@@ -13,6 +13,8 @@ describe('AdminHeader', () => {
   beforeEach(async () => {
     authServiceMock = {
       isMerchant: vi.fn().mockReturnValue(false),
+      isAdmin: vi.fn().mockReturnValue(true),
+      isDualRole: vi.fn().mockReturnValue(false),
       currentUser: vi.fn().mockReturnValue({ fullName: 'Josué Ramos' }),
       logout: vi.fn(),
     };

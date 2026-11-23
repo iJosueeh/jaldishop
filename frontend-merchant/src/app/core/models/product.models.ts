@@ -104,6 +104,8 @@ export interface CreateProductVariantItem {
   priceAmount: number;
   priceCurrency?: string;
   tracksInventory: boolean;
+  initialStock?: number | null;
+  lowStockThreshold?: number | null;
   attributes?: ProductVariantAttribute[];
 }
 
@@ -120,6 +122,8 @@ export interface CreateProductWithVariantPayload {
   priceAmount?: number;
   priceCurrency?: string;
   tracksInventory?: boolean;
+  initialStock?: number | null;
+  lowStockThreshold?: number | null;
   attributes?: ProductVariantAttribute[];
   variants?: CreateProductVariantItem[];
 }

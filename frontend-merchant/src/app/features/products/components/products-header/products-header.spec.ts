@@ -23,7 +23,7 @@ describe('ProductsHeader', () => {
     const spy = vi.fn();
     component.createNewProduct.subscribe(spy);
 
-    const button = fixture.nativeElement.querySelectorAll('button')[2];
+    const button = fixture.nativeElement.querySelectorAll('button')[1];
     button.click();
 
     expect(spy).toHaveBeenCalled();

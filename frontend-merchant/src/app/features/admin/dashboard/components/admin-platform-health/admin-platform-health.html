@@ -7,21 +7,21 @@
       </div>
       <div>
         <h3 class="font-extrabold text-sm sm:text-base text-on-surface">
-          Monitor de Salud & Operatividad
+          Monitor de Salud Operativa & Transaccional
         </h3>
         <p class="text-xs text-on-surface-variant font-medium">
-          Rendimiento y disponibilidad de comercios en tiempo real
+          Disponibilidad operativa de tiendas, procesamiento de pagos y eventos en tiempo real
         </p>
       </div>
     </div>
 
-    <!-- Badge Global de Sistema -->
+    <!-- Badge Global de Disponibilidad -->
     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/30 text-xs font-bold self-start sm:self-auto">
       <span class="relative flex h-2 w-2">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
       </span>
-      <span class="text-on-surface text-[11px]">Sistemas Operativos</span>
+      <span class="text-on-surface text-[11px] font-bold">Servicios Transaccionales Operativos</span>
     </div>
   </div>
 
@@ -30,8 +30,8 @@
     <!-- 1. Tasa de Operatividad de Comercios -->
     <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-3">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-on-surface-variant">Operatividad Comercios</span>
-        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">
+        <span class="text-xs font-bold text-on-surface-variant">Operatividad de Comercios</span>
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
           {{ activeRatio() }}%
         </span>
       </div>
@@ -51,21 +51,21 @@
       </div>
 
       <div class="flex items-center justify-between text-[11px] text-on-surface-variant font-medium">
-        <span class="flex items-center gap-1">
+        <span class="flex items-center gap-1 font-mono tabular-nums">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           {{ metrics().activeStores }} activas
         </span>
-        <span class="flex items-center gap-1">
+        <span class="flex items-center gap-1 font-mono tabular-nums">
           <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
           {{ metrics().suspendedStores }} pausadas
         </span>
       </div>
     </div>
 
-    <!-- 2. Estado de Servicios & Latencia -->
+    <!-- 2. Pasarela de Pagos & Webhooks Transaccionales (Reemplazo de latencia mock 38ms) -->
     <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-2.5">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-on-surface-variant">Infraestructura Core</span>
+        <span class="text-xs font-bold text-on-surface-variant">Pasarelas & Webhooks</span>
         <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold uppercase">
           En línea
         </span>
@@ -73,17 +73,17 @@
 
       <div class="space-y-1.5 text-xs font-medium text-on-surface">
         <div class="flex items-center justify-between">
-          <span class="text-on-surface-variant text-[11px]">API REST Gateway:</span>
-          <span class="font-mono text-[11px] font-bold text-emerald-600 dark:text-emerald-400">~38ms</span>
+          <span class="text-on-surface-variant text-[11px]">Mercado Pago Webhooks:</span>
+          <span class="font-bold text-[11px] text-emerald-600 dark:text-emerald-400">Procesando</span>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-on-surface-variant text-[11px]">Autenticación JWT:</span>
-          <span class="font-bold text-[11px] text-on-surface">Verificado</span>
+          <span class="text-on-surface-variant text-[11px]">Autenticación & Sesiones:</span>
+          <span class="font-bold text-[11px] text-on-surface">Activas & Verificadas</span>
         </div>
       </div>
     </div>
 
-    <!-- 3. Alertas y Supervisión Rápida -->
+    <!-- 3. Alertas de Operación y Supervisión Rápida -->
     <div
       class="p-4 rounded-2xl border flex flex-col justify-between gap-2.5 transition-colors"
       [class.bg-amber-500/5]="hasIssues()"
@@ -92,7 +92,7 @@
       [class.border-outline-variant/20]="!hasIssues()"
     >
       <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-on-surface-variant">Atención Requerida</span>
+        <span class="text-xs font-bold text-on-surface-variant">Supervisión Inmediata</span>
         @if (hasIssues()) {
           <span class="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <ng-icon name="matWarningOutline" class="text-[14px]" />
@@ -106,7 +106,7 @@
 
       @if (hasIssues()) {
         <p class="text-xs font-bold text-on-surface leading-tight">
-          Hay {{ metrics().suspendedStores }} tienda(s) pausada(s).
+          Hay {{ metrics().suspendedStores }} tienda(s) con actividad pausada.
         </p>
         <button
           type="button"
@@ -118,10 +118,10 @@
         </button>
       } @else {
         <p class="text-xs font-medium text-on-surface-variant leading-tight">
-          Todos los comercios registrados se encuentran operando con normalidad.
+          Todos los comercios registrados operan transaccionalmente con normalidad.
         </p>
         <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-          100% de operatividad activa
+          100% de canales de venta activos
         </span>
       }
     </div>

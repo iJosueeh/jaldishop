@@ -37,6 +37,14 @@ describe('adminGuard', () => {
     expect(result).toBe(true);
   });
 
+  it('permite el acceso si el usuario tiene rol dual (MERCHANT y PLATFORM_ADMIN)', () => {
+    authServiceMock.isAdmin.mockReturnValue(true);
+
+    const result = TestBed.runInInjectionContext(() => adminGuard({} as any, {} as any));
+
+    expect(result).toBe(true);
+  });
+
   it('redirige a /unauthorized si el usuario está autenticado pero no es ADMIN', () => {
     authServiceMock.isAdmin.mockReturnValue(false);
     authServiceMock.isAuthenticated.mockReturnValue(true);

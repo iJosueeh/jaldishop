@@ -1,0 +1,134 @@
+<div class="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-xs flex flex-col gap-5 font-sans">
+  <div class="flex items-center justify-between pb-3 border-b border-border/60">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-[#005141]/10 text-[#005141] flex items-center justify-center">
+        <ng-icon name="matReceiptLongOutline" class="text-2xl" />
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-foreground">Identidad Fiscal & Tributaria SUNAT</h3>
+        <p class="text-xs text-muted-foreground mt-0.5">
+          Datos de facturación electrónica y régimen comercial en Perú
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="taxForm" (ngSubmit)="onSave()" class="flex flex-col gap-4">
+    <!-- Razón Social o Nombre Legal -->
+    <div class="flex flex-col gap-1.5">
+      <label for="legalBusinessName" class="text-xs font-semibold text-foreground">
+        Razón Social o Nombre Comercial Registrado
+      </label>
+      <input
+        id="legalBusinessName"
+        type="text"
+        formControlName="legalBusinessName"
+        placeholder="Ej: Inversiones Gastronómicas S.A.C. o Juan Perez"
+        class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all"
+      />
+      <span class="text-[10px] text-muted-foreground">
+        Nombre que figurará en los comprobantes de pago de tus clientes
+      </span>
+    </div>
+
+    <!-- Tipo de Documento y Número -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="taxIdType" class="text-xs font-semibold text-foreground">
+          Tipo de Documento Fiscal
+        </label>
+        <select
+          id="taxIdType"
+          formControlName="taxIdType"
+          class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all cursor-pointer"
+        >
+          <option value="DNI">DNI (Persona Natural - 8 dígitos)</option>
+          <option value="RUC_10">RUC 10 (Persona Natural con Negocio - 11 dígitos)</option>
+          <option value="RUC_20">RUC 20 (Persona Jurídica / Empresa - 11 dígitos)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="taxIdNumber" class="text-xs font-semibold text-foreground">
+          Número de Documento
+        </label>
+        <input
+          id="taxIdNumber"
+          type="text"
+          formControlName="taxIdNumber"
+          placeholder="8 u 11 dígitos numéricos"
+          class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground font-mono focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all"
+        />
+        @if (taxForm.get('taxIdNumber')?.touched && taxForm.get('taxIdNumber')?.errors) {
+          <span class="text-[10px] text-rose-600 font-semibold">
+            Ingresa un documento numérico válido de {{ taxForm.get('taxIdType')?.value === 'DNI' ? '8' : '11' }} dígitos.
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Régimen Tributario SUNAT -->
+    <div class="flex flex-col gap-1.5">
+      <label for="taxRegime" class="text-xs font-semibold text-foreground">
+        Régimen Tributario
+      </label>
+      <select
+        id="taxRegime"
+        formControlName="taxRegime"
+        class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all cursor-pointer"
+      >
+        <option value="RUS">Nuevo RUS (NRUS - Bodegas, pequeños puestos, restaurantes locales)</option>
+        <option value="RER">Régimen Especial de Renta (RER)</option>
+        <option value="MYPE">Régimen MYPE Tributario</option>
+        <option value="GENERAL">Régimen General</option>
+        <option value="NONE">Sin Régimen Fiscal (Solo persona natural)</option>
+      </select>
+    </div>
+
+    <!-- Advertencia de SUNAT para Nuevo RUS -->
+    @if (isRusActive()) {
+      <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 text-xs flex items-start gap-2.5 leading-relaxed">
+        <ng-icon name="matInfoOutline" class="text-base shrink-0 mt-0.5" />
+        <div>
+          <strong>Restricción SUNAT para Nuevo RUS:</strong> Por ley, los contribuyentes en el Nuevo RUS solo pueden emitir Boletas de Venta (tienen prohibido emitir Facturas). JaldiShop deshabilitará automáticamente la opción de Factura para tus clientes en el checkout.
+        </div>
+      </div>
+    }
+
+    <!-- Checkbox / Toggle Emisión de Facturas -->
+    <div class="p-3.5 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between">
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-foreground">Habilitar Emisión de Facturas</span>
+        <span class="text-[11px] text-muted-foreground">
+          Permite a los clientes corporativos solicitar factura ingresando su RUC en tu tienda
+        </span>
+      </div>
+
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          formControlName="canIssueInvoices"
+          class="sr-only peer"
+        />
+        <div class="w-11 h-6 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#005141] peer-disabled:opacity-40 peer-disabled:cursor-not-allowed"></div>
+      </label>
+    </div>
+
+    <!-- Botón Guardar -->
+    <div class="flex items-center justify-end pt-2">
+      <button
+        type="submit"
+        [disabled]="isSaving()"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#005141] text-white text-xs font-bold shadow-xs hover:bg-[#003d31] transition-colors cursor-pointer disabled:opacity-40"
+      >
+        @if (isSaving()) {
+          <ng-icon name="matSyncOutline" class="text-base animate-spin" />
+          <span>Guardando datos fiscales...</span>
+        } @else {
+          <ng-icon name="matSaveOutline" class="text-base" />
+          <span>Guardar Perfil Fiscal</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,81 @@
+<div class="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-xs flex flex-col gap-4 font-sans">
+  <div class="flex items-center justify-between pb-3 border-b border-border/60">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-stone-500/10 text-foreground flex items-center justify-center">
+        <ng-icon name="matReceiptLongOutline" class="text-base" />
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-foreground">Historial de Desembolsos</h3>
+        <p class="text-xs text-muted-foreground mt-0.5">Lotes de liquidación transferidos a tu cuenta</p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="refresh()"
+      [disabled]="isLoading()"
+      class="p-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-muted/80 transition-colors cursor-pointer disabled:opacity-40"
+      title="Actualizar historial"
+    >
+      <ng-icon name="matRefreshOutline" class="text-base" [class.animate-spin]="isLoading()" />
+    </button>
+  </div>
+
+  @if (isLoading() && batches().length === 0) {
+    <div class="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+      <div class="w-6 h-6 border-2 border-[#005141] border-t-transparent rounded-full animate-spin"></div>
+      <span class="text-xs">Cargando transferencias...</span>
+    </div>
+  } @else if (batches().length === 0) {
+    <div class="py-10 text-center flex flex-col items-center justify-center gap-2 text-muted-foreground">
+      <p class="text-xs">Aún no tienes solicitudes de desembolso registradas.</p>
+      <p class="text-[11px] text-muted-foreground/80">
+        Cuando alcances el mínimo de S/ 50.00 podrás solicitar tu primera liquidación bancaria.
+      </p>
+    </div>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
+          <tr>
+            <th class="py-2.5 px-3">Fecha</th>
+            <th class="py-2.5 px-3">Monto Solicitado</th>
+            <th class="py-2.5 px-3">Comisión Retiro</th>
+            <th class="py-2.5 px-3">Neto a Recibir</th>
+            <th class="py-2.5 px-3">Estado</th>
+            <th class="py-2.5 px-3">N° Operación</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/40">
+          @for (batch of batches(); track batch.id) {
+            <tr class="hover:bg-muted/30 transition-colors">
+              <td class="py-3 px-3 font-mono text-muted-foreground">
+                {{ batch.scheduledFor || (batch.createdAt | date: 'dd/MM/yyyy') }}
+              </td>
+              <td class="py-3 px-3 font-bold font-mono text-foreground">
+                S/ {{ batch.grossAmount.toFixed(2) }}
+              </td>
+              <td class="py-3 px-3 font-mono text-muted-foreground">
+                S/ {{ batch.bankingFee.toFixed(2) }}
+              </td>
+              <td class="py-3 px-3 font-bold font-mono text-emerald-600">
+                S/ {{ batch.netDisbursedAmount.toFixed(2) }}
+              </td>
+              <td class="py-3 px-3">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border"
+                  [ngClass]="getStatusBadgeClass(batch.status)"
+                >
+                  {{ getStatusLabel(batch.status) }}
+                </span>
+              </td>
+              <td class="py-3 px-3 font-mono text-[11px] text-muted-foreground">
+                {{ batch.bankOperationNumber || 'En trámite' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

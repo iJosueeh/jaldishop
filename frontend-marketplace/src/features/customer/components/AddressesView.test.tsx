@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddressesView } from './AddressesView';
 import { useCustomerAddresses } from '../hooks/useCustomerAddresses';

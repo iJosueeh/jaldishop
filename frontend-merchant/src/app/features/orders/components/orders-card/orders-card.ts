@@ -15,12 +15,12 @@ import {
   matCheckCircleOutline,
   matVerifiedOutline,
   matReceiptOutline,
-  matMoreVertOutline,
   matPendingOutline,
   matAttachmentOutline,
   matSendOutline,
   matInventory2Outline,
   matCancelOutline,
+  matPrintOutline,
 } from '@ng-icons/material-symbols/outline';
 import { DeliveryMode, MerchantOrder, OrderStatus } from '../../../../core/models/order.models';
 
@@ -42,12 +42,12 @@ import { DeliveryMode, MerchantOrder, OrderStatus } from '../../../../core/model
       matCheckCircleOutline,
       matVerifiedOutline,
       matReceiptOutline,
-      matMoreVertOutline,
       matPendingOutline,
       matAttachmentOutline,
       matSendOutline,
       matInventory2Outline,
       matCancelOutline,
+      matPrintOutline,
     }),
   ],
   selector: 'app-orders-card',
@@ -64,6 +64,7 @@ export class OrdersCard {
   readonly whatsAppClick = output<MerchantOrder>();
   readonly openDetails = output<MerchantOrder>();
   readonly verifyStatus = output<MerchantOrder>();
+  readonly printTicket = output<MerchantOrder>();
 
   canCancel(status: OrderStatus): boolean {
     return status === 'CONFIRMED' || status === 'IN_PREPARATION';
@@ -72,7 +73,7 @@ export class OrdersCard {
   getNextActionLabel(status: OrderStatus, deliveryMode?: DeliveryMode): string {
     switch (status) {
       case 'CONFIRMED':
-        return 'Aceptar';
+        return 'Preparar';
       case 'IN_PREPARATION':
         return 'Listo';
       case 'READY':

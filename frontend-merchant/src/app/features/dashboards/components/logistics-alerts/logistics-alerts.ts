@@ -8,8 +8,7 @@ import {
   matArrowForwardOutline,
 } from '@ng-icons/material-symbols/outline';
 import { OrderService } from '../../../../core/services/order.service';
-import { ProductService } from '../../../../core/services/product.service';
-import { StoreService } from '../../../../core/services/store.service';
+import { InventoryService } from '../../../../core/services/inventory.service';
 
 @Component({
   imports: [RouterLink, NgIcon],
@@ -26,8 +25,7 @@ import { StoreService } from '../../../../core/services/store.service';
 })
 export class LogisticsAlerts implements OnInit {
   private readonly orderService = inject(OrderService);
-  private readonly productService = inject(ProductService);
-  private readonly storeService = inject(StoreService);
+  private readonly inventoryService = inject(InventoryService);
 
   readonly upcomingDeliveries = computed<UpcomingDeliveryItem[]>(() => {
     return this.orderService
@@ -43,25 +41,36 @@ export class LogisticsAlerts implements OnInit {
       }));
   });
 
+  /**
+   * Alertas de stock reales provistas por GET /api/v1/inventory/low-stock.
+   * Elimina la equivalencia ficticia entre status INACTIVE y stock agotado.
+   * Determina OUT_OF_STOCK si physicalQuantity <= 0; de lo contrario LOW_STOCK.
+   */
   readonly stockAlerts = computed<StockAlertItem[]>(() => {
-    return this.productService
-      .products()
-      .filter((p) => p.status === 'INACTIVE')
-      .map((p) => ({
-        id: p.id,
-        productName: p.name,
-        availableUnits: 0,
-        stockStatus: 'OUT_OF_STOCK',
-      }));
+    return this.inventoryService.lowStock().map((item) => {
+      const physical = item.physicalQuantity ?? 0;
+      const available = item.availableQuantity ?? physical;
+      const isOutOfStock = physical <= 0;
+      const productName =
+        item.presentationName && item.presentationName.trim().length > 0
+          ? `${item.productName} (${item.presentationName.trim()})`
+          : item.productName;
+
+      return {
+        id: item.variantId,
+        productName,
+        availableUnits: available,
+        stockStatus: isOutOfStock ? 'OUT_OF_STOCK' : 'LOW_STOCK',
+      };
+    });
   });
 
   ngOnInit(): void {
     if (this.orderService.orders().length === 0) {
-      this.orderService.loadOrders().subscribe();
+      this.orderService.loadOrders().subscribe({ error: () => {} });
     }
-    const storeId = this.storeService.currentStore()?.id;
-    if (storeId && this.productService.products().length === 0) {
-      this.productService.loadProducts(storeId).subscribe();
+    if (!this.inventoryService.isLowStockLoaded()) {
+      this.inventoryService.getLowStockInventory().subscribe({ error: () => {} });
     }
   }
 }

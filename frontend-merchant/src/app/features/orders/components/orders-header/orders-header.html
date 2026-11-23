@@ -12,7 +12,7 @@
       </span>
     </div>
     <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
-      Supervisión ágil de preparación, despachos del día y pedidos por canal sin sobrecargar la cocina.
+      Supervisión ágil de preparación, despachos del día y pedidos por canal sin sobrecargar tu capacidad operativa.
     </p>
   </div>
 
@@ -22,18 +22,10 @@
       type="button"
       (click)="printOrders.emit()"
       class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
+      title="Imprimir Boleta / Ticket de Venta"
     >
       <ng-icon name="matPrintOutline" class="text-[18px] text-on-surface-variant" />
-      <span>Imprimir comandas</span>
-    </button>
-
-    <button
-      type="button"
-      (click)="adjustPace.emit()"
-      class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold shadow-2xs border border-outline-variant/30 cursor-pointer active:scale-98"
-    >
-      <ng-icon name="matTuneOutline" class="text-[18px] text-on-surface-variant" />
-      <span>Ajustar ritmo</span>
+      <span>Imprimir Boleta / Ticket de Venta</span>
     </button>
 
     <button

@@ -53,16 +53,24 @@ public class RealtimeNotificationPublisher {
     }
 
     /**
-     * Publica la notificación de cambio de estado a la cola privada del cliente dueño del pedido.
+     * Publica la notificación de cambio de estado a la cola privada del cliente dueño del pedido
+     * y al tópico de la tienda para sincronización reactiva de terminales del comerciante.
      *
      * @param event Evento ligero con la transición de estado.
      */
     public void publishOrderStatusChanged(OrderStatusChangedDomainEvent event) {
         Objects.requireNonNull(event, "event no puede ser nulo");
-        String user = event.customerId().toString();
-        log.debug("Publicando evento ORDER_STATUS_CHANGED a usuario {} en {} para orden {}",
-                user, CUSTOMER_ORDERS_QUEUE, event.orderNumber());
-        messagingTemplate.convertAndSendToUser(user, CUSTOMER_ORDERS_QUEUE, event);
+        if (event.customerId() != null) {
+            String user = event.customerId().toString();
+            log.debug("Publicando evento ORDER_STATUS_CHANGED a usuario {} en {} para orden {}",
+                    user, CUSTOMER_ORDERS_QUEUE, event.orderNumber());
+            messagingTemplate.convertAndSendToUser(user, CUSTOMER_ORDERS_QUEUE, event);
+        }
+
+        String storeDestination = STORE_ORDERS_TOPIC_PREFIX + event.storeId() + STORE_ORDERS_TOPIC_SUFFIX;
+        log.debug("Publicando evento ORDER_STATUS_CHANGED a tienda {} en {} para orden {}",
+                event.storeId(), storeDestination, event.orderNumber());
+        messagingTemplate.convertAndSend(storeDestination, event);
     }
 
 }

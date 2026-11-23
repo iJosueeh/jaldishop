@@ -37,6 +37,7 @@ export class OrdersGrid {
   whatsAppClick = output<MerchantOrder>();
   openDetails = output<MerchantOrder>();
   verifyStatus = output<MerchantOrder>();
+  printTicket = output<MerchantOrder>();
   resetFilter = output<void>();
   createNewOrder = output<void>();
 }

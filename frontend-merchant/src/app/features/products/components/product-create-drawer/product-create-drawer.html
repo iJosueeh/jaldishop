@@ -50,8 +50,33 @@
 
     <!-- Cuerpo del Drawer con Scroll -->
     <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Banner de Fallo Parcial con Reintento sin duplicación -->
+      @if (pendingCreatedProduct()) {
+        <div
+          class="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs sm:text-sm animate-fade-in shadow-2xs"
+        >
+          <ng-icon name="matWarningOutline" class="text-xl text-amber-600 shrink-0 mt-0.5" />
+          <div class="flex-1 space-y-2">
+            <span class="font-bold block">Producto registrado, pero requiere inicializar inventario:</span>
+            <p class="text-xs text-amber-800 dark:text-amber-300">
+              "{{ pendingCreatedProduct()?.name }}" ya existe en tu catálogo. Puedes completar la asignación de existencias sin duplicar el producto.
+            </p>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                (click)="retryPendingProductInventory()"
+                [disabled]="isLoading()"
+                class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Reintentar Inicialización de Inventario
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Banner de Error si falla la API -->
-      @if (errorMessage()) {
+      @if (errorMessage() && !pendingCreatedProduct()) {
         <div
           class="flex items-start gap-3 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs sm:text-sm animate-fade-in"
         >
@@ -99,7 +124,7 @@
             type="text"
             [ngModel]="name()"
             (ngModelChange)="onNameChange($event)"
-            placeholder="Ej: Torta Húmeda de Chocolate, Croissant de Mantequilla..."
+            placeholder="Ej: Polo Oversize Algodón, Aceite Vegetal 1L, Torta Personalizada, Pack Cuadernos A4, Martillo de Uña 16oz..."
             maxlength="160"
             [disabled]="isLoading()"
             class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium"
@@ -110,7 +135,7 @@
         <div class="space-y-2">
           <div class="flex justify-between items-center text-xs">
             <label class="font-semibold text-on-surface">
-              Categoría en el menú <span class="text-red-500">*</span>
+              Categoría del producto <span class="text-red-500">*</span>
             </label>
             @if (categories().length > 0) {
               <button
@@ -135,7 +160,7 @@
                 type="text"
                 [ngModel]="newCategoryName()"
                 (ngModelChange)="newCategoryName.set($event)"
-                placeholder="Ej: Tortas y Pasteles, Bebidas Frías, Desayunos..."
+                placeholder="Ej: Abarrotes, Ropa, Postres, Bebidas, Papelería..."
                 maxlength="120"
                 [disabled]="isLoading()"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-primary/40 bg-primary/5 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -155,7 +180,7 @@
               [disabled]="isLoading()"
               class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
             >
-              <option value="" disabled>Selecciona una categoría de tu menú...</option>
+              <option value="" disabled>Selecciona una categoría de tu catálogo...</option>
               @for (cat of categories(); track cat.id) {
                 <option [value]="cat.id">{{ cat.name }}</option>
               }
@@ -167,7 +192,7 @@
         <div class="space-y-1.5">
           <div class="flex justify-between items-center text-xs">
             <label for="prod-desc" class="font-semibold text-on-surface">
-              Descripción o detalles <span class="text-stone-400 font-normal">(Opcional)</span>
+              Descripción o detalles <span class="text-stone-600 font-normal">(Opcional)</span>
             </label>
             <span class="text-[11px] text-on-surface-variant">{{ description().length }}/500</span>
           </div>
@@ -177,7 +202,7 @@
             (ngModelChange)="description.set($event)"
             rows="3"
             maxlength="500"
-            placeholder="Describe los ingredientes, porciones o detalles clave (ej: Bizcocho húmedo bañado en chocolate, rinde 8 a 10 porciones)..."
+            placeholder="Describe características, especificaciones, formato o detalles clave (ej: 100% algodón peinado, presentación familiar, rinde 1L)..."
             [disabled]="isLoading()"
             class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
           ></textarea>
@@ -247,14 +272,14 @@
             <!-- Nombre de Presentación / Formato de Venta -->
             <div class="space-y-1.5">
               <label for="prod-pres" class="text-xs font-semibold text-on-surface block">
-                Formato o porción de venta
+                Formato o presentación de venta
               </label>
               <input
                 id="prod-pres"
                 type="text"
                 [ngModel]="presentationName()"
                 (ngModelChange)="presentationName.set($event)"
-                placeholder="Ej: Porción individual, Entera (20 cm), Vaso 12 oz..."
+                placeholder="Ej: Unidad, Caja, Pack, Docena, Litro, Kilo, Talla..."
                 maxlength="120"
                 [disabled]="isLoading()"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -311,7 +336,7 @@
                         type="text"
                         [ngModel]="variant.presentationName"
                         (ngModelChange)="updateVariantName(idx, $event)"
-                        placeholder="Ej: Chico, Mediano, Grande, 500g..."
+                        placeholder="Ej: Unidad, Caja, Pack, Docena, Litro, Kilo, Talla..."
                         maxlength="120"
                         [disabled]="isLoading()"
                         class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-primary"
@@ -363,6 +388,50 @@
                       <span>Controla stock</span>
                     </label>
                   </div>
+
+                  @if (variant.tracksInventory) {
+                    <div class="pt-2 border-t border-outline-variant/15 grid grid-cols-1 sm:grid-cols-2 gap-2.5 animate-fade-in">
+                      <div class="space-y-1">
+                        <label class="text-[11px] font-semibold text-on-surface block">
+                          Stock inicial <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          [ngModel]="variant.initialStock"
+                          (ngModelChange)="updateVariantInitialStock(idx, $event)"
+                          placeholder="Ej: 10"
+                          [disabled]="isLoading()"
+                          class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                          [class.border-red-500]="variant.initialStock === null || variant.initialStock === undefined || variant.initialStock! < 0 || variant.initialStock! % 1 !== 0"
+                        />
+                        @if (variant.initialStock === null || variant.initialStock === undefined || variant.initialStock! < 0 || variant.initialStock! % 1 !== 0) {
+                          <span class="text-[10px] text-red-500 font-medium block">Entero ≥ 0 requerido</span>
+                        }
+                      </div>
+
+                      <div class="space-y-1">
+                        <label class="text-[11px] font-medium text-on-surface block">
+                          Umbral de alerta <span class="text-on-surface-variant font-normal">(Opcional)</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          [ngModel]="variant.lowStockThreshold"
+                          (ngModelChange)="updateVariantLowStockThreshold(idx, $event)"
+                          placeholder="Ej: 3 (vacío = sin alerta)"
+                          [disabled]="isLoading()"
+                          class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                          [class.border-red-500]="variant.lowStockThreshold !== null && variant.lowStockThreshold !== undefined && (variant.lowStockThreshold! < 0 || variant.lowStockThreshold! % 1 !== 0)"
+                        />
+                        @if (variant.lowStockThreshold !== null && variant.lowStockThreshold !== undefined && (variant.lowStockThreshold! < 0 || variant.lowStockThreshold! % 1 !== 0)) {
+                          <span class="text-[10px] text-red-500 font-medium block">Entero ≥ 0</span>
+                        }
+                      </div>
+                    </div>
+                  }
                 </div>
               }
             </div>
@@ -375,36 +444,177 @@
         }
       </section>
 
-      <!-- SECCIÓN 4: Disponibilidad y Forma de Preparación -->
+      <!-- SECCIÓN 4: Disponibilidad y Tipo de Elaboración -->
       <section class="space-y-3 pt-2 border-t border-outline-variant/15">
         <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-          4. Disponibilidad y Tipo de Elaboración
+          4. ¿Cómo vendes este producto?
         </label>
 
-        <div class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low space-y-3">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex flex-col">
-              <span class="text-xs font-bold text-on-surface">
-                {{ tracksInventory() ? 'Control de existencias limitadas (Stock)' : 'Elaborado al momento / A pedido' }}
-              </span>
-              <span class="text-[11px] text-on-surface-variant leading-relaxed">
-                {{ tracksInventory() ? 'Cada venta descontará unidades disponibles en tu tienda.' : 'Tus clientes pueden ordenar siempre fresco sin límite de existencias (ideal para cocina, cafetería o pastelería artesanal).' }}
-              </span>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-              <input
-                type="checkbox"
-                [checked]="tracksInventory()"
-                (change)="tracksInventory.set(!tracksInventory())"
-                [disabled]="isLoading()"
-                class="sr-only peer"
-              />
+        <!-- Selector Tipo Archetype (2 Tarjetas visuales) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Opción 1: Hecho al momento / A pedido -->
+          <div
+            (click)="tracksInventory.set(false)"
+            class="p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 relative select-none"
+            [class.border-primary]="!tracksInventory()"
+            [class.bg-primary/5]="!tracksInventory()"
+            [class.border-outline-variant/30]="tracksInventory()"
+            [class.bg-surface-container-low]="tracksInventory()"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  [class.bg-primary/15]="!tracksInventory()"
+                  [class.text-primary]="!tracksInventory()"
+                  [class.bg-surface-container-high]="tracksInventory()"
+                  [class.text-on-surface-variant]="tracksInventory()"
+                >
+                  <ng-icon name="matCheckOutline" class="text-lg" />
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-on-surface">Bajo demanda / A pedido</span>
+                  <span class="text-[10px] text-primary font-semibold">Personalizaciones, pedidos especiales o servicios</span>
+                </div>
+              </div>
               <div
-                class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
-              ></div>
-            </label>
+                class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5"
+                [class.border-primary]="!tracksInventory()"
+                [class.bg-primary]="!tracksInventory()"
+                [class.border-outline-variant]="tracksInventory()"
+              >
+                @if (!tracksInventory()) {
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                }
+              </div>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Tus clientes solicitan bajo demanda. Ideal para productos a medida, fabricación por encargo o servicios continuos.
+            </p>
+          </div>
+
+          <!-- Opción 2: Existencias limitadas en vitrina / stock -->
+          <div
+            (click)="tracksInventory.set(true)"
+            class="p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 relative select-none"
+            [class.border-primary]="tracksInventory()"
+            [class.bg-primary/5]="tracksInventory()"
+            [class.border-outline-variant/30]="!tracksInventory()"
+            [class.bg-surface-container-low]="!tracksInventory()"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  [class.bg-primary/15]="tracksInventory()"
+                  [class.text-primary]="tracksInventory()"
+                  [class.bg-surface-container-high]="!tracksInventory()"
+                  [class.text-on-surface-variant]="!tracksInventory()"
+                >
+                  <ng-icon name="matInventory2Outline" class="text-lg" />
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-on-surface">Con existencias físicas en tienda</span>
+                  <span class="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Control estricto de unidades numéricas</span>
+                </div>
+              </div>
+              <div
+                class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5"
+                [class.border-primary]="tracksInventory()"
+                [class.bg-primary]="tracksInventory()"
+                [class.border-outline-variant]="!tracksInventory()"
+              >
+                @if (tracksInventory()) {
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                }
+              </div>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Cada venta descuenta existencias automáticamente. Cuando se acaban las unidades, el producto se marca como agotado.
+            </p>
           </div>
         </div>
+
+        @if (!tracksInventory()) {
+          <!-- Mensaje tranquilizador cuando es A Pedido -->
+          <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2 animate-fade-in">
+            <ng-icon name="matCheckOutline" class="text-base text-emerald-600 shrink-0" />
+            <span>Disponible en tu tienda mientras tu negocio esté activo. No requiere conteo manual de existencias.</span>
+          </div>
+        } @else if (pricingMode() === 'single') {
+          <!-- Campos de Stock Físico solo si se eligió Con Stock -->
+          <div class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low space-y-3.5 animate-fade-in">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <!-- Stock Inicial Obligatorio -->
+              <div class="space-y-1.5">
+                <label for="prod-init-stock" class="text-xs font-semibold text-on-surface block">
+                  Unidades listas para vender <span class="text-red-500">*</span>
+                </label>
+                <div class="relative flex items-center">
+                  <input
+                    id="prod-init-stock"
+                    type="number"
+                    min="0"
+                    step="1"
+                    [ngModel]="initialStock()"
+                    (ngModelChange)="onInitialStockChange($event)"
+                    placeholder="Ej: 15"
+                    [disabled]="isLoading()"
+                    class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    [class.border-red-500]="tracksInventory() && (initialStock() === null || initialStock()! < 0 || initialStock()! % 1 !== 0)"
+                  />
+                </div>
+                @if (tracksInventory() && (initialStock() === null || initialStock()! < 0 || initialStock()! % 1 !== 0)) {
+                  <p class="text-[11px] text-red-500 font-medium">
+                    Ingresa un número entero mayor o igual a 0.
+                  </p>
+                } @else {
+                  <!-- Botones de atajo rápido de stock -->
+                  <div class="flex items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-on-surface-variant font-semibold">Atajo:</span>
+                    @for (shortcut of [5, 10, 20, 50]; track shortcut) {
+                      <button
+                        type="button"
+                        (click)="initialStock.set(shortcut)"
+                        class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-mono font-semibold transition-colors cursor-pointer"
+                      >
+                        {{ shortcut }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Umbral de Stock Bajo Opcional -->
+              <div class="space-y-1.5">
+                <label for="prod-threshold" class="text-xs font-semibold text-on-surface block">
+                  Avisarme cuando queden menos de <span class="text-on-surface-variant font-normal">(Opcional)</span>
+                </label>
+                <input
+                  id="prod-threshold"
+                  type="number"
+                  min="0"
+                  step="1"
+                  [ngModel]="lowStockThreshold()"
+                  (ngModelChange)="onLowStockThresholdChange($event)"
+                  placeholder="Ej: 3 (vacío = sin aviso)"
+                  [disabled]="isLoading()"
+                  class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  [class.border-red-500]="lowStockThreshold() !== null && lowStockThreshold() !== undefined && (lowStockThreshold()! < 0 || lowStockThreshold()! % 1 !== 0)"
+                />
+                @if (lowStockThreshold() !== null && lowStockThreshold() !== undefined && (lowStockThreshold()! < 0 || lowStockThreshold()! % 1 !== 0)) {
+                  <p class="text-[11px] text-red-500 font-medium">
+                    El umbral debe ser un entero mayor o igual a 0.
+                  </p>
+                } @else {
+                  <p class="text-[11px] text-on-surface-variant">
+                    Te alertará en tu panel cuando alcances este mínimo para que repongas.
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+        }
       </section>
 
       <!-- SECCIÓN 5: Enlace web y Código interno (Colapsable con auto-generación transparente) -->
@@ -455,7 +665,7 @@
                   type="text"
                   [ngModel]="slug()"
                   (ngModelChange)="onSlugChange($event)"
-                  placeholder="torta-humeda-de-chocolate"
+                  placeholder="polo-oversize-algodon"
                   maxlength="180"
                   [disabled]="isLoading()"
                   class="w-full pl-1 bg-transparent text-on-surface font-mono text-xs focus:outline-none"

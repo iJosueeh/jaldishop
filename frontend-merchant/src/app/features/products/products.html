@@ -3,14 +3,15 @@
   <app-products-header
     [activeCount]="productService.totalActiveCount()"
     (createNewProduct)="onCreateProduct()"
-    (adjustAvailability)="onAdjustQuota(productService.products()[0])"
+    (adjustAvailability)="onAdjustAvailability()"
   />
 
-  <!-- 2. Banner consolidado de alerta de insumos/cupos (solo si hay atención requerida) -->
+  <!-- 2. Banner consolidado de alertas de stock y atención requerida -->
   @if (productService.attentionRequiredProducts().length > 0) {
     <app-products-alert-banner
       [attentionCount]="productService.attentionRequiredProducts().length"
-      (viewDetails)="onStatusChange('INACTIVE')"
+      [attentionMessage]="productService.attentionMessage()"
+      (viewDetails)="onStatusChange('ATTENTION')"
     />
   }
 
@@ -38,6 +39,8 @@
       (editProduct)="onEditProduct($event)"
       (adjustQuota)="onAdjustQuota($event)"
       (toggleStatus)="onToggleStatus($event)"
+      (viewInventory)="onViewInventory($event)"
+      (openPreview)="onOpenStorePreview($event)"
       (createNewProduct)="onCreateProduct()"
       (clearFilters)="onClearFilters()"
     />
@@ -48,7 +51,10 @@
       [isEmptyCatalog]="productService.isEmptyCatalog()"
       [isFilterEmpty]="productService.isFilterEmpty()"
       (editProduct)="onEditProduct($event)"
+      (adjustQuota)="onAdjustQuota($event)"
       (toggleStatus)="onToggleStatus($event)"
+      (viewInventory)="onViewInventory($event)"
+      (openPreview)="onOpenStorePreview($event)"
       (createNewProduct)="onCreateProduct()"
       (clearFilters)="onClearFilters()"
     />
@@ -78,6 +84,7 @@
     [isOpen]="isEditDrawerOpen()"
     [product]="selectedProductForEdit()"
     [categories]="productService.categories()"
+    [initialTab]="editDrawerInitialTab()"
     (closeDrawer)="onCloseEditDrawer()"
     (productUpdated)="onProductUpdated($event)"
   />

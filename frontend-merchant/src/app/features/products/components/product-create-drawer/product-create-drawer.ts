@@ -16,6 +16,7 @@ import {
   matRefreshOutline,
   matLayersOutline,
   matDeleteOutline,
+  matSkilletOutline,
 } from '@ng-icons/material-symbols/outline';
 import {
   ProductCategory,
@@ -28,7 +29,8 @@ import { ProductService } from '../../../../core/services/product.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MediaUploadService } from '../../../../core/services/media-upload.service';
-import { of, switchMap } from 'rxjs';
+import { VariantInventoryCoordinatorService } from '../../../../core/services/variant-inventory-coordinator.service';
+import { forkJoin, map, of, switchMap } from 'rxjs';
 import { ProductGalleryUploader } from '../product-gallery-uploader/product-gallery-uploader';
 
 export function generateProductSlug(text: string): string {
@@ -80,24 +82,30 @@ export interface FormVariantItem {
   sku: string;
   isCustomSku: boolean;
   tracksInventory: boolean;
+  initialStock?: number | null;
+  lowStockThreshold?: number | null;
 }
 
 const createInitialVariants = (): FormVariantItem[] => [
   {
     id: 'v-1',
-    presentationName: 'Chico / Personal',
+    presentationName: 'Estándar / Unidad',
     priceAmount: null,
     sku: '',
     isCustomSku: false,
     tracksInventory: false,
+    initialStock: null,
+    lowStockThreshold: null,
   },
   {
     id: 'v-2',
-    presentationName: 'Grande / Familiar',
+    presentationName: 'Pack / Familiar',
     priceAmount: null,
     sku: '',
     isCustomSku: false,
     tracksInventory: false,
+    initialStock: null,
+    lowStockThreshold: null,
   },
 ];
 
@@ -120,6 +128,7 @@ const createInitialVariants = (): FormVariantItem[] => [
       matRefreshOutline,
       matLayersOutline,
       matDeleteOutline,
+      matSkilletOutline,
     }),
   ],
   templateUrl: './product-create-drawer.html',
@@ -129,6 +138,7 @@ export class ProductCreateDrawer {
   private readonly productService = inject(ProductService);
   private readonly storeService = inject(StoreService);
   private readonly mediaUploadService = inject(MediaUploadService);
+  private readonly coordinator = inject(VariantInventoryCoordinatorService);
   private readonly toast = inject(ToastService);
 
   readonly isOpen = input<boolean>(false);
@@ -153,7 +163,10 @@ export class ProductCreateDrawer {
   readonly priceAmount = signal<number | null>(null);
   readonly presentationName = signal<string>('Unidad Estándar');
   readonly tracksInventory = signal<boolean>(false);
+  readonly initialStock = signal<number | null>(null);
+  readonly lowStockThreshold = signal<number | null>(null);
   readonly formVariants = signal<FormVariantItem[]>(createInitialVariants());
+  readonly pendingCreatedProduct = signal<Product | null>(null);
 
   // Opciones Avanzadas (Auto-generadas en background con opción de personalización)
   readonly showAdvancedOptions = signal<boolean>(false);
@@ -174,17 +187,50 @@ export class ProductCreateDrawer {
   readonly isNameValid = computed(() => this.name().trim().length >= 2);
   readonly isPriceValid = computed(() => {
     if (this.pricingMode() === 'single') {
-      return this.priceAmount() !== null && this.priceAmount()! > 0;
+      const priceValid = this.priceAmount() !== null && this.priceAmount()! > 0;
+      if (!priceValid) return false;
+
+      if (this.tracksInventory()) {
+        const stock = this.initialStock();
+        if (stock === null || !Number.isInteger(stock) || stock < 0) {
+          return false;
+        }
+        const threshold = this.lowStockThreshold();
+        if (
+          threshold !== null &&
+          threshold !== undefined &&
+          (!Number.isInteger(threshold) || threshold < 0)
+        ) {
+          return false;
+        }
+      }
+      return true;
     }
+
     const list = this.formVariants();
     return (
       list.length >= 2 &&
-      list.every(
-        (v) =>
-          v.presentationName.trim().length >= 1 &&
-          v.priceAmount !== null &&
-          v.priceAmount > 0,
-      )
+      list.every((v) => {
+        const nameValid = v.presentationName.trim().length >= 1;
+        const priceValid = v.priceAmount !== null && v.priceAmount > 0;
+        if (!nameValid || !priceValid) return false;
+
+        if (v.tracksInventory) {
+          const stock = v.initialStock;
+          if (stock === null || stock === undefined || !Number.isInteger(stock) || stock < 0) {
+            return false;
+          }
+          const threshold = v.lowStockThreshold;
+          if (
+            threshold !== null &&
+            threshold !== undefined &&
+            (!Number.isInteger(threshold) || threshold < 0)
+          ) {
+            return false;
+          }
+        }
+        return true;
+      })
     );
   });
   readonly isCategoryValid = computed(() => {
@@ -290,6 +336,79 @@ export class ProductCreateDrawer {
     );
   }
 
+  updateVariantInitialStock(index: number, val: any): void {
+    const num = val === '' || val === null || val === undefined ? null : Number(val);
+    this.formVariants.update((list) =>
+      list.map((v, i) => (i === index ? { ...v, initialStock: num } : v)),
+    );
+  }
+
+  updateVariantLowStockThreshold(index: number, val: any): void {
+    const num = val === '' || val === null || val === undefined ? null : Number(val);
+    this.formVariants.update((list) =>
+      list.map((v, i) => (i === index ? { ...v, lowStockThreshold: num } : v)),
+    );
+  }
+
+  onInitialStockChange(val: any): void {
+    const num = val === '' || val === null || val === undefined ? null : Number(val);
+    this.initialStock.set(num);
+  }
+
+  onLowStockThresholdChange(val: any): void {
+    const num = val === '' || val === null || val === undefined ? null : Number(val);
+    this.lowStockThreshold.set(num);
+  }
+
+  retryPendingProductInventory(): void {
+    const pending = this.pendingCreatedProduct();
+    if (!pending) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    const trackedVariants = (pending.variants || []).filter((v) => v.tracksInventory);
+    const initObservables = trackedVariants.map((variant) => {
+      let stock = 0;
+      let threshold: number | null = null;
+      if (this.pricingMode() === 'single') {
+        stock = this.initialStock() ?? 0;
+        threshold = this.lowStockThreshold() ?? null;
+      } else {
+        const formV = this.formVariants().find(
+          (fv) => fv.presentationName.trim() === variant.presentationName.trim(),
+        );
+        stock = formV?.initialStock ?? 0;
+        threshold = formV?.lowStockThreshold ?? null;
+      }
+      return this.coordinator.initializePendingInventory(variant, stock, threshold);
+    });
+
+    forkJoin(initObservables).subscribe({
+      next: (results) => {
+        this.isLoading.set(false);
+        const failed = results.filter((r) => !r.success);
+        if (failed.length > 0) {
+          const failedMsg = failed.map((f) => f.errorMessage).join('; ');
+          this.errorMessage.set(failedMsg);
+          this.toast.error('Aún no se pudo inicializar el inventario de todas las variantes.');
+          return;
+        }
+        this.pendingCreatedProduct.set(null);
+        this.toast.success(
+          `Inventario inicializado exitosamente para "${pending.name}".`,
+          '¡Inventario Listo!',
+        );
+        this.productCreated.emit(pending);
+        this.handleClose();
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(err?.message || 'Error al reintentar la configuración de inventario.');
+      },
+    });
+  }
+
   toggleAdvancedOptions(): void {
     this.showAdvancedOptions.update((v) => !v);
   }
@@ -376,6 +495,8 @@ export class ProductCreateDrawer {
                   priceAmount: Number(v.priceAmount),
                   priceCurrency: 'PEN',
                   tracksInventory: v.tracksInventory,
+                  initialStock: v.initialStock,
+                  lowStockThreshold: v.lowStockThreshold,
                 }))
               : undefined,
           presentationName:
@@ -395,18 +516,77 @@ export class ProductCreateDrawer {
             this.pricingMode() === 'multiple'
               ? this.formVariants()[0].tracksInventory
               : this.tracksInventory(),
+          initialStock:
+            this.pricingMode() === 'multiple'
+              ? this.formVariants()[0].initialStock
+              : this.initialStock(),
+          lowStockThreshold:
+            this.pricingMode() === 'multiple'
+              ? this.formVariants()[0].lowStockThreshold
+              : this.lowStockThreshold(),
         };
 
         return this.productService.createProductWithDefaultVariant(store.id, payload);
       }),
+      switchMap((createdProduct) => {
+        // Verificar si alguna variante requiere inicialización de inventario
+        const trackedVariants = (createdProduct.variants || []).filter((v) => v.tracksInventory);
+        if (trackedVariants.length === 0) {
+          return of({ product: createdProduct, failedCount: 0 });
+        }
+
+        // Construir observables para inicializar el stock de cada variante con tracking
+        const initObservables = trackedVariants.map((variant) => {
+          let stock = 0;
+          let threshold: number | null = null;
+
+          if (this.pricingMode() === 'single') {
+            stock = this.initialStock() ?? 0;
+            threshold = this.lowStockThreshold() ?? null;
+          } else {
+            const formV = this.formVariants().find(
+              (fv) => fv.presentationName.trim() === variant.presentationName.trim(),
+            );
+            stock = formV?.initialStock ?? 0;
+            threshold = formV?.lowStockThreshold ?? null;
+          }
+
+          return this.coordinator.initializePendingInventory(variant, stock, threshold);
+        });
+
+        return forkJoin(initObservables).pipe(
+          map((results: any[]) => {
+            const failed = results.filter((r) => !r.success);
+            return {
+              product: createdProduct,
+              failedCount: failed.length,
+              failedMessages: failed.map((f) => f.errorMessage).join('; '),
+            };
+          }),
+        );
+      }),
     ).subscribe({
-      next: (createdProduct) => {
+      next: (result) => {
         this.isLoading.set(false);
+        const { product, failedCount, failedMessages } = result as any;
+
+        if (failedCount > 0) {
+          this.pendingCreatedProduct.set(product);
+          this.errorMessage.set(
+            `Producto creado en catálogo, pero hubo error en inventario: ${failedMessages}`,
+          );
+          this.toast.error(
+            `"${product.name}" se creó, pero no se pudo inicializar su inventario.`,
+            'Atención',
+          );
+          return;
+        }
+
         this.toast.success(
-          `"${createdProduct.name}" se publicó exitosamente en tu catálogo.`,
+          `"${product.name}" se publicó exitosamente en tu catálogo.`,
           '¡Producto Creado!',
         );
-        this.productCreated.emit(createdProduct);
+        this.productCreated.emit(product);
         this.handleClose();
       },
       error: (err) => {
@@ -435,6 +615,9 @@ export class ProductCreateDrawer {
     this.sku.set('');
     this.isCustomSku.set(false);
     this.tracksInventory.set(false);
+    this.initialStock.set(null);
+    this.lowStockThreshold.set(null);
+    this.pendingCreatedProduct.set(null);
     this.showAdvancedOptions.set(false);
     this.images.set([]);
     this.imageUrl.set('');

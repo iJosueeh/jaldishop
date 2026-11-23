@@ -9,6 +9,7 @@ import {
   matEventBusyOutline,
   matBlockOutline,
   matStarOutline,
+  matPaymentsOutline,
 } from '@ng-icons/material-symbols/outline';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { OrderService } from '../../../../core/services/order.service';
@@ -24,6 +25,7 @@ import { OrderService } from '../../../../core/services/order.service';
       matEventBusyOutline,
       matBlockOutline,
       matStarOutline,
+      matPaymentsOutline,
     }),
   ],
   selector: 'app-dashboard-kpis',
@@ -38,6 +40,14 @@ export class DashboardKpis implements OnInit {
   readonly isTodayCountsLoading = computed(() => this.orderService.isTodayCountsLoading());
   readonly todayCountsError = computed(() => this.orderService.todayCountsError());
   readonly isTodayOutdated = computed(() => this.orderService.isTodayOutdated());
+
+  readonly todaySales = computed<number>(() => {
+    const orders = this.orderService.orders();
+    if (!orders || orders.length === 0) return 0;
+    return orders
+      .filter((o) => o.status !== 'CANCELLED')
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  });
 
   readonly todayException = computed(() => this.capacityService.todayException());
   readonly capacityTotal = computed(() => this.capacityService.todayEffectiveCapacityReal());

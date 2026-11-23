@@ -3,11 +3,18 @@ import {
   HostListener,
   inject,
   input,
+  OnChanges,
   output,
   signal,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminStoreSummary } from '../../../../../core/models/admin.models';
+import { AdminService } from '../../../../../core/services/admin.service';
+import {
+  AdminAnalyticsSummary,
+  AdminStoreDetail,
+  AdminStoreSummary,
+} from '../../../../../core/models/admin.models';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -30,6 +37,9 @@ import {
   matCheckOutline,
   matBoltOutline,
   matTuneOutline,
+  matReceiptLongOutline,
+  matAccountBalanceOutline,
+  matPaymentsOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -55,14 +65,18 @@ import {
       matCheckOutline,
       matBoltOutline,
       matTuneOutline,
+      matReceiptLongOutline,
+      matAccountBalanceOutline,
+      matPaymentsOutline,
     }),
   ],
   selector: 'app-admin-store-drawer',
   styleUrl: './admin-store-drawer.css',
   templateUrl: './admin-store-drawer.html',
 })
-export class AdminStoreDrawer {
+export class AdminStoreDrawer implements OnChanges {
   private readonly toastService = inject(ToastService);
+  private readonly adminService = inject(AdminService);
 
   readonly store = input<AdminStoreSummary | null>(null);
   readonly isOpen = input<boolean>(false);
@@ -75,6 +89,33 @@ export class AdminStoreDrawer {
   readonly isLinkCopied = signal<boolean>(false);
   readonly adminNote = signal<string>('');
   readonly isNoteSaved = signal<boolean>(false);
+
+  // Datos Enriquecidos (Fiscal, Liquidación y Métricas de Tienda)
+  readonly storeDetail = signal<AdminStoreDetail | null>(null);
+  readonly isLoadingDetail = signal<boolean>(false);
+  readonly storeAnalytics = signal<AdminAnalyticsSummary | null>(null);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.isOpen() && this.store()) {
+      this.loadStoreFullData(this.store()!.id);
+    }
+  }
+
+  loadStoreFullData(storeId: string): void {
+    this.isLoadingDetail.set(true);
+    this.adminService.getStoreDetail(storeId, true).subscribe({
+      next: (detail) => {
+        this.storeDetail.set(detail);
+        this.isLoadingDetail.set(false);
+      },
+      error: () => this.isLoadingDetail.set(false),
+    });
+
+    this.adminService.loadAnalyticsSummary(undefined, undefined, storeId).subscribe({
+      next: (analytics) => this.storeAnalytics.set(analytics),
+      error: () => {},
+    });
+  }
 
   @HostListener('window:keydown.escape')
   handleEscape(): void {
@@ -144,4 +185,3 @@ export class AdminStoreDrawer {
     setTimeout(() => this.isNoteSaved.set(false), 2500);
   }
 }
-

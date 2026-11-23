@@ -56,10 +56,12 @@ describe('OrdersGrid', () => {
     const advanceSpy = vi.fn();
     const detailsSpy = vi.fn();
     const whatsAppSpy = vi.fn();
+    const printSpy = vi.fn();
 
     component.statusAdvance.subscribe(advanceSpy);
     component.openDetails.subscribe(detailsSpy);
     component.whatsAppClick.subscribe(whatsAppSpy);
+    component.printTicket.subscribe(printSpy);
 
     component.statusAdvance.emit(mockOrder);
     expect(advanceSpy).toHaveBeenCalledWith(mockOrder);
@@ -69,6 +71,9 @@ describe('OrdersGrid', () => {
 
     component.whatsAppClick.emit(mockOrder);
     expect(whatsAppSpy).toHaveBeenCalledWith(mockOrder);
+
+    component.printTicket.emit(mockOrder);
+    expect(printSpy).toHaveBeenCalledWith(mockOrder);
   });
 
   it('debe emitir resetFilter al hacer clic en ver todos cuando está vacío', () => {

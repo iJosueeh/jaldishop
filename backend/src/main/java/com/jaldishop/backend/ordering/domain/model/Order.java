@@ -35,6 +35,9 @@ public class Order {
     private final Instant confirmedAt;
     private OrderStatus status;
     private Instant updatedAt;
+    private final String origin;
+    private final String paymentMethod;
+    private final String notes;
     private final List<OrderItem> items;
     private final List<OrderStatusHistory> statusHistory;
 
@@ -45,6 +48,7 @@ public class Order {
                   DeliveryAddressSnapshot deliveryAddressSnapshot,
                   MonetarySummary pricing,
                   Instant confirmedAt, OrderStatus status, Instant updatedAt,
+                  String origin, String paymentMethod, String notes,
                   List<OrderItem> items, List<OrderStatusHistory> statusHistory) {
         this.id = id;
         this.orderNumber = orderNumber;
@@ -62,6 +66,9 @@ public class Order {
         this.confirmedAt = confirmedAt;
         this.status = status;
         this.updatedAt = updatedAt;
+        this.origin = origin != null ? origin : "ONLINE";
+        this.paymentMethod = paymentMethod;
+        this.notes = notes;
         this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
         this.statusHistory = statusHistory != null ? new ArrayList<>(statusHistory) : new ArrayList<>();
     }
@@ -77,7 +84,23 @@ public class Order {
         return new Order(
                 id, orderNumber, userId, storeId, paymentId, capacityReservationId, deliveryMode, serviceDate,
                 serviceStartTime, serviceEndTime, customer, deliveryAddressSnapshot, pricing,
-                confirmedAt, status, updatedAt, items, statusHistory
+                confirmedAt, status, updatedAt, "ONLINE", null, null, items, statusHistory
+        );
+    }
+
+    public static Order reconstitute(UUID id, String orderNumber, UUID userId, UUID storeId, UUID paymentId,
+                                     UUID capacityReservationId, DeliveryMode deliveryMode, LocalDate serviceDate,
+                                     LocalTime serviceStartTime, LocalTime serviceEndTime,
+                                     CustomerSnapshot customer,
+                                     DeliveryAddressSnapshot deliveryAddressSnapshot,
+                                     MonetarySummary pricing,
+                                     Instant confirmedAt, OrderStatus status, Instant updatedAt,
+                                     String origin, String paymentMethod, String notes,
+                                     List<OrderItem> items, List<OrderStatusHistory> statusHistory) {
+        return new Order(
+                id, orderNumber, userId, storeId, paymentId, capacityReservationId, deliveryMode, serviceDate,
+                serviceStartTime, serviceEndTime, customer, deliveryAddressSnapshot, pricing,
+                confirmedAt, status, updatedAt, origin, paymentMethod, notes, items, statusHistory
         );
     }
 
@@ -96,7 +119,7 @@ public class Order {
                 CustomerSnapshot.of(customerName, customerPhone, customerEmail),
                 DeliveryAddressSnapshot.of(deliveryAddress, deliveryReference, deliveryLatitude, deliveryLongitude),
                 MonetarySummary.of(productsSubtotalAmount, discountAmount, discountCode, deliveryFeeAmount, includedTaxAmount, totalAmount, currency),
-                confirmedAt, status, updatedAt, items, statusHistory
+                confirmedAt, status, updatedAt, "ONLINE", null, null, items, statusHistory
         );
     }
 
@@ -150,7 +173,7 @@ public class Order {
                 UUID.randomUUID(), orderNumber, data.userId(), data.storeId(), data.paymentId(),
                 data.capacityReservationId(), data.deliveryMode(), data.serviceDate(), data.serviceStartTime(),
                 data.serviceEndTime(), customer, deliverySnapshot, pricing, now,
-                OrderStatus.CONFIRMED, now, new ArrayList<>(), new ArrayList<>()
+                OrderStatus.CONFIRMED, now, "ONLINE", null, null, new ArrayList<>(), new ArrayList<>()
         );
 
         for (ItemData item : data.items()) {
@@ -158,6 +181,66 @@ public class Order {
         }
         order.statusHistory.add(OrderStatusHistory.create(
                 order.id, null, OrderStatus.CONFIRMED, "Pedido confirmado por pago aprobado.", now
+        ));
+
+        return order;
+    }
+
+    public static Order createMerchantDirect(MerchantDirectData data, String orderNumber) {
+        if (data == null) {
+            throw new IllegalArgumentException("Los datos de la orden son obligatorios.");
+        }
+        if (orderNumber == null || orderNumber.isBlank()) {
+            throw new BusinessRuleException("RN-ORD-02", "El número de orden es obligatorio.");
+        }
+        if (data.userId() == null) {
+            throw new BusinessRuleException("RN-ORD-03", "El usuario registrador es obligatorio para la orden.");
+        }
+        if (data.storeId() == null) {
+            throw new BusinessRuleException("RN-ORD-04", "La tienda es obligatoria para la orden.");
+        }
+        if (data.deliveryMode() == null) {
+            throw new BusinessRuleException("RN-DEL-01", "La modalidad de entrega es obligatoria.");
+        }
+        if (data.deliveryMode() == DeliveryMode.DELIVERY
+                && (data.deliveryAddress() == null || data.deliveryAddress().isBlank())) {
+            throw new BusinessRuleException("RN-DEL-05", "La dirección de entrega es obligatoria para modalidad DELIVERY.");
+        }
+        if (data.items() == null || data.items().isEmpty()) {
+            throw new BusinessRuleException("RN-ORD-06", "Una orden debe contener al menos un ítem.");
+        }
+        validateServiceWindow(data.serviceStartTime(), data.serviceEndTime());
+        validateAmounts(data.productsSubtotalAmount(), data.discountAmount(),
+                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount());
+        if (data.currency() == null || data.currency().isBlank()) {
+            throw new BusinessRuleException("RN-ORD-08", "La moneda de la orden es obligatoria.");
+        }
+
+        CustomerSnapshot customer = CustomerSnapshot.of(data.customerName(), data.customerPhone(), data.customerEmail());
+        DeliveryAddressSnapshot deliverySnapshot = DeliveryAddressSnapshot.of(
+                data.deliveryAddress(), data.deliveryReference(), data.deliveryLatitude(), data.deliveryLongitude()
+        );
+        MonetarySummary pricing = MonetarySummary.of(
+                data.productsSubtotalAmount(), data.discountAmount(), data.discountCode(),
+                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount(), data.currency()
+        );
+
+        Instant now = Instant.now();
+        LocalDate serviceDate = data.serviceDate() != null ? data.serviceDate() : LocalDate.now();
+
+        Order order = new Order(
+                UUID.randomUUID(), orderNumber, data.userId(), data.storeId(), null,
+                null, data.deliveryMode(), serviceDate, data.serviceStartTime(),
+                data.serviceEndTime(), customer, deliverySnapshot, pricing, now,
+                OrderStatus.CONFIRMED, now, "MANUAL", data.paymentMethod(), data.notes(),
+                new ArrayList<>(), new ArrayList<>()
+        );
+
+        for (ItemData item : data.items()) {
+            order.items.add(OrderItem.create(order.id, item));
+        }
+        order.statusHistory.add(OrderStatusHistory.create(
+                order.id, data.userId(), OrderStatus.CONFIRMED, "Pedido registrado directamente por el comerciante.", now
         ));
 
         return order;
@@ -182,29 +265,32 @@ public class Order {
         this.statusHistory.add(OrderStatusHistory.create(this.id, changedByUserId, newStatus, reason, now));
     }
 
-    private static void validateServiceWindow(LocalTime startTime, LocalTime endTime) {
-        if (startTime == null && endTime == null) {
-            return;
-        }
-        if (startTime == null || endTime == null) {
-            throw new BusinessRuleException("RN-ORD-05", "La franja de servicio debe indicar inicio y fin juntos.");
-        }
-        if (!startTime.isBefore(endTime)) {
-            throw new BusinessRuleException("RN-ORD-05", "El inicio de la franja de servicio debe ser anterior al fin.");
+    private static void validateServiceWindow(LocalTime start, LocalTime end) {
+        if (start != null && end != null && !end.isAfter(start)) {
+            throw new BusinessRuleException("RN-ORD-09", "La hora de fin de servicio debe ser posterior a la de inicio.");
         }
     }
 
-    private static void validateAmounts(BigDecimal subtotal, BigDecimal discount, BigDecimal deliveryFee,
-                                        BigDecimal includedTax, BigDecimal total) {
-        if (subtotal == null || subtotal.signum() < 0
-                || discount == null || discount.signum() < 0
-                || deliveryFee == null || deliveryFee.signum() < 0
-                || includedTax == null || includedTax.signum() < 0
-                || total == null || total.signum() < 0) {
-            throw new BusinessRuleException("RN-ORD-09", "Los montos de la orden no pueden ser negativos.");
+    private static void validateAmounts(BigDecimal subtotal, BigDecimal discount,
+                                       BigDecimal deliveryFee, BigDecimal tax, BigDecimal total) {
+        if (subtotal == null || subtotal.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-10", "El subtotal no puede ser negativo ni nulo.");
         }
-        if (discount.compareTo(subtotal) > 0) {
-            throw new BusinessRuleException("RN-ORD-10", "El descuento no puede superar el subtotal de productos.");
+        if (discount == null || discount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-11", "El descuento no puede ser negativo ni nulo.");
+        }
+        if (deliveryFee == null || deliveryFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-12", "El costo de delivery no puede ser negativo ni nulo.");
+        }
+        if (tax == null || tax.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-13", "El impuesto no puede ser negativo ni nulo.");
+        }
+        if (total == null || total.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-14", "El total no puede ser negativo ni nulo.");
+        }
+        BigDecimal expectedTotal = subtotal.subtract(discount).add(deliveryFee);
+        if (total.compareTo(expectedTotal) != 0) {
+            throw new BusinessRuleException("RN-ORD-15", "El total de la orden no coincide con la suma calculada.");
         }
     }
 
@@ -242,6 +328,9 @@ public class Order {
     public Instant getConfirmedAt() { return confirmedAt; }
     public OrderStatus getStatus() { return status; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public String getOrigin() { return origin; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public String getNotes() { return notes; }
     public List<OrderItem> getItems() { return Collections.unmodifiableList(items); }
     public List<OrderStatusHistory> getStatusHistory() { return Collections.unmodifiableList(statusHistory); }
 
@@ -268,6 +357,32 @@ public class Order {
             BigDecimal deliveryFeeAmount,
             BigDecimal includedTaxAmount,
             BigDecimal totalAmount,
+            List<ItemData> items
+    ) {}
+
+    public record MerchantDirectData(
+            UUID userId,
+            UUID storeId,
+            DeliveryMode deliveryMode,
+            LocalDate serviceDate,
+            LocalTime serviceStartTime,
+            LocalTime serviceEndTime,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String currency,
+            BigDecimal productsSubtotalAmount,
+            BigDecimal discountAmount,
+            String discountCode,
+            BigDecimal deliveryFeeAmount,
+            BigDecimal includedTaxAmount,
+            BigDecimal totalAmount,
+            String paymentMethod,
+            String notes,
             List<ItemData> items
     ) {}
 

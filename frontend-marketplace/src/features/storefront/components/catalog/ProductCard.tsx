@@ -1,21 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Clock, Layers } from 'lucide-react';
+import { Plus, Clock, Layers, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/components/ui/Button';
 import { ProductVisual } from '../ProductVisual';
 import { ProductItem } from '../../types/storefront.types';
 import { formatCurrency } from '@/shared/utils/formatters';
+import { cn } from '@/shared/utils/cn';
 
 interface ProductCardProps {
   product: ProductItem;
   onAdd: (product: ProductItem) => void;
   currentQuantity?: number;
   pending?: boolean;
+  onOpenDetail?: (product: ProductItem) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (productId: string) => void;
+  isTogglingFavorite?: boolean;
 }
 
-export function ProductCard({ product, onAdd, currentQuantity = 0, pending = false }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onAdd,
+  currentQuantity = 0,
+  pending = false,
+  onOpenDetail,
+  isFavorite = false,
+  onToggleFavorite,
+  isTogglingFavorite = false,
+}: ProductCardProps) {
   const variants = product.variants?.filter((variant) => variant.status === 'ACTIVE') || [];
   const [variantId, setVariantId] = useState('');
   const selected = variants.length === 1 ? variants[0] : variants.find((variant) => variant.id === variantId);
@@ -36,7 +50,13 @@ export function ProductCard({ product, onAdd, currentQuantity = 0, pending = fal
     >
       <div>
         {/* Cabecera visual con fotografía editorial (aspect 4:3) */}
-        <div className="relative overflow-hidden rounded-t-[12px] bg-stone-100">
+        <div
+          onClick={() => onOpenDetail?.(product)}
+          className={cn(
+            'relative overflow-hidden rounded-t-[12px] bg-stone-100',
+            onOpenDetail && 'cursor-pointer'
+          )}
+        >
           <ProductVisual
             name={product.name}
             imageUrl={product.imageUrl}
@@ -58,11 +78,43 @@ export function ProductCard({ product, onAdd, currentQuantity = 0, pending = fal
               </span>
             )}
           </div>
+
+          {/* Botón de Favorito Flotante */}
+          {onToggleFavorite && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(product.id);
+              }}
+              disabled={isTogglingFavorite}
+              aria-label={isFavorite ? `Quitar ${product.name} de favoritos` : `Añadir ${product.name} a favoritos`}
+              className={cn(
+                'absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md cursor-pointer',
+                isFavorite
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100'
+                  : 'bg-white/90 text-stone-500 hover:text-stone-900 hover:bg-white border border-stone-200/80 opacity-90 group-hover:opacity-100'
+              )}
+            >
+              <Heart
+                className={cn(
+                  'w-4 h-4 transition-transform active:scale-125',
+                  isFavorite && 'fill-rose-500 text-rose-500'
+                )}
+              />
+            </button>
+          )}
         </div>
 
         {/* Contenido Editorial del Producto */}
         <div className="p-4 sm:p-5 space-y-2">
-          <h3 className="font-display text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug">
+          <h3
+            onClick={() => onOpenDetail?.(product)}
+            className={cn(
+              'font-display text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug',
+              onOpenDetail && 'cursor-pointer'
+            )}
+          >
             {product.name}
           </h3>
 

@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminUserRole, AdminUserSummary } from '../../../../../core/models/admin.models';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -32,6 +32,7 @@ export class UserRoleModal {
   readonly user = input<AdminUserSummary | null>(null);
   readonly targetRole = input<AdminUserRole | null>(null);
   readonly action = input<'ADD' | 'REMOVE'>('ADD');
+  readonly isClosing = signal<boolean>(false);
 
   readonly confirm = output<{
     user: AdminUserSummary;
@@ -40,6 +41,15 @@ export class UserRoleModal {
     newRoles: AdminUserRole[];
   }>();
   readonly cancel = output<void>();
+
+  handleCancel(): void {
+    if (this.isClosing()) return;
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.isClosing.set(false);
+      this.cancel.emit();
+    }, 200);
+  }
 
   readonly calculatedNewRoles = computed<AdminUserRole[]>(() => {
     const u = this.user();

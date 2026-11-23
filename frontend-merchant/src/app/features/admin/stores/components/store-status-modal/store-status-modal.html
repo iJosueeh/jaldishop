@@ -1,15 +1,21 @@
 @if (isOpen() && store()) {
   <div
-    class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-fade-in"
+    class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans"
+    [class.animate-fade-in]="!isClosing()"
+    [class.modal-backdrop-exit]="isClosing()"
+    (click)="handleCancel()"
   >
     <div
       class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-xl w-full max-w-md p-5 sm:p-6 flex flex-col gap-4 relative"
+      [class.animate-scale-up]="!isClosing()"
+      [class.modal-dialog-exit]="isClosing()"
+      (click)="$event.stopPropagation()"
     >
       <!-- Botón de Cerrar -->
       <button
         type="button"
-        (click)="cancel.emit()"
-        class="absolute top-4 right-4 p-1.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        (click)="handleCancel()"
+        class="absolute top-4 right-4 p-1.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
         aria-label="Cerrar modal"
       >
         <ng-icon name="matCloseOutline" class="text-[20px]" />
@@ -58,8 +64,8 @@
       <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/20">
         <button
           type="button"
-          (click)="cancel.emit()"
-          class="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+          (click)="handleCancel()"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
         >
           Cancelar
         </button>

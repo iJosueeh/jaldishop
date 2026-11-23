@@ -1,0 +1,222 @@
+<div class="rounded-2xl bg-surface-bright border border-outline-variant shadow-2xs overflow-hidden font-sans">
+  <!-- Estado de Carga Inicial (Skeletons) -->
+  @if (isLoading() && items().length === 0) {
+    <div class="p-6 flex flex-col gap-4">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="flex items-center justify-between gap-4 animate-pulse">
+          <div class="flex flex-col gap-2 w-1/3">
+            <div class="h-4 bg-surface-dim rounded-md w-3/4"></div>
+            <div class="h-3 bg-surface-container rounded-md w-1/2"></div>
+          </div>
+          <div class="h-4 bg-surface-container rounded-md w-16"></div>
+          <div class="h-4 bg-surface-container rounded-md w-16"></div>
+          <div class="h-4 bg-surface-container rounded-md w-16"></div>
+          <div class="h-8 bg-surface-dim rounded-xl w-24"></div>
+        </div>
+      }
+    </div>
+  } @else if (hasError() && items().length === 0) {
+    <!-- Estado de Error HTTP -->
+    <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
+        <ng-icon name="matErrorOutline" class="text-2xl" />
+      </div>
+      <h3 class="text-sm font-bold text-on-surface">Error al cargar inventario</h3>
+      <p class="text-xs text-on-surface-variant max-w-sm">
+        {{ errorMessage() || 'No pudimos conectar con el servidor para obtener los datos de existencias.' }}
+      </p>
+      <button
+        type="button"
+        (click)="retry.emit()"
+        class="mt-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors cursor-pointer"
+      >
+        Reintentar
+      </button>
+    </div>
+  } @else if (items().length === 0) {
+    <!-- Estado Vacío (Sin variantes o sin resultados de filtro) -->
+    <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-surface text-on-surface-variant/70 flex items-center justify-center border border-outline-variant">
+        <ng-icon name="matInventory2Outline" class="text-2xl" />
+      </div>
+      <h3 class="text-sm font-bold text-on-surface">
+        {{ isFilterActive() ? 'No se encontraron variantes' : 'Sin variantes registradas' }}
+      </h3>
+      <p class="text-xs text-on-surface-variant max-w-sm">
+        {{
+          isFilterActive()
+            ? 'Ningún ítem coincide con tu búsqueda o filtros actuales. Prueba modificando los criterios.'
+            : 'Tu catálogo no cuenta con variantes registradas. Crea tus primeros productos desde el módulo de Productos.'
+        }}
+      </p>
+      @if (isFilterActive()) {
+        <button
+          type="button"
+          (click)="clearFilters.emit()"
+          class="mt-2 px-3.5 py-2 rounded-xl bg-surface-bright border border-outline-variant text-on-surface text-xs font-bold hover:bg-surface-dim cursor-pointer shadow-2xs"
+        >
+          Limpiar filtros
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- Tabla Responsive de Inventario -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" aria-label="Tabla de inventario de variantes">
+        <thead>
+          <tr class="border-b border-outline-variant bg-surface text-[11px] font-bold text-on-surface-variant/70 uppercase tracking-wider">
+            <th scope="col" class="py-3 px-4 sm:px-6">Producto y Variante</th>
+            <th scope="col" class="py-3 px-4 text-center">Físico</th>
+            <th scope="col" class="py-3 px-4 text-center">Reservado</th>
+            <th scope="col" class="py-3 px-4 text-center">Disponible</th>
+            <th scope="col" class="py-3 px-4 text-center">Umbral</th>
+            <th scope="col" class="py-3 px-4 text-center">Estado</th>
+            <th scope="col" class="py-3 px-4 sm:px-6 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/60 text-xs text-on-surface">
+          @for (item of items(); track item.variantId) {
+            <tr
+              (click)="onRowClick(item)"
+              class="hover:bg-surface-dim/40 transition-colors cursor-pointer group"
+              [class.bg-rose-50/30]="item.isLowStock && (item.physicalQuantity ?? 0) <= 0"
+              [class.bg-amber-50/20]="item.isLowStock && (item.physicalQuantity ?? 0) > 0"
+            >
+              <!-- Producto y Variante -->
+              <td class="py-3.5 px-4 sm:px-6">
+                <div class="flex flex-col min-w-0">
+                  <span class="font-bold text-on-surface truncate group-hover:text-primary transition-colors">{{ item.productName }}</span>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-on-surface-variant font-medium truncate">{{ item.presentationName }}</span>
+                    @if (item.sku) {
+                      <span class="px-1.5 py-0.2 rounded bg-surface text-on-surface-variant font-mono tabular-nums text-[10px] border border-outline-variant/50">
+                        {{ item.sku }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </td>
+
+              <!-- Stock Físico -->
+              <td class="py-3.5 px-4 text-center">
+                @if (item.inventoryStatus === 'NOT_TRACKED') {
+                  <span class="text-on-surface-variant/60 font-medium">A pedido</span>
+                } @else if (item.inventoryStatus === 'NOT_CONFIGURED') {
+                  <span class="text-amber-700 font-semibold italic text-[11px]">Sin inicializar</span>
+                } @else {
+                  <span class="font-mono tabular-nums font-bold text-on-surface text-sm">
+                    {{ item.physicalQuantity ?? 0 }}
+                  </span>
+                }
+              </td>
+
+              <!-- Cantidad Reservada -->
+              <td class="py-3.5 px-4 text-center">
+                @if (item.inventoryStatus === 'CONFIGURED') {
+                  @if ((item.reservedQuantity ?? 0) > 0) {
+                    <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-mono tabular-nums font-bold text-xs inline-flex items-center gap-1" title="Unidades retenidas en checkouts y órdenes confirmadas">
+                      <span>{{ item.reservedQuantity }}</span>
+                    </span>
+                  } @else {
+                    <span class="font-mono tabular-nums text-on-surface-variant/60 text-xs">0</span>
+                  }
+                } @else {
+                  <span class="text-on-surface-variant/40">—</span>
+                }
+              </td>
+
+              <!-- Stock Disponible -->
+              <td class="py-3.5 px-4 text-center">
+                @if (item.inventoryStatus === 'CONFIGURED') {
+                  @if ((item.availableQuantity ?? 0) <= 0) {
+                    <span class="font-mono tabular-nums font-black text-rose-600 text-sm">0</span>
+                  } @else {
+                    <span
+                      class="font-mono tabular-nums font-bold text-sm"
+                      [class.text-amber-700]="item.isLowStock"
+                      [class.text-primary]="!item.isLowStock"
+                    >
+                      {{ item.availableQuantity }}
+                    </span>
+                  }
+                } @else {
+                  <span class="text-on-surface-variant/40">—</span>
+                }
+              </td>
+
+              <!-- Umbral de Alerta -->
+              <td class="py-3.5 px-4 text-center font-mono tabular-nums text-xs">
+                @if (item.inventoryStatus === 'CONFIGURED') {
+                  @if (item.lowStockThreshold !== null) {
+                    <span class="text-on-surface font-semibold">≤ {{ item.lowStockThreshold }}</span>
+                  } @else {
+                    <span class="text-on-surface-variant/60 font-sans italic text-[11px]">Inactivo</span>
+                  }
+                } @else {
+                  <span class="text-on-surface-variant/40 font-sans">—</span>
+                }
+              </td>
+
+              <!-- Estado de Inventario -->
+              <td class="py-3.5 px-4 text-center">
+                @if (item.inventoryStatus === 'NOT_TRACKED') {
+                  <span class="px-2.5 py-1 rounded-full bg-surface-dim text-on-surface-variant text-[10px] font-bold uppercase tracking-wider inline-block">
+                    A pedido
+                  </span>
+                } @else if (item.inventoryStatus === 'NOT_CONFIGURED') {
+                  <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold uppercase tracking-wider inline-block">
+                    Sin configurar
+                  </span>
+                } @else if ((item.physicalQuantity ?? 0) <= 0) {
+                  <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold uppercase tracking-wider inline-block">
+                    Agotado
+                  </span>
+                } @else if (item.isLowStock) {
+                  <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold uppercase tracking-wider inline-block">
+                    Stock bajo
+                  </span>
+                } @else {
+                  <span class="px-2.5 py-1 rounded-full bg-primary-fixed/40 text-primary border border-primary/20 text-[10px] font-bold uppercase tracking-wider inline-block">
+                    En stock
+                  </span>
+                }
+              </td>
+
+              <!-- Acciones -->
+              <td class="py-3.5 px-4 sm:px-6 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  @if (item.tracksInventory) {
+                    <!-- Botón Ajustar Stock -->
+                    <button
+                      type="button"
+                      (click)="$event.stopPropagation(); editStock.emit(item)"
+                      [disabled]="updatingVariantId() === item.variantId"
+                      class="px-2.5 py-1.5 rounded-lg bg-surface hover:bg-primary text-on-surface hover:text-white transition-colors text-xs font-bold inline-flex items-center gap-1 cursor-pointer disabled:opacity-50 border border-outline-variant/40"
+                      [title]="item.inventoryStatus === 'NOT_CONFIGURED' ? 'Inicializar existencias' : 'Ajustar cantidad física'"
+                    >
+                      <ng-icon name="matEditOutline" class="text-[14px]" />
+                      <span>{{ item.inventoryStatus === 'NOT_CONFIGURED' ? 'Inicializar' : 'Stock' }}</span>
+                    </button>
+
+                    <!-- Botón Umbral de Alerta -->
+                    <button
+                      type="button"
+                      (click)="$event.stopPropagation(); editThreshold.emit(item)"
+                      [disabled]="item.inventoryStatus === 'NOT_CONFIGURED' || updatingVariantId() === item.variantId"
+                      class="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                      title="Configurar umbral de stock bajo"
+                    >
+                      <ng-icon name="matNotificationsOutline" class="text-[16px]" />
+                    </button>
+                  } @else {
+                    <span class="text-[11px] text-on-surface-variant/60 italic">Sin control</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

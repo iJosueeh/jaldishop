@@ -4,7 +4,7 @@
       (click)="selectMerchant.emit(merchant)"
       class="p-4 sm:p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-4 hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer group"
     >
-      <!-- Top: Avatar + Nombre + Estado -->
+      <!-- Top: Avatar + Nombre + Estado + Badge Fiscal -->
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-2xl bg-secondary-container/20 group-hover:bg-primary group-hover:text-on-primary text-secondary font-extrabold text-sm flex items-center justify-center shrink-0 transition-colors">
@@ -20,24 +20,36 @@
           </div>
         </div>
 
-        <span
-          class="w-2.5 h-2.5 rounded-full shrink-0 mt-1"
-          [class.bg-emerald-500]="merchant.status === 'ACTIVE'"
-          [class.bg-rose-500]="merchant.status === 'SUSPENDED'"
-          [title]="merchant.status"
-        ></span>
+        <div class="flex flex-col items-end gap-1 shrink-0">
+          <span
+            class="w-2.5 h-2.5 rounded-full mt-1"
+            [class.bg-emerald-500]="merchant.status === 'ACTIVE'"
+            [class.bg-rose-500]="merchant.status === 'SUSPENDED'"
+            [title]="merchant.status"
+          ></span>
+          <span
+            class="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider"
+            [class.bg-emerald-500/10]="merchant.phone"
+            [class.text-emerald-700]="merchant.phone"
+            [class.dark:text-emerald-400]="merchant.phone"
+            [class.bg-surface-container-high]="!merchant.phone"
+            [class.text-on-surface-variant]="!merchant.phone"
+          >
+            {{ merchant.phone ? 'Verificado' : 'Sin Teléfono' }}
+          </span>
+        </div>
       </div>
 
-      <!-- Mid: Tienda Vinculada -->
+      <!-- Mid: Tienda Vinculada y Operación -->
       <div class="p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
         <div class="flex items-center gap-2 min-w-0">
           <ng-icon name="matStorefrontOutline" class="text-primary text-[18px] shrink-0" />
           <div class="flex flex-col min-w-0">
             <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-              Tienda
+              Comercio Operado
             </span>
             <span class="text-xs font-bold text-on-surface truncate">
-              {{ merchant.storeName || 'Sin tienda configurada' }}
+              {{ merchant.storeName || 'Sin tienda asociada' }}
             </span>
           </div>
         </div>
@@ -49,7 +61,7 @@
             rel="noopener noreferrer"
             (click)="$event.stopPropagation()"
             class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors shrink-0"
-            title="Contactar por WhatsApp"
+            title="Contacto comercial por WhatsApp"
           >
             <ng-icon name="matChatOutline" class="text-[16px]" />
           </a>
@@ -58,16 +70,16 @@
 
       <!-- Footer: Teléfono y Acciones -->
       <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20 text-xs" (click)="$event.stopPropagation()">
-        <span class="text-on-surface-variant font-medium">
-          {{ merchant.phone ? '📞 ' + merchant.phone : 'Sin teléfono' }}
+        <span class="text-on-surface-variant font-mono tabular-nums font-medium">
+          {{ merchant.phone ? '📞 ' + merchant.phone : 'Sin teléfono registrado' }}
         </span>
 
         <div class="flex items-center gap-2">
           <button
             type="button"
             (click)="selectMerchant.emit(merchant)"
-            class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
-            title="Ver ficha 360°"
+            class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+            title="Ver ficha comercial 360°"
           >
             <ng-icon name="matVisibilityOutline" class="text-[17px]" />
           </button>
@@ -76,7 +88,7 @@
             <button
               type="button"
               (click)="toggleStatus.emit(merchant)"
-              class="px-3 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors"
+              class="px-3 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors cursor-pointer"
             >
               Suspender
             </button>
@@ -84,7 +96,7 @@
             <button
               type="button"
               (click)="toggleStatus.emit(merchant)"
-              class="px-3 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors"
+              class="px-3 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors cursor-pointer"
             >
               Reactivar
             </button>
@@ -97,7 +109,7 @@
       <div class="flex flex-col items-center justify-center gap-2 text-on-surface-variant">
         <ng-icon name="matPersonOutline" class="text-4xl text-on-surface-variant/40" />
         <p class="text-sm font-bold text-on-surface">No hay comerciantes registrados</p>
-        <p class="text-xs text-on-surface-variant">Los usuarios con rol MERCHANT aparecerán en esta vista.</p>
+        <p class="text-xs text-on-surface-variant">Los operadores comerciales con rol MERCHANT aparecerán aquí.</p>
       </div>
     </div>
   }

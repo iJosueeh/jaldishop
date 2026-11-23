@@ -2,6 +2,7 @@ import { computed, DestroyRef, inject, Injectable, OnDestroy, signal } from '@an
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   ChangeOrderStatusRequest,
+  CreateMerchantOrderRequest,
   MerchantOrder,
   MerchantOrderDetailResponse,
   MerchantOrderPageResponse,
@@ -19,7 +20,7 @@ import { ToastService } from './toast.service';
 import { SettingsService } from './settings.service';
 import { StoreService } from './store.service';
 import { StompService } from './stomp.service';
-import { WhatsAppTemplateId } from '../models/settings.models';
+import { InvalidationBusService } from './invalidation-bus.service';
 import { getMsUntilNextMidnightLima, getOperatingDateLima } from '../utils/date.utils';
 import {
   catchError,
@@ -43,6 +44,7 @@ export class OrderService implements OnDestroy {
   private readonly settingsService = inject(SettingsService);
   private readonly storeService = inject(StoreService);
   private readonly stompService = inject(StompService);
+  private readonly invalidationBus = inject(InvalidationBusService, { optional: true });
   private readonly destroyRef = inject(DestroyRef, { optional: true });
 
   private readonly orderMutatedSubject = new Subject<{
@@ -85,6 +87,15 @@ export class OrderService implements OnDestroy {
   readonly detailError = signal<string | null>(null);
   readonly isDrawerOpen = signal<boolean>(false);
   readonly isCreateModalOpen = signal<boolean>(false);
+
+  // Caché en memoria para estrategia Cache-First
+  private readonly ordersCache = new Map<
+    string,
+    { response: MerchantOrderPageResponse; orders: MerchantOrder[] }
+  >();
+  private cachedStoreId: string | null = null;
+  private cachedCountsStoreId: string | null = null;
+  private cachedTodayCountsKey: string | null = null;
 
   // Control de Concurrencia, Mutaciones en Vuelo e Incertidumbre
   private activeListRequestId = 0;
@@ -246,6 +257,8 @@ export class OrderService implements OnDestroy {
         return; // Ignorar eventos de tiendas inactivas o ajenas
       }
       this.toastService.info(`Nuevo pedido recibido: ${event.orderNumber}`);
+      this.settingsService.playNotificationSound();
+      this.invalidateCache();
       if (this.searchDebounceTimer === null) {
         this.loadOrders(
           this.currentPage(),
@@ -253,6 +266,7 @@ export class OrderService implements OnDestroy {
           this.activeTab(),
           currentStoreId,
           this.appliedSearchQuery(),
+          true,
         ).subscribe();
       }
       if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
@@ -268,9 +282,75 @@ export class OrderService implements OnDestroy {
       }
     });
 
+    this.stompService.orderStatusChanged$.subscribe((event) => {
+      const currentStoreId = this.storeService.currentStore()?.id;
+      if (!currentStoreId || event.storeId !== currentStoreId) {
+        return;
+      }
+
+      const statusLabels: Record<OrderStatus, string> = {
+        CONFIRMED: 'Confirmado',
+        IN_PREPARATION: 'En Preparación',
+        READY: 'Listo para Entrega',
+        OUT_FOR_DELIVERY: 'En Camino',
+        COMPLETED: 'Entregado',
+        CANCELLED: 'Cancelado',
+      };
+      const label = statusLabels[event.newStatus] || event.newStatus;
+      this.toastService.info(`Pedido ${event.orderNumber} cambió a ${label}`);
+
+      this.orders.update((orders) =>
+        orders.map((o) =>
+          o.id === event.orderId
+            ? { ...o, status: event.newStatus }
+            : o
+        )
+      );
+
+      const selected = this.selectedOrder();
+      if (selected && selected.id === event.orderId) {
+        this.selectedOrder.set({
+          ...selected,
+          status: event.newStatus,
+        });
+      }
+
+      this.orderMutatedSubject.next({
+        storeId: currentStoreId,
+        orderId: event.orderId,
+        status: event.newStatus,
+      });
+
+      this.invalidateCache();
+
+      if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
+        this.loadOrderCounts(currentStoreId, true).subscribe();
+      }
+      if (
+        this.todayOrderCounts() !== null ||
+        this.isTodayCountsLoading() ||
+        this.todayCountsError() !== null ||
+        this.isTodayOutdated()
+      ) {
+        this.loadTodayOrderCounts(currentStoreId, true).subscribe();
+      }
+
+      if (this.searchDebounceTimer === null) {
+        this.loadOrders(
+          this.currentPage(),
+          this.pageSize(),
+          this.activeTab(),
+          currentStoreId,
+          this.appliedSearchQuery(),
+          true,
+        ).subscribe();
+      }
+    });
+
     this.stompService.reconnected$.subscribe(() => {
       const currentStoreId = this.storeService.currentStore()?.id;
       if (currentStoreId) {
+        this.invalidateCache();
         if (this.searchDebounceTimer === null) {
           this.loadOrders(
             this.currentPage(),
@@ -278,6 +358,7 @@ export class OrderService implements OnDestroy {
             this.activeTab(),
             currentStoreId,
             this.appliedSearchQuery(),
+            true,
           ).subscribe();
         }
         if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
@@ -301,6 +382,7 @@ export class OrderService implements OnDestroy {
     status = this.activeTab(),
     storeId?: string,
     search = this.appliedSearchQuery(),
+    forceRefresh = false,
   ): Observable<MerchantOrderPageResponse | null> {
     const targetStoreId = storeId ?? this.storeService.currentStore()?.id;
     if (!targetStoreId) {
@@ -311,7 +393,7 @@ export class OrderService implements OnDestroy {
             this.isLoaded.set(true);
             return of(null);
           }
-          return this.fetchOrdersHttp(store.id, page, size, status, search);
+          return this.executeLoadOrders(store.id, page, size, status, search, forceRefresh);
         }),
         catchError((err) => {
           this.handleHttpError(err);
@@ -320,7 +402,42 @@ export class OrderService implements OnDestroy {
       );
     }
 
-    return this.fetchOrdersHttp(targetStoreId, page, size, status, search);
+    return this.executeLoadOrders(targetStoreId, page, size, status, search, forceRefresh);
+  }
+
+  private executeLoadOrders(
+    storeId: string,
+    page: number,
+    size: number,
+    status: OrderFilterTab,
+    search?: string,
+    forceRefresh = false,
+  ): Observable<MerchantOrderPageResponse | null> {
+    const effectiveSearch = (
+      search !== undefined ? search : this.appliedSearchQuery()
+    )
+      .trim()
+      .slice(0, 100);
+
+    const cacheKey = `${storeId}:${status}:${page}:${size}:${effectiveSearch}`;
+
+    // Cache-First: Si los datos ya están en caché para esta tienda y consulta exacta, devolver sin HTTP
+    if (!forceRefresh && this.cachedStoreId === storeId && this.ordersCache.has(cacheKey)) {
+      const cached = this.ordersCache.get(cacheKey)!;
+      this.orders.set(cached.orders);
+      this.totalElements.set(cached.response.totalElements);
+      this.totalPages.set(cached.response.totalPages);
+      this.currentPage.set(cached.response.page);
+      this.pageSize.set(cached.response.size);
+      this.activeTab.set(status);
+      this.appliedSearchQuery.set(effectiveSearch);
+      this.isLoading.set(false);
+      this.isLoaded.set(true);
+      this.error.set(null);
+      return of(cached.response);
+    }
+
+    return this.fetchOrdersHttp(storeId, page, size, status, effectiveSearch, cacheKey);
   }
 
   private fetchOrdersHttp(
@@ -329,6 +446,7 @@ export class OrderService implements OnDestroy {
     size: number,
     status: OrderFilterTab,
     search?: string,
+    cacheKey?: string,
   ): Observable<MerchantOrderPageResponse | null> {
     const requestId = ++this.activeListRequestId;
     this.isListHttpInFlight = true;
@@ -381,6 +499,11 @@ export class OrderService implements OnDestroy {
         this.isLoading.set(false);
         this.isLoaded.set(true);
         this.error.set(null);
+
+        // Guardar en caché reactiva
+        const key = cacheKey ?? `${storeId}:${status}:${page}:${size}:${effectiveSearch}`;
+        this.cachedStoreId = storeId;
+        this.ordersCache.set(key, { response, orders: merged });
       }),
       catchError((err) => {
         const currentActiveStoreId = this.storeService.currentStore()?.id;
@@ -435,6 +558,7 @@ export class OrderService implements OnDestroy {
     orderId: string,
     newStatus: OrderStatus,
     storeId?: string,
+    reason?: string,
   ): Observable<MerchantOrderDetailResponse | null> {
     if (this.isUpdating(orderId) || this.isPendingVerification(orderId)) {
       return of(null); // Evitar solicitudes duplicadas o clics ciegos mientras esté en incertidumbre
@@ -446,10 +570,41 @@ export class OrderService implements OnDestroy {
       return of(null);
     }
 
+    // 1. Snapshot del estado previo para rollback en caso de fallo o rechazo
+    const existingOrder = this.orders().find((o) => o.id === orderId);
+    const prevStatus = existingOrder?.status;
+    const prevSelected = this.selectedOrder();
+    const prevSelectedDetail = this.selectedOrderDetail();
+
     this.updatingOrderIds.update((set) => new Set(set).add(orderId));
 
+    // 2. Optimistic UI: actualización inmediata en memoria (< 5ms) para feedback instantáneo
+    if (existingOrder && prevStatus !== newStatus) {
+      this.orders.update((list) =>
+        list.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
+      );
+    }
+    if (prevSelected && prevSelected.id === orderId) {
+      this.selectedOrder.set({ ...prevSelected, status: newStatus });
+    }
+    if (prevSelectedDetail && prevSelectedDetail.id === orderId) {
+      this.selectedOrderDetail.set({ ...prevSelectedDetail, status: newStatus });
+    }
+
+    // 3. Notificación inmediata al bus reactivo para que módulos (Capacidad, etc.) respondan al instante
+    this.invalidationBus?.dispatchOrderMutated({
+      storeId: targetStoreId,
+      orderId,
+      status: newStatus,
+      previousStatus: prevStatus,
+      source: 'OPTIMISTIC',
+    });
+
     const url = `${this.baseUrl}/${targetStoreId}/orders/${orderId}/status`;
-    const body: ChangeOrderStatusRequest = { status: newStatus };
+    const body: ChangeOrderStatusRequest = {
+      status: newStatus,
+      ...(reason ? { reason: reason.trim() } : {}),
+    };
 
     return this.http.patch<MerchantOrderDetailResponse>(url, body).pipe(
       tap((response) => {
@@ -465,6 +620,29 @@ export class OrderService implements OnDestroy {
       }),
       catchError((err) => {
         this.clearUpdating(orderId);
+
+        // Rollback seguro al estado previo
+        if (existingOrder && prevStatus) {
+          this.orders.update((list) =>
+            list.map((o) => (o.id === orderId ? { ...o, status: prevStatus } : o)),
+          );
+        }
+        if (prevSelected && prevSelected.id === orderId) {
+          this.selectedOrder.set(prevSelected);
+        }
+        if (prevSelectedDetail && prevSelectedDetail.id === orderId) {
+          this.selectedOrderDetail.set(prevSelectedDetail);
+        }
+        if (prevStatus) {
+          this.invalidationBus?.dispatchOrderMutated({
+            storeId: targetStoreId,
+            orderId,
+            status: prevStatus,
+            previousStatus: newStatus,
+            source: 'OPTIMISTIC',
+          });
+        }
+
         this.handlePatchError(err, targetStoreId, orderId, newStatus);
         return of(null);
       }),
@@ -503,6 +681,8 @@ export class OrderService implements OnDestroy {
     // Si la mutación invalida una solicitud HTTP de listado vigente, o el pedido cambió de pestaña:
     const requiresRemoteReload = isOutdatedTab || hadInFlightListHttp;
 
+    this.invalidateCache();
+
     // Solo recargar si no hay un debounce de búsqueda activo en curso
     // (si hay debounce activo, el temporizador disparará la consulta con el término nuevo al expirar)
     if (this.searchDebounceTimer === null) {
@@ -513,6 +693,7 @@ export class OrderService implements OnDestroy {
           tab,
           storeId,
           this.appliedSearchQuery(),
+          true,
         ).subscribe();
       }
     }
@@ -530,11 +711,17 @@ export class OrderService implements OnDestroy {
       this.loadTodayOrderCounts(storeId, true).subscribe();
     }
 
-    // 5. Emitir evento reactivo de mutación de pedido para consumidores externos (ej. CapacityService)
+    // 5. Emitir evento reactivo de mutación de pedido para consumidores externos (ej. CapacityService, InvalidationBus)
     this.orderMutatedSubject.next({
       storeId,
       orderId: detail.id,
       status: detail.status,
+    });
+    this.invalidationBus?.dispatchOrderMutated({
+      storeId,
+      orderId: detail.id,
+      status: detail.status,
+      source: 'LOCAL_MERCHANT',
     });
   }
 
@@ -756,6 +943,34 @@ export class OrderService implements OnDestroy {
     this.isCreateModalOpen.set(false);
   }
 
+  createMerchantOrder(
+    storeId: string,
+    request: CreateMerchantOrderRequest,
+  ): Observable<MerchantOrderDetailResponse> {
+    return this.http.post<MerchantOrderDetailResponse>(`${this.baseUrl}/${storeId}/orders`, request).pipe(
+      tap((newOrder) => {
+        this.toastService.success(`Comanda ${newOrder.orderNumber} creada con éxito`);
+        this.closeCreateModal();
+        this.invalidateCache();
+        this.invalidationBus?.dispatchOrderCreated({
+          storeId,
+          orderId: newOrder.id,
+          orderNumber: newOrder.orderNumber,
+          origin: newOrder.origin,
+          source: 'LOCAL_MERCHANT',
+        });
+        this.loadOrders(0, this.pageSize(), this.activeTab(), storeId, undefined, true).subscribe({ error: () => {} });
+        this.loadOrderCounts(storeId, true).subscribe({ error: () => {} });
+        this.loadTodayOrderCounts(storeId, true).subscribe({ error: () => {} });
+      }),
+      catchError((err) => {
+        const msg = err.error?.message || 'Error al registrar la comanda directa';
+        this.toastService.error(msg);
+        return throwError(() => err);
+      }),
+    );
+  }
+
   addOrder(_order: MerchantOrder): void {
     // La creación manual está deshabilitada hasta implementar el endpoint real en backend (Fase 1)
     this.toastService.info('La creación manual de pedidos estará disponible próximamente.');
@@ -795,21 +1010,14 @@ export class OrderService implements OnDestroy {
     const modality =
       order.deliveryMode === 'DELIVERY' ? 'Delivery a domicilio' : 'Recojo en tienda';
 
-    let templateId: WhatsAppTemplateId = 'in_preparation';
-    if (order.status === 'READY' || order.status === 'OUT_FOR_DELIVERY') {
-      templateId = 'ready';
+    let template = '¡Hola {cliente}! Tu pedido #{numero_pedido} está en camino. Total: {total}. ¡Gracias por tu compra en {tienda}!';
+    if (order.status === 'READY') {
+      template = '¡Hola {cliente}! Tu pedido #{numero_pedido} está listo para entrega/recojo. Total: {total}. ¡Gracias por tu compra en {tienda}!';
     } else if (order.status === 'COMPLETED') {
-      templateId = 'completed';
+      template = '¡Muchas gracias por tu compra en {tienda}, {cliente}! Esperamos que disfrutes tu pedido #{numero_pedido}. ¡Que tengas un excelente día!';
     }
 
-    const templates = this.settingsService.settings().whatsappTemplates;
-    const template = templates.find((t) => t.id === templateId);
-
-    let rawMessage = template
-      ? template.message
-      : `¡Hola {cliente}! Tu pedido {numero_pedido} está en estado {modalidad}. Total: {total}. ¡Gracias por tu compra en {tienda}!`;
-
-    const formattedMessage = rawMessage
+    const formattedMessage = template
       .replace(/{cliente}/g, clientFirstName)
       .replace(/{numero_pedido}/g, order.orderNumber)
       .replace(/{tienda}/g, storeName)
@@ -827,6 +1035,8 @@ export class OrderService implements OnDestroy {
     this.activeDetailOrderId = null;
     this.updatingOrderIds.set(new Set());
     this.pendingVerificationOrderIds.set(new Set());
+    this.ordersCache.clear();
+    this.cachedStoreId = null;
     this.orders.set([]);
     this.totalElements.set(0);
     this.totalPages.set(0);
@@ -844,6 +1054,16 @@ export class OrderService implements OnDestroy {
     this.clearFilters();
   }
 
+  invalidateCache(): void {
+    this.ordersCache.clear();
+    this.cachedCountsStoreId = null;
+    this.cachedTodayCountsKey = null;
+  }
+
+  clearCache(): void {
+    this.clearOrders();
+  }
+
   resetCounts(): void {
     this.activeCountsRequestId++;
     this.activeTodayCountsRequestId++;
@@ -851,6 +1071,8 @@ export class OrderService implements OnDestroy {
     this.inFlightCountsStoreId = null;
     this.inFlightTodayCounts$ = null;
     this.inFlightTodayCountsKey = null;
+    this.cachedCountsStoreId = null;
+    this.cachedTodayCountsKey = null;
     this.orderCounts.set(null);
     this.isCountsLoading.set(false);
     this.countsError.set(null);
@@ -958,6 +1180,11 @@ export class OrderService implements OnDestroy {
     storeId: string,
     force: boolean,
   ): Observable<MerchantOrderStatusCounts | null> {
+    // Cache-First: Retornar contadores en memoria si ya están cargados para esta tienda
+    if (!force && this.orderCounts() !== null && this.cachedCountsStoreId === storeId) {
+      return of(this.orderCounts());
+    }
+
     if (!force && this.inFlightCounts$ && this.inFlightCountsStoreId === storeId) {
       return this.inFlightCounts$;
     }
@@ -990,6 +1217,7 @@ export class OrderService implements OnDestroy {
           return;
         }
         this.orderCounts.set(counts);
+        this.cachedCountsStoreId = storeId;
         this.countsError.set(null);
         this.isCountsLoading.set(false);
       }),
@@ -1039,6 +1267,17 @@ export class OrderService implements OnDestroy {
     const todayLima = this.currentOperatingDate();
     const key = `${storeId}:${todayLima}`;
 
+    // Cache-First: Retornar contadores diarios en memoria si ya están cargados para la fecha operativa
+    if (
+      !force &&
+      this.todayOrderCounts() !== null &&
+      this.todayOperatingDate() === todayLima &&
+      this.cachedTodayCountsKey === key &&
+      !this.isTodayOutdated()
+    ) {
+      return of(this.todayOrderCounts());
+    }
+
     if (!force && this.inFlightTodayCounts$ && this.inFlightTodayCountsKey === key) {
       return this.inFlightTodayCounts$;
     }
@@ -1075,6 +1314,7 @@ export class OrderService implements OnDestroy {
         }
         this.todayOrderCounts.set(counts);
         this.todayOperatingDate.set(todayLima);
+        this.cachedTodayCountsKey = `${storeId}:${todayLima}`;
         this.todayCountsError.set(null);
         this.isTodayCountsLoading.set(false);
       }),

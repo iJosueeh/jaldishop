@@ -31,6 +31,7 @@ export class CapacitySlotModal {
   readonly dayOfWeek = input<number>(1);
   readonly slotToEdit = input<CapacityConfiguration | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly isClosing = signal<boolean>(false);
 
   readonly closeModal = output<void>();
   readonly saveSlot = output<{ request: CreateCapacityConfigRequest; id?: string }>();
@@ -59,6 +60,15 @@ export class CapacitySlotModal {
       }
       this.errorMessage.set(null);
     });
+  }
+
+  handleClose(): void {
+    if (this.isClosing()) return;
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.isClosing.set(false);
+      this.closeModal.emit();
+    }, 200);
   }
 
   onSubmit(): void {

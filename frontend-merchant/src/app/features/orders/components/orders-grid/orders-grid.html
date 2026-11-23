@@ -1,6 +1,6 @@
 @if (isLoading()) {
   <!-- Skeleton Loading Grid -->
-  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <section class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
     @for (i of [1, 2, 3, 4]; track i) {
       <div
         class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 space-y-4 animate-pulse shadow-2xs"
@@ -99,7 +99,7 @@
   </div>
 } @else {
   <!-- Grid de Comandas -->
-  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <section class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
     @for (order of orders(); track order.id) {
       <app-orders-card
         [order]="order"
@@ -110,6 +110,7 @@
         (whatsAppClick)="whatsAppClick.emit($event)"
         (openDetails)="openDetails.emit($event)"
         (verifyStatus)="verifyStatus.emit($event)"
+        (printTicket)="printTicket.emit($event)"
       />
     }
   </section>

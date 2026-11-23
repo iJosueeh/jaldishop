@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminStoreDrawer } from './admin-store-drawer';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { AdminService } from '../../../../../core/services/admin.service';
 import { AdminStoreSummary } from '../../../../../core/models/admin.models';
+import { of } from 'rxjs';
 
 describe('AdminStoreDrawer', () => {
   let component: AdminStoreDrawer;
@@ -11,6 +13,19 @@ describe('AdminStoreDrawer', () => {
     info: vi.fn(),
     success: vi.fn(),
     error: vi.fn(),
+  };
+
+  const mockAdminService = {
+    getStoreDetail: vi.fn().mockReturnValue(
+      of({
+        legalBusinessName: 'Panadería San José S.A.C.',
+        taxIdType: 'RUC_20',
+        taxIdNumber: '20123456789',
+        taxRegime: 'MYPE',
+        canIssueInvoices: true,
+      })
+    ),
+    loadAnalyticsSummary: vi.fn().mockReturnValue(of(null)),
   };
 
   const mockStore: AdminStoreSummary = {
@@ -37,7 +52,10 @@ describe('AdminStoreDrawer', () => {
     vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdminStoreDrawer],
-      providers: [{ provide: ToastService, useValue: mockToastService }],
+      providers: [
+        { provide: ToastService, useValue: mockToastService },
+        { provide: AdminService, useValue: mockAdminService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminStoreDrawer);
@@ -68,35 +86,25 @@ describe('AdminStoreDrawer', () => {
     vi.useRealTimers();
   });
 
-  it('debe abrir la tienda pública en una nueva pestaña', () => {
-    const windowSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
-    component.openPublicStore(mockStore.slug);
-    expect(windowSpy).toHaveBeenCalledWith('/store/panaderia-san-jose', '_blank');
-  });
+  it('debe copiar el ID de la tienda y notificar', async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
 
-  it('debe emitir modalityChange y notificar al alternar modalidad', () => {
-    const spy = vi.spyOn(component.modalityChange, 'emit');
-    component.onToggleModality('pickup');
-    expect(spy).toHaveBeenCalledWith({ store: mockStore, type: 'pickup' });
+    component.copyId(mockStore.id);
+    await Promise.resolve();
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(mockStore.id);
     expect(mockToastService.info).toHaveBeenCalledWith(
-      expect.stringContaining('Pickup'),
-      'Configuración de Tienda'
+      'ID de tienda copiado al portapapeles.',
+      'Copiado'
     );
   });
 
-  it('debe guardar nota interna de auditoría de tienda correctamente', () => {
-    vi.useFakeTimers();
-    component.adminNote.set('Tienda inspeccionada y aprobada');
-    component.onSaveNote();
-    expect(component.isNoteSaved()).toBe(true);
-    expect(mockToastService.success).toHaveBeenCalledWith(
-      'Nota de auditoría de tienda guardada.',
-      'Nota Admin'
-    );
-
-    vi.advanceTimersByTime(2600);
-    expect(component.isNoteSaved()).toBe(false);
-    vi.useRealTimers();
+  it('debe cargar datos fiscales y de liquidación al inicializar', () => {
+    expect(mockAdminService.getStoreDetail).toHaveBeenCalledWith(mockStore.id, true);
+    expect(mockAdminService.loadAnalyticsSummary).toHaveBeenCalledWith(undefined, undefined, mockStore.id);
   });
 });
-

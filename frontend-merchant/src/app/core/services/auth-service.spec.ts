@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { CapacityService } from './capacity.service';
 import { StoreService } from './store.service';
 import { ProfileService } from './profile.service';
+import { InventoryService } from './inventory.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -19,6 +20,7 @@ describe('AuthService', () => {
   let capacityService: CapacityService;
   let storeService: StoreService;
   let profileService: ProfileService;
+  let inventoryService: InventoryService;
 
   const mockAuthResult: AuthResult = {
     token: 'jwt.token.here',
@@ -36,6 +38,7 @@ describe('AuthService', () => {
         CapacityService,
         StoreService,
         ProfileService,
+        InventoryService,
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([{ path: 'login', component: class {} }]),
@@ -49,6 +52,7 @@ describe('AuthService', () => {
     capacityService = TestBed.inject(CapacityService);
     storeService = TestBed.inject(StoreService);
     profileService = TestBed.inject(ProfileService);
+    inventoryService = TestBed.inject(InventoryService);
 
     sessionStorage.clear();
   });
@@ -111,6 +115,26 @@ describe('AuthService', () => {
 
       const req = httpTesting.expectOne(`${environment.apiUrl}/auth/login`);
       req.flush(customerAuthResult);
+    });
+
+    it('debe reconocer rol PLATFORM_ADMIN y computar isAdmin como true', () => {
+      vi.spyOn(tokenService, 'hasValidToken').mockReturnValue(true);
+      vi.spyOn(tokenService, 'getRoles').mockReturnValue(['PLATFORM_ADMIN']);
+      service.token.set('valid.jwt.token');
+
+      expect(service.isAdmin()).toBe(true);
+      expect(service.isMerchant()).toBe(false);
+      expect(service.isDualRole()).toBe(false);
+    });
+
+    it('debe reconocer roles duales MERCHANT y PLATFORM_ADMIN con isDualRole en true', () => {
+      vi.spyOn(tokenService, 'hasValidToken').mockReturnValue(true);
+      vi.spyOn(tokenService, 'getRoles').mockReturnValue(['MERCHANT', 'PLATFORM_ADMIN']);
+      service.token.set('valid.jwt.token');
+
+      expect(service.isAdmin()).toBe(true);
+      expect(service.isMerchant()).toBe(true);
+      expect(service.isDualRole()).toBe(true);
     });
   });
 
@@ -210,6 +234,7 @@ describe('AuthService', () => {
       const capacitySpy = vi.spyOn(capacityService, 'clearCache');
       const storeSpy = vi.spyOn(storeService, 'clearStore');
       const profileSpy = vi.spyOn(profileService, 'clearProfile');
+      const inventorySpy = vi.spyOn(inventoryService, 'clearCache');
 
       service.logout();
 
@@ -219,6 +244,7 @@ describe('AuthService', () => {
       expect(capacitySpy).toHaveBeenCalled();
       expect(storeSpy).toHaveBeenCalled();
       expect(profileSpy).toHaveBeenCalled();
+      expect(inventorySpy).toHaveBeenCalled();
       expect(navigateSpy).toHaveBeenCalledWith(['/login']);
     });
   });

@@ -43,6 +43,31 @@ export function useCustomerFavorites() {
     },
   });
 
+  const addMutation = useMutation({
+    mutationFn: (productId: string) => customerFavoriteService.addFavorite(productId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CUSTOMER_FAVORITES_QUERY_KEY });
+    },
+  });
+
+  const isFavorite = useCallback(
+    (productId: string) => favorites.some((f) => f.productId === productId),
+    [favorites]
+  );
+
+  const toggleFavorite = useCallback(
+    async (productId: string) => {
+      if (isFavorite(productId)) {
+        await removeMutation.mutateAsync(productId);
+        return false;
+      } else {
+        await addMutation.mutateAsync(productId);
+        return true;
+      }
+    },
+    [isFavorite, removeMutation, addMutation]
+  );
+
   const reload = useCallback(() => {
     query.refetch();
   }, [query]);
@@ -52,6 +77,10 @@ export function useCustomerFavorites() {
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error instanceof Error ? query.error.message : query.error ? 'Error al cargar favoritos' : null,
+    isFavorite,
+    toggleFavorite,
+    addFavorite: addMutation.mutateAsync,
+    isAdding: addMutation.isPending,
     removeFavorite: removeMutation.mutate,
     isRemoving: removeMutation.isPending,
     reload,

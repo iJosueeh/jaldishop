@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { ProductService } from '../../core/services/product.service';
 import { StoreService } from '../../core/services/store.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -38,6 +40,8 @@ export class Products implements OnInit {
   readonly isCreateDrawerOpen = signal<boolean>(false);
   readonly isEditDrawerOpen = signal<boolean>(false);
   readonly selectedProductForEdit = signal<Product | null>(null);
+  readonly editDrawerInitialTab = signal<'general' | 'variants'>('general');
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.initCatalog();
@@ -112,6 +116,7 @@ export class Products implements OnInit {
   }
 
   onEditProduct(product: Product): void {
+    this.editDrawerInitialTab.set('general');
     this.selectedProductForEdit.set(product);
     this.isEditDrawerOpen.set(true);
   }
@@ -126,7 +131,26 @@ export class Products implements OnInit {
   }
 
   onAdjustQuota(product: Product): void {
-    this.toast.info(`Ajuste de cupo para "${product.name}"`);
+    if (!product) return;
+    this.editDrawerInitialTab.set('variants');
+    this.selectedProductForEdit.set(product);
+    this.isEditDrawerOpen.set(true);
+  }
+
+  onAdjustAvailability(): void {
+    this.router.navigate(['/capacity']);
+  }
+
+  onViewInventory(product: Product): void {
+    this.router.navigate(['/inventory'], { queryParams: { q: product.name } });
+  }
+
+  onOpenStorePreview(_product: Product): void {
+    const slug = this.storeService.storeSlug() || this.storeService.currentStore()?.slug;
+    const url = slug
+      ? `${environment.marketplaceUrl}/tienda/${slug}`
+      : `${environment.marketplaceUrl}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   onCreateProduct(): void {

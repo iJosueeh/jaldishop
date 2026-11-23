@@ -1,0 +1,308 @@
+<div class="flex flex-col gap-6 w-full font-sans">
+  <!-- Banner / Card de Liquidaciones vinculada a Finanzas -->
+  <aside class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-surface-container-low via-surface-container-low to-primary/5 border border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+    <div class="flex items-start sm:items-center gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+        <ng-icon name="matAccountBalanceOutline" class="text-xl" />
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-on-surface">Cuenta Bancaria para Desembolsos (Liquidaciones)</h4>
+        <p class="text-xs text-on-surface-variant">
+          Las transferencias de tus ventas netas se depositan en tu cuenta CCI o Yape configurada en el balance.
+        </p>
+      </div>
+    </div>
+    <a
+      routerLink="/finances"
+      class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-xs font-bold text-primary transition-colors shrink-0"
+    >
+      <span>Ir a Finanzas</span>
+      <span aria-hidden="true">&rarr;</span>
+    </a>
+  </aside>
+
+  <!-- 1. Pagos Online JaldiShop (Centralizado) -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-4 shadow-2xs">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20">
+          <ng-icon name="matCreditCardOutline" class="text-2xl" />
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-on-surface">Pagos Online JaldiShop</h3>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+              Automático
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Tus clientes pagan con tarjetas de débito/crédito y billeteras digitales. JaldiShop asegura la reserva temporal de inventario al instante.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        role="switch"
+        [attr.aria-checked]="onlinePayments()"
+        (click)="onlinePayments.set(!onlinePayments())"
+        class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+        [class.bg-primary]="onlinePayments()"
+        [class.bg-surface-container-highest]="!onlinePayments()"
+        aria-label="Alternar pagos online JaldiShop"
+      >
+        <span
+          class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+          [class.translate-x-5.5]="onlinePayments()"
+          [class.translate-x-0]="!onlinePayments()"
+        ></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Pago Contra Entrega -->
+  <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-4 shadow-2xs">
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/20">
+          <ng-icon name="matLocalShippingOutline" class="text-2xl" />
+        </div>
+        <div class="flex flex-col">
+          <h3 class="text-base font-bold text-on-surface">Pago Contra Entrega (Efectivo / POS)</h3>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Permite al cliente abonar al momento de recibir el pedido en su domicilio o al retirar en tienda.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        role="switch"
+        [attr.aria-checked]="codEnabled()"
+        (click)="codEnabled.set(!codEnabled())"
+        class="w-12 h-6.5 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-hidden focus:ring-2 focus:ring-primary/30"
+        [class.bg-primary]="codEnabled()"
+        [class.bg-surface-container-highest]="!codEnabled()"
+        aria-label="Alternar pago contra entrega"
+      >
+        <span
+          class="block w-5 h-5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+          [class.translate-x-5.5]="codEnabled()"
+          [class.translate-x-0]="!codEnabled()"
+        ></span>
+      </button>
+    </div>
+
+    @if (codEnabled()) {
+      <div class="pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-on-surface">Repartidor lleva POS para tarjeta física</span>
+          <span class="text-[11px] text-on-surface-variant">El comprador podrá solicitar pago con tarjeta en puerta.</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [checked]="acceptsPos()"
+            (change)="acceptsPos.set($any($event.target).checked)"
+            class="sr-only peer"
+          />
+          <div class="w-11 h-6 bg-surface-variant peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
+      </div>
+    }
+  </div>
+
+  @if (noPaymentMethods()) {
+    <div class="p-3.5 rounded-xl bg-error/10 border border-error/30 text-error flex items-center gap-2.5 text-xs font-medium">
+      <ng-icon name="matInfoOutline" class="text-base shrink-0" />
+      <span>Debes mantener habilitado al menos un método de pago (Online o Contra Entrega) para que los clientes puedan comprar.</span>
+    </div>
+  }
+
+  <!-- 3. Rediseño Impeccable: Reglas de Compra y Despacho en 2 Cards Modulares -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <!-- Card A: Monto Mínimo de Pedido -->
+    <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between gap-5 shadow-2xs">
+      <div class="flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 border border-blue-500/20">
+              <ng-icon name="matPaymentsOutline" class="text-xl" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-on-surface">Monto Mínimo de Compra</h4>
+                <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[10px] font-semibold">
+                  Solo Delivery
+                </span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-0.5">
+                Exige un total base en el carrito para despachos a domicilio.
+              </p>
+            </div>
+          </div>
+
+          <!-- Toggle Monto Mínimo -->
+          <button
+            type="button"
+            role="switch"
+            [attr.aria-checked]="hasMinAmount()"
+            (click)="toggleMinAmount()"
+            class="w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 focus:outline-hidden"
+            [class.bg-primary]="hasMinAmount()"
+            [class.bg-surface-container-highest]="!hasMinAmount()"
+            aria-label="Habilitar monto mínimo"
+          >
+            <span
+              class="block w-4.5 h-4.5 rounded-full bg-white shadow-xs transition-transform absolute top-0.5 left-0.5"
+              [class.translate-x-5]="hasMinAmount()"
+              [class.translate-x-0]="!hasMinAmount()"
+            ></span>
+          </button>
+        </div>
+
+        @if (hasMinAmount()) {
+          <div class="flex flex-col gap-3 pt-2 border-t border-outline-variant/20">
+            <!-- Selector de Presets -->
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Sugeridos:</span>
+              <div class="flex items-center gap-1.5">
+                @for (preset of [15, 20, 30, 50]; track preset) {
+                  <button
+                    type="button"
+                    (click)="selectMinAmountPreset(preset)"
+                    class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer"
+                    [class.bg-primary]="minAmount() === preset"
+                    [class.text-on-primary]="minAmount() === preset"
+                    [class.bg-surface-container-high]="minAmount() !== preset"
+                    [class.text-on-surface-variant]="minAmount() !== preset"
+                  >
+                    S/ {{ preset }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Input personalizado -->
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-on-surface-variant font-mono">S/</span>
+              <input
+                type="number"
+                min="1"
+                step="0.5"
+                [ngModel]="minAmount()"
+                (ngModelChange)="minAmount.set($event)"
+                placeholder="20.00"
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-surface-container-low border text-sm font-mono font-bold text-on-surface focus:outline-hidden focus:ring-2"
+                [class.border-error]="invalidMinAmount()"
+                [class.focus:ring-error/30]="invalidMinAmount()"
+                [class.border-outline-variant]="!invalidMinAmount()"
+                [class.focus:ring-primary/30]="!invalidMinAmount()"
+              />
+            </div>
+            @if (invalidMinAmount()) {
+              <span class="text-[11px] text-error font-medium">
+                El monto mínimo debe ser mayor a S/ 0.00.
+              </span>
+            }
+          </div>
+        } @else {
+          <div class="p-3 rounded-xl bg-surface-container-low/50 border border-outline-variant/20 text-xs text-on-surface-variant">
+            Sin monto mínimo. Los compradores pueden pedir cualquier importe con delivery.
+          </div>
+        }
+      </div>
+
+      <p class="text-[11px] text-on-surface-variant/80 flex items-center gap-1.5">
+        <ng-icon name="matInfoOutline" class="text-sm shrink-0 text-primary" />
+        <span>No restringe pedidos con recojo en tienda física.</span>
+      </p>
+    </div>
+
+    <!-- Card B: Tiempo Promedio de Preparación -->
+    <div class="p-5 sm:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between gap-5 shadow-2xs">
+      <div class="flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0 border border-purple-500/20">
+              <ng-icon name="matTimerOutline" class="text-xl" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-on-surface">Tiempo de Preparación</h4>
+                <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 text-[10px] font-bold">
+                  {{ prepTimeLabel() }}
+                </span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-0.5">
+                Tiempo referencial visible al comprador durante el seguimiento.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 pt-2 border-t border-outline-variant/20">
+          <!-- Presets de Tiempo -->
+          <div class="grid grid-cols-4 gap-2">
+            @for (mins of [15, 30, 45, 60]; track mins) {
+              <button
+                type="button"
+                (click)="selectPrepTimePreset(mins)"
+                class="py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-0.5 border"
+                [class.border-primary]="prepTimeMinutes() === mins"
+                [class.bg-primary/5]="prepTimeMinutes() === mins"
+                [class.text-primary]="prepTimeMinutes() === mins"
+                [class.border-outline-variant/40]="prepTimeMinutes() !== mins"
+                [class.text-on-surface-variant]="prepTimeMinutes() !== mins"
+              >
+                <span class="font-mono text-sm font-extrabold">{{ mins }}</span>
+                <span class="text-[10px]">minutos</span>
+              </button>
+            }
+          </div>
+
+          <!-- Input numérico fino -->
+          <div class="flex items-center gap-3">
+            <input
+              type="number"
+              min="5"
+              max="480"
+              step="5"
+              [ngModel]="prepTimeMinutes()"
+              (ngModelChange)="prepTimeMinutes.set($event)"
+              class="w-24 px-3 py-2 rounded-xl bg-surface-container-low border text-sm font-mono font-bold text-on-surface focus:outline-hidden focus:ring-2"
+              [class.border-error]="invalidPrepTime()"
+              [class.focus:ring-error/30]="invalidPrepTime()"
+              [class.border-outline-variant]="!invalidPrepTime()"
+              [class.focus:ring-primary/30]="!invalidPrepTime()"
+            />
+            <span class="text-xs text-on-surface-variant">Personalizar minutos de preparación o empaque</span>
+          </div>
+          @if (invalidPrepTime()) {
+            <span class="text-[11px] text-error font-medium">
+              El tiempo de preparación debe estar entre 5 y 480 minutos.
+            </span>
+          }
+        </div>
+      </div>
+
+      <p class="text-[11px] text-on-surface-variant/80 flex items-center gap-1.5">
+        <ng-icon name="matSpeedOutline" class="text-sm shrink-0 text-purple-600" />
+        <span>Ayuda a calibrar la expectativa de espera del cliente antes de confirmar.</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Botón Guardar -->
+  <div class="flex justify-end pt-2">
+    <button
+      type="button"
+      (click)="saveChanges()"
+      [disabled]="settingsService.isSaving() || hasErrors()"
+      class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
+    >
+      <ng-icon name="matSaveOutline" class="text-base" />
+      <span>{{ settingsService.isSaving() ? 'Guardando...' : 'Guardar Métodos y Despacho' }}</span>
+    </button>
+  </div>
+</div>

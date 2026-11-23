@@ -1,8 +1,10 @@
+<!-- impeccable-disable broken-image -->
 <div
-  class="group flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden"
+  (click)="onCardClick()"
+  class="group flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-xs hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden cursor-pointer"
   [class.opacity-85]="isPaused()"
 >
-  <!-- Imagen fotográfica con badges flotantes -->
+  <!-- Imagen fotográfica con badges flotantes y botón de vista rápida en tienda -->
   <div class="relative w-full h-52 overflow-hidden bg-surface-container-low">
     @if (mainImageUrl()) {
       <img
@@ -37,7 +39,8 @@
       }
     </div>
 
-    <div class="absolute top-2.5 right-2.5">
+    <!-- Canal y botón Ver en tienda -->
+    <div class="absolute top-2.5 right-2.5 flex items-center gap-1.5">
       <span
         class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface-container-lowest/90 backdrop-blur-md text-on-surface text-[10px] font-semibold shadow-xs"
       >
@@ -46,8 +49,18 @@
           [class.bg-emerald-600]="!isPaused()"
           [class.bg-red-600]="isPaused()"
         ></span>
-        {{ product().channelText || 'WhatsApp & Web' }}
+        {{ product().channelText || 'WhatsApp & Catálogo Web' }}
       </span>
+
+      <button
+        type="button"
+        (click)="onOpenPreview($event)"
+        class="w-6 h-6 rounded-md bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+        title="Ver en Catálogo Web"
+        aria-label="Ver en Catálogo Web"
+      >
+        <ng-icon name="matOpenInNewOutline" class="text-xs"></ng-icon>
+      </button>
     </div>
   </div>
 
@@ -61,7 +74,7 @@
         >
           {{ product().name }}
         </h2>
-        <span class="text-lg font-bold text-on-surface shrink-0">
+        <span class="text-lg font-bold text-on-surface shrink-0 font-mono tabular-nums">
           {{ displayPrice() }}
         </span>
       </div>
@@ -70,18 +83,19 @@
       </p>
     </div>
 
-    <!-- Indicador de Stock / Capacidad / Problema -->
-    @if (product().hasStockIssue) {
+    <!-- Indicador de Stock / Control de existencias -->
+    @let info = stockInfo();
+    @if (info.isOutOfStock) {
       <div
         class="flex items-center justify-between py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs"
       >
-        <div class="flex items-center gap-1.5 text-red-700 dark:text-red-400 font-medium">
+        <div class="flex items-center gap-1.5 text-red-700 dark:text-red-400 font-semibold">
           <ng-icon name="matWarningOutline" class="text-sm"></ng-icon>
-          <span>{{ product().stockIssueMessage || 'Sin stock de insumos' }}</span>
+          <span>{{ info.label }}</span>
         </div>
         <button
           type="button"
-          (click)="editProduct.emit(product())"
+          (click)="onEdit($event)"
           class="text-[10px] font-bold text-red-700 dark:text-red-300 underline uppercase cursor-pointer"
         >
           Reponer
@@ -89,27 +103,38 @@
       </div>
     } @else {
       <div
-        class="flex items-center justify-between py-2 px-3 rounded-lg bg-surface-container-low text-xs"
+        class="flex items-center justify-between py-2 px-3 rounded-lg bg-surface-container-low text-xs border border-outline-variant/15"
       >
         <div class="flex items-center gap-1.5 text-on-surface font-medium">
-          <ng-icon name="matInventory2Outline" class="text-primary text-sm"></ng-icon>
-          <span>
-            @if (product().preparedCount != null) {
-              {{ product().preparedCount }} preparados
-            } @else if (product().quotaToday) {
-              Cupo hoy: {{ product().quotaToday?.current }} de {{ product().quotaToday?.total }}
-            } @else {
-              Disponible para venta
+          @if (info.isControlled) {
+            <ng-icon name="matInventory2Outline" class="text-primary text-sm"></ng-icon>
+            <span class="font-semibold text-on-surface">{{ info.label }}</span>
+          } @else {
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-high text-on-surface-variant">
+              {{ info.label }}
+            </span>
+          }
+        </div>
+        <!-- Micro barras de capacidad si tiene cuota -->
+        @if (info.isControlled && product().quotaToday && product().quotaToday!.total > 0) {
+          <div class="flex items-center gap-[3px]">
+            @for (bar of capacityBars(); track $index) {
+              <span
+                class="w-1.5 h-3 rounded-[2px] transition-colors"
+                [class.bg-primary]="bar.active && !bar.warning"
+                [class.bg-amber-500]="bar.active && bar.warning"
+                [class.bg-surface-variant]="!bar.active"
+              ></span>
             }
+          </div>
+        } @else if (info.isControlled) {
+          <span class="text-[10px] text-on-surface-variant font-medium">Stock físico</span>
+        } @else {
+          <span class="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Disponible
           </span>
-        </div>
-        <!-- Micro barras de capacidad -->
-        <div class="flex items-center gap-[3px]">
-          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
-          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
-          <span class="w-1.5 h-3 rounded-[2px] bg-primary"></span>
-          <span class="w-1.5 h-3 rounded-[2px] bg-surface-variant"></span>
-        </div>
+        }
       </div>
     }
 
@@ -124,28 +149,33 @@
         </span>
       </div>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1.5">
         <button
           type="button"
-          (click)="editProduct.emit(product())"
-          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-          title="Editar receta y costo"
-          aria-label="Editar"
+          (click)="onEdit($event)"
+          class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors cursor-pointer"
+          title="Editar producto, precio y detalles"
+          aria-label="Editar producto"
         >
           <ng-icon name="matEditOutline" class="text-sm"></ng-icon>
+          <span>Editar</span>
         </button>
+
+        @if (product().variants && product().variants!.length > 1) {
+          <button
+            type="button"
+            (click)="onAdjustQuota($event)"
+            class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+            title="Ajustar variantes y precios"
+            aria-label="Ajustar variantes"
+          >
+            <ng-icon name="matTuneOutline" class="text-sm"></ng-icon>
+          </button>
+        }
+
         <button
           type="button"
-          (click)="adjustQuota.emit(product())"
-          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-          title="Ajustar cupo diario"
-          aria-label="Ajustar cupo"
-        >
-          <ng-icon name="matTuneOutline" class="text-sm"></ng-icon>
-        </button>
-        <button
-          type="button"
-          (click)="toggleStatus.emit(product())"
+          (click)="onToggleStatus($event)"
           class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center transition-colors cursor-pointer"
           [class.text-red-600]="isPaused()"
           [class.text-on-surface-variant]="!isPaused()"
@@ -157,14 +187,6 @@
             [name]="isPaused() ? 'matVisibilityOffOutline' : 'matVisibilityOutline'"
             class="text-sm"
           ></ng-icon>
-        </button>
-        <button
-          type="button"
-          class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer"
-          title="Más opciones"
-          aria-label="Más opciones"
-        >
-          <ng-icon name="matMoreVertOutline" class="text-sm"></ng-icon>
         </button>
       </div>
     </div>

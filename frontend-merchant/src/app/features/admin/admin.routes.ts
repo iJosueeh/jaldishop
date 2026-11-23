@@ -7,6 +7,18 @@ export const ADMIN_ROUTES: Routes = [
       import('./dashboard/admin-dashboard').then((m) => m.AdminDashboard),
   },
   {
+    path: 'analytics',
+    loadComponent: () =>
+      import('./analytics/admin-analytics').then((m) => m.AdminAnalytics),
+  },
+  {
+    path: 'reconciliation',
+    loadComponent: () =>
+      import('./reconciliation/admin-reconciliation').then(
+        (m) => m.AdminReconciliation
+      ),
+  },
+  {
     path: 'users',
     loadComponent: () => import('./users/admin-users').then((m) => m.AdminUsers),
   },

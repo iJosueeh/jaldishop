@@ -16,6 +16,7 @@ import {
   matContentCopyOutline,
   matTwoWheelerOutline,
   matCancelOutline,
+  matPrintOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -35,6 +36,7 @@ import {
       matContentCopyOutline,
       matTwoWheelerOutline,
       matCancelOutline,
+      matPrintOutline,
     }),
   ],
   selector: 'app-order-details-drawer',
@@ -56,6 +58,7 @@ export class OrderDetailsDrawer {
   readonly cancelOrder = output<DashboardPriorityOrder>();
   readonly notifyCustomer = output<DashboardPriorityOrder>();
   readonly verifyStatus = output<DashboardPriorityOrder>();
+  readonly printTicket = output<DashboardPriorityOrder>();
 
   canCancel(status?: OrderStatus): boolean {
     return status === 'CONFIRMED' || status === 'IN_PREPARATION';

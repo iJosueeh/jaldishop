@@ -86,5 +86,6 @@ class AdminOrderInvestigationSecurityTest {
     void adminCanInvestigate() {
         assertDoesNotThrow(() -> controller.investigate(UUID.randomUUID(), ADMIN));
         assertDoesNotThrow(() -> controller.reconcile(UUID.randomUUID(), ADMIN));
+        assertDoesNotThrow(() -> controller.getCandidates(15, ADMIN));
     }
 }

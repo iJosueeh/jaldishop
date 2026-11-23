@@ -5,6 +5,7 @@ import { StoreService } from '../../../../core/services/store.service';
 import { ProfileService } from '../../../../core/services/profile.service';
 import { CapacityService } from '../../../../core/services/capacity.service';
 import { OrderService } from '../../../../core/services/order.service';
+import { InventoryService } from '../../../../core/services/inventory.service';
 import { isValidImageUrl } from '../../../../core/utils/image.utils';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -15,9 +16,11 @@ import {
   matReceiptLongOutline,
   matViewWeekOutline,
   matInventory2Outline,
+  matWarehouseOutline,
   matGroupOutline,
   matTuneOutline,
   matLogoutOutline,
+  matPaymentsOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -31,9 +34,11 @@ import {
       matReceiptLongOutline,
       matViewWeekOutline,
       matInventory2Outline,
+      matWarehouseOutline,
       matGroupOutline,
       matTuneOutline,
       matLogoutOutline,
+      matPaymentsOutline,
     }),
   ],
   selector: 'app-siderbar',
@@ -46,6 +51,11 @@ export class Siderbar implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly capacityService = inject(CapacityService);
   readonly orderService = inject(OrderService);
+  readonly inventoryService = inject(InventoryService);
+
+  readonly lowStockAlertsCount = computed<number>(() => {
+    return this.inventoryService.lowStock().length;
+  });
 
   readonly activeOrdersCount = computed<number>(() => {
     return this.orderService.activeOrdersTodayCount();

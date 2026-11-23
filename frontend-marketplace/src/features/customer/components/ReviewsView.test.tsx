@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ReviewsView } from './ReviewsView';
 import { useCustomerReviews } from '../hooks/useCustomerReviews';
@@ -23,6 +23,8 @@ describe('ReviewsView Component', () => {
       isCreating: false,
       updateReview: vi.fn(),
       isUpdating: false,
+      deleteReview: vi.fn(),
+      isDeleting: false,
     });
 
     render(<ReviewsView />);
@@ -40,6 +42,8 @@ describe('ReviewsView Component', () => {
       isCreating: false,
       updateReview: vi.fn(),
       isUpdating: false,
+      deleteReview: vi.fn(),
+      isDeleting: false,
     });
 
     render(<ReviewsView />);
@@ -74,6 +78,8 @@ describe('ReviewsView Component', () => {
       isCreating: false,
       updateReview: vi.fn(),
       isUpdating: false,
+      deleteReview: vi.fn(),
+      isDeleting: false,
     });
 
     render(<ReviewsView />);
@@ -82,5 +88,53 @@ describe('ReviewsView Component', () => {
     expect(screen.getByText('Carpintería Don Luis')).toBeInTheDocument();
     expect(screen.getByText('Impecable acabado y entrega puntual.')).toBeInTheDocument();
     expect(screen.getByText('Compra verificada')).toBeInTheDocument();
+  });
+
+  it('opens confirmation modal and deletes review when confirmed', async () => {
+    const mockDeleteReview = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useCustomerReviews).mockReturnValue({
+      reviews: [
+        {
+          id: 'rev-1',
+          productId: 'prod-1',
+          productName: 'Mueble de Roble Macizo',
+          productSlug: 'mueble-de-roble-macizo',
+          storeName: 'Carpintería Don Luis',
+          storeSlug: 'carpinteria-don-luis',
+          imageUrl: null,
+          rating: 5,
+          comment: 'Impecable acabado.',
+          status: 'PUBLISHED',
+          createdAt: '2026-10-25T12:00:00Z',
+          updatedAt: '2026-10-25T12:00:00Z',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      createReview: vi.fn(),
+      isCreating: false,
+      updateReview: vi.fn(),
+      isUpdating: false,
+      deleteReview: mockDeleteReview,
+      isDeleting: false,
+    });
+
+    render(<ReviewsView />);
+    const deleteButton = screen.getByRole('button', {
+      name: /eliminar opinión de mueble de roble macizo/i,
+    });
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByText('¿Eliminar opinión?')).toBeInTheDocument();
+    expect(
+      screen.getByText(/¿Estás seguro de que deseas eliminar tu valoración sobre/i)
+    ).toBeInTheDocument();
+
+    const confirmButton = screen.getByRole('button', { name: /sí, eliminar/i });
+    fireEvent.click(confirmButton);
+
+    expect(mockDeleteReview).toHaveBeenCalledWith('prod-1');
   });
 });

@@ -1,6 +1,7 @@
 package com.jaldishop.backend.ordering.web.controller;
 
 import com.jaldishop.backend.ordering.application.service.ChangeOrderStatusService;
+import com.jaldishop.backend.ordering.application.service.CreateMerchantOrderService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderDetailService;
 import com.jaldishop.backend.ordering.application.service.GetMerchantOrderStatusCountsService;
 import com.jaldishop.backend.ordering.application.service.ListMerchantOrdersService;
@@ -9,6 +10,7 @@ import com.jaldishop.backend.ordering.application.result.MerchantOrderPageRespon
 import com.jaldishop.backend.ordering.application.result.MerchantOrderStatusCountsResponse;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.web.dto.ChangeOrderStatusRequest;
+import com.jaldishop.backend.ordering.web.dto.CreateMerchantOrderRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
@@ -48,19 +50,22 @@ public class MerchantOrderController {
     private final GetMerchantOrderDetailService getMerchantOrderDetailService;
     private final ChangeOrderStatusService changeOrderStatusService;
     private final GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService;
+    private final CreateMerchantOrderService createMerchantOrderService;
 
     public MerchantOrderController(
             StoreContextService storeContextService,
             ListMerchantOrdersService listMerchantOrdersService,
             GetMerchantOrderDetailService getMerchantOrderDetailService,
             ChangeOrderStatusService changeOrderStatusService,
-            GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService
+            GetMerchantOrderStatusCountsService getMerchantOrderStatusCountsService,
+            CreateMerchantOrderService createMerchantOrderService
     ) {
         this.storeContextService = storeContextService;
         this.listMerchantOrdersService = listMerchantOrdersService;
         this.getMerchantOrderDetailService = getMerchantOrderDetailService;
         this.changeOrderStatusService = changeOrderStatusService;
         this.getMerchantOrderStatusCountsService = getMerchantOrderStatusCountsService;
+        this.createMerchantOrderService = createMerchantOrderService;
     }
 
     /**
@@ -137,9 +142,29 @@ public class MerchantOrderController {
     ) {
         validatePrincipal(principal);
         storeContextService.validateStoreOwnership(storeId, principal);
-        changeOrderStatusService.execute(orderId, request.status(), storeId);
+        if (request.reason() != null && !request.reason().isBlank()) {
+            changeOrderStatusService.execute(orderId, request.status(), storeId, request.reason());
+        } else {
+            changeOrderStatusService.execute(orderId, request.status(), storeId);
+        }
         MerchantOrderDetailResponse updatedOrder = getMerchantOrderDetailService.execute(orderId, storeId);
         return ResponseEntity.ok(updatedOrder);
+    }
+
+    /**
+     * Registro directo de pedidos por parte del comerciante (mostrador, WhatsApp, teléfono).
+     * Retorna 201 Created con el detalle del pedido confirmado y stock descontado.
+     */
+    @PostMapping
+    public ResponseEntity<MerchantOrderDetailResponse> createOrder(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @Valid @RequestBody CreateMerchantOrderRequest request
+    ) {
+        validatePrincipal(principal);
+        storeContextService.validateStoreOwnership(storeId, principal);
+        MerchantOrderDetailResponse response = createMerchantOrderService.execute(storeId, principal.userId(), request);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(response);
     }
 
     private void validatePrincipal(JwtPrincipal principal) {

@@ -1,5 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matPersonOutline,
@@ -9,9 +10,10 @@ import {
   matShieldOutline,
   matSupportAgentOutline,
 } from '@ng-icons/material-symbols/outline';
+import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
-  imports: [ReactiveFormsModule, NgIcon],
+  imports: [ReactiveFormsModule, RouterLink, NgIcon],
   providers: [
     provideIcons({
       matPersonOutline,
@@ -27,6 +29,8 @@ import {
   templateUrl: './profile-info-card.html',
 })
 export class ProfileInfoCard {
+  readonly settingsService = inject(SettingsService);
+
   readonly form = input<FormGroup>(
     new FormGroup({
       firstName: new FormControl(''),
@@ -42,6 +46,14 @@ export class ProfileInfoCard {
 
   onSubmit(): void {
     this.save.emit();
+  }
+
+  onToggleOrderSoundAlert(checked: boolean): void {
+    this.settingsService.saveSettings({ ...this.settingsService.settings(), orderSoundAlert: checked });
+  }
+
+  onToggleCapacityAlert(checked: boolean): void {
+    this.settingsService.saveSettings({ ...this.settingsService.settings(), lowStockVisualAlert: checked });
   }
 }
 

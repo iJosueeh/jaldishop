@@ -5,6 +5,24 @@ import {
   UpdateCustomerAddressPayload,
 } from '../types/customer.types';
 
+function normalizeCustomerAddress(raw: CustomerAddress): CustomerAddress {
+  const street = raw.streetAddress || raw.addressLine || '';
+  return {
+    ...raw,
+    streetAddress: street,
+    addressLine: street,
+  };
+}
+
+function normalizePayload<T extends CreateCustomerAddressPayload | UpdateCustomerAddressPayload>(payload: T): T {
+  const street = payload.streetAddress || payload.addressLine || '';
+  return {
+    ...payload,
+    streetAddress: street,
+    addressLine: street,
+  };
+}
+
 export const customerAddressService = {
   async getAddresses(): Promise<CustomerAddressListResponse> {
     const res = await fetch('/api/customer/addresses', {
@@ -20,7 +38,12 @@ export const customerAddressService = {
       throw new Error(error.message || 'No fue posible cargar tus direcciones.');
     }
 
-    return res.json();
+    const data = await res.json();
+    return {
+      total: data.total ?? (Array.isArray(data.addresses) ? data.addresses.length : 0),
+      maxAllowed: data.maxAllowed ?? 5,
+      addresses: Array.isArray(data.addresses) ? data.addresses.map(normalizeCustomerAddress) : [],
+    };
   },
 
   async createAddress(payload: CreateCustomerAddressPayload): Promise<CustomerAddress> {
@@ -29,7 +52,7 @@ export const customerAddressService = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(normalizePayload(payload)),
     });
 
     if (!res.ok) {
@@ -37,7 +60,8 @@ export const customerAddressService = {
       throw new Error(error.message || 'No fue posible registrar la dirección.');
     }
 
-    return res.json();
+    const raw = await res.json();
+    return normalizeCustomerAddress(raw);
   },
 
   async updateAddress(
@@ -49,7 +73,7 @@ export const customerAddressService = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(normalizePayload(payload)),
     });
 
     if (!res.ok) {
@@ -57,7 +81,8 @@ export const customerAddressService = {
       throw new Error(error.message || 'No fue posible actualizar la dirección.');
     }
 
-    return res.json();
+    const raw = await res.json();
+    return normalizeCustomerAddress(raw);
   },
 
   async setDefaultAddress(id: string): Promise<CustomerAddress> {
@@ -75,7 +100,8 @@ export const customerAddressService = {
       );
     }
 
-    return res.json();
+    const raw = await res.json();
+    return normalizeCustomerAddress(raw);
   },
 
   async deleteAddress(id: string): Promise<void> {

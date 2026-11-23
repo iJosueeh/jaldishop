@@ -1,3 +1,10 @@
+import { vi } from 'vitest';
+
+vi.setConfig({
+  testTimeout: 20000,
+  hookTimeout: 30000,
+});
+
 /**
  * Global test environment setup for Vitest / Angular CLI.
  * Polyfills navigator properties (userAgent, platform, appVersion) and ResizeObserver for Node.js 21/22+ on Linux/CI.

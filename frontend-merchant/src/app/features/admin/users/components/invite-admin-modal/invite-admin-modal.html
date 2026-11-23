@@ -1,0 +1,253 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+    <!-- Backdrop oscuro -->
+    <div
+      (click)="dismiss()"
+      class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+    ></div>
+
+    <!-- Panel del Modal -->
+    <div
+      class="relative w-full max-w-xl rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xl z-10 overflow-hidden font-sans space-y-5 p-6"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Cabecera -->
+      <div class="flex items-start justify-between gap-4 border-b border-outline-variant/20 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+            <ng-icon name="matPersonAddOutline" class="text-[20px]" />
+          </div>
+          <div>
+            <h3 class="font-black text-base text-on-surface">
+              Gobierno de Administradores
+            </h3>
+            <p class="text-xs text-on-surface-variant font-medium">
+              Envía invitaciones con token de 48h a nuevos colaboradores o gestiona invitaciones activas
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+          aria-label="Cerrar modal"
+        >
+          <ng-icon name="matCloseOutline" class="text-[20px]" />
+        </button>
+      </div>
+
+      <!-- Selector de Pestañas (Pills) -->
+      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-surface-container/40 border border-outline-variant/20 text-xs font-bold">
+        <button
+          type="button"
+          (click)="setTab('form')"
+          class="flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer text-center"
+          [class.bg-surface-container-lowest]="activeTab() === 'form'"
+          [class.text-primary]="activeTab() === 'form'"
+          [class.shadow-2xs]="activeTab() === 'form'"
+          [class.text-on-surface-variant]="activeTab() !== 'form'"
+        >
+          Nueva Invitación
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('list')"
+          class="flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
+          [class.bg-surface-container-lowest]="activeTab() === 'list'"
+          [class.text-primary]="activeTab() === 'list'"
+          [class.shadow-2xs]="activeTab() === 'list'"
+          [class.text-on-surface-variant]="activeTab() !== 'list'"
+        >
+          <span>Invitaciones Activas</span>
+          @if (adminService.invitations().length > 0) {
+            <span class="px-1.5 py-0.2 rounded-md bg-primary/10 text-primary text-[10px] font-mono font-bold">
+              {{ adminService.invitations().length }}
+            </span>
+          }
+        </button>
+      </div>
+
+      <!-- Pestaña 1: Formulario de Nueva Invitación -->
+      @if (activeTab() === 'form') {
+        <form (ngSubmit)="onSubmit()" class="space-y-4 text-xs font-sans">
+          <div class="p-3.5 rounded-2xl bg-secondary-container/10 border border-secondary-container/20 text-[11px] text-on-surface-variant leading-relaxed">
+            <strong class="text-secondary font-bold block mb-0.5">Nota de Privilegios:</strong>
+            Las invitaciones son exclusivas para <strong>nuevas cuentas</strong>. Si la persona ya tiene cuenta de cliente o colaborador, utiliza la acción <em>Promover a Administrador</em> en su ficha lateral.
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label for="inviteEmail" class="block font-bold text-on-surface mb-1">
+                Correo Electrónico *
+              </label>
+              <input
+                id="inviteEmail"
+                type="email"
+                [ngModel]="email()"
+                (ngModelChange)="email.set($event)"
+                name="email"
+                required
+                placeholder="colaborador@jaldishop.com"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/30 text-on-surface font-medium focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="inviteFirstName" class="block font-bold text-on-surface mb-1">
+                  Nombres *
+                </label>
+                <input
+                  id="inviteFirstName"
+                  type="text"
+                  [ngModel]="firstName()"
+                  (ngModelChange)="firstName.set($event)"
+                  name="firstName"
+                  required
+                  placeholder="Carlos"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/30 text-on-surface font-medium focus:outline-none focus:border-primary transition-colors"
+                />
+              </div>
+
+              <div>
+                <label for="inviteLastName" class="block font-bold text-on-surface mb-1">
+                  Apellidos *
+                </label>
+                <input
+                  id="inviteLastName"
+                  type="text"
+                  [ngModel]="lastName()"
+                  (ngModelChange)="lastName.set($event)"
+                  name="lastName"
+                  required
+                  placeholder="Mendoza"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/30 text-on-surface font-medium focus:outline-none focus:border-primary transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="invitePhone" class="block font-bold text-on-surface mb-1">
+                Teléfono de Contacto (Opcional)
+              </label>
+              <input
+                id="invitePhone"
+                type="tel"
+                [ngModel]="phone()"
+                (ngModelChange)="phone.set($event)"
+                name="phone"
+                placeholder="987654321"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-high/40 border border-outline-variant/30 text-on-surface font-medium font-mono focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+          </div>
+
+          @if (formError()) {
+            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+              <ng-icon name="matCancelOutline" class="text-[16px] shrink-0" />
+              <span>{{ formError() }}</span>
+            </div>
+          }
+
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/20">
+            <button
+              type="button"
+              (click)="dismiss()"
+              class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="!isFormValid() || isSubmitting()"
+              class="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-40 text-on-primary font-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <ng-icon name="matMailOutline" class="text-[16px]" [class.animate-spin]="isSubmitting()" />
+              <span>{{ isSubmitting() ? 'Enviando...' : 'Enviar Invitación' }}</span>
+            </button>
+          </div>
+        </form>
+      }
+
+      <!-- Pestaña 2: Lista de Invitaciones Activas -->
+      @if (activeTab() === 'list') {
+        <div class="space-y-3 font-sans">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-on-surface-variant font-medium">
+              Historial de invitaciones de administración emitidas
+            </span>
+            <button
+              type="button"
+              (click)="adminService.loadInvitations().subscribe()"
+              class="text-primary hover:underline font-bold inline-flex items-center gap-1 cursor-pointer"
+            >
+              <ng-icon name="matRefreshOutline" class="text-[14px]" />
+              <span>Actualizar</span>
+            </button>
+          </div>
+
+          <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+            @for (inv of adminService.invitations(); track inv.id) {
+              <div class="p-3.5 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex items-center justify-between gap-3 text-xs">
+                <div class="flex flex-col min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-on-surface truncate">
+                      {{ inv.firstName }} {{ inv.lastName }}
+                    </span>
+                    <!-- Status Badge -->
+                    <span
+                      class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                      [class.bg-amber-500/10]="inv.status === 'PENDING'"
+                      [class.text-amber-700]="inv.status === 'PENDING'"
+                      [class.dark:text-amber-400]="inv.status === 'PENDING'"
+                      [class.bg-emerald-500/10]="inv.status === 'ACCEPTED'"
+                      [class.text-emerald-700]="inv.status === 'ACCEPTED'"
+                      [class.dark:text-emerald-400]="inv.status === 'ACCEPTED'"
+                      [class.bg-rose-500/10]="inv.status === 'REVOKED' || inv.status === 'EXPIRED'"
+                      [class.text-rose-700]="inv.status === 'REVOKED' || inv.status === 'EXPIRED'"
+                    >
+                      {{ inv.status === 'PENDING' ? 'Pendiente (48h)' : inv.status }}
+                    </span>
+                  </div>
+                  <span class="text-on-surface-variant text-[11px] font-mono mt-0.5 truncate">
+                    {{ inv.email }}
+                  </span>
+                  <span class="text-[10px] text-on-surface-variant/70 mt-0.5">
+                    Expira: {{ inv.expiresAt | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </div>
+
+                @if (inv.status === 'PENDING') {
+                  <button
+                    type="button"
+                    (click)="onRevoke(inv.id)"
+                    class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shrink-0 cursor-pointer"
+                  >
+                    Revocar
+                  </button>
+                }
+              </div>
+            } @empty {
+              <div class="py-8 text-center text-on-surface-variant text-xs">
+                <p class="font-bold">No hay invitaciones registradas</p>
+                <p class="text-[11px] mt-0.5">Las invitaciones emitidas aparecerán aquí con su estado de vigencia.</p>
+              </div>
+            }
+          </div>
+
+          <div class="flex justify-end pt-2 border-t border-outline-variant/20">
+            <button
+              type="button"
+              (click)="dismiss()"
+              class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors cursor-pointer"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

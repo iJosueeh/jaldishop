@@ -1,0 +1,89 @@
+<div class="flex flex-col flex-1 w-full gap-5 sm:gap-6 font-sans pb-10">
+  <!-- Encabezado y KPIs -->
+  <app-inventory-header
+    [totalCount]="inventoryService.totalCount()"
+    [configuredCount]="inventoryService.configuredCount()"
+    [notConfiguredCount]="inventoryService.notConfiguredCount()"
+    [lowStockCount]="inventoryService.lowStockCount()"
+    [isLoading]="inventoryService.isLoading()"
+    (refresh)="onRefresh()"
+  />
+
+  <!-- Banner de Error si falló la carga -->
+  @if (inventoryService.error() && !inventoryService.isLoading()) {
+    <div
+      class="flex items-center justify-between p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm shadow-xs"
+      role="alert"
+    >
+      <div class="flex items-center gap-3">
+        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+        <span class="font-medium">{{ inventoryService.error() }}</span>
+      </div>
+      <button
+        type="button"
+        (click)="onRefresh()"
+        class="text-xs font-bold text-rose-700 underline hover:text-rose-900 cursor-pointer"
+      >
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Barra de Filtros y Búsqueda -->
+  <app-inventory-filter-bar
+    [searchQuery]="inventoryService.searchQuery()"
+    [selectedFilter]="inventoryService.statusFilter()"
+    [configuredCount]="inventoryService.configuredCount()"
+    [notConfiguredCount]="inventoryService.notConfiguredCount()"
+    [lowStockCount]="inventoryService.lowStockCount()"
+    (searchChange)="onSearchChange($event)"
+    (filterChange)="onFilterChange($event)"
+    (clearFilters)="onClearFilters()"
+  />
+
+  <!-- Listado / Tabla de Inventario -->
+  <app-inventory-table
+    [items]="pagedInventory()"
+    [isLoading]="inventoryService.isLoading()"
+    [hasError]="inventoryService.error() !== null"
+    [errorMessage]="inventoryService.error()"
+    [isFilterActive]="
+      inventoryService.statusFilter() !== 'ALL' ||
+      inventoryService.searchQuery().trim().length > 0
+    "
+    [updatingVariantId]="inventoryService.updatingVariantId()"
+    (editStock)="openStockDrawer($event)"
+    (editThreshold)="openThresholdModal($event)"
+    (retry)="onRefresh()"
+    (clearFilters)="onClearFilters()"
+  />
+
+  <!-- Paginación -->
+  @if (!inventoryService.isLoading() && inventoryService.filteredInventory().length > 0) {
+    <div class="flex justify-center pt-2">
+      <app-pagination
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        [totalItems]="inventoryService.filteredInventory().length"
+        itemLabel="variantes"
+        (pageChange)="onPageChange($event)"
+      />
+    </div>
+  }
+
+  <!-- Drawer para Ajustar Stock Físico -->
+  <app-inventory-stock-drawer
+    [isOpen]="isStockDrawerOpen()"
+    [variant]="selectedVariantForStock()"
+    (close)="closeStockDrawer()"
+    (stockSaved)="onStockSaved($event)"
+  />
+
+  <!-- Modal para Ajustar Umbral de Stock Bajo -->
+  <app-inventory-threshold-modal
+    [isOpen]="isThresholdModalOpen()"
+    [variant]="selectedVariantForThreshold()"
+    (close)="closeThresholdModal()"
+    (thresholdSaved)="onThresholdSaved($event)"
+  />
+</div>

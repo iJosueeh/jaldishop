@@ -165,7 +165,8 @@ export interface CustomerAddress {
   province: string;
   district: string;
   ubigeoCode: string;
-  addressLine: string;
+  streetAddress: string;
+  addressLine?: string;
   reference?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -177,6 +178,7 @@ export interface CustomerAddress {
 export interface CustomerAddressListResponse {
   addresses: CustomerAddress[];
   total: number;
+  maxAllowed?: number;
 }
 
 export interface CreateCustomerAddressPayload {
@@ -187,7 +189,8 @@ export interface CreateCustomerAddressPayload {
   province: string;
   district: string;
   ubigeoCode: string;
-  addressLine: string;
+  streetAddress: string;
+  addressLine?: string;
   reference?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -202,7 +205,8 @@ export interface UpdateCustomerAddressPayload {
   province: string;
   district: string;
   ubigeoCode: string;
-  addressLine: string;
+  streetAddress: string;
+  addressLine?: string;
   reference?: string | null;
   latitude?: number | null;
   longitude?: number | null;

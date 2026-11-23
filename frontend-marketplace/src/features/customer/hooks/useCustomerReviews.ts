@@ -5,6 +5,7 @@ import {
   getCustomerReviews,
   createReview,
   updateReview,
+  deleteReview,
 } from '../services/customerReviewService';
 import type {
   CustomerReview,
@@ -57,6 +58,16 @@ export function useCustomerReviews() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (productId: string) => deleteReview(productId),
+    onSuccess: (_, productId) => {
+      queryClient.invalidateQueries({ queryKey: CUSTOMER_REVIEWS_KEY });
+      queryClient.invalidateQueries({
+        queryKey: ['customer', 'reviews', 'eligibility', productId],
+      });
+    },
+  });
+
   return {
     reviews: query.data ?? [],
     isLoading: query.isLoading,
@@ -67,5 +78,7 @@ export function useCustomerReviews() {
     isCreating: createMutation.isPending,
     updateReview: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
+    deleteReview: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
   };
 }

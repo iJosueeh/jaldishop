@@ -7,15 +7,17 @@ import { AdminSettingsGeneralTab } from './components/admin-settings-general-tab
 import { AdminSettingsSecurityTab } from './components/admin-settings-security-tab/admin-settings-security-tab';
 import { AdminSettingsNotificationsTab } from './components/admin-settings-notifications-tab/admin-settings-notifications-tab';
 import { AdminSettingsSystemTab } from './components/admin-settings-system-tab/admin-settings-system-tab';
+import { AdminSettingsAuditTab } from './components/admin-settings-audit-tab/admin-settings-audit-tab';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matTuneOutline,
   matShieldOutline,
   matNotificationsOutline,
   matInfoOutline,
+  matHistoryEduOutline,
 } from '@ng-icons/material-symbols/outline';
 
-export type AdminSettingsTabType = 'general' | 'security' | 'notifications' | 'system';
+export type AdminSettingsTabType = 'general' | 'security' | 'notifications' | 'system' | 'audit';
 
 @Component({
   imports: [
@@ -25,6 +27,7 @@ export type AdminSettingsTabType = 'general' | 'security' | 'notifications' | 's
     AdminSettingsSecurityTab,
     AdminSettingsNotificationsTab,
     AdminSettingsSystemTab,
+    AdminSettingsAuditTab,
     NgIcon,
   ],
   providers: [
@@ -33,6 +36,7 @@ export type AdminSettingsTabType = 'general' | 'security' | 'notifications' | 's
       matShieldOutline,
       matNotificationsOutline,
       matInfoOutline,
+      matHistoryEduOutline,
     }),
   ],
   selector: 'app-admin-settings',

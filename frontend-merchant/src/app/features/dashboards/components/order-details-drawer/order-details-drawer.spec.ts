@@ -243,5 +243,20 @@ describe('OrderDetailsDrawer', () => {
     expect(component.canCancel('COMPLETED')).toBe(false);
     expect(component.canCancel('CANCELLED')).toBe(false);
   });
+
+  it('debe emitir printTicket al presionar el botón de imprimir comanda', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('order', mockOrder);
+    fixture.detectChanges();
+
+    const printSpy = vi.fn();
+    component.printTicket.subscribe(printSpy);
+
+    const btn = fixture.nativeElement.querySelector('button[aria-label="Imprimir Boleta / Ticket de Venta"]');
+    expect(btn).toBeTruthy();
+    btn.click();
+
+    expect(printSpy).toHaveBeenCalledWith(mockOrder);
+  });
 });
 

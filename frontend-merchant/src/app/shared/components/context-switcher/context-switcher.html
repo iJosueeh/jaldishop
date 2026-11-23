@@ -1,0 +1,149 @@
+@if (isDualRole()) {
+  <div class="relative inline-block text-left font-sans">
+    <!-- Botón disparador visible con badge de entorno actual -->
+    <button
+      type="button"
+      (click)="toggleDropdown()"
+      class="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer shadow-2xs group focus:outline-none focus:ring-2 focus:ring-primary/20"
+      [class.bg-surface-bright]="currentContext() === 'MERCHANT'"
+      [class.border-outline-variant]="currentContext() === 'MERCHANT'"
+      [class.hover:border-primary/40]="currentContext() === 'MERCHANT'"
+      [class.bg-surface-container-high]="currentContext() === 'ADMIN'"
+      [class.border-primary/30]="currentContext() === 'ADMIN'"
+      [class.hover:border-primary/60]="currentContext() === 'ADMIN'"
+      [attr.aria-expanded]="isOpen()"
+      aria-haspopup="true"
+      aria-label="Selector de entorno y contexto operativo"
+      title="Cambiar entre Portal de Comercio y Control Plane (Alt + S)"
+    >
+      @if (currentContext() === 'MERCHANT') {
+        <span class="flex items-center gap-1.5 text-xs font-bold text-on-surface">
+          <ng-icon name="matStorefrontOutline" class="text-primary text-[16px]" />
+          <span class="hidden sm:inline">Mi Tienda</span>
+          <span class="sm:hidden">Tienda</span>
+        </span>
+        <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold tracking-wide uppercase border border-emerald-500/20">
+          Comercio
+        </span>
+      } @else {
+        <span class="flex items-center gap-1.5 text-xs font-bold text-primary">
+          <ng-icon name="matShieldOutline" class="text-primary text-[16px]" />
+          <span class="hidden sm:inline">Super Admin</span>
+          <span class="sm:hidden">Admin</span>
+        </span>
+        <span class="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-extrabold tracking-wide uppercase border border-primary/25">
+          Control Plane
+        </span>
+      }
+
+      <ng-icon
+        name="matKeyboardArrowDownOutline"
+        class="text-[14px] text-on-surface-variant transition-transform duration-200"
+        [class.rotate-180]="isOpen()"
+      />
+
+      <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono text-on-surface-variant/70 bg-surface border border-outline-variant/60 rounded">
+        Alt+S
+      </kbd>
+    </button>
+
+    <!-- Menú desplegable flotante -->
+    @if (isOpen()) {
+      <div
+        class="absolute right-0 mt-2 w-72 rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-xl z-50 p-2 animate-modal-in backdrop-blur-md"
+        role="menu"
+        aria-orientation="vertical"
+      >
+        <div class="px-3 py-2 border-b border-outline-variant/20 mb-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Cambiar Entorno
+            </span>
+            <span class="text-[10px] font-mono text-on-surface-variant/60">
+              Alt + S
+            </span>
+          </div>
+          <p class="text-[11px] text-on-surface-variant/70 mt-0.5">
+            Tienes permisos de Comercio y Plataforma
+          </p>
+        </div>
+
+        <!-- Opción 1: Merchant Portal -->
+        <button
+          type="button"
+          (click)="switchContext('MERCHANT')"
+          class="w-full text-left p-2.5 rounded-xl transition-colors flex items-center justify-between gap-3 cursor-pointer group"
+          [class.bg-surface-dim]="currentContext() === 'MERCHANT'"
+          [class.hover:bg-surface-container]="currentContext() !== 'MERCHANT'"
+          role="menuitem"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+              [class.bg-primary]="currentContext() === 'MERCHANT'"
+              [class.text-white]="currentContext() === 'MERCHANT'"
+              [class.border-primary]="currentContext() === 'MERCHANT'"
+              [class.bg-surface-container]="currentContext() !== 'MERCHANT'"
+              [class.text-on-surface-variant]="currentContext() !== 'MERCHANT'"
+              [class.border-outline-variant/40]="currentContext() !== 'MERCHANT'"
+            >
+              <ng-icon name="matStorefrontOutline" class="text-[18px]" />
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-xs font-bold text-on-surface group-hover:text-primary transition-colors flex items-center gap-1.5">
+                <span>Mi Tienda</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                  Comercio
+                </span>
+              </span>
+              <span class="text-[10px] text-on-surface-variant truncate">
+                Catálogo, existencias y pedidos
+              </span>
+            </div>
+          </div>
+          @if (currentContext() === 'MERCHANT') {
+            <ng-icon name="matCheckOutline" class="text-primary text-[18px] shrink-0" />
+          }
+        </button>
+
+        <!-- Opción 2: Platform Admin Control Plane -->
+        <button
+          type="button"
+          (click)="switchContext('ADMIN')"
+          class="w-full text-left p-2.5 rounded-xl transition-colors flex items-center justify-between gap-3 cursor-pointer group mt-1"
+          [class.bg-surface-dim]="currentContext() === 'ADMIN'"
+          [class.hover:bg-surface-container]="currentContext() !== 'ADMIN'"
+          role="menuitem"
+        >
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+              [class.bg-primary]="currentContext() === 'ADMIN'"
+              [class.text-white]="currentContext() === 'ADMIN'"
+              [class.border-primary]="currentContext() === 'ADMIN'"
+              [class.bg-surface-container]="currentContext() !== 'ADMIN'"
+              [class.text-on-surface-variant]="currentContext() !== 'ADMIN'"
+              [class.border-outline-variant/40]="currentContext() !== 'ADMIN'"
+            >
+              <ng-icon name="matShieldOutline" class="text-[18px]" />
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-xs font-bold text-on-surface group-hover:text-primary transition-colors flex items-center gap-1.5">
+                <span>Super Admin</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20">
+                  Global
+                </span>
+              </span>
+              <span class="text-[10px] text-on-surface-variant truncate">
+                Control de comercios y comisiones
+              </span>
+            </div>
+          </div>
+          @if (currentContext() === 'ADMIN') {
+            <ng-icon name="matCheckOutline" class="text-primary text-[18px] shrink-0" />
+          }
+        </button>
+      </div>
+    }
+  </div>
+}

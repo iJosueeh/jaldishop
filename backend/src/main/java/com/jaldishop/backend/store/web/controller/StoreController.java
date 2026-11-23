@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -31,6 +32,7 @@ public class StoreController {
     private final GetStoreBySlugService getStoreBySlugService;
     private final SearchPublicStoresService searchPublicStoresService;
     private final CloseMyStoreService closeMyStoreService;
+    private final com.jaldishop.backend.store.application.service.UpdateStoreTaxProfileService updateStoreTaxProfileService;
 
     public StoreController(
             CreateStoreService createStoreService,
@@ -40,12 +42,26 @@ public class StoreController {
             SearchPublicStoresService searchPublicStoresService,
             CloseMyStoreService closeMyStoreService
     ) {
+        this(createStoreService, getMyStoreService, updateStoreService, getStoreBySlugService, searchPublicStoresService, closeMyStoreService, null);
+    }
+
+    @Autowired
+    public StoreController(
+            CreateStoreService createStoreService,
+            GetMyStoreService getMyStoreService,
+            UpdateStoreService updateStoreService,
+            GetStoreBySlugService getStoreBySlugService,
+            SearchPublicStoresService searchPublicStoresService,
+            CloseMyStoreService closeMyStoreService,
+            com.jaldishop.backend.store.application.service.UpdateStoreTaxProfileService updateStoreTaxProfileService
+    ) {
         this.createStoreService = createStoreService;
         this.getMyStoreService = getMyStoreService;
         this.updateStoreService = updateStoreService;
         this.getStoreBySlugService = getStoreBySlugService;
         this.searchPublicStoresService = searchPublicStoresService;
         this.closeMyStoreService = closeMyStoreService;
+        this.updateStoreTaxProfileService = updateStoreTaxProfileService;
     }
 
     @PostMapping()
@@ -119,6 +135,15 @@ public class StoreController {
         );
 
         Store store = updateStoreService.execute(command);
+        return ResponseEntity.ok(StoreResponse.fromDomain(store));
+    }
+
+    @PutMapping("/me/tax-profile")
+    public ResponseEntity<StoreResponse> updateTaxProfile(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @Valid @RequestBody com.jaldishop.backend.store.web.dto.UpdateStoreTaxProfileRequest request
+    ) {
+        Store store = updateStoreTaxProfileService.execute(principal.userId(), request);
         return ResponseEntity.ok(StoreResponse.fromDomain(store));
     }
 

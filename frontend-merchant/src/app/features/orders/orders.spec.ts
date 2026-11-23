@@ -134,7 +134,12 @@ describe('Orders', () => {
     component.onConfirmCancel();
     expect(component.isCancelModalOpen()).toBe(false);
     expect(component.orderToCancel()).toBeNull();
-    expect(updateSpy).toHaveBeenCalledWith(confirmedOrder.id, 'CANCELLED');
+    expect(updateSpy).toHaveBeenCalledWith(
+      confirmedOrder.id,
+      'CANCELLED',
+      undefined,
+      expect.stringContaining('Cancelado por el comercio'),
+    );
   });
 
   it('debe rechazar intento de cancelación si el estado no es CONFIRMED ni IN_PREPARATION', () => {
@@ -305,5 +310,32 @@ describe('Orders', () => {
 
     component.onResetFilters();
     expect(resetSpy).toHaveBeenCalled();
+  });
+
+  it('debe abrir modal de comanda térmica en batch al ejecutar onPrintOrders', () => {
+    expect(component.isTicketModalOpen()).toBe(false);
+    component.onPrintOrders();
+    expect(component.isTicketModalOpen()).toBe(true);
+    expect(component.ticketOrdersBatch().length).toBe(2);
+    expect(component.ticketOrder()).toBeNull();
+
+    component.onCloseTicketModal();
+    expect(component.isTicketModalOpen()).toBe(false);
+    expect(component.ticketOrdersBatch().length).toBe(0);
+  });
+
+  it('debe abrir modal de comanda térmica para un pedido individual con onPrintSingleTicket', () => {
+    const order = component.orders()[0];
+    component.onPrintSingleTicket(order);
+    expect(component.isTicketModalOpen()).toBe(true);
+    expect(component.ticketOrder()).toBe(order);
+    expect(component.ticketOrdersBatch().length).toBe(0);
+  });
+
+  it('debe aprovechar Cache-First en OrderService al re-inicializar el componente', () => {
+    component.storeService.currentStore.set({ id: 'store-123', name: 'Mi Tienda' } as any);
+    const loadOrdersSpy = vi.spyOn(orderService, 'loadOrders');
+    component.ngOnInit();
+    expect(loadOrdersSpy).toHaveBeenCalledWith(0, component.pageSize(), component.activeTab(), 'store-123');
   });
 });

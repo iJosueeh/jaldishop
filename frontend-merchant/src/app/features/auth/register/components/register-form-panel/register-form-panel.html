@@ -37,7 +37,7 @@
           >
           <div class="relative rounded-xl shadow-2xs">
             <div
-              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-500"
             >
               <svg
                 class="h-4 w-4"
@@ -58,7 +58,7 @@
               type="text"
               formControlName="firstName"
               placeholder="Ingresa tus nombres"
-              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid
               "
@@ -80,7 +80,7 @@
           >
           <div class="relative rounded-xl shadow-2xs">
             <div
-              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-500"
             >
               <svg
                 class="h-4 w-4"
@@ -101,7 +101,7 @@
               type="text"
               formControlName="lastName"
               placeholder="Ingresa tus apellidos"
-              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-3.5 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid
               "
@@ -123,7 +123,7 @@
         >
         <div class="relative rounded-xl shadow-2xs">
           <div
-            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-500"
           >
             <svg
               class="h-4 w-4"
@@ -144,7 +144,7 @@
             type="email"
             formControlName="email"
             placeholder="nombre@correo.com"
-            class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+            class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
             [class.border-red-500]="
               registerForm.get('email')?.touched && registerForm.get('email')?.invalid
             "
@@ -170,7 +170,7 @@
           >
           <div class="relative rounded-xl shadow-2xs">
             <div
-              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-500"
             >
               <svg
                 class="h-4 w-4"
@@ -191,7 +191,7 @@
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               placeholder="Crea una contraseña"
-              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('password')?.touched && registerForm.get('password')?.invalid
               "
@@ -200,7 +200,7 @@
               type="button"
               (click)="togglePassword()"
               aria-label="Mostrar u ocultar contraseña"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-500 hover:text-stone-700 transition-colors cursor-pointer"
             >
               @if (showPassword()) {
                 <ng-icon name="matVisibilityOffOutline" class="text-lg" />
@@ -220,7 +220,7 @@
           >
           <div class="relative rounded-xl shadow-2xs">
             <div
-              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-400"
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-stone-500"
             >
               <svg
                 class="h-4 w-4"
@@ -241,7 +241,7 @@
               [type]="showConfirmPassword() ? 'text' : 'password'"
               formControlName="passwordConfirm"
               placeholder="Repite tu contraseña"
-              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+              class="block w-full h-11 rounded-xl border border-stone-300 bg-white pl-10 pr-10 text-sm text-stone-900 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
               [class.border-red-500]="
                 registerForm.get('passwordConfirm')?.touched &&
                 (registerForm.get('passwordConfirm')?.invalid || registerForm.hasError('mismatch'))
@@ -251,7 +251,7 @@
               type="button"
               (click)="toggleConfirmPassword()"
               aria-label="Mostrar u ocultar contraseña"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-500 hover:text-stone-700 transition-colors cursor-pointer"
             >
               @if (showConfirmPassword()) {
                 <ng-icon name="matVisibilityOffOutline" class="text-lg" />

@@ -2,8 +2,13 @@ import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { OrderConfirmedDomainEvent, StompConnectionState } from '../models/order.models';
+import {
+  OrderConfirmedDomainEvent,
+  OrderStatusChangedDomainEvent,
+  StompConnectionState,
+} from '../models/order.models';
 import { TokenService } from './token-service';
+import { InvalidationBusService } from './invalidation-bus.service';
 
 /**
  * Convierte la URL base de la API HTTP REST en la URL correspondiente
@@ -32,6 +37,7 @@ export function getWebSocketUrl(apiUrl: string): string {
 })
 export class StompService implements OnDestroy {
   private readonly tokenService = inject(TokenService);
+  private readonly invalidationBus = inject(InvalidationBusService, { optional: true });
 
   private client: Client | null = null;
   private orderSubscription: StompSubscription | null = null;
@@ -45,6 +51,9 @@ export class StompService implements OnDestroy {
 
   private readonly orderConfirmedSubject = new Subject<OrderConfirmedDomainEvent>();
   readonly orderConfirmed$ = this.orderConfirmedSubject.asObservable();
+
+  private readonly orderStatusChangedSubject = new Subject<OrderStatusChangedDomainEvent>();
+  readonly orderStatusChanged$ = this.orderStatusChangedSubject.asObservable();
 
   private readonly reconnectedSubject = new Subject<void>();
   readonly reconnected$ = this.reconnectedSubject.asObservable();
@@ -114,6 +123,9 @@ export class StompService implements OnDestroy {
 
         if (wasReconnection) {
           this.reconnectedSubject.next();
+          if (this.subscribedStoreId) {
+            this.invalidationBus?.dispatchReconnected(this.subscribedStoreId);
+          }
         }
       },
       onDisconnect: () => {
@@ -169,9 +181,27 @@ export class StompService implements OnDestroy {
     const destination = `/topic/stores/${storeId}/orders`;
     this.orderSubscription = this.client.subscribe(destination, (message: IMessage) => {
       try {
-        const payload: OrderConfirmedDomainEvent = JSON.parse(message.body);
-        if (payload.eventType === 'ORDER_CONFIRMED' && payload.storeId === this.subscribedStoreId) {
-          this.orderConfirmedSubject.next(payload);
+        const payload = JSON.parse(message.body);
+        if (payload.storeId === this.subscribedStoreId) {
+          if (payload.eventType === 'ORDER_CONFIRMED') {
+            this.orderConfirmedSubject.next(payload as OrderConfirmedDomainEvent);
+            this.invalidationBus?.dispatchOrderCreated({
+              storeId: payload.storeId,
+              orderId: payload.orderId,
+              orderNumber: payload.orderNumber,
+              origin: payload.origin,
+              source: 'WEBSOCKET',
+            });
+          } else if (payload.eventType === 'ORDER_STATUS_CHANGED') {
+            this.orderStatusChangedSubject.next(payload as OrderStatusChangedDomainEvent);
+            this.invalidationBus?.dispatchOrderMutated({
+              storeId: payload.storeId,
+              orderId: payload.orderId,
+              status: payload.newStatus,
+              previousStatus: payload.previousStatus,
+              source: 'WEBSOCKET',
+            });
+          }
         }
       } catch {
         // Ignorar mensajes mal formateados

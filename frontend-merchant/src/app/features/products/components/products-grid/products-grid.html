@@ -36,7 +36,7 @@
     </div>
     <h3 class="font-bold text-lg text-on-surface">Tu catálogo está vacío</h3>
     <p class="text-sm text-on-surface-variant mt-1.5 max-w-md">
-      Aún no has registrado ningún producto en tu tienda. Comienza creando tus recetas o artículos
+      Aún no has registrado ningún producto en tu tienda. Comienza creando tus productos o artículos
       para habilitar ventas por WhatsApp y catálogo web.
     </p>
     <button
@@ -79,6 +79,8 @@
         (editProduct)="editProduct.emit($event)"
         (adjustQuota)="adjustQuota.emit($event)"
         (toggleStatus)="toggleStatus.emit($event)"
+        (viewInventory)="viewInventory.emit($event)"
+        (openPreview)="openPreview.emit($event)"
       />
     }
   </div>

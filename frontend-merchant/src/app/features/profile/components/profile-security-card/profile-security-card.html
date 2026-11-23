@@ -1,16 +1,9 @@
 <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 flex flex-col items-center text-center relative overflow-hidden font-sans">
-  <!-- Avatar con Botón de Cámara -->
-  <div class="relative group my-2">
+  <!-- Avatar de Usuario -->
+  <div class="relative my-2">
     <div class="w-20 h-20 rounded-full bg-primary-fixed text-primary flex items-center justify-center text-2xl font-bold shadow-inner">
       <span class="select-none font-bold">{{ userInitials() || 'U' }}</span>
     </div>
-    <button
-      type="button"
-      title="Cambiar fotografía"
-      class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary-container text-white flex items-center justify-center shadow-md hover:bg-primary transition-colors cursor-pointer"
-    >
-      <ng-icon name="matPhotoCameraOutline" class="text-[14px]" />
-    </button>
   </div>
 
   <!-- Nombre y Rol -->
@@ -66,7 +59,7 @@
     <div class="flex items-center justify-between py-1">
       <span class="text-on-surface-variant font-medium">Correo</span>
       <span class="font-bold text-on-surface truncate max-w-[180px]">
-        {{ profile()?.email || 'comercio@ejemplo.pe' }}
+        {{ profile()?.email || 'comercio@ejemplo.net' }}
       </span>
     </div>
 
@@ -113,4 +106,3 @@
     </button>
   </div>
 </div>
-

@@ -1,0 +1,88 @@
+<header class="flex flex-col gap-4 font-sans">
+  <!-- Fila principal de título y acción de refresco -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-2.5">
+        <span class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+          <ng-icon name="matWarehouseOutline" class="text-[22px]" />
+        </span>
+        <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">
+          Inventario
+        </h1>
+      </div>
+      <p class="text-xs sm:text-sm text-on-surface-variant font-medium">
+        Control de existencias físicas, reservas activas y umbrales de alerta por variante.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        (click)="refresh.emit()"
+        [disabled]="isLoading()"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-bright border border-outline-variant text-on-surface text-xs font-bold hover:bg-surface-dim transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+        aria-label="Actualizar inventario"
+      >
+        <ng-icon
+          name="matRefreshOutline"
+          class="text-[18px]"
+          [class.animate-spin]="isLoading()"
+        />
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Métricas KPI Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- Card 1: Total Variantes -->
+    <div class="p-4 rounded-2xl bg-surface-bright border border-outline-variant shadow-2xs flex flex-col justify-between gap-2">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70">Total Variantes</span>
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xl font-black text-on-surface font-mono">{{ totalCount() }}</span>
+        <span class="text-xs text-on-surface-variant/70 font-medium">en catálogo</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Configuradas -->
+    <div class="p-4 rounded-2xl bg-surface-bright border border-outline-variant shadow-2xs flex flex-col justify-between gap-2">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-primary">Con Control</span>
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xl font-black text-primary font-mono">{{ configuredCount() }}</span>
+        <span class="text-xs text-on-surface-variant/70 font-medium">con existencias</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Sin Configurar -->
+    <div class="p-4 rounded-2xl bg-surface-bright border border-outline-variant shadow-2xs flex flex-col justify-between gap-2">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">Sin Inicializar</span>
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xl font-black text-amber-800 font-mono">{{ notConfiguredCount() }}</span>
+        @if (notConfiguredCount() > 0) {
+          <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold">
+            Requiere stock
+          </span>
+        } @else {
+          <span class="text-xs text-on-surface-variant/70 font-medium">Al día</span>
+        }
+      </div>
+    </div>
+
+    <!-- Card 4: Alertas de Stock Bajo -->
+    <div class="p-4 rounded-2xl bg-surface-bright border border-outline-variant shadow-2xs flex flex-col justify-between gap-2">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-rose-700">Stock Crítico</span>
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xl font-black text-rose-700 font-mono">{{ lowStockCount() }}</span>
+        @if (lowStockCount() > 0) {
+          <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold uppercase">
+            {{ lowStockCount() === 1 ? '1 Alerta' : lowStockCount() + ' Alertas' }}
+          </span>
+        } @else {
+          <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+            Óptimo
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+</header>

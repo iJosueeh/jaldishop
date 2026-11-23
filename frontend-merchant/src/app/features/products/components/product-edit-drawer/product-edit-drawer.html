@@ -151,7 +151,7 @@
                 type="text"
                 [ngModel]="name()"
                 (ngModelChange)="name.set($event)"
-                placeholder="Ej: Torta Húmeda de Chocolate"
+                placeholder="Ej: Polo Oversize Algodón, Aceite Vegetal 1L, Torta Personalizada, Pack Cuadernos A4, Martillo de Uña 16oz..."
                 maxlength="160"
                 [disabled]="isSavingGeneral()"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium"
@@ -161,7 +161,7 @@
             <!-- Categoría -->
             <div class="space-y-1.5">
               <label for="edit-prod-cat" class="text-xs font-semibold text-on-surface block">
-                Categoría en el menú <span class="text-red-500">*</span>
+                Categoría del producto <span class="text-red-500">*</span>
               </label>
               <select
                 id="edit-prod-cat"
@@ -181,7 +181,7 @@
             <div class="space-y-1.5">
               <div class="flex justify-between items-center text-xs">
                 <label for="edit-prod-desc" class="font-semibold text-on-surface">
-                  Descripción o detalles <span class="text-stone-400 font-normal">(Opcional)</span>
+                  Descripción o detalles <span class="text-stone-600 font-normal">(Opcional)</span>
                 </label>
                 <span class="text-[11px] text-on-surface-variant">{{ description().length }}/500</span>
               </div>
@@ -191,10 +191,66 @@
                 (ngModelChange)="description.set($event)"
                 rows="3"
                 maxlength="500"
-                placeholder="Describe los ingredientes, porciones o detalles clave..."
+                placeholder="Describe características, especificaciones, formato o detalles clave..."
                 [disabled]="isSavingGeneral()"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
               ></textarea>
+            </div>
+
+            <!-- Precio al público (visible en Pestaña General para producto de formato único) -->
+            @if (isSingleVariant()) {
+              <div class="space-y-1.5 p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <label for="edit-single-price" class="text-xs font-semibold text-on-surface block">
+                    Precio al público <span class="text-red-500">*</span>
+                  </label>
+                  <span class="text-[10px] text-primary font-semibold">Formato único</span>
+                </div>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 text-xs font-bold text-on-surface-variant font-mono">
+                    S/
+                  </span>
+                  <input
+                    id="edit-single-price"
+                    type="number"
+                    min="0.01"
+                    step="0.10"
+                    [ngModel]="singleVariantPrice()"
+                    (ngModelChange)="singleVariantPrice.set($event)"
+                    placeholder="0.00"
+                    [disabled]="isSavingGeneral()"
+                    class="w-full pl-8 pr-3 py-2 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <p class="text-[10px] text-on-surface-variant">
+                  Puedes editar el precio directamente aquí. Si agregas más presentaciones, se gestionarán en la pestaña "Formatos y Precios".
+                </p>
+              </div>
+            }
+
+            <!-- Tarjeta Resumen de Disponibilidad en Pestaña General -->
+            @let fVar = firstVariant();
+            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface-container-low space-y-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant block">
+                Tipo de Disponibilidad
+              </span>
+              @if (!fVar || !fVar.tracksInventory) {
+                <div class="flex items-center gap-2 text-xs text-on-surface font-medium">
+                  <ng-icon name="matCheckOutline" class="text-primary text-base shrink-0" />
+                  <span>A pedido / Bajo demanda (Disponible sin límite previo)</span>
+                </div>
+              } @else {
+                @let inv = inventoryMap().get(fVar.id);
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 text-xs text-on-surface font-medium">
+                    <ng-icon name="matInventory2Outline" class="text-amber-700 dark:text-amber-400 text-base shrink-0" />
+                    <span>Con existencias físicas en tienda (Stock)</span>
+                  </div>
+                  <span class="text-xs font-mono font-bold text-on-surface">
+                    {{ inv?.availableQuantity ?? 0 }} disponibles
+                  </span>
+                </div>
+              }
             </div>
 
             <!-- Enlace web (Slug) -->
@@ -265,11 +321,40 @@
       <!-- PESTAÑA 2: FORMATOS Y PRECIOS (VARIANTES) -->
       @if (activeTab() === 'variants') {
         <div class="space-y-5 animate-fade-in">
+          <!-- Banner de Fallo Parcial: Variante Creada pero Stock Pendiente -->
+          @if (pendingCreatedVariant()) {
+            <div
+              class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs sm:text-sm animate-fade-in shadow-2xs space-y-2"
+            >
+              <div class="flex items-start gap-2.5">
+                <ng-icon name="matWarningOutline" class="text-xl text-amber-600 shrink-0 mt-0.5" />
+                <div class="flex-1 space-y-1">
+                  <span class="font-bold block">
+                    Formato creado, pero requiere inicializar inventario:
+                  </span>
+                  <p class="text-xs text-amber-800 dark:text-amber-300">
+                    "{{ pendingCreatedVariant()?.presentationName }}" se registró en el catálogo. Completa la configuración del stock para que no quede bloqueado en checkout.
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  (click)="retryPendingVariantInventory()"
+                  [disabled]="isSavingVariant()"
+                  class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Reintentar Inicialización de Stock
+                </button>
+              </div>
+            </div>
+          }
+
           <!-- Explicación amigable -->
           <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-2.5 text-xs text-on-surface">
             <ng-icon name="matInfoOutline" class="text-primary text-base shrink-0 mt-0.5" />
             <p class="leading-relaxed">
-              Define los diferentes tamaños, porciones o formatos en los que vendes este producto (ej: Porción, Molde Mediano, Vaso 12 oz). Cada uno tiene su propio precio y control de existencias.
+              Define las diferentes presentaciones, tamaños o medidas en que vendes este producto (ej: Unidad, Paquete, Talla, Litro, Caja, Porción). Cada una tiene su propio precio y control de existencias.
             </p>
           </div>
 
@@ -325,7 +410,7 @@
                             type="text"
                             [ngModel]="editVariantName()"
                             (ngModelChange)="editVariantName.set($event)"
-                            placeholder="Ej: Chico, Mediano, Grande..."
+                            placeholder="Ej: Unidad, Caja, Pack, Docena, Litro, Kilo, Talla..."
                             class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
                           />
                         </div>
@@ -349,7 +434,37 @@
                         </div>
                       </div>
 
-                      <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 text-[11px]">
+                      <!-- Disponibilidad de la variante en edición -->
+                      <div class="grid grid-cols-2 gap-2 pt-1 border-t border-outline-variant/15">
+                        <button
+                          type="button"
+                          (click)="editVariantTracksInventory.set(false)"
+                          class="py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer"
+                          [class.border-primary]="!editVariantTracksInventory()"
+                          [class.bg-primary/10]="!editVariantTracksInventory()"
+                          [class.text-primary]="!editVariantTracksInventory()"
+                          [class.border-outline-variant/30]="editVariantTracksInventory()"
+                          [class.text-on-surface-variant]="editVariantTracksInventory()"
+                        >
+                          <ng-icon name="matCheckOutline" class="text-sm" />
+                          <span>A pedido</span>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="editVariantTracksInventory.set(true)"
+                          class="py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer"
+                          [class.border-primary]="editVariantTracksInventory()"
+                          [class.bg-primary/10]="editVariantTracksInventory()"
+                          [class.text-primary]="editVariantTracksInventory()"
+                          [class.border-outline-variant/30]="!editVariantTracksInventory()"
+                          [class.text-on-surface-variant]="!editVariantTracksInventory()"
+                        >
+                          <ng-icon name="matInventory2Outline" class="text-sm" />
+                          <span>Con stock</span>
+                        </button>
+                      </div>
+
+                      <div class="flex items-center justify-between gap-2 pt-1 border-t border-outline-variant/15 text-[11px]">
                         <div class="flex items-center gap-1.5 text-on-surface-variant">
                           <span class="font-mono text-[10px]">Cód SKU:</span>
                           <input
@@ -361,37 +476,27 @@
                           />
                         </div>
 
-                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-on-surface-variant select-none">
-                          <input
-                            type="checkbox"
-                            [checked]="editVariantTracksInventory()"
-                            (change)="editVariantTracksInventory.set(!editVariantTracksInventory())"
-                            class="rounded border-outline-variant text-primary focus:ring-primary h-3.5 w-3.5"
-                          />
-                          <span>Controla stock</span>
-                        </label>
-                      </div>
-
-                      <div class="flex items-center justify-end gap-2 pt-1">
-                        <button
-                          type="button"
-                          (click)="cancelEditVariant()"
-                          [disabled]="isSavingEditVariant()"
-                          class="px-3 py-1 rounded-lg border border-outline-variant/40 text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          type="button"
-                          (click)="saveEditVariant(variant)"
-                          [disabled]="isSavingEditVariant()"
-                          class="px-3 py-1 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1"
-                        >
-                          @if (isSavingEditVariant()) {
-                            <span class="w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
-                          }
-                          <span>Guardar</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                          <button
+                            type="button"
+                            (click)="cancelEditVariant()"
+                            [disabled]="isSavingEditVariant()"
+                            class="px-2.5 py-1 rounded-lg border border-outline-variant/40 text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            (click)="saveEditVariant(variant)"
+                            [disabled]="isSavingEditVariant()"
+                            class="px-3 py-1 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            @if (isSavingEditVariant()) {
+                              <span class="w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
+                            }
+                            <span>Guardar</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   } @else {
@@ -426,7 +531,25 @@
                             S/ {{ variant.priceAmount.toFixed(2) }}
                           </span>
                           <span>•</span>
-                          <span>{{ variant.tracksInventory ? 'Control de stock físico' : 'Elaborado a pedido / fresco' }}</span>
+                          @if (!variant.tracksInventory) {
+                            <span class="text-stone-500">A pedido / Sin control de existencias</span>
+                          } @else {
+                            @let inv = inventoryMap().get(variant.id);
+                            @if (!inv || inv.inventoryStatus === 'NOT_CONFIGURED') {
+                              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+                                Sin stock configurado
+                              </span>
+                            } @else {
+                              <span class="font-mono text-stone-700 dark:text-stone-300">
+                                Stock: <strong>{{ inv.physicalQuantity ?? 0 }}</strong> | Disp: <strong>{{ inv.availableQuantity ?? 0 }}</strong>
+                              </span>
+                              @if (inv.isLowStock) {
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-700 border border-rose-500/30">
+                                  Stock Bajo (≤ {{ inv.lowStockThreshold }})
+                                </span>
+                              }
+                            }
+                          }
                           @if (variant.sku) {
                             <span>•</span>
                             <span class="font-mono text-[10px] text-on-surface-variant/80">Cód: {{ variant.sku }}</span>
@@ -495,7 +618,7 @@
                   type="text"
                   [ngModel]="newVariantName()"
                   (ngModelChange)="onNewVariantNameChange($event)"
-                  placeholder="Ej: Molde Familiar 26 cm, Vaso 16 oz, Caja x 12..."
+                  placeholder="Ej: Unidad, Caja, Pack, Docena, Litro, Kilo, Talla..."
                   maxlength="120"
                   [disabled]="isSavingVariant()"
                   class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -536,7 +659,7 @@
                     type="text"
                     [ngModel]="newVariantSku()"
                     (ngModelChange)="newVariantSku.set($event)"
-                    placeholder="Ej: TORT-FAM-01"
+                    placeholder="Ej: POLO-OVR-NEG"
                     maxlength="100"
                     [disabled]="isSavingVariant()"
                     class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all uppercase"
@@ -544,28 +667,129 @@
                 </div>
               </div>
 
-              <!-- Tipo de Elaboración para esta variante -->
-              <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-on-surface">
-                    {{ newVariantTracksInventory() ? 'Control de existencias (Stock limitado)' : 'Elaborado al momento / A pedido' }}
-                  </span>
-                  <span class="text-[11px] text-on-surface-variant">
-                    {{ newVariantTracksInventory() ? 'Descuenta existencias físicas en tienda.' : 'Sin límite de existencias previas.' }}
-                  </span>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    [checked]="newVariantTracksInventory()"
-                    (change)="newVariantTracksInventory.set(!newVariantTracksInventory())"
-                    [disabled]="isSavingVariant()"
-                    class="sr-only peer"
-                  />
-                  <div
-                    class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
-                  ></div>
+              <!-- Tipo de Elaboración para esta variante (Tarjetas claras) -->
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-on-surface block">
+                  Disponibilidad de esta opción
                 </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div
+                    (click)="newVariantTracksInventory.set(false)"
+                    class="p-2.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between gap-2 select-none"
+                    [class.border-primary]="!newVariantTracksInventory()"
+                    [class.bg-primary/5]="!newVariantTracksInventory()"
+                    [class.border-outline-variant/30]="newVariantTracksInventory()"
+                    [class.bg-surface-container-lowest]="newVariantTracksInventory()"
+                  >
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        [class.bg-primary/15]="!newVariantTracksInventory()"
+                        [class.text-primary]="!newVariantTracksInventory()"
+                        [class.bg-surface-container-high]="newVariantTracksInventory()"
+                        [class.text-on-surface-variant]="newVariantTracksInventory()"
+                      >
+                        <ng-icon name="matCheckOutline" class="text-base" />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-bold text-on-surface">A pedido / Bajo demanda</span>
+                        <span class="text-[10px] text-on-surface-variant">Sin límite de stock previo</span>
+                      </div>
+                    </div>
+                    <div
+                      class="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0"
+                      [class.border-primary]="!newVariantTracksInventory()"
+                      [class.bg-primary]="!newVariantTracksInventory()"
+                      [class.border-outline-variant]="newVariantTracksInventory()"
+                    >
+                      @if (!newVariantTracksInventory()) {
+                        <span class="w-1 h-1 rounded-full bg-white"></span>
+                      }
+                    </div>
+                  </div>
+
+                  <div
+                    (click)="newVariantTracksInventory.set(true)"
+                    class="p-2.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between gap-2 select-none"
+                    [class.border-primary]="newVariantTracksInventory()"
+                    [class.bg-primary/5]="newVariantTracksInventory()"
+                    [class.border-outline-variant/30]="!newVariantTracksInventory()"
+                    [class.bg-surface-container-lowest]="!newVariantTracksInventory()"
+                  >
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        [class.bg-primary/15]="newVariantTracksInventory()"
+                        [class.text-primary]="newVariantTracksInventory()"
+                        [class.bg-surface-container-high]="!newVariantTracksInventory()"
+                        [class.text-on-surface-variant]="!newVariantTracksInventory()"
+                      >
+                        <ng-icon name="matInventory2Outline" class="text-base" />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-bold text-on-surface">Con existencias (Stock)</span>
+                        <span class="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Unidades contadas en tienda</span>
+                      </div>
+                    </div>
+                    <div
+                      class="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0"
+                      [class.border-primary]="newVariantTracksInventory()"
+                      [class.bg-primary]="newVariantTracksInventory()"
+                      [class.border-outline-variant]="!newVariantTracksInventory()"
+                    >
+                      @if (newVariantTracksInventory()) {
+                        <span class="w-1 h-1 rounded-full bg-white"></span>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                @if (newVariantTracksInventory()) {
+                  <div class="pt-2 border-t border-outline-variant/15 grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
+                    <!-- Stock inicial obligatorio -->
+                    <div class="space-y-1">
+                      <label for="new-var-stock" class="text-[11px] font-semibold text-on-surface block">
+                        Unidades listas en tienda <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="new-var-stock"
+                        type="number"
+                        min="0"
+                        step="1"
+                        [ngModel]="newVariantInitialStock()"
+                        (ngModelChange)="onNewVariantInitialStockChange($event)"
+                        placeholder="Ej: 15"
+                        [disabled]="isSavingVariant()"
+                        class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                        [class.border-red-500]="newVariantInitialStock() === null || newVariantInitialStock()! < 0 || newVariantInitialStock()! % 1 !== 0"
+                      />
+                      @if (newVariantInitialStock() === null || newVariantInitialStock()! < 0 || newVariantInitialStock()! % 1 !== 0) {
+                        <span class="text-[10px] text-red-500 font-medium block">
+                          Entero ≥ 0 requerido
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Umbral de stock bajo opcional -->
+                    <div class="space-y-1">
+                      <label for="new-var-threshold" class="text-[11px] font-medium text-on-surface block">
+                        Alerta stock bajo <span class="text-on-surface-variant font-normal">(Opcional)</span>
+                      </label>
+                      <input
+                        id="new-var-threshold"
+                        type="number"
+                        min="0"
+                        step="1"
+                        [ngModel]="newVariantLowStockThreshold()"
+                        (ngModelChange)="onNewVariantLowStockThresholdChange($event)"
+                        placeholder="Ej: 5 (vacío = sin alerta)"
+                        [disabled]="isSavingVariant()"
+                        class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface-container-low text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                        [class.border-red-500]="newVariantLowStockThreshold() !== null && newVariantLowStockThreshold() !== undefined && (newVariantLowStockThreshold()! < 0 || newVariantLowStockThreshold()! % 1 !== 0)"
+                      />
+                    </div>
+                  </div>
+                }
               </div>
 
               <!-- Acciones del mini-formulario -->

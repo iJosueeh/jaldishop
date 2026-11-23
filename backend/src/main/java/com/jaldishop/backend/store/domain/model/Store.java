@@ -26,6 +26,7 @@ public class Store {
     private String whatsappNumber;
     private Set<UUID> categoryIds;
     private StoreStatus status;
+    private StoreTaxProfile taxProfile;
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -49,6 +50,7 @@ public class Store {
         this.whatsappNumber = whatsappNumber;
         this.categoryIds = categoryIds != null ? new HashSet<>(categoryIds) : new HashSet<>();
         this.status = status;
+        this.taxProfile = new StoreTaxProfile(null, com.jaldishop.backend.store.domain.enums.TaxIdType.DNI, null, com.jaldishop.backend.store.domain.enums.TaxRegime.RUS, false);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -342,6 +344,51 @@ public class Store {
                 createdAt,
                 updatedAt
         );
+    }
+
+    public static Store reconstitute(
+            UUID id,
+            UUID ownerUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            StoreLocation location,
+            DeliveryConfiguration deliveryConfig,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt,
+            StoreTaxProfile taxProfile
+    ) {
+        Store store = new Store(
+                id,
+                ownerUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                location,
+                deliveryConfig,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                categoryIds,
+                status,
+                createdAt,
+                updatedAt
+        );
+        if (taxProfile != null) {
+            store.taxProfile = taxProfile;
+        }
+        return store;
     }
 
     public static Store reconstitute(
@@ -658,5 +705,34 @@ public class Store {
 
     public String getWhatsappNumber() {
         return whatsappNumber;
+    }
+
+    public StoreTaxProfile getTaxProfile() {
+        return taxProfile;
+    }
+
+    public String getLegalBusinessName() {
+        return taxProfile != null ? taxProfile.legalBusinessName() : null;
+    }
+
+    public com.jaldishop.backend.store.domain.enums.TaxIdType getTaxIdType() {
+        return taxProfile != null ? taxProfile.taxIdType() : com.jaldishop.backend.store.domain.enums.TaxIdType.DNI;
+    }
+
+    public String getTaxIdNumber() {
+        return taxProfile != null ? taxProfile.taxIdNumber() : null;
+    }
+
+    public com.jaldishop.backend.store.domain.enums.TaxRegime getTaxRegime() {
+        return taxProfile != null ? taxProfile.taxRegime() : com.jaldishop.backend.store.domain.enums.TaxRegime.RUS;
+    }
+
+    public boolean isCanIssueInvoices() {
+        return taxProfile != null && taxProfile.canIssueInvoices();
+    }
+
+    public void updateTaxProfile(StoreTaxProfile taxProfile) {
+        this.taxProfile = taxProfile != null ? taxProfile : new StoreTaxProfile(null, com.jaldishop.backend.store.domain.enums.TaxIdType.DNI, null, com.jaldishop.backend.store.domain.enums.TaxRegime.RUS, false);
+        this.updatedAt = Instant.now();
     }
 }

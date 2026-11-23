@@ -2,6 +2,8 @@ package com.jaldishop.backend.store.web.dto;
 
 import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
+import com.jaldishop.backend.store.domain.enums.TaxIdType;
+import com.jaldishop.backend.store.domain.enums.TaxRegime;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,9 +33,72 @@ public record StoreResponse(
         String whatsappNumber,
         Set<UUID> categoryIds,
         StoreStatus status,
+        String legalBusinessName,
+        TaxIdType taxIdType,
+        String taxIdNumber,
+        TaxRegime taxRegime,
+        boolean canIssueInvoices,
         Instant createdAt,
         Instant updatedAt
 ) {
+    public StoreResponse(
+            UUID id,
+            UUID merchantUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                merchantUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                categoryIds,
+                status,
+                null,
+                TaxIdType.DNI,
+                null,
+                TaxRegime.RUS,
+                false,
+                createdAt,
+                updatedAt
+        );
+    }
     public StoreResponse(
             UUID id,
             UUID merchantUserId,
@@ -159,6 +224,11 @@ public record StoreResponse(
                 store.getWhatsappNumber(),
                 store.getCategoryIds(),
                 store.getStatus(),
+                store.getLegalBusinessName(),
+                store.getTaxIdType(),
+                store.getTaxIdNumber(),
+                store.getTaxRegime(),
+                store.isCanIssueInvoices(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
         );

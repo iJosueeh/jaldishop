@@ -25,6 +25,7 @@ export class ProductService {
 
   private readonly isLoaded = signal<boolean>(false);
   private readonly isCategoriesLoaded = signal<boolean>(false);
+  private readonly variantsCache = new Map<string, ProductVariant[]>();
 
   readonly products = signal<Product[]>([]);
   readonly categories = signal<ProductCategory[]>([]);
@@ -52,8 +53,14 @@ export class ProductService {
       }
 
       // Filtro por estado
-      if (status !== 'all' && p.status !== status) {
-        return false;
+      if (status !== 'all') {
+        if (status === 'ATTENTION') {
+          if (p.status !== 'INACTIVE' && !p.hasStockIssue) {
+            return false;
+          }
+        } else if (p.status !== status) {
+          return false;
+        }
       }
 
       // Filtro por texto de búsqueda
@@ -94,6 +101,32 @@ export class ProductService {
 
   readonly attentionRequiredProducts = computed(() => {
     return this.products().filter((p) => p.status === 'INACTIVE' || p.hasStockIssue);
+  });
+
+  readonly attentionMessage = computed(() => {
+    const list = this.attentionRequiredProducts();
+    if (list.length === 0) return '';
+
+    const paused = list.filter((p) => p.status === 'INACTIVE');
+    const stockIssues = list.filter((p) => p.hasStockIssue);
+
+    const parts: string[] = [];
+    if (paused.length > 0) {
+      if (paused.length === 1) {
+        parts.push(`1 producto pausado ("${paused[0].name}")`);
+      } else {
+        parts.push(`${paused.length} productos pausados`);
+      }
+    }
+    if (stockIssues.length > 0) {
+      if (stockIssues.length === 1) {
+        parts.push(`1 producto con problemas de existencias ("${stockIssues[0].name}")`);
+      } else {
+        parts.push(`${stockIssues.length} productos con problemas de existencias`);
+      }
+    }
+
+    return parts.join(' y ') + '.';
   });
 
   readonly hasActiveFilters = computed(() => {
@@ -165,6 +198,13 @@ export class ProductService {
         });
       }),
       tap((data) => {
+        // Pre-cargar variantsCache con variantes que ya vienen en los productos
+        for (const p of data) {
+          if (p.variants && p.variants.length > 0) {
+            this.variantsCache.set(p.id, p.variants);
+          }
+        }
+
         this.products.set(data);
         this.isLoaded.set(true);
         this.isLoading.set(false);
@@ -232,30 +272,71 @@ export class ProductService {
   }
 
   /**
-   * Obtiene la lista de variantes (formatos y precios) de un producto.
+   * Obtiene la lista de variantes (formatos y precios) de un producto aplicando Cache-First.
+   * Si las variantes ya residen en memoria y forceRefresh es false, retorna inmediatamente el estado reactivo sin disparar petición de red.
    */
-  getProductVariants(storeId: string, productId: string): Observable<ProductVariant[]> {
-    return this.http.get<ProductVariant[]>(
-      `${this.baseUrl}/${storeId}/products/${productId}/variants`,
-    );
+  getProductVariants(
+    storeId: string,
+    productId: string,
+    forceRefresh = false,
+  ): Observable<ProductVariant[]> {
+    if (!forceRefresh) {
+      const cached = this.getCachedVariants(productId);
+      if (cached !== null) {
+        return of(cached);
+      }
+    }
+
+    return this.http
+      .get<ProductVariant[]>(`${this.baseUrl}/${storeId}/products/${productId}/variants`)
+      .pipe(
+        tap((data) => {
+          const variantsList = data || [];
+          this.variantsCache.set(productId, variantsList);
+          this.syncProductVariants(productId, variantsList);
+        }),
+      );
   }
 
   /**
-   * Crea una variante para un producto existente.
+   * Consulta variantes cacheadas en memoria para un producto.
+   */
+  getCachedVariants(productId: string): ProductVariant[] | null {
+    if (this.variantsCache.has(productId)) {
+      return this.variantsCache.get(productId)!;
+    }
+    const found = this.products().find((p) => p.id === productId);
+    if (found?.variants && found.variants.length > 0) {
+      this.variantsCache.set(productId, found.variants);
+      return found.variants;
+    }
+    return null;
+  }
+
+  /**
+   * Crea una variante para un producto existente y actualiza la caché reactiva.
    */
   createProductVariant(
     storeId: string,
     productId: string,
     request: CreateProductVariantRequest,
   ): Observable<ProductVariant> {
-    return this.http.post<ProductVariant>(
-      `${this.baseUrl}/${storeId}/products/${productId}/variants`,
-      request,
-    );
+    return this.http
+      .post<ProductVariant>(`${this.baseUrl}/${storeId}/products/${productId}/variants`, request)
+      .pipe(
+        tap((created) => {
+          const cached = this.variantsCache.get(productId) || [];
+          if (!cached.some((v) => v.id === created.id)) {
+            const next = [...cached, created];
+            this.variantsCache.set(productId, next);
+            this.syncProductVariants(productId, next);
+          }
+        }),
+      );
   }
 
   /**
-   * Actualiza una variante existente de un producto.
+   * Actualiza una variante existente aplicando actualización optimista en 0ms.
    */
   updateProductVariant(
     storeId: string,
@@ -263,16 +344,61 @@ export class ProductService {
     variantId: string,
     request: UpdateProductVariantRequest,
   ): Observable<ProductVariant> {
-    return this.http.put<ProductVariant>(
-      `${this.baseUrl}/${storeId}/products/${productId}/variants/${variantId}`,
-      request,
-    );
+    const previousProducts = this.products();
+    const previousVariants = this.variantsCache.get(productId);
+
+    // Actualización optimista inmediata en memoria
+    if (previousVariants) {
+      const optimisticVariants = previousVariants.map((v) =>
+        v.id === variantId
+          ? {
+              ...v,
+              presentationName: request.presentationName ?? v.presentationName,
+              priceAmount: request.priceAmount !== undefined ? request.priceAmount : v.priceAmount,
+              priceCurrency: request.priceCurrency ?? v.priceCurrency,
+              sku: request.sku !== undefined ? request.sku : v.sku,
+              tracksInventory:
+                request.tracksInventory !== undefined
+                  ? request.tracksInventory
+                  : v.tracksInventory,
+              status: request.status ?? v.status,
+            }
+          : v,
+      );
+      this.variantsCache.set(productId, optimisticVariants);
+      this.syncProductVariants(productId, optimisticVariants);
+    }
+
+    return this.http
+      .put<ProductVariant>(
+        `${this.baseUrl}/${storeId}/products/${productId}/variants/${variantId}`,
+        request,
+      )
+      .pipe(
+        tap((updated) => {
+          const currentList = this.variantsCache.get(productId) || [];
+          const nextList = currentList.map((v) => (v.id === variantId ? updated : v));
+          if (!nextList.some((v) => v.id === variantId)) {
+            nextList.push(updated);
+          }
+          this.variantsCache.set(productId, nextList);
+          this.syncProductVariants(productId, nextList);
+        }),
+        catchError((error) => {
+          if (previousVariants) {
+            this.variantsCache.set(productId, previousVariants);
+          }
+          this.products.set(previousProducts);
+          return throwError(() => error);
+        }),
+      );
   }
 
   /**
    * Recalcula y actualiza los rangos de precio (minPrice, maxPrice) y variantes de un producto en el estado reactivo.
    */
   syncProductVariants(productId: string, variants: ProductVariant[]): void {
+    this.variantsCache.set(productId, variants);
     const activeVariants = variants.filter((v) => v.status === 'ACTIVE');
     const prices = (activeVariants.length > 0 ? activeVariants : variants).map((v) => v.priceAmount);
     const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
@@ -372,12 +498,56 @@ export class ProductService {
     );
   }
 
+  /**
+   * Actualiza un producto aplicando Optimistic Update en 0ms sobre el array reactivo en memoria.
+   * Si la petición falla, restaura el estado previo de forma segura (Rollback).
+   */
   updateProduct(
     storeId: string,
     productId: string,
     request: UpdateProductRequest,
   ): Observable<Product> {
-    this.isLoading.set(true);
+    const previousProducts = this.products();
+    const existing = previousProducts.find((p) => p.id === productId);
+
+    // Optimistic Update en 0ms sobre la señal products
+    if (existing) {
+      const primaryImage =
+        request.imageUrl ||
+        (request.images && request.images.length > 0
+          ? request.images[0].imageUrl
+          : existing.imageUrl);
+      const effectiveImages =
+        request.images && request.images.length > 0
+          ? request.images
+          : primaryImage
+            ? [
+                {
+                  id: `img-${productId}`,
+                  productId,
+                  imageUrl: primaryImage,
+                  position: 0,
+                  isPrimary: true,
+                },
+              ]
+            : existing.images;
+
+      const optimisticProduct: Product = {
+        ...existing,
+        name: request.name ?? existing.name,
+        slug: request.slug ?? existing.slug,
+        description: request.description !== undefined ? request.description : existing.description,
+        categoryId: request.categoryId ?? existing.categoryId,
+        categoryName:
+          this.categories().find((c) => c.id === request.categoryId)?.name ?? existing.categoryName,
+        status: request.status ?? existing.status,
+        imageUrl: primaryImage,
+        images: effectiveImages,
+      };
+
+      this.products.update((list) => list.map((p) => (p.id === productId ? optimisticProduct : p)));
+    }
+
     return this.http.put<Product>(`${this.baseUrl}/${storeId}/products/${productId}`, request).pipe(
       tap((updated) => {
         const currentList = this.products();
@@ -402,15 +572,18 @@ export class ProductService {
               ? {
                   ...p,
                   ...updated,
+                  categoryName:
+                    this.categories().find((c) => c.id === updated.categoryId)?.name ??
+                    p.categoryName,
                   images: effectiveImages,
                 }
               : p,
           ),
         );
-        this.isLoading.set(false);
       }),
       catchError((error) => {
-        this.isLoading.set(false);
+        // Rollback seguro en caso de fallo de red o validación en backend
+        this.products.set(previousProducts);
         return throwError(() => error);
       }),
     );
@@ -461,6 +634,7 @@ export class ProductService {
   clearCache(): void {
     this.products.set([]);
     this.categories.set([]);
+    this.variantsCache.clear();
     this.isLoaded.set(false);
     this.isCategoriesLoaded.set(false);
     this.clearFilters();

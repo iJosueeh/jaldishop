@@ -39,4 +39,12 @@ public class AdminOrderInvestigationController {
         rateLimits.adminPaymentOperation(principal.userId());
         return service.investigate(attemptId);
     }
+
+    @GetMapping("/candidates")
+    public java.util.List<com.jaldishop.backend.payment.web.dto.ReconciliationCandidateItemResponse> getCandidates(
+            @RequestParam(defaultValue = "15") int limit,
+            @AuthenticationPrincipal JwtPrincipal principal) {
+        rateLimits.adminPaymentOperation(principal.userId());
+        return reconciliationService.findOrphanCandidates(limit);
+    }
 }

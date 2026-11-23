@@ -93,3 +93,48 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ productId: string }> }
+) {
+  const { productId } = await context.params;
+  const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
+
+  if (!token) {
+    return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });
+  }
+
+  try {
+    const upstream = await fetch(
+      `${env.apiUrl}/customer/products/${encodeURIComponent(productId)}/reviews`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    if (upstream.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    const data = await upstream.json().catch(() => ({}));
+    const response = NextResponse.json(data, { status: upstream.status });
+
+    if (upstream.status === 401) {
+      response.cookies.delete(CUSTOMER_COOKIE);
+    }
+
+    return response;
+  } catch {
+    return NextResponse.json(
+      { message: 'No pudimos eliminar tu reseña en este momento.' },
+      { status: 503 }
+    );
+  }
+}

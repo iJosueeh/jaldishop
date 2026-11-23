@@ -22,10 +22,15 @@ describe('AdminDashboard', () => {
         totalStores: 1,
         activeStores: 1,
       }),
+      analyticsSummary: vi.fn().mockReturnValue(null),
       isLoadingUsers: vi.fn().mockReturnValue(false),
       isLoadingStores: vi.fn().mockReturnValue(false),
+      isLoadingAnalytics: vi.fn().mockReturnValue(false),
+      isExportingPdf: vi.fn().mockReturnValue(false),
       loadUsers: vi.fn().mockReturnValue(of([])),
       loadStores: vi.fn().mockReturnValue(of([])),
+      loadAnalyticsSummary: vi.fn().mockReturnValue(of(null)),
+      exportAnalyticsPdf: vi.fn(),
       suspendUser: vi.fn().mockReturnValue(of({})),
       activateUser: vi.fn().mockReturnValue(of({})),
       suspendStore: vi.fn().mockReturnValue(of({})),
@@ -50,12 +55,27 @@ describe('AdminDashboard', () => {
     expect(component).toBeTruthy();
     expect(adminServiceMock.loadUsers).toHaveBeenCalled();
     expect(adminServiceMock.loadStores).toHaveBeenCalled();
+    expect(adminServiceMock.loadAnalyticsSummary).toHaveBeenCalled();
   });
 
   it('debe refrescar datos con forceRefresh al llamar refreshData()', () => {
     component.refreshData();
     expect(adminServiceMock.loadUsers).toHaveBeenCalledWith(true);
     expect(adminServiceMock.loadStores).toHaveBeenCalledWith(true);
+    expect(adminServiceMock.loadAnalyticsSummary).toHaveBeenCalled();
+  });
+
+  it('debe exportar reporte PDF al llamar exportPdf()', () => {
+    component.exportPdf();
+    expect(adminServiceMock.exportAnalyticsPdf).toHaveBeenCalled();
+  });
+
+  it('debe abrir y cerrar modal de conciliación de pagos', () => {
+    component.openReconciliationModal();
+    expect(component.isReconciliationModalOpen()).toBe(true);
+
+    component.closeReconciliationModal();
+    expect(component.isReconciliationModalOpen()).toBe(false);
   });
 
   it('debe abrir y cerrar la ficha 360 de usuario', () => {

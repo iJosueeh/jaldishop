@@ -38,6 +38,11 @@ public class ChangeOrderStatusService {
 
     @Transactional
     public void execute(UUID orderId, OrderStatus newStatus, UUID expectedStoreId) {
+        execute(orderId, newStatus, expectedStoreId, null);
+    }
+
+    @Transactional
+    public void execute(UUID orderId, OrderStatus newStatus, UUID expectedStoreId, String reason) {
         Objects.requireNonNull(orderId, "orderId no puede ser nulo");
         Objects.requireNonNull(newStatus, "newStatus no puede ser nulo");
         if (expectedStoreId == null) {
@@ -56,12 +61,13 @@ public class ChangeOrderStatusService {
         }
 
         OrderStatus previousStatus = order.getStatus();
-        order.transitionTo(newStatus, null, null);
+        String cancellationReason = (reason != null && !reason.isBlank()) ? reason.trim() : null;
+        order.transitionTo(newStatus, null, cancellationReason);
 
         Order savedOrder = orderRepository.save(order);
 
         if (newStatus == OrderStatus.CANCELLED && cancellationCompensator != null) {
-            cancellationCompensator.compensate(savedOrder, previousStatus, null);
+            cancellationCompensator.compensate(savedOrder, previousStatus, cancellationReason);
         }
 
         eventPublisher.publishEvent(new OrderStatusChangedDomainEvent(

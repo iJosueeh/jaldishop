@@ -1,0 +1,101 @@
+import { Component, inject, input, output, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AdminService } from '../../../../../core/services/admin.service';
+import {
+  OrderInvestigationResult,
+  OrderReconciliationResult,
+} from '../../../../../core/models/admin.models';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  matCloseOutline,
+  matBoltOutline,
+  matCheckCircleOutline,
+  matWarningOutline,
+  matSearchOutline,
+  matRefreshOutline,
+} from '@ng-icons/material-symbols/outline';
+
+@Component({
+  imports: [CommonModule, FormsModule, NgIcon],
+  providers: [
+    provideIcons({
+      matCloseOutline,
+      matBoltOutline,
+      matCheckCircleOutline,
+      matWarningOutline,
+      matSearchOutline,
+      matRefreshOutline,
+    }),
+  ],
+  selector: 'app-payment-reconciliation-modal',
+  styleUrl: './payment-reconciliation-modal.css',
+  templateUrl: './payment-reconciliation-modal.html',
+})
+export class PaymentReconciliationModal {
+  private readonly adminService = inject(AdminService);
+
+  readonly isOpen = input<boolean>(false);
+  readonly closeModal = output<void>();
+
+  readonly attemptId = signal<string>('');
+  readonly isInvestigating = signal<boolean>(false);
+  readonly isReconciling = signal<boolean>(false);
+  readonly investigationResult = signal<OrderInvestigationResult | null>(null);
+  readonly reconciliationResult = signal<OrderReconciliationResult | null>(null);
+  readonly errorMessage = signal<string | null>(null);
+
+  isValidUuid(): boolean {
+    const trimmed = this.attemptId().trim();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(trimmed);
+  }
+
+  onInvestigate(): void {
+    if (!this.isValidUuid()) {
+      this.errorMessage.set('Debe ingresar un UUID válido de intento de pago (Payment Attempt ID).');
+      return;
+    }
+
+    this.errorMessage.set(null);
+    this.reconciliationResult.set(null);
+    this.isInvestigating.set(true);
+
+    this.adminService.investigatePaymentAttempt(this.attemptId().trim()).subscribe({
+      next: (res) => {
+        this.investigationResult.set(res);
+        this.isInvestigating.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || 'No se pudo obtener información del intento de pago.');
+        this.isInvestigating.set(false);
+      },
+    });
+  }
+
+  onReconcile(): void {
+    if (!this.isValidUuid()) return;
+
+    this.errorMessage.set(null);
+    this.isReconciling.set(true);
+
+    this.adminService.reconcilePaymentAttempt(this.attemptId().trim()).subscribe({
+      next: (res) => {
+        this.reconciliationResult.set(res);
+        this.isReconciling.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || 'Error al ejecutar la conciliación.');
+        this.isReconciling.set(false);
+      },
+    });
+  }
+
+  dismiss(): void {
+    this.attemptId.set('');
+    this.investigationResult.set(null);
+    this.reconciliationResult.set(null);
+    this.errorMessage.set(null);
+    this.closeModal.emit();
+  }
+}

@@ -91,7 +91,7 @@
       <!-- Banner de la Tienda (Reactivo si existe o preview estilizado) -->
       @if (hasValidBanner()) {
         <div class="relative h-28 w-full rounded-xl overflow-hidden border border-white/10 shadow-inner">
-          <img [src]="bannerUrl()" (error)="onBannerError()" alt="" class="w-full h-full object-cover" />
+          <img [src]="bannerUrl()" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" (error)="onBannerError()" alt="Portada de la tienda" class="w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
           <span class="absolute bottom-2 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-black/60 text-emerald-300 border border-emerald-500/30 backdrop-blur-xs flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Portada activa
@@ -111,7 +111,7 @@
         <!-- Logo o Inicial del negocio -->
         @if (hasValidLogo()) {
           <div class="w-13 h-13 rounded-2xl overflow-hidden border-2 border-emerald-400/50 shadow-md bg-[#1c1917] shrink-0">
-            <img [src]="logoUrl()" (error)="onLogoError()" alt="" class="w-full h-full object-cover" />
+            <img [src]="logoUrl()" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" (error)="onLogoError()" alt="Logotipo de la tienda" class="w-full h-full object-cover" />
           </div>
         } @else {
           <app-business-avatar [name]="storeName() || 'Tu negocio'" size="lg" />

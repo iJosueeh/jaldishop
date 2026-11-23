@@ -1,7 +1,7 @@
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- KPI 1: Clientes Totales -->
   <div
-    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3"
+    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
@@ -15,7 +15,7 @@
     </div>
 
     <div class="flex items-baseline gap-2">
-      <span class="text-3xl font-extrabold text-on-surface tracking-tight">
+      <span class="text-3xl font-extrabold text-on-surface tracking-tight font-mono tabular-nums">
         {{ kpis().totalCustomers }}
       </span>
       <span class="inline-flex items-center gap-0.5 text-xs font-bold text-primary">
@@ -29,7 +29,7 @@
 
   <!-- KPI 2: Clientes Recurrentes -->
   <div
-    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3"
+    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
@@ -43,11 +43,11 @@
     </div>
 
     <div class="flex items-baseline gap-2">
-      <span class="text-3xl font-extrabold text-on-surface tracking-tight">
+      <span class="text-3xl font-extrabold text-on-surface tracking-tight font-mono tabular-nums">
         {{ kpis().repeatPercentage }}%
       </span>
       <span
-        class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container text-xs font-bold"
+        class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container text-xs font-bold tabular-nums"
       >
         {{ kpis().repeatCustomersCount }} con &ge;2 compras
       </span>
@@ -58,7 +58,7 @@
 
   <!-- KPI 3: Ticket Promedio Habitual -->
   <div
-    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3 sm:col-span-2 lg:col-span-1"
+    class="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/40 flex flex-col justify-between gap-3 sm:col-span-2 lg:col-span-1 card-interactive"
   >
     <div class="flex items-center justify-between">
       <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
@@ -72,7 +72,7 @@
     </div>
 
     <div class="flex items-baseline gap-2">
-      <span class="text-3xl font-extrabold text-on-surface tracking-tight">
+      <span class="text-3xl font-extrabold text-on-surface tracking-tight font-mono tabular-nums">
         S/ {{ kpis().averageTicketAmount | number: '1.2-2' }}
       </span>
       <span

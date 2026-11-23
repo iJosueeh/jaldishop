@@ -1,11 +1,11 @@
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 font-sans">
   <!-- KPI 1: Capacidad de Hoy -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4"
+    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4 card-interactive"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-700">
           Capacidad de Hoy
         </span>
         @if (todayException()) {
@@ -35,14 +35,14 @@
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline justify-between">
-        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono tabular-nums">
           {{ capacityOccupied() !== null ? capacityOccupied() : '—' }}
-          <span class="text-base sm:text-lg font-bold text-stone-400">
+          <span class="text-base sm:text-lg font-bold text-stone-600">
             / {{ capacityTotal() > 0 ? capacityTotal() : 0 }} Cupos
           </span>
         </span>
         <span
-          class="text-[11px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
+          class="text-[11px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md tabular-nums"
           [class.bg-rose-50]="isClosedToday() || isOverCapacity()"
           [class.text-rose-700]="isClosedToday() || isOverCapacity()"
           [class.border]="true"
@@ -79,7 +79,7 @@
           }
         </div>
       } @else {
-        <div class="pt-1 text-[11px] text-stone-400 font-medium">
+        <div class="pt-1 text-[11px] text-stone-600 font-medium">
           @if (isOccupancyLoading()) {
             Cargando ocupación de hoy...
           } @else {
@@ -90,7 +90,7 @@
     </div>
 
     <div class="flex flex-col gap-1 pt-2.5 border-t border-[#e7e0d6] text-xs">
-      <span class="text-stone-500 font-medium truncate" [title]="shiftSchedule()">
+      <span class="text-stone-700 font-medium truncate" [title]="shiftSchedule()">
         {{ shiftSchedule() }}
       </span>
       <span
@@ -115,10 +115,10 @@
 
   <!-- KPI 2: Pedidos de Hoy -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4"
+    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4 card-interactive"
   >
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-700">
         Pedidos de Hoy
       </span>
       <span
@@ -131,42 +131,42 @@
     <div class="flex flex-col gap-1.5 sm:gap-2">
       @if (isTodayCountsLoading() && !todayOrderCounts()) {
         <span
-          class="text-2xl sm:text-3xl font-extrabold text-stone-400 tracking-tight animate-pulse font-mono"
+          class="text-2xl sm:text-3xl font-extrabold text-stone-600 tracking-tight animate-pulse font-mono tabular-nums"
         >
           Cargando...
         </span>
-        <div class="text-xs text-stone-400 font-medium pt-1">
+        <div class="text-xs text-stone-600 font-medium pt-1">
           Consultando contadores del día operativo...
         </div>
       } @else if (todayCountsError() && !todayOrderCounts()) {
-        <span class="text-2xl sm:text-3xl font-extrabold text-stone-400 tracking-tight font-mono">
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-600 tracking-tight font-mono tabular-nums">
           —
         </span>
         <div class="text-xs text-rose-600 font-medium pt-1">
           {{ todayCountsError() }}
         </div>
       } @else {
-        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight tabular-nums font-mono">
           {{ metrics().totalOrdersToday }}
           {{ metrics().totalOrdersToday === 1 ? 'pedido' : 'pedidos' }}
         </span>
         <div class="flex items-center gap-1.5 flex-wrap pt-1">
           <span
-            class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-semibold"
+            class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-semibold tabular-nums"
           >
             {{ metrics().confirmedOrders }} confirmados
           </span>
           <span
-            class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-300/40 text-[11px] sm:text-xs font-bold"
+            class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-300/40 text-[11px] sm:text-xs font-bold tabular-nums"
           >
             {{ metrics().inPrepOrders }} en preparación
           </span>
           <span
-            class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300/40 text-[11px] sm:text-xs font-bold"
+            class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300/40 text-[11px] sm:text-xs font-bold tabular-nums"
           >
             {{ metrics().readyOrders }} listos
           </span>
-          <span class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-500 text-[11px] sm:text-xs">
+          <span class="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-medium tabular-nums">
             {{ metrics().completedOrders }} completados
           </span>
         </div>
@@ -179,63 +179,61 @@
     </div>
 
     <div class="flex items-center justify-between pt-2.5 border-t border-[#e7e0d6] text-xs">
-      <span class="text-stone-500" title="Contadores reales de la fecha operativa (America/Lima)"
+      <span class="text-stone-700 font-medium" title="Contadores reales de la fecha operativa (America/Lima)"
         >Fecha operativa de hoy</span
       >
       @if (isTodayOutdated()) {
-        <span class="font-bold text-amber-700">Desactualizado</span>
+        <span class="inline-flex items-center gap-1.5 font-bold text-amber-700">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Desactualizado
+        </span>
       } @else if (isTodayCountsLoading()) {
-        <span class="font-medium text-stone-400">Actualizando...</span>
+        <span class="inline-flex items-center gap-1.5 font-medium text-stone-600">
+          <span class="w-1.5 h-1.5 rounded-full bg-stone-400 animate-pulse"></span> Actualizando...
+        </span>
       } @else {
-        <span class="font-bold text-emerald-800">Al día</span>
+        <span class="inline-flex items-center gap-1.5 font-bold text-emerald-800">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span> Al día
+        </span>
       }
     </div>
   </div>
 
-  <!-- KPI 3: Ritmo Operativo -->
+  <!-- KPI 3: Ventas del Día -->
   <div
-    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4 sm:col-span-2 lg:col-span-1"
+    class="p-4 sm:p-5 rounded-2xl bg-white shadow-2xs border border-[#e7e0d6] hover:shadow-xs transition-all flex flex-col justify-between gap-3 sm:gap-4 sm:col-span-2 lg:col-span-1 card-interactive"
   >
     <div class="flex items-center justify-between">
-      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-500">
-        Ritmo Operativo
+      <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-700">
+        Ventas del Día
       </span>
       <span
-        class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-stone-400 flex items-center justify-center shrink-0"
+        class="w-8 h-8 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-emerald-800 flex items-center justify-center shrink-0"
       >
-        <ng-icon name="matTimerOutline" class="text-[18px]" />
+        <ng-icon name="matPaymentsOutline" class="text-[18px]" />
       </span>
     </div>
 
     <div class="flex flex-col gap-1.5 sm:gap-2">
       <div class="flex items-baseline gap-2">
-        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono">
-          {{ metrics().operatingRhythmMin !== null ? metrics().operatingRhythmMin : '—' }}
+        <span class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-mono tabular-nums">
+          S/ {{ todaySales().toFixed(2) }}
         </span>
-        @if (metrics().operatingRhythmMin !== null) {
-          <span class="text-xs sm:text-sm font-semibold text-stone-500">min / pedido</span>
-        }
+        <span class="text-xs text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+          En turno
+        </span>
       </div>
       <div class="flex items-center justify-between gap-2 flex-wrap pt-1">
-        <span
-          class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-medium text-stone-500 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-md"
-        >
-          <ng-icon name="matTimerOutline" class="text-[15px]" />
-          No disponible
+        <span class="text-xs text-stone-600 font-medium">
+          Facturación en pedidos activos y completados
         </span>
-        @if (metrics().targetRhythmMin !== null && metrics().targetRhythmMin! > 0) {
-          <span
-            class="text-[11px] sm:text-xs text-stone-600 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-md font-mono"
-          >
-            Meta: &lt; {{ metrics().targetRhythmMin }} min
-          </span>
-        }
       </div>
     </div>
 
     <div class="flex items-center justify-between pt-2.5 border-t border-[#e7e0d6] text-xs">
-      <span class="text-stone-500">Promedio de preparación</span>
-      <span class="font-medium text-stone-400"> Sin métrica calculada </span>
+      <span class="text-stone-700 font-medium">Ritmo Operativo</span>
+      <span class="font-medium text-stone-600">
+        {{ metrics().operatingRhythmMin !== null ? metrics().operatingRhythmMin + ' min' : 'No disponible · Sin métrica calculada' }}
+      </span>
     </div>
   </div>
 </section>

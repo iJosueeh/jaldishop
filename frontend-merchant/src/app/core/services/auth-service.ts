@@ -20,6 +20,7 @@ import { CustomerService } from './customer.service';
 import { OrderService } from './order.service';
 import { StompService } from './stomp.service';
 import { NotificationService } from './notification.service';
+import { InventoryService } from './inventory.service';
 
 @Service()
 export class AuthService {
@@ -34,6 +35,7 @@ export class AuthService {
   private readonly orderService = inject(OrderService);
   private readonly stompService = inject(StompService);
   private readonly notificationService = inject(NotificationService);
+  private readonly inventoryService = inject(InventoryService, { optional: true });
 
   readonly token = signal<string | null>(this.tokenService.getToken());
   readonly currentUser = signal<AuthResult | null>(null);
@@ -47,11 +49,15 @@ export class AuthService {
     return t && this.tokenService.hasValidToken(t) ? this.tokenService.getRoles(t) : [];
   });
   readonly isMerchant = computed(() => this.userRoles().includes('MERCHANT'));
-  readonly isAdmin = computed(() => this.userRoles().includes('ADMIN'));
+  readonly isAdmin = computed(() =>
+    this.userRoles().includes('ADMIN') || this.userRoles().includes('PLATFORM_ADMIN'),
+  );
+  readonly isDualRole = computed(() => this.isMerchant() && this.isAdmin());
 
   login(credentials: LoginRequest): Observable<AuthResult> {
     return this.http.post<AuthResult>(`${environment.apiUrl}/auth/login`, credentials).pipe(
       tap((result) => {
+        this.inventoryService?.clearCache();
         this.tokenService.setToken(result.token);
         this.token.set(result.token);
         this.currentUser.set(result);
@@ -72,6 +78,7 @@ export class AuthService {
   registerMerchant(request: RegisterMerchantRequest): Observable<AuthResult> {
     return this.http.post<AuthResult>(`${environment.apiUrl}/auth/register/merchant`, request).pipe(
       tap((result) => {
+        this.inventoryService?.clearCache();
         this.tokenService.setToken(result.token);
         this.token.set(result.token);
         this.currentUser.set(result);
@@ -104,6 +111,7 @@ export class AuthService {
     this.orderService.clearOrders();
     this.stompService.disconnect();
     this.notificationService.clearCache();
+    this.inventoryService?.clearCache();
 
     this.router.navigate(['/login']);
   }

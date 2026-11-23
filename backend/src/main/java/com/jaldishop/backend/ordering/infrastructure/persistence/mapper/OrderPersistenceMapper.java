@@ -41,6 +41,7 @@ public class OrderPersistenceMapper {
                 entity.getServiceDate(), entity.getServiceStartTime(), entity.getServiceEndTime(),
                 customer, deliveryAddressSnapshot, pricing,
                 entity.getConfirmedAt(), entity.getStatus(), entity.getUpdatedAt(),
+                entity.getOrigin(), entity.getPaymentMethod(), entity.getNotes(),
                 entity.getItems().stream().map(this::toDomainItem).toList(),
                 entity.getStatusHistory().stream().map(this::toDomainHistory).toList()
         );
@@ -61,6 +62,9 @@ public class OrderPersistenceMapper {
                 domain.getDiscountCode(), domain.getDeliveryFeeAmount(), domain.getIncludedTaxAmount(),
                 domain.getTotalAmount(), domain.getConfirmedAt(), domain.getUpdatedAt()
         );
+        entity.setOrigin(domain.getOrigin());
+        entity.setPaymentMethod(domain.getPaymentMethod());
+        entity.setNotes(domain.getNotes());
 
         entity.setItems(domain.getItems().stream()
                 .map(item -> toEntityItem(item, domain.getStoreId()))
