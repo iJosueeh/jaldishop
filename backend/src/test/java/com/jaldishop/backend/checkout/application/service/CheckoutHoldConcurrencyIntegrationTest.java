@@ -61,6 +61,43 @@ class CheckoutHoldConcurrencyIntegrationTest {
             conn.setAutoCommit(true);
             try (Statement stmt = conn.createStatement()) {
                 stmt.executeUpdate("""
+                    DELETE FROM merchant_payout_ledgers
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM order_payment_breakdowns
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM order_status_history
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM order_items
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM orders
+                    WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com');
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM payment_attempts
+                    WHERE payment_id IN (
+                        SELECT id FROM payments
+                        WHERE capacity_reservation_id IN (
+                            SELECT id FROM capacity_reservations
+                            WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com')
+                        )
+                    );
+                    """);
+                stmt.executeUpdate("""
+                    DELETE FROM payments
+                    WHERE capacity_reservation_id IN (
+                        SELECT id FROM capacity_reservations
+                        WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com')
+                    );
+                    """);
+                stmt.executeUpdate("""
                     DELETE FROM inventory_reservations
                     WHERE capacity_reservation_id IN (
                         SELECT id FROM capacity_reservations
@@ -91,7 +128,7 @@ class CheckoutHoldConcurrencyIntegrationTest {
                 System.out.println("CheckoutHoldConcurrencyIntegrationTest: Datos de prueba limpiados exitosamente.");
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Test database cleanup failed.", e);
+            throw new IllegalStateException("Test database cleanup failed: " + e.getMessage(), e);
         }
     }
 
