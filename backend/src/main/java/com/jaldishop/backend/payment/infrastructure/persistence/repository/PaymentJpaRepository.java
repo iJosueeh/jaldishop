@@ -18,6 +18,16 @@ import java.util.UUID;
 public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, UUID> {
     Optional<PaymentEntity> findByCapacityReservationId(UUID capacityReservationId);
 
+    @Query("""
+            SELECT p FROM PaymentEntity p
+            WHERE EXISTS (
+                SELECT cr.id FROM CapacityReservationEntity cr
+                WHERE cr.id = p.capacityReservationId AND cr.userId = :customerUserId
+            )
+            ORDER BY p.createdAt DESC
+            """)
+    List<PaymentEntity> findByCustomerUserId(@Param("customerUserId") UUID customerUserId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM PaymentEntity p WHERE p.id = :id")
     Optional<PaymentEntity> findByIdForUpdate(@Param("id") UUID id);

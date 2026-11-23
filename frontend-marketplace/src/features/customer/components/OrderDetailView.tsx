@@ -19,6 +19,7 @@ import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderTimelineStepper } from './OrderTimelineStepper';
 import { WhatsAppContactButton } from './WhatsAppContactButton';
 import { CancelOrderModal } from './CancelOrderModal';
+import { OrderReviewAction } from './OrderReviewAction';
 
 interface OrderDetailViewProps {
   orderNumber: string;
@@ -270,9 +271,10 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
                 {item.variantName && (
                   <p className="text-xs text-stone-500">Opción: {item.variantName}</p>
                 )}
-                <p className="text-xs text-stone-400">
-                  {item.quantity} x S/ {Number(item.unitPriceAmount).toFixed(2)}
-                </p>
+                 <p className="text-xs text-stone-400">
+                   {item.quantity} x S/ {Number(item.unitPriceAmount).toFixed(2)}
+                 </p>
+                 {order.status === 'COMPLETED' && item.productId && <OrderReviewAction productId={item.productId} productName={item.productName} />}
               </div>
               <span className="font-semibold text-stone-900 text-right">
                 S/ {Number(item.subtotalAmount).toFixed(2)}

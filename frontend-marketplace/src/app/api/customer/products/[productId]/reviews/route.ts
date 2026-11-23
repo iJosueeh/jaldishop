@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { CUSTOMER_COOKIE } from '@/core/api/customerProxy';
+import { CUSTOMER_COOKIE, rejectCrossOrigin } from '@/core/api/customerProxy';
 import { env } from '@/core/config/env';
 
 /**
@@ -12,6 +12,8 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ productId: string }> }
 ) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
   const { productId } = await context.params;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
 
@@ -55,6 +57,8 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ productId: string }> }
 ) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
   const { productId } = await context.params;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
 
@@ -91,5 +95,24 @@ export async function PUT(
       { message: 'No pudimos actualizar tu reseña en este momento.' },
       { status: 503 }
     );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ productId: string }> }
+) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
+  const { productId } = await context.params;
+  const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
+  if (!token) return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });
+  try {
+    const upstream = await fetch(`${env.apiUrl}/customer/products/${encodeURIComponent(productId)}/reviews`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal: AbortSignal.timeout(10000) });
+    const response = new NextResponse(null, { status: upstream.status });
+    if (upstream.status === 401) response.cookies.delete(CUSTOMER_COOKIE);
+    return response;
+  } catch {
+    return NextResponse.json({ message: 'No pudimos eliminar tu reseña en este momento.' }, { status: 503 });
   }
 }

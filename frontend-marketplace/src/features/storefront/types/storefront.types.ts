@@ -51,9 +51,11 @@ export interface ProductVariantItem {
   priceCurrency: string;
   tracksInventory: boolean;
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  attributes?: { name: string; value: string }[];
 }
 
 export interface ProductItem {
+  slug?: string;
   categoryId?: string;
   priceCurrency?: string;
   variantId?: string;

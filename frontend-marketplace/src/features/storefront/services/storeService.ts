@@ -5,35 +5,32 @@ interface CatalogCategoryDto {
   id: string; storeId: string; name: string; status: 'ACTIVE' | 'INACTIVE';
 }
 interface PublicProductDto {
-  id: string; storeId: string; categoryId?: string; name: string; description?: string;
+  id: string; storeId: string; categoryId?: string; name: string; slug?: string; description?: string;
   imageUrl?: string; minPrice?: number | null; maxPrice?: number | null;
   variants?: ProductVariantItem[];
 }
 
+function toProductItem(product: PublicProductDto, categories: CatalogCategoryDto[]): ProductItem {
+  const category = categories.find((entry) => entry.id === product.categoryId && entry.storeId === product.storeId && entry.status === 'ACTIVE');
+  const price = product.minPrice ?? product.variants?.[0]?.priceAmount ?? 0;
+  return {
+    id: product.id, slug: product.slug, name: product.name, description: product.description || '',
+    price: Number(price), minPrice: product.minPrice != null ? Number(product.minPrice) : undefined,
+    maxPrice: product.maxPrice != null ? Number(product.maxPrice) : undefined,
+    categoryId: product.categoryId, category: category?.name || '',
+    imageUrl: product.imageUrl, imageBg: 'from-amber-700/20 to-stone-800/30',
+    iconText: product.name.substring(0, 2).toUpperCase(), variants: product.variants,
+  };
+}
+
 async function loadStoreProducts(storePath: string): Promise<ProductItem[]> {
-  try {
     const [products, categories] = await Promise.all([
       apiClient<PublicProductDto[]>(storePath + '/products', { timeoutMs: 12000, revalidate: 300 }),
       apiClient<CatalogCategoryDto[]>(storePath + '/categories', { timeoutMs: 12000, revalidate: 300 }).catch(() => []),
     ]);
     if (!Array.isArray(products)) return [];
     const catalogCategories = Array.isArray(categories) ? categories : [];
-    return products.map((product) => {
-      const category = catalogCategories.find((entry) => entry.id === product.categoryId && entry.storeId === product.storeId && entry.status === 'ACTIVE');
-      const price = product.minPrice ?? product.variants?.[0]?.priceAmount ?? 0;
-      return {
-        id: product.id, name: product.name, description: product.description || '',
-        price: Number(price), minPrice: product.minPrice != null ? Number(product.minPrice) : undefined,
-        maxPrice: product.maxPrice != null ? Number(product.maxPrice) : undefined,
-        categoryId: product.categoryId, category: category?.name || '',
-        imageUrl: product.imageUrl, imageBg: 'from-amber-700/20 to-stone-800/30',
-        iconText: product.name.substring(0, 2).toUpperCase(), variants: product.variants,
-      };
-    });
-  } catch (err) {
-    console.error(`[loadStoreProducts] Error consultando productos en ${storePath}:`, err);
-    return [];
-  }
+    return products.map((product) => toProductItem(product, catalogCategories));
 }
 
 export const storeService = {
@@ -115,5 +112,18 @@ export const storeService = {
 
   getStoreProductsBySlug(slug: string): Promise<ProductItem[]> {
     return loadStoreProducts('/stores/slug/' + encodeURIComponent(slug));
+  },
+
+  async getStoreProductBySlug(storeSlug: string, productSlug: string): Promise<ProductItem | null> {
+    try {
+      const [product, categories] = await Promise.all([
+        apiClient<PublicProductDto>(`/stores/slug/${encodeURIComponent(storeSlug)}/products/${encodeURIComponent(productSlug)}`, { timeoutMs: 12000, revalidate: 300 }),
+        apiClient<CatalogCategoryDto[]>(`/stores/slug/${encodeURIComponent(storeSlug)}/categories`, { timeoutMs: 12000, revalidate: 300 }).catch(() => []),
+      ]);
+      return toProductItem(product, Array.isArray(categories) ? categories : []);
+    } catch (error) {
+      if (error instanceof ApiException && error.status === 404) return null;
+      throw error;
+    }
   },
 };

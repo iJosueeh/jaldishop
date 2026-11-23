@@ -1,6 +1,8 @@
 package com.jaldishop.backend.payment.web.controller;
 
 import com.jaldishop.backend.payment.application.status.GetCustomerPaymentStatusService;
+import com.jaldishop.backend.payment.application.status.ListCustomerPaymentHistoryService;
+import com.jaldishop.backend.payment.web.dto.CustomerPaymentHistoryResponse;
 import com.jaldishop.backend.payment.web.dto.CustomerPaymentStatusResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +14,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/customer/payments")
 public class CustomerPaymentStatusController {
 
     private final GetCustomerPaymentStatusService service;
+    private final ListCustomerPaymentHistoryService historyService;
 
-    public CustomerPaymentStatusController(GetCustomerPaymentStatusService service) {
+    public CustomerPaymentStatusController(
+            GetCustomerPaymentStatusService service,
+            ListCustomerPaymentHistoryService historyService
+    ) {
         this.service = service;
+        this.historyService = historyService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CustomerPaymentHistoryResponse>> getPaymentHistory(
+            @AuthenticationPrincipal JwtPrincipal principal
+    ) {
+        validateCustomerPrincipal(principal);
+        return ResponseEntity.ok(historyService.execute(principal.userId()));
     }
 
     @GetMapping("/{paymentId}/status")

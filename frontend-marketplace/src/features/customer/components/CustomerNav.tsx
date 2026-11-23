@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, UserCheck, ArrowLeft, Heart, MessageSquareQuote } from 'lucide-react';
+import { LayoutDashboard, Package, UserCheck, ArrowLeft, Heart, MessageSquareQuote, CreditCard } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 
 interface NavItem {
@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { href: '/mi-jaldishop/pedidos', label: 'Mis Pedidos', icon: Package },
   { href: '/mi-jaldishop/favoritos', label: 'Mis Favoritos', icon: Heart },
   { href: '/mi-jaldishop/resenas', label: 'Mis Reseñas', icon: MessageSquareQuote },
+  { href: '/mi-jaldishop/pagos', label: 'Pagos', icon: CreditCard },
   { href: '/mi-jaldishop/perfil', label: 'Datos de mi Cuenta', icon: UserCheck },
 ];
 

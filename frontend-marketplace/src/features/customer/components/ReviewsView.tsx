@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Package,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import { useCustomerReviews } from '../hooks/useCustomerReviews';
 import { ReviewModal } from './ReviewModal';
@@ -18,7 +19,7 @@ import type { CustomerReview } from '../types/customer.types';
 import { cn } from '@/shared/utils/cn';
 
 export function ReviewsView() {
-  const { reviews, isLoading, isError, refetch } = useCustomerReviews();
+  const { reviews, isLoading, isError, refetch, deleteReview, isDeleting } = useCustomerReviews();
   const [editingReview, setEditingReview] = useState<CustomerReview | null>(null);
 
   if (isLoading) {
@@ -152,14 +153,10 @@ export function ReviewsView() {
                 </div>
 
                 {/* Edit Button */}
-                <button
-                  type="button"
-                  onClick={() => setEditingReview(review)}
-                  className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-stone-400" />
-                  <span>Editar opinión</span>
-                </button>
+                <div className="flex items-center gap-2 self-start">
+                  <button type="button" onClick={() => setEditingReview(review)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:text-stone-900 transition-colors"><Pencil className="w-3.5 h-3.5 text-stone-400" /><span>Editar opinión</span></button>
+                  <button type="button" disabled={isDeleting} aria-label={`Eliminar reseña de ${review.productName}`} onClick={async () => { if (window.confirm('¿Eliminar esta reseña? Esta acción no se puede deshacer.')) await deleteReview(review.productId); }} className="rounded-lg border border-rose-200 p-1.5 text-rose-700 hover:bg-rose-50 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /></button>
+                </div>
               </div>
 
               {/* Rating & Date */}

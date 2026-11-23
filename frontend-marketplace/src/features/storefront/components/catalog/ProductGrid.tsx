@@ -6,6 +6,7 @@ import { CatalogEmptyState } from './CatalogEmptyState';
 import { CartItem, ProductItem } from '../../types/storefront.types';
 
 interface ProductGridProps {
+  storeSlug?: string;
   products: ProductItem[];
   onAdd: (product: ProductItem) => void;
   cart: CartItem[];
@@ -16,6 +17,7 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({
+  storeSlug,
   products,
   onAdd,
   cart,
@@ -44,6 +46,7 @@ export function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
+          storeSlug={storeSlug}
           onAdd={onAdd}
           currentQuantity={quantities.get(product.id) || 0}
           pending={pending}

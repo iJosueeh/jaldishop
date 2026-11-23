@@ -140,6 +140,7 @@ class CustomerOrderControllerTest {
         CustomerOrderItemResponse item = new CustomerOrderItemResponse(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
+                UUID.randomUUID(),
                 "Arroz Costeño 1kg",
                 null,
                 2,

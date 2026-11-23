@@ -40,6 +40,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findByStoreIdAndSlug(UUID storeId, String slug) {
+        return repository.findByStoreIdAndSlug(storeId, slug).map(mapper::toDomain);
+    }
+
+    @Override
     public List<Product> findByStoreId(UUID storeId) {
         return repository.findByStoreId(storeId).stream()
                 .map(mapper::toDomain)

@@ -11,6 +11,7 @@ public interface ProductRepository {
     Product save(Product product);
     Optional<Product> findById(UUID id);
     Optional<Product> findByIdAndStoreId(UUID id, UUID storeId);
+    Optional<Product> findByStoreIdAndSlug(UUID storeId, String slug);
     List<Product> findByStoreId(UUID storeId);
     List<Product> findByStoreIdAndCategoryId(UUID storeId, UUID categoryId);
     boolean existsByStoreIdAndSlug(UUID storeId, String slug);

@@ -42,6 +42,7 @@ interface CatalogContainerProps {
 }
 
 export function CatalogContainer({
+  storeSlug,
   storeName,
   store,
   products,
@@ -67,7 +68,7 @@ export function CatalogContainer({
 
   const totalCartCount = cartStore?.id === store?.id ? count : 0;
   useEffect(() => {
-    if (store) selectStore({ id: store.id, name: store.name, slug: store.slug });
+    if (store?.slug) selectStore({ id: store.id, name: store.name, slug: store.slug });
   }, [store, selectStore]);
 
   const [selectedDate, setSelectedDate] = useState<string>(() => getBusinessTodayDate());
@@ -458,6 +459,7 @@ export function CatalogContainer({
             {/* Cuadrícula de Productos a Ancho Completo */}
             <div className="mt-6">
               <ProductGrid
+                storeSlug={storeSlug ?? store?.slug}
                 products={filtered}
                 onAdd={(p) => changeQuantity(p, 1)}
                 cart={cart}

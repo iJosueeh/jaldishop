@@ -44,12 +44,26 @@ export interface CustomerOrderStoreInfo {
 
 export interface CustomerOrderItem {
   id: string;
+  productId?: string | null;
   variantId?: string | null;
   productName: string;
   variantName?: string | null;
   quantity: number;
   unitPriceAmount: number;
   subtotalAmount: number;
+}
+
+export interface CustomerPaymentHistory {
+  paymentId: string;
+  paymentStatus: string;
+  refundStatus: string;
+  amount: number;
+  currency: string;
+  orderNumber?: string | null;
+  orderStatus?: string | null;
+  createdAt: string;
+  approvedAt?: string | null;
+  refundedAt?: string | null;
 }
 
 export interface CustomerOrderStatusHistory {
