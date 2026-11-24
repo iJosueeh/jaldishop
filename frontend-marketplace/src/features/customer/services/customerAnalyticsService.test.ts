@@ -43,14 +43,14 @@ describe('customerAnalyticsService', () => {
 
   it('exports PDF blob and parses filename from Content-Disposition', async () => {
     const blobData = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
-    fetchMock.mockResolvedValue(
-      new Response(blobData, {
-        status: 200,
-        headers: {
-          'Content-Disposition': 'attachment; filename="reporte-clientes.pdf"',
-        },
-      })
-    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        'Content-Disposition': 'attachment; filename="reporte-clientes.pdf"',
+      }),
+      blob: vi.fn().mockResolvedValue(blobData),
+    });
 
     const result = await customerAnalyticsService.exportPdf({
       from: '2026-10-25',
