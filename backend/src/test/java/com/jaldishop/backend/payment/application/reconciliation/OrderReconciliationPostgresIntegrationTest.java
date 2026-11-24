@@ -221,6 +221,8 @@ class OrderReconciliationPostgresIntegrationTest {
         jdbcTemplate.update("DELETE FROM payment_refund_execution_attempts");
         jdbcTemplate.update("DELETE FROM payment_refund_intents");
         jdbcTemplate.update("DELETE FROM payment_incidences");
+        jdbcTemplate.update("DELETE FROM merchant_payout_ledgers");
+        jdbcTemplate.update("DELETE FROM order_payment_breakdowns");
         jdbcTemplate.update("DELETE FROM order_status_history");
         jdbcTemplate.update("DELETE FROM order_items");
         jdbcTemplate.update("DELETE FROM orders");

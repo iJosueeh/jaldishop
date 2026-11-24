@@ -26,6 +26,7 @@ import com.jaldishop.backend.ordering.application.service.*;
 import com.jaldishop.backend.ordering.web.controller.CustomerOrderController;
 import com.jaldishop.backend.payment.application.investigation.ManualOrderInvestigationService;
 import com.jaldishop.backend.payment.application.reconciliation.PaymentReconciliationService;
+import com.jaldishop.backend.payment.domain.port.PaymentAuditPort;
 import com.jaldishop.backend.payment.web.controller.AdminOrderInvestigationController;
 import com.jaldishop.backend.shared.exception.*;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
@@ -84,6 +85,7 @@ class AuthenticatedRateLimitWebTest {
         @Bean CancelCustomerOrderService cancel() { return mock(CancelCustomerOrderService.class); }
         @Bean ManualOrderInvestigationService investigate() { return mock(ManualOrderInvestigationService.class); }
         @Bean PaymentReconciliationService reconcile() { return mock(PaymentReconciliationService.class); }
+        @Bean PaymentAuditPort paymentAuditPort() { return mock(PaymentAuditPort.class); }
     }
 
     @Autowired WebApplicationContext context;
