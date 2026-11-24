@@ -103,7 +103,7 @@ class CheckoutHoldConcurrencyIntegrationTest {
                         SELECT id FROM capacity_reservations
                         WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com')
                     )
-                    OR variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test');
+                    OR variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test' OR sku LIKE 'SKU-%');
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM capacity_reservations
@@ -111,7 +111,7 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM inventories
-                    WHERE variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test');
+                    WHERE variant_id IN (SELECT id FROM product_variants WHERE presentation_name = 'Variante Test' OR sku LIKE 'SKU-%');
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM product_variants
