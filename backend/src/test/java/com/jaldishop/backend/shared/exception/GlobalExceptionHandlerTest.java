@@ -140,6 +140,27 @@ class GlobalExceptionHandlerTest {
             SQLException sqlEx = new SQLException("violates foreign key constraint fk_orders_user", "23503");
             throw new DataIntegrityViolationException("FK collision", sqlEx);
         }
+
+        @DeleteMapping("/data-integrity-fk-delete")
+        public String dataIntegrityFkDelete() {
+            SQLException sqlEx = new SQLException("violates foreign key constraint fk_orders_store", "23503");
+            throw new DataIntegrityViolationException("FK collision on delete", sqlEx);
+        }
+
+        @PostMapping("/data-integrity-fk-post")
+        public String dataIntegrityFkPost() {
+            SQLException sqlEx = new SQLException("violates foreign key constraint fk_products_category", "23503");
+            throw new DataIntegrityViolationException("FK collision on insert", sqlEx);
+        }
+
+        @DeleteMapping("/resource-conflict-metadata")
+        public String resourceConflictMetadata() {
+            throw new ResourceConflictException(
+                    "STORE_HAS_OPERATIONAL_HISTORY",
+                    "La tienda tiene operaciones registradas.",
+                    java.util.Map.of("suggestedAction", "DEACTIVATE", "currentStatus", "ACTIVE")
+            );
+        }
     }
 
     record TestRequestDto(@NotBlank(message = "El nombre no puede estar vacío") String name) {}
@@ -367,5 +388,33 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value(SharedErrorCodes.INTERNAL_SERVER_ERROR))
                 .andExpect(jsonPath("$.message").value("Ha ocurrido un error de integridad de datos en el servidor"));
+    }
+
+    @Test
+    @DisplayName("Persistencia: FK 23503 en DELETE retorna HTTP 409 RESOURCE_IN_USE sin filtrar nombres de tabla")
+    void shouldReturn409OnDataIntegrityFkViolationDuringDelete() throws Exception {
+        mockMvc.perform(delete("/test/handler/data-integrity-fk-delete"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(SharedErrorCodes.RESOURCE_IN_USE))
+                .andExpect(jsonPath("$.message").value("No es posible eliminar el recurso porque tiene operaciones o registros históricos asociados."));
+    }
+
+    @Test
+    @DisplayName("Persistencia: FK 23503 en POST retorna HTTP 400 INVALID_REFERENCE")
+    void shouldReturn400OnDataIntegrityFkViolationDuringPost() throws Exception {
+        mockMvc.perform(post("/test/handler/data-integrity-fk-post"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(SharedErrorCodes.INVALID_REFERENCE))
+                .andExpect(jsonPath("$.message").value("La referencia proporcionada no existe o no es válida."));
+    }
+
+    @Test
+    @DisplayName("Conflicto de recurso: ResourceConflictException retorna HTTP 409 con metadata")
+    void shouldReturn409WithMetadataOnResourceConflictException() throws Exception {
+        mockMvc.perform(delete("/test/handler/resource-conflict-metadata"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STORE_HAS_OPERATIONAL_HISTORY"))
+                .andExpect(jsonPath("$.metadata.suggestedAction").value("DEACTIVATE"))
+                .andExpect(jsonPath("$.metadata.currentStatus").value("ACTIVE"));
     }
 }

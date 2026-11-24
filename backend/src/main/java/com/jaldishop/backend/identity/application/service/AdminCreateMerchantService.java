@@ -40,7 +40,7 @@ public class AdminCreateMerchantService {
     }
 
     public AuthResult execute(RegisterMerchantCommand command, UUID adminId) {
-        AuthResult result = registerMerchantService.execute(command);
+        AuthResult result = registerMerchantService.execute(command, true);
 
         String adminEmail = (adminId != null)
                 ? userRepository.findById(adminId).map(User::getEmail).orElse(null)

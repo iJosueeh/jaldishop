@@ -2,6 +2,7 @@ package com.jaldishop.backend.capacity.web.controller;
 
 import com.jaldishop.backend.capacity.application.configuration.command.CreateCapacityExceptionCommand;
 import com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityExceptionService;
+import com.jaldishop.backend.capacity.application.configuration.service.DeleteCapacityExceptionService;
 import com.jaldishop.backend.capacity.application.configuration.service.GetStoreCapacityExceptionsService;
 import com.jaldishop.backend.capacity.application.configuration.service.ToggleCapacityExceptionStatusService;
 import com.jaldishop.backend.capacity.application.configuration.command.UpdateCapacityExceptionCommand;
@@ -11,10 +12,13 @@ import com.jaldishop.backend.capacity.web.dto.CapacityExceptionResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityExceptionRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityExceptionRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/capacity-exceptions")
+@PreAuthorize("hasRole('MERCHANT')")
 public class CapacityExceptionController {
 
     private final StoreContextService storeContextService;
@@ -31,17 +36,29 @@ public class CapacityExceptionController {
     private final GetStoreCapacityExceptionsService listService;
     private final UpdateCapacityExceptionService updateService;
     private final ToggleCapacityExceptionStatusService toggleService;
+    private final DeleteCapacityExceptionService deleteService;
 
     public CapacityExceptionController(StoreContextService storeContextService,
                                        CreateCapacityExceptionService createService,
                                        GetStoreCapacityExceptionsService listService,
                                        UpdateCapacityExceptionService updateService,
                                        ToggleCapacityExceptionStatusService toggleService) {
+        this(storeContextService, createService, listService, updateService, toggleService, null);
+    }
+
+    @Autowired
+    public CapacityExceptionController(StoreContextService storeContextService,
+                                       CreateCapacityExceptionService createService,
+                                       GetStoreCapacityExceptionsService listService,
+                                       UpdateCapacityExceptionService updateService,
+                                       ToggleCapacityExceptionStatusService toggleService,
+                                       DeleteCapacityExceptionService deleteService) {
         this.storeContextService = storeContextService;
         this.createService = createService;
         this.listService = listService;
         this.updateService = updateService;
         this.toggleService = toggleService;
+        this.deleteService = deleteService;
     }
 
     @PostMapping
@@ -104,5 +121,17 @@ public class CapacityExceptionController {
 
         CapacityException exception = toggleService.deactivate(id, storeId);
         return ResponseEntity.ok(CapacityExceptionResponse.fromDomain(exception));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResourceResponse> delete(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID id) {
+        UUID storeId = storeContextService.requireStoreId(principal);
+        deleteService.execute(id, storeId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                id,
+                "La excepción de capacidad fue eliminada permanentemente."
+        ));
     }
 }

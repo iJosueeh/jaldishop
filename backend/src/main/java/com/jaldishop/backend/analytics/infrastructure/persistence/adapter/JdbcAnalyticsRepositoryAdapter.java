@@ -102,6 +102,15 @@ public class JdbcAnalyticsRepositoryAdapter implements AnalyticsRepository {
                     p.id,
                     p.amount,
                     o.id AS order_id,
+                    (
+                        o.id IS NULL
+                        AND p.refund_status = 'NOT_REQUIRED'
+                        AND NOT EXISTS (
+                            SELECT 1 FROM payment_incidences pi
+                            WHERE pi.payment_id = p.id
+                              AND pi.status IN ('MANUAL_REVIEW_REQUIRED', 'RESOLVED')
+                        )
+                    ) AS is_pending_orphan,
                     COALESCE(o.store_id, cr.store_id) AS effective_store_id,
                     COALESCE(o.user_id, cr.user_id) AS effective_user_id
                 FROM payments p
@@ -117,8 +126,8 @@ public class JdbcAnalyticsRepositoryAdapter implements AnalyticsRepository {
                     COUNT(ap.id) AS approved_payments_count,
                     COALESCE(SUM(CASE WHEN ap.order_id IS NOT NULL THEN ap.amount ELSE 0 END), 0) AS order_linked_amount,
                     COUNT(CASE WHEN ap.order_id IS NOT NULL THEN 1 END) AS order_linked_count,
-                    COALESCE(SUM(CASE WHEN ap.order_id IS NULL THEN ap.amount ELSE 0 END), 0) AS orphan_amount,
-                    COUNT(CASE WHEN ap.order_id IS NULL THEN 1 END) AS orphan_count
+                    COALESCE(SUM(CASE WHEN ap.is_pending_orphan THEN ap.amount ELSE 0 END), 0) AS orphan_amount,
+                    COUNT(CASE WHEN ap.is_pending_orphan THEN 1 END) AS orphan_count
                 FROM approved_payments ap
                 WHERE (cast(:store_id as uuid) IS NULL OR ap.effective_store_id = cast(:store_id as uuid))
                   AND (cast(:user_id as uuid) IS NULL OR ap.effective_user_id = cast(:user_id as uuid))

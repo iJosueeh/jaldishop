@@ -12,7 +12,9 @@ import com.jaldishop.backend.notification.application.service.IsolatedOrderNotif
 import com.jaldishop.backend.notification.domain.model.Notification;
 import com.jaldishop.backend.notification.domain.port.NotificationRecipientResolver;
 import com.jaldishop.backend.notification.domain.enums.NotificationType;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.domain.event.OrderConfirmedDomainEvent;
+import com.jaldishop.backend.ordering.domain.event.OrderStatusChangedDomainEvent;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -127,6 +129,56 @@ class OrderNotificationEventListenerTest {
         when(persister.persistIsolated(any())).thenThrow(new RuntimeException("Pool connection exhausted"));
 
         assertDoesNotThrow(() -> listener.onOrderConfirmed(event));
+    }
+
+    @Test
+    @DisplayName("Debe persistir notificación ORDER_STATUS_CHANGED cuando la orden es CANCELLED")
+    void shouldPersistCancellationNotificationSuccessfully() {
+        when(recipientResolver.resolveMerchantUserId(storeId)).thenReturn(Optional.of(merchantUserId));
+
+        OrderStatusChangedDomainEvent cancelEvent = new OrderStatusChangedDomainEvent(
+                orderId,
+                "ORD-20261101-0001",
+                UUID.randomUUID(),
+                storeId,
+                OrderStatus.CONFIRMED,
+                OrderStatus.CANCELLED
+        );
+
+        Notification notification = Notification.create(
+                merchantUserId,
+                NotificationType.ORDER_STATUS_CHANGED,
+                "Pedido cancelado: ORD-20261101-0001",
+                "El pedido ha sido cancelado. Ingresa a la sección de pedidos para verificar el motivo.",
+                "ORDER_CANCELLED:" + orderId
+        );
+        when(persister.persistIsolated(any())).thenReturn(notification);
+
+        assertDoesNotThrow(() -> listener.onOrderStatusChanged(cancelEvent));
+
+        ArgumentCaptor<CreateNotificationCommand> captor = ArgumentCaptor.forClass(CreateNotificationCommand.class);
+        verify(persister).persistIsolated(captor.capture());
+
+        CreateNotificationCommand command = captor.getValue();
+        assertThat(command.userId()).isEqualTo(merchantUserId);
+        assertThat(command.type()).isEqualTo(NotificationType.ORDER_STATUS_CHANGED);
+        assertThat(command.deduplicationKey()).isEqualTo("ORDER_CANCELLED:" + orderId);
+    }
+
+    @Test
+    @DisplayName("Debe ignorar transiciones que no sean CANCELLED en listener de notificaciones")
+    void shouldIgnoreNonCancelledOrderStatusChanged() {
+        OrderStatusChangedDomainEvent prepEvent = new OrderStatusChangedDomainEvent(
+                orderId,
+                "ORD-20261101-0001",
+                UUID.randomUUID(),
+                storeId,
+                OrderStatus.CONFIRMED,
+                OrderStatus.IN_PREPARATION
+        );
+
+        assertDoesNotThrow(() -> listener.onOrderStatusChanged(prepEvent));
+        verify(persister, never()).persistIsolated(any());
     }
 
 }

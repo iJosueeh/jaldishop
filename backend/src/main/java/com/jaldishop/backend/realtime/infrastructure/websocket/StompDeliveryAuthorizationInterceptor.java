@@ -75,12 +75,21 @@ public class StompDeliveryAuthorizationInterceptor implements ExecutorChannelInt
             JwtPrincipal principal = sessionPrincipals.get(sessionId);
             if (!matches || principal == null
                     || !principal.userId().toString().equals(subscription.getSession().getUser().getName())) {
+                log.warn("STOMP Delivery Audit: user={}, session={}, destination={}, subscriptionId={}, status=BLOCKED_MISMATCH",
+                        principal != null ? principal.userId() : "unknown", sessionId, destination, subscriptionId);
                 return null;
             }
             authorization.authorize(principal, requested);
+
+            Long timestamp = headers.getTimestamp();
+            long latencyMs = timestamp != null ? Math.max(0, System.currentTimeMillis() - timestamp) : 0;
+            log.info("STOMP Delivery Audit: user={}, session={}, destination={}, subscriptionId={}, latencyMs={}, status=DELIVERED",
+                    principal.userId(), sessionId, destination, subscriptionId, latencyMs);
             return message;
         } catch (RuntimeException exception) {
-            log.warn("Entrega STOMP bloqueada: no se pudo validar la autorización actual.");
+            log.warn("STOMP Delivery Audit: user={}, session={}, destination={}, subscriptionId={}, status=BLOCKED_UNAUTHORIZED, reason={}",
+                    sessionPrincipals.get(sessionId) != null ? sessionPrincipals.get(sessionId).userId() : "unknown",
+                    sessionId, destination, subscriptionId, exception.getMessage());
             return null;
         }
     }

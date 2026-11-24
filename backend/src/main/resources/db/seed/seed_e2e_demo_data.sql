@@ -16,14 +16,14 @@ INSERT INTO roles (id, name) VALUES (3, 'ADMIN') ON CONFLICT (id) DO NOTHING;
 -- --------------------------------------------------------------------
 -- 2. USUARIOS DEMO (Hash BCrypt para 'Password123!')
 -- --------------------------------------------------------------------
--- Super Admin
-INSERT INTO users (id, email, password_encoded, first_name, last_name, phone, status, created_at, updated_at)
+-- Super Admin (Primary Admin)
+INSERT INTO users (id, email, password_encoded, first_name, last_name, phone, status, is_primary_admin, created_at, updated_at)
 VALUES (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e3',
     'admin.demo@jaldishop.com',
     '$2a$10$/hcyKr9yCPUSEREMAygtg.GymkhPi5aOdaepBK8AV/Ojh5Y0uohfS',
-    'Admin', 'JaldiShop', '+51999999999', 'ACTIVE', NOW() - INTERVAL '60 days', NOW()
-) ON CONFLICT (id) DO UPDATE SET password_encoded = EXCLUDED.password_encoded, status = 'ACTIVE';
+    'Admin', 'JaldiShop', '+51999999999', 'ACTIVE', TRUE, NOW() - INTERVAL '60 days', NOW()
+) ON CONFLICT (id) DO UPDATE SET password_encoded = EXCLUDED.password_encoded, status = 'ACTIVE', is_primary_admin = TRUE;
 
 -- Admin Seguridad
 INSERT INTO users (id, email, password_encoded, first_name, last_name, phone, status, created_at, updated_at)
@@ -569,3 +569,44 @@ VALUES (
     comment = EXCLUDED.comment,
     status = EXCLUDED.status,
     updated_at = EXCLUDED.updated_at;
+
+-- --------------------------------------------------------------------
+-- 18. CONFIGURACIONES DE PLATAFORMA, TARIFAS Y TIENDAS (V31, V33, V36, V38)
+-- --------------------------------------------------------------------
+INSERT INTO platform_settings (
+    id, allow_merchant_registration, require_store_approval,
+    maintenance_mode, maintenance_notice, marketplace_commission_rate, version
+) VALUES (
+    1, TRUE, FALSE, FALSE,
+    'La plataforma se encuentra en mantenimiento programado. Volveremos pronto.',
+    5.00, 0
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO fee_policies (
+    id, name, merchant_take_rate_pct, merchant_cash_take_rate_pct,
+    customer_service_fee_fixed, customer_service_fee_threshold_waive, igv_rate, is_active
+) VALUES (
+    'DEFAULT_PERU_COMMERCE', 'Política Estándar Comercios Locales Perú',
+    0.0350, 0.0200, 0.90, 60.00, 0.1800, TRUE
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO store_settings (
+    store_id, cancellation_policy, refund_policy,
+    require_customer_dni, allow_order_notes,
+    online_payments_enabled, cash_on_delivery_enabled, accepts_pos_on_delivery,
+    min_delivery_amount, estimated_prep_time_minutes,
+    order_sound_alert, sound_volume, low_stock_visual_alert, version
+) VALUES
+(
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5',
+    'Puedes solicitar la cancelación gratuita de tu pedido mientras se encuentre en estado Confirmado antes de entrar a preparación.',
+    'Conforme a la normativa de INDECOPI, ante fallas o inconsistencias comprobadas se procederá con el reenvío o reembolso del producto dentro de las 24 horas.',
+    FALSE, TRUE, TRUE, TRUE, TRUE, 20.00, 30, TRUE, 80, TRUE, 0
+),
+(
+    '80acf0ba-5a79-4888-b00d-b5aef8fcf9e6',
+    'Puedes cancelar sin costo hasta 15 minutos antes de tu franja de retiro o despacho.',
+    'Devolución o reposición inmediata en caso de error en el pedido o defectos de calidad dentro de las 24 horas.',
+    FALSE, TRUE, TRUE, TRUE, FALSE, 15.00, 20, TRUE, 80, TRUE, 0
+)
+ON CONFLICT (store_id) DO NOTHING;

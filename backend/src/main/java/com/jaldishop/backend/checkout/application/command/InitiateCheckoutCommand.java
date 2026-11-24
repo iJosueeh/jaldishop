@@ -22,8 +22,33 @@ public record InitiateCheckoutCommand(
         String deliveryReference,
         BigDecimal deliveryLatitude,
         BigDecimal deliveryLongitude,
+        String customerDocumentNumber,
+        String orderNotes,
         String discountCode
 ) {
+    public InitiateCheckoutCommand(
+            UUID userId,
+            UUID storeId,
+            CheckoutFulfillmentType fulfillmentType,
+            LocalDate serviceDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String discountCode
+    ) {
+        this(
+                userId, storeId, fulfillmentType, serviceDate, startTime, endTime,
+                customerName, customerPhone, customerEmail, deliveryAddress, deliveryReference,
+                deliveryLatitude, deliveryLongitude, null, null, discountCode
+        );
+    }
+
     public InitiateCheckoutCommand {
         if (userId == null) {
             throw new IllegalArgumentException("El ID del usuario es obligatorio para iniciar el checkout.");

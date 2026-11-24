@@ -1,10 +1,12 @@
 package com.jaldishop.backend.store.web.controller;
 
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.command.ChangeStoreStatusCommand;
 import com.jaldishop.backend.store.application.command.CreateStoreCommand;
 import com.jaldishop.backend.store.application.query.GetAdminStoresQuery;
 import com.jaldishop.backend.store.application.service.AdminCreateStoreService;
+import com.jaldishop.backend.store.application.service.AdminDeleteStoreService;
 import com.jaldishop.backend.store.application.service.ChangeStoreStatusService;
 import com.jaldishop.backend.store.application.service.CreateStoreService;
 import com.jaldishop.backend.store.application.service.GetAdminStoresService;
@@ -35,6 +37,7 @@ public class AdminStoreController {
     private final GetAdminStoresService getAdminStoresService;
     private final ChangeStoreStatusService changeStoreStatusService;
     private final AdminCreateStoreService adminCreateStoreService;
+    private final AdminDeleteStoreService adminDeleteStoreService;
     private final AdminStoreResponseMapper responseMapper;
 
     public AdminStoreController(
@@ -42,7 +45,16 @@ public class AdminStoreController {
             ChangeStoreStatusService changeStoreStatusService,
             AdminStoreResponseMapper responseMapper
     ) {
-        this(getAdminStoresService, changeStoreStatusService, null, responseMapper);
+        this(getAdminStoresService, changeStoreStatusService, null, null, responseMapper);
+    }
+
+    public AdminStoreController(
+            GetAdminStoresService getAdminStoresService,
+            ChangeStoreStatusService changeStoreStatusService,
+            AdminCreateStoreService adminCreateStoreService,
+            AdminStoreResponseMapper responseMapper
+    ) {
+        this(getAdminStoresService, changeStoreStatusService, adminCreateStoreService, null, responseMapper);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -50,11 +62,13 @@ public class AdminStoreController {
             GetAdminStoresService getAdminStoresService,
             ChangeStoreStatusService changeStoreStatusService,
             AdminCreateStoreService adminCreateStoreService,
+            AdminDeleteStoreService adminDeleteStoreService,
             AdminStoreResponseMapper responseMapper
     ) {
         this.getAdminStoresService = getAdminStoresService;
         this.changeStoreStatusService = changeStoreStatusService;
         this.adminCreateStoreService = adminCreateStoreService;
+        this.adminDeleteStoreService = adminDeleteStoreService;
         this.responseMapper = responseMapper;
     }
 
@@ -128,5 +142,18 @@ public class AdminStoreController {
         UUID adminId = principal != null ? principal.userId() : null;
         Store store = changeStoreStatusService.execute(new ChangeStoreStatusCommand(id, StoreStatus.ACTIVE, adminId));
         return ResponseEntity.ok(responseMapper.toDetail(store));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResourceResponse> deleteStore(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal JwtPrincipal principal
+    ) {
+        UUID adminId = principal != null ? principal.userId() : null;
+        adminDeleteStoreService.execute(id, adminId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                id,
+                "La tienda fue eliminada permanentemente de la plataforma."
+        ));
     }
 }

@@ -66,4 +66,20 @@ public class UserRepositoryAdapter implements UserRepository {
     public void incrementCredentialsVersion(UUID userId) {
         userJpaRepository.incrementCredentialsVersion(userId);
     }
+
+    @Override
+    public Optional<User> lockByIdForDeletion(UUID id) {
+        userJpaRepository.applyShortLockTimeout();
+        return userJpaRepository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean hasOperationalOrAuditActorHistory(UUID userId) {
+        return userJpaRepository.hasOperationalOrAuditActorHistory(userId);
+    }
+
+    @Override
+    public void deleteUserAndSafeOrphans(UUID userId) {
+        userJpaRepository.deleteUserAndSafeOrphans(userId);
+    }
 }

@@ -17,4 +17,8 @@ public interface ProductVariantRepository {
     boolean existsBySkuAndIdNot(String sku, UUID id);
     boolean existsByStoreIdAndSku(UUID storeId, String sku);
     boolean existsByStoreIdAndSkuAndIdNot(UUID storeId, String sku, UUID id);
+    Optional<ProductVariant> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId);
+    boolean hasOperationalHistory(UUID variantId);
+    long countActiveByProductIdAndIdNot(UUID productId, UUID excludeVariantId);
+    void deleteVariantAndSafeOrphans(UUID variantId, UUID storeId);
 }

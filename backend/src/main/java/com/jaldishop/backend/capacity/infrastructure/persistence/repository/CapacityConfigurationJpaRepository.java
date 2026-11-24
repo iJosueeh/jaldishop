@@ -4,6 +4,7 @@ import com.jaldishop.backend.capacity.infrastructure.persistence.entity.Capacity
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,24 @@ public interface CapacityConfigurationJpaRepository extends JpaRepository<Capaci
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime,
             @Param("excludeId") UUID excludeId);
+
+    @Query(value = """
+            SELECT COUNT(*) > 0 FROM capacity_reservations
+            WHERE store_id = :storeId
+              AND EXTRACT(ISODOW FROM service_date) = :dayOfWeek
+              AND status IN ('ACTIVE', 'PAYMENT_PROTECTED', 'COMMITTED')
+              AND (
+                  (CAST(:startTime AS TIME) IS NULL AND start_time IS NULL)
+                  OR (start_time = CAST(:startTime AS TIME) AND end_time = CAST(:endTime AS TIME))
+              )
+            """, nativeQuery = true)
+    boolean hasActiveOrCommittedReservations(
+            @Param("storeId") UUID storeId,
+            @Param("dayOfWeek") int dayOfWeek,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime);
+
+    @Modifying
+    @Query(value = "DELETE FROM capacity_configurations WHERE id = :id AND store_id = :storeId", nativeQuery = true)
+    void deleteByIdAndStoreId(@Param("id") UUID id, @Param("storeId") UUID storeId);
 }

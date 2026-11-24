@@ -3,6 +3,7 @@ package com.jaldishop.backend.store.application.service;
 import com.jaldishop.backend.store.application.command.CloseMyStoreCommand;
 import com.jaldishop.backend.store.application.result.CloseStoreResult;
 
+import com.jaldishop.backend.shared.exception.ResourceConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.enums.CloseStoreAction;
 import com.jaldishop.backend.store.domain.model.Store;
@@ -69,22 +70,50 @@ class CloseMyStoreServiceTest {
     }
 
     @Test
-    @DisplayName("Desactivar tienda lógicamente cuando tiene historial operativo (pedidos o reservas)")
-    void deactivateStoreWhenHasOperationalHistory() {
+    @DisplayName("Bloquear hard delete con 409 STORE_HAS_OPERATIONAL_HISTORY cuando tiene historial operativo")
+    void blockHardDeleteWith409WhenHasOperationalHistory() {
         when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));
+        when(storeRepository.lockByIdForDeletion(store.getId())).thenReturn(Optional.of(store));
         when(storeRepository.hasOperationalHistory(store.getId())).thenReturn(true);
-        when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CloseStoreResult result = closeMyStoreService.execute(new CloseMyStoreCommand(merchantUserId, "Cierre de negocio"));
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
+                () -> closeMyStoreService.execute(new CloseMyStoreCommand(merchantUserId, "Cierre de negocio"))
+        );
 
-        assertNotNull(result);
-        assertEquals(store.getId(), result.storeId());
-        assertEquals(CloseStoreAction.DEACTIVATED, result.action());
-        assertEquals(StoreStatus.INACTIVE, result.storeStatus());
+        assertEquals("STORE_HAS_OPERATIONAL_HISTORY", exception.getCode());
+        assertEquals("DEACTIVATE", exception.getMetadata().get("suggestedAction"));
+        assertEquals("ACTIVE", exception.getMetadata().get("currentStatus"));
 
         verify(storeRepository, never()).deleteStore(any(), any());
         verify(storeMediaCleaner, never()).deleteStoreMedia(any());
+        verify(storeRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Desactivar tienda lógicamente vía deactivate()")
+    void deactivateStoreExplicitly() {
+        when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));
+        when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CloseStoreResult result = closeMyStoreService.deactivate(merchantUserId);
+
+        assertEquals(CloseStoreAction.DEACTIVATED, result.action());
+        assertEquals(StoreStatus.INACTIVE, result.storeStatus());
         verify(storeRepository).save(argThat(s -> s.getStatus() == StoreStatus.INACTIVE));
+    }
+
+    @Test
+    @DisplayName("Reactivar tienda inactiva vía reactivate()")
+    void reactivateInactiveStore() {
+        store.deactivate();
+        when(storeRepository.findByMerchantUserId(merchantUserId)).thenReturn(Optional.of(store));
+        when(storeRepository.save(any(Store.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Store reactivated = closeMyStoreService.reactivate(merchantUserId);
+
+        assertEquals(StoreStatus.ACTIVE, reactivated.getStatus());
+        verify(storeRepository).save(argThat(s -> s.getStatus() == StoreStatus.ACTIVE));
     }
 
     @Test

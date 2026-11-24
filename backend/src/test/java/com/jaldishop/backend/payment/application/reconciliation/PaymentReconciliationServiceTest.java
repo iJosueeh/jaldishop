@@ -75,4 +75,30 @@ class PaymentReconciliationServiceTest {
         verify(processor).processCandidate(id2);
         verify(processor).processCandidate(id3);
     }
+
+    @Test
+    @DisplayName("Debe excluir pagos en reembolso o con incidencias cerradas/revisión manual al buscar candidatos")
+    @SuppressWarnings("unchecked")
+    void shouldExcludeRefundsAndHandledIncidencesWhenFindingOrphanCandidates() {
+        var jdbcTemplate = mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        var serviceWithJdbc = new PaymentReconciliationService(
+                paymentRepository, null, processor, null, jdbcTemplate,
+                600, 50, false, 120, 20, 300
+        );
+        var sqlCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        when(jdbcTemplate.query(
+                sqlCaptor.capture(),
+                any(org.springframework.jdbc.core.RowMapper.class),
+                eq(15)
+        )).thenReturn(List.of());
+
+        List<?> result = serviceWithJdbc.findOrphanCandidates(15);
+
+        assertTrue(result.isEmpty());
+        String sql = sqlCaptor.getValue();
+        assertTrue(sql.contains("p.refund_status = 'NOT_REQUIRED'"));
+        assertTrue(sql.contains("payment_incidences"));
+        assertTrue(sql.contains("'MANUAL_REVIEW_REQUIRED'"));
+        assertTrue(sql.contains("'RESOLVED'"));
+    }
 }

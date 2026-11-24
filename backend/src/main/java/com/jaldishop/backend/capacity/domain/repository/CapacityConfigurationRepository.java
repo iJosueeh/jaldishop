@@ -15,4 +15,6 @@ public interface CapacityConfigurationRepository {
     boolean existsOverlappingByStoreIdAndDayOfWeek(
             UUID storeId, int dayOfWeek, LocalTime startTime, LocalTime endTime, UUID excludeId);
     CapacityConfiguration save(CapacityConfiguration config);
+    boolean hasActiveOrCommittedReservations(UUID storeId, int dayOfWeek, LocalTime startTime, LocalTime endTime);
+    void deleteByIdAndStoreId(UUID id, UUID storeId);
 }

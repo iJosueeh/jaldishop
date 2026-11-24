@@ -62,4 +62,25 @@ public class ProductRepositoryAdapter implements ProductRepository {
     public boolean existsByStoreIdAndSlugAndIdNot(UUID storeId, String slug, UUID id) {
         return repository.existsByStoreIdAndSlugAndIdNot(storeId, slug, id);
     }
+
+    @Override
+    public Optional<Product> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId) {
+        repository.applyShortLockTimeout();
+        return repository.findByIdAndStoreIdForUpdate(id, storeId).map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean hasOperationalHistory(UUID productId) {
+        return repository.hasOperationalHistory(productId);
+    }
+
+    @Override
+    public List<String> findProductImageUrls(UUID productId) {
+        return repository.findProductImageUrls(productId);
+    }
+
+    @Override
+    public void deleteProductAndSafeOrphans(UUID productId, UUID storeId) {
+        repository.deleteProductAndSafeOrphans(productId, storeId);
+    }
 }

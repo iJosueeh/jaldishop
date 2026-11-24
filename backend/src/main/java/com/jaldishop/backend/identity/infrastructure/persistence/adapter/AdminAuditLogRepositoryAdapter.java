@@ -77,6 +77,25 @@ public class AdminAuditLogRepositoryAdapter implements AdminAuditLogRepository {
         return jpaRepository.findAll(spec, pageable).map(this::toDomain);
     }
 
+    @Override
+    public List<AdminAuditLog> findRecentByActions(List<String> actions, int limit) {
+        return jpaRepository.findByActionInOrderByCreatedAtDesc(actions, Pageable.ofSize(limit))
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void acquireTransactionLock(String lockKey) {
+        jpaRepository.acquireTransactionLock(lockKey);
+    }
+
+    @Override
+    public java.util.Optional<AdminAuditLog> findLatestByActorActionAndTarget(UUID actorId, String action, UUID targetId) {
+        return jpaRepository.findFirstByActorIdAndActionAndTargetIdOrderByCreatedAtDesc(actorId, action, targetId)
+                .map(this::toDomain);
+    }
+
     private AdminAuditLog toDomain(AdminAuditLogEntity saved) {
         return new AdminAuditLog(
                 saved.getId(),

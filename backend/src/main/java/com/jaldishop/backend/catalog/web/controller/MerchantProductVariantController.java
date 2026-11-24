@@ -4,17 +4,21 @@ import com.jaldishop.backend.catalog.application.command.CreateProductVariantCom
 import com.jaldishop.backend.catalog.application.service.CreateProductVariantService;
 import com.jaldishop.backend.catalog.application.service.GetProductVariantsService;
 import com.jaldishop.backend.catalog.application.command.UpdateProductVariantCommand;
+import com.jaldishop.backend.catalog.application.service.ManageProductVariantLifecycleService;
 import com.jaldishop.backend.catalog.application.service.UpdateProductVariantService;
 import com.jaldishop.backend.catalog.domain.model.ProductVariant;
 import com.jaldishop.backend.catalog.domain.model.VariantAttribute;
 import com.jaldishop.backend.catalog.web.dto.CreateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
+import com.jaldishop.backend.catalog.web.dto.UpdateCatalogStatusRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductVariantRequest;
 import com.jaldishop.backend.catalog.web.dto.VariantAttributeDto;
 import com.jaldishop.backend.catalog.web.mapper.ProductVariantResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +40,7 @@ public class MerchantProductVariantController {
     private final GetProductVariantsService getVariantsService;
     private final StoreContextService storeContextService;
     private final ProductVariantResponseMapper responseMapper;
+    private final ManageProductVariantLifecycleService lifecycleService;
 
     public MerchantProductVariantController(
             CreateProductVariantService createVariantService,
@@ -44,11 +49,24 @@ public class MerchantProductVariantController {
             StoreContextService storeContextService,
             ProductVariantResponseMapper responseMapper
     ) {
+        this(createVariantService, updateVariantService, getVariantsService, storeContextService, responseMapper, null);
+    }
+
+    @Autowired
+    public MerchantProductVariantController(
+            CreateProductVariantService createVariantService,
+            UpdateProductVariantService updateVariantService,
+            GetProductVariantsService getVariantsService,
+            StoreContextService storeContextService,
+            ProductVariantResponseMapper responseMapper,
+            ManageProductVariantLifecycleService lifecycleService
+    ) {
         this.createVariantService = createVariantService;
         this.updateVariantService = updateVariantService;
         this.getVariantsService = getVariantsService;
         this.storeContextService = storeContextService;
         this.responseMapper = responseMapper;
+        this.lifecycleService = lifecycleService;
     }
 
     @PostMapping
@@ -128,6 +146,34 @@ public class MerchantProductVariantController {
 
         ProductVariant updated = updateVariantService.execute(command);
         return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @PatchMapping("/{variantId}/status")
+    public ResponseEntity<ProductVariantResponse> updateVariantStatus(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID productId,
+            @PathVariable UUID variantId,
+            @Valid @RequestBody UpdateCatalogStatusRequest request
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        ProductVariant updated = lifecycleService.updateStatus(variantId, productId, storeId, request.status());
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @DeleteMapping("/{variantId}")
+    public ResponseEntity<DeleteResourceResponse> deleteVariant(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID productId,
+            @PathVariable UUID variantId
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        lifecycleService.delete(variantId, productId, storeId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                variantId,
+                "La variante fue eliminada permanentemente."
+        ));
     }
 
     private List<VariantAttribute> toAttributes(List<VariantAttributeDto> attributes) {

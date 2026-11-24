@@ -2,8 +2,10 @@ package com.jaldishop.backend.store.infrastructure.persistence.repository;
 
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.infrastructure.persistence.entity.StoreEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,10 +54,22 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
             @Param("status") StoreStatus status
     );
 
+    @Modifying
+    @Query(value = "SET LOCAL lock_timeout = '2s'", nativeQuery = true)
+    void applyShortLockTimeout();
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM StoreEntity s WHERE s.id = :storeId")
+    Optional<StoreEntity> findByIdForUpdate(@Param("storeId") UUID storeId);
+
     @Query(value = """
             SELECT (
                 (SELECT COUNT(*) FROM orders WHERE store_id = :storeId) +
-                (SELECT COUNT(*) FROM capacity_reservations WHERE store_id = :storeId)
+                (SELECT COUNT(*) FROM capacity_reservations WHERE store_id = :storeId) +
+                (SELECT COUNT(*) FROM inventory_reservations WHERE variant_id IN (SELECT id FROM product_variants WHERE store_id = :storeId)) +
+                (SELECT COUNT(*) FROM merchant_payout_batches WHERE store_id = :storeId) +
+                (SELECT COUNT(*) FROM payments WHERE capacity_reservation_id IN (SELECT id FROM capacity_reservations WHERE store_id = :storeId)) +
+                (SELECT COUNT(*) FROM reviews WHERE product_id IN (SELECT id FROM products WHERE store_id = :storeId))
             ) > 0
             """, nativeQuery = true)
     boolean hasOperationalHistory(@Param("storeId") UUID storeId);
@@ -64,6 +78,7 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
     @Query(value = """
             DELETE FROM cart_items WHERE store_id = :storeId;
             DELETE FROM carts WHERE store_id = :storeId;
+            DELETE FROM favorites WHERE product_id IN (SELECT id FROM products WHERE store_id = :storeId);
             DELETE FROM discounts WHERE store_id = :storeId;
             DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE store_id = :storeId);
             DELETE FROM variant_attributes WHERE variant_id IN (SELECT id FROM product_variants WHERE store_id = :storeId);
@@ -74,6 +89,8 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
             DELETE FROM capacity_configurations WHERE store_id = :storeId;
             DELETE FROM capacity_exceptions WHERE store_id = :storeId;
             DELETE FROM store_category_assignments WHERE store_id = :storeId;
+            DELETE FROM merchant_payout_destinations WHERE store_id = :storeId;
+            DELETE FROM store_settings WHERE store_id = :storeId;
             DELETE FROM user_roles WHERE store_id = :storeId;
             DELETE FROM stores WHERE id = :storeId;
             """, nativeQuery = true)

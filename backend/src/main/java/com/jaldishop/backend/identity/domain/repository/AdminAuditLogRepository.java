@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AdminAuditLogRepository {
@@ -18,4 +20,7 @@ public interface AdminAuditLogRepository {
             Instant endDate,
             Pageable pageable
     );
+    List<AdminAuditLog> findRecentByActions(List<String> actions, int limit);
+    void acquireTransactionLock(String lockKey);
+    Optional<AdminAuditLog> findLatestByActorActionAndTarget(UUID actorId, String action, UUID targetId);
 }

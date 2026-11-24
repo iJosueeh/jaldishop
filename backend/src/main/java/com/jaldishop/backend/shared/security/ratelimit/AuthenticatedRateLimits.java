@@ -22,4 +22,16 @@ public class AuthenticatedRateLimits {
     public void adminPaymentOperation(UUID userId) {
         limits.checkAuthenticated("payment-admin-remote-user", userId, 10, Duration.ofMinutes(1));
     }
+
+    public void adminPaymentHistoryRead(UUID userId) {
+        limits.checkAuthenticated("payment-admin-history-read", userId, 60, Duration.ofMinutes(1));
+    }
+
+    public void adminSettingsUpdate(UUID userId) {
+        limits.checkAuthenticated("settings-admin-update", userId, 10, Duration.ofMinutes(1));
+    }
+
+    public void storeSettingsUpdate(UUID userId) {
+        limits.checkAuthenticated("settings-store-update", userId, 20, Duration.ofMinutes(1));
+    }
 }

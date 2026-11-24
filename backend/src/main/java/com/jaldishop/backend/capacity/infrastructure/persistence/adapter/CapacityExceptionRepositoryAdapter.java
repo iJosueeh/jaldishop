@@ -55,4 +55,14 @@ public class CapacityExceptionRepositoryAdapter implements CapacityExceptionRepo
         CapacityExceptionEntity saved = jpaRepository.save(entity);
         return mapper.toDomain(saved);
     }
+
+    @Override
+    public boolean hasActiveOrCommittedReservations(UUID storeId, LocalDate serviceDate, java.time.LocalTime startTime, java.time.LocalTime endTime) {
+        return jpaRepository.hasActiveOrCommittedReservations(storeId, serviceDate, startTime, endTime);
+    }
+
+    @Override
+    public void deleteByIdAndStoreId(UUID id, UUID storeId) {
+        jpaRepository.deleteByIdAndStoreId(id, storeId);
+    }
 }

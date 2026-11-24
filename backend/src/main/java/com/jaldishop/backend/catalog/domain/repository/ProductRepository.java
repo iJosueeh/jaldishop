@@ -15,4 +15,8 @@ public interface ProductRepository {
     List<Product> findByStoreIdAndCategoryId(UUID storeId, UUID categoryId);
     boolean existsByStoreIdAndSlug(UUID storeId, String slug);
     boolean existsByStoreIdAndSlugAndIdNot(UUID storeId, String slug, UUID id);
+    Optional<Product> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId);
+    boolean hasOperationalHistory(UUID productId);
+    List<String> findProductImageUrls(UUID productId);
+    void deleteProductAndSafeOrphans(UUID productId, UUID storeId);
 }

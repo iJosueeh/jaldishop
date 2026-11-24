@@ -5,17 +5,21 @@ import com.jaldishop.backend.catalog.application.service.CreateProductService;
 import com.jaldishop.backend.catalog.application.query.GetProductsQuery;
 import com.jaldishop.backend.catalog.application.service.GetProductsService;
 import com.jaldishop.backend.catalog.application.command.UpdateProductCommand;
+import com.jaldishop.backend.catalog.application.service.ManageProductLifecycleService;
 import com.jaldishop.backend.catalog.application.service.UpdateProductService;
 import com.jaldishop.backend.catalog.domain.model.Product;
 import com.jaldishop.backend.catalog.domain.model.ProductVariant;
 import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.CreateProductRequest;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
+import com.jaldishop.backend.catalog.web.dto.UpdateCatalogStatusRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateProductRequest;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +42,7 @@ public class MerchantProductController {
     private final StoreContextService storeContextService;
     private final ProductResponseMapper responseMapper;
     private final ProductVariantRepository variantRepository;
+    private final ManageProductLifecycleService lifecycleService;
 
     public MerchantProductController(
             CreateProductService createProductService,
@@ -47,12 +52,26 @@ public class MerchantProductController {
             ProductResponseMapper responseMapper,
             ProductVariantRepository variantRepository
     ) {
+        this(createProductService, updateProductService, getProductsService, storeContextService, responseMapper, variantRepository, null);
+    }
+
+    @Autowired
+    public MerchantProductController(
+            CreateProductService createProductService,
+            UpdateProductService updateProductService,
+            GetProductsService getProductsService,
+            StoreContextService storeContextService,
+            ProductResponseMapper responseMapper,
+            ProductVariantRepository variantRepository,
+            ManageProductLifecycleService lifecycleService
+    ) {
         this.createProductService = createProductService;
         this.updateProductService = updateProductService;
         this.getProductsService = getProductsService;
         this.storeContextService = storeContextService;
         this.responseMapper = responseMapper;
         this.variantRepository = variantRepository;
+        this.lifecycleService = lifecycleService;
     }
 
     @PostMapping
@@ -142,5 +161,31 @@ public class MerchantProductController {
         );
         Product updated = updateProductService.execute(command);
         return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @PatchMapping("/{productId}/status")
+    public ResponseEntity<ProductResponse> updateProductStatus(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID productId,
+            @Valid @RequestBody UpdateCatalogStatusRequest request
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        Product updated = lifecycleService.updateStatus(productId, storeId, request.status());
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<DeleteResourceResponse> deleteProduct(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID productId
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        lifecycleService.delete(productId, storeId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                productId,
+                "El producto fue eliminado permanentemente del catálogo."
+        ));
     }
 }

@@ -87,6 +87,10 @@ public record MerchantOrderDetailResponse(
     }
 
     public static MerchantOrderDetailResponse from(Order order) {
+        return from(order, new BigDecimal("0.0350"), new BigDecimal("0.90"));
+    }
+
+    public static MerchantOrderDetailResponse from(Order order, BigDecimal takeRatePct, BigDecimal fixedPlatformFee) {
         if (order == null) {
             return null;
         }
@@ -120,8 +124,8 @@ public record MerchantOrderDetailResponse(
         OrderPaymentBreakdownResponse breakdown = OrderPaymentBreakdownResponse.compute(
                 order.getProductsSubtotalAmount(),
                 order.getDeliveryFeeAmount(),
-                new BigDecimal("0.0350"),
-                new BigDecimal("0.90")
+                takeRatePct != null ? takeRatePct : new BigDecimal("0.0350"),
+                fixedPlatformFee != null ? fixedPlatformFee : new BigDecimal("0.90")
         );
 
         return new MerchantOrderDetailResponse(

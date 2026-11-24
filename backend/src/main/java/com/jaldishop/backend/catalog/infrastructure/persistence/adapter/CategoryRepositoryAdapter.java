@@ -55,4 +55,20 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
     public boolean existsByStoreIdAndNameIgnoreCaseAndIdNot(UUID storeId, String name, UUID id) {
         return repository.existsByStoreIdAndNameIgnoreCaseAndIdNot(storeId, name, id);
     }
+
+    @Override
+    public Optional<Category> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId) {
+        repository.applyShortLockTimeout();
+        return repository.findByIdAndStoreIdForUpdate(id, storeId).map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean hasProducts(UUID categoryId) {
+        return repository.hasProducts(categoryId);
+    }
+
+    @Override
+    public void deleteByIdAndStoreId(UUID id, UUID storeId) {
+        repository.deleteByIdAndStoreId(id, storeId);
+    }
 }
