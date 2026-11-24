@@ -6,6 +6,7 @@ import { CatalogEmptyState } from './CatalogEmptyState';
 import { CartItem, ProductItem } from '../../types/storefront.types';
 
 interface ProductGridProps {
+  storeSlug?: string;
   products: ProductItem[];
   onAdd: (product: ProductItem) => void;
   cart: CartItem[];
@@ -13,13 +14,13 @@ interface ProductGridProps {
   onResetFilters: () => void;
   isFiltering?: boolean;
   pending?: boolean;
-  onOpenDetail?: (product: ProductItem) => void;
   isFavorite?: (productId: string) => boolean;
   onToggleFavorite?: (productId: string) => void;
   isTogglingFavorite?: boolean;
 }
 
 export function ProductGrid({
+  storeSlug,
   products,
   onAdd,
   cart,
@@ -27,7 +28,6 @@ export function ProductGrid({
   onResetFilters,
   isFiltering = false,
   pending = false,
-  onOpenDetail,
   isFavorite,
   onToggleFavorite,
   isTogglingFavorite = false,
@@ -52,10 +52,10 @@ export function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
+          storeSlug={storeSlug}
           onAdd={onAdd}
           currentQuantity={quantities.get(product.id) || 0}
           pending={pending}
-          onOpenDetail={onOpenDetail}
           isFavorite={isFavorite ? isFavorite(product.id) : false}
           onToggleFavorite={onToggleFavorite}
           isTogglingFavorite={isTogglingFavorite}

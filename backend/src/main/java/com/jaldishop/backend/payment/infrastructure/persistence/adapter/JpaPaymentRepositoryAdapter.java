@@ -44,6 +44,11 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
     }
 
     @Override
+    public List<Payment> findByCustomerUserId(UUID customerUserId) {
+        return jpaRepository.findByCustomerUserId(customerUserId).stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public List<UUID> findEligibleReconciliationPaymentIds(Instant cutoffTime, Instant now, int batchSize) {
         int limit = batchSize > 0 ? batchSize : 50;
         return jpaRepository.findEligibleReconciliationPaymentIds(cutoffTime, now, PageRequest.of(0, limit));

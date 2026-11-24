@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { CUSTOMER_COOKIE } from '@/core/api/customerProxy';
+import { CUSTOMER_COOKIE, rejectCrossOrigin } from '@/core/api/customerProxy';
 import { env } from '@/core/config/env';
 
 interface RouteContext {
@@ -54,6 +54,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
  * BFF Endpoint to add product to favorites: POST /api/customer/favorites/[productId] -> Spring /api/v1/customer/favorites/products/[productId]
  */
 export async function POST(_request: NextRequest, context: RouteContext) {
+  const rejected = rejectCrossOrigin(_request);
+  if (rejected) return rejected;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
   if (!token) {
     return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });
@@ -94,6 +96,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
  * BFF Endpoint to remove product from favorites: DELETE /api/customer/favorites/[productId] -> Spring /api/v1/customer/favorites/products/[productId]
  */
 export async function DELETE(_request: NextRequest, context: RouteContext) {
+  const rejected = rejectCrossOrigin(_request);
+  if (rejected) return rejected;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
   if (!token) {
     return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });

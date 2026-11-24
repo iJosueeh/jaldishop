@@ -37,4 +37,9 @@ public class GetProductsService {
         return productRepository.findByIdAndStoreId(productId, storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
     }
+
+    public Product executeBySlug(UUID storeId, String productSlug) {
+        return productRepository.findByStoreIdAndSlug(storeId, productSlug)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
+    }
 }

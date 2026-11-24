@@ -9,6 +9,7 @@ import { ProductItem, CartItem } from '../../types/storefront.types';
 describe('Modular Catalog Components', () => {
   const singlePriceProduct: ProductItem = {
     id: 'prod-1',
+    slug: 'torta-selva-negra',
     name: 'Torta Selva Negra',
     description: 'Bizcocho de chocolate relleno con crema chantilly y cerezas.',
     price: 45.0,
@@ -44,6 +45,15 @@ describe('Modular Catalog Components', () => {
     const addBtn = screen.getByRole('button', { name: /Añadir/i });
     fireEvent.click(addBtn);
     expect(onAdd).toHaveBeenCalledWith({ ...singlePriceProduct, variantId: 'v-cake', price: 45 });
+  });
+
+  it('links a product detail when the store and product slugs are available', () => {
+    render(<ProductCard storeSlug="pasteleria-pepe" product={singlePriceProduct} onAdd={vi.fn()} />);
+
+    expect(screen.getByRole('link', { name: 'Ver detalle de Torta Selva Negra' })).toHaveAttribute(
+      'href',
+      '/tienda/pasteleria-pepe/producto/torta-selva-negra'
+    );
   });
 
   it('ProductCard displays price range and formats badge when multiple variants exist', () => {

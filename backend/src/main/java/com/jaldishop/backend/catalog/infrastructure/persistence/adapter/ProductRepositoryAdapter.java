@@ -40,6 +40,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findByStoreIdAndSlug(UUID storeId, String slug) {
+        return repository.findByStoreIdAndSlug(storeId, slug).map(mapper::toDomain);
+    }
+
+    @Override
     public List<Product> findByStoreId(UUID storeId) {
         return repository.findByStoreId(storeId).stream()
                 .map(mapper::toDomain)
@@ -62,7 +67,6 @@ public class ProductRepositoryAdapter implements ProductRepository {
     public boolean existsByStoreIdAndSlugAndIdNot(UUID storeId, String slug, UUID id) {
         return repository.existsByStoreIdAndSlugAndIdNot(storeId, slug, id);
     }
-
     @Override
     public Optional<Product> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId) {
         repository.applyShortLockTimeout();

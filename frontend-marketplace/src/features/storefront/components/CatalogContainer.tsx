@@ -8,7 +8,6 @@ import {
   ProductGrid,
   CatalogFilterBar,
   CatalogEmptyState,
-  ProductDetailModal,
 } from './catalog';
 import { ProductItem, ProductVariantItem, CartItem, PublicStore, PublicStoreSettings } from '../types/storefront.types';
 import { StorefrontBadges } from './StorefrontBadges';
@@ -45,6 +44,7 @@ interface CatalogContainerProps {
 }
 
 export function CatalogContainer({
+  storeSlug,
   storeName,
   store,
   storeSettings,
@@ -71,7 +71,7 @@ export function CatalogContainer({
 
   const totalCartCount = cartStore?.id === store?.id ? count : 0;
   useEffect(() => {
-    if (store) {
+    if (store?.slug) {
       selectStore({ id: store.id, name: store.name, slug: store.slug });
       if (store.deliveryEnabled === false && store.pickupEnabled) {
         setFulfillment('PICKUP');
@@ -94,7 +94,6 @@ export function CatalogContainer({
   const [orderNotes, setOrderNotes] = useState('');
   const [retryCounter, setRetryCounter] = useState(0);
 
-  const [detailProduct, setDetailProduct] = useState<ProductItem | null>(null);
   const { isFavorite, toggleFavorite } = useCustomerFavorites();
 
   const handleToggleFavorite = useCallback(
@@ -510,6 +509,7 @@ export function CatalogContainer({
             {/* Cuadrícula de Productos a Ancho Completo */}
             <div className="mt-6">
               <ProductGrid
+                storeSlug={storeSlug ?? store?.slug}
                 products={filtered}
                 onAdd={(p) => changeQuantity(p, 1)}
                 cart={cart}
@@ -520,7 +520,6 @@ export function CatalogContainer({
                 }}
                 isFiltering={isFiltering}
                 pending={pending || loading || cartStore?.id !== store?.id}
-                onOpenDetail={(p) => setDetailProduct(p)}
                 isFavorite={(productId) => isFavorite(productId)}
                 onToggleFavorite={handleToggleFavorite}
               />
@@ -769,22 +768,6 @@ export function CatalogContainer({
         storePhone={store?.whatsappNumber || store?.phone || undefined}
         deliveryFee={deliveryFee}
         reservationId={checkoutResponse?.reservationId}
-      />
-
-      {/* Modal de Detalle de Producto y Variantes */}
-      <ProductDetailModal
-        isOpen={Boolean(detailProduct)}
-        onClose={() => setDetailProduct(null)}
-        product={detailProduct}
-        onAdd={(p, qty = 1) => changeQuantity(p, qty)}
-        isFavorite={detailProduct ? isFavorite(detailProduct.id) : false}
-        onToggleFavorite={() => {
-          if (detailProduct) {
-            void handleToggleFavorite(detailProduct.id);
-          }
-        }}
-        currency={currency}
-        pending={pending || loading}
       />
 
       {/* Sticky Mobile Checkout Bar */}

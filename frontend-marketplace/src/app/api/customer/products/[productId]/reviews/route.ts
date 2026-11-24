@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { CUSTOMER_COOKIE } from '@/core/api/customerProxy';
+import { CUSTOMER_COOKIE, rejectCrossOrigin } from '@/core/api/customerProxy';
 import { env } from '@/core/config/env';
 
 /**
@@ -12,6 +12,8 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ productId: string }> }
 ) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
   const { productId } = await context.params;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
 
@@ -55,6 +57,8 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ productId: string }> }
 ) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
   const { productId } = await context.params;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
 
@@ -95,9 +99,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ productId: string }> }
 ) {
+  const rejected = rejectCrossOrigin(request);
+  if (rejected) return rejected;
+
   const { productId } = await context.params;
   const token = (await cookies()).get(CUSTOMER_COOKIE)?.value;
 
