@@ -9,6 +9,8 @@ export interface PublicStore {
   phone?: string;
   contactPhone?: string;
   whatsappNumber?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
   deliveryFeeAmount?: number;
   address?: string;
   addressReference?: string;
@@ -57,11 +59,13 @@ export interface StoreCategory {
 
 export interface ProductVariantItem {
   id: string;
+  productId?: string;
   presentationName: string;
   sku?: string;
   priceAmount: number;
   priceCurrency: string;
   tracksInventory: boolean;
+  availableQuantity?: number | null;
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   attributes?: { name: string; value: string }[];
 }
@@ -76,6 +80,7 @@ export interface ProductItem {
   description: string;
   price: number;
   category: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   badge?: string;
   badgeVariant?: 'jade' | 'terracotta' | 'amber';
   imageBg?: string;
@@ -85,6 +90,8 @@ export interface ProductItem {
   minPrice?: number;
   maxPrice?: number;
   variants?: ProductVariantItem[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem {
@@ -107,4 +114,20 @@ export interface ProductReviewsSummary {
   averageRating: number;
   totalReviews: number;
   reviews: PublicReviewItem[];
+}
+
+export interface MarketplaceProductItem {
+  id: string;
+  name: string;
+  slug?: string;
+  description: string;
+  price: number;
+  priceCurrency?: string;
+  imageUrl?: string;
+  category: string;
+  storeId: string;
+  storeName: string;
+  storeSlug: string;
+  deliveryEnabled: boolean;
+  pickupEnabled: boolean;
 }

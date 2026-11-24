@@ -155,4 +155,35 @@ describe('Storefront without fabricated data', () => {
     expect(screen.getByText('No hay horarios disponibles')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('paginates store products and resets to page 1 when filtering', () => {
+    const manyProducts = Array.from({ length: 14 }, (_, index) => ({
+      id: `prod-${index + 1}`,
+      slug: `producto-${index + 1}`,
+      name: `Producto ${index + 1}`,
+      description: 'Descripción del producto',
+      price: 10 + index,
+      categoryId: index < 13 ? 'c1' : 'c2',
+      category: index < 13 ? 'Panadería' : 'Bebidas',
+    }));
+
+    render(
+      <StorefrontCartProvider>
+        <CatalogContainer storeName="Panadería Central" storeSlug="panaderia-central" products={manyProducts} />
+      </StorefrontCartProvider>
+    );
+
+    expect(screen.getByRole('heading', { name: 'Producto 1' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Producto 12' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Producto 13' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Página 2' }));
+    expect(screen.getByRole('heading', { name: 'Producto 13' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Producto 14' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Producto 1' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Bebidas/ }));
+    expect(screen.getByRole('heading', { name: 'Producto 14' })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Paginación de productos de la tienda' })).not.toBeInTheDocument();
+  });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Clock, ArrowRight, ShoppingBag } from 'lucide-react';
 import { CapacitySlotPicker, CapacitySlot } from './CapacitySlotPicker';
 import { StorefrontNav } from './StorefrontNav';
@@ -9,6 +9,7 @@ import {
   CatalogFilterBar,
   CatalogEmptyState,
 } from './catalog';
+import { PaginationBar } from '@/shared/components/ui/PaginationBar';
 import { ProductItem, ProductVariantItem, CartItem, PublicStore, PublicStoreSettings } from '../types/storefront.types';
 import { StorefrontBadges } from './StorefrontBadges';
 import { useStorefrontCart } from '../cart/StorefrontCartProvider';
@@ -43,6 +44,8 @@ interface CatalogContainerProps {
   capacitySlot?: React.ReactNode;
 }
 
+export const PRODUCTS_PAGE_SIZE = 12;
+
 export function CatalogContainer({
   storeSlug,
   storeName,
@@ -56,6 +59,25 @@ export function CatalogContainer({
 }: CatalogContainerProps) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const catalogSectionRef = useRef<HTMLElement>(null);
+
+  const handleQueryChange = useCallback((nextQuery: string) => {
+    setQuery(nextQuery);
+    setCurrentPage(1);
+  }, []);
+
+  const handleCategoryChange = useCallback((nextCategory: string) => {
+    setCategory(nextCategory);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((nextPage: number) => {
+    setCurrentPage(nextPage);
+    if (typeof catalogSectionRef.current?.scrollIntoView === 'function') {
+      catalogSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
   const {
     items: cart,
     count,
@@ -233,6 +255,11 @@ export function CatalogContainer({
         .toLocaleLowerCase()
         .includes(query.toLocaleLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * PRODUCTS_PAGE_SIZE;
+  const paginatedProducts = filtered.slice(startIndex, startIndex + PRODUCTS_PAGE_SIZE);
 
   const capacityTitle = capacityError
     ? 'No pudimos consultar los horarios'
@@ -463,12 +490,12 @@ export function CatalogContainer({
 
   return (
     <div className="space-y-8 font-sans">
-      <section id="catalogo" className="scroll-mt-40">
+      <section id="catalogo" ref={catalogSectionRef} className="scroll-mt-40">
         {/* Barra Superior con Título, Contador, Búsqueda y Botón de Carrito */}
         <CatalogFilterBar
           storeName={storeName}
           query={query}
-          onQueryChange={setQuery}
+          onQueryChange={handleQueryChange}
           totalProductsCount={items.length}
         />
 
@@ -497,7 +524,7 @@ export function CatalogContainer({
                   ...categories,
                 ]}
                 activeCategoryId={category}
-                onSelectCategory={setCategory}
+                onSelectCategory={handleCategoryChange}
               />
             )}
             {items.some((product) => product.categoryId && !product.category) && (
@@ -510,18 +537,28 @@ export function CatalogContainer({
             <div className="mt-6">
               <ProductGrid
                 storeSlug={storeSlug ?? store?.slug}
-                products={filtered}
+                products={paginatedProducts}
                 onAdd={(p) => changeQuantity(p, 1)}
                 cart={cart}
                 storeName={storeName}
                 onResetFilters={() => {
-                  setQuery('');
-                  setCategory('all');
+                  handleQueryChange('');
+                  handleCategoryChange('all');
                 }}
                 isFiltering={isFiltering}
                 pending={pending || loading || cartStore?.id !== store?.id}
                 isFavorite={(productId) => isFavorite(productId)}
                 onToggleFavorite={handleToggleFavorite}
+              />
+
+              <PaginationBar
+                currentPage={safePage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={PRODUCTS_PAGE_SIZE}
+                itemLabel="productos"
+                onPageChange={handlePageChange}
+                ariaLabel="Paginación de productos de la tienda"
               />
             </div>
           </>

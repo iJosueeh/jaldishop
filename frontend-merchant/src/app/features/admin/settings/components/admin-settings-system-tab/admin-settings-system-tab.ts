@@ -56,6 +56,25 @@ export class AdminSettingsSystemTab {
     }
   }
 
+  onCustomerServiceFeeChange(event: Event): void {
+    const val = parseFloat((event.target as HTMLInputElement).value);
+    if (!isNaN(val) && val >= 0 && val <= 100) {
+      this.settingsChange.emit({ customerServiceFeeRate: val });
+    }
+  }
+
+  onCustomerServiceFeeCapChange(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value.trim();
+    if (!raw) {
+      this.settingsChange.emit({ customerServiceFeeCap: null });
+      return;
+    }
+    const val = parseFloat(raw);
+    if (!isNaN(val) && val >= 0) {
+      this.settingsChange.emit({ customerServiceFeeCap: val });
+    }
+  }
+
   onNoticeChange(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.settingsChange.emit({ maintenanceNotice: val });

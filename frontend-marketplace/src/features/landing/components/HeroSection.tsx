@@ -69,7 +69,7 @@ export function HeroSection() {
                 </Button>
               </a>
 
-              <Link href="#tiendas-destacadas" className="w-full sm:w-auto">
+              <Link href="/tiendas" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="lg"

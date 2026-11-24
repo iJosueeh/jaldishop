@@ -88,6 +88,9 @@ public class PaymentEntity {
     @Column(name = "delivery_fee_amount", precision = 12, scale = 2)
     private BigDecimal deliveryFeeAmount;
 
+    @Column(name = "service_fee_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal serviceFeeAmount = BigDecimal.ZERO;
+
     @Column(name = "included_tax_amount", precision = 12, scale = 2)
     private BigDecimal includedTaxAmount;
 
@@ -204,6 +207,8 @@ public class PaymentEntity {
     public void setDiscountCode(String discountCode) { this.discountCode = discountCode; }
     public BigDecimal getDeliveryFeeAmount() { return deliveryFeeAmount; }
     public void setDeliveryFeeAmount(BigDecimal deliveryFeeAmount) { this.deliveryFeeAmount = deliveryFeeAmount; }
+    public BigDecimal getServiceFeeAmount() { return serviceFeeAmount; }
+    public void setServiceFeeAmount(BigDecimal serviceFeeAmount) { this.serviceFeeAmount = serviceFeeAmount != null ? serviceFeeAmount : BigDecimal.ZERO; }
     public BigDecimal getIncludedTaxAmount() { return includedTaxAmount; }
     public void setIncludedTaxAmount(BigDecimal includedTaxAmount) { this.includedTaxAmount = includedTaxAmount; }
 

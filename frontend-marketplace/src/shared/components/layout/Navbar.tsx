@@ -11,7 +11,6 @@ import {
   ArrowRight,
   HelpCircle,
   Sliders,
-  ArrowLeftRight,
   Store,
   User,
   ChevronDown,
@@ -21,6 +20,7 @@ import {
   LayoutDashboard,
   UserCheck,
   Heart,
+  Bell,
 } from 'lucide-react';
 import { Container } from '@/shared/components/ui/Container';
 import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
@@ -29,6 +29,7 @@ import { MobileSearchModal } from './MobileSearchModal';
 import { env } from '@/core/config/env';
 import { StorefrontCart } from '@/features/storefront/cart/StorefrontCart';
 import { useCustomerSession } from '@/features/customer/hooks/useCustomerSession';
+import { useUnreadNotificationsCount } from '@/features/customer/hooks/useCustomerNotifications';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -39,6 +40,7 @@ export function Navbar() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const { isAuthenticated, user, logout } = useCustomerSession();
+  const { unreadCount } = useUnreadNotificationsCount(isAuthenticated);
 
   const loginHref =
     pathname && pathname !== '/login' && pathname !== '/registro'
@@ -125,33 +127,47 @@ export function Navbar() {
 
             {/* Desktop Navigation Links */}
             <nav className="hidden min-[1440px]:flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-medium text-[#99b3ad]">
-              <Link
-                href="/#como-funciona"
-                className="hover:text-[#36f4a4] transition-colors"
-              >
-                ¿Cómo funciona?
-              </Link>
-              <Link
-                href="/#caracteristicas"
-                className="hover:text-[#36f4a4] transition-colors"
-              >
-                Herramientas para tu negocio
-              </Link>
-              <Link
-                href="/#antes-despues"
-                className="hover:text-[#36f4a4] transition-colors"
-              >
-                Antes vs Después
-              </Link>
-              <Link
-                href="/#tiendas-destacadas"
-                className="hover:text-[#36f4a4] transition-colors"
-              >
-                Comercios
-              </Link>
+              {[
+                { href: '/tiendas', label: 'Tiendas' },
+                { href: '/productos', label: 'Productos' },
+                { href: '/como-funciona', label: '¿Cómo funciona?' },
+                { href: '/para-comercios', label: 'Para Comercios' },
+              ].map((navLink) => {
+                const isActive = pathname.startsWith(navLink.href);
+                return (
+                  <Link
+                    key={navLink.href}
+                    href={navLink.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`transition-colors ${
+                      isActive ? 'text-[#36f4a4] font-semibold' : 'hover:text-[#36f4a4]'
+                    }`}
+                  >
+                    {navLink.label}
+                  </Link>
+                );
+              })}
             </nav>
 
             <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+            {isAuthenticated && (
+              <Link
+                href="/mi-jaldishop/notificaciones"
+                aria-label={
+                  unreadCount > 0
+                    ? `Notificaciones (${unreadCount} sin leer)`
+                    : 'Notificaciones'
+                }
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#1e2c31] bg-[#061a1c] text-white hover:border-[#36f4a4]/50 hover:bg-[#072720] transition-colors shrink-0"
+              >
+                <Bell className="w-4 h-4 text-[#99b3ad]" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#36f4a4] text-[#02090a] text-[10px] font-extrabold flex items-center justify-center tabular-nums shadow-sm">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <div className="shrink-0"><StorefrontCart /></div>
 
             {/* Role-Based / Customer-Aware Auth Dropdown (Desktop) */}
@@ -436,24 +452,24 @@ export function Navbar() {
                 <nav className="flex flex-col space-y-1.5 pt-1">
                   {[
                     {
-                      href: '/#como-funciona',
+                      href: '/tiendas',
+                      icon: <Store className="w-4 h-4 text-[#005141]" />,
+                      title: 'Tiendas',
+                    },
+                    {
+                      href: '/productos',
+                      icon: <Package className="w-4 h-4 text-[#ea580c]" />,
+                      title: 'Productos',
+                    },
+                    {
+                      href: '/como-funciona',
                       icon: <HelpCircle className="w-4 h-4 text-[#005141]" />,
                       title: '¿Cómo funciona?',
                     },
                     {
-                      href: '/#caracteristicas',
-                      icon: <Sliders className="w-4 h-4 text-[#ea580c]" />,
-                      title: 'Herramientas para tu negocio',
-                    },
-                    {
-                      href: '/#antes-despues',
-                      icon: <ArrowLeftRight className="w-4 h-4 text-[#feae2c]" />,
-                      title: 'Antes vs Después',
-                    },
-                    {
-                      href: '/#tiendas-destacadas',
-                      icon: <Store className="w-4 h-4 text-[#005141]" />,
-                      title: 'Comercios Destacados',
+                      href: '/para-comercios',
+                      icon: <Sliders className="w-4 h-4 text-[#feae2c]" />,
+                      title: 'Para Comercios',
                     },
                   ].map((item) => (
                     <Link

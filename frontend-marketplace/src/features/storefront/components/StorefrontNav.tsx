@@ -29,8 +29,8 @@ export function StorefrontNav({
   if (categories.length === 0) return null;
 
   return (
-    <div className="sticky top-16 sm:top-20 z-30 bg-white/90 backdrop-blur-md border-y border-stone-200/70 py-2.5 shadow-2xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="sticky top-16 sm:top-20 z-30 rounded-2xl bg-white/95 backdrop-blur-md border border-stone-200/90 px-3 sm:px-4 py-2.5 shadow-xs">
+      <div className="w-full">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 relative">
           {categories.map((cat) => {
             const isSelected = (activeCategoryId ?? selected) === cat.id;

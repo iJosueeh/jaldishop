@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/public-settings").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/public/platform-settings").permitAll()
                         .requestMatchers(
                                 "/api/v1/health",
                                 "/actuator/health",

@@ -26,7 +26,7 @@ export function StoreBanner({ bannerUrl, storeName }: StoreBannerProps) {
   const showImage = bannerUrl && !hasError;
 
   return (
-    <div className="relative w-full h-64 sm:h-80 md:h-96 bg-[#003d31] overflow-hidden">
+    <div className="relative w-full h-64 sm:h-76 lg:h-88 bg-[#003d31] overflow-hidden">
       {/* Portada Fotográfica Luminosa y Nítida */}
       {showImage ? (
         <div className="absolute inset-0">
@@ -55,14 +55,14 @@ export function StoreBanner({ bannerUrl, storeName }: StoreBannerProps) {
       )}
 
       {/* Barra de Navegación Superior Flotante en Píldoras (rounded-full) */}
-      <div className="absolute top-0 inset-x-0 z-20 pt-6 sm:pt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="absolute top-0 inset-x-0 z-20 pt-20 sm:pt-24">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 flex items-center justify-between">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-md text-xs font-semibold text-white border border-white/20 transition-all hover:-translate-x-0.5 shadow-md"
+            href="/tiendas"
+            className="min-h-[40px] inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-xs font-semibold text-white border border-white/20 transition-all hover:-translate-x-0.5 shadow-md"
           >
             <ArrowLeft className="w-4 h-4 text-[#feae2c]" />
-            <span>Volver al Marketplace</span>
+            <span>Explorar tiendas</span>
           </Link>
 
           <div className="flex items-center gap-2">

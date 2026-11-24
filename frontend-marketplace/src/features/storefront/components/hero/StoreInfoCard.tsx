@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import {
   ShieldCheck,
   Star,
-  ArrowRight,
   MessageCircle,
+  Share2,
+  Globe,
 } from 'lucide-react';
 import { PublicStore } from '../../types/storefront.types';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -68,28 +68,46 @@ export function StoreInfoCard({ store }: StoreInfoCardProps) {
           )}
         </div>
 
-        {/* Acciones Rápidas: WhatsApp y Catálogo en Pill Buttons (rounded-full) */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Acciones Rápidas: WhatsApp y Redes Sociales */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {store.instagramUrl && (
+            <a
+              href={store.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Instagram de ${store.name}`}
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-stone-200 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 hover:text-[#005141] transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#ea580c]" />
+              <span>Instagram</span>
+            </a>
+          )}
+
+          {store.facebookUrl && (
+            <a
+              href={store.facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Facebook de ${store.name}`}
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-stone-200 bg-white hover:bg-stone-50 text-xs font-semibold text-stone-700 hover:text-[#005141] transition-colors"
+            >
+              <Globe className="w-3.5 h-3.5 text-[#005141]" />
+              <span>Facebook</span>
+            </a>
+          )}
+
           {whatsappUrl && (
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#005141] border border-emerald-200/80 text-xs sm:text-sm font-bold shadow-xs transition-all hover:-translate-y-0.5 active:scale-95"
+              className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#072720] hover:bg-[#005141] text-white text-xs sm:text-sm font-bold shadow-xs transition-all hover:-translate-y-0.5 active:scale-95"
               title="Escribir por WhatsApp"
             >
-              <MessageCircle className="w-4 h-4 text-[#005141]" />
+              <MessageCircle className="w-4 h-4 text-[#36f4a4]" />
               <span>WhatsApp</span>
             </a>
           )}
-
-          <Link
-            href="#catalogo"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:brightness-105 text-white text-xs sm:text-sm font-bold shadow-md shadow-orange-950/20 transition-all hover:-translate-y-0.5 active:scale-95"
-          >
-            <span>Ver productos</span>
-            <ArrowRight className="w-4 h-4 text-white" />
-          </Link>
         </div>
       </div>
 

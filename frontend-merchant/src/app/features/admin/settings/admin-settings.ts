@@ -94,6 +94,20 @@ export class AdminSettings implements OnInit {
         after: `${current.marketplaceCommissionRate}%`,
       });
     }
+    if ((current.customerServiceFeeRate ?? 0) !== (base.customerServiceFeeRate ?? 0)) {
+      diffs.push({
+        label: 'Tarifa de Servicio al Comprador',
+        before: `${base.customerServiceFeeRate ?? 0}%`,
+        after: `${current.customerServiceFeeRate ?? 0}%`,
+      });
+    }
+    if ((current.customerServiceFeeCap ?? null) !== (base.customerServiceFeeCap ?? null)) {
+      diffs.push({
+        label: 'Tope de Tarifa al Comprador',
+        before: base.customerServiceFeeCap != null ? `S/ ${base.customerServiceFeeCap}` : 'Sin tope',
+        after: current.customerServiceFeeCap != null ? `S/ ${current.customerServiceFeeCap}` : 'Sin tope',
+      });
+    }
 
     if (diffs.length > 0) {
       this.pendingDiffs.set(diffs);

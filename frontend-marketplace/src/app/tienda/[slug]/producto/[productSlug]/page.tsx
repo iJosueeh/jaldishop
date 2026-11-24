@@ -7,11 +7,21 @@ interface ProductDetailPageProps {
   params: Promise<{ slug: string; productSlug: string }>;
 }
 
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { slug, productSlug } = await params;
   const product = await storeService.getStoreProductBySlug(slug, productSlug).catch(() => null);
   return product
-    ? { title: `${product.name} | JaldiShop`, description: product.description }
+    ? {
+        title: `${product.name} | JaldiShop`,
+        description: product.description,
+        openGraph: {
+          title: `${product.name} — JaldiShop`,
+          description: product.description,
+          images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
+        },
+      }
     : { title: 'Producto no encontrado | JaldiShop' };
 }
 
@@ -24,10 +34,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   if (!store || !product) notFound();
 
-  const [storeSettings, reviewsSummary] = await Promise.all([
+  const [storeSettings, reviewsSummary, storeProducts] = await Promise.all([
     storeService.getPublicStoreSettings(store.id),
     storeService.getPublicProductReviews(product.id),
+    storeService.getStoreProductsBySlug(slug),
   ]);
+
+  const relatedProducts = storeService.selectRelatedProducts(storeProducts, product, 8);
 
   return (
     <ProductDetailView
@@ -35,6 +48,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       product={product}
       storeSettings={storeSettings}
       reviewsSummary={reviewsSummary}
+      relatedProducts={relatedProducts}
     />
   );
 }

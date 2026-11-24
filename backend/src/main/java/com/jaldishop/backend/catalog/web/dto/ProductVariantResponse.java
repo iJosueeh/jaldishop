@@ -13,8 +13,38 @@ public record ProductVariantResponse(
         BigDecimal priceAmount,
         String priceCurrency,
         boolean tracksInventory,
+        Integer availableQuantity,
         String status,
         List<VariantAttributeDto> attributes,
         Instant createdAt,
         Instant updatedAt
-) {}
+) {
+    public ProductVariantResponse(
+            UUID id,
+            UUID productId,
+            String presentationName,
+            String sku,
+            BigDecimal priceAmount,
+            String priceCurrency,
+            boolean tracksInventory,
+            String status,
+            List<VariantAttributeDto> attributes,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                productId,
+                presentationName,
+                sku,
+                priceAmount,
+                priceCurrency,
+                tracksInventory,
+                null,
+                status,
+                attributes,
+                createdAt,
+                updatedAt
+        );
+    }
+}

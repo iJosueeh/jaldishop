@@ -52,6 +52,9 @@ public class PaymentPreferencePreparationService {
     private final java.time.Clock clock;
     private final AuthenticatedRateLimits rateLimits;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.jaldishop.backend.identity.application.port.PlatformSettingsProvider platformSettingsProvider;
+
     @org.springframework.beans.factory.annotation.Autowired
     public PaymentPreferencePreparationService(
             CapacityReservationRepository capacityReservationRepository,
@@ -266,8 +269,19 @@ public class PaymentPreferencePreparationService {
 
         List<CheckoutItemSnapshot> itemSnapshots = snapshotAssembler.assemble(cart, store.getId());
         String currency = itemSnapshots.isEmpty() ? "PEN" : itemSnapshots.getFirst().currency();
+        java.math.BigDecimal serviceFeeRate = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal serviceFeeCap = null;
+        if (platformSettingsProvider != null) {
+            var platformSettings = platformSettingsProvider.getSettings();
+            if (platformSettings != null) {
+                if (platformSettings.customerServiceFeeRate() != null) {
+                    serviceFeeRate = platformSettings.customerServiceFeeRate();
+                }
+                serviceFeeCap = platformSettings.customerServiceFeeCap();
+            }
+        }
         CheckoutPricing pricing = CheckoutPricing.calculate(
-                itemSnapshots, command.fulfillmentType(), store.getDeliveryFeeAmount(), store.getTaxRate(), currency
+                itemSnapshots, command.fulfillmentType(), store.getDeliveryFeeAmount(), store.getTaxRate(), serviceFeeRate, serviceFeeCap, currency
         );
 
         String itemsSnapshotJson;
@@ -301,6 +315,7 @@ public class PaymentPreferencePreparationService {
                 pricing.discountAmount(),
                 pricing.discountCode(),
                 pricing.deliveryFeeAmount(),
+                pricing.serviceFeeAmount(),
                 pricing.includedTaxAmount(),
                 itemsSnapshotJson
         );

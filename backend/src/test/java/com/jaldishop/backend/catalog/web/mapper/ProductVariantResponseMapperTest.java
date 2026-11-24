@@ -48,10 +48,25 @@ class ProductVariantResponseMapperTest {
         assertEquals(new BigDecimal("12.50"), response.priceAmount());
         assertEquals("PEN", response.priceCurrency());
         assertTrue(response.tracksInventory());
+        assertNull(response.availableQuantity());
         assertEquals("ACTIVE", response.status());
         assertEquals(1, response.attributes().size());
         assertEquals("Tamano", response.attributes().get(0).name());
         assertEquals("Pequeno", response.attributes().get(0).value());
+    }
+
+    @Test
+    @DisplayName("Should include availableQuantity when tracksInventory is true")
+    void shouldIncludeAvailableQuantityWhenTracked() {
+        ProductVariant tracked = ProductVariant.create(
+                UUID.randomUUID(), "Caja", "SKU-CAJA", new BigDecimal("25.00"), "PEN", true, List.of()
+        );
+        ProductVariant untracked = ProductVariant.create(
+                UUID.randomUUID(), "Bajo pedido", "SKU-PED", new BigDecimal("30.00"), "PEN", false, List.of()
+        );
+
+        assertEquals(7, mapper.toResponse(tracked, 7).availableQuantity());
+        assertNull(mapper.toResponse(untracked, 7).availableQuantity());
     }
 
     @Test

@@ -62,6 +62,8 @@ export class AdminService implements OnDestroy {
     maintenanceMode: false,
     maintenanceNotice: 'La plataforma se encuentra en mantenimiento programado. Volveremos pronto.',
     marketplaceCommissionRate: 5.0,
+    customerServiceFeeRate: 0.0,
+    customerServiceFeeCap: null,
   });
   readonly isLoadingSettings = signal<boolean>(false);
   readonly isSavingSettings = signal<boolean>(false);
@@ -740,7 +742,7 @@ export class AdminService implements OnDestroy {
       this.isLoadingSettings.set(true);
     }
 
-    return this.http.get<AdminPlatformSettings>(`${environment.apiUrl}/api/v1/admin/settings`).pipe(
+    return this.http.get<AdminPlatformSettings>(`${environment.apiUrl}/admin/settings`).pipe(
       tap((data) => {
         this.settings.set(data);
         this.isLoadingSettings.set(false);
@@ -759,7 +761,7 @@ export class AdminService implements OnDestroy {
     const previous = { ...current };
     this.isSavingSettings.set(true);
 
-    this.http.put<AdminPlatformSettings>(`${environment.apiUrl}/api/v1/admin/settings`, current).pipe(
+    this.http.put<AdminPlatformSettings>(`${environment.apiUrl}/admin/settings`, current).pipe(
       tap((saved) => {
         this.settings.set(saved);
         this.isSavingSettings.set(false);

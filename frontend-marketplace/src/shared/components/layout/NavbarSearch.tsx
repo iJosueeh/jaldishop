@@ -290,13 +290,16 @@ export function NavbarSearch({
                 <button
                   type="button"
                   onClick={() => {
+                    const target = query.trim()
+                      ? `/tiendas?q=${encodeURIComponent(query.trim())}`
+                      : "/tiendas";
                     setIsOpen(false);
                     onNavigate?.();
-                    router.push("/#tiendas-destacadas");
+                    router.push(target);
                   }}
                   className="text-[11px] font-bold text-[#005141] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
                 >
-                  <span>Ver comercios destacados</span>
+                  <span>{query.trim() ? 'Ver todos los resultados' : 'Explorar todas las tiendas'}</span>
                   <ArrowRight className="w-3 h-3" />
                 </button>
               </div>

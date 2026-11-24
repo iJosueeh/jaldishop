@@ -11,14 +11,14 @@ describe('Footer Component', () => {
     expect(screen.getByText(/Tiendas y pedidos activos en tiempo real/i)).toBeInTheDocument();
   });
 
-  it('renders official store_categories and merchant links', () => {
+  it('renders marketplace directory and merchant links', () => {
     render(<Footer />);
 
     expect(screen.getByText('Explorar Tiendas')).toBeInTheDocument();
-    expect(screen.getByText('Restaurantes & Cafeterías')).toBeInTheDocument();
-    expect(screen.getByText('Moda, Textil & Calzado')).toBeInTheDocument();
-    expect(screen.getByText('Hogar, Decoración & Cerámica')).toBeInTheDocument();
-    expect(screen.getByText('Floristerías & Arreglos')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Todas las Tiendas' })).toHaveAttribute('href', '/tiendas');
+    expect(screen.getByRole('link', { name: 'Catálogo de Productos' })).toHaveAttribute('href', '/productos');
+    expect(screen.getByRole('link', { name: 'Con Delivery' })).toHaveAttribute('href', '/tiendas?entrega=delivery');
+    expect(screen.getByRole('link', { name: 'Retiro en Tienda' })).toHaveAttribute('href', '/tiendas?entrega=pickup');
     expect(screen.getByText('Para Comercios')).toBeInTheDocument();
     expect(screen.getByText('Portal MYPE')).toBeInTheDocument();
   });

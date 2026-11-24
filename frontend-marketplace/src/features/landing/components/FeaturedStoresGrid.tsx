@@ -1,123 +1,20 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, Store } from 'lucide-react';
 import { Container } from '@/shared/components/ui/Container';
 import { Button } from '@/shared/components/ui/Button';
 import { storeService } from '@/features/storefront/services/storeService';
 import { PublicStore } from '@/features/storefront/types/storefront.types';
 import { StorePeekSlider } from './StorePeekSlider';
+import { env } from '@/core/config/env';
 
 interface FeaturedStoresGridProps {
   initialStores?: PublicStore[];
 }
 
-const CURATED_DEFAULT_STORES: PublicStore[] = [
-  {
-    id: 'store-01',
-    name: 'Panadería Don Pepe',
-    slug: 'panaderia-don-pepe',
-    category: 'Panadería & Masa Madre',
-    tagline: 'Fermentación natural de 24 horas y horneado artesanal al alba en Miraflores.',
-    description: 'Fermentación natural de 24 horas y horneado artesanal al alba en Miraflores.',
-    bannerUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
-    iconEmoji: '🥐',
-    logoBg: 'bg-[#072720]',
-    rating: 4.9,
-    reviewsCount: 148,
-    preparationTimeMinutes: 20,
-    deliveryFee: 5.0,
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    status: 'ACTIVE',
-    badge: 'Más Pedido',
-    badgeVariant: 'amber',
-  },
-  {
-    id: 'store-02',
-    name: 'Dulce Amor Repostería',
-    slug: 'dulce-amor',
-    category: 'Pastelería & Postres',
-    tagline: 'Tortas artesanales de autor, alfajores de maicena y bocaditos para celebraciones.',
-    description: 'Tortas artesanales de autor, alfajores de maicena y bocaditos para celebraciones.',
-    bannerUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop',
-    iconEmoji: '🍰',
-    logoBg: 'bg-[#ea580c]',
-    rating: 4.8,
-    reviewsCount: 94,
-    preparationTimeMinutes: 30,
-    deliveryFee: 6.0,
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    status: 'ACTIVE',
-    badge: 'Horneado Hoy',
-    badgeVariant: 'terracotta',
-  },
-  {
-    id: 'store-03',
-    name: 'Café Villa Rica Barista',
-    slug: 'cafe-villa-rica',
-    category: 'Cafetería de Especialidad',
-    tagline: 'Granos de altura 100% arábica tostados semanalmente y cold brew embotellado.',
-    description: 'Granos de altura 100% arábica tostados semanalmente y cold brew embotellado.',
-    bannerUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=800&auto=format&fit=crop',
-    iconEmoji: '☕',
-    logoBg: 'bg-stone-900',
-    rating: 5.0,
-    reviewsCount: 210,
-    preparationTimeMinutes: 10,
-    deliveryFee: 0,
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    status: 'ACTIVE',
-    badge: '100% Arábica',
-    badgeVariant: 'jade',
-  },
-  {
-    id: 'store-04',
-    name: 'La Focacceria Urbana',
-    slug: 'la-focacceria',
-    category: 'Pizzas & Masas Italianas',
-    tagline: 'Focaccias crujientes con romero fresco, aceite de oliva virgen extra y mortadela.',
-    description: 'Focaccias crujientes con romero fresco, aceite de oliva virgen extra y mortadela.',
-    bannerUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop',
-    iconEmoji: '🍕',
-    logoBg: 'bg-[#072720]',
-    rating: 4.9,
-    reviewsCount: 82,
-    preparationTimeMinutes: 25,
-    deliveryFee: 5.5,
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    status: 'ACTIVE',
-    badge: 'Receta Romana',
-    badgeVariant: 'amber',
-  },
-  {
-    id: 'store-05',
-    name: 'El Taller del Bagel',
-    slug: 'el-taller-del-bagel',
-    category: 'Desayunos & Brunches',
-    tagline: 'Bagels hervidos estilo Montreal rellenos de salmón curado, queso crema y eneldo.',
-    description: 'Bagels hervidos estilo Montreal rellenos de salmón curado, queso crema y eneldo.',
-    bannerUrl: 'https://images.unsplash.com/photo-1585478259715-876a6a81ae08?q=80&w=800&auto=format&fit=crop',
-    iconEmoji: '🥯',
-    logoBg: 'bg-[#ea580c]',
-    rating: 4.8,
-    reviewsCount: 67,
-    preparationTimeMinutes: 15,
-    deliveryFee: 4.5,
-    deliveryEnabled: true,
-    pickupEnabled: true,
-    status: 'ACTIVE',
-    badge: 'Nuevo en Jaldi',
-    badgeVariant: 'jade',
-  },
-];
-
 export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridProps) {
-  const fetchedStores = initialStores ?? (await storeService.getFeaturedStores());
-  const isDemo = fetchedStores.length === 0;
-  const storesToDisplay = isDemo ? CURATED_DEFAULT_STORES : fetchedStores;
+  const stores = initialStores ?? (await storeService.getFeaturedStores());
+  const hasStores = stores.length > 0;
 
   return (
     <section id="tiendas-destacadas" className="py-20 sm:py-28 bg-[#fbfcfb] relative overflow-hidden scroll-mt-20 sm:scroll-mt-24">
@@ -127,32 +24,71 @@ export async function FeaturedStoresGrid({ initialStores }: FeaturedStoresGridPr
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-100 border border-stone-200 shadow-xs text-xs font-semibold text-[#072720] uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              {isDemo ? 'Tiendas de demostración' : 'Explora negocios locales'}
+              Explora negocios locales
             </div>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-[#1c1917]">
-              {isDemo ? 'Así puede verse tu tienda' : 'Comercios destacados en JaldiShop'}
+              Comercios destacados en JaldiShop
             </h2>
             <p className="text-sm sm:text-base text-stone-600 max-w-xl">
-              {isDemo
-                ? 'Conoce ejemplos de catálogos para negocios bajo pedido. Los comercios, productos y datos que ves aquí son ilustrativos.'
-                : 'Descubre panaderías, reposterías y negocios locales. Consulta sus productos y horarios para organizar tu próxima compra.'}
+              Descubre panaderías, reposterías y negocios locales. Consulta sus productos y horarios para organizar tu próxima compra.
             </p>
           </div>
 
-          <Link href={`/tienda/${storesToDisplay[0].slug}`}>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white border-stone-200 hover:bg-stone-50 text-[#02090a] font-medium shadow-xs cursor-pointer rounded-full px-5 py-2.5"
-              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-            >
-              {isDemo ? 'Ver una demostración' : 'Explorar una tienda'}
-            </Button>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/tiendas">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white border-stone-200 hover:bg-stone-50 text-[#02090a] font-medium shadow-xs cursor-pointer rounded-full px-5 py-2.5"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+              >
+                Ver todas las tiendas
+              </Button>
+            </Link>
+            {hasStores && (
+              <Link href={`/tienda/${stores[0].slug}`}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="font-medium shadow-xs cursor-pointer rounded-full px-5 py-2.5"
+                  rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                >
+                  Explorar una tienda
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
-        {/* Peek Slider Carousel Component with 12px card geometry */}
-        <StorePeekSlider stores={storesToDisplay} isDemo={isDemo} />
+        {hasStores ? (
+          <StorePeekSlider stores={stores} />
+        ) : (
+          <div
+            role="status"
+            className="rounded-2xl border border-stone-200/90 bg-white p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-4 shadow-xs"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/70 text-[#005141] flex items-center justify-center mx-auto">
+              <Store className="w-6 h-6" />
+            </div>
+            <h3 className="font-display text-xl font-bold text-stone-900">
+              Aún no hay comercios destacados disponibles
+            </h3>
+            <p className="text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
+              Los negocios locales de tu comunidad aparecerán aquí en cuanto publiquen su catálogo y horarios de atención.
+            </p>
+            <div className="pt-2">
+              <a
+                href={env.merchantUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#005141] hover:bg-[#072720] text-white text-xs sm:text-sm font-semibold px-5 py-2.5 transition-colors"
+              >
+                <span>¿Tienes un comercio? Regístralo aquí</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        )}
       </Container>
     </section>
   );

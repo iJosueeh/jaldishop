@@ -48,6 +48,8 @@ export interface CheckoutPricing {
   discountAmount: number;
   discountCode?: string | null;
   deliveryFeeAmount: number;
+  serviceFeeRate?: number | null;
+  serviceFeeAmount?: number | null;
   taxRate?: number | null;
   includedTaxAmount: number;
   totalAmount: number;

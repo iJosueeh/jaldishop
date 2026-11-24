@@ -271,6 +271,19 @@ export const checkoutService = {
       );
     }
 
+    if (data.orderCreated && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('jaldishop:order-completed'));
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const channel = new BroadcastChannel('jaldishop-stock-sync');
+          channel.postMessage({ type: 'ORDER_COMPLETED' });
+          channel.close();
+        } catch {
+          // Ignore BroadcastChannel errors in unsupported contexts
+        }
+      }
+    }
+
     return data as CustomerPaymentStatusResponse;
   },
 

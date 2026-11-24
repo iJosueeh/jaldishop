@@ -94,6 +94,8 @@ export interface AdminPlatformSettings {
   maintenanceMode: boolean;
   maintenanceNotice: string;
   marketplaceCommissionRate: number;
+  customerServiceFeeRate?: number;
+  customerServiceFeeCap?: number | null;
   version?: number;
   updatedAt?: string;
 }

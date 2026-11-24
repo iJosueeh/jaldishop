@@ -4,10 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { useCustomerProfile } from '@/features/customer/hooks/useCustomerProfile';
 import { useCustomerOrders } from '@/features/customer/hooks/useCustomerOrders';
+import { useCustomerAnalytics } from '@/features/customer/hooks/useCustomerAnalytics';
 import { ActiveOrderCard } from '@/features/customer/components/ActiveOrderCard';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { formatCurrency } from '@/shared/utils/formatters';
 import {
   Package,
   Clock,
@@ -30,6 +32,7 @@ export function CustomerHomeView() {
     pastOrders,
     isLoading: isOrdersLoading,
   } = useCustomerOrders();
+  const { summary: analyticsSummary, isLoading: isAnalyticsLoading } = useCustomerAnalytics();
 
   const isInitialLoading = isProfileLoading && !profile;
 
@@ -237,14 +240,22 @@ export function CustomerHomeView() {
         {/* Columna Lateral (1 Columna) */}
         <div className="space-y-6">
           {/* Métricas Reales del Comprador */}
-          <div className="p-5 rounded-2xl bg-white border border-stone-200/90 shadow-xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4 text-[#005141]" />
-              <span>Resumen de compras</span>
-            </h3>
+          <div className="p-5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-[#005141]" />
+                <span>Resumen de compras</span>
+              </h3>
+              <Link
+                href="/mi-jaldishop/estadisticas"
+                className="text-[11px] font-bold text-[#005141] hover:underline"
+              >
+                Ver estadísticas
+              </Link>
+            </div>
             <div className="grid grid-cols-2 gap-3 text-center">
               <div className="p-3 bg-stone-50 rounded-xl">
-                <span className="block text-2xl font-bold text-stone-900">
+                <span className="block text-2xl font-bold text-stone-900 tabular-nums">
                   {isOrdersLoading && !activeOrders.length ? '-' : activeOrders.length}
                 </span>
                 <span className="text-[11px] text-stone-500 font-medium">
@@ -252,13 +263,21 @@ export function CustomerHomeView() {
                 </span>
               </div>
               <div className="p-3 bg-stone-50 rounded-xl">
-                <span className="block text-2xl font-bold text-stone-900">
+                <span className="block text-2xl font-bold text-stone-900 tabular-nums">
                   {isOrdersLoading && !pastOrders.length ? '-' : pastOrders.length}
                 </span>
                 <span className="text-[11px] text-stone-500 font-medium">
                   {pastOrders.length === 1 ? 'Anterior' : 'Anteriores'}
                 </span>
               </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[#faf7f2] border border-stone-200/70 flex items-center justify-between text-xs">
+              <span className="text-stone-600 font-medium">Gasto (últimos 30 días)</span>
+              <span className="font-bold text-[#005141] tabular-nums">
+                {isAnalyticsLoading && !analyticsSummary
+                  ? '—'
+                  : formatCurrency(Number(analyticsSummary?.spending?.totalSpentAmount ?? 0), 'PEN')}
+              </span>
             </div>
           </div>
 

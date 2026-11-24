@@ -35,6 +35,12 @@ public class PlatformSettingsEntity {
     @Column(name = "marketplace_commission_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal marketplaceCommissionRate;
 
+    @Column(name = "customer_service_fee_rate", nullable = false, precision = 5, scale = 2)
+    private BigDecimal customerServiceFeeRate = BigDecimal.ZERO;
+
+    @Column(name = "customer_service_fee_cap", precision = 12, scale = 2)
+    private BigDecimal customerServiceFeeCap;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -48,14 +54,29 @@ public class PlatformSettingsEntity {
 
     public PlatformSettingsEntity(Integer id, boolean allowMerchantRegistration, boolean requireStoreApproval,
                                   boolean maintenanceMode, String maintenanceNotice,
-                                  BigDecimal marketplaceCommissionRate, Long version) {
+                                  BigDecimal marketplaceCommissionRate, BigDecimal customerServiceFeeRate,
+                                  BigDecimal customerServiceFeeCap, Long version) {
         this.id = id != null ? id : 1;
         this.allowMerchantRegistration = allowMerchantRegistration;
         this.requireStoreApproval = requireStoreApproval;
         this.maintenanceMode = maintenanceMode;
         this.maintenanceNotice = maintenanceNotice;
         this.marketplaceCommissionRate = marketplaceCommissionRate;
+        this.customerServiceFeeRate = customerServiceFeeRate != null ? customerServiceFeeRate : BigDecimal.ZERO;
+        this.customerServiceFeeCap = customerServiceFeeCap;
         this.version = version != null ? version : 0L;
+    }
+
+    public PlatformSettingsEntity(Integer id, boolean allowMerchantRegistration, boolean requireStoreApproval,
+                                  boolean maintenanceMode, String maintenanceNotice,
+                                  BigDecimal marketplaceCommissionRate, BigDecimal customerServiceFeeRate, Long version) {
+        this(id, allowMerchantRegistration, requireStoreApproval, maintenanceMode, maintenanceNotice, marketplaceCommissionRate, customerServiceFeeRate, null, version);
+    }
+
+    public PlatformSettingsEntity(Integer id, boolean allowMerchantRegistration, boolean requireStoreApproval,
+                                  boolean maintenanceMode, String maintenanceNotice,
+                                  BigDecimal marketplaceCommissionRate, Long version) {
+        this(id, allowMerchantRegistration, requireStoreApproval, maintenanceMode, maintenanceNotice, marketplaceCommissionRate, BigDecimal.ZERO, null, version);
     }
 
     public PlatformSettings toDomain() {
@@ -66,6 +87,8 @@ public class PlatformSettingsEntity {
                 this.maintenanceMode,
                 this.maintenanceNotice,
                 this.marketplaceCommissionRate,
+                this.customerServiceFeeRate != null ? this.customerServiceFeeRate : BigDecimal.ZERO,
+                this.customerServiceFeeCap,
                 this.version,
                 this.createdAt,
                 this.updatedAt
@@ -80,6 +103,8 @@ public class PlatformSettingsEntity {
                 settings.maintenanceMode(),
                 settings.maintenanceNotice(),
                 settings.marketplaceCommissionRate(),
+                settings.customerServiceFeeRate(),
+                settings.customerServiceFeeCap(),
                 settings.version()
         );
         entity.createdAt = settings.createdAt();

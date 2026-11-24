@@ -81,4 +81,37 @@ class CheckoutPricingTest {
         assertThat(pricing.includedTaxAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(pricing.currency()).isEqualTo("PEN");
     }
+
+    @Test
+    @DisplayName("Debe calcular tarifa de servicio al comprador y respetar tope máximo")
+    void shouldCalculateServiceFeeWithAndWithoutCap() {
+        CheckoutItemSnapshot item = new CheckoutItemSnapshot(
+                UUID.randomUUID(), UUID.randomUUID(), "Pack", "Caja", "SKU3", null,
+                1, new BigDecimal("500.00"), "PEN", new BigDecimal("500.00"), true
+        );
+
+        CheckoutPricing uncapped = CheckoutPricing.calculate(
+                List.of(item),
+                CheckoutFulfillmentType.DELIVERY,
+                new BigDecimal("5.00"),
+                new BigDecimal("18.00"),
+                new BigDecimal("5.00"),
+                null,
+                "PEN"
+        );
+        assertThat(uncapped.serviceFeeAmount()).isEqualByComparingTo(new BigDecimal("25.00"));
+        assertThat(uncapped.totalAmount()).isEqualByComparingTo(new BigDecimal("530.00"));
+
+        CheckoutPricing capped = CheckoutPricing.calculate(
+                List.of(item),
+                CheckoutFulfillmentType.DELIVERY,
+                new BigDecimal("5.00"),
+                new BigDecimal("18.00"),
+                new BigDecimal("5.00"),
+                new BigDecimal("10.00"),
+                "PEN"
+        );
+        assertThat(capped.serviceFeeAmount()).isEqualByComparingTo(new BigDecimal("10.00"));
+        assertThat(capped.totalAmount()).isEqualByComparingTo(new BigDecimal("515.00"));
+    }
 }
