@@ -13,6 +13,7 @@ import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.identity.web.dto.*;
 import com.jaldishop.backend.identity.web.mapper.AdminUserResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class AdminUserController {
     private final UpdateUserRolesService updateUserRolesService;
     private final AdminCreateUserService adminCreateUserService;
     private final AdminCreateMerchantService adminCreateMerchantService;
+    private final AdminDeleteUserService adminDeleteUserService;
     private final AdminUserResponseMapper responseMapper;
 
     public AdminUserController(
@@ -44,7 +46,18 @@ public class AdminUserController {
             UpdateUserRolesService updateUserRolesService,
             AdminUserResponseMapper responseMapper
     ) {
-        this(getAdminUsersService, changeUserStatusService, updateUserRolesService, null, null, responseMapper);
+        this(getAdminUsersService, changeUserStatusService, updateUserRolesService, null, null, null, responseMapper);
+    }
+
+    public AdminUserController(
+            GetAdminUsersService getAdminUsersService,
+            ChangeUserStatusService changeUserStatusService,
+            UpdateUserRolesService updateUserRolesService,
+            AdminCreateUserService adminCreateUserService,
+            AdminCreateMerchantService adminCreateMerchantService,
+            AdminUserResponseMapper responseMapper
+    ) {
+        this(getAdminUsersService, changeUserStatusService, updateUserRolesService, adminCreateUserService, adminCreateMerchantService, null, responseMapper);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -54,6 +67,7 @@ public class AdminUserController {
             UpdateUserRolesService updateUserRolesService,
             AdminCreateUserService adminCreateUserService,
             AdminCreateMerchantService adminCreateMerchantService,
+            AdminDeleteUserService adminDeleteUserService,
             AdminUserResponseMapper responseMapper
     ) {
         this.getAdminUsersService = getAdminUsersService;
@@ -61,6 +75,7 @@ public class AdminUserController {
         this.updateUserRolesService = updateUserRolesService;
         this.adminCreateUserService = adminCreateUserService;
         this.adminCreateMerchantService = adminCreateMerchantService;
+        this.adminDeleteUserService = adminDeleteUserService;
         this.responseMapper = responseMapper;
     }
 
@@ -158,5 +173,18 @@ public class AdminUserController {
         UUID adminId = principal != null ? principal.userId() : null;
         User user = updateUserRolesService.execute(id, request.roles(), adminId);
         return ResponseEntity.ok(responseMapper.toDetail(user));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResourceResponse> deleteUser(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal JwtPrincipal principal
+    ) {
+        UUID adminId = principal != null ? principal.userId() : null;
+        adminDeleteUserService.execute(id, adminId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                id,
+                "El usuario fue eliminado permanentemente de la plataforma."
+        ));
     }
 }

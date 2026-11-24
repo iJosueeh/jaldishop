@@ -583,6 +583,15 @@
                         >
                           {{ variant.status === 'ACTIVE' ? 'Pausar' : 'Reactivar' }}
                         </button>
+                        <button
+                          type="button"
+                          (click)="requestDeleteVariant(variant)"
+                          class="p-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
+                          title="Eliminar formato"
+                          aria-label="Eliminar formato"
+                        >
+                          <ng-icon name="matDeleteOutline" class="text-sm" />
+                        </button>
                       </div>
                     </div>
                   }
@@ -825,8 +834,18 @@
 
     <!-- Pie del Drawer -->
     <div
-      class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container-low/90 backdrop-blur-xs flex items-center justify-end gap-3 shrink-0"
+      class="p-4 sm:p-5 border-t border-outline-variant/20 bg-surface-container-low/90 backdrop-blur-xs flex items-center justify-between gap-3 shrink-0"
     >
+      <button
+        type="button"
+        (click)="requestDeleteProduct()"
+        [disabled]="isSavingGeneral() || isSavingVariant() || isDeletingTarget()"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-40"
+      >
+        <ng-icon name="matDeleteOutline" class="text-sm" />
+        <span>Eliminar producto</span>
+      </button>
+
       <button
         type="button"
         (click)="handleClose()"
@@ -837,4 +856,19 @@
       </button>
     </div>
   </aside>
+
+  <app-destructive-action-modal
+    [isOpen]="!!deleteTarget()"
+    [title]="deleteTarget()?.type === 'product' ? '¿Eliminar producto permanentemente?' : '¿Eliminar formato permanentemente?'"
+    [message]="deleteTarget()?.type === 'product'
+      ? 'Si este producto no tiene órdenes, reservas ni reseñas, se eliminará del catálogo junto con sus variantes e imágenes.'
+      : 'Si este formato no tiene órdenes ni reservas y existe otra variante activa, se eliminará permanentemente.'"
+    [isLoading]="isDeletingTarget()"
+    [errorStatus]="deleteErrorStatus()"
+    [errorMessage]="deleteErrorMessage()"
+    [conflictMetadata]="deleteConflictMetadata()"
+    (confirm)="confirmDeleteTarget()"
+    (fallback)="fallbackDeactivateTarget()"
+    (cancel)="cancelDeleteTarget()"
+  />
 }

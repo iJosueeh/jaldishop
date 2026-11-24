@@ -1,17 +1,21 @@
 package com.jaldishop.backend.store.web.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
 public record StoreSettingsRequest(
         @NotBlank(message = "La política de cancelación no puede estar vacía")
+        @Size(max = 2000, message = "La política de cancelación no puede exceder 2000 caracteres")
         String cancellationPolicy,
 
         @NotBlank(message = "La política de reembolso no puede estar vacía")
+        @Size(max = 2000, message = "La política de reembolso no puede exceder 2000 caracteres")
         String refundPolicy,
 
         boolean requireCustomerDni,
@@ -33,6 +37,12 @@ public record StoreSettingsRequest(
         @Max(value = 100, message = "El volumen debe estar entre 0 y 100")
         int soundVolume,
 
-        boolean lowStockVisualAlert
+        boolean lowStockVisualAlert,
+
+        Long version
 ) {
+    @AssertTrue(message = "Debes mantener habilitado al menos un método de pago (Online o Contra Entrega)")
+    public boolean isAnyPaymentMethodEnabled() {
+        return onlinePaymentsEnabled || cashOnDeliveryEnabled;
+    }
 }

@@ -4,15 +4,19 @@ import com.jaldishop.backend.catalog.application.command.CreateCategoryCommand;
 import com.jaldishop.backend.catalog.application.service.CreateCategoryService;
 import com.jaldishop.backend.catalog.application.service.GetCategoriesService;
 import com.jaldishop.backend.catalog.application.command.UpdateCategoryCommand;
+import com.jaldishop.backend.catalog.application.service.ManageCategoryLifecycleService;
 import com.jaldishop.backend.catalog.application.service.UpdateCategoryService;
 import com.jaldishop.backend.catalog.domain.model.Category;
 import com.jaldishop.backend.catalog.web.dto.CategoryResponse;
 import com.jaldishop.backend.catalog.web.dto.CreateCategoryRequest;
+import com.jaldishop.backend.catalog.web.dto.UpdateCatalogStatusRequest;
 import com.jaldishop.backend.catalog.web.dto.UpdateCategoryRequest;
 import com.jaldishop.backend.catalog.web.mapper.CategoryResponseMapper;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +36,7 @@ public class MerchantCategoryController {
     private final GetCategoriesService getCategoriesService;
     private final StoreContextService storeContextService;
     private final CategoryResponseMapper responseMapper;
+    private final ManageCategoryLifecycleService lifecycleService;
 
     public MerchantCategoryController(
             CreateCategoryService createCategoryService,
@@ -40,11 +45,24 @@ public class MerchantCategoryController {
             StoreContextService storeContextService,
             CategoryResponseMapper responseMapper
     ) {
+        this(createCategoryService, updateCategoryService, getCategoriesService, storeContextService, responseMapper, null);
+    }
+
+    @Autowired
+    public MerchantCategoryController(
+            CreateCategoryService createCategoryService,
+            UpdateCategoryService updateCategoryService,
+            GetCategoriesService getCategoriesService,
+            StoreContextService storeContextService,
+            CategoryResponseMapper responseMapper,
+            ManageCategoryLifecycleService lifecycleService
+    ) {
         this.createCategoryService = createCategoryService;
         this.updateCategoryService = updateCategoryService;
         this.getCategoriesService = getCategoriesService;
         this.storeContextService = storeContextService;
         this.responseMapper = responseMapper;
+        this.lifecycleService = lifecycleService;
     }
 
     @PostMapping
@@ -104,5 +122,31 @@ public class MerchantCategoryController {
         );
         Category updated = updateCategoryService.execute(command);
         return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @PatchMapping("/{categoryId}/status")
+    public ResponseEntity<CategoryResponse> updateCategoryStatus(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID categoryId,
+            @Valid @RequestBody UpdateCatalogStatusRequest request
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        Category updated = lifecycleService.updateStatus(categoryId, storeId, request.status());
+        return ResponseEntity.ok(responseMapper.toResponse(updated));
+    }
+
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<DeleteResourceResponse> deleteCategory(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID storeId,
+            @PathVariable UUID categoryId
+    ) {
+        storeContextService.validateStoreOwnership(storeId, principal);
+        lifecycleService.delete(categoryId, storeId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                categoryId,
+                "La categoría fue eliminada permanentemente."
+        ));
     }
 }

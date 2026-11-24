@@ -5,7 +5,9 @@ import com.jaldishop.backend.notification.application.service.IsolatedOrderNotif
 import com.jaldishop.backend.notification.domain.port.NotificationRecipientResolver;
 import com.jaldishop.backend.notification.domain.enums.NotificationType;
 import com.jaldishop.backend.notification.infrastructure.persistence.NotificationDeduplicationExceptionClassifier;
+import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.domain.event.OrderConfirmedDomainEvent;
+import com.jaldishop.backend.ordering.domain.event.OrderStatusChangedDomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -84,6 +86,54 @@ public class OrderNotificationEventListener {
                         event.orderNumber(), event.orderId());
             } else {
                 log.error("Fallo no bloqueante al persistir notificación in-app para la orden {}: {}",
+                        event.orderNumber(), ex.getMessage(), ex);
+            }
+        }
+    }
+
+    /**
+     * Procesa el cambio de estado de un pedido (por ejemplo, cancelaciones) y persiste
+     * la notificación correspondiente para el comerciante.
+     *
+     * @param event Evento ligero con el nuevo estado del pedido.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onOrderStatusChanged(OrderStatusChangedDomainEvent event) {
+        if (event.newStatus() != OrderStatus.CANCELLED) {
+            return;
+        }
+        log.info("Procesando OrderStatusChangedDomainEvent (CANCELLED) en listener de notificaciones para orden {}", event.orderNumber());
+        try {
+            Optional<UUID> merchantUserIdOpt = recipientResolver.resolveMerchantUserId(event.storeId());
+            if (merchantUserIdOpt.isEmpty()) {
+                log.warn("No se pudo determinar el merchantUserId para la tienda {}. Notificación omitida para orden {}.",
+                        event.storeId(), event.orderNumber());
+                return;
+            }
+
+            UUID merchantUserId = merchantUserIdOpt.get();
+            String deduplicationKey = "ORDER_CANCELLED:" + event.orderId();
+            String title = "Pedido cancelado: " + event.orderNumber();
+            String message = "El pedido ha sido cancelado. Ingresa a la sección de pedidos para verificar el motivo.";
+
+            CreateNotificationCommand command = new CreateNotificationCommand(
+                    merchantUserId,
+                    NotificationType.ORDER_STATUS_CHANGED,
+                    title,
+                    message,
+                    deduplicationKey
+            );
+
+            persister.persistIsolated(command);
+            log.info("Notificación persistente ORDER_STATUS_CHANGED (CANCELLED) generada exitosamente para orden {} y comerciante {}",
+                    event.orderNumber(), merchantUserId);
+
+        } catch (Exception ex) {
+            if (NotificationDeduplicationExceptionClassifier.isDeduplicationViolation(ex)) {
+                log.info("Notificación duplicada detectada para orden {} (deduplication_key: ORDER_CANCELLED:{}). Inserción omitida de forma idempotente.",
+                        event.orderNumber(), event.orderId());
+            } else {
+                log.error("Fallo no bloqueante al persistir notificación de cancelación para la orden {}: {}",
                         event.orderNumber(), ex.getMessage(), ex);
             }
         }

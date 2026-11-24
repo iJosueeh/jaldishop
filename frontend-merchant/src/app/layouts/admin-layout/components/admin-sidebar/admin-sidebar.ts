@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -14,7 +14,8 @@ import {
   matLogoutOutline,
   matAnalyticsOutline,
   matBoltOutline,
-  matKeyboardArrowDownOutline,
+  matChevronRightOutline,
+  matHistoryEduOutline,
 } from '@ng-icons/material-symbols/outline';
 
 export interface AdminSidebarSections {
@@ -37,12 +38,14 @@ export interface AdminSidebarSections {
       matLogoutOutline,
       matAnalyticsOutline,
       matBoltOutline,
-      matKeyboardArrowDownOutline,
+      matChevronRightOutline,
+      matHistoryEduOutline,
     }),
   ],
   selector: 'app-admin-sidebar',
   styleUrl: './admin-sidebar.css',
   templateUrl: './admin-sidebar.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminSidebar implements OnInit {
   readonly adminService = inject(AdminService);
@@ -93,7 +96,7 @@ export class AdminSidebar implements OnInit {
     if (url.includes('/admin/reconciliation')) {
       this.openSections.update((s) => ({ ...s, finances: true }));
     }
-    if (url.includes('/admin/settings')) {
+    if (url.includes('/admin/settings') || url.includes('/admin/audit-logs')) {
       this.openSections.update((s) => ({ ...s, governance: true }));
     }
   }

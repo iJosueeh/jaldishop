@@ -1,5 +1,6 @@
 package com.jaldishop.backend.ordering.application.service;
 
+import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
 import com.jaldishop.backend.ordering.web.dto.*;
@@ -17,10 +18,16 @@ public class GetCustomerOrderDetailService {
 
     private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
+    private final ProductVariantRepository productVariantRepository;
 
-    public GetCustomerOrderDetailService(OrderRepository orderRepository, StoreRepository storeRepository) {
+    public GetCustomerOrderDetailService(
+            OrderRepository orderRepository,
+            StoreRepository storeRepository,
+            ProductVariantRepository productVariantRepository
+    ) {
         this.orderRepository = orderRepository;
         this.storeRepository = storeRepository;
+        this.productVariantRepository = productVariantRepository;
     }
 
     @Transactional(readOnly = true)
@@ -52,6 +59,9 @@ public class GetCustomerOrderDetailService {
         List<CustomerOrderItemResponse> items = order.getItems().stream()
                 .map(item -> new CustomerOrderItemResponse(
                         item.id(),
+                        productVariantRepository.findById(item.variantId())
+                                .map(variant -> variant.getProductId())
+                                .orElse(null),
                         item.variantId(),
                         item.productName(),
                         item.variantName(),

@@ -5,13 +5,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 /** Only for the public-only Render Free deployment; re-evaluate before enabling private ingress. */
-final class ClientIpResolver {
+@Component
+public class ClientIpResolver {
     private final boolean render;
     private final boolean enabled;
 
-    ClientIpResolver(Environment environment) {
+    public ClientIpResolver(Environment environment) {
         // Deployment metadata, never the HTTP Host header or a request-supplied flag.
         render = "true".equals(environment.getProperty("RENDER"));
         boolean verified = environment.getProperty("app.security.rate-limit.render-ip-verified", Boolean.class, false);
@@ -21,11 +23,11 @@ final class ClientIpResolver {
         }
     }
 
-    static final class Unavailable extends RuntimeException {}
+    public static final class Unavailable extends RuntimeException {}
 
-    boolean enabled() { return enabled; }
+    public boolean enabled() { return enabled; }
 
-    String resolve(HttpServletRequest request) {
+    public String resolve(HttpServletRequest request) {
         if (!enabled) throw new IllegalStateException("Render IP verification is pending");
         if (!render) return request.getRemoteAddr();
         // Enable only after confirming the complete ingress path and header sanitization.
@@ -48,5 +50,16 @@ final class ClientIpResolver {
             }
         }
         throw new Unavailable();
+    }
+
+    public String resolveOrRemoteAddr(HttpServletRequest request) {
+        try {
+            if (enabled) {
+                return resolve(request);
+            }
+        } catch (Exception ignored) {
+            // Fallback safe to remote address
+        }
+        return request != null ? request.getRemoteAddr() : "127.0.0.1";
     }
 }

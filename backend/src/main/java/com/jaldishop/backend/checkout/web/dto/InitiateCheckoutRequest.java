@@ -44,6 +44,12 @@ public record InitiateCheckoutRequest(
 
         BigDecimal deliveryLongitude,
 
+        @Size(max = 20, message = "El documento no puede exceder los 20 caracteres.")
+        String customerDocumentNumber,
+
+        @Size(max = 500, message = "Las notas del pedido no pueden exceder los 500 caracteres.")
+        String orderNotes,
+
         @Size(max = 80, message = "El código de descuento no puede exceder los 80 caracteres.")
         String discountCode
 ) {}

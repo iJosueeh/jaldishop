@@ -18,7 +18,7 @@
         @for (store of stores(); track store.id) {
           <tr
             (click)="selectStore.emit(store)"
-            class="hover:bg-surface-container/40 transition-colors cursor-pointer group"
+            class="hover:bg-surface-container/40 transition-colors duration-150 cursor-pointer group"
           >
             <!-- Columna Tienda -->
             <td class="py-3.5 px-4 sm:px-6">
@@ -73,7 +73,7 @@
             <!-- Columna Estado -->
             <td class="py-3.5 px-4">
               <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
+                class="badge-enter inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
                 [class.bg-emerald-500/10]="store.status === 'ACTIVE'"
                 [class.text-emerald-700]="store.status === 'ACTIVE'"
                 [class.dark:text-emerald-400]="store.status === 'ACTIVE'"
@@ -103,7 +103,7 @@
                 <button
                   type="button"
                   (click)="selectStore.emit(store)"
-                  class="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                  class="btn-tactile p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container cursor-pointer"
                   title="Ver ficha 360°"
                 >
                   <ng-icon name="matVisibilityOutline" class="text-[17px]" />
@@ -113,7 +113,7 @@
                   <button
                     type="button"
                     (click)="toggleStatus.emit(store)"
-                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-colors shadow-2xs"
+                    class="btn-tactile px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 shadow-2xs cursor-pointer"
                     title="Suspender esta tienda"
                   >
                     Pausar
@@ -122,7 +122,7 @@
                   <button
                     type="button"
                     (click)="toggleStatus.emit(store)"
-                    class="px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 transition-colors shadow-2xs"
+                    class="btn-tactile px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 shadow-2xs cursor-pointer"
                     title="Reactivar esta tienda"
                   >
                     Reactivar

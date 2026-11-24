@@ -3,6 +3,7 @@ export interface ProductCategory {
   storeId?: string;
   name: string;
   description?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
   productCount?: number;
   createdAt?: string;
   updatedAt?: string;

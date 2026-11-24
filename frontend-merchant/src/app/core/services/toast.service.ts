@@ -54,6 +54,24 @@ export class ToastService {
     return this.show('info', message, title);
   }
 
+  infoWithAction(
+    message: string,
+    action: { label: string; run: () => void },
+    title?: string,
+    durationMs: number = 6000,
+  ): string {
+    const id = crypto.randomUUID();
+    const newToast: Toast = { id, type: 'info', title, message, durationMs, dismissing: false, action };
+
+    this.toasts.update((current) => [...current, newToast]);
+
+    if (durationMs > 0) {
+      setTimeout(() => this.dismiss(id), durationMs);
+    }
+
+    return id;
+  }
+
   dismiss(id: string): void {
     const target = this.toasts().find((t) => t.id === id);
     if (!target) return;

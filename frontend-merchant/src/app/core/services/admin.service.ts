@@ -61,15 +61,12 @@ export class AdminService implements OnDestroy {
     requireStoreApproval: false,
     maintenanceMode: false,
     maintenanceNotice: 'La plataforma se encuentra en mantenimiento programado. Volveremos pronto.',
-    sessionTimeoutHours: 24,
-    enforce2FAForAdmins: true,
-    notifyOnNewStoreRegistration: true,
-    notifyOnStoreSuspension: true,
-    adminAlertEmail: 'admin@jaldishop.com',
-    platformVersion: '1.2.0',
-    environment: 'production',
     marketplaceCommissionRate: 5.0,
   });
+  readonly isLoadingSettings = signal<boolean>(false);
+  readonly isSavingSettings = signal<boolean>(false);
+  private isSettingsLoaded = signal<boolean>(false);
+  private lastSettingsSync = 0;
 
   // Filtros de Usuarios
   readonly userSearchQuery = signal<string>('');
@@ -731,8 +728,132 @@ export class AdminService implements OnDestroy {
     this.settings.update((current) => ({ ...current, ...partial }));
   }
 
+  loadSettings(force = false): Observable<AdminPlatformSettings | null> {
+    const now = Date.now();
+    const isStale = now - this.lastSettingsSync > this.STALE_THRESHOLD_MS;
+
+    if (this.isSettingsLoaded() && !isStale && !force) {
+      return of(this.settings());
+    }
+
+    if (!this.isSettingsLoaded()) {
+      this.isLoadingSettings.set(true);
+    }
+
+    return this.http.get<AdminPlatformSettings>(`${environment.apiUrl}/api/v1/admin/settings`).pipe(
+      tap((data) => {
+        this.settings.set(data);
+        this.isLoadingSettings.set(false);
+        this.isSettingsLoaded.set(true);
+        this.lastSettingsSync = Date.now();
+      }),
+      catchError((err) => {
+        this.isLoadingSettings.set(false);
+        return of(this.settings());
+      })
+    );
+  }
+
   saveSettings(): void {
-    this.toastService.success('Parámetros de la plataforma guardados exitosamente.', 'Configuración Actualizada');
+    const current = this.settings();
+    const previous = { ...current };
+    this.isSavingSettings.set(true);
+
+    this.http.put<AdminPlatformSettings>(`${environment.apiUrl}/api/v1/admin/settings`, current).pipe(
+      tap((saved) => {
+        this.settings.set(saved);
+        this.isSavingSettings.set(false);
+        this.lastSettingsSync = Date.now();
+        this.toastService.success('Parámetros de la plataforma guardados exitosamente.', 'Configuración Actualizada');
+        
+        // Disparar sincronización reactiva a través del InvalidationBus
+        this.invalidationBus.dispatchCacheInvalidated({ storeId: 'GLOBAL', module: 'SETTINGS' });
+        // Refrescar auditoría silenciosamente ya que se generó un nuevo registro de auditoría
+        this.loadAuditLogs({ page: 0, size: 30 }).subscribe();
+      }),
+      catchError((err) => {
+        this.settings.set(previous);
+        this.isSavingSettings.set(false);
+        this.toastService.error(
+          err?.error?.message || 'Error al guardar la configuración en la base de datos.',
+          'Error al Guardar'
+        );
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+  getReconciliationHistory(limit = 10): Observable<
+    Array<{
+      attemptId: string;
+      action: string;
+      outcome: string;
+      reason: string;
+      reconciled: boolean;
+      orderNumber?: string;
+      actorEmail?: string;
+      timestamp: string;
+    }>
+  > {
+    return this.http.get<
+      Array<{
+        attemptId: string;
+        action: string;
+        outcome: string;
+        reason: string;
+        reconciled: boolean;
+        orderNumber?: string;
+        actorEmail?: string;
+        timestamp: string;
+      }>
+    >(`${environment.apiUrl}/admin/payments/attempts/history`, {
+      params: { limit: String(limit) },
+    });
+  }
+
+  deleteStore(storeId: string): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(
+        `${environment.apiUrl}/admin/stores/${storeId}`,
+      )
+      .pipe(
+        tap(() => {
+          this.stores.update((list) => list.filter((s) => s.id !== storeId));
+          this.storeDetailCache.delete(storeId);
+          // Sincronizar usuarios/comerciantes vinculados a la tienda eliminada (rol MERCHANT y storeName)
+          this.users.update((list) =>
+            list.map((u) =>
+              u.storeId === storeId
+                ? {
+                    ...u,
+                    storeId: undefined,
+                    storeName: undefined,
+                    roles: u.roles.filter((r) => r !== 'MERCHANT'),
+                  }
+                : u,
+            ),
+          );
+          if (this.isUsersLoaded()) {
+            this.loadUsers(true).subscribe();
+          }
+          this.invalidationBus.dispatchCacheInvalidated({ storeId, module: 'STORE' });
+          this.loadAuditLogs({ page: 0, size: 30 }).subscribe();
+        }),
+      );
+  }
+
+  deleteUser(userId: string): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(
+        `${environment.apiUrl}/admin/users/${userId}`,
+      )
+      .pipe(
+        tap(() => {
+          this.users.update((list) => list.filter((u) => u.id !== userId));
+          this.invalidationBus.dispatchCacheInvalidated({ storeId: 'GLOBAL', module: 'ALL' });
+          this.loadAuditLogs({ page: 0, size: 30 }).subscribe();
+        }),
+      );
   }
 
   clearCache(): void {

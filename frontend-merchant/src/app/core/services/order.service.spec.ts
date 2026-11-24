@@ -963,6 +963,50 @@ describe('OrderService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mockPageResponse);
     });
+
+    it('debe consolidar múltiples eventos de ráfaga en una sola recarga REST (Coalescing)', () => {
+      const stompService = TestBed.inject(StompService);
+
+      // Primer evento: dispara recarga inmediata
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-burst-1',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-1',
+        orderNumber: '#PED-001',
+        storeId: 'store-123',
+        totalAmount: 10.0,
+        currency: 'PEN',
+        occurredAt: '2026-10-31T12:00:00Z',
+      });
+
+      const req1 = httpMock.expectOne((r) => r.url.includes('/orders'));
+      req1.flush(mockPageResponse);
+
+      // Ráfaga inmediata de 2 eventos adicionales dentro de la ventana de consolidación
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-burst-2',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-2',
+        orderNumber: '#PED-002',
+        storeId: 'store-123',
+        totalAmount: 20.0,
+        currency: 'PEN',
+        occurredAt: '2026-10-31T12:00:01Z',
+      });
+      (stompService as any).orderConfirmedSubject.next({
+        eventId: 'evt-burst-3',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-3',
+        orderNumber: '#PED-003',
+        storeId: 'store-123',
+        totalAmount: 30.0,
+        currency: 'PEN',
+        occurredAt: '2026-10-31T12:00:02Z',
+      });
+
+      // No debe haber peticiones HTTP inmediatas adicionales; permanecen consolidadas
+      httpMock.expectNone((r) => r.url.includes('/orders'));
+    });
   });
 
   describe('getOrderStatusCounts y gestión reactiva de contadores', () => {

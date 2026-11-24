@@ -19,6 +19,7 @@ public class StoreSettings {
     private final boolean orderSoundAlert;
     private final int soundVolume;
     private final boolean lowStockVisualAlert;
+    private final Long version;
     private final Instant createdAt;
     private final Instant updatedAt;
 
@@ -36,6 +37,7 @@ public class StoreSettings {
             boolean orderSoundAlert,
             int soundVolume,
             boolean lowStockVisualAlert,
+            Long version,
             Instant createdAt,
             Instant updatedAt
     ) {
@@ -52,6 +54,7 @@ public class StoreSettings {
         this.orderSoundAlert = orderSoundAlert;
         this.soundVolume = soundVolume;
         this.lowStockVisualAlert = lowStockVisualAlert;
+        this.version = version != null ? version : 0L;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -72,6 +75,7 @@ public class StoreSettings {
                 true,
                 80,
                 true,
+                0L,
                 now,
                 now
         );
@@ -127,6 +131,10 @@ public class StoreSettings {
 
     public boolean isLowStockVisualAlert() {
         return lowStockVisualAlert;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public Instant getCreatedAt() {

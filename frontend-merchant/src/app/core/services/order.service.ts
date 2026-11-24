@@ -54,6 +54,11 @@ export class OrderService implements OnDestroy {
   }>();
   readonly orderMutated$ = this.orderMutatedSubject.asObservable();
 
+  private realtimeCoalesceTimer: ReturnType<typeof setTimeout> | null = null;
+  private pendingCoalescedStoreId: string | null = null;
+  private lastRealtimeReloadTimestamp = 0;
+  private static readonly COALESCE_WINDOW_MS = 600;
+
   private readonly baseUrl = `${environment.apiUrl}/merchants/stores`;
 
   constructor() {
@@ -250,6 +255,54 @@ export class OrderService implements OnDestroy {
     this.pendingVerificationOrderIds.update((set) => new Set(set).add(orderId));
   }
 
+  private executeRealtimeReload(storeId: string): void {
+    this.invalidateCache();
+    if (this.searchDebounceTimer === null) {
+      this.loadOrders(
+        this.currentPage(),
+        this.pageSize(),
+        this.activeTab(),
+        storeId,
+        this.appliedSearchQuery(),
+        true,
+      ).subscribe();
+    }
+    if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
+      this.loadOrderCounts(storeId, true).subscribe();
+    }
+    if (
+      this.todayOrderCounts() !== null ||
+      this.isTodayCountsLoading() ||
+      this.todayCountsError() !== null ||
+      this.isTodayOutdated()
+    ) {
+      this.loadTodayOrderCounts(storeId, true).subscribe();
+    }
+  }
+
+  private triggerCoalescedReload(storeId: string): void {
+    const now = Date.now();
+    const elapsed = now - this.lastRealtimeReloadTimestamp;
+
+    if (elapsed > OrderService.COALESCE_WINDOW_MS) {
+      this.lastRealtimeReloadTimestamp = now;
+      this.executeRealtimeReload(storeId);
+    } else {
+      this.pendingCoalescedStoreId = storeId;
+      if (!this.realtimeCoalesceTimer) {
+        this.realtimeCoalesceTimer = setTimeout(() => {
+          this.realtimeCoalesceTimer = null;
+          this.lastRealtimeReloadTimestamp = Date.now();
+          if (this.pendingCoalescedStoreId) {
+            const pendingId = this.pendingCoalescedStoreId;
+            this.pendingCoalescedStoreId = null;
+            this.executeRealtimeReload(pendingId);
+          }
+        }, OrderService.COALESCE_WINDOW_MS - elapsed);
+      }
+    }
+  }
+
   private initRealtimeSubscriptions(): void {
     this.stompService.orderConfirmed$.subscribe((event) => {
       const currentStoreId = this.storeService.currentStore()?.id;
@@ -258,28 +311,7 @@ export class OrderService implements OnDestroy {
       }
       this.toastService.info(`Nuevo pedido recibido: ${event.orderNumber}`);
       this.settingsService.playNotificationSound();
-      this.invalidateCache();
-      if (this.searchDebounceTimer === null) {
-        this.loadOrders(
-          this.currentPage(),
-          this.pageSize(),
-          this.activeTab(),
-          currentStoreId,
-          this.appliedSearchQuery(),
-          true,
-        ).subscribe();
-      }
-      if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-        this.loadOrderCounts(currentStoreId, true).subscribe();
-      }
-      if (
-        this.todayOrderCounts() !== null ||
-        this.isTodayCountsLoading() ||
-        this.todayCountsError() !== null ||
-        this.isTodayOutdated()
-      ) {
-        this.loadTodayOrderCounts(currentStoreId, true).subscribe();
-      }
+      this.triggerCoalescedReload(currentStoreId);
     });
 
     this.stompService.orderStatusChanged$.subscribe((event) => {
@@ -321,57 +353,13 @@ export class OrderService implements OnDestroy {
         status: event.newStatus,
       });
 
-      this.invalidateCache();
-
-      if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-        this.loadOrderCounts(currentStoreId, true).subscribe();
-      }
-      if (
-        this.todayOrderCounts() !== null ||
-        this.isTodayCountsLoading() ||
-        this.todayCountsError() !== null ||
-        this.isTodayOutdated()
-      ) {
-        this.loadTodayOrderCounts(currentStoreId, true).subscribe();
-      }
-
-      if (this.searchDebounceTimer === null) {
-        this.loadOrders(
-          this.currentPage(),
-          this.pageSize(),
-          this.activeTab(),
-          currentStoreId,
-          this.appliedSearchQuery(),
-          true,
-        ).subscribe();
-      }
+      this.triggerCoalescedReload(currentStoreId);
     });
 
     this.stompService.reconnected$.subscribe(() => {
       const currentStoreId = this.storeService.currentStore()?.id;
       if (currentStoreId) {
-        this.invalidateCache();
-        if (this.searchDebounceTimer === null) {
-          this.loadOrders(
-            this.currentPage(),
-            this.pageSize(),
-            this.activeTab(),
-            currentStoreId,
-            this.appliedSearchQuery(),
-            true,
-          ).subscribe();
-        }
-        if (this.orderCounts() !== null || this.isCountsLoading() || this.countsError() !== null) {
-          this.loadOrderCounts(currentStoreId, true).subscribe();
-        }
-        if (
-          this.todayOrderCounts() !== null ||
-          this.isTodayCountsLoading() ||
-          this.todayCountsError() !== null ||
-          this.isTodayOutdated()
-        ) {
-          this.loadTodayOrderCounts(currentStoreId, true).subscribe();
-        }
+        this.triggerCoalescedReload(currentStoreId);
       }
     });
   }
@@ -1127,6 +1115,10 @@ export class OrderService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.realtimeCoalesceTimer) {
+      clearTimeout(this.realtimeCoalesceTimer);
+      this.realtimeCoalesceTimer = null;
+    }
     if (this.midnightTimerId) {
       clearTimeout(this.midnightTimerId);
       this.midnightTimerId = null;

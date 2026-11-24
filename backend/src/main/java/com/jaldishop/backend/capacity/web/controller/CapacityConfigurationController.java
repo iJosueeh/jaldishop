@@ -2,6 +2,7 @@ package com.jaldishop.backend.capacity.web.controller;
 
 import com.jaldishop.backend.capacity.application.configuration.command.CreateCapacityConfigurationCommand;
 import com.jaldishop.backend.capacity.application.configuration.service.CreateCapacityConfigurationService;
+import com.jaldishop.backend.capacity.application.configuration.service.DeleteCapacityConfigurationService;
 import com.jaldishop.backend.capacity.application.configuration.service.GetStoreCapacityConfigurationsService;
 import com.jaldishop.backend.capacity.application.configuration.service.ToggleCapacityConfigurationStatusService;
 import com.jaldishop.backend.capacity.application.configuration.command.UpdateCapacityConfigurationCommand;
@@ -11,13 +12,16 @@ import com.jaldishop.backend.capacity.web.dto.CapacityConfigurationResponse;
 import com.jaldishop.backend.capacity.web.dto.CreateCapacityConfigurationRequest;
 import com.jaldishop.backend.capacity.web.dto.UpdateCapacityConfigurationRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.DeleteResourceResponse;
 import com.jaldishop.backend.store.application.service.GetMyStoreService;
 import com.jaldishop.backend.store.application.service.StoreContextService;
 import com.jaldishop.backend.store.domain.model.Store;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/capacity-configurations")
+@PreAuthorize("hasRole('MERCHANT')")
 public class CapacityConfigurationController {
 
     private final StoreContextService storeContextService;
@@ -34,6 +39,7 @@ public class CapacityConfigurationController {
     private final GetStoreCapacityConfigurationsService listService;
     private final UpdateCapacityConfigurationService updateService;
     private final ToggleCapacityConfigurationStatusService toggleService;
+    private final DeleteCapacityConfigurationService deleteService;
 
     public CapacityConfigurationController(
             StoreContextService storeContextService,
@@ -42,11 +48,24 @@ public class CapacityConfigurationController {
             UpdateCapacityConfigurationService updateService,
             ToggleCapacityConfigurationStatusService toggleService
     ) {
+        this(storeContextService, createService, listService, updateService, toggleService, null);
+    }
+
+    @Autowired
+    public CapacityConfigurationController(
+            StoreContextService storeContextService,
+            CreateCapacityConfigurationService createService,
+            GetStoreCapacityConfigurationsService listService,
+            UpdateCapacityConfigurationService updateService,
+            ToggleCapacityConfigurationStatusService toggleService,
+            DeleteCapacityConfigurationService deleteService
+    ) {
         this.storeContextService = storeContextService;
         this.createService = createService;
         this.listService = listService;
         this.updateService = updateService;
         this.toggleService = toggleService;
+        this.deleteService = deleteService;
     }
 
     @PostMapping
@@ -111,6 +130,19 @@ public class CapacityConfigurationController {
 
         CapacityConfiguration config = toggleService.deactivate(id, storeId);
         return ResponseEntity.ok(CapacityConfigurationResponse.fromDomain(config));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DeleteResourceResponse> delete(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID id
+    ) {
+        UUID storeId = storeContextService.requireStoreId(principal);
+        deleteService.execute(id, storeId);
+        return ResponseEntity.ok(DeleteResourceResponse.deleted(
+                id,
+                "El horario de atención fue eliminado permanentemente."
+        ));
     }
 
 }

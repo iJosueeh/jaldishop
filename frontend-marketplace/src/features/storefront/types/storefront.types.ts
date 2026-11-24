@@ -34,6 +34,18 @@ export interface PublicStore {
   keywords?: string[];
 }
 
+export interface PublicStoreSettings {
+  cancellationPolicy: string;
+  refundPolicy: string;
+  requireCustomerDni: boolean;
+  allowOrderNotes: boolean;
+  onlinePaymentsEnabled: boolean;
+  cashOnDeliveryEnabled: boolean;
+  acceptsPosOnDelivery: boolean;
+  minDeliveryAmount: number | null;
+  estimatedPrepTimeMinutes: number;
+}
+
 export interface StoreCategory {
   id: string;
   name: string;
@@ -51,9 +63,11 @@ export interface ProductVariantItem {
   priceCurrency: string;
   tracksInventory: boolean;
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  attributes?: { name: string; value: string }[];
 }
 
 export interface ProductItem {
+  slug?: string;
   categoryId?: string;
   priceCurrency?: string;
   variantId?: string;
@@ -78,4 +92,19 @@ export interface CartItem {
   product: ProductItem;
   quantity: number;
   notes?: string;
+}
+
+export interface PublicReviewItem {
+  id: string;
+  customerName: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface ProductReviewsSummary {
+  productId: string;
+  averageRating: number;
+  totalReviews: number;
+  reviews: PublicReviewItem[];
 }

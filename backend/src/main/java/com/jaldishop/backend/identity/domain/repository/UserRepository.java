@@ -17,5 +17,8 @@ public interface UserRepository {
     List<User> findAll(String query, RoleName role, UserStatus status);
     void assignStoreToMerchantRole(UUID userId, UUID storeId);
     void incrementCredentialsVersion(UUID userId);
+    Optional<User> lockByIdForDeletion(UUID id);
+    boolean hasOperationalOrAuditActorHistory(UUID userId);
+    void deleteUserAndSafeOrphans(UUID userId);
 
 }

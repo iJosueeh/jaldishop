@@ -9,6 +9,15 @@
         Diagnóstico forzado y recuperación transaccional de pagos desfasados o webhooks no entregados
       </p>
     </div>
+
+    <button
+      type="button"
+      (click)="openHistoryModal()"
+      class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/30 text-xs font-bold text-on-surface transition-colors shadow-2xs flex items-center gap-2 cursor-pointer self-start sm:self-auto shrink-0"
+    >
+      <ng-icon name="matReceiptLongOutline" class="text-base text-primary" />
+      <span>Historial reciente ({{ sessionHistory().length }})</span>
+    </button>
   </div>
 
   <!-- Monitor de Contingencia de Pagos (Lectura Real de FinancialSummary) -->
@@ -81,10 +90,8 @@
     </div>
   </div>
 
-  <!-- Consola Interactiva de Diagnóstico y Acción -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <!-- Columna Principal: Formulario y Ejecución (2 cols) -->
-    <div class="lg:col-span-2 p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col gap-5">
+  <!-- Consola Interactiva de Diagnóstico y Acción (Ancho Completo) -->
+  <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col gap-5">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -135,8 +142,9 @@
 
               <!-- Lista Acotada de Incidencias -->
               @if (isLoadingCandidates()) {
-                <div class="py-6 text-center text-xs text-on-surface-variant animate-pulse">
-                  Cargando incidencias...
+                <div class="py-6 px-4 space-y-2">
+                  <div class="h-4 w-3/4 mx-auto rounded bg-surface-container-high skeleton-shimmer"></div>
+                  <div class="h-3 w-1/2 mx-auto rounded bg-surface-container-high skeleton-shimmer"></div>
                 </div>
               } @else if (filteredCandidates().length === 0) {
                 <div class="py-6 text-center text-xs text-on-surface-variant italic">
@@ -245,7 +253,7 @@
 
           <button
             type="button"
-            (click)="reconcile()"
+            (click)="requestReconcile()"
             [disabled]="isInvestigating() || isReconciling()"
             class="px-4 py-2.5 rounded-2xl bg-primary text-on-primary hover:bg-primary/90 text-xs font-bold transition-colors shadow-2xs cursor-pointer disabled:opacity-50 flex items-center gap-2 shrink-0"
           >
@@ -258,6 +266,41 @@
           <span class="text-[11px] font-semibold text-rose-600 mt-0.5">{{ err }}</span>
         }
       </div>
+
+      @if (selectedHistoryItemSummary(); as hist) {
+        <div class="p-4 rounded-2xl bg-surface-container/50 border border-outline-variant/30 flex items-center justify-between gap-3 flex-wrap text-xs">
+          <div class="flex flex-col gap-0.5">
+            <span class="font-bold text-on-surface">
+              Registro previo: {{ hist.outcome }} {{ hist.reconciled ? '(Conciliado)' : '' }}
+            </span>
+            <span class="text-[11px] text-on-surface-variant">
+              {{ hist.reason || 'Sin detalle' }} · Presiona "Diagnosticar" para consultar en vivo a Mercado Pago.
+            </span>
+          </div>
+          <button
+            type="button"
+            (click)="investigate(true)"
+            [disabled]="isInvestigating()"
+            class="px-3 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs cursor-pointer"
+          >
+            Consultar en vivo
+          </button>
+        </div>
+      }
+
+      @if (isCachedDiagnostic() && investigationResult()) {
+        <div class="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-[11px] text-on-surface-variant">
+          <span>Resultado reciente en caché (evita llamadas repetidas a Mercado Pago).</span>
+          <button
+            type="button"
+            (click)="investigate(true)"
+            [disabled]="isInvestigating()"
+            class="font-bold text-primary hover:underline cursor-pointer shrink-0"
+          >
+            Forzar consulta en vivo
+          </button>
+        </div>
+      }
 
       <!-- Panel de Resultado de Investigación y Recomendación de Acciones -->
       @if (investigationResult(); as res) {
@@ -342,7 +385,7 @@
               @if (rec.canReconcile) {
                 <button
                   type="button"
-                  (click)="reconcile()"
+                  (click)="requestReconcile()"
                   [disabled]="isReconciling()"
                   class="px-4 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
                 >
@@ -446,53 +489,122 @@
           }
         </div>
       }
-    </div>
+  </div>
 
-    <!-- Columna Lateral: Historial de la Sesión Actual (1 col) -->
-    <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between">
-      <div>
-        <div class="flex items-center gap-2 mb-3">
-          <ng-icon name="matReceiptLongOutline" class="text-[18px] text-primary" />
-          <h3 class="text-xs font-bold text-on-surface uppercase tracking-wider">Historial de Sesión</h3>
+  <!-- Modal de Historial Reciente (Solo Lectura) -->
+  @if (isHistoryModalOpen()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
+      (click)="closeHistoryModal()"
+    >
+      <div
+        class="w-full max-w-2xl rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xl p-6 flex flex-col gap-4"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <ng-icon name="matReceiptLongOutline" class="text-[20px]" />
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-on-surface">Historial Reciente</h3>
+              <p class="text-[11px] text-on-surface-variant">
+                Últimas 10 investigaciones y reconciliaciones guardadas (solo lectura).
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            @if (isPrimaryAdmin()) {
+              <a
+                [routerLink]="['/admin/audit-logs']"
+                [queryParams]="{ action: 'PAYMENT_RECONCILED' }"
+                (click)="closeHistoryModal()"
+                class="text-xs font-bold text-primary hover:underline whitespace-nowrap"
+              >
+                Ver todo →
+              </a>
+            }
+            <button
+              type="button"
+              (click)="closeHistoryModal()"
+              class="p-1.5 rounded-xl hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+              title="Cerrar"
+            >
+              <ng-icon name="matCloseOutline" class="text-lg" />
+            </button>
+          </div>
         </div>
-        <p class="text-[11px] text-on-surface-variant mb-4">
-          Últimas investigaciones ejecutadas en esta consola.
-        </p>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1">
           @if (sessionHistory().length === 0) {
-            <div class="py-8 text-center text-on-surface-variant text-xs">
-              No hay investigaciones previas en esta sesión.
+            <div class="py-10 text-center text-on-surface-variant text-xs">
+              No hay investigaciones registradas recientemente.
             </div>
           } @else {
             @for (item of sessionHistory(); track item.timestamp.getTime()) {
-              <div
-                (click)="selectHistoryItem(item)"
-                class="p-2.5 rounded-2xl bg-surface-container/40 border border-outline-variant/20 hover:bg-surface-container/80 transition-colors cursor-pointer text-xs flex flex-col gap-1"
-              >
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-[10px] text-on-surface font-bold">
-                    {{ item.attemptId.slice(0, 14) }}...
-                  </span>
-                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-                    [class.bg-emerald-500/10]="item.outcome === 'VERIFIED' || item.reconciled"
-                    [class.text-emerald-600]="item.outcome === 'VERIFIED' || item.reconciled"
-                    [class.bg-amber-500/10]="item.outcome === 'INCONCLUSIVE'"
-                    [class.text-amber-600]="item.outcome === 'INCONCLUSIVE'"
-                    [class.bg-rose-500/10]="item.outcome === 'CONTRADICTION' || item.outcome === 'TECHNICAL_ERROR'"
-                    [class.text-rose-600]="item.outcome === 'CONTRADICTION' || item.outcome === 'TECHNICAL_ERROR'"
-                  >
-                    {{ item.outcome }}
-                  </span>
+              <div class="p-3 rounded-2xl bg-surface-container/40 border border-outline-variant/20 text-xs flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono text-[11px] text-on-surface font-bold" [title]="item.attemptId">
+                      {{ item.attemptId }}
+                    </span>
+                    <button
+                      type="button"
+                      (click)="copyToClipboard(item.attemptId)"
+                      class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+                      title="Copiar UUID"
+                    >
+                      <ng-icon name="matContentCopyOutline" class="text-xs" />
+                    </button>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-on-surface-variant font-mono">
+                      {{ item.timestamp | date: 'dd/MM HH:mm' }}
+                    </span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md"
+                      [class.bg-emerald-500/10]="item.outcome === 'VERIFIED' || item.reconciled"
+                      [class.text-emerald-600]="item.outcome === 'VERIFIED' || item.reconciled"
+                      [class.bg-amber-500/10]="item.outcome === 'INCONCLUSIVE'"
+                      [class.text-amber-600]="item.outcome === 'INCONCLUSIVE'"
+                      [class.bg-rose-500/10]="item.outcome === 'CONTRADICTION' || item.outcome === 'TECHNICAL_ERROR'"
+                      [class.text-rose-600]="item.outcome === 'CONTRADICTION' || item.outcome === 'TECHNICAL_ERROR'"
+                    >
+                      {{ item.reconciled ? 'CONCILIADO' : item.outcome }}
+                    </span>
+                  </div>
                 </div>
-                <span class="text-[10px] text-on-surface-variant truncate">
-                  {{ item.reason }}
-                </span>
+
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <span class="text-[11px] text-on-surface-variant break-all">
+                    {{ item.reason || 'Sin detalle' }}
+                  </span>
+                  <button
+                    type="button"
+                    (click)="selectHistoryItem(item)"
+                    class="px-2.5 py-1 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-[11px] font-bold text-on-surface transition-colors cursor-pointer shrink-0"
+                  >
+                    Cargar en consola
+                  </button>
+                </div>
               </div>
             }
           }
         </div>
       </div>
     </div>
-  </div>
+  }
+
+  <app-confirm-modal
+    [isOpen]="isReconcileConfirmOpen()"
+    title="¿Confirmar conciliación manual?"
+    message="Esta acción forzará la creación o actualización de la orden asociada al intento de pago seleccionado. Verifica que el pago haya sido acreditado en Mercado Pago."
+    confirmText="Sí, forzar conciliación"
+    cancelText="Cancelar"
+    [isDanger]="false"
+    (confirm)="reconcile()"
+    (cancel)="isReconcileConfirmOpen.set(false)"
+    (isOpenChange)="isReconcileConfirmOpen.set($event)"
+  />
 </div>

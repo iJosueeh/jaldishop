@@ -47,10 +47,26 @@ public class GlobalExceptionHandler {
     @Autowired(required = false)
     private ObjectProvider<AdminAuditService> auditServiceProvider;
 
+    @Autowired(required = false)
+    private ObjectProvider<com.jaldishop.backend.identity.domain.repository.UserRepository> userRepositoryProvider;
+
+    @Autowired(required = false)
+    private tools.jackson.databind.ObjectMapper objectMapper;
+
     public GlobalExceptionHandler() {}
 
     public GlobalExceptionHandler(ObjectProvider<AdminAuditService> auditServiceProvider) {
         this.auditServiceProvider = auditServiceProvider;
+    }
+
+    public GlobalExceptionHandler(
+            ObjectProvider<AdminAuditService> auditServiceProvider,
+            ObjectProvider<com.jaldishop.backend.identity.domain.repository.UserRepository> userRepositoryProvider,
+            tools.jackson.databind.ObjectMapper objectMapper
+    ) {
+        this.auditServiceProvider = auditServiceProvider;
+        this.userRepositoryProvider = userRepositoryProvider;
+        this.objectMapper = objectMapper;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -139,6 +155,13 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<ApiError> handleResourceConflict(ResourceConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                new ApiError(ex.getCode(), ex.getMessage(), null, ex.getMetadata())
+        );
+    }
+
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiError> handleConflict(ConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
@@ -191,17 +214,49 @@ public class GlobalExceptionHandler {
                 auditServiceProvider.ifAvailable(auditService -> {
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     UUID actorId = null;
+                    String actorEmail = null;
                     if (auth != null && auth.getPrincipal() instanceof JwtPrincipal principal) {
                         actorId = principal.userId();
+                        if (userRepositoryProvider != null && userRepositoryProvider.getIfAvailable() != null && actorId != null) {
+                            actorEmail = userRepositoryProvider.getIfAvailable().findById(actorId)
+                                    .map(com.jaldishop.backend.identity.domain.model.User::getEmail)
+                                    .orElse(null);
+                        }
                     }
+                    if (actorEmail == null && actorId != null) {
+                        actorEmail = "ID:" + actorId;
+                    } else if (actorEmail == null) {
+                        actorEmail = "ANONYMOUS";
+                    }
+
+                    String method = request.getMethod() != null ? request.getMethod() : "UNKNOWN";
+                    String reason = ex.getMessage() != null && !ex.getMessage().isBlank()
+                            ? ex.getMessage()
+                            : "Acceso denegado a endpoint administrativo";
+
+                    String detailsJson;
+                    if (objectMapper != null) {
+                        try {
+                            detailsJson = objectMapper.writeValueAsString(Map.of(
+                                    "method", method,
+                                    "uri", uri,
+                                    "reason", reason
+                            ));
+                        } catch (Exception e) {
+                            detailsJson = "{\"method\":\"" + method + "\",\"uri\":\"" + uri + "\"}";
+                        }
+                    } else {
+                        detailsJson = "{\"method\":\"" + method + "\",\"uri\":\"" + uri + "\"}";
+                    }
+
                     auditService.logDenied(
                             actorId,
-                            null,
+                            actorEmail,
                             "ACCESS_DENIED",
-                            "ADMIN_ROUTE",
+                            "ENDPOINT",
                             null,
                             request.getRemoteAddr(),
-                            ex.getMessage()
+                            detailsJson
                     );
                 });
             }
@@ -284,13 +339,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
         log.warn("Violación de integridad de datos detectada: {}", ex.getMessage());
-        if (isUniqueConstraintViolation(ex)) {
+        if (hasSqlState(ex, "23505") || isUniqueConstraintMessage(ex)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     new ApiError(SharedErrorCodes.RESOURCE_CONFLICT,
                             "El recurso entra en conflicto con un registro existente.")
             );
+        }
+        if (hasSqlState(ex, "23503")) {
+            String method = request != null ? request.getMethod() : null;
+            if ("DELETE".equalsIgnoreCase(method)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                        new ApiError(SharedErrorCodes.RESOURCE_IN_USE,
+                                "No es posible eliminar el recurso porque tiene operaciones o registros históricos asociados.")
+                );
+            }
+            if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ApiError(SharedErrorCodes.INVALID_REFERENCE,
+                                "La referencia proporcionada no existe o no es válida.")
+                );
+            }
         }
         log.error("Violación de integridad de datos no recuperable: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -307,19 +380,27 @@ public class GlobalExceptionHandler {
         );
     }
 
-    private boolean isUniqueConstraintViolation(Throwable throwable) {
+    private boolean hasSqlState(Throwable throwable, String targetSqlState) {
         Throwable current = throwable;
         while (current != null) {
             if (current instanceof org.hibernate.exception.ConstraintViolationException cve) {
-                if ("23505".equals(cve.getSQLState())) {
+                if (targetSqlState.equals(cve.getSQLState())) {
                     return true;
                 }
             }
             if (current instanceof SQLException sqlEx) {
-                if ("23505".equals(sqlEx.getSQLState())) {
+                if (targetSqlState.equals(sqlEx.getSQLState())) {
                     return true;
                 }
             }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private boolean isUniqueConstraintMessage(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
             String message = current.getMessage();
             if (message != null && (message.contains("23505")
                     || message.toLowerCase().contains("duplicate key")

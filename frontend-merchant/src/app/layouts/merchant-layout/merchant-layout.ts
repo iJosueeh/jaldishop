@@ -43,7 +43,7 @@ export class MerchantLayout implements OnInit {
     this.isMobileMenuOpen.set(false);
   }
 
-  onOrderCreated(order: MerchantOrder): void {
-    this.orderService.addOrder(order);
+  onOrderCreated(_order: MerchantOrder): void {
+    // La creación real se ejecuta en CreateOrderModal -> OrderService.createMerchantOrder()
   }
 }

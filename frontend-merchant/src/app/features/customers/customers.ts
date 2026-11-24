@@ -77,6 +77,12 @@ export class Customers implements OnInit {
   }
 
   onOpenWhatsApp(customer: StoreCustomer): void {
-    this.toastService.info(`Iniciando chat con ${customer.firstName}...`);
+    const rawPhone = customer.phone?.replace(/\D/g, '') ?? '';
+    if (!rawPhone) {
+      this.toastService.warning(`${customer.firstName} no tiene un teléfono registrado para WhatsApp.`);
+      return;
+    }
+    const normalized = rawPhone.startsWith('51') ? rawPhone : `51${rawPhone}`;
+    window.open(`https://wa.me/${normalized}`, '_blank', 'noopener,noreferrer');
   }
 }

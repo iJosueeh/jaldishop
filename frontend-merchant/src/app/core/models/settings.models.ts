@@ -17,6 +17,7 @@ export interface StoreAlertsSettings {
   orderSoundAlert: boolean;
   soundVolume: number;
   lowStockVisualAlert: boolean;
+  version?: number;
 }
 
 export interface MerchantSettings {
@@ -32,4 +33,5 @@ export interface MerchantSettings {
   orderSoundAlert: boolean;
   soundVolume: number;
   lowStockVisualAlert: boolean;
+  version?: number;
 }

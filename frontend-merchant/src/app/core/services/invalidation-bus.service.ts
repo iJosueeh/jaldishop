@@ -46,7 +46,7 @@ export interface StoreProfileMutatedBusEvent {
   storeId: string;
 }
 
-export type CacheModule = 'ORDERS' | 'INVENTORY' | 'CAPACITY' | 'ANALYTICS' | 'BILLING' | 'STORE' | 'ALL';
+export type CacheModule = 'ORDERS' | 'INVENTORY' | 'CAPACITY' | 'ANALYTICS' | 'BILLING' | 'STORE' | 'SETTINGS' | 'AUDIT' | 'ALL';
 
 export interface CacheInvalidatedBusEvent {
   storeId: string;

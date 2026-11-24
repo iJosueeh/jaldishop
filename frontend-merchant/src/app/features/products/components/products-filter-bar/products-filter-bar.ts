@@ -8,6 +8,7 @@ import {
   matSearchOutline,
   matStorefrontOutline,
   matViewAgendaOutline,
+  matCategoryOutline,
 } from '@ng-icons/material-symbols/outline';
 import { ProductCategory, ProductViewMode } from '../../../../core/models/product.models';
 
@@ -22,6 +23,7 @@ import { ProductCategory, ProductViewMode } from '../../../../core/models/produc
       matSearchOutline,
       matStorefrontOutline,
       matViewAgendaOutline,
+      matCategoryOutline,
     }),
   ],
   templateUrl: './products-filter-bar.html',
@@ -39,6 +41,7 @@ export class ProductsFilterBar {
   searchChange = output<string>();
   statusChange = output<string>();
   viewModeChange = output<ProductViewMode>();
+  manageCategories = output<void>();
 
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;

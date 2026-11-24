@@ -27,6 +27,7 @@
     (searchChange)="onSearchChange($event)"
     (statusChange)="onStatusChange($event)"
     (viewModeChange)="onViewModeChange($event)"
+    (manageCategories)="isCategoryModalOpen.set(true)"
   />
 
   <!-- 4. Contenido en Cuadrícula o Lista con Skeletons y Estados Vacíos -->
@@ -77,6 +78,13 @@
     [categories]="productService.categories()"
     (closeDrawer)="onCloseCreateDrawer()"
     (productCreated)="onProductCreated($event)"
+  />
+
+  <app-category-manager-modal
+    [isOpen]="isCategoryModalOpen()"
+    [storeId]="storeService.currentStore()?.id ?? ''"
+    [categories]="productService.categories()"
+    (closeModal)="isCategoryModalOpen.set(false)"
   />
 
   <!-- 7. Drawer Desplegable Lateral de Edición de Producto y Variantes -->

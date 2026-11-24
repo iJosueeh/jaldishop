@@ -5,6 +5,7 @@ import {
   InventoryFilterStatus,
   InventoryService,
 } from '../../core/services/inventory.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { ToastService } from '../../core/services/toast.service';
 import { InventoryResponse } from '../../core/models/inventory.models';
 import { InventoryHeader } from './components/inventory-header/inventory-header';
@@ -31,6 +32,7 @@ import { InventoryThresholdModal } from './components/inventory-threshold-modal/
 })
 export class Inventory implements OnInit, OnDestroy {
   readonly inventoryService = inject(InventoryService);
+  readonly settingsService = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
 
@@ -57,6 +59,7 @@ export class Inventory implements OnInit, OnDestroy {
       this.inventoryService.setSearchQuery(query);
     }
     this.inventoryService.setViewActive(true);
+    this.settingsService.loadSettings();
     this.inventoryService.getStoreInventory().subscribe({
       error: () => {
         this.toast.error('No se pudo cargar el inventario de la tienda.');

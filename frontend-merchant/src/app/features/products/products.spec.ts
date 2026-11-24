@@ -113,9 +113,9 @@ describe('Products', () => {
     component.onToggleStatus(product);
 
     const toggleReq = httpMock.expectOne(
-      `${environment.apiUrl}/merchants/stores/demo-store/products/${product.id}`,
+      `${environment.apiUrl}/merchants/stores/demo-store/products/${product.id}/status`,
     );
-    expect(toggleReq.request.method).toBe('PUT');
+    expect(toggleReq.request.method).toBe('PATCH');
     toggleReq.flush({ ...product, status: 'INACTIVE' });
 
     expect(toastSpy).toHaveBeenCalled();

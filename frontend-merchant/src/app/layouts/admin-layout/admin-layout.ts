@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AdminHeader } from './components/admin-header/admin-header';
 import { AdminSidebar } from './components/admin-sidebar/admin-sidebar';
@@ -11,13 +11,26 @@ import { ProfileService } from '../../core/services/profile.service';
   selector: 'app-admin-layout',
   styleUrl: './admin-layout.css',
   templateUrl: './admin-layout.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLayout implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly profileService = inject(ProfileService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isMobileMenuOpen = signal<boolean>(false);
+  readonly isMobileOverlayRendered = signal<boolean>(false);
+  readonly isMobileOverlayClosing = signal<boolean>(false);
   readonly isCommandPaletteOpen = signal<boolean>(false);
+  private overlayTimeoutId?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.overlayTimeoutId) {
+        clearTimeout(this.overlayTimeoutId);
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (!this.profileService.currentProfile()) {
@@ -31,11 +44,31 @@ export class AdminLayout implements OnInit {
   }
 
   toggleMobileMenu(): void {
-    this.isMobileMenuOpen.update((open) => !open);
+    if (this.isMobileMenuOpen()) {
+      this.closeMobileMenu();
+    } else {
+      if (this.overlayTimeoutId) {
+        clearTimeout(this.overlayTimeoutId);
+        this.overlayTimeoutId = undefined;
+      }
+      this.isMobileOverlayRendered.set(true);
+      this.isMobileOverlayClosing.set(false);
+      this.isMobileMenuOpen.set(true);
+    }
   }
 
   closeMobileMenu(): void {
+    if (!this.isMobileMenuOpen()) return;
     this.isMobileMenuOpen.set(false);
+    this.isMobileOverlayClosing.set(true);
+    if (this.overlayTimeoutId) {
+      clearTimeout(this.overlayTimeoutId);
+    }
+    this.overlayTimeoutId = setTimeout(() => {
+      this.isMobileOverlayRendered.set(false);
+      this.isMobileOverlayClosing.set(false);
+      this.overlayTimeoutId = undefined;
+    }, 180);
   }
 
   openCommandPalette(): void {

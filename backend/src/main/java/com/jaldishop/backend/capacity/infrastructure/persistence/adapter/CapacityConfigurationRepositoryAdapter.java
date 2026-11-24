@@ -56,4 +56,14 @@ public class CapacityConfigurationRepositoryAdapter implements CapacityConfigura
         CapacityConfigurationEntity saved = jpaRepository.save(entity);
         return mapper.toDomain(saved);
     }
+
+    @Override
+    public boolean hasActiveOrCommittedReservations(UUID storeId, int dayOfWeek, LocalTime startTime, LocalTime endTime) {
+        return jpaRepository.hasActiveOrCommittedReservations(storeId, dayOfWeek, startTime, endTime);
+    }
+
+    @Override
+    public void deleteByIdAndStoreId(UUID id, UUID storeId) {
+        jpaRepository.deleteByIdAndStoreId(id, storeId);
+    }
 }

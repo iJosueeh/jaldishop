@@ -1,0 +1,431 @@
+{
+  "info": {
+    "name": "JaldiShop - Merchant workflow (local)",
+    "description": "Flujo automatico de demostracion Merchant: salud, registro, tienda, catalogo, inventario, capacidad y listado de pedidos. Ejecutar solamente contra una base local desechable.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const baseUrl = pm.environment.get('baseUrl') || '';",
+          "if (!/^http:\/\/(127\\.0\\.0\\.1|localhost):[0-9]+$/.test(baseUrl)) {",
+          "  throw new Error('Esta coleccion solo permite un backend local en loopback.');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Inicio",
+      "item": [
+        {
+          "name": "01 - Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/actuator/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Backend disponible', () => pm.response.to.have.status(200));",
+                  "pm.test('Health UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Registrar merchant y tienda",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now();",
+                  "pm.environment.set('merchantEmail', `merchant.${suffix}@example.test`);",
+                  "pm.environment.set('merchantStoreName', `Demo Merchant ${suffix}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Merchant creado', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "pm.environment.set('merchantToken', body.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{merchantEmail}}\",\n  \"password\": \"{{merchantPassword}}\",\n  \"firstName\": \"Demo\",\n  \"lastName\": \"Merchant\",\n  \"storeName\": \"{{merchantStoreName}}\",\n  \"pickupEnabled\": true,\n  \"deliveryEnabled\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register/merchant"
+          }
+        },
+        {
+          "name": "03 - Obtener mi tienda",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/stores/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Tienda obtenida', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.id).to.be.a('string').and.not.empty;",
+                  "pm.environment.set('storeId', body.id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 - Tienda y catalogo",
+      "item": [
+        {
+          "name": "01 - Actualizar mi tienda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{merchantStoreName}}\",\n  \"pickupEnabled\": true,\n  \"deliveryEnabled\": false,\n  \"deliveryFeeAmount\": 0,\n  \"deliveryFeeCurrency\": \"PEN\",\n  \"taxRate\": 0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/stores/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Tienda actualizada', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Crear categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bebidas demo\",\n  \"description\": \"Categoria creada por la coleccion Postman\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/merchants/stores/{{storeId}}/categories"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Categoria creada', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('categoryId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Cafe demo\",\n  \"slug\": \"cafe-demo-{{storeId}}\",\n  \"description\": \"Producto creado por Postman\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Producto creado', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('productId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Crear variante",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presentationName\": \"Vaso mediano\",\n  \"priceAmount\": 8.5,\n  \"priceCurrency\": \"PEN\",\n  \"tracksInventory\": true,\n  \"sku\": \"CAFE-{{productId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/merchants/stores/{{storeId}}/products/{{productId}}/variants"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Variante creada', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('variantId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Inventario",
+      "item": [
+        {
+          "name": "01 - Establecer stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/inventory/variants/{{variantId}}/stock"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Stock establecido', () => pm.response.to.have.status(200));",
+                  "pm.test('Cantidad disponible', () => pm.expect(pm.response.json().availableQuantity).to.eql(20));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Configurar alerta de stock bajo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lowStockThreshold\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/inventory/variants/{{variantId}}/threshold"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Umbral actualizado', () => pm.response.to.have.status(200));",
+                  "pm.test('Umbral guardado', () => pm.expect(pm.response.json().lowStockThreshold).to.eql(5));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Consultar inventario de la variante",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/inventory/variants/{{variantId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inventario consultado', () => pm.response.to.have.status(200));",
+                  "pm.test('Stock consistente', () => pm.expect(pm.response.json().physicalQuantity).to.eql(20));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Capacidad",
+      "item": [
+        {
+          "name": "01 - Crear horario y cupo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayOfWeek\": 1,\n  \"startTime\": \"09:00:00\",\n  \"endTime\": \"18:00:00\",\n  \"maxCapacity\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/capacity-configurations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Horario creado', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('capacityConfigurationId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Listar horarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/capacity-configurations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Horarios listados', () => pm.response.to.have.status(200));",
+                  "pm.test('Incluye el horario creado', () => pm.expect(pm.response.json().some(item => item.id === pm.environment.get('capacityConfigurationId'))).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Pedidos",
+      "item": [
+        {
+          "name": "01 - Listar pedidos de la tienda",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders?page=0&size=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pedidos listados', () => pm.response.to.have.status(200));",
+                  "pm.test('Respuesta paginada', () => pm.expect(pm.response.json()).to.have.property('content'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Cambiar estado de pedido existente (opcional)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('existingOrderId')) {",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado de pedido actualizado', () => pm.response.to.have.status(200));",
+                  "pm.test('Estado esperado', () => pm.expect(pm.response.json().status).to.eql(pm.environment.get('nextOrderStatus')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{merchantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{nextOrderStatus}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/merchants/stores/{{storeId}}/orders/{{existingOrderId}}/status"
+          }
+        }
+      ]
+    }
+  ]
+}

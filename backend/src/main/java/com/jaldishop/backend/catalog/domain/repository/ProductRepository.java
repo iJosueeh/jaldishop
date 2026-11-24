@@ -11,8 +11,13 @@ public interface ProductRepository {
     Product save(Product product);
     Optional<Product> findById(UUID id);
     Optional<Product> findByIdAndStoreId(UUID id, UUID storeId);
+    Optional<Product> findByStoreIdAndSlug(UUID storeId, String slug);
     List<Product> findByStoreId(UUID storeId);
     List<Product> findByStoreIdAndCategoryId(UUID storeId, UUID categoryId);
     boolean existsByStoreIdAndSlug(UUID storeId, String slug);
     boolean existsByStoreIdAndSlugAndIdNot(UUID storeId, String slug, UUID id);
+    Optional<Product> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId);
+    boolean hasOperationalHistory(UUID productId);
+    List<String> findProductImageUrls(UUID productId);
+    void deleteProductAndSafeOrphans(UUID productId, UUID storeId);
 }

@@ -56,13 +56,6 @@ export class AdminSettingsSystemTab {
     }
   }
 
-  onSessionTimeoutChange(event: Event): void {
-    const val = parseInt((event.target as HTMLInputElement).value, 10);
-    if (!isNaN(val) && val > 0) {
-      this.settingsChange.emit({ sessionTimeoutHours: val });
-    }
-  }
-
   onNoticeChange(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.settingsChange.emit({ maintenanceNotice: val });

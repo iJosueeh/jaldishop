@@ -21,6 +21,7 @@ public interface StoreRepository {
         return existsByOwnerUserId(merchantUserId);
     }
     List<Store> findAllStores(String query, StoreStatus status);
+    Optional<Store> lockByIdForDeletion(UUID storeId);
     boolean hasOperationalHistory(UUID storeId);
     void deleteStore(UUID storeId, UUID ownerUserId);
 }

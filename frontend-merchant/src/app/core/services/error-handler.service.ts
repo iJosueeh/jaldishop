@@ -32,6 +32,7 @@ export class ErrorHandlerService {
       code: apiError?.code ?? this.getDefaultCodeForStatus(error.status),
       message: apiError?.message ?? this.getDefaultMessageForStatus(error.status),
       fieldErrors: apiError?.errors ?? {},
+      metadata: apiError?.metadata,
       timestamp: new Date(),
     };
   }

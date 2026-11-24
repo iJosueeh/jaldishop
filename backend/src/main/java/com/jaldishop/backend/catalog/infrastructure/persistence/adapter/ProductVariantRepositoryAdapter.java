@@ -81,4 +81,25 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
     public boolean existsByStoreIdAndSkuAndIdNot(UUID storeId, String sku, UUID id) {
         return repository.existsByStoreIdAndSkuAndIdNot(storeId, sku, id);
     }
+
+    @Override
+    public Optional<ProductVariant> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId) {
+        repository.applyShortLockTimeout();
+        return repository.findByIdAndStoreIdForUpdate(id, storeId).map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean hasOperationalHistory(UUID variantId) {
+        return repository.hasOperationalHistory(variantId);
+    }
+
+    @Override
+    public long countActiveByProductIdAndIdNot(UUID productId, UUID excludeVariantId) {
+        return repository.countActiveByProductIdAndIdNot(productId, excludeVariantId);
+    }
+
+    @Override
+    public void deleteVariantAndSafeOrphans(UUID variantId, UUID storeId) {
+        repository.deleteVariantAndSafeOrphans(variantId, storeId);
+    }
 }

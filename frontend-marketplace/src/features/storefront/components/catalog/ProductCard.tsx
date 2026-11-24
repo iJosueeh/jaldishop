@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Plus, Clock, Layers, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/components/ui/Button';
@@ -10,22 +11,22 @@ import { formatCurrency } from '@/shared/utils/formatters';
 import { cn } from '@/shared/utils/cn';
 
 interface ProductCardProps {
+  storeSlug?: string;
   product: ProductItem;
   onAdd: (product: ProductItem) => void;
   currentQuantity?: number;
   pending?: boolean;
-  onOpenDetail?: (product: ProductItem) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (productId: string) => void;
   isTogglingFavorite?: boolean;
 }
 
 export function ProductCard({
+  storeSlug,
   product,
   onAdd,
   currentQuantity = 0,
   pending = false,
-  onOpenDetail,
   isFavorite = false,
   onToggleFavorite,
   isTogglingFavorite = false,
@@ -41,6 +42,7 @@ export function ProductCard({
   const displayPrice = hasPriceRange
     ? `${formatCurrency(product.minPrice!)} - ${formatCurrency(product.maxPrice!)}`
     : formatCurrency(product.price);
+  const detailHref = storeSlug && product.slug ? `/tienda/${storeSlug}/producto/${product.slug}` : null;
 
   return (
     <motion.article
@@ -50,19 +52,24 @@ export function ProductCard({
     >
       <div>
         {/* Cabecera visual con fotografía editorial (aspect 4:3) */}
-        <div
-          onClick={() => onOpenDetail?.(product)}
-          className={cn(
-            'relative overflow-hidden rounded-t-[12px] bg-stone-100',
-            onOpenDetail && 'cursor-pointer'
+        <div className="relative overflow-hidden rounded-t-[12px] bg-stone-100">
+          {detailHref ? (
+            <Link href={detailHref} aria-label={`Ver detalle de ${product.name}`} className="block">
+              <ProductVisual
+                name={product.name}
+                imageUrl={product.imageUrl}
+                imageBg={product.imageBg || 'from-amber-700/20 to-stone-800/30'}
+                iconText={product.iconText || product.name.substring(0, 2).toUpperCase()}
+              />
+            </Link>
+          ) : (
+            <ProductVisual
+              name={product.name}
+              imageUrl={product.imageUrl}
+              imageBg={product.imageBg || 'from-amber-700/20 to-stone-800/30'}
+              iconText={product.iconText || product.name.substring(0, 2).toUpperCase()}
+            />
           )}
-        >
-          <ProductVisual
-            name={product.name}
-            imageUrl={product.imageUrl}
-            imageBg={product.imageBg || 'from-amber-700/20 to-stone-800/30'}
-            iconText={product.iconText || product.name.substring(0, 2).toUpperCase()}
-          />
 
           {/* Insignias Flotantes estilo Shopify */}
           <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 z-10 pointer-events-none">
@@ -108,23 +115,24 @@ export function ProductCard({
 
         {/* Contenido Editorial del Producto */}
         <div className="p-4 sm:p-5 space-y-2">
-          <h3
-            onClick={() => onOpenDetail?.(product)}
-            className={cn(
-              'font-display text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug',
-              onOpenDetail && 'cursor-pointer'
+          <h3 className="font-display text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug">
+            {detailHref ? (
+              <Link href={detailHref} className="hover:underline">
+                {product.name}
+              </Link>
+            ) : (
+              product.name
             )}
-          >
-            {product.name}
           </h3>
 
-          {product.description ? (
-            <p className="text-xs sm:text-sm text-stone-600 line-clamp-2 leading-relaxed">
-              {product.description}
-            </p>
+            {product.description ? (
+              <p className="text-xs sm:text-sm text-stone-600 line-clamp-2 leading-relaxed">
+                {product.description}
+              </p>
           ) : (
             <div className="h-4" />
-          )}
+            )}
+
 
           {/* Tag de tiempo de preparación artesanal */}
           {product.prepTimeMinutes ? (

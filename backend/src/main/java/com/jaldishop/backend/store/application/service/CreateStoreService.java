@@ -4,10 +4,14 @@ import com.jaldishop.backend.store.application.command.CreateStoreCommand;
 import com.jaldishop.backend.store.domain.model.StoreCategory;
 import com.jaldishop.backend.store.domain.repository.StoreCategoryRepository;
 
+import com.jaldishop.backend.identity.application.port.PlatformSettingsProvider;
+import com.jaldishop.backend.identity.domain.model.PlatformSettings;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.shared.exception.ConflictException;
+import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +24,19 @@ public class CreateStoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final PlatformSettingsProvider platformSettingsProvider;
 
-    public CreateStoreService(StoreRepository storeRepository, UserRepository userRepository) {
+    @Autowired
+    public CreateStoreService(StoreRepository storeRepository,
+                              UserRepository userRepository,
+                              PlatformSettingsProvider platformSettingsProvider) {
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
+        this.platformSettingsProvider = platformSettingsProvider;
+    }
+
+    public CreateStoreService(StoreRepository storeRepository, UserRepository userRepository) {
+        this(storeRepository, userRepository, null);
     }
 
     public Store execute(CreateStoreCommand command) {
@@ -58,6 +71,13 @@ public class CreateStoreService {
                 command.whatsappNumber(),
                 command.categoryIds()
         );
+
+        if (platformSettingsProvider != null) {
+            PlatformSettings settings = platformSettingsProvider.getSettings();
+            if (settings != null && settings.requireStoreApproval()) {
+                store.suspend(); // Queda suspendida / pendiente de aprobación del administrador
+            }
+        }
 
         Store savedStore = storeRepository.save(store);
         userRepository.assignStoreToMerchantRole(command.ownerUserId(), savedStore.getId());

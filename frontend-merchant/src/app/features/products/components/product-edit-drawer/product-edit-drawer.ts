@@ -26,6 +26,7 @@ import {
   matLayersOutline,
   matEditOutline,
   matSkilletOutline,
+  matDeleteOutline,
 } from '@ng-icons/material-symbols/outline';
 import {
   Product,
@@ -50,11 +51,14 @@ import {
 import { map, of, switchMap } from 'rxjs';
 import { ProductGalleryUploader } from '../product-gallery-uploader/product-gallery-uploader';
 import { generateProductSku } from '../product-create-drawer/product-create-drawer';
+import { DestructiveActionModal } from '../../../../shared/components/destructive-action-modal/destructive-action-modal';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { ApiErrorMetadata } from '../../../../core/models/api-error.models';
 
 @Component({
   selector: 'app-product-edit-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIcon, ProductGalleryUploader],
+  imports: [CommonModule, FormsModule, NgIcon, ProductGalleryUploader, DestructiveActionModal],
   providers: [
     provideIcons({
       matCloseOutline,
@@ -71,6 +75,7 @@ import { generateProductSku } from '../product-create-drawer/product-create-draw
       matLayersOutline,
       matEditOutline,
       matSkilletOutline,
+      matDeleteOutline,
     }),
   ],
   templateUrl: './product-edit-drawer.html',
@@ -611,5 +616,110 @@ export class ProductEditDrawer {
         this.toast.error(msg);
       },
     });
+  }
+
+  private readonly errorHandler = inject(ErrorHandlerService);
+  readonly deleteTarget = signal<
+    | { type: 'product'; product: Product }
+    | { type: 'variant'; variant: ProductVariant }
+    | null
+  >(null);
+  readonly isDeletingTarget = signal<boolean>(false);
+  readonly deleteErrorStatus = signal<number | null>(null);
+  readonly deleteErrorMessage = signal<string | null>(null);
+  readonly deleteConflictMetadata = signal<ApiErrorMetadata | null>(null);
+
+  requestDeleteProduct(): void {
+    const p = this.product();
+    if (!p) return;
+    this.deleteErrorStatus.set(null);
+    this.deleteErrorMessage.set(null);
+    this.deleteConflictMetadata.set(null);
+    this.deleteTarget.set({ type: 'product', product: p });
+  }
+
+  requestDeleteVariant(variant: ProductVariant): void {
+    this.deleteErrorStatus.set(null);
+    this.deleteErrorMessage.set(null);
+    this.deleteConflictMetadata.set(null);
+    this.deleteTarget.set({ type: 'variant', variant });
+  }
+
+  cancelDeleteTarget(): void {
+    if (!this.isDeletingTarget()) {
+      this.deleteTarget.set(null);
+    }
+  }
+
+  confirmDeleteTarget(): void {
+    const target = this.deleteTarget();
+    const p = this.product();
+    const storeId = this.storeService.currentStore()?.id || p?.storeId;
+    if (!target || !p || !storeId) return;
+
+    this.isDeletingTarget.set(true);
+    if (target.type === 'product') {
+      this.productService.deleteProduct(storeId, p.id).subscribe({
+        next: (res) => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.toast.success(res.message);
+          this.handleClose();
+        },
+        error: (err) => this.handleDeleteError(err),
+      });
+    } else {
+      this.productService.deleteProductVariant(storeId, p.id, target.variant.id).subscribe({
+        next: (res) => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.variants.update((list) => list.filter((v) => v.id !== target.variant.id));
+          this.toast.success(res.message);
+        },
+        error: (err) => this.handleDeleteError(err),
+      });
+    }
+  }
+
+  fallbackDeactivateTarget(): void {
+    const target = this.deleteTarget();
+    const p = this.product();
+    const storeId = this.storeService.currentStore()?.id || p?.storeId;
+    if (!target || !p || !storeId) return;
+
+    this.isDeletingTarget.set(true);
+    if (target.type === 'product') {
+      this.productService.updateProductStatus(storeId, p.id, 'INACTIVE').subscribe({
+        next: () => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.toast.info(`Producto "${p.name}" desactivado.`);
+        },
+        error: (err) => this.handleDeleteError(err),
+      });
+    } else {
+      this.productService.updateVariantStatus(storeId, p.id, target.variant.id, 'INACTIVE').subscribe({
+        next: (updated) => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.variants.update((list) => list.map((v) => (v.id === updated.id ? updated : v)));
+          this.toast.info(`Formato "${updated.presentationName}" desactivado.`);
+        },
+        error: (err) => this.handleDeleteError(err),
+      });
+    }
+  }
+
+  private handleDeleteError(err: unknown): void {
+    this.isDeletingTarget.set(false);
+    const normalized = this.errorHandler.normalize(err);
+    if (normalized.status === 409 || normalized.status === 403) {
+      this.deleteErrorStatus.set(normalized.status);
+      this.deleteErrorMessage.set(normalized.message);
+      this.deleteConflictMetadata.set(normalized.metadata ?? null);
+    } else {
+      this.deleteTarget.set(null);
+      this.toast.error(normalized.message);
+    }
   }
 }

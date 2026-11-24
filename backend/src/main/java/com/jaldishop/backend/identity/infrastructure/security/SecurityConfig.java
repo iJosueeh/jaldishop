@@ -5,6 +5,7 @@ import com.jaldishop.backend.shared.exception.RestAuthenticationEntryPoint;
 import com.jaldishop.backend.shared.exception.ApiError;
 import com.jaldishop.backend.shared.exception.SharedErrorCodes;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,13 +29,16 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final MaintenanceModeFilter maintenanceModeFilter;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          ObjectProvider<MaintenanceModeFilter> maintenanceModeFilterProvider,
                           RestAuthenticationEntryPoint restAuthenticationEntryPoint,
                           RestAccessDeniedHandler restAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.maintenanceModeFilter = maintenanceModeFilterProvider.getIfAvailable();
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
     }
@@ -51,7 +55,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.cors(Customizer.withDefaults())
+        http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -59,6 +63,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/public-settings").permitAll()
                         .requestMatchers(
                                 "/api/v1/health",
                                 "/actuator/health",
@@ -88,8 +93,11 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler)
-                )
-                .build();
+                );
+        if (maintenanceModeFilter != null) {
+            http.addFilterAfter(maintenanceModeFilter, JwtAuthenticationFilter.class);
+        }
+        return http.build();
     }
 
 }

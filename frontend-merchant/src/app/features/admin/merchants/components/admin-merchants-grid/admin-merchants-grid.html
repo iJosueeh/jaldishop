@@ -2,7 +2,7 @@
   @for (merchant of merchants(); track merchant.id) {
     <div
       (click)="selectMerchant.emit(merchant)"
-      class="p-4 sm:p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-4 hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer group"
+      class="card-interactive p-4 sm:p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xs flex flex-col justify-between gap-4 hover:border-primary/40 cursor-pointer group"
     >
       <!-- Top: Avatar + Nombre + Estado + Badge Fiscal -->
       <div class="flex items-start justify-between gap-3">
@@ -28,7 +28,7 @@
             [title]="merchant.status"
           ></span>
           <span
-            class="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider"
+            class="badge-enter px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider"
             [class.bg-emerald-500/10]="merchant.phone"
             [class.text-emerald-700]="merchant.phone"
             [class.dark:text-emerald-400]="merchant.phone"

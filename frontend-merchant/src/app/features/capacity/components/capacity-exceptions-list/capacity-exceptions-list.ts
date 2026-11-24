@@ -8,6 +8,7 @@ import {
   matEventBusyOutline,
   matBlockOutline,
   matEditOutline,
+  matDeleteOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -20,6 +21,7 @@ import {
       matEventBusyOutline,
       matBlockOutline,
       matEditOutline,
+      matDeleteOutline,
     }),
   ],
   selector: 'app-capacity-exceptions-list',
@@ -32,6 +34,7 @@ export class CapacityExceptionsList {
 
   readonly toggleStatus = output<CapacityException>();
   readonly editException = output<CapacityException>();
+  readonly deleteException = output<CapacityException>();
   readonly createException = output<void>();
 
   formatDate(dateStr: string): string {

@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { storeService } from '@/features/storefront/services/storeService';
+import { getMaintenanceNotice } from '@/core/api/apiClient';
 import { StorefrontHero } from '@/features/storefront/components/StorefrontHero';
 import { CatalogContainer } from '@/features/storefront/components/CatalogContainer';
 import { StoreLocationMap } from '@/features/storefront/components/map';
@@ -56,16 +57,38 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const { slug } = await params;
   let store: import('@/features/storefront/types/storefront.types').PublicStore | null = null;
   let loadFailed = false;
+  let maintenanceNotice: string | null = null;
 
   try {
     store = await storeService.getStoreBySlug(slug);
   } catch (error) {
+    maintenanceNotice = getMaintenanceNotice(error);
     console.error(`[StorefrontPage] Error al obtener datos de la tienda '${slug}':`, error);
     loadFailed = true;
   }
 
   if (!store && !loadFailed) {
     notFound();
+  }
+
+  if (maintenanceNotice) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fcfbfa]">
+        <main className="flex-1 flex items-center justify-center py-20 px-6">
+          <div className="max-w-md w-full text-center space-y-5 bg-white p-8 sm:p-10 rounded-[12px] border border-amber-200 shadow-xl">
+            <div className="w-14 h-14 rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto font-black text-xl">
+              !
+            </div>
+            <div className="space-y-2">
+              <h1 className="font-display text-2xl font-bold text-stone-900">
+                Plataforma en Mantenimiento
+              </h1>
+              <p className="text-sm text-stone-600 leading-relaxed">{maintenanceNotice}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (loadFailed || !store) {
@@ -104,8 +127,11 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
     );
   }
 
-  // Cargar productos activos del catálogo público de la tienda
-  const products = await storeService.getStoreProducts(store.id);
+  // Cargar productos activos y settings públicos de la tienda en paralelo
+  const [products, storeSettings] = await Promise.all([
+    storeService.getStoreProducts(store.id),
+    storeService.getPublicStoreSettings(store.id),
+  ]);
   const contactNumber = store.whatsappNumber || store.phone;
   const whatsappUrl = contactNumber?.replace(/\D/g, '') ? `https://wa.me/${contactNumber.replace(/\D/g, '')}` : null;
 
@@ -122,10 +148,50 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
           storeName={store.name}
           products={products}
           store={store}
+          storeSettings={storeSettings}
         />
 
         {/* Mapa Interactivo del Local con Coordenadas OpenStreetMap Leaflet */}
         <StoreLocationMap store={store} />
+
+        {/* Políticas de Atención y Condiciones Operativas (INDECOPI) */}
+        {storeSettings && (
+          <section
+            aria-labelledby="policies-heading"
+            className="rounded-[12px] border border-stone-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-4"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 id="policies-heading" className="font-display text-lg font-bold text-stone-900">
+                Políticas de Tienda y Condiciones de Atención
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
+                <span className="px-2.5 py-1 rounded-full bg-stone-100">
+                  Preparación estimada: ~{storeSettings.estimatedPrepTimeMinutes} min
+                </span>
+                {storeSettings.acceptsPosOnDelivery && (
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-[#005141]">
+                    Acepta POS contra entrega
+                  </span>
+                )}
+                {storeSettings.minDeliveryAmount !== null && (
+                  <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800">
+                    Mínimo delivery: S/ {Number(storeSettings.minDeliveryAmount).toFixed(2)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-stone-600">
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200/70 space-y-1">
+                <h3 className="font-bold text-stone-800">Política de Cancelación</h3>
+                <p className="leading-relaxed">{storeSettings.cancellationPolicy}</p>
+              </div>
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200/70 space-y-1">
+                <h3 className="font-bold text-stone-800">Política de Reembolsos (INDECOPI)</h3>
+                <p className="leading-relaxed">{storeSettings.refundPolicy}</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Sección de Consulta Directa con 12px radius & Pill Button */}
         <section aria-labelledby="contact-heading" className="flex flex-col gap-4 rounded-[12px] border border-stone-200/90 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7 shadow-xs">

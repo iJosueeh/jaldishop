@@ -193,6 +193,8 @@ class PaymentRefundPostgresIntegrationTest {
         jdbcTemplate.update("DELETE FROM payment_refund_intents");
         jdbcTemplate.update("DELETE FROM payment_incidences");
         jdbcTemplate.update("DELETE FROM payment_attempts");
+        jdbcTemplate.update("DELETE FROM merchant_payout_ledgers WHERE order_id IN (SELECT id FROM orders WHERE payment_id IS NOT NULL)");
+        jdbcTemplate.update("DELETE FROM order_payment_breakdowns WHERE order_id IN (SELECT id FROM orders WHERE payment_id IS NOT NULL)");
         jdbcTemplate.update("DELETE FROM orders WHERE payment_id IS NOT NULL");
         jdbcTemplate.update("DELETE FROM payments");
         jdbcTemplate.update("DELETE FROM capacity_reservations WHERE user_id = ?", USER_ID);

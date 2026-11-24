@@ -11,10 +11,14 @@ import com.jaldishop.backend.identity.domain.repository.RoleRepository;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
 
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
+import com.jaldishop.backend.identity.application.port.PlatformSettingsProvider;
+import com.jaldishop.backend.identity.domain.model.PlatformSettings;
+import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,16 +36,46 @@ public class RegisterMerchantService {
     private final PasswordEncoder passwordEncoder;
     private final StoreProvisioning storeProvisioning;
     private final JwtService jwtService;
+    private final PlatformSettingsProvider platformSettingsProvider;
 
-    public RegisterMerchantService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, StoreProvisioning storeProvisioning, JwtService jwtService) {
+    @Autowired
+    public RegisterMerchantService(UserRepository userRepository,
+                                   RoleRepository roleRepository,
+                                   PasswordEncoder passwordEncoder,
+                                   StoreProvisioning storeProvisioning,
+                                   JwtService jwtService,
+                                   PlatformSettingsProvider platformSettingsProvider) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.storeProvisioning = storeProvisioning;
         this.jwtService = jwtService;
+        this.platformSettingsProvider = platformSettingsProvider;
+    }
+
+    public RegisterMerchantService(UserRepository userRepository,
+                                   RoleRepository roleRepository,
+                                   PasswordEncoder passwordEncoder,
+                                   StoreProvisioning storeProvisioning,
+                                   JwtService jwtService) {
+        this(userRepository, roleRepository, passwordEncoder, storeProvisioning, jwtService, null);
     }
 
     public AuthResult execute(RegisterMerchantCommand command) {
+        return execute(command, false);
+    }
+
+    public AuthResult execute(RegisterMerchantCommand command, boolean bypassRegistrationCheck) {
+        if (!bypassRegistrationCheck && platformSettingsProvider != null) {
+            PlatformSettings settings = platformSettingsProvider.getSettings();
+            if (settings != null && !settings.allowMerchantRegistration()) {
+                throw new BusinessRuleException(
+                        "MERCHANT_REGISTRATION_DISABLED",
+                        "El registro de comerciantes está temporalmente deshabilitado por la administración de la plataforma."
+                );
+            }
+        }
+
         Role merchantRole = roleRepository.findByName(RoleName.MERCHANT)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol MERCHANT no encontrado."));
 

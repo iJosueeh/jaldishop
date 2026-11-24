@@ -16,7 +16,8 @@ public record StoreSettingsResponse(
         int estimatedPrepTimeMinutes,
         boolean orderSoundAlert,
         int soundVolume,
-        boolean lowStockVisualAlert
+        boolean lowStockVisualAlert,
+        Long version
 ) {
     public static StoreSettingsResponse fromDomain(StoreSettings settings) {
         return new StoreSettingsResponse(
@@ -31,7 +32,8 @@ public record StoreSettingsResponse(
                 settings.getEstimatedPrepTimeMinutes(),
                 settings.isOrderSoundAlert(),
                 settings.getSoundVolume(),
-                settings.isLowStockVisualAlert()
+                settings.isLowStockVisualAlert(),
+                settings.getVersion()
         );
     }
 }

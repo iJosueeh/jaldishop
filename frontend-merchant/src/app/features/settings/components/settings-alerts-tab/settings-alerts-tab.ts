@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { StoreService } from '../../../../core/services/store.service';
@@ -41,6 +41,15 @@ export class SettingsAlertsTab {
   readonly lowStockAlert = signal<boolean>(
     this.settingsService.settings().lowStockVisualAlert
   );
+
+  constructor() {
+    effect(() => {
+      const s = this.settingsService.settings();
+      this.soundAlert.set(s.orderSoundAlert);
+      this.soundVolume.set(s.soundVolume ?? 80);
+      this.lowStockAlert.set(s.lowStockVisualAlert);
+    });
+  }
 
   playTestSound(): void {
     this.settingsService.playNotificationSound();

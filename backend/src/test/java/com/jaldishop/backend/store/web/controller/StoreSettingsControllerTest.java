@@ -50,7 +50,8 @@ class StoreSettingsControllerTest {
                 25,
                 true,
                 80,
-                true
+                true,
+                0L
         );
 
         when(getStoreSettingsUseCase.execute(userId)).thenReturn(expected);
@@ -79,7 +80,8 @@ class StoreSettingsControllerTest {
                 35,
                 true,
                 90,
-                false
+                false,
+                0L
         );
 
         StoreSettingsResponse updated = new StoreSettingsResponse(
@@ -94,10 +96,11 @@ class StoreSettingsControllerTest {
                 request.estimatedPrepTimeMinutes(),
                 request.orderSoundAlert(),
                 request.soundVolume(),
-                request.lowStockVisualAlert()
+                request.lowStockVisualAlert(),
+                1L
         );
 
-        when(updateStoreSettingsUseCase.execute(userId, request)).thenReturn(updated);
+        when(updateStoreSettingsUseCase.execute(userId, request, null)).thenReturn(updated);
 
         ResponseEntity<StoreSettingsResponse> response = controller.updateMySettings(principal, request);
 
@@ -106,6 +109,6 @@ class StoreSettingsControllerTest {
         assertThat(response.getBody().requireCustomerDni()).isTrue();
         assertThat(response.getBody().cashOnDeliveryEnabled()).isFalse();
         assertThat(response.getBody().acceptsPosOnDelivery()).isTrue();
-        verify(updateStoreSettingsUseCase).execute(userId, request);
+        verify(updateStoreSettingsUseCase).execute(userId, request, null);
     }
 }

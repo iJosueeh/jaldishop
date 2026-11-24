@@ -14,6 +14,8 @@ public final class SharedErrorCodes {
     public static final String BUSINESS_RULE_VIOLATION = "BUSINESS_RULE_VIOLATION";
     public static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
     public static final String RESOURCE_CONFLICT = "RESOURCE_CONFLICT";
+    public static final String RESOURCE_IN_USE = "RESOURCE_IN_USE";
+    public static final String INVALID_REFERENCE = "INVALID_REFERENCE";
     public static final String CONCURRENT_MODIFICATION = "CONCURRENT_MODIFICATION";
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String FORBIDDEN = "FORBIDDEN";

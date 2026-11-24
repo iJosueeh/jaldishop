@@ -1,8 +1,11 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  computed,
+  DestroyRef,
   ElementRef,
   HostListener,
+  computed,
+  effect,
   inject,
   input,
   output,
@@ -61,12 +64,14 @@ export interface CommandGroup {
   selector: 'app-admin-command-palette',
   styleUrl: './admin-command-palette.css',
   templateUrl: './admin-command-palette.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminCommandPalette {
   private readonly router = inject(Router);
   private readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isOpen = input<boolean>(false);
   readonly closePalette = output<void>();
@@ -75,7 +80,31 @@ export class AdminCommandPalette {
 
   readonly query = signal<string>('');
   readonly selectedIndex = signal<number>(0);
+  readonly isRendered = signal<boolean>(false);
   readonly isClosing = signal<boolean>(false);
+  private closeTimeoutId?: ReturnType<typeof setTimeout>;
+
+  private readonly syncOpenEffect = effect(() => {
+    const open = this.isOpen();
+    if (open) {
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId);
+        this.closeTimeoutId = undefined;
+      }
+      this.isRendered.set(true);
+      this.isClosing.set(false);
+    } else if (this.isRendered() && !this.isClosing()) {
+      this.triggerExit();
+    }
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId);
+      }
+    });
+  }
 
   // Límite máximo de resultados para optimizar rendimiento y mantener la interfaz compacta
   private readonly MAX_TOTAL_RESULTS = 5;
@@ -130,11 +159,22 @@ export class AdminCommandPalette {
 
   dismiss(): void {
     if (this.isClosing()) return;
-    this.isClosing.set(true);
-    setTimeout(() => {
-      this.isClosing.set(false);
+    this.triggerExit(() => {
       this.closePalette.emit();
-    }, 160);
+    });
+  }
+
+  private triggerExit(callback?: () => void): void {
+    if (this.closeTimeoutId) {
+      clearTimeout(this.closeTimeoutId);
+    }
+    this.isClosing.set(true);
+    this.closeTimeoutId = setTimeout(() => {
+      this.isRendered.set(false);
+      this.isClosing.set(false);
+      this.closeTimeoutId = undefined;
+      callback?.();
+    }, 180);
   }
 
   readonly filteredItems = computed<CommandItem[]>(() => {

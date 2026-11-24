@@ -18,6 +18,9 @@ import { CapacitySlotModal } from './components/capacity-slot-modal/capacity-slo
 import { CapacityExceptionsList } from './components/capacity-exceptions-list/capacity-exceptions-list';
 import { CapacityExceptionModal } from './components/capacity-exception-modal/capacity-exception-modal';
 import { CapacityTabSelector } from './components/capacity-tab-selector/capacity-tab-selector';
+import { DestructiveActionModal } from '../../shared/components/destructive-action-modal/destructive-action-modal';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
+import { ApiErrorMetadata } from '../../core/models/api-error.models';
 
 @Component({
   imports: [
@@ -29,6 +32,7 @@ import { CapacityTabSelector } from './components/capacity-tab-selector/capacity
     CapacitySlotModal,
     CapacityExceptionsList,
     CapacityExceptionModal,
+    DestructiveActionModal,
   ],
   selector: 'app-capacity',
   styleUrl: './capacity.css',
@@ -232,5 +236,99 @@ export class Capacity implements OnInit {
 
   private getTodayDayOfWeek(): number {
     return new Date().getDay();
+  }
+
+  private readonly errorHandler = inject(ErrorHandlerService);
+  readonly deleteTarget = signal<
+    | { type: 'slot'; slot: CapacityConfiguration }
+    | { type: 'exception'; exc: CapacityException }
+    | null
+  >(null);
+  readonly isDeletingTarget = signal<boolean>(false);
+  readonly deleteErrorStatus = signal<number | null>(null);
+  readonly deleteErrorMessage = signal<string | null>(null);
+  readonly deleteConflictMetadata = signal<ApiErrorMetadata | null>(null);
+
+  requestDeleteSlot(slot: CapacityConfiguration): void {
+    this.resetDeleteErrors();
+    this.deleteTarget.set({ type: 'slot', slot });
+  }
+
+  requestDeleteException(exc: CapacityException): void {
+    this.resetDeleteErrors();
+    this.deleteTarget.set({ type: 'exception', exc });
+  }
+
+  cancelDeleteTarget(): void {
+    if (!this.isDeletingTarget()) {
+      this.deleteTarget.set(null);
+    }
+  }
+
+  confirmDeleteTarget(): void {
+    const target = this.deleteTarget();
+    if (!target) return;
+    this.isDeletingTarget.set(true);
+    const req$ =
+      target.type === 'slot'
+        ? this.capacityService.deleteConfiguration(target.slot.id)
+        : this.capacityService.deleteException(target.exc.id);
+
+    req$.subscribe({
+      next: (res) => {
+        this.isDeletingTarget.set(false);
+        this.deleteTarget.set(null);
+        this.toastService.success(res.message);
+      },
+      error: (err) => {
+        this.isDeletingTarget.set(false);
+        const normalized = this.errorHandler.normalize(err);
+        if (normalized.status === 409 || normalized.status === 403) {
+          this.deleteErrorStatus.set(normalized.status);
+          this.deleteErrorMessage.set(normalized.message);
+          this.deleteConflictMetadata.set(normalized.metadata ?? null);
+        } else {
+          this.deleteTarget.set(null);
+          this.toastService.error(normalized.message);
+        }
+      },
+    });
+  }
+
+  fallbackDeactivateTarget(): void {
+    const target = this.deleteTarget();
+    if (!target) return;
+    this.isDeletingTarget.set(true);
+    if (target.type === 'slot') {
+      this.capacityService.deactivateConfiguration(target.slot.id).subscribe({
+        next: () => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.toastService.info('Franja horaria pausada.');
+        },
+        error: () => {
+          this.isDeletingTarget.set(false);
+          this.toastService.error('No se pudo pausar la franja horaria.');
+        },
+      });
+    } else {
+      this.capacityService.deactivateException(target.exc.id).subscribe({
+        next: () => {
+          this.isDeletingTarget.set(false);
+          this.deleteTarget.set(null);
+          this.toastService.info('Excepción pausada.');
+        },
+        error: () => {
+          this.isDeletingTarget.set(false);
+          this.toastService.error('No se pudo pausar la excepción.');
+        },
+      });
+    }
+  }
+
+  private resetDeleteErrors(): void {
+    this.deleteErrorStatus.set(null);
+    this.deleteErrorMessage.set(null);
+    this.deleteConflictMetadata.set(null);
   }
 }

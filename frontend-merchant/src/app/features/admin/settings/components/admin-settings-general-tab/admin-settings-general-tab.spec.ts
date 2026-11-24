@@ -11,13 +11,8 @@ describe('AdminSettingsGeneralTab', () => {
     requireStoreApproval: false,
     maintenanceMode: false,
     maintenanceNotice: 'Mantenimiento',
-    sessionTimeoutHours: 24,
-    enforce2FAForAdmins: true,
-    notifyOnNewStoreRegistration: true,
-    notifyOnStoreSuspension: true,
-    adminAlertEmail: 'admin@jaldishop.com',
-    platformVersion: '1.2.0',
-    environment: 'production',
+    marketplaceCommissionRate: 5.0,
+    version: 0,
   };
 
   beforeEach(async () => {

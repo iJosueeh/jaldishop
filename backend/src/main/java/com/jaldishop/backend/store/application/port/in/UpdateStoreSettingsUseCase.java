@@ -7,4 +7,8 @@ import java.util.UUID;
 
 public interface UpdateStoreSettingsUseCase {
     StoreSettingsResponse execute(UUID userId, StoreSettingsRequest request);
+
+    default StoreSettingsResponse execute(UUID userId, StoreSettingsRequest request, String ipAddress) {
+        return execute(userId, request);
+    }
 }

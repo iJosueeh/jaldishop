@@ -4,6 +4,9 @@ import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
+import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
+import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
+import com.jaldishop.backend.catalog.domain.model.ProductVariant;
 
 import com.jaldishop.backend.ordering.domain.model.*;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderDetailResponse;
@@ -38,6 +41,9 @@ class GetCustomerOrderDetailServiceTest {
     @Mock
     private StoreRepository storeRepository;
 
+    @Mock
+    private ProductVariantRepository productVariantRepository;
+
     private GetCustomerOrderDetailService service;
 
     private UUID customerUserId;
@@ -47,7 +53,7 @@ class GetCustomerOrderDetailServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new GetCustomerOrderDetailService(orderRepository, storeRepository);
+        service = new GetCustomerOrderDetailService(orderRepository, storeRepository, productVariantRepository);
         customerUserId = UUID.randomUUID();
         storeId = UUID.randomUUID();
 
@@ -106,12 +112,20 @@ class GetCustomerOrderDetailServiceTest {
     void shouldReturnOrderDetailWhenBelongsToCustomer() {
         when(orderRepository.findByOrderNumber("ORD-00000001")).thenReturn(Optional.of(testOrder));
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(testStore));
+        UUID productId = UUID.randomUUID();
+        UUID variantId = testOrder.getItems().get(0).variantId();
+        ProductVariant variant = new ProductVariant(
+                variantId, productId, "Bolsa x10", "PAN-001", new BigDecimal("10.00"), "PEN",
+                true, VariantStatus.ACTIVE, List.of(), java.time.Instant.now(), java.time.Instant.now()
+        );
+        when(productVariantRepository.findById(variantId)).thenReturn(Optional.of(variant));
 
         CustomerOrderDetailResponse result = service.execute(customerUserId, "ORD-00000001");
 
         assertThat(result.orderNumber()).isEqualTo("ORD-00000001");
         assertThat(result.store().name()).isEqualTo("Panadería Don Pepe");
         assertThat(result.items()).hasSize(1);
+        assertThat(result.items().get(0).productId()).isEqualTo(productId);
         assertThat(result.items().get(0).productName()).isEqualTo("Pan Francés");
         assertThat(result.statusHistory()).hasSize(1);
         assertThat(result.statusHistory().get(0).status()).isEqualTo(OrderStatus.CONFIRMED);

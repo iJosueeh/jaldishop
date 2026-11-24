@@ -13,6 +13,7 @@ import { ProductsGrid } from './components/products-grid/products-grid';
 import { ProductsList } from './components/products-list/products-list';
 import { ProductCreateDrawer } from './components/product-create-drawer/product-create-drawer';
 import { ProductEditDrawer } from './components/product-edit-drawer/product-edit-drawer';
+import { CategoryManagerModal } from './components/category-manager-modal/category-manager-modal';
 import { Pagination } from '../../shared/components/pagination/pagination';
 
 @Component({
@@ -27,6 +28,7 @@ import { Pagination } from '../../shared/components/pagination/pagination';
     ProductsList,
     ProductCreateDrawer,
     ProductEditDrawer,
+    CategoryManagerModal,
     Pagination,
   ],
   templateUrl: './products.html',
@@ -39,6 +41,7 @@ export class Products implements OnInit {
 
   readonly isCreateDrawerOpen = signal<boolean>(false);
   readonly isEditDrawerOpen = signal<boolean>(false);
+  readonly isCategoryModalOpen = signal<boolean>(false);
   readonly selectedProductForEdit = signal<Product | null>(null);
   readonly editDrawerInitialTab = signal<'general' | 'variants'>('general');
   private readonly router = inject(Router);

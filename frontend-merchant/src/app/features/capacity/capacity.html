@@ -34,6 +34,7 @@
       [isLoading]="isLoading()"
       (toggleStatus)="onToggleStatus($event)"
       (editSlot)="openEditModal($event)"
+      (deleteSlot)="requestDeleteSlot($event)"
       (createSlot)="openCreateModal()"
     />
   }
@@ -45,6 +46,7 @@
       [isLoading]="isLoadingExceptions()"
       (toggleStatus)="onToggleExceptionStatus($event)"
       (editException)="openEditExceptionModal($event)"
+      (deleteException)="requestDeleteException($event)"
       (createException)="openCreateExceptionModal()"
     />
   }
@@ -67,5 +69,19 @@
     [exceptionToEdit]="selectedExceptionToEdit()"
     (closeModal)="closeExceptionModal()"
     (saveException)="onSaveException($event)"
+  />
+
+  <app-destructive-action-modal
+    [isOpen]="!!deleteTarget()"
+    [title]="deleteTarget()?.type === 'slot' ? '¿Eliminar franja horaria?' : '¿Eliminar excepción de capacidad?'"
+    message="Si no existen reservas activas o confirmadas en este bloque, se eliminará permanentemente."
+    fallbackLabel="Pausar en su lugar"
+    [isLoading]="isDeletingTarget()"
+    [errorStatus]="deleteErrorStatus()"
+    [errorMessage]="deleteErrorMessage()"
+    [conflictMetadata]="deleteConflictMetadata()"
+    (confirm)="confirmDeleteTarget()"
+    (fallback)="fallbackDeactivateTarget()"
+    (cancel)="cancelDeleteTarget()"
   />
 </div>

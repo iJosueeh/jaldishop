@@ -55,6 +55,10 @@ public class StoreSettingsEntity {
     @Column(name = "low_stock_visual_alert", nullable = false)
     private boolean lowStockVisualAlert;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version = 0L;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -195,5 +199,13 @@ public class StoreSettingsEntity {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

@@ -116,14 +116,23 @@
   --color-amberAccent: #f59e0b;
   --color-terracotta: #ea580c;
 
+  /* Tokens de Movimiento Centralizados (Motion Director / WCAG) */
+  --duration-fast: 150ms;
+  --duration-normal: 220ms;
+  --duration-exit: 180ms;
+  --duration-slow: 320ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* Animaciones Semánticas Globales (Cubic-bezier Amortiguado de Alta Precisión) */
-  --animate-fade-in: fadeIn 0.22s ease-out forwards;
-  --animate-fade-out: fadeOut 0.18s ease-in forwards;
-  --animate-slide-in-right: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-slide-out-right: slideOutRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  --animate-scale-up: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-modal-in: modalScaleIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-modal-out: modalScaleOut 0.20s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-fade-in: fadeIn var(--duration-normal) var(--ease-enter) forwards;
+  --animate-fade-out: fadeOut var(--duration-exit) var(--ease-exit) forwards;
+  --animate-slide-in-right: slideInRight var(--duration-slow) var(--ease-enter) forwards;
+  --animate-slide-out-right: slideOutRight var(--duration-exit) var(--ease-exit) forwards;
+  --animate-scale-up: scaleUp var(--duration-normal) var(--ease-enter) forwards;
+  --animate-modal-in: modalScaleIn var(--duration-normal) var(--ease-enter) both;
+  --animate-modal-out: modalScaleOut var(--duration-exit) var(--ease-exit) both;
   --animate-toast-slide-in: toastSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-toast-slide-out: toastSlideOut 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   --animate-live-pulse: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -156,26 +165,18 @@
 @keyframes backdropFadeIn {
   from {
     opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
   }
 }
 
 @keyframes backdropFadeOut {
   from {
     opacity: 1;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
   }
   to {
     opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
   }
 }
 
@@ -215,22 +216,42 @@
 @keyframes modalScaleIn {
   0% {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: scale(0.96);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
 @keyframes modalScaleOut {
   0% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.95) translateY(8px);
+    transform: scale(0.96);
+  }
+}
+
+@keyframes badgeEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes skeletonShimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
   }
 }
 
@@ -354,12 +375,22 @@
 @layer utilities {
   /* Feedback táctil de compresión al presionar botones y acciones rápidas */
   .btn-press, .btn-tactile {
-    transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
-    will-change: transform;
+    transition:
+      transform var(--duration-fast) var(--ease-enter),
+      background-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
   }
 
-  .btn-press:active, .btn-tactile:active {
-    transform: scale(0.97);
+  @media (hover: hover) and (pointer: fine) {
+    .btn-press:hover:not(:disabled), .btn-tactile:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+  }
+
+  .btn-press:active:not(:disabled), .btn-tactile:active:not(:disabled) {
+    transform: scale(0.98);
   }
 
   /* Elevación y borde interactivo sutil en tarjetas de gestión */
@@ -402,35 +433,109 @@
     animation: syncSpin 0.9s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
   }
 
-  /* Clases de Salida Fluida y Amortiguada para Modales y Drawers */
+  /* Clases de Entrada/Salida Bidireccional para Modales, Drawers, Badges y Skeletons */
+  .modal-dialog-enter {
+    animation: modalScaleIn var(--duration-normal) var(--ease-enter) both;
+    will-change: transform, opacity;
+  }
+
   .modal-dialog-exit, .animate-modal-out {
-    animation: modalScaleOut 190ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: modalScaleOut var(--duration-exit) var(--ease-exit) forwards;
     pointer-events: none;
     will-change: transform, opacity;
   }
 
+  .modal-backdrop-enter {
+    animation: backdropFadeIn var(--duration-normal) var(--ease-enter) both;
+    will-change: opacity;
+  }
+
   .modal-backdrop-exit {
-    animation: backdropFadeOut 180ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: backdropFadeOut var(--duration-exit) var(--ease-exit) forwards;
     pointer-events: none;
-    will-change: opacity, backdrop-filter;
+    will-change: opacity;
   }
 
   .drawer-panel-exit {
-    animation: slideOutRight 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: slideOutRight var(--duration-exit) var(--ease-exit) forwards;
     pointer-events: none;
     will-change: transform;
     transform: translateZ(0);
+  }
+
+  .badge-enter {
+    animation: badgeEnter var(--duration-fast) var(--ease-enter) both;
+  }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.4s var(--ease-standard) infinite;
+    will-change: transform;
+    pointer-events: none;
   }
 }
 
 /* ==========================================================================
    Respeto Estricto de Movimiento Reducido (WCAG 2.3.3 Motion Actuators)
+   Apaga traslaciones, escalas y loops; preserva transiciones simples de opacidad.
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .btn-press, .btn-tactile, .card-interactive {
+    transition-property: background-color, border-color, color, opacity !important;
+    transition-duration: 100ms !important;
+    transform: none !important;
+  }
+
+  .btn-press:hover, .btn-tactile:hover,
+  .btn-press:active, .btn-tactile:active,
+  .card-interactive:hover, .card-interactive:active {
+    transform: none !important;
+  }
+
+  .modal-dialog-enter, .animate-scale-up, .badge-enter {
+    animation: fadeIn 100ms ease-out both !important;
+    transform: none !important;
+  }
+
+  .modal-dialog-exit, .animate-modal-out {
+    animation: fadeOut 80ms ease-in forwards !important;
+    transform: none !important;
+  }
+
+  .modal-backdrop-enter {
+    animation: backdropFadeIn 100ms ease-out both !important;
+  }
+
+  .modal-backdrop-exit {
+    animation: backdropFadeOut 80ms ease-in forwards !important;
+  }
+
+  .drawer-panel-exit {
+    animation: fadeOut 80ms ease-in forwards !important;
+    transform: none !important;
+  }
+
+  .skeleton-shimmer::after,
+  .live-indicator,
+  .sync-spinning {
+    animation: none !important;
   }
 }

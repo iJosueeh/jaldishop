@@ -231,7 +231,13 @@ public class PaymentReconciliationService {
             LEFT JOIN stores s ON s.id = cr.store_id
             LEFT JOIN users u ON u.id = cr.user_id
             WHERE p.status = 'APPROVED'
+              AND p.refund_status = 'NOT_REQUIRED'
               AND NOT EXISTS (SELECT 1 FROM orders o WHERE o.payment_id = p.id)
+              AND NOT EXISTS (
+                  SELECT 1 FROM payment_incidences pi
+                  WHERE pi.payment_id = p.id
+                    AND pi.status IN ('MANUAL_REVIEW_REQUIRED', 'RESOLVED')
+              )
             ORDER BY p.approved_at DESC NULLS LAST, p.created_at DESC
             LIMIT ?
             """;

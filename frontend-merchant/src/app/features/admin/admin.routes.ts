@@ -37,6 +37,11 @@ export const ADMIN_ROUTES: Routes = [
       import('./settings/admin-settings').then((m) => m.AdminSettings),
   },
   {
+    path: 'audit-logs',
+    loadComponent: () =>
+      import('./audit-logs/admin-audit-logs').then((m) => m.AdminAuditLogs),
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',

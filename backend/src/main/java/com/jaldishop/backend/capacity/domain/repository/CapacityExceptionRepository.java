@@ -14,4 +14,6 @@ public interface CapacityExceptionRepository {
     List<CapacityException> findByStoreId(UUID storeId);
     List<CapacityException> findByStoreIdAndServiceDate(UUID storeId, LocalDate serviceDate);
     CapacityException save(CapacityException exception);
+    boolean hasActiveOrCommittedReservations(UUID storeId, LocalDate serviceDate, java.time.LocalTime startTime, java.time.LocalTime endTime);
+    void deleteByIdAndStoreId(UUID id, UUID storeId);
 }

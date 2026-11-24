@@ -25,6 +25,7 @@ public class StoreSettingsPersistenceMapper {
                 entity.isOrderSoundAlert(),
                 entity.getSoundVolume(),
                 entity.isLowStockVisualAlert(),
+                entity.getVersion(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -48,6 +49,7 @@ public class StoreSettingsPersistenceMapper {
         entity.setOrderSoundAlert(domain.isOrderSoundAlert());
         entity.setSoundVolume(domain.getSoundVolume());
         entity.setLowStockVisualAlert(domain.isLowStockVisualAlert());
+        entity.setVersion(domain.getVersion());
         if (domain.getCreatedAt() != null) {
             entity.setCreatedAt(domain.getCreatedAt());
         }

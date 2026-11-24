@@ -5,6 +5,7 @@ import com.jaldishop.backend.catalog.application.service.GetProductsService;
 import com.jaldishop.backend.catalog.domain.model.Product;
 import com.jaldishop.backend.catalog.domain.enums.ProductStatus;
 import com.jaldishop.backend.catalog.domain.model.ProductVariant;
+import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
 import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
@@ -57,6 +58,23 @@ public class PublicProductController {
     ) {
         Store store = getStoreBySlugService.execute(slug);
         return ResponseEntity.ok(fetchActiveProducts(store.getId(), categoryId));
+    }
+
+    @GetMapping("/slug/{storeSlug}/products/{productSlug}")
+    public ResponseEntity<ProductResponse> getStoreProductBySlug(
+            @PathVariable @Size(max = 180, message = "El slug no puede exceder 180 caracteres") String storeSlug,
+            @PathVariable @Size(max = 180, message = "El slug no puede exceder 180 caracteres") String productSlug
+    ) {
+        Store store = getStoreBySlugService.execute(storeSlug);
+        Product product = getProductsService.executeBySlug(store.getId(), productSlug);
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<ProductVariant> activeVariants = variantRepository.findByProductId(product.getId()).stream()
+                .filter(variant -> variant.getStatus() == VariantStatus.ACTIVE)
+                .toList();
+        return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants));
     }
 
     private List<ProductResponse> fetchActiveProducts(UUID storeId, UUID categoryId) {

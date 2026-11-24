@@ -53,6 +53,8 @@ public class CheckoutController {
                 request.deliveryReference(),
                 request.deliveryLatitude(),
                 request.deliveryLongitude(),
+                request.customerDocumentNumber(),
+                request.orderNotes(),
                 request.discountCode()
         );
 

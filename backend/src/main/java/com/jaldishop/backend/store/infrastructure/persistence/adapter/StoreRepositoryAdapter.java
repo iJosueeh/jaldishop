@@ -98,6 +98,13 @@ public class StoreRepositoryAdapter implements StoreRepository {
     }
 
     @Override
+    public Optional<Store> lockByIdForDeletion(UUID storeId) {
+        storeJpaRepository.applyShortLockTimeout();
+        return storeJpaRepository.findByIdForUpdate(storeId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public boolean hasOperationalHistory(UUID storeId) {
         return storeJpaRepository.hasOperationalHistory(storeId);
     }

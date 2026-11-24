@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../../core/services/admin.service';
@@ -31,12 +31,47 @@ import {
   selector: 'app-payment-reconciliation-modal',
   styleUrl: './payment-reconciliation-modal.css',
   templateUrl: './payment-reconciliation-modal.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentReconciliationModal {
   private readonly adminService = inject(AdminService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isOpen = input<boolean>(false);
   readonly closeModal = output<void>();
+
+  readonly isRendered = signal<boolean>(false);
+  readonly isClosing = signal<boolean>(false);
+  private closeTimeoutId?: ReturnType<typeof setTimeout>;
+
+  private readonly syncOpenEffect = effect(() => {
+    const open = this.isOpen();
+    if (open) {
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId);
+        this.closeTimeoutId = undefined;
+      }
+      this.isRendered.set(true);
+      this.isClosing.set(false);
+    } else if (this.isRendered() && !this.isClosing()) {
+      this.triggerExit();
+    }
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId);
+      }
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isRendered() && !this.isClosing()) {
+      this.dismiss();
+    }
+  }
 
   readonly attemptId = signal<string>('');
   readonly isInvestigating = signal<boolean>(false);
@@ -92,10 +127,26 @@ export class PaymentReconciliationModal {
   }
 
   dismiss(): void {
-    this.attemptId.set('');
-    this.investigationResult.set(null);
-    this.reconciliationResult.set(null);
-    this.errorMessage.set(null);
-    this.closeModal.emit();
+    if (this.isClosing()) return;
+    this.triggerExit(() => {
+      this.attemptId.set('');
+      this.investigationResult.set(null);
+      this.reconciliationResult.set(null);
+      this.errorMessage.set(null);
+      this.closeModal.emit();
+    });
+  }
+
+  private triggerExit(callback?: () => void): void {
+    if (this.closeTimeoutId) {
+      clearTimeout(this.closeTimeoutId);
+    }
+    this.isClosing.set(true);
+    this.closeTimeoutId = setTimeout(() => {
+      this.isRendered.set(false);
+      this.isClosing.set(false);
+      this.closeTimeoutId = undefined;
+      callback?.();
+    }, 180);
   }
 }

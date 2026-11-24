@@ -86,4 +86,26 @@ describe('AdminAnalytics', () => {
     component.exportPdf();
     expect(adminServiceMock.exportAnalyticsPdf).toHaveBeenCalled();
   });
+
+  it('debe cerrar el drawer de tienda cuando app-admin-store-drawer emite closeDrawer', () => {
+    adminServiceMock.stores.set([
+      {
+        id: 'store-1',
+        name: 'Bodega Central',
+        slug: 'bodega-central',
+        status: 'ACTIVE',
+      },
+    ]);
+    adminServiceMock.getStoreDetail = vi.fn().mockReturnValue(of({}));
+
+    component.onSelectStoreById('store-1');
+    fixture.detectChanges();
+    expect(component.isDrawerOpen()).toBe(true);
+    expect(component.selectedStore()?.id).toBe('store-1');
+
+    const drawerEl = fixture.nativeElement.querySelector('app-admin-store-drawer');
+    drawerEl.dispatchEvent(new CustomEvent('closeDrawer'));
+    expect(component.isDrawerOpen()).toBe(false);
+    expect(component.selectedStore()).toBeNull();
+  });
 });

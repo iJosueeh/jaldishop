@@ -504,26 +504,53 @@
           Cerrar
         </button>
 
-        @if (s.status === 'ACTIVE') {
+        <div class="flex items-center gap-2">
+          @if (s.status === 'ACTIVE') {
+            <button
+              type="button"
+              (click)="onToggleStatus()"
+              class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <ng-icon name="matCancelOutline" class="text-[16px]" />
+              <span>Suspender Tienda</span>
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="onToggleStatus()"
+              class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
+              <span>Reactivar Tienda</span>
+            </button>
+          }
+
           <button
             type="button"
-            (click)="onToggleStatus()"
-            class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+            (click)="requestDeleteStore()"
+            class="px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-500/30 text-xs font-extrabold transition-colors flex items-center gap-1.5 cursor-pointer"
+            title="Eliminar tienda permanentemente si no tiene historial"
           >
-            <ng-icon name="matCancelOutline" class="text-[16px]" />
-            <span>Suspender Tienda</span>
+            <ng-icon name="matDeleteOutline" class="text-[16px]" />
+            <span>Eliminar</span>
           </button>
-        } @else {
-          <button
-            type="button"
-            (click)="onToggleStatus()"
-            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
-          >
-            <ng-icon name="matCheckCircleOutline" class="text-[16px]" />
-            <span>Reactivar Tienda</span>
-          </button>
-        }
+        </div>
       </div>
     </div>
   </div>
+
+  <app-destructive-action-modal
+    [isOpen]="isDeleteModalOpen()"
+    title="¿Eliminar tienda permanentemente?"
+    message="Si esta tienda no tiene órdenes, pagos, reservas ni reseñas registradas, se eliminará de forma definitiva junto con su catálogo."
+    confirmText="Sí, eliminar tienda"
+    fallbackLabel="Suspender tienda en su lugar"
+    [isLoading]="isDeletingStore()"
+    [errorStatus]="deleteErrorStatus()"
+    [errorMessage]="deleteErrorMessage()"
+    [conflictMetadata]="deleteConflictMetadata()"
+    (confirm)="confirmDeleteStore()"
+    (fallback)="fallbackSuspendStore()"
+    (cancel)="cancelDeleteStore()"
+  />
 }

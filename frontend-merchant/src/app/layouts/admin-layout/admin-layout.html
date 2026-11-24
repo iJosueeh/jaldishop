@@ -1,9 +1,11 @@
 <div class="min-h-screen bg-surface font-sans text-on-surface antialiased">
   <!-- Overlay oscuro en móvil cuando el menú está abierto -->
-  @if (isMobileMenuOpen()) {
+  @if (isMobileOverlayRendered()) {
     <div
       (click)="closeMobileMenu()"
-      class="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-200"
+      class="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
+      [class.modal-backdrop-enter]="!isMobileOverlayClosing()"
+      [class.modal-backdrop-exit]="isMobileOverlayClosing()"
     ></div>
   }
 

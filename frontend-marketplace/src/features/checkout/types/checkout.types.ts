@@ -13,6 +13,8 @@ export interface InitiateCheckoutPayload {
   deliveryReference?: string | null;
   deliveryLatitude?: number | null;
   deliveryLongitude?: number | null;
+  customerDocumentNumber?: string | null;
+  orderNotes?: string | null;
   discountCode?: string | null;
 }
 

@@ -1,7 +1,7 @@
 @if (isRendered()) {
   <div
     class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[1000] flex items-center justify-center p-4 font-sans"
-    [class.modal-backdrop-animate]="!isClosing()"
+    [class.modal-backdrop-enter]="!isClosing()"
     [class.modal-backdrop-exit]="isClosing()"
     role="dialog"
     aria-modal="true"
@@ -9,7 +9,7 @@
   >
     <div
       class="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl shadow-2xl w-full max-w-md p-5 sm:p-6 flex flex-col gap-4 relative"
-      [class.modal-dialog-animate]="!isClosing()"
+      [class.modal-dialog-enter]="!isClosing()"
       [class.modal-dialog-exit]="isClosing()"
     >
       <!-- Botón de Cerrar Superior (X) -->
@@ -57,7 +57,7 @@
         <button
           type="button"
           (click)="onCancel()"
-          class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+          class="btn-tactile px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer"
         >
           {{ cancelText() }}
         </button>
@@ -65,7 +65,7 @@
         <button
           type="button"
           (click)="onConfirm()"
-          class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+          class="btn-tactile px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm cursor-pointer"
           [class.bg-rose-600]="isDanger()"
           [class.text-white]="isDanger()"
           [class.hover:bg-rose-700]="isDanger()"

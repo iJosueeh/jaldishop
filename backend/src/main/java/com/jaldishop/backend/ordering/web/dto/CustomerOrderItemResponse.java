@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record CustomerOrderItemResponse(
         UUID id,
+        UUID productId,
         UUID variantId,
         String productName,
         String variantName,

@@ -35,6 +35,7 @@ describe('AdminReconciliation', () => {
           providerPaymentId: 'MP-998877',
         },
       ])),
+      getReconciliationHistory: vi.fn().mockReturnValue(of([])),
       investigatePaymentAttempt: vi.fn().mockReturnValue(
         of({ outcome: 'VERIFIED', reason: 'Coincidencia confirmada en Mercado Pago.' })
       ),
@@ -77,6 +78,17 @@ describe('AdminReconciliation', () => {
 
   it('debe ejecutar la investigación ante un UUID válido y actualizar el historial', () => {
     const validUuid = '123e4567-e89b-12d3-a456-426614174000';
+    adminServiceMock.getReconciliationHistory.mockReturnValueOnce(
+      of([
+        {
+          attemptId: validUuid,
+          timestamp: '2026-11-24T10:00:00Z',
+          outcome: 'VERIFIED',
+          reason: 'Coincidencia confirmada en Mercado Pago.',
+          reconciled: false,
+        },
+      ]),
+    );
     component.onInputId(validUuid);
     component.investigate();
 

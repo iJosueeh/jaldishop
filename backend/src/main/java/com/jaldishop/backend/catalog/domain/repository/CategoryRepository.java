@@ -14,4 +14,7 @@ public interface CategoryRepository {
     List<Category> findByStoreId(UUID storeId);
     boolean existsByStoreIdAndNameIgnoreCase(UUID storeId, String name);
     boolean existsByStoreIdAndNameIgnoreCaseAndIdNot(UUID storeId, String name, UUID id);
+    Optional<Category> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId);
+    boolean hasProducts(UUID categoryId);
+    void deleteByIdAndStoreId(UUID id, UUID storeId);
 }

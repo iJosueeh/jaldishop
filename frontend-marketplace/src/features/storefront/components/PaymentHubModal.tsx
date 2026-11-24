@@ -31,6 +31,9 @@ export interface PaymentHubModalProps {
   storeName?: string;
   slotTime?: string;
   countdownSeconds?: number;
+  onlinePaymentsEnabled?: boolean;
+  cashOnDeliveryEnabled?: boolean;
+  acceptsPosOnDelivery?: boolean;
 }
 
 export function PaymentHubModal({
@@ -43,9 +46,12 @@ export function PaymentHubModal({
   storeName = 'Panadería Don Pepe',
   slotTime = '10:00 - 11:00 AM',
   countdownSeconds = 600,
+  onlinePaymentsEnabled = true,
+  cashOnDeliveryEnabled = true,
+  acceptsPosOnDelivery = false,
 }: PaymentHubModalProps) {
-  const hasMercadoPago = Boolean(onPayWithMercadoPago);
-  const hasWhatsApp = Boolean(onProceedToWhatsApp);
+  const hasMercadoPago = Boolean(onPayWithMercadoPago) && onlinePaymentsEnabled;
+  const hasWhatsApp = Boolean(onProceedToWhatsApp) && cashOnDeliveryEnabled;
 
   const [activeMethod, setActiveMethod] = useState<'MERCADO_PAGO' | 'WHATSAPP'>(() => {
     return hasMercadoPago ? 'MERCADO_PAGO' : 'WHATSAPP';

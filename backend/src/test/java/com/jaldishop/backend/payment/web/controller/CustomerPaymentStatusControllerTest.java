@@ -1,6 +1,8 @@
 package com.jaldishop.backend.payment.web.controller;
 
 import com.jaldishop.backend.payment.application.status.GetCustomerPaymentStatusService;
+import com.jaldishop.backend.payment.application.status.ListCustomerPaymentHistoryService;
+import com.jaldishop.backend.payment.web.dto.CustomerPaymentHistoryResponse;
 import com.jaldishop.backend.payment.web.dto.CustomerPaymentStatusResponse;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
@@ -25,6 +27,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -38,12 +41,15 @@ class CustomerPaymentStatusControllerTest {
     @Mock
     private GetCustomerPaymentStatusService service;
 
+    @Mock
+    private ListCustomerPaymentHistoryService historyService;
+
     private MockMvc mockMvc;
     private final UUID authenticatedUserId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        CustomerPaymentStatusController controller = new CustomerPaymentStatusController(service);
+        CustomerPaymentStatusController controller = new CustomerPaymentStatusController(service, historyService);
 
         HandlerMethodArgumentResolver principalResolver = new HandlerMethodArgumentResolver() {
             @Override
@@ -97,6 +103,25 @@ class CustomerPaymentStatusControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/customer/payments retorna el historial seguro del cliente")
+    void returnsCustomerPaymentHistory() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+        CustomerPaymentHistoryResponse payment = new CustomerPaymentHistoryResponse(
+                paymentId, "APPROVED", "NOT_REQUIRED", new BigDecimal("45.00"), "PEN",
+                "ORD-12345", "CONFIRMED", Instant.now(), Instant.now(), null
+        );
+        when(historyService.execute(authenticatedUserId)).thenReturn(List.of(payment));
+
+        mockMvc.perform(get("/api/v1/customer/payments").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].paymentId").value(paymentId.toString()))
+                .andExpect(jsonPath("$[0].amount").value(45.00))
+                .andExpect(jsonPath("$[0].orderNumber").value("ORD-12345"))
+                .andExpect(jsonPath("$[0].token").doesNotExist())
+                .andExpect(jsonPath("$[0].cvv").doesNotExist());
+    }
+
+    @Test
     @DisplayName("GET /status retorna 404 cuando el pago no existe")
     void returns404WhenPaymentNotFound() throws Exception {
         UUID paymentId = UUID.randomUUID();
@@ -127,7 +152,7 @@ class CustomerPaymentStatusControllerTest {
     @DisplayName("GET /status retorna 403 cuando el usuario no tiene rol CUSTOMER")
     void returns403WhenRoleIsNotCustomer() throws Exception {
         UUID paymentId = UUID.randomUUID();
-        CustomerPaymentStatusController controller = new CustomerPaymentStatusController(service);
+        CustomerPaymentStatusController controller = new CustomerPaymentStatusController(service, historyService);
 
         HandlerMethodArgumentResolver merchantResolver = new HandlerMethodArgumentResolver() {
             @Override

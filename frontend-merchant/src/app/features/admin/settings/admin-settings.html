@@ -7,7 +7,7 @@
     <button
       type="button"
       (click)="setTab('general')"
-      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      class="btn-tactile flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer"
       [class.bg-primary]="currentTab() === 'general'"
       [class.text-on-primary]="currentTab() === 'general'"
       [class.shadow-2xs]="currentTab() === 'general'"
@@ -20,58 +20,16 @@
 
     <button
       type="button"
-      (click)="setTab('security')"
-      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
-      [class.bg-primary]="currentTab() === 'security'"
-      [class.text-on-primary]="currentTab() === 'security'"
-      [class.shadow-2xs]="currentTab() === 'security'"
-      [class.text-on-surface-variant]="currentTab() !== 'security'"
-      [class.hover:bg-surface-container]="currentTab() !== 'security'"
-    >
-      <ng-icon name="matShieldOutline" class="text-[16px]" />
-      <span>Seguridad & Sesiones</span>
-    </button>
-
-    <button
-      type="button"
-      (click)="setTab('notifications')"
-      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
-      [class.bg-primary]="currentTab() === 'notifications'"
-      [class.text-on-primary]="currentTab() === 'notifications'"
-      [class.shadow-2xs]="currentTab() === 'notifications'"
-      [class.text-on-surface-variant]="currentTab() !== 'notifications'"
-      [class.hover:bg-surface-container]="currentTab() !== 'notifications'"
-    >
-      <ng-icon name="matNotificationsOutline" class="text-[16px]" />
-      <span>Notificaciones</span>
-    </button>
-
-    <button
-      type="button"
       (click)="setTab('system')"
-      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+      class="btn-tactile flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer"
       [class.bg-primary]="currentTab() === 'system'"
       [class.text-on-primary]="currentTab() === 'system'"
       [class.shadow-2xs]="currentTab() === 'system'"
       [class.text-on-surface-variant]="currentTab() !== 'system'"
       [class.hover:bg-surface-container]="currentTab() !== 'system'"
     >
-      <ng-icon name="matInfoOutline" class="text-[16px]" />
-      <span>Sistema & Plataforma</span>
-    </button>
-
-    <button
-      type="button"
-      (click)="setTab('audit')"
-      class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
-      [class.bg-primary]="currentTab() === 'audit'"
-      [class.text-on-primary]="currentTab() === 'audit'"
-      [class.shadow-2xs]="currentTab() === 'audit'"
-      [class.text-on-surface-variant]="currentTab() !== 'audit'"
-      [class.hover:bg-surface-container]="currentTab() !== 'audit'"
-    >
-      <ng-icon name="matHistoryEduOutline" class="text-[16px]" />
-      <span>Pistas de Auditoría</span>
+      <ng-icon name="matPaymentsOutline" class="text-[16px]" />
+      <span>Finanzas & Comisión</span>
     </button>
   </div>
 
@@ -79,32 +37,69 @@
   <div class="mt-1">
     @switch (currentTab()) {
       @case ('general') {
-        <app-admin-settings-general-tab
-          [settings]="adminService.settings()"
-          (settingsChange)="onUpdateSettings($event)"
-        />
-      }
-      @case ('security') {
-        <app-admin-settings-security-tab
-          [settings]="adminService.settings()"
-          (settingsChange)="onUpdateSettings($event)"
-        />
-      }
-      @case ('notifications') {
-        <app-admin-settings-notifications-tab
-          [settings]="adminService.settings()"
-          (settingsChange)="onUpdateSettings($event)"
-        />
+        <div class="badge-enter">
+          <app-admin-settings-general-tab
+            [settings]="adminService.settings()"
+            (settingsChange)="onUpdateSettings($event)"
+          />
+        </div>
       }
       @case ('system') {
-        <app-admin-settings-system-tab
-          [settings]="adminService.settings()"
-          (settingsChange)="onUpdateSettings($event)"
-        />
-      }
-      @case ('audit') {
-        <app-admin-settings-audit-tab />
+        <div class="badge-enter">
+          <app-admin-settings-system-tab
+            [settings]="adminService.settings()"
+            (settingsChange)="onUpdateSettings($event)"
+          />
+        </div>
       }
     }
   </div>
+
+  @if (showConfirmModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md rounded-3xl bg-surface-container-lowest border border-outline-variant/30 p-6 shadow-xl space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+            <ng-icon name="matWarningOutline" class="text-[20px]" />
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-on-surface">
+              Confirmar cambios de alto impacto
+            </h3>
+            <p class="text-xs text-on-surface-variant">
+              Estos cambios afectan inmediatamente a toda la plataforma.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2 rounded-2xl bg-surface-container/50 p-3 border border-outline-variant/20">
+          @for (item of pendingDiffs(); track item.label) {
+            <div class="flex items-center justify-between text-xs gap-2">
+              <span class="font-bold text-on-surface">{{ item.label }}</span>
+              <span class="font-mono text-on-surface-variant">
+                {{ item.before }} → <strong class="text-primary">{{ item.after }}</strong>
+              </span>
+            </div>
+          }
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button
+            type="button"
+            (click)="cancelConfirm()"
+            class="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmSave()"
+            class="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 cursor-pointer"
+          >
+            Confirmar y Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

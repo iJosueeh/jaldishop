@@ -56,4 +56,8 @@ describe('AdminSidebar', () => {
     component.toggleSection('supervision');
     expect(component.openSections()['supervision']).toBe(true);
   });
+
+  it('debe tener la sección governance configurada por defecto', () => {
+    expect(component.openSections()['governance']).toBe(true);
+  });
 });

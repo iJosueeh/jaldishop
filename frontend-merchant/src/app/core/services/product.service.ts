@@ -591,14 +591,131 @@ export class ProductService {
 
   toggleProductStatus(storeId: string, product: Product): Observable<Product> {
     const newStatus = product.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    return this.updateProduct(storeId, product.id, {
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      categoryId: product.categoryId,
-      status: newStatus,
-    });
+    return this.updateProductStatus(storeId, product.id, newStatus);
+  }
+
+  updateProductStatus(
+    storeId: string,
+    productId: string,
+    status: 'ACTIVE' | 'INACTIVE',
+  ): Observable<Product> {
+    const previousProducts = this.products();
+    this.products.update((list) =>
+      list.map((p) => (p.id === productId ? { ...p, status } : p)),
+    );
+    return this.http
+      .patch<Product>(`${this.baseUrl}/${storeId}/products/${productId}/status`, { status })
+      .pipe(
+        tap((updated) => {
+          this.products.update((list) =>
+            list.map((p) => (p.id === productId ? { ...p, status: updated.status } : p)),
+          );
+        }),
+        catchError((error) => {
+          this.products.set(previousProducts);
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  deleteProduct(storeId: string, productId: string): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(
+        `${this.baseUrl}/${storeId}/products/${productId}`,
+      )
+      .pipe(
+        tap(() => {
+          this.products.update((list) => list.filter((p) => p.id !== productId));
+          this.variantsCache.delete(productId);
+        }),
+      );
+  }
+
+  deleteProductVariant(
+    storeId: string,
+    productId: string,
+    variantId: string,
+  ): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(
+        `${this.baseUrl}/${storeId}/products/${productId}/variants/${variantId}`,
+      )
+      .pipe(
+        tap(() => {
+          const cached = this.variantsCache.get(productId);
+          if (cached) {
+            this.variantsCache.set(
+              productId,
+              cached.filter((v) => v.id !== variantId),
+            );
+          }
+          this.products.update((list) =>
+            list.map((p) =>
+              p.id === productId
+                ? { ...p, variants: (p.variants ?? []).filter((v) => v.id !== variantId) }
+                : p,
+            ),
+          );
+        }),
+      );
+  }
+
+  updateVariantStatus(
+    storeId: string,
+    productId: string,
+    variantId: string,
+    status: 'ACTIVE' | 'INACTIVE',
+  ): Observable<ProductVariant> {
+    return this.http
+      .patch<ProductVariant>(
+        `${this.baseUrl}/${storeId}/products/${productId}/variants/${variantId}/status`,
+        { status },
+      )
+      .pipe(
+        tap((updated) => {
+          const cached = this.variantsCache.get(productId);
+          if (cached) {
+            this.variantsCache.set(
+              productId,
+              cached.map((v) => (v.id === variantId ? updated : v)),
+            );
+          }
+        }),
+      );
+  }
+
+  updateCategory(
+    storeId: string,
+    categoryId: string,
+    request: { name: string; description?: string; status: 'ACTIVE' | 'INACTIVE' },
+  ): Observable<ProductCategory> {
+    return this.http
+      .put<ProductCategory>(`${this.baseUrl}/${storeId}/categories/${categoryId}`, request)
+      .pipe(
+        tap((updated) => {
+          this.categories.update((list) =>
+            list.map((c) => (c.id === categoryId ? updated : c)),
+          );
+        }),
+      );
+  }
+
+  deleteCategory(
+    storeId: string,
+    categoryId: string,
+  ): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(
+        `${this.baseUrl}/${storeId}/categories/${categoryId}`,
+      )
+      .pipe(
+        tap(() => {
+          this.categories.update((list) => list.filter((c) => c.id !== categoryId));
+          if (this.selectedCategoryId() === categoryId) {
+            this.selectedCategoryId.set(null);
+          }
+        }),
+      );
   }
 
   setCategoryFilter(categoryId: string | null): void {

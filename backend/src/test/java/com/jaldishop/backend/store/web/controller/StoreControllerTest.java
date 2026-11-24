@@ -337,18 +337,47 @@ class StoreControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/stores/me - Desactivar tienda lógicamente cuando tiene historial")
-    void closeMyStoreDeactivated() throws Exception {
-        UUID storeId = UUID.randomUUID();
+    @DisplayName("DELETE /api/v1/stores/me - Retornar 409 STORE_HAS_OPERATIONAL_HISTORY cuando tiene historial")
+    void closeMyStoreReturns409WhenHasHistory() throws Exception {
         when(closeMyStoreService.execute(any(CloseMyStoreCommand.class)))
-                .thenReturn(new CloseStoreResult(storeId, CloseStoreAction.DEACTIVATED, StoreStatus.INACTIVE, "La tienda fue desactivada exitosamente para preservar su historial operativo y de auditoría."));
+                .thenThrow(new com.jaldishop.backend.shared.exception.ResourceConflictException(
+                        "STORE_HAS_OPERATIONAL_HISTORY",
+                        "Tu tienda tiene operaciones registradas.",
+                        java.util.Map.of("suggestedAction", "DEACTIVATE", "currentStatus", "ACTIVE")
+                ));
 
         mockMvc.perform(delete("/api/v1/stores/me"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STORE_HAS_OPERATIONAL_HISTORY"))
+                .andExpect(jsonPath("$.metadata.suggestedAction").value("DEACTIVATE"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/stores/me/deactivate - Desactivar tienda explícitamente (200 OK)")
+    void deactivateMyStoreSuccess() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        when(closeMyStoreService.deactivate(testMerchantId))
+                .thenReturn(new CloseStoreResult(storeId, CloseStoreAction.DEACTIVATED, StoreStatus.INACTIVE, "Tienda desactivada."));
+
+        mockMvc.perform(patch("/api/v1/stores/me/deactivate"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.storeId").value(storeId.toString()))
                 .andExpect(jsonPath("$.action").value("DEACTIVATED"))
-                .andExpect(jsonPath("$.status").value("INACTIVE"))
-                .andExpect(jsonPath("$.message").value("La tienda fue desactivada exitosamente para preservar su historial operativo y de auditoría."));
+                .andExpect(jsonPath("$.status").value("INACTIVE"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/stores/me/reactivate - Reactivar tienda inactiva (200 OK)")
+    void reactivateMyStoreSuccess() throws Exception {
+        Store store = Store.reconstitute(
+                UUID.randomUUID(), testMerchantId, "Mi Tienda", "mi-tienda", "Desc",
+                "+51999999999", "Dir", "Ref", null, null, true, false, null, "PEN", null,
+                StoreStatus.ACTIVE, Instant.now(), Instant.now()
+        );
+        when(closeMyStoreService.reactivate(testMerchantId)).thenReturn(store);
+
+        mockMvc.perform(patch("/api/v1/stores/me/reactivate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
 
     @Test

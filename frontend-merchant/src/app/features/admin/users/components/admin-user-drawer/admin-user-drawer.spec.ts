@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { AdminUserDrawer } from './admin-user-drawer';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { AuthService } from '../../../../../core/services/auth-service';
+import { AdminService } from '../../../../../core/services/admin.service';
+import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
 import { AdminUserSummary } from '../../../../../core/models/admin.models';
 
 describe('AdminUserDrawer', () => {
@@ -11,6 +15,18 @@ describe('AdminUserDrawer', () => {
     info: vi.fn(),
     success: vi.fn(),
     error: vi.fn(),
+  };
+
+  const mockAuthService = {
+    forgotPassword: vi.fn().mockReturnValue(of({})),
+  };
+
+  const mockAdminService = {
+    deleteUser: vi.fn().mockReturnValue(of({ message: 'Usuario eliminado' })),
+  };
+
+  const mockErrorHandler = {
+    normalize: vi.fn().mockReturnValue({ status: 500, message: 'Error' }),
   };
 
   const mockUser: AdminUserSummary = {
@@ -32,7 +48,12 @@ describe('AdminUserDrawer', () => {
     vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdminUserDrawer],
-      providers: [{ provide: ToastService, useValue: mockToastService }],
+      providers: [
+        { provide: ToastService, useValue: mockToastService },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: AdminService, useValue: mockAdminService },
+        { provide: ErrorHandlerService, useValue: mockErrorHandler },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminUserDrawer);
@@ -85,19 +106,13 @@ describe('AdminUserDrawer', () => {
     });
   });
 
-  it('debe guardar nota interna de auditoría correctamente', () => {
-    vi.useFakeTimers();
+  it('debe mostrar aviso informativo al guardar nota interna de auditoría', () => {
     component.adminNote.set('Cliente verificado por DNI');
     component.onSaveNote();
-    expect(component.isNoteSaved()).toBe(true);
-    expect(mockToastService.success).toHaveBeenCalledWith(
-      'Nota interna de auditoría guardada.',
+    expect(mockToastService.info).toHaveBeenCalledWith(
+      'La persistencia de notas internas estará disponible próximamente.',
       'Nota Admin'
     );
-
-    vi.advanceTimersByTime(2600);
-    expect(component.isNoteSaved()).toBe(false);
-    vi.useRealTimers();
   });
 });
 
