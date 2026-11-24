@@ -13,6 +13,17 @@ export class ApiException extends Error {
   }
 }
 
+export function getMaintenanceNotice(error: unknown): string | null {
+  if (
+    error instanceof ApiException &&
+    error.status === 503 &&
+    error.errorData?.code === 'MAINTENANCE_MODE_ACTIVE'
+  ) {
+    return error.errorData.message || 'La plataforma se encuentra en mantenimiento programado. Volveremos pronto.';
+  }
+  return null;
+}
+
 interface FetchOptions extends RequestInit {
   baseUrl?: string;
   params?: Record<string, string | number | boolean | undefined>;

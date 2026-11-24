@@ -1,5 +1,5 @@
 import { apiClient, ApiException } from '@/core/api/apiClient';
-import { ProductItem, ProductVariantItem, PublicStore, StoreCategory } from '../types/storefront.types';
+import { ProductItem, ProductVariantItem, PublicStore, PublicStoreSettings, StoreCategory } from '../types/storefront.types';
 
 interface CatalogCategoryDto {
   id: string; storeId: string; name: string; status: 'ACTIVE' | 'INACTIVE';
@@ -115,5 +115,16 @@ export const storeService = {
 
   getStoreProductsBySlug(slug: string): Promise<ProductItem[]> {
     return loadStoreProducts('/stores/slug/' + encodeURIComponent(slug));
+  },
+
+  async getPublicStoreSettings(storeId: string): Promise<PublicStoreSettings | null> {
+    try {
+      return await apiClient<PublicStoreSettings>(`/stores/${encodeURIComponent(storeId)}/public-settings`, {
+        timeoutMs: 5000,
+        revalidate: 30,
+      });
+    } catch {
+      return null;
+    }
   },
 };

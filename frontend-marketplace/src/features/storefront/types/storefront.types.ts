@@ -34,6 +34,18 @@ export interface PublicStore {
   keywords?: string[];
 }
 
+export interface PublicStoreSettings {
+  cancellationPolicy: string;
+  refundPolicy: string;
+  requireCustomerDni: boolean;
+  allowOrderNotes: boolean;
+  onlinePaymentsEnabled: boolean;
+  cashOnDeliveryEnabled: boolean;
+  acceptsPosOnDelivery: boolean;
+  minDeliveryAmount: number | null;
+  estimatedPrepTimeMinutes: number;
+}
+
 export interface StoreCategory {
   id: string;
   name: string;

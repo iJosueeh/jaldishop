@@ -10,7 +10,7 @@ import {
   CatalogEmptyState,
   ProductDetailModal,
 } from './catalog';
-import { ProductItem, ProductVariantItem, CartItem, PublicStore } from '../types/storefront.types';
+import { ProductItem, ProductVariantItem, CartItem, PublicStore, PublicStoreSettings } from '../types/storefront.types';
 import { StorefrontBadges } from './StorefrontBadges';
 import { useStorefrontCart } from '../cart/StorefrontCartProvider';
 import { useCustomerFavorites } from '@/features/customer/hooks/useCustomerFavorites';
@@ -36,6 +36,7 @@ interface CatalogContainerProps {
   storeSlug?: string;
   storeName: string;
   store?: PublicStore;
+  storeSettings?: PublicStoreSettings | null;
   products?: ProductItem[] | null;
   slots?: CapacitySlot[] | null;
   catalogError?: boolean;
@@ -46,6 +47,7 @@ interface CatalogContainerProps {
 export function CatalogContainer({
   storeName,
   store,
+  storeSettings,
   products,
   slots,
   catalogError = false,
@@ -88,6 +90,8 @@ export function CatalogContainer({
   const [fulfillment, setFulfillment] = useState<'DELIVERY' | 'PICKUP'>('DELIVERY');
   const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
   const [isDeliveryValid, setIsDeliveryValid] = useState(false);
+  const [customerDocumentNumber, setCustomerDocumentNumber] = useState('');
+  const [orderNotes, setOrderNotes] = useState('');
   const [retryCounter, setRetryCounter] = useState(0);
 
   const [detailProduct, setDetailProduct] = useState<ProductItem | null>(null);
@@ -298,6 +302,19 @@ export function CatalogContainer({
       }
     }
 
+    if (fulfillment === 'DELIVERY' && storeSettings?.minDeliveryAmount != null && subtotal < storeSettings.minDeliveryAmount) {
+      toast.error(`El monto mínimo para envío a domicilio es ${formatCurrency(storeSettings.minDeliveryAmount, currency)}.`);
+      return;
+    }
+
+    if (storeSettings?.requireCustomerDni) {
+      const cleanDoc = customerDocumentNumber.trim();
+      if (!/^\d{8}$|^\d{11}$/.test(cleanDoc)) {
+        toast.error('Ingresa un DNI válido de 8 dígitos o RUC de 11 dígitos.');
+        return;
+      }
+    }
+
     try {
       setIsSubmittingCheckout(true);
 
@@ -341,6 +358,8 @@ export function CatalogContainer({
         deliveryReference: deliveryFields.deliveryReference || null,
         deliveryLatitude: deliveryFields.deliveryLatitude ?? null,
         deliveryLongitude: deliveryFields.deliveryLongitude ?? null,
+        ...(storeSettings?.requireCustomerDni ? { customerDocumentNumber: customerDocumentNumber.trim() } : {}),
+        ...(storeSettings?.allowOrderNotes !== false && orderNotes.trim() ? { orderNotes: orderNotes.trim() } : {}),
       };
 
       const result = await checkoutService.initiateCheckout(payload);
@@ -650,6 +669,45 @@ export function CatalogContainer({
                 </div>
               </div>
 
+              {/* Campos configurables de la tienda (DNI/RUC y Notas) */}
+              {(storeSettings?.requireCustomerDni || storeSettings?.allowOrderNotes !== false) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {storeSettings?.requireCustomerDni && (
+                    <div className="space-y-1">
+                      <label htmlFor="checkout-dni-input" className="block text-xs font-bold text-stone-700">
+                        DNI o RUC (Obligatorio)
+                      </label>
+                      <input
+                        id="checkout-dni-input"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={11}
+                        value={customerDocumentNumber}
+                        onChange={(e) => setCustomerDocumentNumber(e.target.value)}
+                        placeholder="Ej. 12345678"
+                        className="w-full px-3 py-2 rounded-lg border border-stone-300 text-xs text-stone-900 focus:outline-none focus:border-[#005141]"
+                      />
+                    </div>
+                  )}
+                  {storeSettings?.allowOrderNotes !== false && (
+                    <div className="space-y-1">
+                      <label htmlFor="checkout-notes-input" className="block text-xs font-bold text-stone-700">
+                        Notas para la tienda (Opcional)
+                      </label>
+                      <input
+                        id="checkout-notes-input"
+                        type="text"
+                        maxLength={250}
+                        value={orderNotes}
+                        onChange={(e) => setOrderNotes(e.target.value)}
+                        placeholder="Ej. Sin cubiertos, tocar timbre..."
+                        className="w-full px-3 py-2 rounded-lg border border-stone-300 text-xs text-stone-900 focus:outline-none focus:border-[#005141]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Botón Principal de Checkout */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
                 <p className="text-[11px] text-stone-500">
@@ -685,6 +743,9 @@ export function CatalogContainer({
         total={checkoutResponse?.pricing?.totalAmount ?? totalAmount}
         storeName={store?.name || storeName}
         slotTime={selectedSlot?.timeRange}
+        onlinePaymentsEnabled={storeSettings?.onlinePaymentsEnabled ?? true}
+        cashOnDeliveryEnabled={storeSettings?.cashOnDeliveryEnabled ?? true}
+        acceptsPosOnDelivery={storeSettings?.acceptsPosOnDelivery ?? false}
         countdownSeconds={Math.max(
           60,
           checkoutResponse?.reservationExpiresAt
