@@ -79,9 +79,18 @@ export class SettingsService {
     this.settings.update((current) => ({ ...current, ...partial }));
   }
 
+  private lastSoundPlayedTimestamp = 0;
+  private static readonly SOUND_THROTTLE_MS = 2000;
+
   playNotificationSound(): void {
     const prefs = this.settings();
     if (!prefs.orderSoundAlert) return;
+
+    const now = Date.now();
+    if (now - this.lastSoundPlayedTimestamp < SettingsService.SOUND_THROTTLE_MS) {
+      return;
+    }
+    this.lastSoundPlayedTimestamp = now;
 
     try {
       const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();

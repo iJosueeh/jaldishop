@@ -1,8 +1,11 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth-service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmModal } from '../../../shared/components/confirm-modal/confirm-modal';
 import {
   OrderInvestigationResult,
   OrderReconciliationResult,
@@ -38,7 +41,7 @@ export interface AuditSessionInvestigation {
 }
 
 @Component({
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, ConfirmModal],
   providers: [
     provideIcons({
       matBoltOutline,
@@ -90,6 +93,7 @@ export class AdminReconciliation implements OnInit {
 
   // Historial de la sesión actual
   readonly sessionHistory = signal<AuditSessionInvestigation[]>([]);
+  readonly isHistoryModalOpen = signal<boolean>(false);
 
   // Candidatos filtrados en el dropdown (Top 5 visible para rendimiento)
   readonly filteredCandidates = computed(() => {
@@ -111,11 +115,32 @@ export class AdminReconciliation implements OnInit {
   private readonly uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+  private readonly authService = inject(AuthService);
+  readonly isPrimaryAdmin = this.authService.isAdmin;
+
   ngOnInit(): void {
-    if (!this.analyticsSummary()) {
-      this.adminService.loadAnalyticsSummary().subscribe();
-    }
+    this.adminService.loadAnalyticsSummary().subscribe();
     this.loadCandidates();
+    this.loadHistory();
+  }
+
+  loadHistory(): void {
+    this.adminService.getReconciliationHistory(10).subscribe({
+      next: (items) => {
+        this.sessionHistory.set(
+          items.map((item) => ({
+            attemptId: item.attemptId,
+            timestamp: new Date(item.timestamp),
+            outcome: item.outcome,
+            reason: item.reason,
+            reconciled: item.reconciled,
+          })),
+        );
+      },
+      error: () => {
+        // Silencioso si no hay historial previo
+      },
+    });
   }
 
   loadCandidates(): void {
@@ -226,10 +251,35 @@ export class AdminReconciliation implements OnInit {
     }
   }
 
-  investigate(): void {
+  private readonly investigationCache = new Map<
+    string,
+    { result: OrderInvestigationResult; cachedAt: number }
+  >();
+  private static readonly CACHE_TTL_MS = 60_000;
+  readonly selectedHistoryItemSummary = signal<AuditSessionInvestigation | null>(null);
+  readonly isCachedDiagnostic = signal<boolean>(false);
+
+  investigate(forceRefresh = false): void {
     const id = this.attemptIdInput().trim();
     if (!this.validateUuid(id)) return;
 
+    this.selectedHistoryItemSummary.set(null);
+
+    if (!forceRefresh) {
+      const cached = this.investigationCache.get(id);
+      if (cached && Date.now() - cached.cachedAt < AdminReconciliation.CACHE_TTL_MS) {
+        this.investigationResult.set(cached.result);
+        this.reconciliationResult.set(null);
+        this.isCachedDiagnostic.set(true);
+        this.toast.info(
+          'Mostrando diagnóstico reciente en caché. Usa "Forzar consulta en vivo" para consultar nuevamente a Mercado Pago.',
+          'Diagnóstico en Caché'
+        );
+        return;
+      }
+    }
+
+    this.isCachedDiagnostic.set(false);
     this.isInvestigating.set(true);
     this.investigationResult.set(null);
     this.reconciliationResult.set(null);
@@ -238,14 +288,13 @@ export class AdminReconciliation implements OnInit {
       next: (res) => {
         this.isInvestigating.set(false);
         this.investigationResult.set(res);
+        this.investigationCache.set(id, { result: res, cachedAt: Date.now() });
         const outcome = res.outcome || res.status || 'UNKNOWN';
-        const reason = res.reason || res.detail || 'Sin detalle adicional';
         this.toast.success(
           `Diagnóstico completado: ${outcome}`,
           'Investigación Transaccional'
         );
-
-        this.recordSessionHistory(id, outcome, reason, false);
+        this.loadHistory();
       },
       error: (err) => {
         this.isInvestigating.set(false);
@@ -255,7 +304,16 @@ export class AdminReconciliation implements OnInit {
     });
   }
 
+  readonly isReconcileConfirmOpen = signal<boolean>(false);
+
+  requestReconcile(): void {
+    const id = this.attemptIdInput().trim();
+    if (!this.validateUuid(id)) return;
+    this.isReconcileConfirmOpen.set(true);
+  }
+
   reconcile(): void {
+    this.isReconcileConfirmOpen.set(false);
     const id = this.attemptIdInput().trim();
     if (!this.validateUuid(id)) return;
 
@@ -264,13 +322,26 @@ export class AdminReconciliation implements OnInit {
     this.adminService.reconcilePaymentAttempt(id).subscribe({
       next: (res) => {
         this.isReconciling.set(false);
+        this.investigationCache.delete(id);
+        this.isCachedDiagnostic.set(false);
+        this.selectedHistoryItemSummary.set(null);
         this.reconciliationResult.set(res);
+        this.candidates.update((list) =>
+          list.filter((c) => c.attemptId !== id && c.paymentId !== id)
+        );
+        if (
+          this.selectedCandidate()?.attemptId === id ||
+          this.selectedCandidate()?.paymentId === id
+        ) {
+          this.selectedCandidate.set(null);
+        }
         this.toast.success(
           `Transacción conciliada exitosamente. Orden ${res.orderNumber || res.orderId}.`,
           'Conciliación Exitosa'
         );
-
-        this.recordSessionHistory(id, 'RECONCILED', `Estado: ${res.status}`, true);
+        this.loadHistory();
+        this.loadCandidates();
+        this.adminService.loadAnalyticsSummary().subscribe();
       },
       error: (err) => {
         this.isReconciling.set(false);
@@ -314,8 +385,30 @@ export class AdminReconciliation implements OnInit {
     this.toast.success('UUID copiado al portapapeles', 'Copiado');
   }
 
+  openHistoryModal(): void {
+    this.isHistoryModalOpen.set(true);
+  }
+
+  closeHistoryModal(): void {
+    this.isHistoryModalOpen.set(false);
+  }
+
   selectHistoryItem(item: AuditSessionInvestigation): void {
+    this.isHistoryModalOpen.set(false);
     this.attemptIdInput.set(item.attemptId);
-    this.investigate();
+    this.inputError.set(null);
+    this.reconciliationResult.set(null);
+
+    const cached = this.investigationCache.get(item.attemptId);
+    if (cached && Date.now() - cached.cachedAt < AdminReconciliation.CACHE_TTL_MS) {
+      this.investigationResult.set(cached.result);
+      this.isCachedDiagnostic.set(true);
+      this.selectedHistoryItemSummary.set(null);
+      return;
+    }
+
+    this.investigationResult.set(null);
+    this.isCachedDiagnostic.set(false);
+    this.selectedHistoryItemSummary.set(item);
   }
 }

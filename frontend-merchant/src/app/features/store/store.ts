@@ -5,7 +5,9 @@ import { StoreLocationCard } from './components/store-location-card/store-locati
 import { StorePreviewCard } from './components/store-preview-card/store-preview-card';
 import { StoreDangerZoneCard } from './components/store-danger-zone-card/store-danger-zone-card';
 import { StoreTaxCard } from './components/store-tax-card/store-tax-card';
-import { ConfirmModal } from '../../shared/components/confirm-modal/confirm-modal';
+import { DestructiveActionModal } from '../../shared/components/destructive-action-modal/destructive-action-modal';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
+import { ApiErrorMetadata } from '../../core/models/api-error.models';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { StoreService } from '../../core/services/store.service';
 import { AuthService } from '../../core/services/auth-service';
@@ -29,7 +31,7 @@ import {
     StoreLocationCard,
     StorePreviewCard,
     StoreDangerZoneCard,
-    ConfirmModal,
+    DestructiveActionModal,
     NgIcon,
   ],
   providers: [
@@ -212,7 +214,17 @@ export class Store {
     this.errorMessage.set(message);
   }
 
+  private readonly errorHandler = inject(ErrorHandlerService);
+
+  readonly isReactivatingStore = signal<boolean>(false);
+  readonly closeStoreErrorStatus = signal<number | null>(null);
+  readonly closeStoreErrorMessage = signal<string | null>(null);
+  readonly closeStoreConflictMetadata = signal<ApiErrorMetadata | null>(null);
+
   openDangerModal(): void {
+    this.closeStoreErrorStatus.set(null);
+    this.closeStoreErrorMessage.set(null);
+    this.closeStoreConflictMetadata.set(null);
     this.isDangerModalOpen.set(true);
   }
 
@@ -222,20 +234,54 @@ export class Store {
       next: (res) => {
         this.isClosingStore.set(false);
         this.isDangerModalOpen.set(false);
-        if (res.action === 'DELETED') {
-          this.toastService.success(res.message);
-          setTimeout(() => {
-            this.authService.logout();
-          }, 1500);
-        } else {
-          this.toastService.info(res.message);
-        }
+        const msg = res.message || 'Tu tienda y cuenta comercial han sido eliminadas permanentemente.';
+        this.toastService.success(msg, 'Tienda Eliminada');
+        setTimeout(() => {
+          this.authService.logout();
+        }, 1800);
       },
       error: (err) => {
         this.isClosingStore.set(false);
+        const normalized = this.errorHandler.normalize(err);
+        if (normalized.status === 409 || normalized.status === 403) {
+          this.closeStoreErrorStatus.set(normalized.status);
+          this.closeStoreErrorMessage.set(normalized.message);
+          this.closeStoreConflictMetadata.set(normalized.metadata ?? null);
+        } else {
+          this.isDangerModalOpen.set(false);
+          this.toastService.error(normalized.message);
+        }
+      },
+    });
+  }
+
+  onFallbackDeactivateStore(): void {
+    this.isClosingStore.set(true);
+    this.storeService.deactivateMyStore().subscribe({
+      next: (res) => {
+        this.isClosingStore.set(false);
         this.isDangerModalOpen.set(false);
-        const msg = err?.error?.message ?? 'No se pudo procesar la solicitud para cerrar la tienda.';
-        this.toastService.error(msg);
+        this.toastService.info(res.message || 'Tu tienda ha sido desactivada.');
+      },
+      error: (err) => {
+        this.isClosingStore.set(false);
+        const normalized = this.errorHandler.normalize(err);
+        this.toastService.error(normalized.message);
+      },
+    });
+  }
+
+  onReactivateStore(): void {
+    this.isReactivatingStore.set(true);
+    this.storeService.reactivateMyStore().subscribe({
+      next: () => {
+        this.isReactivatingStore.set(false);
+        this.toastService.success('¡Tu tienda ha sido reactivada y ya es visible en el marketplace!');
+      },
+      error: (err) => {
+        this.isReactivatingStore.set(false);
+        const normalized = this.errorHandler.normalize(err);
+        this.toastService.error(normalized.message);
       },
     });
   }

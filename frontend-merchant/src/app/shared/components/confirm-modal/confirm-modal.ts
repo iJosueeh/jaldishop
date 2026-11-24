@@ -1,4 +1,4 @@
-import { Component, HostListener, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matCloseOutline,
@@ -19,8 +19,10 @@ import {
   ],
   templateUrl: './confirm-modal.html',
   styleUrl: './confirm-modal.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmModal {
+  private readonly destroyRef = inject(DestroyRef);
   readonly isOpen = input<boolean>(false);
   readonly title = input<string>('¿Eliminar elemento?');
   readonly message = input<string>('Esta acción no se puede deshacer. ¿Deseas continuar?');
@@ -37,7 +39,15 @@ export class ConfirmModal {
   readonly isRendered = signal<boolean>(false);
   readonly isClosing = signal<boolean>(false);
 
-  private closeTimeoutId?: any;
+  private closeTimeoutId?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.closeTimeoutId) {
+        clearTimeout(this.closeTimeoutId);
+      }
+    });
+  }
 
   private readonly syncOpenEffect = effect(() => {
     const open = this.isOpen();
@@ -94,6 +104,6 @@ export class ConfirmModal {
       this.isClosing.set(false);
       this.closeTimeoutId = undefined;
       callback?.();
-    }, 220);
+    }, 180);
   }
 }

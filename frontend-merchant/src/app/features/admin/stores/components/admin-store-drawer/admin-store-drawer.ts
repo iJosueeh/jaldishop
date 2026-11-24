@@ -16,6 +16,10 @@ import {
   AdminStoreSummary,
 } from '../../../../../core/models/admin.models';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
+import { ApiErrorMetadata } from '../../../../../core/models/api-error.models';
+import { DestructiveActionModal } from '../../../../../shared/components/destructive-action-modal/destructive-action-modal';
+import { environment } from '../../../../../../environments/environment';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matCloseOutline,
@@ -40,10 +44,11 @@ import {
   matReceiptLongOutline,
   matAccountBalanceOutline,
   matPaymentsOutline,
+  matDeleteOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
-  imports: [CommonModule, NgIcon],
+  imports: [CommonModule, NgIcon, DestructiveActionModal],
   providers: [
     provideIcons({
       matCloseOutline,
@@ -68,6 +73,7 @@ import {
       matReceiptLongOutline,
       matAccountBalanceOutline,
       matPaymentsOutline,
+      matDeleteOutline,
     }),
   ],
   selector: 'app-admin-store-drawer',
@@ -142,7 +148,7 @@ export class AdminStoreDrawer implements OnChanges {
   }
 
   copyStoreLink(slug: string): void {
-    const url = `${window.location.origin}/store/${slug}`;
+    const url = `${environment.marketplaceUrl}/store/${slug}`;
     navigator.clipboard.writeText(url).then(() => {
       this.isLinkCopied.set(true);
       this.toastService.info('Enlace público de la tienda copiado.', 'Enlace Copiado');
@@ -151,8 +157,8 @@ export class AdminStoreDrawer implements OnChanges {
   }
 
   openPublicStore(slug: string): void {
-    const url = `/store/${slug}`;
-    window.open(url, '_blank');
+    const url = `${environment.marketplaceUrl}/store/${slug}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   onToggleStatus(): void {
@@ -166,10 +172,9 @@ export class AdminStoreDrawer implements OnChanges {
     const s = this.store();
     if (s) {
       this.modalityChange.emit({ store: s, type });
-      const label = type === 'pickup' ? 'Recogida (Pickup)' : 'Entrega (Delivery)';
-      this.toastService.info(
-        `Modalidad ${label} actualizada para ${s.name}.`,
-        'Configuración de Tienda'
+      this.toastService.warning(
+        'La modificación directa de modalidades desde Admin requiere autorización del comercio.',
+        'Acción No Disponible'
       );
     }
   }
@@ -180,8 +185,57 @@ export class AdminStoreDrawer implements OnChanges {
   }
 
   onSaveNote(): void {
-    this.isNoteSaved.set(true);
-    this.toastService.success('Nota de auditoría de tienda guardada.', 'Nota Admin');
-    setTimeout(() => this.isNoteSaved.set(false), 2500);
+    this.toastService.info('La persistencia de notas internas estará disponible próximamente.', 'Notas Admin');
+  }
+
+  private readonly errorHandler = inject(ErrorHandlerService);
+  readonly isDeleteModalOpen = signal<boolean>(false);
+  readonly isDeletingStore = signal<boolean>(false);
+  readonly deleteErrorStatus = signal<number | null>(null);
+  readonly deleteErrorMessage = signal<string | null>(null);
+  readonly deleteConflictMetadata = signal<ApiErrorMetadata | null>(null);
+
+  requestDeleteStore(): void {
+    this.deleteErrorStatus.set(null);
+    this.deleteErrorMessage.set(null);
+    this.deleteConflictMetadata.set(null);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  cancelDeleteStore(): void {
+    if (!this.isDeletingStore()) {
+      this.isDeleteModalOpen.set(false);
+    }
+  }
+
+  confirmDeleteStore(): void {
+    const s = this.store();
+    if (!s) return;
+    this.isDeletingStore.set(true);
+    this.adminService.deleteStore(s.id).subscribe({
+      next: (res) => {
+        this.isDeletingStore.set(false);
+        this.isDeleteModalOpen.set(false);
+        this.toastService.success(res.message, 'Tienda Eliminada');
+        this.dismiss();
+      },
+      error: (err) => {
+        this.isDeletingStore.set(false);
+        const normalized = this.errorHandler.normalize(err);
+        if (normalized.status === 409 || normalized.status === 403) {
+          this.deleteErrorStatus.set(normalized.status);
+          this.deleteErrorMessage.set(normalized.message);
+          this.deleteConflictMetadata.set(normalized.metadata ?? null);
+        } else {
+          this.isDeleteModalOpen.set(false);
+          this.toastService.error(normalized.message);
+        }
+      },
+    });
+  }
+
+  fallbackSuspendStore(): void {
+    this.isDeleteModalOpen.set(false);
+    this.onToggleStatus();
   }
 }

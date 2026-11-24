@@ -1,0 +1,288 @@
+<div class="flex flex-col gap-5 sm:gap-6 font-sans">
+  <!-- Card Header & Operational Summary -->
+  <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-5 sm:p-6 shadow-2xs">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <ng-icon name="matHistoryEduOutline" class="text-[24px]" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-lg sm:text-xl font-black text-on-surface tracking-tight">Registros de Auditoría & Gobernanza</h1>
+            @if (totalItems() > 0) {
+              <span class="badge-enter inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                {{ totalItems() }} registros
+              </span>
+            }
+          </div>
+          <p class="text-xs text-on-surface-variant font-medium mt-0.5">
+            Trazabilidad inmutable de cambios de privilegios, políticas globales y suspensiones operativas.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5 self-end md:self-auto">
+        <select
+          [value]="actionFilter()"
+          (change)="onActionFilterChange($event)"
+          aria-label="Filtrar por acción"
+          class="px-3 py-2 rounded-xl text-xs font-semibold bg-surface-container border border-outline-variant/30 text-on-surface"
+        >
+          <option value="">Todas las acciones</option>
+          <option value="PAYMENT_RECONCILED">Reconciliación de pago</option>
+          <option value="PAYMENT_INVESTIGATED">Diagnóstico de pago</option>
+          <option value="STORE_DELETED">Tienda eliminada</option>
+          <option value="USER_DELETED">Usuario eliminado</option>
+          <option value="SUSPEND_STORE">Suspender tienda</option>
+          <option value="ACTIVATE_STORE">Activar tienda</option>
+          <option value="SUSPEND_USER">Suspender usuario</option>
+          <option value="UPDATE_USER_ROLES">Cambio de roles</option>
+          <option value="ACCESS_DENIED">Acceso denegado</option>
+        </select>
+
+        <select
+          [value]="statusFilter()"
+          (change)="onStatusFilterChange($event)"
+          aria-label="Filtrar por resultado"
+          class="px-3 py-2 rounded-xl text-xs font-semibold bg-surface-container border border-outline-variant/30 text-on-surface"
+        >
+          <option value="">Todos los estados</option>
+          <option value="SUCCESS">Éxito</option>
+          <option value="DENIED">Denegado</option>
+          <option value="FAILED">Fallido</option>
+        </select>
+
+        <button
+          type="button"
+          (click)="refreshLogs()"
+          [disabled]="isLoading()"
+          class="btn-tactile flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high cursor-pointer disabled:opacity-50 shadow-2xs"
+        >
+          <ng-icon name="matRefreshOutline" class="text-[16px]" [class.animate-spin]="isLoading()" />
+          <span>Actualizar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Table Container -->
+  <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-outline-variant/20 bg-surface-container/50 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70">
+            <th class="py-3.5 px-4 pl-6">Fecha / Hora</th>
+            <th class="py-3.5 px-4">Operador / Actor</th>
+            <th class="py-3.5 px-4">Acción</th>
+            <th class="py-3.5 px-4">Entidad Afectada</th>
+            <th class="py-3.5 px-4">IP Origen</th>
+            <th class="py-3.5 px-4">Resultado</th>
+            <th class="py-3.5 px-4 pr-6 text-right">Detalle</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/15 text-xs text-on-surface">
+          @if (isLoading() && auditLogs().length === 0) {
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+              <tr>
+                <td class="py-3 px-4 pl-6"><div class="h-4 w-28 bg-surface-container-high rounded skeleton-shimmer"></div></td>
+                <td class="py-3 px-4"><div class="h-4 w-36 bg-surface-container-high rounded skeleton-shimmer"></div></td>
+                <td class="py-3 px-4"><div class="h-4 w-32 bg-surface-container-high rounded skeleton-shimmer"></div></td>
+                <td class="py-3 px-4"><div class="h-4 w-24 bg-surface-container-high rounded skeleton-shimmer"></div></td>
+                <td class="py-3 px-4"><div class="h-4 w-20 bg-surface-container-high rounded skeleton-shimmer"></div></td>
+                <td class="py-3 px-4"><div class="h-5 w-16 bg-surface-container-high rounded-full skeleton-shimmer"></div></td>
+                <td class="py-3 px-4 pr-6 text-right"><div class="h-6 w-8 bg-surface-container-high rounded ml-auto skeleton-shimmer"></div></td>
+              </tr>
+            }
+          } @else if (auditLogs().length === 0) {
+            <tr>
+              <td colspan="7" class="py-12 text-center text-on-surface-variant font-medium">
+                No hay pistas de auditoría registradas en la plataforma.
+              </td>
+            </tr>
+          } @else {
+            @for (log of auditLogs(); track log.id) {
+              <tr class="hover:bg-surface-container/30 transition-colors duration-150">
+                <td class="py-3.5 px-4 pl-6 font-mono text-[11px] text-on-surface-variant tabular-nums whitespace-nowrap">
+                  {{ log.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+                </td>
+                <td class="py-3.5 px-4">
+                  @let actor = getActorDisplay(log);
+                  @if (actor.isAnonymous) {
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-container-high/80 text-on-surface-variant/80 border border-outline-variant/30">
+                      <ng-icon name="matPersonOutline" class="text-[12px] opacity-70" />
+                      {{ actor.label }}
+                    </span>
+                  } @else {
+                    <span class="font-semibold text-on-surface">{{ actor.label }}</span>
+                  }
+                </td>
+                <td class="py-3.5 px-4 font-mono text-[11px] font-bold text-primary">
+                  {{ log.action }}
+                </td>
+                <td class="py-3.5 px-4 font-mono text-[11px]">
+                  @let target = getTargetDisplay(log);
+                  <div class="flex items-center gap-1.5">
+                    <span class="px-1.5 py-0.5 rounded bg-surface-container font-semibold text-on-surface-variant text-[10px]">
+                      {{ target.type }}
+                    </span>
+                    @if (target.idOrUri) {
+                      <span class="text-on-surface truncate max-w-[220px]" [title]="target.idOrUri">
+                        {{ target.idOrUri }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-mono text-[11px] text-on-surface-variant">
+                  {{ log.ipAddress || '127.0.0.1' }}
+                </td>
+                <td class="py-3.5 px-4">
+                  @if (log.status === 'SUCCESS') {
+                    <span class="badge-enter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                      <ng-icon name="matCheckCircleOutline" class="text-[12px]" />
+                      ÉXITO
+                    </span>
+                  } @else if (log.status === 'DENIED') {
+                    <span class="badge-enter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                      <ng-icon name="matBlockOutline" class="text-[12px]" />
+                      DENEGADO
+                    </span>
+                  } @else {
+                    <span class="badge-enter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                      <ng-icon name="matCancelOutline" class="text-[12px]" />
+                      FALLO
+                    </span>
+                  }
+                </td>
+                <td class="py-3.5 px-4 pr-6 text-right">
+                  <button
+                    type="button"
+                    (click)="inspectLog(log)"
+                    class="btn-tactile p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container cursor-pointer"
+                    title="Inspeccionar detalle y payload"
+                    aria-label="Inspeccionar detalle"
+                  >
+                    <ng-icon name="matVisibilityOutline" class="text-[18px]" />
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalItems() > 0) {
+      <div class="border-t border-outline-variant/20 px-4 py-3 bg-surface-container/20">
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalItems]="totalItems()"
+          [pageSize]="pageSize()"
+          itemLabel="registros"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Inspector Modal (Accessible & Bidirectional Animated) -->
+  @if (selectedLog(); as log) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      [class.modal-backdrop-enter]="!isClosingModal()"
+      [class.modal-backdrop-exit]="isClosingModal()"
+      (click)="closeModal()"
+    >
+      <div
+        class="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden"
+        [class.modal-dialog-enter]="!isClosingModal()"
+        [class.modal-dialog-exit]="isClosingModal()"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-outline-variant/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <ng-icon name="matHistoryEduOutline" class="text-[18px]" />
+            </div>
+            <div>
+              <h2 id="modal-title" class="text-sm font-black text-on-surface leading-tight">Detalle de Registro de Auditoría</h2>
+              <span class="text-[10px] font-mono text-on-surface-variant">ID: {{ log.id }}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="btn-tactile p-1.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer"
+            aria-label="Cerrar modal"
+          >
+            <ng-icon name="matCloseOutline" class="text-[20px]" />
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-5 sm:p-6 flex-1 overflow-y-auto space-y-4">
+          <div class="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 text-xs">
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">Fecha / Hora</span>
+              <span class="font-mono tabular-nums font-semibold text-on-surface">{{ log.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">Resultado</span>
+              <span
+                class="font-bold"
+                [class.text-emerald-600]="log.status === 'SUCCESS'"
+                [class.text-amber-600]="log.status === 'DENIED'"
+                [class.text-rose-600]="log.status === 'FAILURE'"
+              >
+                {{ log.status }}
+              </span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">Operador / Actor</span>
+              @let modalActor = getActorDisplay(log);
+              <span class="font-semibold text-on-surface">{{ modalActor.label }}</span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">IP Origen</span>
+              <span class="font-mono tabular-nums text-on-surface">{{ log.ipAddress || '127.0.0.1' }}</span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">Acción</span>
+              <span class="font-mono font-bold text-primary">{{ log.action }}</span>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block text-[10px] uppercase font-bold tracking-wider">Entidad Afectada</span>
+              @let modalTarget = getTargetDisplay(log);
+              <span class="font-mono text-on-surface">
+                {{ modalTarget.type }}
+                @if (modalTarget.idOrUri) {
+                  <span class="opacity-80">({{ modalTarget.idOrUri }})</span>
+                }
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-on-surface mb-2">Payload y Metadatos de la Operación</h3>
+            <pre class="p-4 rounded-2xl bg-surface-container-high/60 border border-outline-variant/20 font-mono text-[11px] text-on-surface overflow-x-auto whitespace-pre-wrap">{{ formatJson(log.details) }}</pre>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-4 border-t border-outline-variant/20 flex justify-end">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="btn-tactile px-4 py-2 rounded-xl text-xs font-bold bg-surface-container text-on-surface hover:bg-surface-container-high cursor-pointer"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -9,6 +9,30 @@
     (refresh)="onRefresh()"
   />
 
+  <!-- Alerta visual de stock bajo (controlada por Settings -> lowStockVisualAlert) -->
+  @if (settingsService.settings().lowStockVisualAlert && inventoryService.lowStockCount() > 0 && !inventoryService.isLoading()) {
+    <div
+      class="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm shadow-xs"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+        <span>
+          Tienes <strong>{{ inventoryService.lowStockCount() }}</strong>
+          {{ inventoryService.lowStockCount() === 1 ? 'variante con stock bajo' : 'variantes con stock bajo' }}.
+        </span>
+      </div>
+      <button
+        type="button"
+        (click)="onFilterChange('LOW_STOCK')"
+        class="px-3 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-colors cursor-pointer shrink-0"
+      >
+        Ver stock bajo
+      </button>
+    </div>
+  }
+
   <!-- Banner de Error si falló la carga -->
   @if (inventoryService.error() && !inventoryService.isLoading()) {
     <div

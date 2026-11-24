@@ -93,14 +93,9 @@ export interface AdminPlatformSettings {
   requireStoreApproval: boolean;
   maintenanceMode: boolean;
   maintenanceNotice: string;
-  sessionTimeoutHours: number;
-  enforce2FAForAdmins: boolean;
-  notifyOnNewStoreRegistration: boolean;
-  notifyOnStoreSuspension: boolean;
-  adminAlertEmail: string;
-  platformVersion: string;
-  environment: string;
-  marketplaceCommissionRate?: number;
+  marketplaceCommissionRate: number;
+  version?: number;
+  updatedAt?: string;
 }
 
 // Analíticas y Finanzas Globales
@@ -169,9 +164,9 @@ export interface AdminAuditLog {
   action: string;
   targetType: string;
   targetId: string;
-  status: 'SUCCESS' | 'FAILURE';
+  status: 'SUCCESS' | 'FAILURE' | 'DENIED';
   ipAddress: string;
-  details?: Record<string, any>;
+  details?: Record<string, any> | string;
   createdAt: string;
 }
 

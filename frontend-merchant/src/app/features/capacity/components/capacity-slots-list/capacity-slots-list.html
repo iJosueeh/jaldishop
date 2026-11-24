@@ -109,6 +109,16 @@
               />
               <span>{{ slot.status === 'ACTIVE' ? 'Pausar' : 'Reactivar' }}</span>
             </button>
+
+            <button
+              type="button"
+              (click)="deleteSlot.emit(slot)"
+              class="p-2 rounded-xl text-rose-600 bg-rose-500/10 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
+              title="Eliminar franja horaria"
+              aria-label="Eliminar franja horaria"
+            >
+              <ng-icon name="matDeleteOutline" class="text-[16px]" />
+            </button>
           </div>
         </div>
       } @empty {

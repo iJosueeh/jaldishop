@@ -54,12 +54,25 @@ describe('AdminLayout', () => {
     expect(component.isMobileMenuOpen()).toBe(false);
   });
 
-  it('debe alternar y cerrar el menú móvil', () => {
-    component.toggleMobileMenu();
-    expect(component.isMobileMenuOpen()).toBe(true);
+  it('debe alternar y cerrar el menú móvil con salida diferida del overlay', () => {
+    vi.useFakeTimers();
+    try {
+      component.toggleMobileMenu();
+      expect(component.isMobileMenuOpen()).toBe(true);
+      expect(component.isMobileOverlayRendered()).toBe(true);
+      expect(component.isMobileOverlayClosing()).toBe(false);
 
-    component.closeMobileMenu();
-    expect(component.isMobileMenuOpen()).toBe(false);
+      component.closeMobileMenu();
+      expect(component.isMobileMenuOpen()).toBe(false);
+      expect(component.isMobileOverlayClosing()).toBe(true);
+      expect(component.isMobileOverlayRendered()).toBe(true);
+
+      vi.advanceTimersByTime(180);
+      expect(component.isMobileOverlayRendered()).toBe(false);
+      expect(component.isMobileOverlayClosing()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('debe abrir y cerrar la command palette', () => {

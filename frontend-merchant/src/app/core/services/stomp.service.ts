@@ -45,6 +45,10 @@ export class StompService implements OnDestroy {
   private isIntentionalDisconnect = false;
   private hadPreviousConnection = false;
 
+  private readonly recentEventIds = new Set<string>();
+  private readonly eventIdQueue: string[] = [];
+  private static readonly MAX_DEDUP_CACHE_SIZE = 200;
+
   readonly connectionState = signal<StompConnectionState>('DISCONNECTED');
   readonly isSubscribed = signal<boolean>(false);
   readonly currentStoreId = signal<string | null>(null);
@@ -57,6 +61,30 @@ export class StompService implements OnDestroy {
 
   private readonly reconnectedSubject = new Subject<void>();
   readonly reconnected$ = this.reconnectedSubject.asObservable();
+
+  /**
+   * Determina si un frame STOMP ya fue procesado mediante una caché LRU en memoria.
+   */
+  isDuplicateEvent(eventId: string): boolean {
+    if (!eventId) return false;
+    if (this.recentEventIds.has(eventId)) {
+      return true;
+    }
+    this.recentEventIds.add(eventId);
+    this.eventIdQueue.push(eventId);
+    if (this.eventIdQueue.length > StompService.MAX_DEDUP_CACHE_SIZE) {
+      const oldest = this.eventIdQueue.shift();
+      if (oldest) {
+        this.recentEventIds.delete(oldest);
+      }
+    }
+    return false;
+  }
+
+  clearDedupCache(): void {
+    this.recentEventIds.clear();
+    this.eventIdQueue.length = 0;
+  }
 
   /**
    * Permite inyectar o sustituir la instancia del cliente STOMP (útil para pruebas unitarias).
@@ -98,7 +126,7 @@ export class StompService implements OnDestroy {
 
     this.client = new Client({
       brokerURL,
-      reconnectDelay: 5000,
+      reconnectDelay: 4000 + Math.floor(Math.random() * 2000),
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       beforeConnect: () => {
@@ -183,6 +211,9 @@ export class StompService implements OnDestroy {
       try {
         const payload = JSON.parse(message.body);
         if (payload.storeId === this.subscribedStoreId) {
+          if (payload.eventId && this.isDuplicateEvent(payload.eventId)) {
+            return;
+          }
           if (payload.eventType === 'ORDER_CONFIRMED') {
             this.orderConfirmedSubject.next(payload as OrderConfirmedDomainEvent);
             this.invalidationBus?.dispatchOrderCreated({
@@ -230,6 +261,7 @@ export class StompService implements OnDestroy {
   disconnect(): void {
     this.isIntentionalDisconnect = true;
     this.unsubscribe();
+    this.clearDedupCache();
     if (this.client) {
       this.client.deactivate();
       this.client = null;

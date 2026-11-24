@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Notification, UnreadCountResponse } from '../models/notification.models';
 import { NotificationService } from './notification.service';
 import { TokenService } from './token-service';
+import { InvalidationBusService } from './invalidation-bus.service';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -43,6 +44,7 @@ describe('NotificationService', () => {
     TestBed.configureTestingModule({
       providers: [
         NotificationService,
+        InvalidationBusService,
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: TokenService, useValue: tokenServiceMock },
@@ -357,6 +359,19 @@ describe('NotificationService', () => {
       expect(service.isLoading()).toBe(false);
       expect(service.error()).toBeNull();
       expect(service.hasUnread()).toBe(false);
+    });
+  });
+
+  describe('Reconciliación Silenciosa tras Reconexión WebSocket', () => {
+    it('debe reconsultar getUnreadCount cuando InvalidationBus emite reconnected$', () => {
+      const bus = TestBed.inject(InvalidationBusService);
+      bus.dispatchReconnected('store-test-123');
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/notifications/unread/count`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ unreadCount: 5 });
+
+      expect(service.unreadCount()).toBe(5);
     });
   });
 });

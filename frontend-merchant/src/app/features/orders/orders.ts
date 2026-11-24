@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { OrderService } from '../../core/services/order.service';
 import { CapacityService } from '../../core/services/capacity.service';
 import { StoreService } from '../../core/services/store.service';
@@ -42,6 +43,7 @@ export class Orders implements OnInit {
   readonly stompService = inject(StompService);
   private readonly productService = inject(ProductService);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
 
   readonly isCancelModalOpen = signal<boolean>(false);
   readonly orderToCancel = signal<MerchantOrder | DashboardPriorityOrder | null>(null);
@@ -241,7 +243,7 @@ export class Orders implements OnInit {
   }
 
   onAdjustPace(): void {
-    this.toastService.info('Ajuste de ritmo operativo disponible en Próximas Mejoras.');
+    this.router.navigate(['/capacity']);
   }
 
   onPrintOrders(): void {

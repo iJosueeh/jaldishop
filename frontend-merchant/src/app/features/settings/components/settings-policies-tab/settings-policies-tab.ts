@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { StoreService } from '../../../../core/services/store.service';
@@ -50,6 +50,16 @@ export class SettingsPoliciesTab {
   readonly allowNotes = signal<boolean>(
     this.settingsService.settings().allowOrderNotes
   );
+
+  constructor() {
+    effect(() => {
+      const s = this.settingsService.settings();
+      this.cancellationPolicy.set(s.cancellationPolicy);
+      this.refundPolicy.set(s.refundPolicy);
+      this.requireDni.set(s.requireCustomerDni);
+      this.allowNotes.set(s.allowOrderNotes);
+    });
+  }
 
   applyIndecopiCancellationTemplate(): void {
     this.cancellationPolicy.set(INDECOPI_CANCELLATION_TEMPLATE);

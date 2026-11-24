@@ -46,6 +46,16 @@
         </span>
       </button>
     }
+
+    <button
+      type="button"
+      (click)="manageCategories.emit()"
+      class="px-3 py-1.5 rounded-lg border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-semibold text-xs whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1"
+      title="Editar o eliminar categorías"
+    >
+      <ng-icon name="matCategoryOutline" class="text-[14px]" />
+      <span>Gestionar</span>
+    </button>
   </div>
 
   <!-- Herramientas de búsqueda, filtro de estado y vista grid/list -->

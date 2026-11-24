@@ -1,7 +1,14 @@
+export interface ApiErrorMetadata {
+    suggestedAction?: 'DEACTIVATE' | 'SUSPEND' | string;
+    currentStatus?: string;
+    blockingReason?: string;
+}
+
 export interface ApiError {
     code: string;
     message: string;
     errors?: Record<string, string>;
+    metadata?: ApiErrorMetadata;
 }
 
 export interface NormalizedApiError {
@@ -9,6 +16,7 @@ export interface NormalizedApiError {
     code: string;
     message: string;
     fieldErrors: Record<string, string>;
+    metadata?: ApiErrorMetadata;
     timestamp: Date;
 }
 

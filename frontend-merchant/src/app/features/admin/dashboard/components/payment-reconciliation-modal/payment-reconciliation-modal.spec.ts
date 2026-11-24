@@ -66,4 +66,26 @@ describe('PaymentReconciliationModal', () => {
     expect(adminServiceMock.reconcilePaymentAttempt).toHaveBeenCalledWith(validUuid);
     expect(component.reconciliationResult()).toBeTruthy();
   });
+
+  it('debe ejecutar animación de salida diferida al cerrar con Escape o dismiss()', () => {
+    vi.useFakeTimers();
+    try {
+      let closed = false;
+      component.closeModal.subscribe(() => {
+        closed = true;
+      });
+
+      expect(component.isRendered()).toBe(true);
+      component.onEscape();
+      expect(component.isClosing()).toBe(true);
+      expect(closed).toBe(false);
+
+      vi.advanceTimersByTime(180);
+      expect(component.isRendered()).toBe(false);
+      expect(component.isClosing()).toBe(false);
+      expect(closed).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

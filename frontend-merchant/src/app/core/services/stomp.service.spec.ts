@@ -178,6 +178,59 @@ describe('StompService', () => {
       });
     });
 
+    it('debe descartar frames duplicados con el mismo eventId de forma reactiva mediante caché LRU', () => {
+      tokenServiceMock.getToken.mockReturnValue('valid.jwt.token');
+      tokenServiceMock.isTokenExpired.mockReturnValue(false);
+
+      service.connect('store-uuid-abc');
+      const client = service.getClient()!;
+      Object.defineProperty(client, 'connected', { value: true, configurable: true });
+
+      let messageCallback: (msg: any) => void = () => {};
+      vi.spyOn(client, 'subscribe').mockImplementation((_dest, cb) => {
+        messageCallback = cb as any;
+        return { id: 'sub-1', unsubscribe: vi.fn() };
+      });
+
+      client.onConnect?.({} as any);
+
+      const receivedEvents: OrderConfirmedDomainEvent[] = [];
+      service.orderConfirmed$.subscribe((event) => receivedEvents.push(event));
+
+      const eventPayload: OrderConfirmedDomainEvent = {
+        eventId: 'evt-duplicate-1',
+        eventType: 'ORDER_CONFIRMED',
+        orderId: 'ord-111',
+        orderNumber: '#PED-111',
+        storeId: 'store-uuid-abc',
+        totalAmount: 50.0,
+        currency: 'PEN',
+        occurredAt: '2026-10-31T12:00:00Z',
+      };
+
+      // Primer frame: debe procesarse
+      messageCallback({ body: JSON.stringify(eventPayload) });
+      expect(receivedEvents.length).toBe(1);
+
+      // Segundo frame idéntico (reentrega STOMP): debe ser descartado
+      messageCallback({ body: JSON.stringify(eventPayload) });
+      expect(receivedEvents.length).toBe(1);
+    });
+
+    it('debe desalojar el eventId más antiguo al exceder la capacidad máxima de la caché LRU', () => {
+      for (let i = 0; i < 200; i++) {
+        expect(service.isDuplicateEvent(`event-${i}`)).toBe(false);
+      }
+      // 'event-0' está en caché
+      expect(service.isDuplicateEvent('event-0')).toBe(true);
+
+      // Insertar el elemento 201 (provoca desalojo de 'event-0')
+      expect(service.isDuplicateEvent('event-200')).toBe(false);
+
+      // 'event-0' ya fue desalojado por LRU
+      expect(service.isDuplicateEvent('event-0')).toBe(false);
+    });
+
     it('debe recibir y emitir eventos ORDER_STATUS_CHANGED para la tienda activa', () => {
       tokenServiceMock.getToken.mockReturnValue('valid.jwt.token');
       tokenServiceMock.isTokenExpired.mockReturnValue(false);

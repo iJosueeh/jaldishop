@@ -135,6 +135,16 @@
               >
                 {{ exc.status === 'ACTIVE' ? 'Pausar' : 'Activar' }}
               </button>
+
+              <button
+                type="button"
+                (click)="deleteException.emit(exc)"
+                class="p-1.5 rounded-xl text-rose-600 bg-rose-500/10 hover:bg-rose-600 hover:text-white transition-all cursor-pointer active:scale-98"
+                title="Eliminar excepción"
+                aria-label="Eliminar excepción"
+              >
+                <ng-icon name="matDeleteOutline" class="text-[14px]" />
+              </button>
             </div>
           </div>
         </article>

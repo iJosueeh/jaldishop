@@ -3,6 +3,7 @@ import { AdminSettings } from './admin-settings';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import { AdminPlatformSettings } from '../../../core/models/admin.models';
 
 describe('AdminSettings', () => {
@@ -16,21 +17,13 @@ describe('AdminSettings', () => {
     requireStoreApproval: false,
     maintenanceMode: false,
     maintenanceNotice: 'Mantenimiento programado',
-    sessionTimeoutHours: 24,
-    enforce2FAForAdmins: true,
-    notifyOnNewStoreRegistration: true,
-    notifyOnStoreSuspension: true,
-    adminAlertEmail: 'admin@jaldishop.com',
-    platformVersion: '1.2.0',
-    environment: 'production',
+    marketplaceCommissionRate: 5.0,
   };
 
   beforeEach(async () => {
     adminServiceMock = {
       settings: signal(initialSettings),
-      auditLogs: signal([]),
-      auditLogsLoading: signal(false),
-      loadAuditLogs: vi.fn(),
+      loadSettings: vi.fn().mockReturnValue(of(initialSettings)),
       updateSettings: vi.fn(),
       saveSettings: vi.fn(),
     };
@@ -59,17 +52,11 @@ describe('AdminSettings', () => {
   });
 
   it('debe cambiar de pestaña con setTab()', () => {
-    component.setTab('security');
-    expect(component.currentTab()).toBe('security');
-
-    component.setTab('notifications');
-    expect(component.currentTab()).toBe('notifications');
-
     component.setTab('system');
     expect(component.currentTab()).toBe('system');
 
-    component.setTab('audit');
-    expect(component.currentTab()).toBe('audit');
+    component.setTab('general');
+    expect(component.currentTab()).toBe('general');
   });
 
   it('debe delegar la actualización de configuración a AdminService', () => {

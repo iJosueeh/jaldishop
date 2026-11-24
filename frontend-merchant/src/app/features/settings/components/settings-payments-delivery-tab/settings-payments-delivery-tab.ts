@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SettingsService } from '../../../../core/services/settings.service';
@@ -45,6 +45,18 @@ export class SettingsPaymentsDeliveryTab {
   readonly hasMinAmount = signal<boolean>(this.settingsService.settings().minDeliveryAmount !== null);
   readonly minAmount = signal<number | null>(this.settingsService.settings().minDeliveryAmount);
   readonly prepTimeMinutes = signal<number>(this.settingsService.settings().estimatedPrepTimeMinutes || 30);
+
+  constructor() {
+    effect(() => {
+      const s = this.settingsService.settings();
+      this.onlinePayments.set(s.onlinePaymentsEnabled);
+      this.codEnabled.set(s.cashOnDeliveryEnabled);
+      this.acceptsPos.set(s.acceptsPosOnDelivery);
+      this.hasMinAmount.set(s.minDeliveryAmount !== null);
+      this.minAmount.set(s.minDeliveryAmount);
+      this.prepTimeMinutes.set(s.estimatedPrepTimeMinutes || 30);
+    });
+  }
 
   readonly noPaymentMethods = computed(() => !this.onlinePayments() && !this.codEnabled());
   readonly invalidMinAmount = computed(() => this.hasMinAmount() && (this.minAmount() === null || this.minAmount()! <= 0));

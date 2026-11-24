@@ -152,6 +152,37 @@ export class StoreService {
     );
   }
 
+  deactivateMyStore(): Observable<CloseStoreResponse> {
+    this.isLoading.set(true);
+    return this.http.patch<CloseStoreResponse>(`${this.baseUrl}/me/deactivate`, {}).pipe(
+      tap((res) => {
+        this.isLoading.set(false);
+        const current = this.currentStore();
+        if (current) {
+          this.currentStore.set({ ...current, status: res.status ?? 'INACTIVE' });
+        }
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  reactivateMyStore(): Observable<StoreResponse> {
+    this.isLoading.set(true);
+    return this.http.patch<StoreResponse>(`${this.baseUrl}/me/reactivate`, {}).pipe(
+      tap((updated) => {
+        this.isLoading.set(false);
+        this.currentStore.set(updated);
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        return throwError(() => error);
+      }),
+    );
+  }
+
   clearStore(): void {
     this.currentStore.set(null);
     this.isLoaded.set(false);

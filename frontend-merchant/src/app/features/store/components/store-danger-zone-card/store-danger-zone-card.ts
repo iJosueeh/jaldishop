@@ -34,7 +34,9 @@ export interface StoreStatusInfo {
 export class StoreDangerZoneCard {
   readonly status = input<string>('ACTIVE');
   readonly isClosing = input<boolean>(false);
+  readonly isReactivating = input<boolean>(false);
   readonly requestClose = output<void>();
+  readonly requestReactivate = output<void>();
 
   readonly statusInfo = computed<StoreStatusInfo>(() => {
     const raw = (this.status() || '').toUpperCase();
@@ -80,6 +82,12 @@ export class StoreDangerZoneCard {
   onRequestClose(): void {
     if (!this.isClosing()) {
       this.requestClose.emit();
+    }
+  }
+
+  onRequestReactivate(): void {
+    if (!this.isReactivating()) {
+      this.requestReactivate.emit();
     }
   }
 }

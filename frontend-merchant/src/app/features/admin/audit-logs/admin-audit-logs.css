@@ -1,0 +1,4 @@
+/* Estilos locales delegados al sistema global de tokens de movimiento en styles.css */
+:host {
+  display: block;
+}

@@ -4,6 +4,7 @@ import { catchError, finalize, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Notification, UnreadCountResponse } from '../models/notification.models';
 import { TokenService } from './token-service';
+import { InvalidationBusService } from './invalidation-bus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,12 +12,20 @@ import { TokenService } from './token-service';
 export class NotificationService {
   private readonly http = inject(HttpClient);
   private readonly tokenService = inject(TokenService);
+  private readonly invalidationBus = inject(InvalidationBusService, { optional: true });
   private readonly baseUrl = `${environment.apiUrl}/notifications`;
 
   private currentUserId: string | null = null;
   private requestSequence = 0;
   private unreadCountSequence = 0;
   private readonly inFlightPatchIds = signal<Set<string>>(new Set());
+
+  constructor() {
+    this.invalidationBus?.reconnected$.subscribe(() => {
+      // Reconciliación silenciosa del contador tras reconexión WebSocket
+      this.getUnreadCount().subscribe();
+    });
+  }
 
   readonly notifications = signal<Notification[]>([]);
   readonly unreadCount = signal<number>(0);

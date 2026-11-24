@@ -110,4 +110,36 @@ describe('SettingsService', () => {
     expect(service.settings().soundVolume).toBe(originalSettings.soundVolume);
     expect(mockToastService.error).toHaveBeenCalled();
   });
+
+  it('debe aplicar throttling de 2 segundos a la reproducción de alertas sonoras', () => {
+    service.updateSettingsLocally({ orderSoundAlert: true });
+
+    let audioContextCount = 0;
+    class MockAudioContext {
+      currentTime = 0;
+      destination = {};
+      createOscillator = vi.fn().mockReturnValue({
+        type: 'sine',
+        frequency: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
+      });
+      createGain = vi.fn().mockReturnValue({
+        gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+        connect: vi.fn(),
+      });
+      constructor() {
+        audioContextCount++;
+      }
+    }
+    vi.stubGlobal('AudioContext', MockAudioContext);
+
+    service.playNotificationSound();
+    service.playNotificationSound();
+    service.playNotificationSound();
+
+    expect(audioContextCount).toBe(1);
+    vi.unstubAllGlobals();
+  });
 });

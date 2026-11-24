@@ -1,0 +1,114 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[1000] flex items-center justify-center p-4 font-sans"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="destructive-modal-title"
+    (click)="onBackdropClick($event)"
+  >
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl shadow-2xl w-full max-w-md p-5 sm:p-6 flex flex-col gap-4 relative">
+      <button
+        type="button"
+        [disabled]="isLoading()"
+        (click)="cancel.emit()"
+        class="absolute top-4 right-4 p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-40"
+        aria-label="Cerrar modal"
+      >
+        <ng-icon name="matCloseOutline" class="text-[20px]" />
+      </button>
+
+      <div class="flex items-center gap-3 pr-8">
+        <div
+          class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+          [class.bg-amber-500/15]="isConflict()"
+          [class.text-amber-600]="isConflict()"
+          [class.bg-rose-500/10]="!isConflict()"
+          [class.text-rose-600]="!isConflict()"
+        >
+          @if (isConflict()) {
+            <ng-icon name="matWarningOutline" class="text-[24px]" />
+          } @else if (isForbidden()) {
+            <ng-icon name="matBlockOutline" class="text-[24px]" />
+          } @else {
+            <ng-icon name="matDeleteOutline" class="text-[24px]" />
+          }
+        </div>
+        <h2 id="destructive-modal-title" class="text-base sm:text-lg font-black text-on-surface leading-tight">
+          @if (isConflict()) {
+            No se puede eliminar permanentemente
+          } @else if (isForbidden()) {
+            Acción no autorizada
+          } @else {
+            {{ title() }}
+          }
+        </h2>
+      </div>
+
+      @if (isConflict() || isForbidden()) {
+        <div
+          class="p-3.5 rounded-2xl border text-xs leading-relaxed"
+          [class.bg-amber-500/10]="isConflict()"
+          [class.border-amber-500/30]="isConflict()"
+          [class.text-on-surface]="isConflict()"
+          [class.bg-rose-500/10]="isForbidden()"
+          [class.border-rose-500/30]="isForbidden()"
+          [class.text-rose-700]="isForbidden()"
+        >
+          <p>{{ errorMessage() }}</p>
+          @if (alreadyInactiveNotice()) {
+            <p class="mt-2 font-semibold text-on-surface-variant">
+              Este recurso ya se encuentra en estado {{ conflictMetadata()?.currentStatus }}.
+            </p>
+          }
+        </div>
+      } @else {
+        <div class="p-3.5 rounded-2xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface leading-relaxed">
+          <p>{{ message() }}</p>
+        </div>
+      }
+
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/20">
+        <button
+          type="button"
+          [disabled]="isLoading()"
+          (click)="cancel.emit()"
+          class="btn-tactile px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer disabled:opacity-50"
+        >
+          {{ isConflict() || isForbidden() ? 'Entendido' : cancelText() }}
+        </button>
+
+        @if (canOfferFallback()) {
+          <button
+            type="button"
+            [disabled]="isLoading()"
+            (click)="fallback.emit()"
+            class="btn-tactile inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            @if (isLoading()) {
+              <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Procesando...</span>
+            } @else {
+              <ng-icon name="matPauseCircleOutline" class="text-[16px]" />
+              <span>{{ fallbackLabel() }}</span>
+            }
+          </button>
+        } @else if (!isConflict() && !isForbidden()) {
+          <button
+            type="button"
+            [disabled]="isLoading()"
+            (click)="confirm.emit()"
+            class="btn-tactile inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            @if (isLoading()) {
+              <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Eliminando...</span>
+            } @else {
+              <ng-icon name="matDeleteOutline" class="text-[16px]" />
+              <span>{{ confirmText() }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

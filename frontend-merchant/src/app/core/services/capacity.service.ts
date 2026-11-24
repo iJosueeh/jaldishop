@@ -320,6 +320,26 @@ export class CapacityService {
     );
   }
 
+  deleteConfiguration(id: string): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(`${this.baseUrl}/${id}`)
+      .pipe(
+        tap(() => {
+          this.configurations.update((list) => list.filter((item) => item.id !== id));
+        }),
+      );
+  }
+
+  deleteException(id: string): Observable<{ id: string; action: string; message: string }> {
+    return this.http
+      .delete<{ id: string; action: string; message: string }>(`${this.exceptionsUrl}/${id}`)
+      .pipe(
+        tap(() => {
+          this.exceptions.update((list) => list.filter((item) => item.id !== id));
+        }),
+      );
+  }
+
   // =========================================================================
   // Métodos de Ocupación Real para Comerciantes (PR 5)
   // =========================================================================

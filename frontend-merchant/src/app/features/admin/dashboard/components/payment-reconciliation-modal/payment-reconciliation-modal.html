@@ -1,14 +1,18 @@
-@if (isOpen()) {
-  <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+@if (isRendered()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" role="dialog" aria-modal="true">
     <!-- Backdrop oscuro con blur -->
     <div
       (click)="dismiss()"
-      class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-200"
+      class="fixed inset-0 bg-black/60 backdrop-blur-xs"
+      [class.modal-backdrop-enter]="!isClosing()"
+      [class.modal-backdrop-exit]="isClosing()"
     ></div>
 
     <!-- Contenedor del Modal -->
     <div
       class="relative w-full max-w-lg rounded-3xl bg-surface-container-lowest border border-outline-variant/30 shadow-2xl z-10 overflow-hidden font-sans space-y-5 p-6"
+      [class.modal-dialog-enter]="!isClosing()"
+      [class.modal-dialog-exit]="isClosing()"
       (click)="$event.stopPropagation()"
     >
       <!-- Cabecera -->

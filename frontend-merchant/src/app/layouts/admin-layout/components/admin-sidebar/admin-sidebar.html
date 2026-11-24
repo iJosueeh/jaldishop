@@ -1,5 +1,5 @@
 <aside
-  class="fixed top-0 bottom-0 left-0 w-60 bg-sidebar border-r border-sidebar-border text-white shadow-2xl lg:shadow-[1px_0_24px_rgba(0,0,0,0.35)] z-50 flex flex-col justify-between transition-transform duration-200 ease-in-out font-sans"
+  class="fixed top-0 bottom-0 left-0 w-60 bg-sidebar border-r border-sidebar-border text-white shadow-2xl lg:shadow-[1px_0_24px_rgba(0,0,0,0.35)] z-50 flex flex-col justify-between transition-transform duration-320 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
   [class.translate-x-0]="isOpen()"
   [class.-translate-x-full]="!isOpen()"
   [class.lg:translate-x-0]="true"
@@ -46,9 +46,9 @@
         >
           <span>Supervisión & Métricas</span>
           <ng-icon
-            name="matKeyboardArrowDownOutline"
-            class="text-[14px] transition-transform duration-200"
-            [class.-rotate-90]="!openSections().supervision"
+            name="matChevronRightOutline"
+            class="text-[14px] transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            [class.rotate-90]="openSections().supervision"
           />
         </button>
 
@@ -87,9 +87,9 @@
         >
           <span>Ecosistema & Entidades</span>
           <ng-icon
-            name="matKeyboardArrowDownOutline"
-            class="text-[14px] transition-transform duration-200"
-            [class.-rotate-90]="!openSections().ecosystem"
+            name="matChevronRightOutline"
+            class="text-[14px] transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            [class.rotate-90]="openSections().ecosystem"
           />
         </button>
 
@@ -160,9 +160,9 @@
         >
           <span>Finanzas & Pagos</span>
           <ng-icon
-            name="matKeyboardArrowDownOutline"
-            class="text-[14px] transition-transform duration-200"
-            [class.-rotate-90]="!openSections().finances"
+            name="matChevronRightOutline"
+            class="text-[14px] transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            [class.rotate-90]="openSections().finances"
           />
         </button>
 
@@ -180,7 +180,7 @@
         }
       </div>
 
-      <!-- SECCIÓN 4: GOBERNANZA & AUDITORÍA -->
+      <!-- SECCIÓN 4: GOBERNANZA & SEGURIDAD -->
       <div class="flex flex-col gap-1">
         <button
           type="button"
@@ -188,16 +188,27 @@
           class="flex items-center justify-between px-3 pt-2 pb-1 text-[10px] font-bold text-sidebar-muted/70 uppercase tracking-wider hover:text-white transition-colors cursor-pointer w-full text-left"
           [attr.aria-expanded]="openSections().governance"
         >
-          <span>Gobernanza & Auditoría</span>
+          <span>Gobernanza & Seguridad</span>
           <ng-icon
-            name="matKeyboardArrowDownOutline"
-            class="text-[14px] transition-transform duration-200"
-            [class.-rotate-90]="!openSections().governance"
+            name="matChevronRightOutline"
+            class="text-[14px] transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]"
+            [class.rotate-90]="openSections().governance"
           />
         </button>
 
         @if (openSections().governance) {
-          <!-- Parámetros & Auditoría -->
+          <!-- Registros de Auditoría -->
+          <a
+            routerLink="/admin/audit-logs"
+            routerLinkActive="bg-white/10 text-white font-bold border-l-3 border-primary"
+            (click)="closeSidebar.emit()"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-muted hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <ng-icon name="matHistoryEduOutline" class="text-[18px]" />
+            <span>Registros de Auditoría</span>
+          </a>
+
+          <!-- Configuración de Plataforma -->
           <a
             routerLink="/admin/settings"
             routerLinkActive="bg-white/10 text-white font-bold border-l-3 border-primary"
@@ -205,7 +216,7 @@
             class="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-muted hover:text-white hover:bg-white/10 transition-colors"
           >
             <ng-icon name="matSettingsOutline" class="text-[18px]" />
-            <span>Parámetros & Auditoría</span>
+            <span>Configuración de Plataforma</span>
           </a>
         }
       </div>
