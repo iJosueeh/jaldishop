@@ -59,7 +59,7 @@ public class AdminOrderInvestigationController {
     ) {
         rateLimits.adminPaymentOperation(principal.userId());
         OrderReconciliationCandidateResult result = reconciliationService.reconcileOrderAttempt(attemptId);
-        if (paymentAuditPort != null) {
+        if (paymentAuditPort != null && result != null) {
             boolean reconciled = result.status() == OrderReconciliationCandidateResult.Status.SUCCESS_CONFIRMED
                     || result.status() == OrderReconciliationCandidateResult.Status.SUCCESS_ORDER_OPEN;
             paymentAuditPort.recordReconciliation(
@@ -82,7 +82,7 @@ public class AdminOrderInvestigationController {
     ) {
         rateLimits.adminPaymentOperation(principal.userId());
         ManualOrderInvestigationService.Result result = service.investigate(attemptId);
-        if (paymentAuditPort != null) {
+        if (paymentAuditPort != null && result != null) {
             paymentAuditPort.recordInvestigation(
                     principal.userId(),
                     attemptId,
