@@ -118,10 +118,14 @@ describe('Customers', () => {
     req.flush(mockCustomers);
     fixture.detectChanges();
 
-    const toastService = TestBed.inject(ToastService);
-    const infoSpy = vi.spyOn(toastService, 'info');
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
     component.onOpenWhatsApp(mockCustomers[0]);
-    expect(infoSpy).toHaveBeenCalledWith('Iniciando chat con Ana...');
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^https:\/\/wa\.me\/\d+$/),
+      '_blank',
+      'noopener,noreferrer'
+    );
+    openSpy.mockRestore();
   });
 });

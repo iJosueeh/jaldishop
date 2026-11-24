@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AdminAuditLogs } from './admin-audit-logs';
 import { AdminService } from '../../../core/services/admin.service';
 import { signal } from '@angular/core';
@@ -47,7 +48,10 @@ describe('AdminAuditLogs', () => {
 
     await TestBed.configureTestingModule({
       imports: [AdminAuditLogs],
-      providers: [{ provide: AdminService, useValue: mockAdminService }],
+      providers: [
+        provideRouter([]),
+        { provide: AdminService, useValue: mockAdminService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AdminAuditLogs);

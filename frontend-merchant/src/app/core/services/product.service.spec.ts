@@ -131,9 +131,9 @@ describe('ProductService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/${prod.id}`,
+      `${environment.apiUrl}/merchants/stores/${mockStoreId}/products/${prod.id}/status`,
     );
-    expect(req.request.method).toBe('PUT');
+    expect(req.request.method).toBe('PATCH');
     req.flush({ ...prod, status: 'INACTIVE' });
 
     expect(service.products().find((p) => p.id === 'prod-1')?.status).toBe('INACTIVE');

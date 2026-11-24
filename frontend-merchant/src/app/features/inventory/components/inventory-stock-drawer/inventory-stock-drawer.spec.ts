@@ -30,6 +30,7 @@ describe('InventoryStockDrawer', () => {
   };
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [InventoryStockDrawer],
       providers: [
