@@ -21,6 +21,8 @@ import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.inventory.application.service.ReserveInventoryService;
+import com.jaldishop.backend.identity.application.port.PlatformSettingsProvider;
+import com.jaldishop.backend.identity.domain.model.PlatformSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,9 @@ public class InitiateCheckoutService {
     private final CreateCapacityReservationService createCapacityReservationService;
     private final ReserveInventoryService reserveInventoryService;
     private final StoreOperationalSettingsPort storeOperationalSettingsPort;
+
+    @Autowired(required = false)
+    private PlatformSettingsProvider platformSettingsProvider;
 
     @Autowired
     public InitiateCheckoutService(
@@ -114,11 +119,25 @@ public class InitiateCheckoutService {
         List<CheckoutItemSnapshot> itemSnapshots = snapshotAssembler.assemble(cart, command.storeId());
         String currency = itemSnapshots.isEmpty() ? "PEN" : itemSnapshots.getFirst().currency();
 
+        BigDecimal serviceFeeRate = BigDecimal.ZERO;
+        BigDecimal serviceFeeCap = null;
+        if (platformSettingsProvider != null) {
+            PlatformSettings platformSettings = platformSettingsProvider.getSettings();
+            if (platformSettings != null) {
+                if (platformSettings.customerServiceFeeRate() != null) {
+                    serviceFeeRate = platformSettings.customerServiceFeeRate();
+                }
+                serviceFeeCap = platformSettings.customerServiceFeeCap();
+            }
+        }
+
         CheckoutPricing pricing = CheckoutPricing.calculate(
                 itemSnapshots,
                 command.fulfillmentType(),
                 store.getDeliveryFeeAmount(),
                 store.getTaxRate(),
+                serviceFeeRate,
+                serviceFeeCap,
                 currency
         );
 

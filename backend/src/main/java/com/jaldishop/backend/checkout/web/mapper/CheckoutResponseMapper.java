@@ -74,6 +74,8 @@ public class CheckoutResponseMapper {
                 pricing.discountAmount(),
                 pricing.discountCode(),
                 pricing.deliveryFeeAmount(),
+                pricing.serviceFeeRate(),
+                pricing.serviceFeeAmount(),
                 pricing.taxRate(),
                 pricing.includedTaxAmount(),
                 pricing.totalAmount(),

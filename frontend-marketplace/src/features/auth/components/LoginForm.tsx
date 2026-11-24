@@ -25,8 +25,13 @@ import { env } from '@/core/config/env';
 import { customerAuthService } from '../services/customerAuthService';
 import { getSafeRedirectUrl } from '../utils/safeRedirect';
 import { isValidEmail } from '../utils/validation';
+import { PublicStore } from '@/features/storefront/types/storefront.types';
 
-export function LoginForm() {
+export interface LoginFormProps {
+  featuredStore?: PublicStore | null;
+}
+
+export function LoginForm({ featuredStore = null }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -174,27 +179,59 @@ export function LoginForm() {
             Inicia sesión para recuperar tu carrito guardado, consultar tus pedidos pendientes y coordinar con el comerciante directo por WhatsApp.
           </p>
 
-          {/* Tarjeta destacada de tienda local */}
-          <div className="mt-8 p-6 rounded-2xl bg-[#061a1c]/90 border border-[#1e2c31] backdrop-blur-sm shadow-xl shadow-black/50">
-            <div className="flex items-center justify-between pb-3.5 border-b border-[#1e2c31]/80">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#005141]/40 border border-[#133b32] flex items-center justify-center text-[#36f4a4]">
-                  <Store className="w-5 h-5" />
+          {/* Tarjeta destacada: comercio real desde backend (con caché revalidable) o resumen de garantías */}
+          {featuredStore ? (
+            <Link
+              href={`/tienda/${featuredStore.slug}`}
+              className="mt-8 block p-6 rounded-2xl bg-[#061a1c]/90 border border-[#1e2c31] hover:border-[#36f4a4]/40 backdrop-blur-sm shadow-xl shadow-black/50 transition-colors group"
+            >
+              <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#1e2c31]/80">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#005141]/40 border border-[#133b32] flex items-center justify-center text-[#36f4a4] shrink-0">
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-white block truncate group-hover:text-[#36f4a4] transition-colors">
+                      {featuredStore.name}
+                    </span>
+                    <span className="text-[11px] text-[#99b3ad] block truncate">
+                      {featuredStore.address || 'Comercio local verificado'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-[#36f4a4] bg-[#005141]/30 border border-[#133b32] px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0">
+                  <Clock className="w-3 h-3 text-[#36f4a4]" /> Turnos reales
+                </span>
+              </div>
+              <div className="pt-3.5 flex items-center justify-between text-xs text-[#99b3ad] gap-3">
+                <span className="truncate">
+                  {featuredStore.deliveryEnabled && featuredStore.pickupEnabled
+                    ? 'Delivery y retiro en tienda disponibles'
+                    : featuredStore.deliveryEnabled
+                    ? 'Delivery programado disponible'
+                    : 'Retiro en tienda disponible'}
+                </span>
+                <span className="font-bold text-white inline-flex items-center gap-1 shrink-0">
+                  Explorar <ArrowRight className="w-3.5 h-3.5 text-[#36f4a4]" />
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div className="mt-8 p-6 rounded-2xl bg-[#061a1c]/90 border border-[#1e2c31] backdrop-blur-sm shadow-xl shadow-black/50 space-y-3">
+              <div className="flex items-center gap-3 pb-3 border-b border-[#1e2c31]/80">
+                <div className="w-10 h-10 rounded-xl bg-[#005141]/40 border border-[#133b32] flex items-center justify-center text-[#36f4a4] shrink-0">
+                  <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-white block">Panadería Artesanal San Pedro</span>
-                  <span className="text-[11px] text-[#99b3ad]">Miraflores, Lima</span>
+                  <span className="text-xs font-bold text-white block">Reserva por franjas horarias</span>
+                  <span className="text-[11px] text-[#99b3ad]">Cupos reales definidos por cada comercio local</span>
                 </div>
               </div>
-              <span className="text-[11px] font-semibold text-[#36f4a4] bg-[#005141]/30 border border-[#133b32] px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-[#36f4a4]" /> Turno 10:30 AM
-              </span>
+              <p className="text-xs text-[#99b3ad] leading-relaxed">
+                Sigue tus pedidos en tiempo real, descarga tus estadísticas de compra y guarda tus direcciones de entrega.
+              </p>
             </div>
-            <div className="pt-3.5 flex items-center justify-between text-xs text-[#99b3ad]">
-              <span>1x Pan de Masa Madre + 2x Croissants</span>
-              <span className="font-bold text-white text-sm">S/ 24.50</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Footer inferior izquierdo: Garantías de confianza */}

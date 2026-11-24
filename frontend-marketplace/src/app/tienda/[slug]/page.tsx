@@ -140,8 +140,8 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
       {/* Store Header / Hero Modular */}
       <StorefrontHero store={store} />
 
-      {/* Main Container */}
-      <Container size="lg" className="flex-1 py-8 space-y-8">
+      {/* Main Full-Width Responsive Container */}
+      <Container size="full" className="flex-1 py-6 sm:py-8 px-4 sm:px-6 lg:px-10 xl:px-12 space-y-8">
         {/* Modular Open/Closed Catalog Container con productos reales */}
         <CatalogContainer
           storeSlug={store.slug}
@@ -151,66 +151,81 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
           storeSettings={storeSettings}
         />
 
-        {/* Mapa Interactivo del Local con Coordenadas OpenStreetMap Leaflet */}
-        <StoreLocationMap store={store} />
-
-        {/* Políticas de Atención y Condiciones Operativas (INDECOPI) */}
-        {storeSettings && (
-          <section
-            aria-labelledby="policies-heading"
-            className="rounded-[12px] border border-stone-200/90 bg-white p-5 sm:p-7 shadow-xs space-y-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 id="policies-heading" className="font-display text-lg font-bold text-stone-900">
-                Políticas de Tienda y Condiciones de Atención
-              </h2>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
-                <span className="px-2.5 py-1 rounded-full bg-stone-100">
-                  Preparación estimada: ~{storeSettings.estimatedPrepTimeMinutes} min
-                </span>
-                {storeSettings.acceptsPosOnDelivery && (
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-[#005141]">
-                    Acepta POS contra entrega
-                  </span>
-                )}
-                {storeSettings.minDeliveryAmount !== null && (
-                  <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800">
-                    Mínimo delivery: S/ {Number(storeSettings.minDeliveryAmount).toFixed(2)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-stone-600">
-              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200/70 space-y-1">
-                <h3 className="font-bold text-stone-800">Política de Cancelación</h3>
-                <p className="leading-relaxed">{storeSettings.cancellationPolicy}</p>
-              </div>
-              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200/70 space-y-1">
-                <h3 className="font-bold text-stone-800">Política de Reembolsos (INDECOPI)</h3>
-                <p className="leading-relaxed">{storeSettings.refundPolicy}</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Sección de Consulta Directa con 12px radius & Pill Button */}
-        <section aria-labelledby="contact-heading" className="flex flex-col gap-4 rounded-[12px] border border-stone-200/90 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7 shadow-xs">
-          <div>
-            <h2 id="contact-heading" className="font-display text-lg font-bold text-stone-900">¿Tienes una consulta para {store.name}?</h2>
-            <p className="mt-1 text-sm text-stone-600">{whatsappUrl ? 'Consulta directamente con la tienda antes de elegir.' : 'La tienda aún no ha publicado un número de contacto.'}</p>
+        {/* Bento Asymmetric Lower Grid: Map + Policies & Direct Contact */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          <div className="xl:col-span-7 min-w-0">
+            <StoreLocationMap store={store} />
           </div>
-          {whatsappUrl && (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-6 py-3 text-sm font-bold text-[#005141] transition-all hover:-translate-y-0.5 active:scale-95 shadow-2xs"
+
+          <div className="xl:col-span-5 space-y-6 min-w-0">
+            {/* Políticas de Atención y Condiciones Operativas (INDECOPI) */}
+            {storeSettings && (
+              <section
+                aria-labelledby="policies-heading"
+                className="rounded-[16px] border border-stone-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4"
+              >
+                <div className="space-y-2">
+                  <h2 id="policies-heading" className="font-display text-lg font-bold text-stone-900">
+                    Políticas de Tienda y Atención
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
+                    <span className="px-2.5 py-1 rounded-full bg-stone-100">
+                      Preparación: ~{storeSettings.estimatedPrepTimeMinutes} min
+                    </span>
+                    {storeSettings.acceptsPosOnDelivery && (
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-[#005141]">
+                        POS contra entrega
+                      </span>
+                    )}
+                    {storeSettings.minDeliveryAmount !== null && (
+                      <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800">
+                        Mínimo delivery: S/ {Number(storeSettings.minDeliveryAmount).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-3 text-xs sm:text-sm text-stone-600">
+                  <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
+                    <h3 className="font-bold text-stone-800">Política de Cancelación</h3>
+                    <p className="leading-relaxed">{storeSettings.cancellationPolicy}</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
+                    <h3 className="font-bold text-stone-800">Política de Reembolsos (INDECOPI)</h3>
+                    <p className="leading-relaxed">{storeSettings.refundPolicy}</p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Sección de Consulta Directa */}
+            <section
+              aria-labelledby="contact-heading"
+              className="flex flex-col gap-4 rounded-[16px] border border-stone-200/90 bg-white p-5 sm:p-6 shadow-xs"
             >
-              <MessageCircle className="w-4 h-4 text-[#005141]" />
-              <span>Contactar por WhatsApp</span>
-            </a>
-          )}
-        </section>
+              <div>
+                <h2 id="contact-heading" className="font-display text-lg font-bold text-stone-900">
+                  ¿Tienes una consulta para {store.name}?
+                </h2>
+                <p className="mt-1 text-sm text-stone-600">
+                  {whatsappUrl
+                    ? 'Consulta directamente con la tienda antes de elegir.'
+                    : 'La tienda aún no ha publicado un número de contacto.'}
+                </p>
+              </div>
+              {whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 px-6 py-2.5 text-sm font-bold text-[#005141] transition-all hover:-translate-y-0.5 active:scale-95 shadow-2xs"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#005141]" />
+                  <span>Contactar por WhatsApp</span>
+                </a>
+              )}
+            </section>
+          </div>
+        </div>
       </Container>
 
       {/* Footer sobrio conforme a DESIGN.md */}

@@ -78,6 +78,12 @@ public class PlatformSettingsService {
                 ? command.marketplaceCommissionRate()
                 : beforeDomain.marketplaceCommissionRate();
 
+        BigDecimal customerServiceFeeRate = command.customerServiceFeeRate() != null
+                ? command.customerServiceFeeRate()
+                : (beforeDomain.customerServiceFeeRate() != null ? beforeDomain.customerServiceFeeRate() : BigDecimal.ZERO);
+
+        BigDecimal customerServiceFeeCap = command.customerServiceFeeCap();
+
         PlatformSettings toSave = new PlatformSettings(
                 1,
                 Boolean.TRUE.equals(command.allowMerchantRegistration()),
@@ -85,6 +91,8 @@ public class PlatformSettingsService {
                 maintenanceMode,
                 sanitizedNotice,
                 commissionRate,
+                customerServiceFeeRate,
+                customerServiceFeeCap,
                 persisted ? command.version() : 0L,
                 beforeDomain.createdAt(),
                 Instant.now()

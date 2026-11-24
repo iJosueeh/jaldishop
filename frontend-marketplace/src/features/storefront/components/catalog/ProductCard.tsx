@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Clock, Layers, Heart } from 'lucide-react';
+import { ShoppingCart, Clock, Layers, Heart, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/components/ui/Button';
 import { ProductVisual } from '../ProductVisual';
@@ -44,15 +44,22 @@ export function ProductCard({
     : formatCurrency(product.price);
   const detailHref = storeSlug && product.slug ? `/tienda/${storeSlug}/producto/${product.slug}` : null;
 
+  const addLabel =
+    variants.length === 0
+      ? 'No disponible'
+      : currentQuantity > 0
+        ? `Añadir (${currentQuantity})`
+        : 'Añadir';
+
   return (
     <motion.article
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-[12px] border border-stone-200/90 bg-white shadow-2xs hover:shadow-lg hover:border-stone-300 transition-all duration-300"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-2xs hover:shadow-lg hover:border-[#005141]/25 transition-all duration-300"
     >
-      <div>
+      <div className="flex-1 flex flex-col">
         {/* Cabecera visual con fotografía editorial (aspect 4:3) */}
-        <div className="relative overflow-hidden rounded-t-[12px] bg-stone-100">
+        <div className="relative overflow-hidden rounded-t-2xl bg-stone-100">
           {detailHref ? (
             <Link href={detailHref} aria-label={`Ver detalle de ${product.name}`} className="block">
               <ProductVisual
@@ -71,7 +78,7 @@ export function ProductCard({
             />
           )}
 
-          {/* Insignias Flotantes estilo Shopify */}
+          {/* Insignias Flotantes */}
           <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 z-10 pointer-events-none">
             {product.category && product.category !== 'General' && (
               <span className="px-2.5 py-0.5 rounded-full bg-stone-900/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs">
@@ -85,6 +92,16 @@ export function ProductCard({
               </span>
             )}
           </div>
+
+          {/* Indicador sutil de detalle en hover (desktop) */}
+          {detailHref && (
+            <div className="absolute bottom-2.5 right-2.5 z-10 pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 hidden sm:block">
+              <span className="inline-flex items-center gap-1 rounded-full bg-stone-950/75 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md shadow-sm">
+                <Eye className="w-3 h-3 text-[#36f4a4]" />
+                Ver detalle
+              </span>
+            </div>
+          )}
 
           {/* Botón de Favorito Flotante */}
           {onToggleFavorite && (
@@ -114,10 +131,10 @@ export function ProductCard({
         </div>
 
         {/* Contenido Editorial del Producto */}
-        <div className="p-4 sm:p-5 space-y-2">
-          <h3 className="font-display text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug">
+        <div className="flex-1 p-4 space-y-2">
+          <h3 className="font-display text-base font-bold text-stone-900 group-hover:text-[#005141] transition-colors line-clamp-2 leading-snug">
             {detailHref ? (
-              <Link href={detailHref} className="hover:underline">
+              <Link href={detailHref} className="hover:underline underline-offset-2">
                 {product.name}
               </Link>
             ) : (
@@ -125,31 +142,30 @@ export function ProductCard({
             )}
           </h3>
 
-            {product.description ? (
-              <p className="text-xs sm:text-sm text-stone-600 line-clamp-2 leading-relaxed">
-                {product.description}
-              </p>
+          {product.description ? (
+            <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
           ) : (
             <div className="h-4" />
-            )}
-
+          )}
 
           {/* Tag de tiempo de preparación artesanal */}
           {product.prepTimeMinutes ? (
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 pt-0.5">
-              <Clock className="w-3.5 h-3.5 text-[#ea580c]" />
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50/90 border border-amber-200/60 px-2.5 py-0.5 text-[11px] font-medium text-stone-700">
+              <Clock className="w-3 h-3 text-[#ea580c]" />
               <span>Preparación ~{product.prepTimeMinutes} min</span>
             </div>
           ) : null}
 
           {variants.length > 1 && (
-            <label className="block pt-1 text-xs font-semibold text-stone-700">
+            <label className="block pt-1 text-[11px] font-semibold text-stone-700">
               Presentación
               <select
                 aria-label={`Presentación de ${product.name}`}
                 value={variantId}
                 onChange={(event) => setVariantId(event.target.value)}
-                className="mt-1 w-full rounded-[8px] border border-stone-200/90 bg-stone-50/70 p-2 text-xs font-medium text-stone-900 focus:bg-white focus:border-[#005141] focus:outline-none transition-colors"
+                className="mt-1 w-full rounded-xl border border-stone-200/90 bg-stone-50/80 px-2.5 py-2 text-xs font-medium text-stone-900 focus:bg-white focus:border-[#005141] focus:outline-none transition-colors"
               >
                 <option value="">Elige una presentación</option>
                 {variants.map((variant) => (
@@ -163,27 +179,56 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Pie de Card: Precio y Botón Pill de Añadir */}
-      <div className="p-4 sm:p-5 pt-0">
-        <div className="flex items-center justify-between gap-3 border-t border-stone-100 pt-3">
-          <div className="flex flex-col">
+      {/* Pie de Card: Precio + Ver detalles + Botón de Carrito */}
+      <div className="px-4 pb-4 pt-0">
+        <div className="flex items-center justify-between gap-2 border-t border-stone-100 pt-3">
+          <div className="flex flex-col min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
               Precio
             </span>
-            <span className="font-display font-black text-base sm:text-lg text-stone-900">
+            <span className="font-display font-black text-base sm:text-lg text-stone-950 tabular-nums truncate">
               {selected ? formatCurrency(selected.priceAmount, selected.priceCurrency) : displayPrice}
             </span>
           </div>
 
-          <Button
-            size="sm"
-            disabled={pending || !selected}
-            onClick={() => selected && onAdd({ ...product, variantId: selected.id, price: Number(selected.priceAmount) })}
-            className="rounded-full bg-[#005141] hover:bg-[#00382d] text-white text-xs font-bold px-4 py-2 shadow-xs hover:shadow-md transition-all active:scale-95"
-            leftIcon={<Plus className="h-3.5 w-3.5 text-[#feae2c]" />}
-          >
-            {variants.length === 0 ? 'No disponible' : currentQuantity > 0 ? `Añadir (${currentQuantity})` : 'Añadir'}
-          </Button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {detailHref && (
+              <Link
+                href={detailHref}
+                aria-label={`Detalles de ${product.name}`}
+                title="Ver detalles del producto"
+                className="inline-flex h-9 items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2.5 text-xs font-semibold text-stone-700 hover:border-[#005141]/35 hover:bg-emerald-50/70 hover:text-[#005141] transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Ver</span>
+              </Link>
+            )}
+
+            <Button
+              size="sm"
+              aria-label={addLabel}
+              title={variants.length === 0 ? 'No disponible' : selected ? 'Añadir al carrito' : 'Elige una presentación'}
+              disabled={pending || !selected}
+              onClick={() => selected && onAdd({ ...product, variantId: selected.id, price: Number(selected.priceAmount) })}
+              className={cn(
+                'h-9 rounded-full bg-[#005141] hover:bg-[#00382d] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all active:scale-95',
+                variants.length === 0 ? 'px-3' : currentQuantity > 0 ? 'px-3 gap-1.5' : 'w-9 px-0 justify-center'
+              )}
+            >
+              {variants.length === 0 ? (
+                <span>No disponible</span>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4 text-[#36f4a4]" />
+                  {currentQuantity > 0 && (
+                    <span className="inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-[#36f4a4] px-1 text-[10px] font-black text-[#02090a]">
+                      {currentQuantity}
+                    </span>
+                  )}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </motion.article>

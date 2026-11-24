@@ -26,10 +26,11 @@ describe('Storefront Hero Modular Components', () => {
     phone: '+51987654321',
   };
 
-  it('StoreBanner renders navigation link and action buttons', () => {
+  it('StoreBanner renders navigation link to /tiendas and action buttons', () => {
     render(<StoreBanner bannerUrl={mockStore.bannerUrl} storeName={mockStore.name} />);
 
-    expect(screen.getByText('Volver al Marketplace')).toBeInTheDocument();
+    const backLink = screen.getByRole('link', { name: /Explorar tiendas/i });
+    expect(backLink).toHaveAttribute('href', '/tiendas');
     expect(screen.getByTitle('Compartir tienda')).toBeInTheDocument();
   });
 
@@ -52,15 +53,31 @@ describe('Storefront Hero Modular Components', () => {
     expect(screen.getByText('4.9')).toBeInTheDocument();
     expect(screen.getByText('Ver ubicación')).toBeInTheDocument();
     expect(screen.getByText('Av. Primavera 450, Surco')).toBeInTheDocument();
-    expect(screen.getByText('Ver productos')).toBeInTheDocument();
+    expect(screen.queryByText('Ver productos')).not.toBeInTheDocument();
   });
 
   it('StorefrontHero orchestrates StoreBanner, StoreLogo and StoreInfoCard together', () => {
-    render(<StorefrontHero store={mockStore} />);
+    render(
+      <StorefrontHero
+        store={{
+          ...mockStore,
+          instagramUrl: 'https://instagram.com/donpepe',
+          facebookUrl: 'https://facebook.com/donpepe',
+        }}
+      />
+    );
 
     expect(screen.getByText('Tiendita Don Pepe')).toBeInTheDocument();
-    expect(screen.getByText('Volver al Marketplace')).toBeInTheDocument();
+    expect(screen.getByText('Explorar tiendas')).toBeInTheDocument();
     expect(screen.getByText('Tienda activa')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Instagram de Tiendita Don Pepe/i })).toHaveAttribute(
+      'href',
+      'https://instagram.com/donpepe'
+    );
+    expect(screen.getByRole('link', { name: /Facebook de Tiendita Don Pepe/i })).toHaveAttribute(
+      'href',
+      'https://facebook.com/donpepe'
+    );
   });
 
   it('shows published modalities without implying opening hours', () => {

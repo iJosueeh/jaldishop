@@ -65,6 +65,8 @@ public class AdminPlatformSettingsController {
                 request.maintenanceMode(),
                 request.maintenanceNotice(),
                 request.marketplaceCommissionRate(),
+                request.customerServiceFeeRate(),
+                request.customerServiceFeeCap(),
                 request.version()
         );
 
@@ -84,6 +86,8 @@ public class AdminPlatformSettingsController {
                 settings.maintenanceMode(),
                 settings.maintenanceNotice(),
                 settings.marketplaceCommissionRate(),
+                settings.customerServiceFeeRate() != null ? settings.customerServiceFeeRate() : java.math.BigDecimal.ZERO,
+                settings.customerServiceFeeCap(),
                 settings.version(),
                 settings.updatedAt()
         );

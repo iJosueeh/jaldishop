@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 public class ProductVariantResponseMapper {
 
     public ProductVariantResponse toResponse(ProductVariant variant) {
+        return toResponse(variant, null);
+    }
+
+    public ProductVariantResponse toResponse(ProductVariant variant, Integer availableQuantity) {
         if (variant == null) {
             return null;
         }
@@ -31,6 +35,7 @@ public class ProductVariantResponseMapper {
                 variant.getPriceAmount(),
                 variant.getPriceCurrency(),
                 variant.isTracksInventory(),
+                variant.isTracksInventory() ? availableQuantity : null,
                 variant.getStatus().name(),
                 attributeDtos,
                 variant.getCreatedAt(),

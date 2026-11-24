@@ -48,33 +48,33 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-sm font-normal text-[#99b3ad]">
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Restaurantes & Cafeterías
+                <Link href="/tiendas" className="hover:text-[#36f4a4] transition-colors">
+                  Todas las Tiendas
                 </Link>
               </li>
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Moda, Textil & Calzado
+                <Link href="/productos" className="hover:text-[#36f4a4] transition-colors">
+                  Catálogo de Productos
                 </Link>
               </li>
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Hogar, Decoración & Cerámica
+                <Link href="/tiendas?q=panaderia" className="hover:text-[#36f4a4] transition-colors">
+                  Panaderías & Cafeterías
                 </Link>
               </li>
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Salud, Belleza & Bienestar
+                <Link href="/tiendas?q=pasteleria" className="hover:text-[#36f4a4] transition-colors">
+                  Pastelerías & Postres
                 </Link>
               </li>
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Floristerías & Arreglos
+                <Link href="/tiendas?entrega=delivery" className="hover:text-[#36f4a4] transition-colors">
+                  Con Delivery
                 </Link>
               </li>
               <li>
-                <Link href="/#tiendas-destacadas" className="hover:text-[#36f4a4] transition-colors">
-                  Supermercado & Bodega Local
+                <Link href="/tiendas?entrega=pickup" className="hover:text-[#36f4a4] transition-colors">
+                  Retiro en Tienda
                 </Link>
               </li>
             </ul>
@@ -109,12 +109,12 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/#caracteristicas" className="hover:text-[#36f4a4] transition-colors">
+                <Link href="/para-comercios" className="hover:text-[#36f4a4] transition-colors">
                   Horarios y Cupos
                 </Link>
               </li>
               <li>
-                <Link href="/#como-funciona" className="hover:text-[#36f4a4] transition-colors">
+                <Link href="/como-funciona" className="hover:text-[#36f4a4] transition-colors">
                   Cobros con Yape y Tarjetas
                 </Link>
               </li>

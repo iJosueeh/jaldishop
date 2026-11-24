@@ -227,4 +227,58 @@ export interface UpdateCustomerAddressPayload {
   isDefault?: boolean;
 }
 
+export interface PeriodFilterDto {
+  from: string;
+  to: string;
+  timeZone: string;
+}
+
+export interface CustomerSpendingSummary {
+  userId: string;
+  totalOrdersCount: number;
+  totalSpentAmount: number;
+  totalRefundedAmount: number;
+  firstOrderAt: string | null;
+  lastOrderAt: string | null;
+}
+
+export interface ProductSalesRank {
+  variantId: string;
+  productId: string;
+  productName: string;
+  variantName: string | null;
+  unitsSold: number;
+  totalRevenue: number;
+}
+
+export interface CustomerAnalyticsSummary {
+  userId: string;
+  period: PeriodFilterDto;
+  spending: CustomerSpendingSummary | null;
+  topPurchasedProducts: ProductSalesRank[];
+}
+
+export type NotificationType =
+  | 'NEW_ORDER'
+  | 'ORDER_STATUS_CHANGED'
+  | 'LOW_STOCK'
+  | 'SYSTEM';
+
+export type NotificationStatus = 'UNREAD' | 'READ';
+
+export interface CustomerNotification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  status: NotificationStatus;
+  createdAt: string;
+  readAt: string | null;
+}
+
+export interface UnreadNotificationsCount {
+  unreadCount: number;
+}
+
 

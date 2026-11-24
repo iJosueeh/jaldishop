@@ -9,6 +9,8 @@ public record PlatformSettingsResponse(
         boolean maintenanceMode,
         String maintenanceNotice,
         BigDecimal marketplaceCommissionRate,
+        BigDecimal customerServiceFeeRate,
+        BigDecimal customerServiceFeeCap,
         Long version,
         Instant updatedAt
 ) {

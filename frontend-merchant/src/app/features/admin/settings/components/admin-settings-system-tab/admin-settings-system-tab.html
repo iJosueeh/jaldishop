@@ -36,6 +36,42 @@
           <span class="text-xs font-bold text-on-surface-variant">% por venta concretada</span>
         </div>
       </div>
+
+      <!-- Tarifa de Servicio al Comprador -->
+      <div class="p-4 rounded-2xl bg-surface-container/40 border border-outline-variant/20 flex flex-col justify-between gap-3">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-on-surface">Tarifa de Servicio al Comprador</span>
+          <span class="text-[11px] text-on-surface-variant">Porcentaje aplicado al subtotal del carrito en checkout y cobro con Mercado Pago (0.00% - 100.00%)</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            [value]="settings().customerServiceFeeRate ?? 0.0"
+            (input)="onCustomerServiceFeeChange($event)"
+            class="w-28 px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-xs font-bold font-mono tabular-nums text-on-surface focus:outline-none focus:border-primary"
+          />
+          <span class="text-xs font-bold text-on-surface-variant">% en checkout</span>
+        </div>
+
+        <div class="pt-2 border-t border-outline-variant/20 flex flex-wrap items-center gap-3">
+          <label class="text-[11px] font-semibold text-on-surface-variant">
+            Tope máximo por pedido (opcional, S/):
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="0.5"
+            placeholder="Sin tope"
+            [value]="settings().customerServiceFeeCap ?? ''"
+            (input)="onCustomerServiceFeeCapChange($event)"
+            class="w-28 px-3 py-1.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-xs font-bold font-mono tabular-nums text-on-surface focus:outline-none focus:border-primary"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Metadatos de Plataforma -->

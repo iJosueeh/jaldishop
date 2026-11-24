@@ -35,6 +35,7 @@ public class PaymentPersistenceMapper {
                 entity.getDiscountAmount(),
                 entity.getDiscountCode(),
                 entity.getDeliveryFeeAmount(),
+                entity.getServiceFeeAmount(),
                 entity.getIncludedTaxAmount(),
                 entity.getAmount(),
                 entity.getCurrency()
@@ -66,7 +67,7 @@ public class PaymentPersistenceMapper {
 
         String fulfillmentType = domain.getFulfillmentType() != null ? domain.getFulfillmentType().name() : null;
 
-        return new PaymentEntity(
+        PaymentEntity entity = new PaymentEntity(
                 domain.getId(),
                 domain.getCapacityReservationId(),
                 domain.getAmount(),
@@ -94,6 +95,8 @@ public class PaymentPersistenceMapper {
                 domain.getIncludedTaxAmount(),
                 domain.getItemsSnapshot()
         );
+        entity.setServiceFeeAmount(domain.getServiceFeeAmount());
+        return entity;
     }
 
 }

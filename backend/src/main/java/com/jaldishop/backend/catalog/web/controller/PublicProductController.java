@@ -9,13 +9,17 @@ import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
 import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
+import com.jaldishop.backend.inventory.application.service.GetStoreInventoryService;
+import com.jaldishop.backend.inventory.web.dto.InventoryResponse;
 import com.jaldishop.backend.store.application.service.GetStoreBySlugService;
 import com.jaldishop.backend.store.domain.model.Store;
 import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,6 +34,7 @@ public class PublicProductController {
     private final ProductResponseMapper responseMapper;
     private final ProductVariantRepository variantRepository;
     private final GetStoreBySlugService getStoreBySlugService;
+    private final GetStoreInventoryService getStoreInventoryService;
 
     public PublicProductController(
             GetProductsService getProductsService,
@@ -37,10 +42,22 @@ public class PublicProductController {
             ProductVariantRepository variantRepository,
             GetStoreBySlugService getStoreBySlugService
     ) {
+        this(getProductsService, responseMapper, variantRepository, getStoreBySlugService, null);
+    }
+
+    @Autowired
+    public PublicProductController(
+            GetProductsService getProductsService,
+            ProductResponseMapper responseMapper,
+            ProductVariantRepository variantRepository,
+            GetStoreBySlugService getStoreBySlugService,
+            GetStoreInventoryService getStoreInventoryService
+    ) {
         this.getProductsService = getProductsService;
         this.responseMapper = responseMapper;
         this.variantRepository = variantRepository;
         this.getStoreBySlugService = getStoreBySlugService;
+        this.getStoreInventoryService = getStoreInventoryService;
     }
 
     @GetMapping("/{storeId}/products")
@@ -74,7 +91,12 @@ public class PublicProductController {
         List<ProductVariant> activeVariants = variantRepository.findByProductId(product.getId()).stream()
                 .filter(variant -> variant.getStatus() == VariantStatus.ACTIVE)
                 .toList();
-        return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants));
+
+        Map<UUID, Integer> availableStockMap = loadAvailableStockMap(store.getId());
+        if (availableStockMap.isEmpty()) {
+            return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants));
+        }
+        return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants, availableStockMap));
     }
 
     private List<ProductResponse> fetchActiveProducts(UUID storeId, UUID categoryId) {
@@ -93,13 +115,31 @@ public class PublicProductController {
         Map<UUID, List<ProductVariant>> variantsByProductId = allVariants.stream()
                 .collect(Collectors.groupingBy(ProductVariant::getProductId));
 
+        Map<UUID, Integer> availableStockMap = loadAvailableStockMap(storeId);
+
         return products.stream()
                 .map(product -> {
                     List<ProductVariant> vars = variantsByProductId.get(product.getId());
-                    return (vars != null && !vars.isEmpty())
+                    if (vars == null || vars.isEmpty()) {
+                        return responseMapper.toResponse(product);
+                    }
+                    return availableStockMap.isEmpty()
                             ? responseMapper.toResponse(product, vars)
-                            : responseMapper.toResponse(product);
+                            : responseMapper.toResponse(product, vars, availableStockMap);
                 })
                 .toList();
+    }
+
+    private Map<UUID, Integer> loadAvailableStockMap(UUID storeId) {
+        if (getStoreInventoryService == null) {
+            return Collections.emptyMap();
+        }
+        return getStoreInventoryService.execute(storeId).stream()
+                .filter(inv -> inv.tracksInventory() && inv.availableQuantity() != null)
+                .collect(Collectors.toMap(
+                        InventoryResponse::variantId,
+                        InventoryResponse::availableQuantity,
+                        (existing, replacement) -> existing
+                ));
     }
 }

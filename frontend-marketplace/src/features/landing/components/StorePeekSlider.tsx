@@ -17,7 +17,6 @@ import { PublicStore } from '@/features/storefront/types/storefront.types';
 
 export interface StorePeekSliderProps {
   stores: PublicStore[];
-  isDemo?: boolean;
 }
 
 export type StoreCategoryFilter = 'ALL' | 'PANADERIA' | 'REPOSTERIA' | 'CAFE' | 'SALADOS';
@@ -57,27 +56,10 @@ export const FILTER_OPTIONS: FilterOption[] = [
   },
 ];
 
-const STORE_PHOTOS_FALLBACK: Record<string, string> = {
-  'panaderia-don-pepe':
-    'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
-  'dulce-amor':
-    'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop',
-  'cafe-villa-rica':
-    'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=800&auto=format&fit=crop',
-  'la-focacceria':
-    'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop',
-  'el-taller-del-bagel':
-    'https://images.unsplash.com/photo-1585478259715-876a6a81ae08?q=80&w=800&auto=format&fit=crop',
-};
-
-const DEFAULT_BANNER =
-  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop';
-
 export interface InferredCraftProfile {
   category: string;
   iconEmoji: string;
   logoBg: string;
-  defaultPrep: string;
   badge: string;
   badgeVariant: 'jade' | 'terracotta' | 'amber';
 }
@@ -87,7 +69,6 @@ const CRAFT_CATEGORY_PRESETS: InferredCraftProfile[] = [
     category: 'Panadería & Masa Madre',
     iconEmoji: '🥐',
     logoBg: 'bg-amber-900',
-    defaultPrep: '15-25 min prep',
     badge: 'Horno Diario',
     badgeVariant: 'amber',
   },
@@ -95,7 +76,6 @@ const CRAFT_CATEGORY_PRESETS: InferredCraftProfile[] = [
     category: 'Pastelería & Postres',
     iconEmoji: '🍰',
     logoBg: 'bg-[#9f1239]',
-    defaultPrep: '25-35 min prep',
     badge: 'Repostería de Autor',
     badgeVariant: 'terracotta',
   },
@@ -103,7 +83,6 @@ const CRAFT_CATEGORY_PRESETS: InferredCraftProfile[] = [
     category: 'Café de Especialidad',
     iconEmoji: '☕',
     logoBg: 'bg-[#451a03]',
-    defaultPrep: '10-15 min prep',
     badge: 'Grano de Origen',
     badgeVariant: 'jade',
   },
@@ -111,82 +90,30 @@ const CRAFT_CATEGORY_PRESETS: InferredCraftProfile[] = [
     category: 'Cocinas & Pizzas',
     iconEmoji: '🍕',
     logoBg: 'bg-[#c2410c]',
-    defaultPrep: '20-30 min prep',
     badge: 'Masa Fermentada',
     badgeVariant: 'amber',
   },
 ];
 
-/**
- * Genera métricas determinísticas basadas en un seed (slug, id o nombre).
- * Esto garantiza que cada tienda tenga valoraciones y número de reseñas
- * variadas y realistas, sin causar inconsistencias de hidratación SSR.
- */
-export function getDeterministicStoreMetrics(seed: string) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash |= 0;
-  }
-  const abs = Math.abs(hash);
-
-  // Calificaciones de alta calidad gastronómica artesanal: 4.7 a 5.0
-  const ratings = [4.8, 4.9, 5.0, 4.8, 4.9, 4.7, 5.0, 4.9];
-  const rating = ratings[abs % ratings.length];
-
-  // Número realista de reseñas de comercios locales: entre 48 y 280
-  const reviewsCount = 48 + (abs % 233);
-
-  return { rating, reviewsCount };
-}
-
-/**
- * Infiere de manera inteligente el rubro gastronómico, emoji, paleta de color y
- * tiempo de preparación a partir de la identidad de la tienda (nombre, slug, descripción).
- */
 export function inferStoreCraftProfile(
   store: Partial<PublicStore>,
   seed: string
 ): InferredCraftProfile {
   const combinedText = `${store.name || ''} ${store.slug || ''} ${store.description || ''} ${store.tagline || ''} ${store.category || ''}`.toLowerCase();
 
-  // 1. Café de especialidad
-  if (
-    /cafe|café|cafeteria|cafetería|coffee|barista|espresso|villa rica|grano|tueste|latte|cold brew|brew|filtrado/.test(
-      combinedText
-    )
-  ) {
+  if (/cafe|café|cafeteria|cafetería|coffee|barista|espresso|villa rica|grano|tueste|latte|cold brew|brew|filtrado/.test(combinedText)) {
     return CRAFT_CATEGORY_PRESETS[2];
   }
-
-  // 2. Cocinas, Pizzas & Salados (prioridad antes de pan/masa general para capturar pizzas y focaccias)
-  if (
-    /pizza|pizzeria|pizzería|focaccia|focacceria|salado|empanada|brunch|sandwich|pasta|italiana|comida|lunch|cena/.test(
-      combinedText
-    )
-  ) {
+  if (/pizza|pizzeria|pizzería|focaccia|focacceria|salado|empanada|brunch|sandwich|pasta|italiana|comida|lunch|cena/.test(combinedText)) {
     return CRAFT_CATEGORY_PRESETS[3];
   }
-
-  // 3. Pastelería & Repostería
-  if (
-    /postre|dulce|torta|cake|pasteleria|pastelería|reposteria|repostería|cheesecake|alfajor|chocolate|galleta|cookie|tartaleta|brownie|muffin/.test(
-      combinedText
-    )
-  ) {
+  if (/postre|dulce|torta|cake|pasteleria|pastelería|reposteria|repostería|cheesecake|alfajor|chocolate|galleta|cookie|tartaleta|brownie|muffin/.test(combinedText)) {
     return CRAFT_CATEGORY_PRESETS[1];
   }
-
-  // 4. Panadería & Masas
-  if (
-    /pan|panaderia|panadería|masa|bagel|croissant|hogaza|sourdough|ciabatta|horno|boulangerie|panes/.test(
-      combinedText
-    )
-  ) {
+  if (/pan|panaderia|panadería|masa|bagel|croissant|hogaza|sourdough|ciabatta|horno|boulangerie|panes/.test(combinedText)) {
     return CRAFT_CATEGORY_PRESETS[0];
   }
 
-  // Si tiene una categoría explícita válida que no sea el texto genérico de fallback
   if (
     store.category &&
     store.category.trim() !== '' &&
@@ -197,40 +124,31 @@ export function inferStoreCraftProfile(
       category: store.category,
       iconEmoji: '✨',
       logoBg: 'bg-[#005141]',
-      defaultPrep: '20-30 min prep',
       badge: 'Verificado',
       badgeVariant: 'jade',
     };
   }
 
-  // 5. Fallback determinista en el catálogo artesanal (evita que todas digan lo mismo)
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = (hash << 5) - hash + seed.charCodeAt(i);
     hash |= 0;
   }
-  const presetIndex = Math.abs(hash) % CRAFT_CATEGORY_PRESETS.length;
-  return CRAFT_CATEGORY_PRESETS[presetIndex];
+  return CRAFT_CATEGORY_PRESETS[Math.abs(hash) % CRAFT_CATEGORY_PRESETS.length];
 }
 
-/**
- * Normaliza y enriquece cualquier tienda que llegue de la API con métricas dinámicas realistas
- */
 export function formatStoreData(store: Partial<PublicStore>) {
   const name = store.name?.trim() || 'Comercio Local';
   const slug = store.slug || 'tienda-local';
   const seed = `${slug}-${name}`;
 
   const craftProfile = inferStoreCraftProfile(store, seed);
-  const metrics = getDeterministicStoreMetrics(seed);
 
-  const bannerUrl =
-    store.bannerUrl || STORE_PHOTOS_FALLBACK[slug] || DEFAULT_BANNER;
+  const bannerUrl = store.bannerUrl || null;
   const logoUrl = store.logoUrl || null;
   const iconEmoji = store.iconEmoji || craftProfile.iconEmoji;
   const logoBg = store.logoBg || craftProfile.logoBg;
 
-  // Categoría: si viene definida y personalizada se respeta; sino, la inferida por su rubro real
   const category =
     store.category &&
     store.category.trim() !== '' &&
@@ -242,25 +160,21 @@ export function formatStoreData(store: Partial<PublicStore>) {
   const description =
     store.tagline ||
     store.description ||
-    'Elaboración artesanal bajo pedido con ingredientes frescos y control de capacidad.';
+    'Comercio local con reserva de horarios y atención directa.';
 
-  // Rating & Reseñas: dinámicos y deterministas si no vienen de la API
   const rating =
-    typeof store.rating === 'number' && store.rating > 0
-      ? store.rating
-      : metrics.rating;
+    typeof store.rating === 'number' && store.rating > 0 ? store.rating : null;
 
   const reviewsCount =
     typeof store.reviewsCount === 'number' && store.reviewsCount > 0
       ? store.reviewsCount
-      : metrics.reviewsCount;
+      : null;
 
-  // Tiempo de preparación: según minutos explícitos o el estándar del rubro inferido
-  const prepTime = store.preparationTimeMinutes
-    ? `${store.preparationTimeMinutes} min prep`
-    : craftProfile.defaultPrep;
+  const prepTime =
+    typeof store.preparationTimeMinutes === 'number' && store.preparationTimeMinutes > 0
+      ? `${store.preparationTimeMinutes} min de preparación`
+      : 'Turnos programados';
 
-  // Soporta tanto deliveryFee como deliveryFeeAmount (del DTO PublicStoreResponse de backend)
   const deliveryFee =
     typeof store.deliveryFee === 'number'
       ? store.deliveryFee
@@ -277,19 +191,8 @@ export function formatStoreData(store: Partial<PublicStore>) {
     deliveryText = 'Solo retiro en local';
   }
 
-  // Badge contextual o según métricas
-  let badge = store.badge || craftProfile.badge;
-  let badgeVariant = store.badgeVariant || craftProfile.badgeVariant;
-
-  if (!store.badge) {
-    if (rating === 5.0) {
-      badge = '⭐ Top Valorado';
-      badgeVariant = 'amber';
-    } else if (reviewsCount > 180) {
-      badge = '🔥 Más Popular';
-      badgeVariant = 'terracotta';
-    }
-  }
+  const badge = store.badge || craftProfile.badge;
+  const badgeVariant = store.badgeVariant || craftProfile.badgeVariant;
 
   return {
     id: store.id || slug,
@@ -310,30 +213,37 @@ export function formatStoreData(store: Partial<PublicStore>) {
   };
 }
 
-function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; isDemo: boolean }) {
+function StoreCardItem({ rawStore }: { rawStore: Partial<PublicStore> }) {
   const store = formatStoreData(rawStore);
-  const hasReviews = !isDemo && typeof rawStore.rating === 'number' && rawStore.rating > 0 && typeof rawStore.reviewsCount === 'number' && rawStore.reviewsCount > 0;
-  const [bannerSrc, setBannerSrc] = useState(store.bannerUrl);
+  const hasReviews = store.rating !== null && store.reviewsCount !== null;
+  const [bannerError, setBannerError] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
   return (
     <div className="w-[84vw] sm:w-[350px] lg:w-[380px] shrink-0 snap-start flex flex-col group">
-      <Link href={`/tienda/${store.slug}`} aria-label={`${isDemo ? 'Ver demostración' : 'Ver tienda'}: ${store.name}`} className="block h-full rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#072720]">
+      <Link
+        href={`/tienda/${store.slug}`}
+        aria-label={`Ver tienda: ${store.name}`}
+        className="block h-full rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#072720]"
+      >
         <div className="h-full flex flex-col justify-between bg-white rounded-[12px] border border-stone-200/90 shadow-md group-hover:shadow-xl group-hover:border-stone-400 transition-all duration-300 overflow-hidden relative">
-          {/* Top Photographic Cover Banner with Shine & Hover Zoom */}
-          <div className="aspect-[16/9] w-full relative overflow-hidden bg-stone-900">
-            <Image
-              src={bannerSrc}
-              alt={store.name}
-              fill
-              sizes="(max-width: 768px) 85vw, 380px"
-              onError={() => setBannerSrc(DEFAULT_BANNER)}
-              className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110 filter brightness-[0.92] group-hover:brightness-100"
-            />
+          {/* Top Cover Banner */}
+          <div className="aspect-[16/9] w-full relative overflow-hidden bg-gradient-to-br from-[#072720] via-[#061a1c] to-[#02090a]">
+            {store.bannerUrl && !bannerError ? (
+              <Image
+                src={store.bannerUrl}
+                alt={store.name}
+                fill
+                sizes="(max-width: 768px) 85vw, 380px"
+                onError={() => setBannerError(true)}
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110 filter brightness-[0.92] group-hover:brightness-100"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#36f4a4]/30">
+                <Store className="w-12 h-12" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-
-            {/* Diagonal Light Shine on hover */}
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
 
             {/* Top Badges */}
             <div className="absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-2 z-10">
@@ -342,16 +252,18 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
                 size="sm"
                 className="bg-white/95 backdrop-blur-md shadow-md border-0 font-bold"
               >
-                {isDemo ? 'Demostración' : 'Negocio local'}
+                Negocio local
               </Badge>
 
-              {hasReviews && <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2.5 sm:px-3 py-1 rounded-full shadow-md">
-                <Star className="w-3.5 h-3.5 text-[#feae2c] fill-[#feae2c]" />
-                <span>{rawStore.rating!.toFixed(1)}</span>
-                <span className="text-[#78716c] text-[10px] font-medium">
-                  ({rawStore.reviewsCount})
-                </span>
-              </div>}
+              {hasReviews && (
+                <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2.5 sm:px-3 py-1 rounded-full shadow-md">
+                  <Star className="w-3.5 h-3.5 text-[#feae2c] fill-[#feae2c]" />
+                  <span>{store.rating!.toFixed(1)}</span>
+                  <span className="text-[#78716c] text-[10px] font-medium">
+                    ({store.reviewsCount})
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -372,7 +284,7 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span>{store.iconEmoji}</span>
+                  <span aria-hidden="true">{store.iconEmoji}</span>
                 )}
               </div>
 
@@ -381,7 +293,7 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
               </span>
             </div>
 
-            {/* Title & Tagline */}
+            {/* Title & Description */}
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center gap-1.5">
                 <h3 className="min-h-14 line-clamp-2 text-lg sm:text-xl font-bold text-[#1c1917] group-hover:text-[#005141] transition-colors leading-snug">
@@ -397,7 +309,7 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
             <div className="mt-6 pt-4 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2 text-xs text-[#57534e]">
               <div className="flex items-center gap-1.5 font-medium">
                 <Clock className="w-3.5 h-3.5 text-[#a8a29e]" />
-                <span>{store.prepTime.replace('min prep', 'min de preparación')}</span>
+                <span>{store.prepTime}</span>
               </div>
 
               <div className="flex items-center gap-1.5 font-semibold text-[#1c1917]">
@@ -406,9 +318,9 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
               </div>
             </div>
 
-            {/* Hover Call-to-action bar */}
+            {/* Call-to-action bar */}
             <div className="mt-4 rounded-full bg-[#02090a] px-5 py-2.5 flex items-center justify-between text-sm font-medium text-white group-hover:bg-[#072720] transition-colors shadow-xs">
-              <span>{isDemo ? 'Ver demostración' : 'Ver tienda'}</span>
+              <span>Ver tienda</span>
               <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -418,7 +330,7 @@ function StoreCardItem({ rawStore, isDemo }: { rawStore: Partial<PublicStore>; i
   );
 }
 
-export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps) {
+export function StorePeekSlider({ stores }: StorePeekSliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<StoreCategoryFilter>('ALL');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -483,7 +395,6 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
     <div className="relative space-y-5">
       {/* Category Filter Pills & Slider Prev/Next Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-stone-200/80">
-        {/* Interactive Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 pt-1">
           {FILTER_OPTIONS.map((opt) => {
             const isActive = selectedFilter === opt.id;
@@ -498,14 +409,13 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
                     : 'bg-white text-stone-600 border-stone-200 hover:border-stone-300 hover:bg-stone-50'
                 }`}
               >
-                <span>{opt.emoji}</span>
+                <span aria-hidden="true">{opt.emoji}</span>
                 <span>{opt.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Circular Prev/Next Action Buttons */}
         <div className="flex items-center justify-between sm:justify-end gap-3">
           <span className="text-[11px] font-bold text-[#78716c] font-mono">
             {filteredStores.length} {filteredStores.length === 1 ? 'comercio' : 'comercios'}
@@ -517,7 +427,7 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
               onClick={() => scrollByAmount(-380)}
               disabled={!canScrollLeft}
               aria-label="Ver comercios anteriores"
-              className="w-9 h-9 rounded-full bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-700 hover:text-[#02090a] hover:border-stone-400 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
+              className="w-10 h-10 rounded-full bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-700 hover:text-[#02090a] hover:border-stone-400 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
             >
               <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             </button>
@@ -527,7 +437,7 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
               onClick={() => scrollByAmount(380)}
               disabled={!canScrollRight}
               aria-label="Ver siguientes comercios"
-              className="w-9 h-9 rounded-full bg-[#02090a] text-white shadow-sm flex items-center justify-center hover:bg-[#072720] disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
+              className="w-10 h-10 rounded-full bg-[#02090a] text-white shadow-sm flex items-center justify-center hover:bg-[#072720] disabled:opacity-30 disabled:pointer-events-none transition-all duration-200 cursor-pointer group"
             >
               <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
@@ -558,17 +468,15 @@ export function StorePeekSlider({ stores, isDemo = false }: StorePeekSliderProps
           className="flex gap-5 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-6 pt-2 -mx-4 px-4 sm:-mx-6 sm:px-6"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {filteredStores.map((rawStore) => (
+          {filteredStores.map((rawStore, idx) => (
             <StoreCardItem
-              key={rawStore.id || rawStore.slug || Math.random().toString()}
+              key={rawStore.id || rawStore.slug || `store-${idx}`}
               rawStore={rawStore}
-              isDemo={isDemo}
             />
           ))}
         </div>
       )}
 
-      {/* Subtle Scroll Progress Indicator Bar */}
       {filteredStores.length > 1 && (
         <div className="w-full h-1 bg-stone-200/70 rounded-full overflow-hidden max-w-xs mx-auto">
           <div

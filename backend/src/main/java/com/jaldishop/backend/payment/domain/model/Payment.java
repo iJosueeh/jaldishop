@@ -88,11 +88,40 @@ public class Payment {
             BigDecimal includedTaxAmount,
             String itemsSnapshot
     ) {
+        return createPending(
+                capacityReservationId, amount, currency, fulfillmentType,
+                customerName, customerPhone, customerEmail, deliveryAddress, deliveryReference,
+                deliveryLatitude, deliveryLongitude, productsSubtotalAmount, discountAmount,
+                discountCode, deliveryFeeAmount, BigDecimal.ZERO, includedTaxAmount, itemsSnapshot
+        );
+    }
+
+    public static Payment createPending(
+            UUID capacityReservationId,
+            BigDecimal amount,
+            String currency,
+            FulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            BigDecimal productsSubtotalAmount,
+            BigDecimal discountAmount,
+            String discountCode,
+            BigDecimal deliveryFeeAmount,
+            BigDecimal serviceFeeAmount,
+            BigDecimal includedTaxAmount,
+            String itemsSnapshot
+    ) {
         MonetarySummary pricing = MonetarySummary.of(
                 productsSubtotalAmount,
                 discountAmount != null ? discountAmount : BigDecimal.ZERO,
                 discountCode,
                 deliveryFeeAmount != null ? deliveryFeeAmount : BigDecimal.ZERO,
+                serviceFeeAmount != null ? serviceFeeAmount : BigDecimal.ZERO,
                 includedTaxAmount != null ? includedTaxAmount : BigDecimal.ZERO,
                 amount,
                 currency
@@ -292,6 +321,7 @@ public class Payment {
     public BigDecimal getDiscountAmount() { return pricing != null ? pricing.discount() : null; }
     public String getDiscountCode() { return pricing != null ? pricing.discountCode() : null; }
     public BigDecimal getDeliveryFeeAmount() { return pricing != null ? pricing.deliveryFee() : null; }
+    public BigDecimal getServiceFeeAmount() { return pricing != null ? pricing.serviceFee() : BigDecimal.ZERO; }
     public BigDecimal getIncludedTaxAmount() { return pricing != null ? pricing.tax() : null; }
     public String getItemsSnapshot() { return itemsSnapshot; }
 

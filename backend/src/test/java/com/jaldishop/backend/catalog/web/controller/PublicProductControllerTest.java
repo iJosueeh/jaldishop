@@ -15,6 +15,8 @@ import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
 import com.jaldishop.backend.catalog.web.dto.ProductResponse;
 import com.jaldishop.backend.catalog.web.mapper.ProductResponseMapper;
+import com.jaldishop.backend.inventory.application.service.GetStoreInventoryService;
+import com.jaldishop.backend.inventory.web.dto.InventoryResponse;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.util.MethodValidationTestSupport;
 import com.jaldishop.backend.store.application.service.GetStoreBySlugService;
@@ -184,5 +186,45 @@ class PublicProductControllerTest {
         mockMvc.perform(get("/api/v1/stores/slug/{slug}/products", "panaderia-pepe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/stores/slug/{storeSlug}/products/{productSlug} incluye stock disponible desde inventario")
+    void shouldIncludeAvailableQuantityFromInventoryService() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        Product product = Product.create(storeId, categoryId, "Pastel", "pastel", "De lúcuma", null);
+        ProductVariant activeVariant = ProductVariant.create(
+                product.getId(), "Unidad", "PASTEL-001", new java.math.BigDecimal("12.00"), "PEN", true, List.of()
+        );
+
+        Store store = org.mockito.Mockito.mock(Store.class);
+        when(store.getId()).thenReturn(storeId);
+        when(getStoreBySlugService.execute("panaderia-pepe")).thenReturn(store);
+        when(getProductsService.executeBySlug(storeId, "pastel")).thenReturn(product);
+        when(variantRepository.findByProductId(product.getId())).thenReturn(List.of(activeVariant));
+
+        GetStoreInventoryService inventoryService = org.mockito.Mockito.mock(GetStoreInventoryService.class);
+        when(inventoryService.execute(storeId)).thenReturn(List.of(
+                new InventoryResponse(
+                        activeVariant.getId(), product.getId(), "Pastel", "Unidad", "PASTEL-001",
+                        true, "ACTIVE", "CONFIGURED", 10, 2, 8, 3, false, Instant.now()
+                )
+        ));
+
+        PublicProductController controllerWithInventory = new PublicProductController(
+                getProductsService,
+                new ProductResponseMapper(),
+                variantRepository,
+                getStoreBySlugService,
+                inventoryService
+        );
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(controllerWithInventory)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        mvc.perform(get("/api/v1/stores/slug/{storeSlug}/products/{productSlug}", "panaderia-pepe", "pastel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.variants[0].availableQuantity").value(8));
     }
 }

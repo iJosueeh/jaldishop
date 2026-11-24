@@ -54,15 +54,20 @@ describe('Modular Catalog Components', () => {
       'href',
       '/tienda/pasteleria-pepe/producto/torta-selva-negra'
     );
+    expect(screen.getByRole('link', { name: 'Detalles de Torta Selva Negra' })).toHaveAttribute(
+      'href',
+      '/tienda/pasteleria-pepe/producto/torta-selva-negra'
+    );
   });
 
-  it('ProductCard displays price range and formats badge when multiple variants exist', () => {
+  it('ProductCard displays price range, formats badge, and cart quantity badge when multiple variants exist', () => {
     const onAdd = vi.fn();
     render(<ProductCard product={rangePriceProduct} onAdd={onAdd} currentQuantity={2} />);
 
     expect(screen.getByText('Empanadas Artesanales')).toBeInTheDocument();
     expect(screen.getByText('S/ 8.50 - S/ 24.00')).toBeInTheDocument();
     expect(screen.getByText('Formatos')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Añadir \(2\)/i })).toBeDisabled();
     fireEvent.change(screen.getByLabelText('Presentación de Empanadas Artesanales'), { target: { value: 'v2' } });
     fireEvent.click(screen.getByRole('button', { name: /Añadir \(2\)/i }));

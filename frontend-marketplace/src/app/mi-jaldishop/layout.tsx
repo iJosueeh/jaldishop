@@ -6,7 +6,7 @@ import { CustomerNav } from '@/features/customer/components/CustomerNav';
 
 export const metadata: Metadata = {
   title: 'Mi JaldiShop | Área Personal del Comprador',
-  description: 'Gestiona tus pedidos programados y tus datos de contacto en JaldiShop.',
+  description: 'Gestiona tus pedidos programados, estadísticas, notificaciones y datos de contacto en JaldiShop.',
 };
 
 export default function CustomerLayout({
@@ -17,14 +17,13 @@ export default function CustomerLayout({
   return (
     <div className="min-h-screen bg-[#faf7f2] flex flex-col">
       {/* 1. Header Banner Editorial (Midnight Greenhouse) */}
-      <section className="bg-gradient-to-r from-[#02090a] via-[#072720] to-[#061a1c] text-white pt-24 sm:pt-28 pb-8 sm:pb-10 border-b border-[#1e2c31] relative overflow-hidden">
-        {/* Glow atmosférico suave */}
+      <section className="bg-gradient-to-r from-[#02090a] via-[#072720] to-[#061a1c] text-white pt-24 sm:pt-28 pb-7 sm:pb-9 border-b border-[#1e2c31] relative overflow-hidden">
         <div
           className="absolute -top-24 right-1/4 w-96 h-96 bg-[#005141]/30 rounded-full blur-[100px] pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-4">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#072720] border border-[#133b32] text-[#36f4a4] text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
@@ -45,7 +44,7 @@ export default function CustomerLayout({
                 Mi JaldiShop
               </h1>
               <p className="text-sm sm:text-base text-[#99b3ad] mt-1 max-w-2xl leading-relaxed">
-                Revisa tus compras programadas, consulta tus franjas horarias y mantén al día tus datos de entrega.
+                Revisa tus compras programadas, estadísticas, notificaciones y mantén al día tus datos de entrega.
               </p>
             </div>
 
@@ -62,13 +61,11 @@ export default function CustomerLayout({
         </div>
       </section>
 
-      {/* 2. Secondary Navigation Tabs (Full Width) */}
-      <CustomerNav />
-
-      {/* 3. Main Content Container (Warm Luminous Canvas) */}
-      <main className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {children}
-      </main>
+      {/* 2. Marketplace Workspace: Responsive Sidebar + Main Content */}
+      <div className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:grid lg:grid-cols-[268px_minmax(0,1fr)] lg:gap-8 items-start">
+        <CustomerNav />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
     </div>
   );
 }

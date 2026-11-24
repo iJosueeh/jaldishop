@@ -354,28 +354,28 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
   };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-6 my-8">
-      <Card className="w-full max-w-xl p-6 sm:p-8 bg-white border border-[#e7e0d6] shadow-sm text-center">
+    <div className="min-h-[80vh] bg-[#02090a] text-white flex items-center justify-center p-4 sm:p-6 pt-28 sm:pt-32 pb-12">
+      <Card className="w-full max-w-xl p-6 sm:p-8 bg-[#061a1c] border border-[#1e2c31] text-white shadow-2xl text-center rounded-[12px]">
         {/* State: Polling / Resolving */}
         {(state === 'RESOLVING_CORRELATION' || state === 'POLLING') && (
           <div className="space-y-6" data-testid="state-polling">
-            <div className="inline-flex p-4 rounded-full bg-[#f0fdfa] text-[#005141] mb-2 animate-pulse">
+            <div className="inline-flex p-4 rounded-full bg-[#072720] text-[#36f4a4] mb-2 animate-pulse border border-[#133b32]">
               <Clock className="w-10 h-10 animate-spin" style={{ animationDuration: '3s' }} />
             </div>
             <div className="space-y-2">
               <Badge variant="jade" size="lg">
                 Verificando pago con el banco
               </Badge>
-              <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
+              <h1 className="text-2xl font-medium text-white tracking-tight">
                 Estamos confirmando tu transacción
               </h1>
-              <p className="text-sm text-[#57534e] max-w-md mx-auto">
+              <p className="text-sm text-[#99b3ad] max-w-md mx-auto">
                 Mercado Pago ha procesado tu solicitud. Estamos sincronizando la confirmación oficial con nuestros servidores.
               </p>
             </div>
             <div className="pt-4 flex justify-center">
-              <div className="flex items-center gap-2 text-xs text-[#78716c]">
-                <ShieldCheck className="w-4 h-4 text-[#005141]" />
+              <div className="flex items-center gap-2 text-xs text-[#9dabad]">
+                <ShieldCheck className="w-4 h-4 text-[#36f4a4]" />
                 <span>Verificación segura y cifrada en curso...</span>
               </div>
             </div>
@@ -385,37 +385,37 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
         {/* State: Order Confirmed */}
         {state === 'ORDER_CONFIRMED' && statusData && (
           <div className="space-y-6" data-testid="state-order-confirmed">
-            <div className="inline-flex p-4 rounded-full bg-[#f0fdfa] text-[#005141] mb-2">
+            <div className="inline-flex p-4 rounded-full bg-[#072720] text-[#36f4a4] mb-2 border border-[#133b32]">
               <CheckCircle2 className="w-12 h-12" />
             </div>
             <div className="space-y-2">
               <Badge variant="success" size="lg">
                 ¡Compra Exitosa!
               </Badge>
-              <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
+              <h1 className="text-2xl font-medium text-white tracking-tight">
                 ¡Tu pedido está confirmado!
               </h1>
-              <p className="text-sm text-[#57534e] max-w-md mx-auto">
+              <p className="text-sm text-[#99b3ad] max-w-md mx-auto">
                 Hemos recibido tu pago y tu pedido ya está registrado en el comercio.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#f7f3ec] border border-[#e7e0d6]/80 text-left space-y-2">
+            <div className="p-4 rounded-[12px] bg-[#02090a] border border-[#1e2c31] text-left space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#57534e]">Número de Pedido:</span>
-                <span className="font-bold text-[#1c1917] font-mono text-base">
+                <span className="text-[#99b3ad]">Número de Pedido:</span>
+                <span className="font-bold text-white font-mono text-base">
                   #{statusData.orderNumber}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#57534e]">Total pagado:</span>
-                <span className="font-bold text-[#005141]">
+                <span className="text-[#99b3ad]">Total pagado:</span>
+                <span className="font-bold text-[#36f4a4] font-mono">
                   {statusData.currency} {Number(statusData.amount).toFixed(2)}
                 </span>
               </div>
               {statusData.orderStatus && (
-                <div className="flex justify-between items-center text-sm pt-1 border-t border-[#e7e0d6]/50">
-                  <span className="text-[#57534e]">Estado del despacho:</span>
+                <div className="flex justify-between items-center text-sm pt-2 border-t border-[#1e2c31]">
+                  <span className="text-[#99b3ad]">Estado del despacho:</span>
                   <Badge variant="jade" size="sm">
                     {statusData.orderStatus}
                   </Badge>
@@ -425,12 +425,12 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={`/mi-jaldishop/pedidos/${encodeURIComponent(statusData.orderNumber!)}`} className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="w-full" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                <Button variant="primary" size="lg" className="w-full rounded-full bg-white text-[#02090a] hover:bg-stone-100" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Ver detalle del pedido
                 </Button>
               </Link>
               <Link href="/mi-jaldishop/pedidos" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full">
+                <Button variant="outline" size="lg" className="w-full rounded-full border-white/30 text-white hover:bg-white/10">
                   Ir a Mis Pedidos
                 </Button>
               </Link>

@@ -11,7 +11,7 @@ export default function CheckoutPendingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[70vh] flex items-center justify-center p-6 text-stone-500 text-sm">
+        <div className="min-h-[80vh] bg-[#02090a] flex items-center justify-center p-6 text-[#99b3ad] text-sm">
           Cargando verificación de pago...
         </div>
       }
