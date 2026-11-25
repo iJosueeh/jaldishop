@@ -293,4 +293,48 @@ describe('Mercado Pago Preference BFF: POST /api/customer/checkout/mercado-pago/
     const body = await res.json();
     expect(body.code).toBe('PAYMENT_SERVICE_UNAVAILABLE');
   });
+
+  it('forwards explicit returnBaseUrl and falls back to request origin when omitted', async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'jwt-token' }),
+    } as unknown as Awaited<ReturnType<typeof cookies>>);
+
+    const mockResponse = {
+      paymentId: '6c318881-8051-4f32-be43-851f5e8dae41',
+      preferenceId: 'pref_abc123',
+      initPoint: 'https://mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_abc123',
+      status: 'PENDING',
+    };
+
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify(mockResponse), { status: 201 })
+    );
+
+    const reqWithReturnUrl = new NextRequest('http://localhost:3000/api/customer/checkout/mercado-pago/preference', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...validPayload,
+        returnBaseUrl: 'https://preview.jaldishop.com',
+      }),
+    });
+
+    const res1 = await POST(reqWithReturnUrl);
+    expect(res1.status).toBe(201);
+    const upstreamBody1 = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(upstreamBody1.returnBaseUrl).toBe('https://preview.jaldishop.com');
+
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify(mockResponse), { status: 201 })
+    );
+
+    const reqWithoutReturnUrl = new NextRequest('http://localhost:3000/api/customer/checkout/mercado-pago/preference', {
+      method: 'POST',
+      body: JSON.stringify(validPayload),
+    });
+
+    const res2 = await POST(reqWithoutReturnUrl);
+    expect(res2.status).toBe(201);
+    const upstreamBody2 = JSON.parse(fetchMock.mock.calls[1][1].body);
+    expect(upstreamBody2.returnBaseUrl).toBe('http://localhost:3000');
+  });
 });

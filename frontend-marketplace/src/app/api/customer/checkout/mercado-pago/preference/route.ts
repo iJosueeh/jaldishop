@@ -155,6 +155,10 @@ export async function POST(request: NextRequest) {
     deliveryReference: typeof body.deliveryReference === 'string' ? body.deliveryReference.trim() : null,
     deliveryLatitude: typeof body.deliveryLatitude === 'number' ? body.deliveryLatitude : null,
     deliveryLongitude: typeof body.deliveryLongitude === 'number' ? body.deliveryLongitude : null,
+    returnBaseUrl:
+      typeof body.returnBaseUrl === 'string' && body.returnBaseUrl.trim()
+        ? body.returnBaseUrl.trim()
+        : request.nextUrl.origin,
   };
 
   try {

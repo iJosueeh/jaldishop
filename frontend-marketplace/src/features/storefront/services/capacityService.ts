@@ -48,6 +48,23 @@ export function getBusinessTodayDate(timeZone = 'America/Lima'): string {
   }
 }
 
+export function getBusinessCurrentTime(timeZone = 'America/Lima'): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(new Date());
+    const hour = parts.find((p) => p.type === 'hour')?.value ?? '00';
+    const minute = parts.find((p) => p.type === 'minute')?.value ?? '00';
+    return `${hour}:${minute}`;
+  } catch {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+}
+
 /**
  * Maps raw backend CapacitySlotResponse list to CapacitySlot format required by CapacitySlotPicker.
  */
@@ -58,14 +75,21 @@ export function mapBackendSlotsToPickerSlots(
     return [];
   }
 
+  const today = getBusinessTodayDate();
+  const nowTime = getBusinessCurrentTime();
+
   return backendSlots.map((slot) => {
     const startFormatted = slot.startTime.length >= 5 ? slot.startTime.substring(0, 5) : slot.startTime;
     const endFormatted = slot.endTime.length >= 5 ? slot.endTime.substring(0, 5) : slot.endTime;
     const timeRange = `${startFormatted} - ${endFormatted}`;
     const id = `${startFormatted}-${endFormatted}`;
 
-    let status: 'available' | 'few_left' | 'sold_out' = 'available';
-    if (slot.availableCapacity <= 0) {
+    const isExpired = slot.serviceDate === today && endFormatted <= nowTime;
+
+    let status: 'available' | 'few_left' | 'sold_out' | 'expired' = 'available';
+    if (isExpired) {
+      status = 'expired';
+    } else if (slot.availableCapacity <= 0) {
       status = 'sold_out';
     } else if (slot.availableCapacity <= 2) {
       status = 'few_left';

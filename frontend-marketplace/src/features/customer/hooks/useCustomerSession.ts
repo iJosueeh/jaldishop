@@ -30,6 +30,12 @@ export function useCustomerSession() {
     } finally {
       queryClient.setQueryData(CUSTOMER_SESSION_QUERY_KEY, { authenticated: false });
       queryClient.removeQueries({ queryKey: CUSTOMER_PROFILE_QUERY_KEY });
+      queryClient.removeQueries({ queryKey: ['customer-addresses'] });
+      queryClient.removeQueries({ queryKey: ['customer-cart'] });
+      try {
+        localStorage.removeItem('jaldishop-active-cart-store');
+        localStorage.removeItem('jaldishop-recent-cart-stores');
+      } catch { /* Storage is optional */ }
       window.location.href = '/';
     }
   };

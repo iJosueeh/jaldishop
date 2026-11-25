@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingBag, FileText, IdCard, Sparkles } from 'lucide-react';
+import { useQueries } from '@tanstack/react-query';
+import { ArrowLeft, ArrowDown, ShoppingBag, FileText, IdCard, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Container } from '@/shared/components/ui/Container';
+import { formatCurrency } from '@/shared/utils/formatters';
 import { useStorefrontCart } from '@/features/storefront/cart/StorefrontCartProvider';
+import { cartService } from '@/features/storefront/cart/services/cartService';
 import { useCustomerProfile } from '@/features/customer/hooks/useCustomerProfile';
 import { storeService } from '@/features/storefront/services/storeService';
 import { PublicStore, PublicStoreSettings } from '@/features/storefront/types/storefront.types';
@@ -50,6 +53,24 @@ export function CheckoutPageClient() {
 
   const targetSlug = queryStoreSlug || cartStore?.slug || '';
 
+  const storeCartQueries = useQueries({
+    queries: recentStores.map((entry) => ({
+      queryKey: ['customer-cart', entry.id],
+      queryFn: () => cartService.get(entry.id),
+      enabled: authenticated,
+      retry: false,
+      staleTime: 0,
+    })),
+  });
+
+  const populatedStores = useMemo(
+    () =>
+      recentStores.filter(
+        (_entry, idx) => (storeCartQueries[idx]?.data?.totalItems ?? 0) > 0
+      ),
+    [recentStores, storeCartQueries]
+  );
+
   const [store, setStore] = useState<PublicStore | null>(null);
   const [storeSettings, setStoreSettings] = useState<PublicStoreSettings | null>(null);
   const [isLoadingStore, setIsLoadingStore] = useState(true);
@@ -75,7 +96,34 @@ export function CheckoutPageClient() {
   const [hasAutofilledFromAccount, setHasAutofilledFromAccount] = useState(false);
   const [serviceFeeRate, setServiceFeeRate] = useState(0);
   const [serviceFeeCap, setServiceFeeCap] = useState<number | null>(null);
+  const [activePaymentSession, setActivePaymentSession] = useState<{
+    paymentId: string;
+    initPoint: string;
+    popupBlocked: boolean;
+  } | null>(null);
   const hasAutofilledRef = useRef(false);
+
+  const checkActivePaymentStatus = useCallback(
+    async (paymentId: string) => {
+      try {
+        const res = await checkoutService.getPaymentStatus(paymentId);
+        if ((res.orderCreated && res.orderNumber) || res.paymentStatus === 'FAILED') {
+          router.push(`/checkout/success?payment_id=${encodeURIComponent(paymentId)}`);
+        }
+      } catch {
+        // Silent retry on transient polling errors
+      }
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    if (!activePaymentSession?.paymentId) return;
+    const interval = setInterval(() => {
+      void checkActivePaymentStatus(activePaymentSession.paymentId);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activePaymentSession?.paymentId, checkActivePaymentStatus]);
 
   useEffect(() => {
     let active = true;
@@ -202,6 +250,21 @@ export function CheckoutPageClient() {
     };
   }, [store?.id, selectedDate, authenticated, count, retryCounter]);
 
+  useEffect(() => {
+    if (!store?.id || !selectedSlot?.id) return;
+    try {
+      const raw = sessionStorage.getItem(`jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as CheckoutResponse;
+      const expiresMs = parsed?.reservationExpiresAt ? new Date(parsed.reservationExpiresAt).getTime() : 0;
+      if (expiresMs > Date.now() + 5000) {
+        setCheckoutResponse(parsed);
+      } else {
+        sessionStorage.removeItem(`jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`);
+      }
+    } catch { /* Storage is optional */ }
+  }, [store?.id, selectedSlot?.id]);
+
   const handleDeliveryChange = useCallback((data: DeliveryFormData | null, isValid: boolean) => {
     setDeliveryData(data);
     setIsDeliveryValid(isValid);
@@ -237,6 +300,22 @@ export function CheckoutPageClient() {
     isDniValid &&
     (fulfillment === 'DELIVERY' ? Boolean(deliveryData) && isDeliveryValid && store?.deliveryEnabled : isPickupContactValid && store?.pickupEnabled)
   );
+
+  const disabledHint = canProceed
+    ? null
+    : hasUnavailableItems
+    ? 'Tienes productos sin stock disponible en tu carrito.'
+    : isBelowMinDelivery
+    ? 'Tu pedido aún no alcanza el monto mínimo de delivery.'
+    : !selectedSlot
+    ? 'Selecciona una franja horaria de entrega o retiro.'
+    : fulfillment === 'DELIVERY' && !isDeliveryValid
+    ? 'Selecciona o completa tu dirección de entrega.'
+    : fulfillment === 'PICKUP' && !isPickupContactValid
+    ? 'Ingresa tu nombre completo y teléfono para el retiro.'
+    : !isDniValid
+    ? 'Ingresa un DNI/RUC válido (8 a 11 dígitos).'
+    : 'Completa los datos requeridos para continuar.';
 
   const ensureReservation = async (): Promise<CheckoutResponse | null> => {
     if (!store || !selectedSlot) return null;
@@ -312,6 +391,12 @@ export function CheckoutPageClient() {
 
       const result = await checkoutService.initiateCheckout(payload);
       setCheckoutResponse(result);
+      try {
+        sessionStorage.setItem(
+          `jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`,
+          JSON.stringify(result)
+        );
+      } catch { /* Storage is optional */ }
       return result;
     } catch (err: unknown) {
       const errorObj = err as { status?: number; code?: string; message?: string };
@@ -367,6 +452,7 @@ export function CheckoutPageClient() {
         deliveryLongitude: deliveryData?.longitude ?? null,
         storeId: store.id,
         storeName: store.name,
+        returnBaseUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
       });
 
       if (!isValidMercadoPagoUrl(pref.initPoint)) {
@@ -374,10 +460,20 @@ export function CheckoutPageClient() {
         return;
       }
 
-      setIsRedirectingToMercadoPago(true);
-      toast.success('Conectando con Mercado Pago...');
-      if (typeof window !== 'undefined') {
-        window.location.assign(pref.initPoint);
+      const openedTab =
+        typeof window !== 'undefined'
+          ? window.open(pref.initPoint, '_blank', 'noopener,noreferrer')
+          : null;
+      const popupBlocked = !openedTab;
+      setActivePaymentSession({
+        paymentId: pref.paymentId,
+        initPoint: pref.initPoint,
+        popupBlocked,
+      });
+      if (popupBlocked) {
+        toast.info('Tu navegador bloqueó la nueva pestaña. Usa el enlace directo para abrir Mercado Pago.');
+      } else {
+        toast.success('Mercado Pago abierto en una nueva pestaña.');
       }
     } catch (err: unknown) {
       const errorObj = err as { code?: string; status?: number; message?: string };
@@ -403,9 +499,9 @@ export function CheckoutPageClient() {
 
   if (isLoadingStore || cartLoading) {
     return (
-      <div className="min-h-screen bg-[#02090a] text-white pt-28 sm:pt-32 pb-12">
+      <div className="min-h-screen bg-[#faf7f2] text-[#1c1917] pt-28 sm:pt-32 pb-12">
         <Container size="full">
-          <div role="status" className="rounded-[12px] border border-[#1e2c31] bg-[#061a1c] p-10 text-center text-sm text-[#99b3ad]">
+          <div role="status" className="rounded-[12px] border border-[#e7e0d6] bg-white p-10 text-center text-sm text-[#57534e]">
             Preparando tu checkout...
           </div>
         </Container>
@@ -415,16 +511,18 @@ export function CheckoutPageClient() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-[#02090a] text-white pt-28 sm:pt-32 pb-14">
+      <div className="min-h-screen bg-[#faf7f2] text-[#1c1917] pt-28 sm:pt-32 pb-14">
         <Container size="md">
-          <div className="rounded-[12px] border border-[#1e2c31] bg-[#061a1c] p-8 sm:p-12 text-center space-y-4">
-            <h1 className="font-display text-3xl font-light text-white">Inicia sesión para finalizar tu compra</h1>
-            <p className="text-sm text-[#99b3ad] max-w-md mx-auto">
+          <div className="rounded-[12px] border border-[#e7e0d6] bg-white p-8 sm:p-12 text-center space-y-4">
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-[#1c1917]">
+              Inicia sesión para finalizar tu compra
+            </h1>
+            <p className="text-sm text-[#57534e] max-w-md mx-auto leading-relaxed">
               Necesitas tu cuenta de cliente para seleccionar tu dirección, reservar horario y pagar con Mercado Pago.
             </p>
             <Link
               href={`/login?redirect=${encodeURIComponent(targetSlug ? `/checkout?store=${targetSlug}` : '/checkout')}`}
-              className="inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#02090a] hover:bg-stone-100"
+              className="inline-flex rounded-full bg-[#005141] px-7 py-3 text-sm font-semibold text-white hover:bg-[#003d31] transition-colors"
             >
               Ingresar como cliente
             </Link>
@@ -434,30 +532,66 @@ export function CheckoutPageClient() {
     );
   }
 
+  if (store && customerProfile?.ownedStoreId && customerProfile.ownedStoreId === store.id) {
+    return (
+      <div className="min-h-screen bg-[#faf7f2] text-[#1c1917] pt-28 sm:pt-32 pb-14">
+        <Container size="md">
+          <div className="rounded-[12px] border border-amber-200 bg-white p-8 sm:p-12 text-center space-y-4">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 border border-amber-200">
+              <ShoppingBag className="h-6 w-6 text-amber-700" aria-hidden="true" />
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-[#1c1917]">
+              No puedes comprar en tu propia tienda
+            </h1>
+            <p className="text-sm text-[#57534e] max-w-md mx-auto">
+              Tu cuenta administra <strong>{store.name}</strong>. Por seguridad del marketplace, no está permitido realizar autocompras.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Link
+                href="/tiendas"
+                className="rounded-full bg-[#005141] px-6 py-3 text-sm font-semibold text-white hover:bg-[#003d31] transition-colors"
+              >
+                Explorar otras tiendas
+              </Link>
+              <Link
+                href="/carrito"
+                className="rounded-full border border-[#e7e0d6] bg-white px-6 py-3 text-sm font-semibold text-[#1c1917] hover:bg-[#f7f3ec] transition-colors"
+              >
+                Ver mis carritos
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
   if (storeLoadError || !store || count === 0) {
     return (
-      <div className="min-h-screen bg-[#02090a] text-white pt-28 sm:pt-32 pb-14">
+      <div className="min-h-screen bg-[#faf7f2] text-[#1c1917] pt-28 sm:pt-32 pb-14">
         <Container size="md">
-          <div className="rounded-[12px] border border-[#1e2c31] bg-[#061a1c] p-8 sm:p-12 text-center space-y-4">
-            <ShoppingBag className="h-10 w-10 text-[#36f4a4] mx-auto" aria-hidden="true" />
-            <h1 className="font-display text-3xl font-light text-white">
+          <div className="rounded-[12px] border border-[#e7e0d6] bg-white p-8 sm:p-12 text-center space-y-4">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f0fdfa] border border-[#ccfbf1]">
+              <ShoppingBag className="h-6 w-6 text-[#005141]" aria-hidden="true" />
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-[#1c1917]">
               {storeLoadError || 'Tu carrito en esta tienda está vacío'}
             </h1>
-            <p className="text-sm text-[#99b3ad]">
+            <p className="text-sm text-[#57534e]">
               Agrega productos antes de continuar al checkout.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               {store && (
                 <Link
                   href={`/tienda/${store.slug}`}
-                  className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#02090a]"
+                  className="rounded-full bg-[#005141] px-6 py-3 text-sm font-semibold text-white hover:bg-[#003d31] transition-colors"
                 >
                   Volver a {store.name}
                 </Link>
               )}
               <Link
                 href="/carrito"
-                className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                className="rounded-full border border-[#e7e0d6] bg-white px-6 py-3 text-sm font-semibold text-[#1c1917] hover:bg-[#f7f3ec] transition-colors"
               >
                 Ver mis carritos
               </Link>
@@ -469,35 +603,41 @@ export function CheckoutPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#02090a] text-white pt-28 sm:pt-32 pb-12">
+    <div className="min-h-screen bg-[#faf7f2] text-[#1c1917] pt-28 sm:pt-32 pb-24 lg:pb-16">
       <Container size="full" className="space-y-8">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#1e2c31] pb-6">
-          <div className="space-y-1.5">
-            <Link
-              href={`/tienda/${store.slug}`}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#36f4a4] hover:underline"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Volver a {store.name}</span>
-            </Link>
-            <h1 className="font-display text-3xl sm:text-5xl font-light tracking-[0.02em] text-white">
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e7e0d6] pb-6">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[#005141]">
+              <Link
+                href={`/tienda/${store.slug}`}
+                className="inline-flex items-center gap-1.5 hover:underline"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Volver a {store.name}</span>
+              </Link>
+              <span className="text-[#e7e0d6]" aria-hidden="true">/</span>
+              <Link href="/carrito" className="text-[#57534e] hover:text-[#1c1917] hover:underline">
+                Mis carritos
+              </Link>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-[#1c1917]">
               Checkout · {store.name}
             </h1>
           </div>
 
-          {recentStores.length > 1 && (
+          {populatedStores.length > 1 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-[#99b3ad]">Cambiar tienda:</span>
-              {recentStores.map((entry) => (
+              <span className="text-xs text-[#57534e]">Tus carritos activos:</span>
+              {populatedStores.map((entry) => (
                 <button
                   key={entry.id}
                   type="button"
                   onClick={() => router.push(`/checkout?store=${encodeURIComponent(entry.slug)}`)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium cursor-pointer ${
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                     entry.id === store.id
-                      ? 'bg-white text-[#02090a]'
-                      : 'border border-[#1e2c31] text-[#99b3ad] hover:text-white'
+                      ? 'bg-[#005141] text-white'
+                      : 'border border-[#e7e0d6] bg-white text-[#57534e] hover:text-[#1c1917] hover:bg-[#f7f3ec]'
                   }`}
                 >
                   {entry.name}
@@ -507,11 +647,13 @@ export function CheckoutPageClient() {
           )}
         </header>
 
-        {/* Asymmetric 7 / 5 Layout */}
+        {/* Balanced 7 / 5 Layout: Left = Unified Editorial Form Sheet, Right = Sticky Summary + Mercado Pago CTA */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column (7 cols): Fulfillment, Address, Capacity Slot, Operational Fields, Payment */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Left Column (7 cols): Unified Editorial Sheet */}
+          <div className="lg:col-span-7 bg-white rounded-[12px] border border-[#e7e0d6] divide-y divide-[#e7e0d6]">
             <CapacitySlotPicker
+              embedded
+              hasActiveReservation={Boolean(checkoutResponse)}
               slots={slots}
               selectedSlotId={selectedSlot?.id ?? null}
               onSelectSlot={(slot) => {
@@ -539,6 +681,7 @@ export function CheckoutPageClient() {
 
             {fulfillment === 'DELIVERY' ? (
               <DeliveryAddressSelector
+                embedded
                 store={store}
                 value={deliveryData}
                 onChange={handleDeliveryChange}
@@ -546,18 +689,18 @@ export function CheckoutPageClient() {
                 defaultRecipientPhone={customerPhone}
               />
             ) : (
-              <section className="bg-[#061a1c] rounded-[12px] p-5 sm:p-7 border border-[#1e2c31] space-y-4">
-                <h3 className="text-base sm:text-lg font-medium text-white">
+              <section className="p-5 sm:p-7 space-y-4">
+                <h3 className="font-display text-base sm:text-lg font-semibold text-[#1c1917]">
                   Datos para el retiro en tienda
                 </h3>
                 {store.address && (
-                  <p className="text-xs text-[#99b3ad]">
-                    Punto de retiro: <strong className="text-white">{store.address}</strong>
+                  <p className="text-xs text-[#57534e]">
+                    Punto de retiro: <strong className="text-[#1c1917]">{store.address}</strong>
                   </p>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label htmlFor="pickup-customer-name" className="block text-xs font-medium text-[#99b3ad] mb-1">
+                    <label htmlFor="pickup-customer-name" className="block text-xs font-medium text-[#57534e] mb-1.5">
                       Nombre completo *
                     </label>
                     <input
@@ -566,11 +709,11 @@ export function CheckoutPageClient() {
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Tu nombre completo"
-                      className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none"
+                      className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label htmlFor="pickup-customer-phone" className="block text-xs font-medium text-[#99b3ad] mb-1">
+                    <label htmlFor="pickup-customer-phone" className="block text-xs font-medium text-[#57534e] mb-1.5">
                       Teléfono celular *
                     </label>
                     <input
@@ -579,7 +722,7 @@ export function CheckoutPageClient() {
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       placeholder="987654321"
-                      className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none"
+                      className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -587,13 +730,13 @@ export function CheckoutPageClient() {
             )}
 
             {/* Operational Fields: Email, DNI (if required), Order Notes */}
-            <section className="bg-[#061a1c] rounded-[12px] p-5 sm:p-7 border border-[#1e2c31] space-y-4">
+            <section className="p-5 sm:p-7 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-base sm:text-lg font-medium text-white">
+                <h3 className="font-display text-base sm:text-lg font-semibold text-[#1c1917]">
                   Datos de comprobante y notas
                 </h3>
                 {hasAutofilledFromAccount && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#072720] border border-[#133b32] px-2.5 py-0.5 text-[11px] font-medium text-[#36f4a4]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f0fdfa] border border-[#ccfbf1] px-2.5 py-0.5 text-[11px] font-semibold text-[#005141]">
                     <Sparkles className="h-3 w-3" aria-hidden="true" />
                     <span>Completado desde tu cuenta</span>
                   </span>
@@ -602,7 +745,7 @@ export function CheckoutPageClient() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="checkout-email" className="block text-xs font-medium text-[#99b3ad] mb-1">
+                  <label htmlFor="checkout-email" className="block text-xs font-medium text-[#57534e] mb-1.5">
                     Correo electrónico (opcional)
                   </label>
                   <input
@@ -611,14 +754,14 @@ export function CheckoutPageClient() {
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     placeholder="cliente@correo.com"
-                    className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none"
+                    className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                   />
                 </div>
 
                 {requiresDni && (
                   <div>
-                    <label htmlFor="checkout-dni" className="text-xs font-medium text-[#99b3ad] mb-1 flex items-center gap-1.5">
-                      <IdCard className="w-3.5 h-3.5 text-[#36f4a4]" aria-hidden="true" />
+                    <label htmlFor="checkout-dni" className="text-xs font-medium text-[#57534e] mb-1.5 flex items-center gap-1.5">
+                      <IdCard className="w-3.5 h-3.5 text-[#005141]" aria-hidden="true" />
                       <span>DNI / RUC (Obligatorio) *</span>
                     </label>
                     <input
@@ -629,10 +772,10 @@ export function CheckoutPageClient() {
                       value={customerDocumentNumber}
                       onChange={(e) => setCustomerDocumentNumber(e.target.value.replace(/\D/g, ''))}
                       placeholder="12345678"
-                      className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none font-mono"
+                      className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none font-mono tabular-nums transition-colors"
                     />
                     {customerDocumentNumber && !isDniValid && (
-                      <p className="text-[11px] text-rose-400 mt-1">
+                      <p className="text-[11px] text-rose-600 mt-1">
                         Ingresa entre 8 y 11 dígitos numéricos.
                       </p>
                     )}
@@ -642,8 +785,8 @@ export function CheckoutPageClient() {
 
               {storeSettings?.allowOrderNotes !== false && (
                 <div>
-                  <label htmlFor="checkout-order-notes" className="text-xs font-medium text-[#99b3ad] mb-1 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-[#36f4a4]" aria-hidden="true" />
+                  <label htmlFor="checkout-order-notes" className="text-xs font-medium text-[#57534e] mb-1.5 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-[#005141]" aria-hidden="true" />
                     <span>Notas para el comercio (opcional)</span>
                   </label>
                   <textarea
@@ -653,33 +796,17 @@ export function CheckoutPageClient() {
                     value={orderNotes}
                     onChange={(e) => setOrderNotes(e.target.value)}
                     placeholder="Instrucciones especiales de preparación o entrega..."
-                    className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none resize-none"
+                    className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none resize-none transition-colors"
                   />
                 </div>
               )}
             </section>
-
-            {/* Payment Section */}
-            <CheckoutPaymentSection
-              storeSettings={storeSettings}
-              totalAmount={checkoutResponse?.pricing?.totalAmount ?? totalAmount}
-              currency={checkoutResponse?.pricing?.currency ?? currency}
-              canProceed={canProceed}
-              isSubmittingCheckout={isSubmittingCheckout}
-              isInitiatingPayment={isInitiatingPayment}
-              isRedirectingToMercadoPago={isRedirectingToMercadoPago}
-              paymentError={paymentError}
-              hasActiveReservation={Boolean(checkoutResponse)}
-              onPayWithMercadoPago={handlePayWithMercadoPago}
-              onProceedCashOnDelivery={
-                storeSettings?.cashOnDeliveryEnabled ? handleProceedCashOnDelivery : undefined
-              }
-            />
           </div>
 
-          {/* Right Column (5 cols): Sticky Order Summary */}
-          <div className="lg:col-span-5">
+          {/* Right Column (5 cols): Sticky Order Summary + Mercado Pago Payment Rail */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 bg-white rounded-[12px] border border-[#e7e0d6] overflow-hidden divide-y divide-[#e7e0d6]">
             <CheckoutOrderSummary
+              embedded
               storeName={store.name}
               items={cart}
               currency={currency}
@@ -698,12 +825,66 @@ export function CheckoutPageClient() {
               }}
               onReservationExpired={() => {
                 setCheckoutResponse(null);
+                if (store && selectedSlot) {
+                  try {
+                    sessionStorage.removeItem(`jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`);
+                  } catch { /* Storage is optional */ }
+                }
                 setPaymentError('Tu reserva de horario expiró. Vuelve a confirmar para generar una nueva.');
               }}
+            />
+
+            <CheckoutPaymentSection
+              embedded
+              storeSettings={storeSettings}
+              totalAmount={checkoutResponse?.pricing?.totalAmount ?? totalAmount}
+              currency={checkoutResponse?.pricing?.currency ?? currency}
+              canProceed={canProceed}
+              disabledHint={disabledHint}
+              isSubmittingCheckout={isSubmittingCheckout}
+              isInitiatingPayment={isInitiatingPayment}
+              isRedirectingToMercadoPago={isRedirectingToMercadoPago}
+              paymentError={paymentError}
+              hasActiveReservation={Boolean(checkoutResponse)}
+              activePaymentSession={activePaymentSession}
+              onCheckPaymentStatus={() => {
+                if (activePaymentSession) {
+                  void checkActivePaymentStatus(activePaymentSession.paymentId);
+                }
+              }}
+              onPayWithMercadoPago={handlePayWithMercadoPago}
+              onProceedCashOnDelivery={
+                storeSettings?.cashOnDeliveryEnabled ? handleProceedCashOnDelivery : undefined
+              }
             />
           </div>
         </div>
       </Container>
+
+      {/* Mobile Quick-Pay Bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[#e7e0d6] bg-white/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between gap-3">
+        <div>
+          <span className="text-[11px] text-[#57534e] block">Total a pagar</span>
+          <span className="font-display text-base font-bold text-[#005141] tabular-nums">
+            {formatCurrency(
+              checkoutResponse?.pricing?.totalAmount ?? totalAmount,
+              checkoutResponse?.pricing?.currency ?? currency
+            )}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            document
+              .getElementById('checkout-payment-section')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#005141] hover:bg-[#003d31] text-white text-xs font-semibold px-4 py-2.5 cursor-pointer"
+        >
+          <span>Ir a pagar</span>
+          <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
+      </div>
 
       <WhatsAppBridgeModal
         isOpen={isWhatsAppModalOpen}

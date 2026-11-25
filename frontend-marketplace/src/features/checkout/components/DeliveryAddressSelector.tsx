@@ -14,9 +14,10 @@ import {
 import { formatCurrency } from '@/shared/utils/formatters';
 import {
   MapPin,
-  CheckCircle2,
+  Home,
+  Briefcase,
+  Star,
   AlertCircle,
-  Compass,
   User,
   Phone,
   ShieldCheck,
@@ -33,6 +34,7 @@ export interface DeliveryAddressSelectorProps {
   disabled?: boolean;
   defaultRecipientName?: string;
   defaultRecipientPhone?: string;
+  embedded?: boolean;
 }
 
 export function DeliveryAddressSelector({
@@ -41,6 +43,7 @@ export function DeliveryAddressSelector({
   disabled = false,
   defaultRecipientName,
   defaultRecipientPhone,
+  embedded = false,
 }: DeliveryAddressSelectorProps) {
   const {
     addresses,
@@ -72,8 +75,6 @@ export function DeliveryAddressSelector({
   const [ubigeoCode, setUbigeoCode] = useState('');
   const [addressLine, setAddressLine] = useState('');
   const [reference, setReference] = useState('');
-  const [latitudeInput, setLatitudeInput] = useState('');
-  const [longitudeInput, setLongitudeInput] = useState('');
   const [saveToAddresses, setSaveToAddresses] = useState(false);
   const [inlineSaveError, setInlineSaveError] = useState<string | null>(null);
   const [inlineSaveSuccess, setInlineSaveSuccess] = useState<string | null>(null);
@@ -168,8 +169,6 @@ export function DeliveryAddressSelector({
         Boolean(ubigeoCode) &&
         addressLine.trim().length >= 5;
 
-      const parsedLat = latitudeInput.trim() ? Number(latitudeInput) : null;
-      const parsedLng = longitudeInput.trim() ? Number(longitudeInput) : null;
       const formData: DeliveryFormData = {
         mode: 'manual',
         alias: alias.trim() || undefined,
@@ -181,8 +180,8 @@ export function DeliveryAddressSelector({
         ubigeoCode,
         addressLine: addressLine.trim(),
         reference: reference.trim() || null,
-        latitude: parsedLat !== null && Number.isFinite(parsedLat) ? parsedLat : null,
-        longitude: parsedLng !== null && Number.isFinite(parsedLng) ? parsedLng : null,
+        latitude: null,
+        longitude: null,
         saveToAddresses: canAddAddress && saveToAddresses,
       };
 
@@ -201,8 +200,6 @@ export function DeliveryAddressSelector({
     ubigeoCode,
     addressLine,
     reference,
-    latitudeInput,
-    longitudeInput,
     saveToAddresses,
     alias,
     canAddAddress,
@@ -240,8 +237,6 @@ export function DeliveryAddressSelector({
     setInlineSaveError(null);
     setInlineSaveSuccess(null);
     setIsSavingInline(true);
-    const parsedLat = latitudeInput.trim() ? Number(latitudeInput) : null;
-    const parsedLng = longitudeInput.trim() ? Number(longitudeInput) : null;
     try {
       const created = await createAddress({
         alias: alias.trim() || 'Mi dirección',
@@ -254,8 +249,8 @@ export function DeliveryAddressSelector({
         streetAddress: addressLine.trim(),
         addressLine: addressLine.trim(),
         reference: reference.trim() || null,
-        latitude: parsedLat !== null && Number.isFinite(parsedLat) ? parsedLat : null,
-        longitude: parsedLng !== null && Number.isFinite(parsedLng) ? parsedLng : null,
+        latitude: null,
+        longitude: null,
         isDefault: addresses.length === 0,
       });
       setSelectedAddressId(created.id);
@@ -277,24 +272,24 @@ export function DeliveryAddressSelector({
     Boolean(lastSelectedSnapshot);
 
   return (
-    <div className="bg-[#061a1c] rounded-[12px] p-5 sm:p-7 border border-[#1e2c31] text-white space-y-5">
+    <div className={embedded ? 'p-5 sm:p-7 text-[#1c1917] space-y-5' : 'bg-white rounded-[12px] p-5 sm:p-7 border border-[#e7e0d6] text-[#1c1917] space-y-5'}>
       {/* Header: Title & Store Delivery Fee */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1e2c31]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#e7e0d6]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#36f4a4]" />
-            <h3 className="text-base sm:text-lg font-medium text-white tracking-tight flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#005141]" />
+            <h3 className="font-display text-base sm:text-lg font-semibold text-[#1c1917] tracking-tight flex items-center gap-2">
               Dirección de Entrega
             </h3>
           </div>
-          <p className="text-xs text-[#99b3ad] mt-0.5">
+          <p className="text-xs text-[#57534e] mt-0.5">
             Indica a dónde debe llegar tu pedido cuando el repartidor de {store.name} salga en camino.
           </p>
         </div>
 
         {store.deliveryEnabled && (
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#072720] border border-[#133b32] text-[#36f4a4]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#f0fdfa] border border-[#ccfbf1] text-[#005141] tabular-nums">
               <Truck className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Costo de envío: {formatCurrency(store.deliveryFeeAmount ?? 0, 'PEN')}</span>
             </span>
@@ -306,9 +301,9 @@ export function DeliveryAddressSelector({
       {!store.deliveryEnabled && (
         <div
           role="alert"
-          className="p-4 rounded-[12px] bg-amber-950/40 border border-amber-500/40 flex items-start gap-3 text-xs text-amber-200"
+          className="p-4 rounded-[10px] bg-amber-50 border border-amber-200 flex items-start gap-3 text-xs text-amber-900"
         >
-          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
             <p className="font-bold">Envíos a domicilio no disponibles</p>
             <p className="leading-relaxed">
@@ -322,11 +317,11 @@ export function DeliveryAddressSelector({
       {isAddressDeletedRemotely && (
         <div
           role="status"
-          className="p-3.5 rounded-[12px] bg-[#02090a] border border-[#1e2c31] flex items-start gap-2.5 text-xs text-[#99b3ad]"
+          className="p-3.5 rounded-[10px] bg-[#faf7f2] border border-[#e7e0d6] flex items-start gap-2.5 text-xs text-[#57534e]"
         >
-          <RotateCcw className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <RotateCcw className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <p className="font-bold text-white">La dirección seleccionada fue modificada o eliminada en tu cuenta.</p>
+            <p className="font-bold text-[#1c1917]">La dirección seleccionada fue modificada o eliminada en tu cuenta.</p>
             <p className="mt-0.5">
               Hemos conservado los datos ingresados para que no los pierdas ({lastSelectedSnapshot?.addressLine}), o puedes seleccionar otra de tus direcciones guardadas.
             </p>
@@ -335,7 +330,7 @@ export function DeliveryAddressSelector({
       )}
 
       {inlineSaveSuccess && (
-        <div role="status" className="p-3 rounded-[12px] bg-[#072720] border border-[#36f4a4]/40 text-xs text-[#36f4a4]">
+        <div role="status" className="p-3 rounded-[10px] bg-[#f0fdfa] border border-[#ccfbf1] text-xs font-medium text-[#005141]">
           {inlineSaveSuccess}
         </div>
       )}
@@ -343,21 +338,21 @@ export function DeliveryAddressSelector({
       {/* Loading state */}
       {isLoading ? (
         <div className="space-y-3">
-          <Skeleton className="h-20 w-full rounded-[12px] bg-[#072720]" />
+          <Skeleton className="h-20 w-full rounded-[12px] bg-[#f7f3ec]" />
         </div>
       ) : (
         <div className="space-y-4">
           {/* Selector de Modo: Direcciones Guardadas vs Nueva Dirección */}
           {addresses.length > 0 && (
-            <div className="flex items-center gap-2 p-1 bg-[#02090a] rounded-full border border-[#1e2c31] max-w-md">
+            <div className="flex items-center gap-1.5 p-1 bg-[#f7f3ec] rounded-full border border-[#e7e0d6] max-w-md">
               <button
                 type="button"
                 onClick={() => setMode('saved')}
                 className={cn(
                   'flex-1 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer text-center',
                   mode === 'saved'
-                    ? 'bg-white text-[#02090a]'
-                    : 'text-[#99b3ad] hover:text-white'
+                    ? 'bg-[#005141] text-white'
+                    : 'text-[#57534e] hover:text-[#1c1917]'
                 )}
               >
                 Mis direcciones guardadas ({total})
@@ -368,8 +363,8 @@ export function DeliveryAddressSelector({
                 className={cn(
                   'flex-1 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer text-center',
                   mode === 'manual'
-                    ? 'bg-white text-[#02090a]'
-                    : 'text-[#99b3ad] hover:text-white'
+                    ? 'bg-[#005141] text-white'
+                    : 'text-[#57534e] hover:text-[#1c1917]'
                 )}
               >
                 Usar otra dirección
@@ -382,7 +377,7 @@ export function DeliveryAddressSelector({
             <div
               role="radiogroup"
               aria-label="Selecciona tu dirección guardada"
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
             >
               {addresses.map((addr) => {
                 const isSelected = selectedAddressId === addr.id;
@@ -396,10 +391,10 @@ export function DeliveryAddressSelector({
                   <div
                     key={addr.id}
                     className={cn(
-                      'relative p-4 rounded-[12px] border transition-all flex flex-col justify-between space-y-3',
+                      'group relative p-3.5 rounded-[10px] border transition-colors flex flex-col justify-between gap-2',
                       isSelected
-                        ? 'border-[#36f4a4] bg-[#072720] ring-1 ring-[#36f4a4]/40'
-                        : 'border-[#1e2c31] bg-[#02090a] hover:border-white/30'
+                        ? 'border-[#005141] bg-[#f0fdfa] ring-1 ring-[#005141]/20'
+                        : 'border-[#e7e0d6] bg-[#faf7f2]/50 hover:border-[#005141]/40 hover:bg-white'
                     )}
                   >
                     <button
@@ -408,51 +403,74 @@ export function DeliveryAddressSelector({
                       aria-checked={isSelected}
                       onClick={() => handleSelectSaved(addr)}
                       disabled={disabled || !store.deliveryEnabled}
-                      className="text-left cursor-pointer w-full space-y-1.5 focus-visible:outline-none"
+                      className="text-left cursor-pointer w-full focus-visible:outline-none flex items-start gap-3"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#061a1c] border border-[#1e2c31] text-white">
-                          <MapPin className="w-3 h-3 text-[#36f4a4]" aria-hidden="true" />
-                          <span>{addr.alias}</span>
-                        </span>
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'mt-0.5 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors',
+                          isSelected
+                            ? 'border-[#005141] bg-[#005141]'
+                            : 'border-[#78716c]/50 bg-white group-hover:border-[#005141]'
+                        )}
+                      >
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </span>
 
-                        {addr.isDefault && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#36f4a4]">
-                            <CheckCircle2 className="w-3 h-3 text-[#36f4a4]" aria-hidden="true" />
-                            <span>Predeterminada</span>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1c1917] truncate">
+                            {addr.alias.toLowerCase().includes('casa') ? (
+                              <Home className="w-3.5 h-3.5 text-[#005141] shrink-0" aria-hidden="true" />
+                            ) : addr.alias.toLowerCase().includes('oficina') || addr.alias.toLowerCase().includes('trabajo') ? (
+                              <Briefcase className="w-3.5 h-3.5 text-[#005141] shrink-0" aria-hidden="true" />
+                            ) : (
+                              <MapPin className="w-3.5 h-3.5 text-[#005141] shrink-0" aria-hidden="true" />
+                            )}
+                            <span className="truncate">{addr.alias}</span>
                           </span>
+
+                          {addr.isDefault && (
+                            <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#005141]/10 px-2 py-0.5 text-[10px] font-semibold text-[#005141]">
+                              <Star className="w-2.5 h-2.5 fill-[#005141]" aria-hidden="true" />
+                              <span>Predeterminada</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-xs font-medium text-[#1c1917] leading-snug truncate">
+                          {addr.addressLine}
+                        </p>
+
+                        <p className="text-[11px] text-[#57534e] truncate flex items-center gap-1.5">
+                          <span className="truncate">{locationLabel}</span>
+                          <span aria-hidden="true">·</span>
+                          <span className="inline-flex items-center gap-1 shrink-0">
+                            <User className="w-3 h-3 text-[#78716c]" aria-hidden="true" />
+                            <span>{addr.recipientName}</span>
+                          </span>
+                        </p>
+
+                        {isSelected && addr.reference && (
+                          <p className="text-[11px] text-[#005141]/85 truncate pt-0.5">
+                            Ref: {addr.reference}
+                          </p>
                         )}
                       </div>
-
-                      <p className="text-xs sm:text-sm font-medium text-white leading-snug line-clamp-2">
-                        {addr.addressLine}
-                      </p>
-                      <p className="text-[11px] text-[#99b3ad]">{locationLabel}</p>
-
-                      {addr.reference && (
-                        <div className="flex items-start gap-1 text-[11px] text-[#9dabad] italic">
-                          <Compass className="w-3 h-3 mt-0.5 shrink-0 text-[#99b3ad]" aria-hidden="true" />
-                          <span className="line-clamp-1">{addr.reference}</span>
-                        </div>
-                      )}
                     </button>
 
-                    <div className="pt-2 border-t border-[#1e2c31] flex items-center justify-between gap-2 text-[11px] text-[#99b3ad]">
-                      <span className="font-medium text-white truncate">{addr.recipientName}</span>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono">{addr.recipientPhone}</span>
-                        {!addr.isDefault && (
-                          <button
-                            type="button"
-                            disabled={disabled || isSavingInline}
-                            onClick={() => void setDefaultAddress?.(addr.id)}
-                            className="text-[#36f4a4] hover:underline cursor-pointer disabled:opacity-50"
-                          >
-                            Hacer predeterminada
-                          </button>
-                        )}
+                    {!addr.isDefault && (
+                      <div className="pl-7 flex justify-end">
+                        <button
+                          type="button"
+                          disabled={disabled || isSavingInline}
+                          onClick={() => void setDefaultAddress?.(addr.id)}
+                          className="text-[11px] font-medium text-[#005141] hover:underline cursor-pointer disabled:opacity-50"
+                        >
+                          Hacer predeterminada
+                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
@@ -462,14 +480,14 @@ export function DeliveryAddressSelector({
           {/* MODO 2: Formulario de Dirección Manual / Nueva Dirección */}
           {mode === 'manual' && (
             <div className="space-y-4 pt-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Nombre de quien recibe */}
                 <div>
-                  <label htmlFor="chk-recipient-name" className="block text-xs font-medium text-[#99b3ad] mb-1">
-                    Nombre del destinatario <span className="text-rose-400">*</span>
+                  <label htmlFor="chk-recipient-name" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                    Nombre del destinatario <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#99b3ad] absolute left-3 top-2.5 pointer-events-none" aria-hidden="true" />
+                    <User className="w-4 h-4 text-[#78716c] absolute left-3 top-2.5 pointer-events-none" aria-hidden="true" />
                     <input
                       id="chk-recipient-name"
                       type="text"
@@ -477,7 +495,7 @@ export function DeliveryAddressSelector({
                       onChange={(e) => setRecipientName(e.target.value)}
                       placeholder="Nombre y apellido completo"
                       disabled={disabled || !store.deliveryEnabled}
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                       maxLength={100}
                     />
                   </div>
@@ -485,11 +503,11 @@ export function DeliveryAddressSelector({
 
                 {/* Teléfono */}
                 <div>
-                  <label htmlFor="chk-recipient-phone" className="block text-xs font-medium text-[#99b3ad] mb-1">
-                    Teléfono celular <span className="text-rose-400">*</span>
+                  <label htmlFor="chk-recipient-phone" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                    Teléfono celular <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-[#99b3ad] absolute left-3 top-2.5 pointer-events-none" aria-hidden="true" />
+                    <Phone className="w-4 h-4 text-[#78716c] absolute left-3 top-2.5 pointer-events-none" aria-hidden="true" />
                     <input
                       id="chk-recipient-phone"
                       type="tel"
@@ -497,7 +515,7 @@ export function DeliveryAddressSelector({
                       onChange={(e) => setRecipientPhone(e.target.value)}
                       placeholder="987654321"
                       disabled={disabled || !store.deliveryEnabled}
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none"
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                       maxLength={15}
                     />
                   </div>
@@ -505,22 +523,22 @@ export function DeliveryAddressSelector({
               </div>
 
               {/* Cascada UBIGEO Oficial */}
-              <div className="p-3.5 rounded-[12px] bg-[#02090a] border border-[#1e2c31] space-y-3">
-                <span className="text-[11px] font-semibold text-[#36f4a4] uppercase tracking-[0.06em] block">
+              <div className="p-3.5 rounded-[10px] bg-[#faf7f2] border border-[#e7e0d6] space-y-3">
+                <span className="text-[11px] font-semibold text-[#005141] uppercase tracking-[0.06em] block">
                   Ubicación de entrega (Perú)
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div>
-                    <label htmlFor="chk-department" className="block text-[11px] font-medium text-[#99b3ad] mb-1">
-                      Departamento <span className="text-rose-400">*</span>
+                    <label htmlFor="chk-department" className="block text-[11px] font-medium text-[#57534e] mb-1">
+                      Departamento <span className="text-rose-600">*</span>
                     </label>
                     <select
                       id="chk-department"
                       value={department}
                       onChange={(e) => handleDepartmentChange(e.target.value)}
                       disabled={disabled || !store.deliveryEnabled}
-                      className="w-full px-2.5 py-1.5 text-xs bg-[#061a1c] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none"
+                      className="w-full px-2.5 py-2 text-xs bg-white border border-[#e7e0d6] focus:border-[#005141] rounded-[8px] text-[#1c1917] outline-none"
                     >
                       <option value="">Selecciona...</option>
                       {departments.map((d) => (
@@ -532,15 +550,15 @@ export function DeliveryAddressSelector({
                   </div>
 
                   <div>
-                    <label htmlFor="chk-province" className="block text-[11px] font-medium text-[#99b3ad] mb-1">
-                      Provincia <span className="text-rose-400">*</span>
+                    <label htmlFor="chk-province" className="block text-[11px] font-medium text-[#57534e] mb-1">
+                      Provincia <span className="text-rose-600">*</span>
                     </label>
                     <select
                       id="chk-province"
                       value={province}
                       onChange={(e) => handleProvinceChange(e.target.value)}
                       disabled={disabled || !store.deliveryEnabled || !department}
-                      className="w-full px-2.5 py-1.5 text-xs bg-[#061a1c] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none disabled:opacity-50"
+                      className="w-full px-2.5 py-2 text-xs bg-white border border-[#e7e0d6] focus:border-[#005141] rounded-[8px] text-[#1c1917] outline-none disabled:opacity-50"
                     >
                       <option value="">Selecciona...</option>
                       {provinces.map((p) => (
@@ -552,15 +570,15 @@ export function DeliveryAddressSelector({
                   </div>
 
                   <div>
-                    <label htmlFor="chk-district" className="block text-[11px] font-medium text-[#99b3ad] mb-1">
-                      Distrito <span className="text-rose-400">*</span>
+                    <label htmlFor="chk-district" className="block text-[11px] font-medium text-[#57534e] mb-1">
+                      Distrito <span className="text-rose-600">*</span>
                     </label>
                     <select
                       id="chk-district"
                       value={district}
                       onChange={(e) => handleDistrictChange(e.target.value)}
                       disabled={disabled || !store.deliveryEnabled || !province}
-                      className="w-full px-2.5 py-1.5 text-xs bg-[#061a1c] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white outline-none disabled:opacity-50"
+                      className="w-full px-2.5 py-2 text-xs bg-white border border-[#e7e0d6] focus:border-[#005141] rounded-[8px] text-[#1c1917] outline-none disabled:opacity-50"
                     >
                       <option value="">Selecciona...</option>
                       {districts.map((di) => (
@@ -573,16 +591,16 @@ export function DeliveryAddressSelector({
                 </div>
 
                 {ubigeoCode && (
-                  <p className="text-[10px] text-[#99b3ad]">
-                    UBIGEO validado: <span className="font-mono font-semibold text-[#36f4a4]">{ubigeoCode}</span>
+                  <p className="text-[10px] text-[#57534e]">
+                    UBIGEO validado: <span className="font-mono font-semibold text-[#005141] tabular-nums">{ubigeoCode}</span>
                   </p>
                 )}
               </div>
 
               {/* Dirección exacta */}
               <div>
-                <label htmlFor="chk-address-line" className="block text-xs font-medium text-[#99b3ad] mb-1">
-                  Dirección exacta (Calle, Nro, Interior) <span className="text-rose-400">*</span>
+                <label htmlFor="chk-address-line" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                  Dirección exacta (Calle, Nro, Interior) <span className="text-rose-600">*</span>
                 </label>
                 <input
                   id="chk-address-line"
@@ -591,79 +609,47 @@ export function DeliveryAddressSelector({
                   onChange={(e) => setAddressLine(e.target.value)}
                   placeholder="Ej. Jr. Huancavelica 340, Dpto 201"
                   disabled={disabled || !store.deliveryEnabled}
-                  className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none"
+                  className="w-full px-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
                   maxLength={255}
                 />
               </div>
 
-              {/* Referencia + Coordenadas opcionales */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-3">
-                  <label htmlFor="chk-reference" className="block text-xs font-medium text-[#99b3ad] mb-1">
-                    Referencia de entrega (opcional)
-                  </label>
-                  <input
-                    id="chk-reference"
-                    type="text"
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
-                    placeholder="Ej. Frente a la farmacia, portón marrón"
-                    disabled={disabled || !store.deliveryEnabled}
-                    className="w-full px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none"
-                    maxLength={255}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="chk-latitude" className="block text-[11px] font-medium text-[#9dabad] mb-1">
-                    Latitud (opcional)
-                  </label>
-                  <input
-                    id="chk-latitude"
-                    type="number"
-                    step="any"
-                    value={latitudeInput}
-                    onChange={(e) => setLatitudeInput(e.target.value)}
-                    placeholder="-12.0464"
-                    disabled={disabled || !store.deliveryEnabled}
-                    className="w-full px-3 py-1.5 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="chk-longitude" className="block text-[11px] font-medium text-[#9dabad] mb-1">
-                    Longitud (opcional)
-                  </label>
-                  <input
-                    id="chk-longitude"
-                    type="number"
-                    step="any"
-                    value={longitudeInput}
-                    onChange={(e) => setLongitudeInput(e.target.value)}
-                    placeholder="-77.0428"
-                    disabled={disabled || !store.deliveryEnabled}
-                    className="w-full px-3 py-1.5 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none font-mono"
-                  />
-                </div>
+              {/* Referencia */}
+              <div>
+                <label htmlFor="chk-reference" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                  Referencia de entrega (opcional)
+                </label>
+                <input
+                  id="chk-reference"
+                  type="text"
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder="Ej. Frente a la farmacia, portón marrón"
+                  disabled={disabled || !store.deliveryEnabled}
+                  className="w-full px-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
+                  maxLength={255}
+                />
               </div>
 
               {inlineSaveError && (
-                <p role="alert" className="text-xs text-rose-300">
+                <p role="alert" className="text-xs text-rose-700">
                   {inlineSaveError}
                 </p>
               )}
 
               {/* Checkbox para guardar opcionalmente en Mis Direcciones + botón inline */}
-              <div className="pt-2 border-t border-[#1e2c31] space-y-3">
+              <div className="pt-3 border-t border-[#e7e0d6] space-y-3">
                 <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={canAddAddress && saveToAddresses}
                     disabled={disabled || !canAddAddress || !store.deliveryEnabled}
                     onChange={(e) => setSaveToAddresses(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded-[4px] border-[#1e2c31] bg-[#02090a] text-[#36f4a4] focus:ring-[#36f4a4] accent-[#36f4a4]"
+                    className="mt-0.5 w-4 h-4 rounded-[4px] border-[#e7e0d6] bg-white text-[#005141] focus:ring-[#005141] accent-[#005141]"
                   />
-                  <span className="text-xs text-white">
+                  <span className="text-xs text-[#1c1917]">
                     <span className="font-semibold block">Guardar esta dirección en Mis Direcciones</span>
-                    <span className="text-[#99b3ad] text-[11px]">
+                    <span className="text-[#57534e] text-[11px]">
                       {canAddAddress
                         ? 'Podrás reutilizarla rápidamente en tus próximas compras sin volver a escribirla.'
                         : 'Has alcanzado el límite de 5 direcciones. Puedes usar esta dirección para este pedido sin guardarla.'}
@@ -678,7 +664,7 @@ export function DeliveryAddressSelector({
                       value={alias}
                       onChange={(e) => setAlias(e.target.value)}
                       placeholder="Alias (ej. Playa, Taller)"
-                      className="w-full max-w-xs px-3 py-1.5 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none"
+                      className="w-full max-w-xs px-3 py-1.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none"
                       maxLength={50}
                     />
                     <button
@@ -692,7 +678,7 @@ export function DeliveryAddressSelector({
                         addressLine.trim().length < 5
                       }
                       onClick={() => void handleSaveAddressInline()}
-                      className="rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold text-white hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+                      className="rounded-full border border-[#e7e0d6] bg-white px-4 py-1.5 text-xs font-semibold text-[#1c1917] hover:bg-[#f7f3ec] disabled:opacity-40 cursor-pointer"
                     >
                       {isSavingInline ? 'Guardando...' : 'Guardar dirección ahora'}
                     </button>
@@ -705,9 +691,9 @@ export function DeliveryAddressSelector({
       )}
 
       {/* Nota de Cobertura y Contacto Directo */}
-      <div className="pt-2 text-[11px] text-[#99b3ad] flex items-center justify-between gap-2 border-t border-[#1e2c31]">
+      <div className="pt-3 text-[11px] text-[#57534e] flex items-center justify-between gap-2 border-t border-[#e7e0d6]">
         <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#36f4a4]" aria-hidden="true" />
+          <ShieldCheck className="w-3.5 h-3.5 text-[#005141]" aria-hidden="true" />
           <span>La entrega se coordinará directamente según el radio de despacho de {store.name}.</span>
         </span>
       </div>

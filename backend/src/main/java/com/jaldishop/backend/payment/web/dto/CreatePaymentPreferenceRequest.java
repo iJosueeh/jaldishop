@@ -28,5 +28,31 @@ public record CreatePaymentPreferenceRequest(
         String deliveryAddress,
         String deliveryReference,
         BigDecimal deliveryLatitude,
-        BigDecimal deliveryLongitude
-) {}
+        BigDecimal deliveryLongitude,
+        String returnBaseUrl
+) {
+    public CreatePaymentPreferenceRequest(
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude
+    ) {
+        this(
+                capacityReservationId,
+                fulfillmentType,
+                customerName,
+                customerPhone,
+                customerEmail,
+                deliveryAddress,
+                deliveryReference,
+                deliveryLatitude,
+                deliveryLongitude,
+                null
+        );
+    }
+}

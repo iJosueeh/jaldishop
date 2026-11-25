@@ -100,6 +100,7 @@ export interface CreatePaymentPreferencePayload {
   deliveryLongitude?: number | null;
   storeId?: string;
   storeName?: string;
+  returnBaseUrl?: string;
 }
 
 export interface CreatePaymentPreferenceResponse {

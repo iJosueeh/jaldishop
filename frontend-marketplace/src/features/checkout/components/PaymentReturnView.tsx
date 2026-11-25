@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { QueryClientContext } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   CheckCircle2,
   Clock,
@@ -15,6 +17,8 @@ import {
   ExternalLink,
   ShieldCheck,
   RotateCcw,
+  Receipt,
+  PackageCheck,
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
@@ -204,6 +208,8 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
+  const queryClient = useContext(QueryClientContext);
+  const notifiedOrderRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const executeStatusVerification = useCallback(async (paymentId: string) => {
@@ -249,8 +255,42 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
       // Rule 2: Order confirmed and persisted
       if (res.orderCreated && res.orderNumber) {
         setState('ORDER_CONFIRMED');
+        const pendingStoreId = getPendingPayment()?.storeId;
         // Safely clean storage ONLY if stored correlation matches this confirmed payment
         clearMatchingPendingPayment(res.paymentId || paymentId);
+        try {
+          Object.keys(sessionStorage)
+            .filter((k) => k.startsWith('jaldishop-checkout-reservation:'))
+            .forEach((k) => sessionStorage.removeItem(k));
+          if (pendingStoreId) {
+            const rawRecent = JSON.parse(localStorage.getItem('jaldishop-recent-cart-stores') || '[]');
+            if (Array.isArray(rawRecent)) {
+              localStorage.setItem(
+                'jaldishop-recent-cart-stores',
+                JSON.stringify(rawRecent.filter((s: { id?: string }) => s?.id !== pendingStoreId))
+              );
+            }
+          }
+        } catch { /* Storage is optional */ }
+        if (queryClient) {
+          if (pendingStoreId) {
+            queryClient.setQueryData(['customer-cart', pendingStoreId], {
+              id: '',
+              storeId: pendingStoreId,
+              items: [],
+              totalItems: 0,
+              totalAmount: 0,
+              currency: res.currency || 'PEN',
+            });
+          }
+          void queryClient.invalidateQueries({ queryKey: ['customer-cart'] });
+          void queryClient.invalidateQueries({ queryKey: ['customer-notifications'] });
+          void queryClient.invalidateQueries({ queryKey: ['customer-notifications-unread-count'] });
+        }
+        if (notifiedOrderRef.current !== res.orderNumber) {
+          notifiedOrderRef.current = res.orderNumber;
+          toast.success(`¡Pago confirmado! Pedido #${res.orderNumber} registrado.`);
+        }
         return;
       }
 
@@ -304,7 +344,7 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
     } finally {
       setIsRetrying(false);
     }
-  }, []);
+  }, [queryClient]);
 
   // Initial correlation resolution on mount
   useEffect(() => {
@@ -319,19 +359,58 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
     }
 
     const resolution = resolveCorrelationId(rawStored, searchParams);
+    let cancelled = false;
+    const attemptController = new AbortController();
 
     if (resolution.status === 'RESOLVED') {
       setResolvedPaymentId(resolution.paymentId);
       executeStatusVerification(resolution.paymentId);
+    } else if (resolution.code === 'ATTEMPT_ID_ONLY') {
+      const rawExternalRef = searchParams.get('external_reference')?.trim() || '';
+      const attemptId = rawExternalRef.startsWith(ATTEMPT_PREFIX)
+        ? rawExternalRef.slice(ATTEMPT_PREFIX.length).trim()
+        : '';
+
+      if (UUID_REGEX.test(attemptId)) {
+        setState('RESOLVING_CORRELATION');
+        checkoutService
+          .resolvePaymentByAttemptId(attemptId, { signal: attemptController.signal })
+          .then((paymentId) => {
+            if (cancelled) return;
+            setResolvedPaymentId(paymentId);
+            executeStatusVerification(paymentId);
+          })
+          .catch((err: unknown) => {
+            if (cancelled) return;
+            if (err instanceof DOMException && err.name === 'AbortError') {
+              return;
+            }
+            if (err instanceof PaymentServiceError) {
+              if (err.status === 401) {
+                setState('SESSION_EXPIRED');
+                return;
+              }
+              if (err.status === 403) {
+                setState('UNAUTHORIZED');
+                return;
+              }
+            }
+            setState('CORRELATION_ERROR');
+            setErrorMessage(
+              'No fue posible recuperar la sesión de pago debido a que el retorno solo contiene una referencia de intento y no la correlación activa de la compra. Si el pedido no llegó a crearse, no figurará en tu historial.'
+            );
+          });
+      } else {
+        setState('CORRELATION_ERROR');
+        setErrorMessage(
+          'No fue posible recuperar la sesión de pago debido a que el retorno solo contiene una referencia de intento y no la correlación activa de la compra. Si el pedido no llegó a crearse, no figurará en tu historial.'
+        );
+      }
     } else {
       setState('CORRELATION_ERROR');
       if (resolution.code === 'DISCREPANCY') {
         setErrorMessage(
           'Se detectó un conflicto de seguridad entre la sesión local y los parámetros de retorno. La consulta fue detenida.'
-        );
-      } else if (resolution.code === 'ATTEMPT_ID_ONLY') {
-        setErrorMessage(
-          'No fue posible recuperar la sesión de pago debido a que el retorno solo contiene una referencia de intento y no la correlación activa de la compra. Si el pedido no llegó a crearse, no figurará en tu historial.'
         );
       } else {
         setErrorMessage(
@@ -341,6 +420,8 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
     }
 
     return () => {
+      cancelled = true;
+      attemptController.abort();
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -354,28 +435,28 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
   };
 
   return (
-    <div className="min-h-[80vh] bg-[#02090a] text-white flex items-center justify-center p-4 sm:p-6 pt-28 sm:pt-32 pb-12">
-      <Card className="w-full max-w-xl p-6 sm:p-8 bg-[#061a1c] border border-[#1e2c31] text-white shadow-2xl text-center rounded-[12px]">
+    <div className="min-h-[80vh] bg-[#faf7f2] text-[#1c1917] flex items-center justify-center p-4 sm:p-6 pt-28 sm:pt-32 pb-12">
+      <Card className="w-full max-w-xl p-6 sm:p-8 bg-white border border-[#e7e0d6] text-[#1c1917] shadow-sm text-center rounded-[12px]">
         {/* State: Polling / Resolving */}
         {(state === 'RESOLVING_CORRELATION' || state === 'POLLING') && (
           <div className="space-y-6" data-testid="state-polling">
-            <div className="inline-flex p-4 rounded-full bg-[#072720] text-[#36f4a4] mb-2 animate-pulse border border-[#133b32]">
+            <div className="inline-flex p-4 rounded-full bg-[#f0fdfa] text-[#005141] mb-2 animate-pulse border border-[#ccfbf1]">
               <Clock className="w-10 h-10 animate-spin" style={{ animationDuration: '3s' }} />
             </div>
             <div className="space-y-2">
               <Badge variant="jade" size="lg">
                 Verificando pago con el banco
               </Badge>
-              <h1 className="text-2xl font-medium text-white tracking-tight">
+              <h1 className="text-2xl font-bold text-[#1c1917] tracking-tight">
                 Estamos confirmando tu transacción
               </h1>
-              <p className="text-sm text-[#99b3ad] max-w-md mx-auto">
+              <p className="text-sm text-[#57534e] max-w-md mx-auto">
                 Mercado Pago ha procesado tu solicitud. Estamos sincronizando la confirmación oficial con nuestros servidores.
               </p>
             </div>
             <div className="pt-4 flex justify-center">
-              <div className="flex items-center gap-2 text-xs text-[#9dabad]">
-                <ShieldCheck className="w-4 h-4 text-[#36f4a4]" />
+              <div className="flex items-center gap-2 text-xs text-[#78716c]">
+                <ShieldCheck className="w-4 h-4 text-[#005141]" />
                 <span>Verificación segura y cifrada en curso...</span>
               </div>
             </div>
@@ -385,37 +466,46 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
         {/* State: Order Confirmed */}
         {state === 'ORDER_CONFIRMED' && statusData && (
           <div className="space-y-6" data-testid="state-order-confirmed">
-            <div className="inline-flex p-4 rounded-full bg-[#072720] text-[#36f4a4] mb-2 border border-[#133b32]">
+            <div className="inline-flex p-4 rounded-full bg-[#f0fdfa] text-[#005141] mb-2 border border-[#ccfbf1]">
               <CheckCircle2 className="w-12 h-12" />
             </div>
             <div className="space-y-2">
               <Badge variant="success" size="lg">
                 ¡Compra Exitosa!
               </Badge>
-              <h1 className="text-2xl font-medium text-white tracking-tight">
+              <h1 className="font-display text-2xl font-bold text-[#1c1917] tracking-tight">
                 ¡Tu pedido está confirmado!
               </h1>
-              <p className="text-sm text-[#99b3ad] max-w-md mx-auto">
-                Hemos recibido tu pago y tu pedido ya está registrado en el comercio.
+              <p className="text-sm text-[#57534e] max-w-md mx-auto">
+                Hemos recibido tu pago en Mercado Pago y tu pedido ya fue enviado al comercio.
               </p>
             </div>
 
-            <div className="p-4 rounded-[12px] bg-[#02090a] border border-[#1e2c31] text-left space-y-2">
+            <div className="p-4 rounded-[12px] bg-[#f7f3ec] border border-[#e7e0d6] text-left space-y-2.5">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#99b3ad]">Número de Pedido:</span>
-                <span className="font-bold text-white font-mono text-base">
+                <span className="text-[#57534e] inline-flex items-center gap-1.5">
+                  <Receipt className="w-4 h-4 text-[#005141]" aria-hidden="true" />
+                  <span>Número de Pedido:</span>
+                </span>
+                <span className="font-bold text-[#1c1917] font-mono text-base tabular-nums">
                   #{statusData.orderNumber}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#99b3ad]">Total pagado:</span>
-                <span className="font-bold text-[#36f4a4] font-mono">
+                <span className="text-[#57534e] inline-flex items-center gap-1.5">
+                  <ShoppingBag className="w-4 h-4 text-[#005141]" aria-hidden="true" />
+                  <span>Total pagado:</span>
+                </span>
+                <span className="font-bold text-[#005141] font-mono tabular-nums">
                   {statusData.currency} {Number(statusData.amount).toFixed(2)}
                 </span>
               </div>
               {statusData.orderStatus && (
-                <div className="flex justify-between items-center text-sm pt-2 border-t border-[#1e2c31]">
-                  <span className="text-[#99b3ad]">Estado del despacho:</span>
+                <div className="flex justify-between items-center text-sm pt-2.5 border-t border-[#e7e0d6]">
+                  <span className="text-[#57534e] inline-flex items-center gap-1.5">
+                    <PackageCheck className="w-4 h-4 text-[#005141]" aria-hidden="true" />
+                    <span>Estado del despacho:</span>
+                  </span>
                   <Badge variant="jade" size="sm">
                     {statusData.orderStatus}
                   </Badge>
@@ -425,12 +515,12 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={`/mi-jaldishop/pedidos/${encodeURIComponent(statusData.orderNumber!)}`} className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="w-full rounded-full bg-white text-[#02090a] hover:bg-stone-100" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                <Button variant="primary" size="lg" className="w-full rounded-full" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Ver detalle del pedido
                 </Button>
               </Link>
               <Link href="/mi-jaldishop/pedidos" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full rounded-full border-white/30 text-white hover:bg-white/10">
+                <Button variant="outline" size="lg" className="w-full rounded-full">
                   Ir a Mis Pedidos
                 </Button>
               </Link>

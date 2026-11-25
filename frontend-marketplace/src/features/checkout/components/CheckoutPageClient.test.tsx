@@ -8,6 +8,7 @@ import { customerSessionService } from '@/features/storefront/cart/services/cust
 import { storeService } from '@/features/storefront/services/storeService';
 import { capacityService } from '@/features/storefront/services/capacityService';
 import { customerAddressService } from '@/features/customer/services/customerAddressService';
+import { useCustomerProfile } from '@/features/customer/hooks/useCustomerProfile';
 import { checkoutService } from '../services/checkoutService';
 
 vi.mock('next/navigation', () => ({
@@ -156,11 +157,11 @@ describe('CheckoutPageClient', () => {
     });
     vi.mocked(capacityService.getCapacitySlots).mockResolvedValue({
       storeId: 'store-1',
-      serviceDate: '2026-11-24',
+      serviceDate: '2099-12-31',
       slots: [
         {
           storeId: 'store-1',
-          serviceDate: '2026-11-24',
+          serviceDate: '2099-12-31',
           startTime: '14:00:00',
           endTime: '15:00:00',
           effectiveCapacity: 5,
@@ -186,11 +187,8 @@ describe('CheckoutPageClient', () => {
   });
 
   it('requires valid DNI when requireCustomerDni is true and redirects to valid Mercado Pago initPoint', async () => {
-    const assignMock = vi.fn();
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: { assign: assignMock, pathname: '/checkout', href: '' },
-    });
+    const openMock = vi.fn().mockReturnValue({});
+    vi.stubGlobal('open', openMock);
 
     vi.mocked(checkoutService.initiateCheckout).mockResolvedValue({
       reservationId: 'res-123',
@@ -245,8 +243,10 @@ describe('CheckoutPageClient', () => {
       )
     );
     await waitFor(() =>
-      expect(assignMock).toHaveBeenCalledWith(
-        'https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref-123'
+      expect(openMock).toHaveBeenCalledWith(
+        'https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref-123',
+        '_blank',
+        'noopener,noreferrer'
       )
     );
   });
@@ -256,5 +256,26 @@ describe('CheckoutPageClient', () => {
     const emailInput = (await screen.findByLabelText(/Correo electrónico/i)) as HTMLInputElement;
     await waitFor(() => expect(emailInput.value).toBe('juan.perez@example.com'));
     expect(screen.getByText('Completado desde tu cuenta')).toBeInTheDocument();
+  });
+
+  it('blocks self-purchase when customer owns the store', async () => {
+    vi.mocked(useCustomerProfile).mockReturnValue({
+      data: {
+        id: 'user-owner',
+        email: 'owner@example.com',
+        firstName: 'Dueño',
+        lastName: 'Tienda',
+        phone: '987654321',
+        status: 'ACTIVE',
+        roles: ['CUSTOMER', 'MERCHANT'],
+        createdAt: '2026-01-01T00:00:00Z',
+        ownedStoreId: 'store-1',
+      },
+    } as ReturnType<typeof useCustomerProfile>);
+
+    renderCheckout();
+
+    expect(await screen.findByText('No puedes comprar en tu propia tienda')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Reservar y pagar con Mercado Pago/i })).not.toBeInTheDocument();
   });
 });

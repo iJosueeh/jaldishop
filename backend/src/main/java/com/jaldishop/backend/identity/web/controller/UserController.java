@@ -7,10 +7,15 @@ import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
 import com.jaldishop.backend.identity.web.dto.UpdateUserRequest;
 import com.jaldishop.backend.identity.web.dto.UserProfileResponse;
+import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -18,6 +23,9 @@ public class UserController {
 
     private final GetMyProfileService getMyProfileService;
     private final UpdateProfileService updateProfileService;
+
+    @Autowired(required = false)
+    private StoreRepository storeRepository;
 
     public UserController(GetMyProfileService getMyProfileService, UpdateProfileService updateProfileService) {
         this.getMyProfileService = getMyProfileService;
@@ -29,7 +37,7 @@ public class UserController {
             @AuthenticationPrincipal JwtPrincipal principal
     ) {
         User user = getMyProfileService.execute(principal.userId());
-        return ResponseEntity.ok(UserProfileResponse.fromDomain(user));
+        return ResponseEntity.ok(UserProfileResponse.fromDomain(user, resolveOwnedStoreId(user.getId())));
     }
 
     @PutMapping("/me")
@@ -45,7 +53,16 @@ public class UserController {
         );
 
         User user = updateProfileService.execute(command);
-        return ResponseEntity.ok(UserProfileResponse.fromDomain(user));
+        return ResponseEntity.ok(UserProfileResponse.fromDomain(user, resolveOwnedStoreId(user.getId())));
+    }
+
+    private UUID resolveOwnedStoreId(UUID userId) {
+        if (storeRepository == null || userId == null) {
+            return null;
+        }
+        return storeRepository.findByOwnerUserId(userId)
+                .map(Store::getId)
+                .orElse(null);
     }
 
 }

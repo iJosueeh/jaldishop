@@ -80,6 +80,13 @@ public class InitiateCheckoutService {
             throw new ConflictException("STORE_INACTIVE", "La tienda no se encuentra disponible actualmente.");
         }
 
+        if (store.getOwnerUserId() != null && store.getOwnerUserId().equals(command.userId())) {
+            throw new BusinessRuleException(
+                    "SELF_PURCHASE_NOT_ALLOWED",
+                    "No puedes realizar compras en tu propia tienda."
+            );
+        }
+
         // Validación de reglas operativas de tienda (INDECOPI / Políticas de checkout)
         if (storeOperationalSettingsPort != null) {
             StoreOperationalSettingsPort.OperationalSettings ops =

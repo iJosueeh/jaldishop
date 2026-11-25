@@ -288,6 +288,57 @@ export const checkoutService = {
   },
 
   /**
+   * Resolves a paymentId UUID from an attemptId (extracted from Mercado Pago external_reference `pa1_<attemptId>`).
+   */
+  async resolvePaymentByAttemptId(
+    attemptId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<string> {
+    let res: Response;
+    try {
+      res = await fetch(
+        `/api/customer/payments/attempts/${encodeURIComponent(attemptId.trim())}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+          signal: options?.signal,
+        }
+      );
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw err;
+      }
+      throw new PaymentServiceError(
+        'Error de red al recuperar la referencia del pago. Intenta nuevamente.',
+        'NETWORK_ERROR',
+        0
+      );
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      const message =
+        errorData.message ||
+        'No fue posible recuperar la sesión de pago.';
+      throw new PaymentServiceError(message, errorData.code, res.status);
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data || typeof data.paymentId !== 'string') {
+      throw new PaymentServiceError(
+        'Respuesta inválida del servidor al resolver la referencia del pago.',
+        'INVALID_STATUS_RESPONSE',
+        502
+      );
+    }
+
+    return data.paymentId;
+  },
+
+  /**
    * Polls the payment status until terminal state or maximum attempts reached.
    * Terminal states: orderCreated === true, hasIncidence === true, paymentStatus === 'FAILED'.
    * When max attempts are reached without terminal state, returns the latest status

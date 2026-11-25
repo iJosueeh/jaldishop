@@ -49,6 +49,16 @@ public class CustomerPaymentStatusController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/attempts/{attemptId}")
+    public ResponseEntity<java.util.Map<String, UUID>> resolvePaymentByAttempt(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @PathVariable UUID attemptId
+    ) {
+        validateCustomerPrincipal(principal);
+        UUID paymentId = service.resolvePaymentIdByAttempt(attemptId, principal.userId());
+        return ResponseEntity.ok(java.util.Map.of("paymentId", paymentId));
+    }
+
     private void validateCustomerPrincipal(JwtPrincipal principal) {
         if (principal == null || !principal.roles().contains("CUSTOMER")) {
             throw new AccessDeniedException("Solo los usuarios con el rol CUSTOMER pueden consultar el estado de sus pagos.");

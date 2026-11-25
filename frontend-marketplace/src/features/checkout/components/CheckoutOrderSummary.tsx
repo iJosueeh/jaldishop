@@ -1,7 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Tag, Clock, ShoppingBag, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Tag,
+  Clock,
+  ShoppingBag,
+  AlertTriangle,
+  Package,
+  Receipt,
+  Truck,
+  ShieldCheck,
+  Info,
+  ChevronDown,
+} from 'lucide-react';
 import { CartItem, PublicStoreSettings } from '@/features/storefront/types/storefront.types';
 import { CheckoutFulfillmentType, CheckoutResponse } from '../types/checkout.types';
 import { estimateServiceFee } from '../utils/pricing';
@@ -22,12 +33,36 @@ export interface CheckoutOrderSummaryProps {
   onDiscountCodeChange: (code: string) => void;
   onApplyDiscount?: () => void;
   onReservationExpired?: () => void;
+  embedded?: boolean;
 }
 
 function getRemainingSeconds(expiresAt?: string): number {
   if (!expiresAt) return 0;
   const diff = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
   return Math.max(0, diff);
+}
+
+function OrderItemThumbnail({ imageUrl, name }: { imageUrl?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!imageUrl || failed) {
+    return (
+      <div className="h-10 w-10 shrink-0 rounded-[8px] border border-[#e7e0d6] bg-[#faf7f2] flex items-center justify-center text-[#78716c]">
+        <Package className="w-4 h-4" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={imageUrl}
+      alt={name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-10 w-10 shrink-0 rounded-[8px] border border-[#e7e0d6] bg-[#faf7f2] object-cover"
+    />
+  );
 }
 
 export function CheckoutOrderSummary({
@@ -45,10 +80,21 @@ export function CheckoutOrderSummary({
   onDiscountCodeChange,
   onApplyDiscount,
   onReservationExpired,
+  embedded = false,
 }: CheckoutOrderSummaryProps) {
   const [secondsLeft, setSecondsLeft] = useState<number>(() =>
     getRemainingSeconds(checkoutResponse?.reservationExpiresAt)
   );
+  const [isDiscountOpen, setIsDiscountOpen] = useState<boolean>(() =>
+    Boolean(discountCode || checkoutResponse?.pricing?.discountCode)
+  );
+  const discountInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (discountCode || checkoutResponse?.pricing?.discountCode) {
+      setIsDiscountOpen(true);
+    }
+  }, [discountCode, checkoutResponse?.pricing?.discountCode]);
 
   useEffect(() => {
     if (!checkoutResponse?.reservationExpiresAt) {
@@ -96,153 +142,207 @@ export function CheckoutOrderSummary({
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
   const formattedTimer = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const totalItemsCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <aside
       aria-label="Resumen del pedido"
-      className="rounded-[12px] border border-[#1e2c31] bg-[#061a1c] p-5 sm:p-6 text-white space-y-5 lg:sticky lg:top-24"
+      className={
+        embedded
+          ? 'text-[#1c1917]'
+          : 'rounded-[12px] border border-[#e7e0d6] bg-white text-[#1c1917] overflow-hidden lg:sticky lg:top-24'
+      }
     >
-      <div className="flex items-center justify-between border-b border-[#1e2c31] pb-4">
+      <div className="flex items-center justify-between gap-3 border-b border-[#e7e0d6] bg-[#f7f3ec]/60 px-5 sm:px-6 py-4">
         <div>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#36f4a4] block">
-            Resumen del pedido
-          </span>
-          <h2 className="font-display text-lg font-medium text-white mt-0.5">{storeName}</h2>
+          <h2 className="font-display text-lg font-semibold text-[#1c1917]">Resumen del pedido</h2>
+          <p className="text-xs text-[#57534e] mt-0.5">{storeName}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#072720] border border-[#133b32] px-3 py-1 text-xs font-medium text-[#36f4a4]">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-[#e7e0d6] px-3 py-1 text-xs font-semibold text-[#005141] tabular-nums">
           <ShoppingBag className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{items.reduce((sum, i) => sum + i.quantity, 0)} ítems</span>
+          <span>
+            {totalItemsCount} {totalItemsCount === 1 ? 'ítem' : 'ítems'}
+          </span>
         </span>
       </div>
 
-      {/* Live Reservation Countdown */}
-      {checkoutResponse?.reservationExpiresAt && (
-        <div
-          role="status"
-          className={`rounded-[12px] border p-3.5 flex items-center justify-between gap-3 text-xs ${
-            secondsLeft <= 60
-              ? 'bg-rose-950/40 border-rose-500/40 text-rose-200'
-              : 'bg-[#072720] border-[#133b32] text-[#36f4a4]'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="font-medium">
-              {secondsLeft > 0 ? 'Reserva de horario activa' : 'La reserva ha expirado'}
+      <div className="p-5 sm:p-6 space-y-4">
+        {/* Live Reservation Countdown */}
+        {checkoutResponse?.reservationExpiresAt && (
+          <div
+            role="status"
+            className={`rounded-[10px] border p-3 flex items-center justify-between gap-3 text-xs ${
+              secondsLeft <= 60
+                ? 'bg-rose-50 border-rose-200 text-rose-800'
+                : 'bg-[#f0fdfa] border-[#ccfbf1] text-[#005141]'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="font-semibold">
+                {secondsLeft > 0 ? 'Reserva de horario activa' : 'La reserva ha expirado'}
+              </span>
+            </div>
+            <span className="font-mono font-bold text-sm tabular-nums">{formattedTimer}</span>
+          </div>
+        )}
+
+        {/* Minimum delivery warning */}
+        {isBelowMinDelivery && minDeliveryAmount !== null && (
+          <div
+            role="alert"
+            className="rounded-[10px] border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 flex items-start gap-2.5"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
+            <span>
+              El monto mínimo para delivery en {storeName} es{' '}
+              <strong className="font-mono tabular-nums">{formatCurrency(minDeliveryAmount, effectiveCurrency)}</strong>. Te faltan{' '}
+              <strong className="font-mono tabular-nums">{formatCurrency(minDeliveryAmount - subtotal, effectiveCurrency)}</strong>.
             </span>
           </div>
-          <span className="font-mono font-bold text-sm tabular-nums">{formattedTimer}</span>
-        </div>
-      )}
+        )}
 
-      {/* Minimum delivery warning */}
-      {isBelowMinDelivery && minDeliveryAmount !== null && (
-        <div
-          role="alert"
-          className="rounded-[12px] border border-amber-500/40 bg-amber-950/40 p-3.5 text-xs text-amber-200 flex items-start gap-2.5"
-        >
-          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
-          <span>
-            El monto mínimo para delivery en {storeName} es{' '}
-            <strong className="font-mono">{formatCurrency(minDeliveryAmount, effectiveCurrency)}</strong>. Te faltan{' '}
-            <strong className="font-mono">{formatCurrency(minDeliveryAmount - subtotal, effectiveCurrency)}</strong>.
-          </span>
-        </div>
-      )}
+        {/* Itemized list with thumbnails */}
+        <ul className="divide-y divide-[#e7e0d6] max-h-60 overflow-y-auto pr-1">
+          {items.map(({ product, quantity }) => (
+            <li key={product.variantId || product.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <OrderItemThumbnail imageUrl={product.imageUrl} name={product.name} />
+                <div className="min-w-0">
+                  <p className="font-medium text-[#1c1917] truncate">
+                    <span className="font-mono font-semibold text-[#005141] mr-1.5 tabular-nums">{quantity}×</span>
+                    {product.name}
+                  </p>
+                  <p className="text-[11px] text-[#57534e] tabular-nums">
+                    {formatCurrency(product.price, product.priceCurrency || effectiveCurrency)} c/u
+                  </p>
+                </div>
+              </div>
+              <span className="font-mono font-semibold text-[#1c1917] shrink-0 tabular-nums">
+                {formatCurrency(product.price * quantity, product.priceCurrency || effectiveCurrency)}
+              </span>
+            </li>
+          ))}
+        </ul>
 
-      {/* Itemized list */}
-      <ul className="divide-y divide-[#1e2c31] max-h-60 overflow-y-auto pr-1">
-        {items.map(({ product, quantity }) => (
-          <li key={product.variantId || product.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-xs">
-            <div className="min-w-0">
-              <p className="font-medium text-white truncate">
-                <span className="font-mono text-[#36f4a4] mr-1.5">{quantity}×</span>
-                {product.name}
-              </p>
-              <p className="text-[11px] text-[#99b3ad]">
-                {formatCurrency(product.price, product.priceCurrency || effectiveCurrency)} c/u
-              </p>
-            </div>
-            <span className="font-mono font-semibold text-white shrink-0">
-              {formatCurrency(product.price * quantity, product.priceCurrency || effectiveCurrency)}
+        {/* Progressive Disclosure Discount Code */}
+        <div className="pt-3 border-t border-[#e7e0d6]">
+          <button
+            type="button"
+            aria-expanded={isDiscountOpen}
+            aria-controls="checkout-discount-panel"
+            onClick={() => {
+              setIsDiscountOpen((prev) => {
+                const next = !prev;
+                if (next) {
+                  requestAnimationFrame(() => discountInputRef.current?.focus());
+                }
+                return next;
+              });
+            }}
+            className="w-full flex items-center justify-between text-xs font-medium text-[#005141] hover:text-[#003d31] cursor-pointer py-0.5"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>¿Tienes un código de descuento?</span>
             </span>
-          </li>
-        ))}
-      </ul>
+            <ChevronDown
+              className={`w-3.5 h-3.5 transition-transform duration-200 ${isDiscountOpen ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
 
-      {/* Discount code */}
-      <div className="pt-3 border-t border-[#1e2c31] space-y-2">
-        <label htmlFor="checkout-discount-code" className="text-xs font-medium text-[#99b3ad] flex items-center gap-1.5">
-          <Tag className="w-3.5 h-3.5 text-[#36f4a4]" aria-hidden="true" />
-          <span>Código de descuento (opcional)</span>
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            id="checkout-discount-code"
-            type="text"
-            maxLength={80}
-            value={discountCode}
-            onChange={(e) => onDiscountCodeChange(e.target.value.toUpperCase())}
-            placeholder="EJ. BIENVENIDO10"
-            className="flex-1 px-3 py-2 text-xs bg-[#02090a] border border-[#1e2c31] focus:border-[#36f4a4] rounded-[4px] text-white placeholder-[#71717a] outline-none font-mono uppercase"
-          />
-          {onApplyDiscount && (
-            <button
-              type="button"
-              onClick={onApplyDiscount}
-              disabled={!discountCode.trim()}
-              className="rounded-full border border-white/30 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 disabled:opacity-40 cursor-pointer shrink-0"
-            >
-              Aplicar
-            </button>
+          {isDiscountOpen && (
+            <div id="checkout-discount-panel" className="mt-2.5 flex items-center gap-2">
+              <input
+                ref={discountInputRef}
+                id="checkout-discount-code"
+                type="text"
+                maxLength={80}
+                value={discountCode}
+                onChange={(e) => onDiscountCodeChange(e.target.value.toUpperCase())}
+                placeholder="EJ. BIENVENIDO10"
+                aria-label="Código de descuento"
+                className="flex-1 px-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none font-mono uppercase transition-colors"
+              />
+              {onApplyDiscount && (
+                <button
+                  type="button"
+                  onClick={onApplyDiscount}
+                  disabled={!discountCode.trim()}
+                  className="rounded-full border border-[#e7e0d6] bg-white px-4 py-2 text-xs font-semibold text-[#1c1917] hover:bg-[#f7f3ec] disabled:opacity-40 cursor-pointer shrink-0 transition-colors"
+                >
+                  Aplicar
+                </button>
+              )}
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Pricing breakdown */}
-      <div className="pt-3 border-t border-[#1e2c31] space-y-2 text-xs">
-        <div className="flex items-center justify-between text-[#99b3ad]">
-          <span>Subtotal productos</span>
-          <span className="font-mono text-white">
-            {formatCurrency(effectiveSubtotal, effectiveCurrency)}
-          </span>
-        </div>
-
-        {effectiveDiscount > 0 && (
-          <div className="flex items-center justify-between text-[#36f4a4]">
-            <span>Descuento {pricing?.discountCode ? `(${pricing.discountCode})` : ''}</span>
-            <span className="font-mono">-{formatCurrency(effectiveDiscount, effectiveCurrency)}</span>
+        {/* Pricing breakdown with semantic icons */}
+        <div className="pt-3 border-t border-[#e7e0d6] space-y-2 text-xs">
+          <div className="flex items-center justify-between text-[#57534e]">
+            <span className="inline-flex items-center gap-1.5">
+              <Receipt className="w-3.5 h-3.5 text-[#78716c]" aria-hidden="true" />
+              <span>Subtotal productos</span>
+            </span>
+            <span className="font-mono font-medium text-[#1c1917] tabular-nums">
+              {formatCurrency(effectiveSubtotal, effectiveCurrency)}
+            </span>
           </div>
-        )}
 
-        <div className="flex items-center justify-between text-[#99b3ad]">
-          <span>Costo de envío</span>
-          <span className="font-mono text-white">
-            {fulfillmentType === 'DELIVERY'
-              ? formatCurrency(effectiveDeliveryFee, effectiveCurrency)
-              : 'Gratis'}
-          </span>
-        </div>
+          {effectiveDiscount > 0 && (
+            <div className="flex items-center justify-between text-[#005141] font-medium">
+              <span className="inline-flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Descuento {pricing?.discountCode ? `(${pricing.discountCode})` : ''}</span>
+              </span>
+              <span className="font-mono tabular-nums">-{formatCurrency(effectiveDiscount, effectiveCurrency)}</span>
+            </div>
+          )}
 
-        <div className="flex items-center justify-between text-[#99b3ad]">
-          <span>Tarifa de servicio</span>
-          <span className="font-mono text-white">
-            {formatCurrency(effectiveServiceFee, effectiveCurrency)}
-          </span>
-        </div>
-
-        {effectiveTax > 0 && (
-          <div className="flex items-center justify-between text-[#9dabad]">
-            <span>IGV incluido</span>
-            <span className="font-mono">{formatCurrency(effectiveTax, effectiveCurrency)}</span>
+          <div className="flex items-center justify-between text-[#57534e]">
+            <span className="inline-flex items-center gap-1.5">
+              <Truck className="w-3.5 h-3.5 text-[#78716c]" aria-hidden="true" />
+              <span>Costo de envío</span>
+            </span>
+            <span className={`font-mono font-medium tabular-nums ${fulfillmentType === 'DELIVERY' ? 'text-[#1c1917]' : 'text-[#005141]'}`}>
+              {fulfillmentType === 'DELIVERY'
+                ? formatCurrency(effectiveDeliveryFee, effectiveCurrency)
+                : 'Gratis'}
+            </span>
           </div>
-        )}
 
-        <div className="pt-3 border-t border-[#1e2c31] flex items-center justify-between text-base font-semibold">
-          <span className="text-white">Total a pagar</span>
-          <span className="font-display text-xl text-[#36f4a4] tabular-nums">
-            {formatCurrency(effectiveTotal, effectiveCurrency)}
-          </span>
+          <div className="flex items-center justify-between text-[#57534e]">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#78716c]" aria-hidden="true" />
+              <span>Tarifa de servicio</span>
+              <span
+                title="Cubre procesamiento seguro de pagos y soporte de plataforma"
+                aria-label="Cubre procesamiento seguro de pagos y soporte de plataforma"
+                className="inline-flex text-[#78716c] hover:text-[#1c1917] cursor-help"
+              >
+                <Info className="w-3 h-3" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="font-mono font-medium text-[#1c1917] tabular-nums">
+              {formatCurrency(effectiveServiceFee, effectiveCurrency)}
+            </span>
+          </div>
+
+          {effectiveTax > 0 && (
+            <div className="flex items-center justify-between text-[#78716c]">
+              <span>IGV incluido</span>
+              <span className="font-mono tabular-nums">{formatCurrency(effectiveTax, effectiveCurrency)}</span>
+            </div>
+          )}
+
+          <div className="pt-3 border-t border-[#e7e0d6] flex items-center justify-between text-base font-semibold">
+            <span className="text-[#1c1917]">Total a pagar</span>
+            <span className="font-display text-xl font-bold text-[#005141] tabular-nums">
+              {formatCurrency(effectiveTotal, effectiveCurrency)}
+            </span>
+          </div>
         </div>
       </div>
     </aside>

@@ -31,6 +31,7 @@ public class OrderPersistenceMapper {
         MonetarySummary pricing = MonetarySummary.of(
                 entity.getProductsSubtotalAmount(), entity.getDiscountAmount(),
                 entity.getDiscountCode(), entity.getDeliveryFeeAmount(),
+                entity.getServiceFeeAmount(),
                 entity.getIncludedTaxAmount(), entity.getTotalAmount(),
                 entity.getCurrency()
         );
@@ -65,6 +66,7 @@ public class OrderPersistenceMapper {
         entity.setOrigin(domain.getOrigin());
         entity.setPaymentMethod(domain.getPaymentMethod());
         entity.setNotes(domain.getNotes());
+        entity.setServiceFeeAmount(domain.getServiceFeeAmount() != null ? domain.getServiceFeeAmount() : java.math.BigDecimal.ZERO);
 
         entity.setItems(domain.getItems().stream()
                 .map(item -> toEntityItem(item, domain.getStoreId()))
