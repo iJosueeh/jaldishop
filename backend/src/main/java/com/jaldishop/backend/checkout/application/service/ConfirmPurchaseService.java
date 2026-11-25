@@ -174,6 +174,8 @@ public class ConfirmPurchaseService {
                     payment.discountAmount() != null ? payment.discountAmount() : BigDecimal.ZERO,
                     payment.discountCode(),
                     payment.deliveryFeeAmount() != null ? payment.deliveryFeeAmount() : BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    payment.serviceFeeAmount() != null ? payment.serviceFeeAmount() : BigDecimal.ZERO,
                     store.getTaxRate(),
                     payment.includedTaxAmount() != null ? payment.includedTaxAmount() : BigDecimal.ZERO,
                     payment.amount(),
@@ -347,6 +349,7 @@ public class ConfirmPurchaseService {
                 pricing.discountAmount(),
                 pricing.discountCode(),
                 pricing.deliveryFeeAmount(),
+                pricing.serviceFeeAmount(),
                 pricing.includedTaxAmount(),
                 pricing.totalAmount(),
                 itemSnapshots.stream()

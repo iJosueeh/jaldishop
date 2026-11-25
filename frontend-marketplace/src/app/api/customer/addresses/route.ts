@@ -26,7 +26,12 @@ export async function GET() {
     });
 
     const data = await upstream.json().catch(() => ({}));
-    const response = NextResponse.json(data, { status: upstream.status });
+    const response = NextResponse.json(data, {
+      status: upstream.status,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
 
     if (upstream.status === 401) {
       response.cookies.delete(CUSTOMER_COOKIE);
@@ -64,7 +69,12 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await upstream.json().catch(() => ({}));
-    const response = NextResponse.json(data, { status: upstream.status });
+    const response = NextResponse.json(data, {
+      status: upstream.status,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
 
     if (upstream.status === 401) {
       response.cookies.delete(CUSTOMER_COOKIE);

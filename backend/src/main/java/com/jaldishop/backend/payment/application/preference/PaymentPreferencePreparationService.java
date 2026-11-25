@@ -176,6 +176,13 @@ public class PaymentPreferencePreparationService {
             throw new ConflictException("STORE_INACTIVE", "La tienda no se encuentra disponible actualmente.");
         }
 
+        if (store.getOwnerUserId() != null && store.getOwnerUserId().equals(command.userId())) {
+            throw new com.jaldishop.backend.shared.exception.BusinessRuleException(
+                    "SELF_PURCHASE_NOT_ALLOWED",
+                    "No puedes pagar compras de tu propia tienda."
+            );
+        }
+
         CheckoutFulfillmentValidator.validate(command.fulfillmentType(), command.deliveryAddress(), store);
 
         // Control de Idempotencia y Concurrencia: Verificar si ya existe un Payment para esta reserva

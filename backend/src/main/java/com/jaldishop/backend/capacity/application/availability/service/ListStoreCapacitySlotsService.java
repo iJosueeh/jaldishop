@@ -55,9 +55,14 @@ public class ListStoreCapacitySlotsService {
                     "No es posible consultar franjas de fechas pasadas.");
         }
 
+        boolean isToday = serviceDate.equals(today);
+        LocalTime currentTime = LocalTime.now(BUSINESS_ZONE);
         List<Window> candidates = candidateWindows(storeId, serviceDate);
         List<CapacitySlotAvailability> slots = new ArrayList<>(candidates.size());
         for (Window window : candidates) {
+            if (isToday && !window.end().isAfter(currentTime)) {
+                continue;
+            }
             EffectiveCapacityQuery query =
                     new EffectiveCapacityQuery(storeId, serviceDate, window.start(), window.end());
             slots.add(new CapacitySlotAvailability(

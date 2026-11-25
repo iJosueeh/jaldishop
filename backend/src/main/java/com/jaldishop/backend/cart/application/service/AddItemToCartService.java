@@ -14,8 +14,10 @@ import com.jaldishop.backend.catalog.domain.enums.ProductStatus;
 import com.jaldishop.backend.catalog.domain.model.ProductVariant;
 import com.jaldishop.backend.catalog.domain.repository.ProductVariantRepository;
 import com.jaldishop.backend.catalog.domain.enums.VariantStatus;
+import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
+import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +51,13 @@ public class AddItemToCartService {
             throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
         }
 
-        validateStoreExists(command.storeId());
+        Store store = validateStoreExists(command.storeId());
+        if (store.getOwnerUserId() != null && store.getOwnerUserId().equals(command.userId())) {
+            throw new BusinessRuleException(
+                    "SELF_PURCHASE_NOT_ALLOWED",
+                    "No puedes agregar productos de tu propia tienda al carrito."
+            );
+        }
 
         ProductVariant variant = productVariantRepository.findById(command.variantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Variante no encontrada"));
@@ -83,11 +91,11 @@ public class AddItemToCartService {
         return cartViewAssembler.assemble(savedCart);
     }
 
-    private void validateStoreExists(UUID storeId) {
+    private Store validateStoreExists(UUID storeId) {
         if (storeId == null) {
             throw new IllegalArgumentException("El ID de la tienda es obligatorio");
         }
-        storeRepository.findById(storeId)
+        return storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tienda no encontrada"));
     }
 }

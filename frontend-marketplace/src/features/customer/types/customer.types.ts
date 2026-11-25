@@ -7,6 +7,7 @@ export interface UserProfile {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   roles: string[];
   createdAt: string;
+  ownedStoreId?: string | null;
 }
 
 export interface UpdateProfilePayload {

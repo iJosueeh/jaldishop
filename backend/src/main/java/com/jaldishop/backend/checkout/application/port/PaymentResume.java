@@ -23,9 +23,57 @@ public record PaymentResume(
         BigDecimal discountAmount,
         String discountCode,
         BigDecimal deliveryFeeAmount,
+        BigDecimal serviceFeeAmount,
         BigDecimal includedTaxAmount,
         String itemsSnapshot
 ) {
+    public PaymentResume(
+            UUID paymentId,
+            UUID capacityReservationId,
+            String status,
+            Instant approvedAt,
+            BigDecimal amount,
+            String currency,
+            String fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            BigDecimal productsSubtotalAmount,
+            BigDecimal discountAmount,
+            String discountCode,
+            BigDecimal deliveryFeeAmount,
+            BigDecimal includedTaxAmount,
+            String itemsSnapshot
+    ) {
+        this(
+                paymentId,
+                capacityReservationId,
+                status,
+                approvedAt,
+                amount,
+                currency,
+                fulfillmentType,
+                customerName,
+                customerPhone,
+                customerEmail,
+                deliveryAddress,
+                deliveryReference,
+                deliveryLatitude,
+                deliveryLongitude,
+                productsSubtotalAmount,
+                discountAmount,
+                discountCode,
+                deliveryFeeAmount,
+                BigDecimal.ZERO,
+                includedTaxAmount,
+                itemsSnapshot
+        );
+    }
+
     public PaymentResume(
             UUID paymentId,
             UUID capacityReservationId,
@@ -52,6 +100,7 @@ public record PaymentResume(
                 amount,
                 BigDecimal.ZERO,
                 null,
+                BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 null

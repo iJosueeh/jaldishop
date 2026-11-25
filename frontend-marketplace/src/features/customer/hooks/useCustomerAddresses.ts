@@ -13,12 +13,22 @@ export const CUSTOMER_ADDRESSES_QUERY_KEY = ['customer-addresses'];
 
 export function useCustomerAddresses() {
   const queryClient = useQueryClient();
+  const profileQuery = useQuery<{ id?: string } | null>({
+    queryKey: ['customer-profile'],
+    queryFn: () => null,
+    enabled: false,
+  });
+  const scopedKey = useMemo(
+    () => [...CUSTOMER_ADDRESSES_QUERY_KEY, profileQuery.data?.id ?? 'active'],
+    [profileQuery.data?.id]
+  );
 
   const query = useQuery({
-    queryKey: CUSTOMER_ADDRESSES_QUERY_KEY,
+    queryKey: scopedKey,
     queryFn: customerAddressService.getAddresses,
-    staleTime: 1000 * 60 * 2, // 2 minutes fresh cache
-    gcTime: 1000 * 60 * 10,
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
     retry: 1,
   });
 

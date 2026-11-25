@@ -16,9 +16,14 @@ public record UserProfileResponse(
    String phone,
    UserStatus status,
    Set<String> roles,
-   Instant createdAt
+   Instant createdAt,
+   UUID ownedStoreId
 ) {
     public static UserProfileResponse fromDomain(User user) {
+        return fromDomain(user, null);
+    }
+
+    public static UserProfileResponse fromDomain(User user, UUID ownedStoreId) {
         Set<String> roleNames = user.getRoles().stream()
                 .map(r -> r.getName().name())
                 .collect(Collectors.toSet());
@@ -31,7 +36,8 @@ public record UserProfileResponse(
                 user.getPhone(),
                 user.getStatus(),
                 roleNames,
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                ownedStoreId
         );
     }
 }

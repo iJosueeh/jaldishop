@@ -154,7 +154,7 @@ public class Order {
         }
         validateServiceWindow(data.serviceStartTime(), data.serviceEndTime());
         validateAmounts(data.productsSubtotalAmount(), data.discountAmount(),
-                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount());
+                data.deliveryFeeAmount(), data.serviceFeeAmount(), data.includedTaxAmount(), data.totalAmount());
         if (data.currency() == null || data.currency().isBlank()) {
             throw new BusinessRuleException("RN-ORD-08", "La moneda de la orden es obligatoria.");
         }
@@ -165,7 +165,8 @@ public class Order {
         );
         MonetarySummary pricing = MonetarySummary.of(
                 data.productsSubtotalAmount(), data.discountAmount(), data.discountCode(),
-                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount(), data.currency()
+                data.deliveryFeeAmount(), data.serviceFeeAmount(), data.includedTaxAmount(),
+                data.totalAmount(), data.currency()
         );
 
         Instant now = Instant.now();
@@ -211,7 +212,7 @@ public class Order {
         }
         validateServiceWindow(data.serviceStartTime(), data.serviceEndTime());
         validateAmounts(data.productsSubtotalAmount(), data.discountAmount(),
-                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount());
+                data.deliveryFeeAmount(), BigDecimal.ZERO, data.includedTaxAmount(), data.totalAmount());
         if (data.currency() == null || data.currency().isBlank()) {
             throw new BusinessRuleException("RN-ORD-08", "La moneda de la orden es obligatoria.");
         }
@@ -222,7 +223,8 @@ public class Order {
         );
         MonetarySummary pricing = MonetarySummary.of(
                 data.productsSubtotalAmount(), data.discountAmount(), data.discountCode(),
-                data.deliveryFeeAmount(), data.includedTaxAmount(), data.totalAmount(), data.currency()
+                data.deliveryFeeAmount(), BigDecimal.ZERO, data.includedTaxAmount(),
+                data.totalAmount(), data.currency()
         );
 
         Instant now = Instant.now();
@@ -272,7 +274,7 @@ public class Order {
     }
 
     private static void validateAmounts(BigDecimal subtotal, BigDecimal discount,
-                                       BigDecimal deliveryFee, BigDecimal tax, BigDecimal total) {
+                                       BigDecimal deliveryFee, BigDecimal serviceFee, BigDecimal tax, BigDecimal total) {
         if (subtotal == null || subtotal.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessRuleException("RN-ORD-10", "El subtotal no puede ser negativo ni nulo.");
         }
@@ -282,13 +284,17 @@ public class Order {
         if (deliveryFee == null || deliveryFee.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessRuleException("RN-ORD-12", "El costo de delivery no puede ser negativo ni nulo.");
         }
+        BigDecimal effectiveServiceFee = serviceFee != null ? serviceFee : BigDecimal.ZERO;
+        if (effectiveServiceFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException("RN-ORD-12B", "La tarifa de servicio no puede ser negativa.");
+        }
         if (tax == null || tax.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessRuleException("RN-ORD-13", "El impuesto no puede ser negativo ni nulo.");
         }
         if (total == null || total.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessRuleException("RN-ORD-14", "El total no puede ser negativo ni nulo.");
         }
-        BigDecimal expectedTotal = subtotal.subtract(discount).add(deliveryFee);
+        BigDecimal expectedTotal = subtotal.subtract(discount).add(deliveryFee).add(effectiveServiceFee);
         if (total.compareTo(expectedTotal) != 0) {
             throw new BusinessRuleException("RN-ORD-15", "El total de la orden no coincide con la suma calculada.");
         }
@@ -322,6 +328,7 @@ public class Order {
     public BigDecimal getDiscountAmount() { return pricing != null ? pricing.discount() : null; }
     public String getDiscountCode() { return pricing != null ? pricing.discountCode() : null; }
     public BigDecimal getDeliveryFeeAmount() { return pricing != null ? pricing.deliveryFee() : null; }
+    public BigDecimal getServiceFeeAmount() { return pricing != null ? pricing.serviceFee() : BigDecimal.ZERO; }
     public BigDecimal getIncludedTaxAmount() { return pricing != null ? pricing.tax() : null; }
     public BigDecimal getTotalAmount() { return pricing != null ? pricing.total() : null; }
 
@@ -355,10 +362,43 @@ public class Order {
             BigDecimal discountAmount,
             String discountCode,
             BigDecimal deliveryFeeAmount,
+            BigDecimal serviceFeeAmount,
             BigDecimal includedTaxAmount,
             BigDecimal totalAmount,
             List<ItemData> items
-    ) {}
+    ) {
+        public CreateData(
+                UUID userId,
+                UUID storeId,
+                UUID paymentId,
+                UUID capacityReservationId,
+                DeliveryMode deliveryMode,
+                LocalDate serviceDate,
+                LocalTime serviceStartTime,
+                LocalTime serviceEndTime,
+                String customerName,
+                String customerPhone,
+                String customerEmail,
+                String deliveryAddress,
+                String deliveryReference,
+                BigDecimal deliveryLatitude,
+                BigDecimal deliveryLongitude,
+                String currency,
+                BigDecimal productsSubtotalAmount,
+                BigDecimal discountAmount,
+                String discountCode,
+                BigDecimal deliveryFeeAmount,
+                BigDecimal includedTaxAmount,
+                BigDecimal totalAmount,
+                List<ItemData> items
+        ) {
+            this(userId, storeId, paymentId, capacityReservationId, deliveryMode, serviceDate,
+                    serviceStartTime, serviceEndTime, customerName, customerPhone, customerEmail,
+                    deliveryAddress, deliveryReference, deliveryLatitude, deliveryLongitude,
+                    currency, productsSubtotalAmount, discountAmount, discountCode,
+                    deliveryFeeAmount, BigDecimal.ZERO, includedTaxAmount, totalAmount, items);
+        }
+    }
 
     public record MerchantDirectData(
             UUID userId,

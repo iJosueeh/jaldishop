@@ -103,17 +103,17 @@ public class CreatePaymentPreferenceService {
         }
 
         if (useOrders) {
-            return executeWithOrdersApi(prep);
+            return executeWithOrdersApi(prep, command.returnBaseUrl());
         } else {
-            return executeWithPreferencesApi(prep);
+            return executeWithPreferencesApi(prep, command.returnBaseUrl());
         }
     }
 
-    private CreatePaymentPreferenceResult executeWithPreferencesApi(PreparationResult prep) {
+    private CreatePaymentPreferenceResult executeWithPreferencesApi(PreparationResult prep, String returnBaseUrl) {
         // 2. Paso Gateway Externo: FUERA de transacción de PostgreSQL
         PreferenceResult preferenceResult;
         try {
-            CreatePreferenceCommand mpCommand = buildGatewayPreferenceCommand(prep);
+            CreatePreferenceCommand mpCommand = buildGatewayPreferenceCommand(prep, returnBaseUrl);
             preferenceResult = mercadoPagoGateway.createPreference(mpCommand, prep.attempt().getId());
         } catch (ConflictException ex) {
             throw ex;
@@ -153,11 +153,11 @@ public class CreatePaymentPreferenceService {
         );
     }
 
-    private CreatePaymentPreferenceResult executeWithOrdersApi(PreparationResult prep) {
+    private CreatePaymentPreferenceResult executeWithOrdersApi(PreparationResult prep, String returnBaseUrl) {
         // 2. Paso Gateway Externo: FUERA de transacción de PostgreSQL
         OrderResult orderResult;
         try {
-            CreateOrderCommand orderCommand = buildGatewayOrderCommand(prep);
+            CreateOrderCommand orderCommand = buildGatewayOrderCommand(prep, returnBaseUrl);
             orderResult = mercadoPagoGateway.createOrder(orderCommand, prep.attempt().getId());
         } catch (ConflictException ex) {
             throw ex;
@@ -208,7 +208,7 @@ public class CreatePaymentPreferenceService {
         );
     }
 
-    private CreateOrderCommand buildGatewayOrderCommand(PreparationResult prep) {
+    private CreateOrderCommand buildGatewayOrderCommand(PreparationResult prep, String returnBaseUrl) {
         List<CreateOrderCommand.OrderItem> items = extractOrderItems(prep);
 
         CreateOrderCommand.PayerInfo payer = new CreateOrderCommand.PayerInfo(
@@ -226,9 +226,9 @@ public class CreatePaymentPreferenceService {
                 items,
                 payer,
                 properties.getNotificationUrl(),
-                properties.getBackUrlSuccess(),
-                properties.getBackUrlFailure(),
-                properties.getBackUrlPending(),
+                resolveBackUrl(returnBaseUrl, "/checkout/success", properties.getBackUrlSuccess()),
+                resolveBackUrl(returnBaseUrl, "/checkout/failure", properties.getBackUrlFailure()),
+                resolveBackUrl(returnBaseUrl, "/checkout/pending", properties.getBackUrlPending()),
                 "JALDI SHOP",
                 prep.attempt().getIdempotencyKey(),
                 expirationTime
@@ -318,14 +318,8 @@ public class CreatePaymentPreferenceService {
             ));
         }
 
-        // Si existe costo de entrega, agregarlo como ítem si los ítems no suman ya el total
-        BigDecimal itemsSum = items.stream()
-                .map(it -> it.unitPrice().multiply(BigDecimal.valueOf(it.quantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         if (prep.payment().getDeliveryFeeAmount() != null
-                && prep.payment().getDeliveryFeeAmount().signum() > 0
-                && prep.payment().getAmount().compareTo(itemsSum) > 0) {
+                && prep.payment().getDeliveryFeeAmount().signum() > 0) {
             items.add(new CreateOrderCommand.OrderItem(
                     "delivery-fee",
                     "Costo de Envío",
@@ -336,10 +330,38 @@ public class CreatePaymentPreferenceService {
             ));
         }
 
+        if (prep.payment().getServiceFeeAmount() != null
+                && prep.payment().getServiceFeeAmount().signum() > 0) {
+            items.add(new CreateOrderCommand.OrderItem(
+                    "service-fee",
+                    "Tarifa de servicio",
+                    "Servicio de plataforma",
+                    1,
+                    prep.payment().getServiceFeeAmount(),
+                    prep.payment().getCurrency()
+            ));
+        }
+
+        BigDecimal itemsSum = items.stream()
+                .map(it -> it.unitPrice().multiply(BigDecimal.valueOf(it.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (prep.payment().getAmount() != null && itemsSum.compareTo(prep.payment().getAmount()) != 0) {
+            items = new ArrayList<>();
+            items.add(new CreateOrderCommand.OrderItem(
+                    "payment-" + prep.payment().getId(),
+                    "Compra JaldiShop - " + prep.storeName(),
+                    "Total de la compra",
+                    1,
+                    prep.payment().getAmount(),
+                    prep.payment().getCurrency()
+            ));
+        }
+
         return items;
     }
 
-    private CreatePreferenceCommand buildGatewayPreferenceCommand(PreparationResult prep) {
+    private CreatePreferenceCommand buildGatewayPreferenceCommand(PreparationResult prep, String returnBaseUrl) {
         List<CreatePreferenceCommand.PreferenceItem> items = new ArrayList<>();
 
         if (prep.itemSnapshots() != null && !prep.itemSnapshots().isEmpty()) {
@@ -392,7 +414,7 @@ public class CreatePaymentPreferenceService {
             ));
         }
 
-        // Si existe costo de entrega, agregarlo como ítem de servicio si no está en subtotal
+        // Si existe costo de entrega o tarifa de servicio, agregarlos como ítems
         if (prep.payment().getDeliveryFeeAmount() != null && prep.payment().getDeliveryFeeAmount().signum() > 0) {
             items.add(new CreatePreferenceCommand.PreferenceItem(
                     "delivery-fee",
@@ -400,6 +422,33 @@ public class CreatePaymentPreferenceService {
                     "Servicio de despacho",
                     1,
                     prep.payment().getDeliveryFeeAmount(),
+                    prep.payment().getCurrency()
+            ));
+        }
+
+        if (prep.payment().getServiceFeeAmount() != null && prep.payment().getServiceFeeAmount().signum() > 0) {
+            items.add(new CreatePreferenceCommand.PreferenceItem(
+                    "service-fee",
+                    "Tarifa de servicio",
+                    "Servicio de plataforma",
+                    1,
+                    prep.payment().getServiceFeeAmount(),
+                    prep.payment().getCurrency()
+            ));
+        }
+
+        BigDecimal prefItemsSum = items.stream()
+                .map(it -> it.unitPrice().multiply(BigDecimal.valueOf(it.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (prep.payment().getAmount() != null && prefItemsSum.compareTo(prep.payment().getAmount()) != 0) {
+            items = new ArrayList<>();
+            items.add(new CreatePreferenceCommand.PreferenceItem(
+                    "payment-" + prep.payment().getId(),
+                    "Compra JaldiShop - " + prep.storeName(),
+                    "Total de la compra",
+                    1,
+                    prep.payment().getAmount(),
                     prep.payment().getCurrency()
             ));
         }
@@ -417,12 +466,30 @@ public class CreatePaymentPreferenceService {
                 items,
                 payer,
                 properties.getNotificationUrl(),
-                properties.getBackUrlSuccess(),
-                properties.getBackUrlFailure(),
-                properties.getBackUrlPending(),
+                resolveBackUrl(returnBaseUrl, "/checkout/success", properties.getBackUrlSuccess()),
+                resolveBackUrl(returnBaseUrl, "/checkout/failure", properties.getBackUrlFailure()),
+                resolveBackUrl(returnBaseUrl, "/checkout/pending", properties.getBackUrlPending()),
                 "JALDI SHOP",
                 prep.attempt().getIdempotencyKey()
         );
+    }
+
+    private static final java.util.regex.Pattern ALLOWED_RETURN_BASE_URL = java.util.regex.Pattern.compile(
+            "^https?://(localhost(:\\d+)?|127\\.0\\.0\\.1(:\\d+)?)$"
+                    + "|^https://(jaldishop\\.com|www\\.jaldishop\\.com|[a-z0-9-]+\\.jaldishop\\.com|[a-z0-9-]+\\.vercel\\.app|[a-z0-9-]+\\.pages\\.dev)$",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+    );
+
+    private String resolveBackUrl(String returnBaseUrl, String path, String fallbackUrl) {
+        if (returnBaseUrl == null || returnBaseUrl.isBlank()) {
+            return fallbackUrl;
+        }
+        String normalized = returnBaseUrl.trim().replaceAll("/+$", "");
+        if (!ALLOWED_RETURN_BASE_URL.matcher(normalized).matches()) {
+            log.warn("returnBaseUrl rechazado por allowlist: {}. Usando fallback configurado.", normalized);
+            return fallbackUrl;
+        }
+        return normalized + path;
     }
 
 }

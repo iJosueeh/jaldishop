@@ -16,8 +16,36 @@ public record CreatePaymentPreferenceCommand(
         String deliveryAddress,
         String deliveryReference,
         BigDecimal deliveryLatitude,
-        BigDecimal deliveryLongitude
+        BigDecimal deliveryLongitude,
+        String returnBaseUrl
 ) {
+    public CreatePaymentPreferenceCommand(
+            UUID userId,
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude
+    ) {
+        this(
+                userId,
+                capacityReservationId,
+                fulfillmentType,
+                customerName,
+                customerPhone,
+                customerEmail,
+                deliveryAddress,
+                deliveryReference,
+                deliveryLatitude,
+                deliveryLongitude,
+                null
+        );
+    }
+
     public CreatePaymentPreferenceCommand {
         Objects.requireNonNull(userId, "userId no puede ser nulo");
         Objects.requireNonNull(capacityReservationId, "capacityReservationId no puede ser nulo");

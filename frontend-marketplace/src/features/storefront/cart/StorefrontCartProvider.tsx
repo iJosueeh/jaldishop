@@ -65,7 +65,16 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
   const pendingAdd = useRef<{ storeId: string; variantId: string; quantity: number } | null>(null);
   const session = useQuery({ queryKey: ['customer-session'], queryFn: customerSessionService.get, retry: false, staleTime: 0 });
   const authenticated = session.data?.authenticated === true;
-  const cart = useQuery({ queryKey: cartKey(store?.id), queryFn: () => cartService.get(store!.id), enabled: authenticated && !!store, retry: false, staleTime: 0 });
+  const cart = useQuery({
+    queryKey: cartKey(store?.id),
+    queryFn: () => cartService.get(store!.id),
+    enabled: authenticated && !!store,
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: 'always',
+    refetchOnMount: 'always',
+  });
 
   const selectStore = useCallback((next: ActiveStore) => {
     setRecentStores((prev) => {
@@ -99,6 +108,17 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
       if (isValidStore(saved)) selectStore(saved);
     } catch { /* Ignore invalid store metadata. Never restore local product data. */ }
   }, [selectStore]);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === RECENT_STORES_KEY) {
+        setRecentStores(readRecentStores());
+        void client.invalidateQueries({ queryKey: ['customer-cart'] });
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [client]);
 
   useEffect(() => {
     if (cart.error instanceof ApiException && cart.error.status === 401) {
@@ -160,6 +180,8 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
       signedIn = true;
       setLoginRequired(false);
       client.removeQueries({ queryKey: ['customer-cart'] });
+      client.removeQueries({ queryKey: ['customer-addresses'] });
+      client.removeQueries({ queryKey: ['customer-profile'] });
       const intent = pendingAdd.current;
       pendingAdd.current = null;
       if (intent && activeStore.current?.id === intent.storeId) {
@@ -194,7 +216,21 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
     login, logout: async () => {
       if (busy.current) return;
       busy.current = true; setPending(true);
-      try { await customerSessionService.logout(); await client.cancelQueries({ queryKey: ['customer-cart'] }); client.setQueryData(['customer-session'], { authenticated: false }); client.removeQueries({ queryKey: ['customer-cart'] }); }
+      try {
+        await customerSessionService.logout();
+        await client.cancelQueries({ queryKey: ['customer-cart'] });
+        client.setQueryData(['customer-session'], { authenticated: false });
+        client.removeQueries({ queryKey: ['customer-cart'] });
+        client.removeQueries({ queryKey: ['customer-addresses'] });
+        client.removeQueries({ queryKey: ['customer-profile'] });
+        activeStore.current = null;
+        setStore(null);
+        setRecentStores([]);
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(RECENT_STORES_KEY);
+        } catch { /* Storage is optional */ }
+      }
       catch (reason) { reportError(reason); }
       finally { busy.current = false; setPending(false); }
     }, dismissLogin: () => { setLoginRequired(false); pendingAdd.current = null; },

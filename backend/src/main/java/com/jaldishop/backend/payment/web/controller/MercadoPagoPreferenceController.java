@@ -40,7 +40,8 @@ public class MercadoPagoPreferenceController {
                 request.deliveryAddress(),
                 request.deliveryReference(),
                 request.deliveryLatitude(),
-                request.deliveryLongitude()
+                request.deliveryLongitude(),
+                request.returnBaseUrl()
         ));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new CreatePaymentPreferenceResponse(
