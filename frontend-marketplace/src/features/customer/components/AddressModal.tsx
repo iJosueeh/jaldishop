@@ -271,7 +271,10 @@ export function AddressModal({
                 onChange={(localPhone) => {
                   setRecipientPhone(localPhone);
                   if (errors.recipientPhone) {
-                    setErrors((prev) => ({ ...prev, recipientPhone: undefined }));
+                    setErrors((prev) => {
+                      const { recipientPhone: _, ...rest } = prev;
+                      return rest;
+                    });
                   }
                 }}
                 error={errors.recipientPhone}
