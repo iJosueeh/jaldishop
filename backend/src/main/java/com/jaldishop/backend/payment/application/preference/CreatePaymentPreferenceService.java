@@ -476,11 +476,11 @@ public class CreatePaymentPreferenceService {
 
     private static final java.util.regex.Pattern ALLOWED_RETURN_BASE_URL = java.util.regex.Pattern.compile(
             "^https?://(localhost(:\\d+)?|127\\.0\\.0\\.1(:\\d+)?)$"
-                    + "|^https://(jaldishop\\.com|www\\.jaldishop\\.com|[a-z0-9-]+\\.jaldishop\\.com|[a-z0-9-]+\\.vercel\\.app|[a-z0-9-]+\\.pages\\.dev)$",
+                    + "|^https://(jaldishop\\.(com|net|pe)|www\\.jaldishop\\.(com|net|pe)|[a-z0-9-]+\\.jaldishop\\.(com|net|pe)|[a-z0-9-]+\\.vercel\\.app|[a-z0-9-]+\\.pages\\.dev)$",
             java.util.regex.Pattern.CASE_INSENSITIVE
     );
 
-    private String resolveBackUrl(String returnBaseUrl, String path, String fallbackUrl) {
+    String resolveBackUrl(String returnBaseUrl, String path, String fallbackUrl) {
         if (returnBaseUrl == null || returnBaseUrl.isBlank()) {
             return fallbackUrl;
         }

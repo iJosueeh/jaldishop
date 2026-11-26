@@ -39,9 +39,9 @@ public class MercadoPagoProperties {
     /**
      * URLs de retorno al comercio tras finalizar o cancelar en Checkout Pro.
      */
-    private String backUrlSuccess = "https://jaldishop.com/checkout/success";
-    private String backUrlFailure = "https://jaldishop.com/checkout/failure";
-    private String backUrlPending = "https://jaldishop.com/checkout/pending";
+    private String backUrlSuccess = "https://www.jaldishop.net/checkout/success";
+    private String backUrlFailure = "https://www.jaldishop.net/checkout/failure";
+    private String backUrlPending = "https://www.jaldishop.net/checkout/pending";
 
     /**
      * Modo de integración de checkout de Mercado Pago (PREFERENCES u ORDERS).
