@@ -256,6 +256,7 @@ class MercadoPagoOrdersApiEndToEndIntegrationTest {
         jdbcTemplate.update("DELETE FROM payment_incidences");
         jdbcTemplate.update("DELETE FROM payment_attempts");
         jdbcTemplate.update("DELETE FROM order_items");
+        jdbcTemplate.update("DELETE FROM fiscal_receipts");
         jdbcTemplate.update("DELETE FROM orders");
         jdbcTemplate.update("DELETE FROM payments");
         jdbcTemplate.update("DELETE FROM inventory_reservations");

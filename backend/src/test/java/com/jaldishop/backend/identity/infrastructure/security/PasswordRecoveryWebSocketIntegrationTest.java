@@ -71,6 +71,7 @@ class PasswordRecoveryWebSocketIntegrationTest {
         TestPostgresConfig.requireDestructiveIntegrationDatabase(jdbc.queryForObject("SELECT current_database()", String.class));
         email = "recovery-ws-" + UUID.randomUUID() + "@example.test";
         userId = registration.execute(new RegisterCustomerCommand(email, "old-password", "Recovery", "Socket", null)).getId();
+        jdbc.update("UPDATE users SET email_verified = true WHERE id = ?", userId);
         previousJwt = login.execute(new LoginCommand(email, "old-password")).token();
         doAnswer(invocation -> { recoveryTokens.offer(invocation.getArgument(1)); return null; })
                 .when(mail).send(eq(email), any(), any());
