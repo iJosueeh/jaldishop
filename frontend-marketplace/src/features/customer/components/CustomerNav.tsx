@@ -108,17 +108,17 @@ export function CustomerNav() {
 
   const renderNavContent = (onNavigate?: () => void) => (
     <div className="flex flex-col h-full">
-      {/* Customer summary chip */}
-      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-[#faf7f2] border border-stone-200/80 mb-5">
+      {/* Flat Customer Identity Header (no nested card) */}
+      <div className="flex items-center gap-3 pb-4 mb-4 border-b border-[#e7e0d6]">
         <div
-          className="w-10 h-10 rounded-full bg-[#072720] text-[#36f4a4] font-bold text-sm flex items-center justify-center shrink-0"
+          className="w-9 h-9 rounded-full bg-[#072720] text-[#36f4a4] font-bold text-sm flex items-center justify-center shrink-0"
           aria-hidden="true"
         >
           {userInitial}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-stone-900 truncate">{userFullName}</p>
-          <p className="text-[11px] text-stone-500 truncate">
+          <p className="text-xs font-bold text-[#1c1917] truncate">{userFullName}</p>
+          <p className="text-[11px] text-[#57534e] truncate">
             {profile?.email || 'Comprador JaldiShop'}
           </p>
         </div>
@@ -128,10 +128,10 @@ export function CustomerNav() {
       <nav aria-label="Navegación de Mi JaldiShop" className="space-y-5 flex-1">
         {groups.map((group) => (
           <div key={group.title} className="space-y-1">
-            <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-[#57534e]">
               {group.title}
             </p>
-            <ul role="list" className="space-y-1">
+            <ul role="list" className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = item.exact
@@ -146,33 +146,40 @@ export function CustomerNav() {
                       onClick={onNavigate}
                       aria-current={isActive ? 'page' : undefined}
                       className={cn(
-                        'min-h-[44px] flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]',
+                        'min-h-[44px] flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]',
                         isActive
-                          ? 'bg-[#072720] text-white font-semibold shadow-xs'
-                          : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900'
+                          ? 'bg-[#072720] text-white font-semibold'
+                          : 'text-[#1c1917] hover:bg-[#f7f3ec]'
                       )}
                     >
                       <span className="flex items-center gap-2.5 min-w-0">
                         <Icon
                           className={cn(
                             'w-4 h-4 shrink-0',
-                            isActive ? 'text-[#36f4a4]' : 'text-stone-500'
+                            isActive ? 'text-[#36f4a4]' : 'text-[#57534e]'
                           )}
                         />
                         <span className="truncate">{item.label}</span>
                       </span>
                       {showBadge && (
-                        <span
-                          aria-live="polite"
-                          className={cn(
-                            'px-2 py-0.5 text-[11px] font-bold rounded-full tabular-nums shrink-0',
-                            isActive
-                              ? 'bg-[#36f4a4] text-[#02090a]'
-                              : 'bg-[#005141] text-white'
-                          )}
-                        >
-                          {item.badgeCount! > 99 ? '99+' : item.badgeCount}
-                        </span>
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              'px-2 py-0.5 text-[11px] font-bold rounded-full tabular-nums shrink-0 transition-colors duration-150',
+                              isActive
+                                ? 'bg-[#36f4a4] text-[#02090a]'
+                                : 'bg-[#005141] text-white'
+                            )}
+                          >
+                            {item.badgeCount! > 99 ? '99+' : item.badgeCount}
+                          </span>
+                          <span className="sr-only" role="status" aria-atomic="true">
+                            {item.badgeCount === 1
+                              ? '1 notificación sin leer'
+                              : `${item.badgeCount} notificaciones sin leer`}
+                          </span>
+                        </>
                       )}
                     </Link>
                   </li>
@@ -184,11 +191,11 @@ export function CustomerNav() {
       </nav>
 
       {/* Back to Marketplace */}
-      <div className="pt-4 mt-5 border-t border-stone-200/80">
+      <div className="pt-4 mt-5 border-t border-[#e7e0d6]">
         <Link
           href="/"
           onClick={onNavigate}
-          className="min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-stone-600 hover:text-[#005141] hover:bg-stone-100 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
+          className="min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-[#57534e] hover:text-[#005141] hover:bg-[#f7f3ec] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
         >
           <ArrowLeft className="w-4 h-4 shrink-0" />
           <span>Explorar comercios locales</span>
@@ -200,16 +207,26 @@ export function CustomerNav() {
   return (
     <>
       {/* Mobile Top Bar & Drawer Trigger */}
-      <div className="lg:hidden mb-6 flex items-center justify-between gap-3 rounded-2xl bg-white border border-stone-200/90 px-4 py-2.5 shadow-2xs">
+      <div className="lg:hidden mb-5 flex items-center justify-between gap-3 rounded-xl bg-white border border-[#e7e0d6] px-4 py-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <activeItem.icon className="w-4 h-4 text-[#005141] shrink-0" />
-          <span className="text-sm font-bold text-stone-900 truncate">
+          <span className="text-sm font-bold text-[#1c1917] truncate">
             {activeItem.label}
           </span>
           {unreadCount > 0 && (
-            <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[#005141] text-white tabular-nums">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
+            <>
+              <span
+                aria-hidden="true"
+                className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[#005141] text-white tabular-nums"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+              <span className="sr-only" role="status" aria-atomic="true">
+                {unreadCount === 1
+                  ? '1 notificación sin leer'
+                  : `${unreadCount} notificaciones sin leer`}
+              </span>
+            </>
           )}
         </div>
 
@@ -220,7 +237,7 @@ export function CustomerNav() {
           aria-expanded={isMobileOpen}
           aria-controls="customer-sidebar-drawer"
           aria-label="Abrir menú de Mi JaldiShop"
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-2 px-3 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-xs font-semibold text-stone-800 transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-2 px-3 rounded-lg border border-[#e7e0d6] bg-[#faf7f2] hover:bg-[#f0eae0] text-xs font-semibold text-[#1c1917] transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
         >
           <Menu className="w-4 h-4" />
           <span>Menú</span>
@@ -237,16 +254,16 @@ export function CustomerNav() {
           className="fixed inset-0 z-50 lg:hidden flex"
         >
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-[#02090a]/60 backdrop-blur-xs"
             onClick={() => {
               setIsMobileOpen(false);
               triggerRef.current?.focus();
             }}
             aria-hidden="true"
           />
-          <div className="relative z-10 w-[84vw] max-w-[300px] h-full bg-white border-r border-stone-200 p-5 overflow-y-auto shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200/80">
-              <span className="font-display text-base font-bold text-stone-900">
+          <div className="relative z-10 w-[84vw] max-w-[300px] h-full bg-white border-r border-[#e7e0d6] p-5 overflow-y-auto flex flex-col">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#e7e0d6]">
+              <span className="font-display text-base font-bold text-[#1c1917]">
                 Mi JaldiShop
               </span>
               <button
@@ -257,7 +274,7 @@ export function CustomerNav() {
                   triggerRef.current?.focus();
                 }}
                 aria-label="Cerrar menú"
-                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-[#faf7f2] hover:bg-[#f0eae0] text-[#1c1917] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -267,10 +284,10 @@ export function CustomerNav() {
         </div>
       )}
 
-      {/* Desktop Fixed Sticky Sidebar */}
+      {/* Desktop Sticky Sidebar Rail */}
       <aside
         aria-label="Barra lateral de Mi JaldiShop"
-        className="hidden lg:block sticky top-24 rounded-2xl bg-white border border-stone-200/90 p-4 shadow-xs"
+        className="hidden lg:block sticky top-24 rounded-xl bg-white border border-[#e7e0d6] p-4"
       >
         {renderNavContent()}
       </aside>

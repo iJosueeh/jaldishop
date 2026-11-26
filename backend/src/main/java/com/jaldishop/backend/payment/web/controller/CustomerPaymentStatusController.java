@@ -5,12 +5,14 @@ import com.jaldishop.backend.payment.application.status.ListCustomerPaymentHisto
 import com.jaldishop.backend.payment.web.dto.CustomerPaymentHistoryResponse;
 import com.jaldishop.backend.payment.web.dto.CustomerPaymentStatusResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.CustomerPageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -37,6 +39,20 @@ public class CustomerPaymentStatusController {
     ) {
         validateCustomerPrincipal(principal);
         return ResponseEntity.ok(historyService.execute(principal.userId()));
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<CustomerPageResponse<CustomerPaymentHistoryResponse>> getPagedPaymentHistory(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "ALL") String filter,
+            @RequestParam(required = false) String q
+    ) {
+        validateCustomerPrincipal(principal);
+        return ResponseEntity.ok(
+                historyService.executePaged(principal.userId(), filter, q, page, size)
+        );
     }
 
     @GetMapping("/{paymentId}/status")

@@ -33,7 +33,7 @@ class StoreTest {
                 true,
                 new BigDecimal("15.00"),
                 "GTQ",
-                new BigDecimal("12.00")
+                BigDecimal.ZERO
         );
 
         assertNotNull(store.getId());
@@ -50,7 +50,7 @@ class StoreTest {
         assertTrue(store.isDeliveryEnabled());
         assertEquals(new BigDecimal("15.00"), store.getDeliveryFeeAmount());
         assertEquals("GTQ", store.getDeliveryFeeCurrency());
-        assertEquals(new BigDecimal("12.00"), store.getTaxRate());
+        assertEquals(0, BigDecimal.ZERO.compareTo(store.getTaxRate()));
         assertEquals(StoreStatus.ACTIVE, store.getStatus());
         assertNotNull(store.getCreatedAt());
         assertNotNull(store.getUpdatedAt());
@@ -186,7 +186,7 @@ class StoreTest {
                 true, false, null, null,
                 BigDecimal.ZERO
         );
-        assertEquals(BigDecimal.ZERO, store.getTaxRate());
+        assertEquals(0, BigDecimal.ZERO.compareTo(store.getTaxRate()));
     }
 
     @Test

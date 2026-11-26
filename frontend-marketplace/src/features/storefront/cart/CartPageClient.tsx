@@ -24,7 +24,12 @@ import { PaginationBar } from '@/shared/components/ui/PaginationBar';
 import { useStorefrontCart, ActiveStore } from './StorefrontCartProvider';
 import { cartService, CartResponse } from './services/cartService';
 import { storeService } from '../services/storeService';
-import { estimateServiceFee } from '@/features/checkout/utils/pricing';
+import { SafeProductImage } from '../components/SafeProductImage';
+import {
+  calculateTaxBreakdown,
+  estimateServiceFee,
+  formatServiceFeeLabel,
+} from '@/features/checkout/utils/pricing';
 import { formatCurrency } from '@/shared/utils/formatters';
 
 export const STORES_PAGE_SIZE = 3;
@@ -147,6 +152,10 @@ export function CartPageClient() {
       : 0;
   const platformCommission =
     selectedCount > 0 ? estimateServiceFee(selectedSubtotal, serviceFeeRate, serviceFeeCap) : 0;
+  const taxBreakdown =
+    selectedCount > 0
+      ? calculateTaxBreakdown(selectedSubtotal, selectedStoreInfo?.taxRate ?? 0.18)
+      : { baseAmount: 0, includedTaxAmount: 0, effectiveRate: 0.18 };
   const estimatedTotal = selectedSubtotal + estimatedDeliveryFee + platformCommission;
 
   const minDeliveryAmount = selectedStoreSettings?.minDeliveryAmount ?? null;
@@ -444,18 +453,12 @@ export function CartPageClient() {
                                   className="py-3.5 first:pt-0 last:pb-0 flex items-start gap-3.5"
                                 >
                                   <div className="h-14 w-14 shrink-0 rounded-[8px] border border-[#e7e0d6] bg-[#faf7f2] overflow-hidden flex items-center justify-center">
-                                    {item.imageUrl ? (
-                                      <img
-                                        src={item.imageUrl}
-                                        alt={displayName}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    ) : (
-                                      <ShoppingBag
-                                        className="h-4 w-4 text-[#78716c]"
-                                        aria-hidden="true"
-                                      />
-                                    )}
+                                    <SafeProductImage
+                                      src={item.imageUrl}
+                                      alt={displayName}
+                                      variant="thumb"
+                                      useNativeImg
+                                    />
                                   </div>
 
                                   <div className="min-w-0 flex-1 space-y-1.5">
@@ -559,12 +562,12 @@ export function CartPageClient() {
               className="lg:col-span-4 rounded-[12px] border border-[#e7e0d6] bg-white p-5 sm:p-6 space-y-5 lg:sticky lg:top-28"
             >
               <div className="border-b border-[#e7e0d6] pb-3.5">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#005141] block">
+                <h2 className="font-display text-lg font-semibold text-[#1c1917]">
                   Resumen de compra
-                </span>
-                <h2 className="font-display text-lg font-semibold text-[#1c1917] mt-0.5">
-                  {selectedEntry ? selectedEntry.store.name : 'Sin tienda seleccionada'}
                 </h2>
+                <p className="text-xs text-[#57534e] mt-0.5">
+                  {selectedEntry ? selectedEntry.store.name : 'Sin tienda seleccionada'}
+                </p>
               </div>
 
               {/* Economic Breakdown */}
@@ -589,12 +592,44 @@ export function CartPageClient() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[#57534e]">
-                  <span>Tarifa de servicio</span>
-                  <span className="font-mono font-semibold text-[#005141] tabular-nums">
+                <div className="flex items-center justify-between gap-2 text-[#57534e]">
+                  <span className="min-w-0">
+                    {formatServiceFeeLabel(serviceFeeRate, serviceFeeCap, selectedCurrency)}
+                  </span>
+                  <span className="font-mono font-semibold text-[#005141] tabular-nums shrink-0">
                     {formatCurrency(platformCommission, selectedCurrency)}
                   </span>
                 </div>
+
+                {selectedCount > 0 && (
+                  <div className="pt-2.5 border-t border-[#e7e0d6]/70 space-y-1.5 text-xs text-[#57534e]">
+                    {taxBreakdown.effectiveRate > 0 ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>Operación gravada (Base)</span>
+                          <span className="font-mono tabular-nums">
+                            {formatCurrency(taxBreakdown.baseAmount, selectedCurrency)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>
+                            IGV incluido ({Math.round(taxBreakdown.effectiveRate * 100)}% est.)
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            {formatCurrency(taxBreakdown.includedTaxAmount, selectedCurrency)}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span>IGV (Exonerado 0%)</span>
+                        <span className="font-mono tabular-nums">
+                          {formatCurrency(0, selectedCurrency)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="pt-3 border-t border-[#e7e0d6] flex items-center justify-between text-base font-semibold">
                   <span className="text-[#1c1917]">Total estimado</span>
@@ -602,6 +637,10 @@ export function CartPageClient() {
                     {formatCurrency(estimatedTotal, selectedCurrency)}
                   </span>
                 </div>
+
+                <p className="text-[11px] text-[#78716c] leading-relaxed">
+                  Cálculo referencial. El monto final e IGV se validan en el servidor al reservar horario.
+                </p>
               </div>
 
               {/* Essential Store Operational Info */}

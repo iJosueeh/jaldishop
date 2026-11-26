@@ -13,6 +13,7 @@ public record ProductResponse(
         String slug,
         String description,
         String imageUrl,
+        List<String> images,
         String status,
         BigDecimal minPrice,
         BigDecimal maxPrice,
@@ -20,6 +21,39 @@ public record ProductResponse(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public ProductResponse(
+            UUID id,
+            UUID storeId,
+            UUID categoryId,
+            String name,
+            String slug,
+            String description,
+            String imageUrl,
+            String status,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<ProductVariantResponse> variants,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                storeId,
+                categoryId,
+                name,
+                slug,
+                description,
+                imageUrl,
+                imageUrl != null && !imageUrl.isBlank() ? List.of(imageUrl.trim()) : List.of(),
+                status,
+                minPrice,
+                maxPrice,
+                variants,
+                createdAt,
+                updatedAt
+        );
+    }
+
     public ProductResponse(
             UUID id,
             UUID storeId,

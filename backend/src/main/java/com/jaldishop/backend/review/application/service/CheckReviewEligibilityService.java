@@ -45,6 +45,9 @@ public class CheckReviewEligibilityService {
 
         boolean eligible = orderRepository.hasCompletedOrderWithProduct(userId, productId);
         Optional<Review> existingReviewOpt = reviewRepository.findByUserIdAndProductId(userId, productId);
+        boolean hasInProgressOrder = !eligible
+                && existingReviewOpt.isEmpty()
+                && orderRepository.hasInProgressOrderWithProduct(userId, productId);
 
         CustomerReviewResponse currentReviewDto = null;
         if (existingReviewOpt.isPresent()) {
@@ -70,7 +73,8 @@ public class CheckReviewEligibilityService {
                 productId,
                 eligible,
                 existingReviewOpt.isPresent(),
-                currentReviewDto
+                currentReviewDto,
+                hasInProgressOrder
         );
     }
 }

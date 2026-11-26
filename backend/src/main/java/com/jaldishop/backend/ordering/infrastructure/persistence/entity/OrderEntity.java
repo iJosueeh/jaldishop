@@ -105,6 +105,9 @@ public class OrderEntity {
     @Column(name = "discount_code", length = 80)
     private String discountCode;
 
+    @Column(name = "promo_funding_source", length = 20)
+    private String promoFundingSource;
+
     @Column(name = "delivery_fee_amount", nullable = false)
     private BigDecimal deliveryFeeAmount;
 
@@ -218,6 +221,8 @@ public class OrderEntity {
     public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
     public String getDiscountCode() { return discountCode; }
     public void setDiscountCode(String discountCode) { this.discountCode = discountCode; }
+    public String getPromoFundingSource() { return promoFundingSource; }
+    public void setPromoFundingSource(String promoFundingSource) { this.promoFundingSource = promoFundingSource; }
     public BigDecimal getDeliveryFeeAmount() { return deliveryFeeAmount; }
     public void setDeliveryFeeAmount(BigDecimal deliveryFeeAmount) { this.deliveryFeeAmount = deliveryFeeAmount; }
     public BigDecimal getServiceFeeAmount() { return serviceFeeAmount; }

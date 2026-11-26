@@ -4,7 +4,9 @@ import com.jaldishop.backend.payment.domain.model.Payment;
 import com.jaldishop.backend.payment.domain.repository.PaymentRepository;
 import com.jaldishop.backend.payment.infrastructure.persistence.mapper.PaymentPersistenceMapper;
 import com.jaldishop.backend.payment.infrastructure.persistence.repository.PaymentJpaRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -46,6 +48,18 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepository {
     @Override
     public List<Payment> findByCustomerUserId(UUID customerUserId) {
         return jpaRepository.findByCustomerUserId(customerUserId).stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public Page<Payment> findPagedByCustomerUserId(
+            UUID customerUserId,
+            String filter,
+            String searchPattern,
+            Pageable pageable
+    ) {
+        String normalizedFilter = (filter != null && !filter.isBlank()) ? filter.toUpperCase() : "ALL";
+        return jpaRepository.findPagedByCustomerUserId(customerUserId, normalizedFilter, searchPattern, pageable)
+                .map(mapper::toDomain);
     }
 
     @Override

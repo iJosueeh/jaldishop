@@ -70,3 +70,30 @@ export interface RequestPayoutResponse {
   currency: string;
   message: string;
 }
+
+export interface FiscalReceiptResponse {
+  id: string;
+  orderId: string;
+  paymentId?: string;
+  storeId: string;
+  documentTypeCode: '01' | '03' | '00';
+  documentTypeName: string;
+  series: string;
+  correlative: number;
+  fullNumber: string;
+  emitterTaxIdType: string;
+  emitterTaxIdNumber?: string;
+  emitterLegalName: string;
+  emitterTaxRegime: string;
+  customerDocType: string;
+  customerDocNumber?: string;
+  customerName: string;
+  taxableAmount: number;
+  igvRate: number;
+  igvAmount: number;
+  totalAmount: number;
+  currency: string;
+  paymentProvider?: string;
+  providerPaymentId?: string;
+  issuedAt: string;
+}

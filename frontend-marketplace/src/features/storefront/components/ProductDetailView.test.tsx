@@ -224,6 +224,6 @@ describe('ProductDetailView (Marketplace)', () => {
 
   it('renders editorial fallback when imageUrl is missing', () => {
     renderWithQuery(<ProductDetailView store={store} product={product} />);
-    expect(screen.getByText('Fotografía no publicada por el comercio')).toBeInTheDocument();
+    expect(screen.getByText('Sin fotografía publicada')).toBeInTheDocument();
   });
 });

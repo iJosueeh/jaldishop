@@ -94,6 +94,18 @@ public class PaymentEntity {
     @Column(name = "included_tax_amount", precision = 12, scale = 2)
     private BigDecimal includedTaxAmount;
 
+    @Column(name = "requested_receipt_type", length = 10)
+    private String requestedReceiptType;
+
+    @Column(name = "customer_doc_type", length = 10)
+    private String customerDocType;
+
+    @Column(name = "customer_doc_number", length = 11)
+    private String customerDocNumber;
+
+    @Column(name = "customer_legal_name", length = 200)
+    private String customerLegalName;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "items_snapshot")
     private String itemsSnapshot;
@@ -214,5 +226,14 @@ public class PaymentEntity {
 
     public String getItemsSnapshot() { return itemsSnapshot; }
     public void setItemsSnapshot(String itemsSnapshot) { this.itemsSnapshot = itemsSnapshot; }
+
+    public String getRequestedReceiptType() { return requestedReceiptType; }
+    public void setRequestedReceiptType(String requestedReceiptType) { this.requestedReceiptType = requestedReceiptType; }
+    public String getCustomerDocType() { return customerDocType; }
+    public void setCustomerDocType(String customerDocType) { this.customerDocType = customerDocType; }
+    public String getCustomerDocNumber() { return customerDocNumber; }
+    public void setCustomerDocNumber(String customerDocNumber) { this.customerDocNumber = customerDocNumber; }
+    public String getCustomerLegalName() { return customerLegalName; }
+    public void setCustomerLegalName(String customerLegalName) { this.customerLegalName = customerLegalName; }
 
 }

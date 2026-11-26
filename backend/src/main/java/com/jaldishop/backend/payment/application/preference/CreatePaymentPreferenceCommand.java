@@ -17,8 +17,62 @@ public record CreatePaymentPreferenceCommand(
         String deliveryReference,
         BigDecimal deliveryLatitude,
         BigDecimal deliveryLongitude,
-        String returnBaseUrl
+        String returnBaseUrl,
+        String discountCode,
+        String requestedReceiptType,
+        String customerDocType,
+        String customerDocNumber,
+        String customerLegalName
 ) {
+    public CreatePaymentPreferenceCommand(
+            UUID userId,
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String returnBaseUrl,
+            String discountCode
+    ) {
+        this(
+                userId, capacityReservationId, fulfillmentType, customerName, customerPhone,
+                customerEmail, deliveryAddress, deliveryReference, deliveryLatitude,
+                deliveryLongitude, returnBaseUrl, discountCode, null, null, null, null
+        );
+    }
+    public CreatePaymentPreferenceCommand(
+            UUID userId,
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String returnBaseUrl
+    ) {
+        this(
+                userId,
+                capacityReservationId,
+                fulfillmentType,
+                customerName,
+                customerPhone,
+                customerEmail,
+                deliveryAddress,
+                deliveryReference,
+                deliveryLatitude,
+                deliveryLongitude,
+                returnBaseUrl,
+                null
+        );
+    }
+
     public CreatePaymentPreferenceCommand(
             UUID userId,
             UUID capacityReservationId,
@@ -42,6 +96,7 @@ public record CreatePaymentPreferenceCommand(
                 deliveryReference,
                 deliveryLatitude,
                 deliveryLongitude,
+                null,
                 null
         );
     }

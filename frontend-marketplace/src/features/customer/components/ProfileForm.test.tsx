@@ -54,7 +54,8 @@ describe('ProfileForm Component', () => {
     render(<ProfileForm />);
     expect(screen.getByDisplayValue('María')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Rojas')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('+51987654321')).toBeInTheDocument();
+    expect(screen.getByText('+51')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('987654321')).toBeInTheDocument();
     expect(screen.getByText('cliente@ejemplo.com')).toBeInTheDocument();
   });
 

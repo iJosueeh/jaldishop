@@ -1,6 +1,7 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matReceiptLongOutline,
@@ -13,6 +14,11 @@ import {
 import { StoreService } from '../../../../core/services/store.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { TaxIdType, TaxRegime } from '../../../../core/models/store.models';
+import {
+  getAllowedDocTypesForRegime,
+  getDefaultTaxRateForRegime,
+  sunatDocumentValidator,
+} from '../../../../core/utils/sunat-tax.utils';
 
 @Component({
   selector: 'app-store-tax-card',
@@ -39,71 +45,94 @@ export class StoreTaxCard {
   readonly isRusActive = signal<boolean>(true);
 
   readonly taxForm: FormGroup = this.fb.group({
-    legalBusinessName: ['', [Validators.maxLength(200)]],
-    taxIdType: ['DNI' as TaxIdType, [Validators.required]],
-    taxIdNumber: ['', [Validators.required]],
+    legalBusinessName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+    taxIdType: ['RUC_10' as TaxIdType, [Validators.required]],
+    taxIdNumber: ['', [Validators.required, sunatDocumentValidator(() => this.taxForm?.get('taxIdType')?.value ?? 'RUC_10')]],
     taxRegime: ['RUS' as TaxRegime, [Validators.required]],
     canIssueInvoices: [{ value: false, disabled: true }],
+    igvExempt: [{ value: true, disabled: true }],
+    taxRate: [0],
+  });
+
+  private readonly formValues = toSignal(this.taxForm.valueChanges, {
+    initialValue: this.taxForm.getRawValue(),
+  });
+
+  readonly allowedDocTypes = computed(() => {
+    const regime = (this.formValues()?.taxRegime || 'RUS') as TaxRegime;
+    return getAllowedDocTypesForRegime(regime);
   });
 
   constructor() {
-    // Sincronizar desde currentStore
     effect(() => {
       const store = this.storeService.currentStore();
       if (store) {
         const regime = store.taxRegime || 'RUS';
         const isRus = regime === 'RUS' || regime === 'NONE';
+        const currentRate = store.taxRate ?? (isRus ? 0 : 18);
+        const isExempt = isRus || currentRate === 0;
         this.isRusActive.set(isRus);
 
         this.taxForm.patchValue(
           {
-            legalBusinessName: store.legalBusinessName || '',
+            legalBusinessName: store.legalBusinessName || store.name || '',
             taxIdType: store.taxIdType || 'DNI',
             taxIdNumber: store.taxIdNumber || '',
             taxRegime: regime,
             canIssueInvoices: isRus ? false : !!store.canIssueInvoices,
+            igvExempt: isExempt,
+            taxRate: isRus ? 0 : currentRate,
           },
           { emitEvent: false }
         );
 
-        if (isRus) {
-          this.taxForm.get('canIssueInvoices')?.disable({ emitEvent: false });
-        } else {
-          this.taxForm.get('canIssueInvoices')?.enable({ emitEvent: false });
-        }
+        this.applyRegimeControlState(isRus);
+        this.taxForm.get('taxIdNumber')?.updateValueAndValidity({ emitEvent: false });
       }
     });
 
-    // Reaccionar a cambios en taxRegime
     this.taxForm.get('taxRegime')?.valueChanges.subscribe((regime: TaxRegime) => {
       const isRus = regime === 'RUS' || regime === 'NONE';
       this.isRusActive.set(isRus);
 
-      const invoiceControl = this.taxForm.get('canIssueInvoices');
+      const allowed = getAllowedDocTypesForRegime(regime);
+      const currentType = this.taxForm.get('taxIdType')?.value as TaxIdType;
+      if (!allowed.includes(currentType)) {
+        this.taxForm.patchValue({ taxIdType: allowed[0] }, { emitEvent: false });
+      }
+      this.taxForm.get('taxIdNumber')?.updateValueAndValidity();
+
+      this.applyRegimeControlState(isRus);
       if (isRus) {
-        invoiceControl?.setValue(false);
-        invoiceControl?.disable();
+        this.taxForm.patchValue({ canIssueInvoices: false, igvExempt: true, taxRate: 0 }, { emitEvent: false });
       } else {
-        invoiceControl?.enable();
+        this.taxForm.patchValue({ igvExempt: false, taxRate: 18 }, { emitEvent: false });
       }
     });
 
-    // Reaccionar a cambios en taxIdType para ajustar validaciones de longitud
-    this.taxForm.get('taxIdType')?.valueChanges.subscribe((type: TaxIdType) => {
-      const numberControl = this.taxForm.get('taxIdNumber');
-      if (type === 'DNI') {
-        numberControl?.setValidators([
-          Validators.required,
-          Validators.pattern('^\\d{8}$'),
-        ]);
-      } else {
-        numberControl?.setValidators([
-          Validators.required,
-          Validators.pattern('^\\d{11}$'),
-        ]);
-      }
-      numberControl?.updateValueAndValidity();
+    this.taxForm.get('taxIdType')?.valueChanges.subscribe(() => {
+      this.taxForm.get('taxIdNumber')?.updateValueAndValidity();
     });
+
+    this.taxForm.get('igvExempt')?.valueChanges.subscribe((exempt: boolean) => {
+      const regime = (this.taxForm.get('taxRegime')?.value || 'RUS') as TaxRegime;
+      this.taxForm.patchValue(
+        { taxRate: getDefaultTaxRateForRegime(regime, !!exempt) },
+        { emitEvent: false }
+      );
+    });
+  }
+
+  private applyRegimeControlState(isRus: boolean): void {
+    const invoiceControl = this.taxForm.get('canIssueInvoices');
+    const exemptControl = this.taxForm.get('igvExempt');
+    if (isRus) {
+      invoiceControl?.disable({ emitEvent: false });
+      exemptControl?.disable({ emitEvent: false });
+    } else {
+      invoiceControl?.enable({ emitEvent: false });
+      exemptControl?.enable({ emitEvent: false });
+    }
   }
 
   onSave(): void {
@@ -116,13 +145,16 @@ export class StoreTaxCard {
     const raw = this.taxForm.getRawValue();
     this.isSaving.set(true);
 
+    const isRus = raw.taxRegime === 'RUS' || raw.taxRegime === 'NONE';
+
     this.storeService
       .updateTaxProfile({
-        legalBusinessName: raw.legalBusinessName?.trim() || undefined,
+        legalBusinessName: raw.legalBusinessName?.trim(),
         taxIdType: raw.taxIdType,
         taxIdNumber: raw.taxIdNumber.trim(),
         taxRegime: raw.taxRegime,
-        canIssueInvoices: raw.taxRegime === 'RUS' || raw.taxRegime === 'NONE' ? false : !!raw.canIssueInvoices,
+        canIssueInvoices: isRus ? false : !!raw.canIssueInvoices,
+        taxRate: isRus ? 0 : (raw.taxRate ?? 18),
       })
       .subscribe({
         next: () => {

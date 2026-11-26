@@ -19,6 +19,11 @@ export const ADMIN_ROUTES: Routes = [
       ),
   },
   {
+    path: 'promo-codes',
+    loadComponent: () =>
+      import('./promo-codes/admin-promo-codes').then((m) => m.AdminPromoCodes),
+  },
+  {
     path: 'users',
     loadComponent: () => import('./users/admin-users').then((m) => m.AdminUsers),
   },

@@ -11,6 +11,7 @@ import com.jaldishop.backend.identity.domain.repository.RoleRepository;
 import com.jaldishop.backend.identity.domain.model.User;
 import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.identity.infrastructure.security.JwtService;
+import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,8 +81,11 @@ class RegisterMerchantServiceTest {
                 "Repostería",
                 "987654321",
                 "Av. Principal 123",
+                null, null, null,
                 true,
-                true
+                true,
+                null, null, null,
+                "Carlos Mendoza", "RUC_10", "10456789019", "RUS", false, BigDecimal.ZERO, true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -127,8 +131,11 @@ class RegisterMerchantServiceTest {
                 "Cafetería",
                 "912345678",
                 "Calle Central 45",
+                null, null, null,
                 true,
-                false
+                false,
+                null, null, null,
+                "Cafetería Express SAC", "RUC_20", "20100070970", "MYPE", true, new BigDecimal("18.00"), true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -170,8 +177,11 @@ class RegisterMerchantServiceTest {
                 "Comercio",
                 null,
                 null,
+                null, null, null,
                 true,
-                true
+                true,
+                null, null, null,
+                "Luis Rojas", "RUC_10", "10456789019", "RUS", false, BigDecimal.ZERO, true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -209,8 +219,11 @@ class RegisterMerchantServiceTest {
                 "Cafetería",
                 null,
                 null,
+                null, null, null,
                 true,
-                true
+                true,
+                null, null, null,
+                "Ana Torres", "RUC_10", "10456789019", "RUS", false, BigDecimal.ZERO, true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -240,8 +253,11 @@ class RegisterMerchantServiceTest {
                 "Repostería",
                 null,
                 null,
+                null, null, null,
                 true,
-                true
+                true,
+                null, null, null,
+                "Carlos Mendoza", "RUC_10", "10456789019", "RUS", false, BigDecimal.ZERO, true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -284,7 +300,14 @@ class RegisterMerchantServiceTest {
                 false,
                 "https://cdn/logo.png",
                 "https://cdn/banner.png",
-                Set.of(categoryId, storeCategoryId)
+                Set.of(categoryId, storeCategoryId),
+                "Pastelería Dulce SAC",
+                "RUC_20",
+                "20100070970",
+                "MYPE",
+                true,
+                new BigDecimal("18.00"),
+                true
         );
 
         when(roleRepository.findByName(RoleName.MERCHANT)).thenReturn(Optional.of(merchantRole));
@@ -340,5 +363,39 @@ class RegisterMerchantServiceTest {
         assertEquals(data.contactPhone(), data.whatsappNumber());
         // 20. categoryIds
         assertEquals(Set.of(categoryId, storeCategoryId), data.categoryIds());
+        assertEquals("Pastelería Dulce SAC", data.legalBusinessName());
+        assertEquals("RUC_20", data.taxIdType());
+        assertEquals("20100070970", data.taxIdNumber());
+        assertEquals("MYPE", data.taxRegime());
+        assertTrue(data.canIssueInvoices());
+        assertNotNull(data.sunatTermsAcceptedAt());
+    }
+
+    @Test
+    @DisplayName("Rechaza registro público si no aceptó los términos SUNAT")
+    void rejectRegistrationWhenSunatTermsNotAccepted() {
+        RegisterMerchantCommand command = new RegisterMerchantCommand(
+                "nuevo@comercio.com",
+                "password123",
+                "Carlos",
+                "Mendoza",
+                "987654321",
+                "Pastelería Dulce",
+                "Repostería",
+                "911111111",
+                "Av. Principal 123",
+                null, null, null,
+                true,
+                true,
+                null, null, null,
+                "Carlos Mendoza", "RUC_10", "10456789019", "RUS", false, BigDecimal.ZERO, false
+        );
+
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
+                () -> registerMerchantService.execute(command)
+        );
+        assertEquals("SUNAT_TERMS_REQUIRED", ex.getCode());
+        verify(storeProvisioning, never()).provisionStore(any());
     }
 }

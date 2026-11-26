@@ -155,6 +155,8 @@ export function ProductDetailModal({
               <ProductVisual
                 name={product.name}
                 imageUrl={product.imageUrl}
+                category={product.category}
+                imageCount={product.images?.length}
                 imageBg={product.imageBg || 'from-amber-700/20 to-stone-800/30'}
                 iconText={product.iconText || product.name.substring(0, 2).toUpperCase()}
               />

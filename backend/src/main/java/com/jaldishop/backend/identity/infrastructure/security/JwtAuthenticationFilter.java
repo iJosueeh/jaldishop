@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (userOpt.isPresent() && userOpt.get().canAuthenticate()
+        if (userOpt.isPresent() && userOpt.get().canUseAuthenticatedSession()
                 && userOpt.get().getCredentialsVersion() == principal.credentialsVersion()) {
             var currentRoles = userOpt.get().getRoles().stream()
                     .map(role -> role.getName().name())

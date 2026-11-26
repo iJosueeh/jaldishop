@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import {
   CraftMarqueeSection,
   DEFAULT_ROTATING_PHRASES,
@@ -51,5 +51,26 @@ describe('CraftMarqueeSection Component', () => {
       'href',
       '/productos'
     );
+  });
+
+  it('falls back to decorative placeholder when imageUrl is missing or fails to load', () => {
+    const itemsWithBrokenImg: MarqueeItem[] = [
+      {
+        ...realItems[0],
+        imageUrl: 'https://broken.example.com/torta.jpg',
+      },
+    ];
+
+    render(<CraftMarqueeSection items={itemsWithBrokenImg} />);
+    const images = screen.getAllByRole('img', { name: 'Torta de Chocolate Clásica' });
+    expect(images.length).toBeGreaterThan(0);
+
+    for (const img of images) {
+      fireEvent.error(img);
+    }
+
+    expect(
+      screen.queryByRole('img', { name: 'Torta de Chocolate Clásica' })
+    ).not.toBeInTheDocument();
   });
 });

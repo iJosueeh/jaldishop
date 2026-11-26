@@ -41,6 +41,7 @@ export class RegisterStep4Form implements OnInit {
     closingTime: ['19:00', Validators.required],
     operatingDays: [['L', 'M', 'X', 'J', 'V', 'S']],
     autoPauseOnLimit: [true],
+    sunatTermsAccepted: [false, [Validators.requiredTrue]],
   });
 
   ngOnInit(): void {

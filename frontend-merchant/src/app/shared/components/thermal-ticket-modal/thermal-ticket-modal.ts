@@ -1,5 +1,6 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   matCloseOutline,
@@ -9,11 +10,15 @@ import {
   matReceiptLongOutline,
 } from '@ng-icons/material-symbols/outline';
 import { ToastService } from '../../../core/services/toast.service';
+import { StoreService } from '../../../core/services/store.service';
+import { FiscalReceiptResponse } from '../../../core/models/billing.models';
+import { environment } from '../../../../environments/environment';
 import {
   generateAsciiTicket,
   generateBatchAsciiTickets,
   mapOrderToThermalData,
   printThermalText,
+  ThermalTicketOrderData,
 } from '../../../core/utils/thermal-ticket.utils';
 
 @Component({
@@ -34,6 +39,8 @@ import {
 })
 export class ThermalTicketModal {
   private readonly toastService = inject(ToastService);
+  private readonly storeService = inject(StoreService, { optional: true });
+  private readonly http = inject(HttpClient, { optional: true });
 
   readonly isOpen = input<boolean>(false);
   readonly order = input<any | null>(null);
@@ -44,6 +51,44 @@ export class ThermalTicketModal {
 
   readonly paperWidth = signal<80 | 58>(80);
   readonly copied = signal<boolean>(false);
+  readonly activeReceipt = signal<FiscalReceiptResponse | null>(null);
+
+  constructor() {
+    effect(() => {
+      const open = this.isOpen();
+      const single = this.order();
+      if (!open || !single?.id || !this.http) {
+        this.activeReceipt.set(null);
+        return;
+      }
+      this.http
+        .get<FiscalReceiptResponse>(`${environment.apiUrl}/orders/${encodeURIComponent(single.id)}/receipt`)
+        .subscribe({
+          next: (receipt) => this.activeReceipt.set(receipt),
+          error: () => this.activeReceipt.set(null),
+        });
+    });
+  }
+
+  private enrichWithFiscalData(data: ThermalTicketOrderData, receipt: FiscalReceiptResponse | null): ThermalTicketOrderData {
+    const store = this.storeService?.currentStore();
+    return {
+      ...data,
+      paymentMethod: receipt?.paymentProvider === 'MERCADO_PAGO' ? 'MERCADO PAGO' : data.paymentMethod,
+      emitterLegalName: receipt?.emitterLegalName || store?.legalBusinessName || undefined,
+      emitterTaxIdType: receipt?.emitterTaxIdType || store?.taxIdType,
+      emitterTaxIdNumber: receipt?.emitterTaxIdNumber || store?.taxIdNumber,
+      emitterTaxRegime: receipt?.emitterTaxRegime || store?.taxRegime,
+      receiptTypeCode: receipt?.documentTypeCode,
+      receiptTypeName: receipt?.documentTypeName,
+      receiptFullNumber: receipt?.fullNumber,
+      customerDocType: receipt?.customerDocType,
+      customerDocNumber: receipt?.customerDocNumber,
+      taxableAmount: receipt?.taxableAmount,
+      igvRate: receipt?.igvRate ?? (store?.taxRegime === 'RUS' || store?.taxRegime === 'NONE' ? 0 : store?.taxRate),
+      igvAmount: receipt?.igvAmount,
+    };
+  }
 
   readonly asciiContent = computed<string>(() => {
     const wMm = this.paperWidth();
@@ -52,13 +97,13 @@ export class ThermalTicketModal {
 
     const single = this.order();
     if (single) {
-      const data = mapOrderToThermalData(single);
+      const data = this.enrichWithFiscalData(mapOrderToThermalData(single), this.activeReceipt());
       return generateAsciiTicket(data, sName, cols);
     }
 
     const batch = this.orders();
     if (batch && batch.length > 0) {
-      const dataList = batch.map(mapOrderToThermalData);
+      const dataList = batch.map((o) => this.enrichWithFiscalData(mapOrderToThermalData(o), null));
       return generateBatchAsciiTickets(dataList, sName, cols);
     }
 

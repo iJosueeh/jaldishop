@@ -26,10 +26,12 @@ import { Container } from '@/shared/components/ui/Container';
 import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
 import { NavbarSearch } from './NavbarSearch';
 import { MobileSearchModal } from './MobileSearchModal';
+import { AnnouncementBar } from './AnnouncementBar';
 import { env } from '@/core/config/env';
 import { StorefrontCart } from '@/features/storefront/cart/StorefrontCart';
 import { useCustomerSession } from '@/features/customer/hooks/useCustomerSession';
 import { useUnreadNotificationsCount } from '@/features/customer/hooks/useCustomerNotifications';
+import { useCustomerOrderRealtime } from '@/features/customer/hooks/useCustomerOrderRealtime';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -38,9 +40,11 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isBannerVisible, setIsBannerVisible] = useState(false);
 
   const { isAuthenticated, user, logout } = useCustomerSession();
   const { unreadCount } = useUnreadNotificationsCount(isAuthenticated);
+  useCustomerOrderRealtime(isAuthenticated);
 
   const loginHref =
     pathname && pathname !== '/login' && pathname !== '/registro'
@@ -108,12 +112,13 @@ export function Navbar() {
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isHome
             ? isScrolled
-              ? 'bg-[#072720]/90 backdrop-blur-md shadow-xl shadow-black/40 py-2.5 border-b border-[#1e2c31]'
-              : 'bg-transparent py-4'
-            : 'bg-[#072720]/95 backdrop-blur-md shadow-md py-2.5 sm:py-3 border-b border-[#1e2c31]'
+              ? 'bg-[#072720]/90 backdrop-blur-md shadow-xl shadow-black/40 pb-2.5 border-b border-[#1e2c31]'
+              : 'bg-transparent pb-4'
+            : 'bg-[#072720]/95 backdrop-blur-md shadow-md pb-2.5 sm:pb-3 border-b border-[#1e2c31]'
         }`}
       >
-        <Container size="full" className="max-w-[1440px]">
+        <AnnouncementBar onVisibilityChange={setIsBannerVisible} />
+        <Container size="full" className={`max-w-[1440px] ${isHome && !isScrolled ? 'pt-4' : 'pt-2.5 sm:pt-3'}`}>
           <div className="flex items-center h-14 sm:h-16 gap-3 md:gap-6">
             {/* Brand Logo Oficial */}
             <Link href="/" className="group shrink-0">
@@ -162,7 +167,10 @@ export function Navbar() {
               >
                 <Bell className="w-4 h-4 text-[#99b3ad]" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#36f4a4] text-[#02090a] text-[10px] font-extrabold flex items-center justify-center tabular-nums shadow-sm">
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#36f4a4] text-[#02090a] text-[10px] font-extrabold flex items-center justify-center tabular-nums shadow-sm"
+                  >
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -393,6 +401,7 @@ export function Navbar() {
           </div>
         </Container>
       </header>
+      {isBannerVisible && !isHome && <div className="h-10 shrink-0" aria-hidden="true" />}
 
       {/* Modern Side-over Drawer with Backdrop Blur */}
       <AnimatePresence>

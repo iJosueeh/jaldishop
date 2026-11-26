@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CUSTOMER_COOKIE, rejectCrossOrigin } from '@/core/api/customerProxy';
+import { rejectCrossOrigin } from '@/core/api/customerProxy';
 import { env } from '@/core/config/env';
 import { isValidEmail, normalizePhone, PERU_PHONE_REGEX } from '@/features/auth/utils/validation';
 
@@ -132,61 +132,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: registerData.message || 'No pudimos registrar tu cuenta. Inténtalo nuevamente.' },
         { status: registerUpstream.status }
       );
+      const retryAfter = registerUpstream.headers.get('Retry-After');
+      if (retryAfter) response.headers.set('Retry-After', retryAfter);
+      return response;
     }
 
-    // Step 2: Auto-login after successful 201 registration
-    try {
-      const loginUpstream = await fetch(`${env.apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password }),
-        cache: 'no-store',
-        signal: AbortSignal.timeout(10000),
-      });
-
-      if (loginUpstream.ok) {
-        const loginData = await loginUpstream.json();
-        if (
-          Array.isArray(loginData.roles) &&
-          loginData.roles.includes('CUSTOMER') &&
-          typeof loginData.token === 'string'
-        ) {
-          const response = NextResponse.json(
-            {
-              authenticated: true,
-              autoLogin: true,
-              fullName: loginData.fullName || cleanFirstName,
-              message: '¡Cuenta creada con éxito!',
-            },
-            { status: 201 }
-          );
-
-          response.cookies.set(CUSTOMER_COOKIE, loginData.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-          });
-
-          return response;
-        }
-      }
-    } catch {
-      // Auto-login failed (e.g. timeout), but user registration succeeded in database.
-      // Do not repeat registration or report error; instruct user to log in.
-    }
-
-    // Fallback: registration succeeded but auto-login could not establish session
+    // Registration requires email verification before session creation (no auto-login).
     return NextResponse.json(
       {
         authenticated: false,
         autoLogin: false,
+        requiresEmailVerification: true,
+        email: cleanEmail,
         fullName: cleanFirstName,
-        message: 'Tu cuenta fue creada con éxito. Por favor, inicia sesión con tus credenciales.',
+        message: 'Tu cuenta fue creada. Revisa tu correo para verificarla antes de iniciar sesión.',
       },
       { status: 201 }
     );

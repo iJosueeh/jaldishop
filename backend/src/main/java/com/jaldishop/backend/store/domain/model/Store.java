@@ -27,6 +27,7 @@ public class Store {
     private Set<UUID> categoryIds;
     private StoreStatus status;
     private StoreTaxProfile taxProfile;
+    private Instant sunatTermsAcceptedAt;
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -161,6 +162,56 @@ public class Store {
             String whatsappNumber,
             Set<UUID> categoryIds
     ) {
+        return create(
+                ownerUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                address,
+                addressReference,
+                latitude,
+                longitude,
+                pickupEnabled,
+                deliveryEnabled,
+                deliveryFeeAmount,
+                deliveryFeeCurrency,
+                taxRate,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                categoryIds,
+                null,
+                null
+        );
+    }
+
+    public static Store create(
+            UUID ownerUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreTaxProfile taxProfile,
+            Instant sunatTermsAcceptedAt
+    ) {
         if (ownerUserId == null) {
             throw new IllegalArgumentException("El ID del comerciante no puede ser nulo.");
         }
@@ -173,9 +224,14 @@ public class Store {
             throw new IllegalArgumentException("El slug no puede ser nulo ni vacio.");
         }
 
+        StoreTaxProfile resolvedTaxProfile = taxProfile != null
+                ? taxProfile
+                : new StoreTaxProfile(null, com.jaldishop.backend.store.domain.enums.TaxIdType.DNI, null, com.jaldishop.backend.store.domain.enums.TaxRegime.RUS, false);
+        BigDecimal effectiveTaxRate = resolvedTaxProfile.resolveEffectiveTaxRate(taxRate);
+
         StoreLocation location = StoreLocation.of(address, addressReference, latitude, longitude);
         DeliveryConfiguration deliveryConfig = DeliveryConfiguration.of(
-                pickupEnabled, deliveryEnabled, deliveryFeeAmount, deliveryFeeCurrency, taxRate
+                pickupEnabled, deliveryEnabled, deliveryFeeAmount, deliveryFeeCurrency, effectiveTaxRate
         );
 
         String normalizedContactPhone = PhoneUtils.normalizePeruPhone(contactPhone);
@@ -184,7 +240,7 @@ public class Store {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
 
-        return new Store(
+        Store store = new Store(
                 id,
                 ownerUserId,
                 name,
@@ -203,6 +259,9 @@ public class Store {
                 now,
                 now
         );
+        store.taxProfile = resolvedTaxProfile;
+        store.sunatTermsAcceptedAt = sunatTermsAcceptedAt;
+        return store;
     }
 
     public static Store reconstitute(
@@ -366,6 +425,50 @@ public class Store {
             Instant updatedAt,
             StoreTaxProfile taxProfile
     ) {
+        return reconstitute(
+                id,
+                ownerUserId,
+                name,
+                slug,
+                description,
+                contactPhone,
+                location,
+                deliveryConfig,
+                logoUrl,
+                bannerUrl,
+                instagramUrl,
+                facebookUrl,
+                whatsappNumber,
+                categoryIds,
+                status,
+                createdAt,
+                updatedAt,
+                taxProfile,
+                null
+        );
+    }
+
+    public static Store reconstitute(
+            UUID id,
+            UUID ownerUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            StoreLocation location,
+            DeliveryConfiguration deliveryConfig,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreStatus status,
+            Instant createdAt,
+            Instant updatedAt,
+            StoreTaxProfile taxProfile,
+            Instant sunatTermsAcceptedAt
+    ) {
         Store store = new Store(
                 id,
                 ownerUserId,
@@ -388,6 +491,7 @@ public class Store {
         if (taxProfile != null) {
             store.taxProfile = taxProfile;
         }
+        store.sunatTermsAcceptedAt = sunatTermsAcceptedAt;
         return store;
     }
 
@@ -731,8 +835,29 @@ public class Store {
         return taxProfile != null && taxProfile.canIssueInvoices();
     }
 
+    public Instant getSunatTermsAcceptedAt() {
+        return sunatTermsAcceptedAt;
+    }
+
     public void updateTaxProfile(StoreTaxProfile taxProfile) {
-        this.taxProfile = taxProfile != null ? taxProfile : new StoreTaxProfile(null, com.jaldishop.backend.store.domain.enums.TaxIdType.DNI, null, com.jaldishop.backend.store.domain.enums.TaxRegime.RUS, false);
+        updateTaxProfile(taxProfile, null);
+    }
+
+    public void updateTaxProfile(StoreTaxProfile taxProfile, BigDecimal requestedTaxRate) {
+        StoreTaxProfile resolved = taxProfile != null
+                ? taxProfile
+                : new StoreTaxProfile(null, com.jaldishop.backend.store.domain.enums.TaxIdType.DNI, null, com.jaldishop.backend.store.domain.enums.TaxRegime.RUS, false);
+        BigDecimal effectiveTaxRate = resolved.resolveEffectiveTaxRate(requestedTaxRate);
+        this.taxProfile = resolved;
+        if (this.deliveryConfig != null) {
+            this.deliveryConfig = DeliveryConfiguration.of(
+                    this.deliveryConfig.pickupEnabled(),
+                    this.deliveryConfig.deliveryEnabled(),
+                    this.deliveryConfig.deliveryFeeAmount(),
+                    this.deliveryConfig.deliveryFeeCurrency(),
+                    effectiveTaxRate
+            );
+        }
         this.updatedAt = Instant.now();
     }
 }

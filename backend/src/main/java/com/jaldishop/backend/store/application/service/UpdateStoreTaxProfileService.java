@@ -24,7 +24,7 @@ public class UpdateStoreTaxProfileService {
         Store store = storeRepository.findByMerchantUserId(merchantUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("STORE_NOT_FOUND", "No se encontró una tienda para este comerciante."));
 
-        StoreTaxProfile profile = new StoreTaxProfile(
+        StoreTaxProfile profile = StoreTaxProfile.createValidated(
                 request.legalBusinessName(),
                 request.taxIdType(),
                 request.taxIdNumber(),
@@ -32,7 +32,7 @@ public class UpdateStoreTaxProfileService {
                 request.canIssueInvoices()
         );
 
-        store.updateTaxProfile(profile);
+        store.updateTaxProfile(profile, request.taxRate());
         return storeRepository.save(store);
     }
 }

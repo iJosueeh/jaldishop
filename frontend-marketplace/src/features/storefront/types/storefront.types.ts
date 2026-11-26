@@ -21,6 +21,8 @@ export interface PublicStore {
   pickupEnabled: boolean;
   deliveryFee?: number;
   deliveryFeeCurrency?: string;
+  canIssueInvoices?: boolean;
+  taxRate?: number;
   minOrderAmount?: number;
   category?: string;
   categoryIds?: string[];
@@ -86,6 +88,7 @@ export interface ProductItem {
   imageBg?: string;
   iconText?: string;
   imageUrl?: string;
+  images?: string[];
   prepTimeMinutes?: number;
   minPrice?: number;
   maxPrice?: number;
@@ -124,6 +127,7 @@ export interface MarketplaceProductItem {
   price: number;
   priceCurrency?: string;
   imageUrl?: string;
+  images?: string[];
   category: string;
   storeId: string;
   storeName: string;

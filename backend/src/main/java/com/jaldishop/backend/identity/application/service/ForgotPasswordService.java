@@ -71,7 +71,7 @@ public class ForgotPasswordService {
         record RecipientInfo(String email, Set<RoleName> roles) {}
         RecipientInfo recipient = transaction.execute(status -> {
             var user = repository.lockByEmail(email);
-            if (user.isEmpty() || !user.get().canAuthenticate()) return null;
+            if (user.isEmpty() || !user.get().canUseAuthenticatedSession()) return null;
             repository.replaceToken(user.get().getId(), tokens.hash(token), expiresAt);
             Set<RoleName> roles = user.get().getRoles().stream()
                     .map(Role::getName)

@@ -10,16 +10,13 @@ import java.util.HexFormat;
 
 @Component
 public class PasswordResetTokens {
-    private final SecureRandom random = new SecureRandom();
+    private final OpaqueTokenCodec codec = new OpaqueTokenCodec();
+
     public String generate() {
-        byte[] bytes = new byte[32];
-        random.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        return codec.generate();
     }
+
     public String hash(String token) {
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(token.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+        return codec.hash(token);
     }
 }

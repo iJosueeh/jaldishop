@@ -13,7 +13,9 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -41,5 +43,19 @@ public class GetProductsService {
     public Product executeBySlug(UUID storeId, String productSlug) {
         return productRepository.findByStoreIdAndSlug(storeId, productSlug)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado o no pertenece a la tienda"));
+    }
+
+    public List<String> getOrderedImageUrls(UUID productId) {
+        if (productId == null) {
+            return Collections.emptyList();
+        }
+        return productRepository.findOrderedImageUrls(productId);
+    }
+
+    public Map<UUID, List<String>> getOrderedImageUrlsByProductIds(List<UUID> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return productRepository.findOrderedImageUrlsByProductIds(productIds);
     }
 }

@@ -54,6 +54,14 @@ export interface CustomerOrderItem {
   subtotalAmount: number;
 }
 
+export interface CustomerPageResponse<T> {
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface CustomerPaymentHistory {
   paymentId: string;
   paymentStatus: string;
@@ -65,6 +73,8 @@ export interface CustomerPaymentHistory {
   createdAt: string;
   approvedAt?: string | null;
   refundedAt?: string | null;
+  storeName?: string | null;
+  totalItems?: number | null;
 }
 
 export interface CustomerOrderStatusHistory {
@@ -112,6 +122,7 @@ export interface CustomerOrderDetail {
   discountAmount: number;
   discountCode?: string | null;
   deliveryFeeAmount: number;
+  serviceFeeAmount?: number;
   includedTaxAmount: number;
   totalAmount: number;
   confirmedAt: string;
@@ -159,6 +170,18 @@ export interface ReviewEligibility {
   eligible: boolean;
   alreadyReviewed: boolean;
   currentReview?: CustomerReview | null;
+  hasInProgressOrder?: boolean;
+}
+
+export interface PendingReviewProduct {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  storeName: string;
+  storeSlug: string;
+  productImageUrl?: string | null;
+  lastOrderNumber: string;
+  lastPurchasedAt?: string | null;
 }
 
 export interface CreateReviewPayload {

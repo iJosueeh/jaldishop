@@ -10,6 +10,7 @@ import com.jaldishop.backend.identity.domain.repository.UserRepository;
 import com.jaldishop.backend.shared.exception.ConflictException;
 import com.jaldishop.backend.store.domain.enums.StoreStatus;
 import com.jaldishop.backend.store.domain.model.Store;
+import com.jaldishop.backend.store.domain.model.StoreTaxProfile;
 import com.jaldishop.backend.store.domain.repository.StoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,16 @@ public class CreateStoreService {
             throw new ConflictException("STORE_SLUG_ALREADY_EXISTS", "El slug de la tienda ya está en uso");
         }
 
+        StoreTaxProfile taxProfile = (command.taxIdType() != null || command.taxRegime() != null || command.taxIdNumber() != null)
+                ? StoreTaxProfile.createValidated(
+                        command.legalBusinessName(),
+                        command.taxIdType(),
+                        command.taxIdNumber(),
+                        command.taxRegime(),
+                        command.canIssueInvoices()
+                )
+                : null;
+
         Store store = Store.create(
                 command.ownerUserId(),
                 command.name(),
@@ -69,7 +80,9 @@ public class CreateStoreService {
                 command.instagramUrl(),
                 command.facebookUrl(),
                 command.whatsappNumber(),
-                command.categoryIds()
+                command.categoryIds(),
+                taxProfile,
+                command.sunatTermsAcceptedAt()
         );
 
         if (platformSettingsProvider != null) {

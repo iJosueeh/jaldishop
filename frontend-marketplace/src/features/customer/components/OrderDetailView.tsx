@@ -20,6 +20,7 @@ import { OrderTimelineStepper } from './OrderTimelineStepper';
 import { WhatsAppContactButton } from './WhatsAppContactButton';
 import { CancelOrderModal } from './CancelOrderModal';
 import { OrderReviewAction } from './OrderReviewAction';
+import { OrderReceiptCard } from './OrderReceiptCard';
 
 interface OrderDetailViewProps {
   orderNumber: string;
@@ -41,36 +42,41 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-6 w-36 bg-stone-200 rounded-md" />
-        <div className="h-28 bg-white rounded-2xl border border-stone-200/90 p-6" />
-        <div className="h-32 bg-white rounded-2xl border border-stone-200/90 p-6" />
-        <div className="h-48 bg-white rounded-2xl border border-stone-200/90 p-6" />
+      <div className="space-y-6 animate-pulse" role="status" aria-busy="true" aria-label="Cargando detalle del pedido">
+        <div className="h-6 w-36 bg-[#f0eae0] rounded-md" />
+        <div className="h-32 bg-white rounded-xl border border-[#e7e0d6]" />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] gap-6">
+          <div className="h-64 bg-white rounded-xl border border-[#e7e0d6]" />
+          <div className="h-64 bg-white rounded-xl border border-[#e7e0d6]" />
+        </div>
       </div>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50/60 p-8 text-center max-w-lg mx-auto">
+      <div
+        role="alert"
+        className="rounded-xl border border-rose-200 bg-rose-50/70 p-8 text-center max-w-lg mx-auto"
+      >
         <AlertCircle className="w-10 h-10 text-rose-600 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-rose-950 mb-1">
+        <h2 className="text-lg font-semibold text-rose-950 mb-1">
           No pudimos cargar este pedido
-        </h3>
+        </h2>
         <p className="text-sm text-rose-800 mb-6">
           {error || 'El pedido solicitado no existe o no tienes permisos para visualizarlo.'}
         </p>
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/mi-jaldishop/pedidos"
-            className="px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-xl hover:bg-stone-50 transition-colors"
+            className="min-h-[44px] inline-flex items-center px-4 text-sm font-medium text-[#1c1917] bg-white border border-[#e7e0d6] rounded-lg hover:bg-[#f7f3ec] transition-colors"
           >
             Volver a mis pedidos
           </Link>
           <button
             type="button"
             onClick={reload}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[#005141] rounded-xl hover:bg-[#003e32] transition-colors"
+            className="min-h-[44px] inline-flex items-center gap-1.5 px-4 text-sm font-medium text-white bg-[#005141] rounded-lg hover:bg-[#003d31] transition-colors cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Reintentar</span>
@@ -96,28 +102,28 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
 
   return (
     <div className="space-y-6">
-      {/* Back button */}
+      {/* Back link */}
       <div>
         <Link
           href="/mi-jaldishop/pedidos"
-          className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-[#005141] transition-colors"
+          className="min-h-[44px] inline-flex items-center gap-2 text-sm font-semibold text-[#57534e] hover:text-[#005141] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141] rounded"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver a Mis Pedidos</span>
         </Link>
       </div>
 
-      {/* Header Card */}
-      <div className="bg-white rounded-2xl border border-stone-200/90 shadow-xs p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-stone-100">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+      {/* Header Card (no nested cards inside) */}
+      <section className="bg-white rounded-xl border border-[#e7e0d6] p-5 sm:p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e7e0d6]/70">
+          <div className="space-y-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-display text-xl sm:text-2xl font-bold text-[#1c1917] tracking-tight tabular-nums">
                 Pedido #{order.orderNumber}
               </h1>
-              <OrderStatusBadge status={order.status} />
+              <OrderStatusBadge status={order.status} size="sm" />
             </div>
-            <p className="text-xs text-stone-500 font-mono mt-1">
+            <p className="text-xs text-[#57534e] font-mono tabular-nums">
               Realizado el{' '}
               {new Date(order.confirmedAt).toLocaleDateString('es-PE', {
                 day: '2-digit',
@@ -129,7 +135,7 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto">
             {order.status === 'CONFIRMED' && (
               <button
                 type="button"
@@ -137,7 +143,7 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
                   resetCancelError();
                   setIsCancelModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors cursor-pointer"
+                className="min-h-[44px] w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
               >
                 <XCircle className="w-4 h-4 text-rose-600" />
                 <span>Cancelar pedido</span>
@@ -149,67 +155,66 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
               orderNumber={order.orderNumber}
               storeName={order.store.name}
               variant="primary"
+              className="w-full sm:w-auto justify-center"
             />
           </div>
         </div>
 
-        {/* Store & Fulfillment banner */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-5">
-          {/* Store Info */}
-          <div className="flex items-start gap-3.5 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005141] shrink-0 font-bold">
+        {/* Store & Fulfillment Split (clean divider, no nested boxes) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 md:divide-x md:divide-[#e7e0d6]/70">
+          <div className="flex items-start gap-3.5 md:pr-6">
+            <div className="w-10 h-10 rounded-lg bg-[#f0fdfa] border border-[#ccfbf1] flex items-center justify-center text-[#005141] shrink-0 overflow-hidden">
               {order.store.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={order.store.logoUrl}
                   alt={order.store.name}
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <Store className="w-5 h-5 text-[#005141]" />
               )}
             </div>
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold uppercase text-stone-400 tracking-wider">
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-[11px] font-bold uppercase text-[#78716c] tracking-wider">
                 Comercio
               </span>
-              <h3 className="font-semibold text-stone-900">
+              <h2 className="font-semibold text-[#1c1917]">
                 <Link
                   href={`/tienda/${order.store.slug}`}
                   className="hover:text-[#005141] transition-colors"
                 >
                   {order.store.name}
                 </Link>
-              </h3>
+              </h2>
               {order.store.address && (
-                <p className="text-xs text-stone-500">{order.store.address}</p>
+                <p className="text-xs text-[#57534e]">{order.store.address}</p>
               )}
             </div>
           </div>
 
-          {/* Fulfillment Slot */}
-          <div className="flex items-start gap-3.5 p-4 rounded-xl bg-stone-50/70 border border-stone-100">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005141] shrink-0">
+          <div className="flex items-start gap-3.5 pt-4 md:pt-0 border-t md:border-t-0 border-[#e7e0d6]/70 md:pl-6">
+            <div className="w-10 h-10 rounded-lg bg-[#f0fdfa] border border-[#ccfbf1] flex items-center justify-center text-[#005141] shrink-0">
               <Clock className="w-5 h-5 text-[#005141]" />
             </div>
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold uppercase text-stone-400 tracking-wider">
+              <span className="text-[11px] font-bold uppercase text-[#78716c] tracking-wider">
                 {isDelivery ? 'Entrega programada' : 'Recojo en local'}
               </span>
-              <p className="text-sm font-semibold text-stone-900 capitalize">
+              <p className="text-sm font-semibold text-[#1c1917] capitalize tabular-nums">
                 {formattedDate}
               </p>
-              <p className="text-xs text-stone-600">
+              <p className="text-xs text-[#57534e] tabular-nums">
                 Franja: {formattedTimeWindow || 'Horario regular'}
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Live Timeline Tracker */}
-      <div className="bg-white rounded-2xl border border-stone-200/90 shadow-xs p-5 sm:p-6 space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700">
+      {/* Full-Width Live Timeline Tracker (prevents narrow-column label wrapping) */}
+      <section className="bg-white rounded-xl border border-[#e7e0d6] p-5 sm:p-6 space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-[#57534e]">
           Estado del pedido
         </h2>
         <OrderTimelineStepper
@@ -217,129 +222,154 @@ export const OrderDetailView: React.FC<OrderDetailViewProps> = ({ orderNumber })
           deliveryMode={order.deliveryMode}
           statusHistory={order.statusHistory}
         />
-      </div>
+      </section>
 
-      {/* Delivery / Pickup address info */}
-      <div className="bg-white rounded-2xl border border-stone-200/90 shadow-xs p-5 sm:p-6 space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#005141]" />
-          <span>{isDelivery ? 'Destino de entrega' : 'Dirección para recojo'}</span>
-        </h2>
-        {isDelivery ? (
-          <div className="space-y-1 text-sm text-stone-700">
-            <p className="font-semibold text-stone-900">
-              {order.deliveryAddress || 'Dirección registrada'}
-            </p>
-            {order.deliveryReference && (
-              <p className="text-xs text-stone-500">
-                Referencia: {order.deliveryReference}
-              </p>
-            )}
-            <p className="text-xs text-stone-500 pt-1">
-              Receptor: {order.customerName} &bull; Teléfono: {order.customerPhone}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-1 text-sm text-stone-700">
-            <p className="font-semibold text-stone-900">
-              {order.store.address || 'Local principal del comercio'}
-            </p>
-            {order.store.addressReference && (
-              <p className="text-xs text-stone-500">
-                Referencia: {order.store.addressReference}
-              </p>
-            )}
-            <p className="text-xs text-stone-500 pt-1">
-              Comprador: {order.customerName}
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Main 2-Column Desktop Body */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.65fr)_minmax(300px,1fr)] gap-6 items-start">
+        {/* Left: Items Receipt */}
+        <div className="space-y-6 min-w-0">
+          <section className="bg-white rounded-xl border border-[#e7e0d6] p-5 sm:p-6 space-y-5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#57534e] flex items-center gap-2">
+              <Receipt className="w-4 h-4 text-[#005141]" />
+              <span className="tabular-nums">Resumen de compra ({order.items.length} artículos)</span>
+            </h2>
 
-      {/* Items Table & Receipt */}
-      <div className="bg-white rounded-2xl border border-stone-200/90 shadow-xs p-5 sm:p-6 space-y-5">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 flex items-center gap-2">
-          <Receipt className="w-4 h-4 text-[#005141]" />
-          <span>Resumen de compra ({order.items.length} artículos)</span>
-        </h2>
+            <div className="divide-y divide-[#e7e0d6]/70">
+              {order.items.map((item) => (
+                <div key={item.id} className="py-3.5 flex items-start justify-between gap-4 text-sm">
+                  <div className="space-y-1 min-w-0">
+                    <p className="font-medium text-[#1c1917]">{item.productName}</p>
+                    {item.variantName && (
+                      <p className="text-xs text-[#57534e]">Opción: {item.variantName}</p>
+                    )}
+                    <p className="text-xs text-[#78716c] tabular-nums">
+                      {item.quantity} x S/ {Number(item.unitPriceAmount).toFixed(2)}
+                    </p>
+                    {order.status === 'COMPLETED' && item.productId && (
+                      <OrderReviewAction productId={item.productId} productName={item.productName} />
+                    )}
+                  </div>
+                  <span className="font-semibold text-[#1c1917] text-right tabular-nums shrink-0">
+                    S/ {Number(item.subtotalAmount).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-        <div className="divide-y divide-stone-100">
-          {order.items.map((item) => (
-            <div key={item.id} className="py-3.5 flex items-center justify-between gap-4 text-sm">
-              <div className="space-y-0.5">
-                <p className="font-medium text-stone-900">{item.productName}</p>
-                {item.variantName && (
-                  <p className="text-xs text-stone-500">Opción: {item.variantName}</p>
-                )}
-                 <p className="text-xs text-stone-400">
-                   {item.quantity} x S/ {Number(item.unitPriceAmount).toFixed(2)}
-                 </p>
-                 {order.status === 'COMPLETED' && item.productId && <OrderReviewAction productId={item.productId} productName={item.productName} />}
+            <div className="pt-4 border-t border-[#e7e0d6]/70 space-y-2 text-sm">
+              <div className="flex justify-between text-[#57534e]">
+                <span>Subtotal de productos</span>
+                <span className="tabular-nums">S/ {Number(order.productsSubtotalAmount).toFixed(2)}</span>
               </div>
-              <span className="font-semibold text-stone-900 text-right">
-                S/ {Number(item.subtotalAmount).toFixed(2)}
-              </span>
+
+              {Number(order.discountAmount) > 0 && (
+                <div className="flex justify-between text-[#005141]">
+                  <span>Descuento {order.discountCode && `(${order.discountCode})`}</span>
+                  <span className="tabular-nums">- S/ {Number(order.discountAmount).toFixed(2)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-[#57534e]">
+                <span>Costo de envío</span>
+                <span className="tabular-nums">
+                  {Number(order.deliveryFeeAmount) === 0
+                    ? 'Gratis'
+                    : `S/ ${Number(order.deliveryFeeAmount).toFixed(2)}`}
+                </span>
+              </div>
+
+              {Number(order.serviceFeeAmount ?? 0) > 0 && (
+                <div className="flex justify-between text-[#57534e]">
+                  <span>Tarifa de servicio</span>
+                  <span className="tabular-nums">
+                    S/ {Number(order.serviceFeeAmount).toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              {Number(order.includedTaxAmount ?? 0) > 0 && (
+                <div className="flex justify-between text-xs text-[#78716c] pt-1">
+                  <span>IGV incluido (18%)</span>
+                  <span className="tabular-nums">
+                    S/ {Number(order.includedTaxAmount).toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-baseline pt-3 border-t border-[#e7e0d6] text-base font-bold text-[#1c1917]">
+                <span>Total pagado</span>
+                <span className="text-xl text-[#005141] tabular-nums">
+                  S/ {Number(order.totalAmount).toFixed(2)}
+                </span>
+              </div>
             </div>
-          ))}
+          </section>
         </div>
 
-        {/* Pricing calculations */}
-        <div className="pt-4 border-t border-stone-100 space-y-2 text-sm">
-          <div className="flex justify-between text-stone-600">
-            <span>Subtotal de productos</span>
-            <span>S/ {Number(order.productsSubtotalAmount).toFixed(2)}</span>
-          </div>
+        {/* Right: Delivery Address + Verified Review Callout */}
+        <div className="space-y-6 min-w-0">
+          <section className="bg-white rounded-xl border border-[#e7e0d6] p-5 sm:p-6 space-y-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#57534e] flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-[#005141]" />
+              <span>{isDelivery ? 'Destino de entrega' : 'Dirección para recojo'}</span>
+            </h2>
+            {isDelivery ? (
+              <div className="space-y-1.5 text-sm text-[#57534e]">
+                <p className="font-semibold text-[#1c1917]">
+                  {order.deliveryAddress || 'Dirección registrada'}
+                </p>
+                {order.deliveryReference && (
+                  <p className="text-xs text-[#57534e]">
+                    Referencia: {order.deliveryReference}
+                  </p>
+                )}
+                <p className="text-xs text-[#57534e] pt-1 tabular-nums">
+                  Receptor: {order.customerName} &bull; Teléfono: {order.customerPhone}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 text-sm text-[#57534e]">
+                <p className="font-semibold text-[#1c1917]">
+                  {order.store.address || 'Local principal del comercio'}
+                </p>
+                {order.store.addressReference && (
+                  <p className="text-xs text-[#57534e]">
+                    Referencia: {order.store.addressReference}
+                  </p>
+                )}
+                <p className="text-xs text-[#57534e] pt-1">
+                  Comprador: {order.customerName}
+                </p>
+              </div>
+            )}
+          </section>
 
-          {Number(order.discountAmount) > 0 && (
-            <div className="flex justify-between text-emerald-700">
-              <span>Descuento {order.discountCode && `(${order.discountCode})`}</span>
-              <span>- S/ {Number(order.discountAmount).toFixed(2)}</span>
-            </div>
+          <OrderReceiptCard orderId={order.id} />
+
+          {order.status === 'COMPLETED' && (
+            <section className="bg-[#f0fdfa] border border-[#ccfbf1] rounded-xl p-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <Star className="w-5 h-5 fill-amber-400 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-[#1c1917]">
+                    ¿Qué te parecieron los productos de esta compra?
+                  </p>
+                  <p className="text-xs text-[#57534e] mt-1 leading-relaxed">
+                    Como comprador verificado, tu reseña ayuda a la comunidad y a este comercio local.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/mi-jaldishop/resenas"
+                className="min-h-[44px] w-full inline-flex items-center justify-center gap-1.5 px-4 rounded-lg bg-[#005141] text-white text-xs font-semibold hover:bg-[#003d31] transition-colors"
+              >
+                <MessageSquareQuote className="w-4 h-4" />
+                <span>Gestionar mis reseñas</span>
+              </Link>
+            </section>
           )}
-
-          <div className="flex justify-between text-stone-600">
-            <span>Costo de envío</span>
-            <span>
-              {Number(order.deliveryFeeAmount) === 0
-                ? 'Gratis'
-                : `S/ ${Number(order.deliveryFeeAmount).toFixed(2)}`}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-baseline pt-3 border-t border-stone-200 text-base font-bold text-stone-900">
-            <span>Total pagado</span>
-            <span className="text-xl text-[#005141]">
-              S/ {Number(order.totalAmount).toFixed(2)}
-            </span>
-          </div>
         </div>
       </div>
-
-      {/* Verified Buyer Review Banner */}
-      {order.status === 'COMPLETED' && (
-        <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-emerald-800 shrink-0">
-              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-stone-900">
-                ¿Qué te parecieron los productos de esta compra?
-              </p>
-              <p className="text-xs text-stone-600">
-                Como comprador verificado, tu reseña ayuda a la comunidad y a este comercio local.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/mi-jaldishop/resenas"
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#005141] text-white text-xs font-semibold hover:bg-[#004033] transition-colors shrink-0 shadow-xs"
-          >
-            <MessageSquareQuote className="w-4 h-4" />
-            <span>Gestionar mis reseñas</span>
-          </Link>
-        </div>
-      )}
 
       {/* Cancellation Modal */}
       {order && (

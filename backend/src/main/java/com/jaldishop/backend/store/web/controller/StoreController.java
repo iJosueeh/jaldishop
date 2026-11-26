@@ -102,7 +102,13 @@ public class StoreController {
                 request.instagramUrl(),
                 request.facebookUrl(),
                 request.whatsappNumber(),
-                request.categoryIds()
+                request.categoryIds(),
+                request.legalBusinessName(),
+                request.taxIdType(),
+                request.taxIdNumber(),
+                request.taxRegime(),
+                Boolean.TRUE.equals(request.canIssueInvoices()),
+                Boolean.TRUE.equals(request.sunatTermsAccepted()) ? java.time.Instant.now() : null
         );
 
         Store store = createStoreService.execute(command);

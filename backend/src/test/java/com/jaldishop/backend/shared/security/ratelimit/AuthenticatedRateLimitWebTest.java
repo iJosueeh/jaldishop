@@ -118,6 +118,8 @@ class AuthenticatedRateLimitWebTest {
         when(jwt.getPrincipal(bearer)).thenReturn(new JwtPrincipal(id, Set.of(role)));
         User user = mock(User.class);
         when(user.canAuthenticate()).thenReturn(true);
+        when(user.canUseAuthenticatedSession()).thenReturn(true);
+        when(user.isEmailVerified()).thenReturn(true);
         var currentRole = mock(com.jaldishop.backend.identity.domain.model.Role.class);
         when(currentRole.getName()).thenReturn(com.jaldishop.backend.identity.domain.enums.RoleName.valueOf(role));
         when(user.getRoles()).thenReturn(Set.of(currentRole));

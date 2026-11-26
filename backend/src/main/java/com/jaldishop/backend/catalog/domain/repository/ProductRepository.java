@@ -4,6 +4,7 @@ import com.jaldishop.backend.catalog.domain.model.*;
 import com.jaldishop.backend.catalog.domain.enums.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,5 +20,11 @@ public interface ProductRepository {
     Optional<Product> lockByIdAndStoreIdForUpdate(UUID id, UUID storeId);
     boolean hasOperationalHistory(UUID productId);
     List<String> findProductImageUrls(UUID productId);
+    default List<String> findOrderedImageUrls(UUID productId) {
+        return List.of();
+    }
+    default Map<UUID, List<String>> findOrderedImageUrlsByProductIds(List<UUID> productIds) {
+        return Map.of();
+    }
     void deleteProductAndSafeOrphans(UUID productId, UUID storeId);
 }

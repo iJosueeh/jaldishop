@@ -215,7 +215,7 @@ class OrderNotificationPostgresIntegrationTest {
                                     pickup_enabled, delivery_enabled, delivery_fee_amount, delivery_fee_currency,
                                     tax_rate, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, 'Tienda de prueba N2', '999888777', 'Av. Test 123',
-                        true, false, 0.00, 'PEN', 0.18, 'ACTIVE', NOW(), NOW())
+                        true, false, 0.00, 'PEN', 0.00, 'ACTIVE', NOW(), NOW())
                 ON CONFLICT (id) DO NOTHING;
                 """)) {
             ps.setObject(1, id);

@@ -160,6 +160,10 @@ class WebSocketStompRealIntegrationTest {
                     ps.setObject(1, orderId);
                     ps.executeUpdate();
                 }
+                try (var ps = conn.prepareStatement("DELETE FROM fiscal_receipts WHERE order_id = ?")) {
+                    ps.setObject(1, orderId);
+                    ps.executeUpdate();
+                }
                 try (var ps = conn.prepareStatement("DELETE FROM orders WHERE id = ?")) {
                     ps.setObject(1, orderId);
                     ps.executeUpdate();
@@ -167,6 +171,10 @@ class WebSocketStompRealIntegrationTest {
             }
 
             for (UUID capResId : createdCapResIds) {
+                try (var ps = conn.prepareStatement("DELETE FROM fiscal_receipts WHERE order_id IN (SELECT id FROM orders WHERE capacity_reservation_id = ?)")) {
+                    ps.setObject(1, capResId);
+                    ps.executeUpdate();
+                }
                 try (var ps = conn.prepareStatement("DELETE FROM order_status_history WHERE order_id IN (SELECT id FROM orders WHERE capacity_reservation_id = ?)")) {
                     ps.setObject(1, capResId);
                     ps.executeUpdate();

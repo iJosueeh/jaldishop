@@ -17,44 +17,55 @@ export function AccountSubNav({ addressCount }: AccountSubNavProps) {
   const isAddressesActive = pathname.startsWith('/mi-jaldishop/direcciones');
 
   return (
-    <div className="flex items-center gap-2 border-b border-stone-200/90 pb-px mb-6 overflow-x-auto">
+    <nav
+      aria-label="Subnavegación de cuenta"
+      className="flex items-center gap-2 border-b border-[#e7e0d6] pb-px mb-6 overflow-x-auto"
+    >
       <Link
         href="/mi-jaldishop/perfil"
+        aria-current={isProfileActive ? 'page' : undefined}
         className={cn(
-          'inline-flex items-center gap-2 py-2.5 px-4 rounded-t-xl text-xs sm:text-sm font-semibold border-b-2 transition-all whitespace-nowrap',
+          'relative min-h-[44px] inline-flex items-center gap-2 py-2 px-4 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]',
           isProfileActive
-            ? 'border-[#005141] text-[#005141] bg-[#005141]/5'
-            : 'border-transparent text-stone-600 hover:text-stone-900 hover:bg-stone-100/60'
+            ? 'text-[#005141] bg-[#f0fdfa]'
+            : 'text-[#57534e] hover:text-[#1c1917] hover:bg-[#f7f3ec]'
         )}
       >
-        <User className={cn('w-4 h-4', isProfileActive ? 'text-[#005141]' : 'text-stone-400')} />
+        <User className={cn('w-4 h-4', isProfileActive ? 'text-[#005141]' : 'text-[#78716c]')} />
         <span>Datos Personales</span>
+        {isProfileActive && (
+          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#005141]" aria-hidden="true" />
+        )}
       </Link>
 
       <Link
         href="/mi-jaldishop/direcciones"
+        aria-current={isAddressesActive ? 'page' : undefined}
         className={cn(
-          'inline-flex items-center gap-2 py-2.5 px-4 rounded-t-xl text-xs sm:text-sm font-semibold border-b-2 transition-all whitespace-nowrap',
+          'relative min-h-[44px] inline-flex items-center gap-2 py-2 px-4 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005141]',
           isAddressesActive
-            ? 'border-[#005141] text-[#005141] bg-[#005141]/5'
-            : 'border-transparent text-stone-600 hover:text-stone-900 hover:bg-stone-100/60'
+            ? 'text-[#005141] bg-[#f0fdfa]'
+            : 'text-[#57534e] hover:text-[#1c1917] hover:bg-[#f7f3ec]'
         )}
       >
-        <MapPin className={cn('w-4 h-4', isAddressesActive ? 'text-[#005141]' : 'text-stone-400')} />
+        <MapPin className={cn('w-4 h-4', isAddressesActive ? 'text-[#005141]' : 'text-[#78716c]')} />
         <span>Mis Direcciones</span>
         {typeof addressCount === 'number' && (
           <span
             className={cn(
-              'px-2 py-0.5 text-[11px] font-bold rounded-full',
+              'px-2 py-0.5 text-[11px] font-bold rounded-full tabular-nums',
               isAddressesActive
                 ? 'bg-[#005141] text-white'
-                : 'bg-stone-200 text-stone-700'
+                : 'bg-[#f0eae0] text-[#1c1917]'
             )}
           >
             {addressCount}/5
           </span>
         )}
+        {isAddressesActive && (
+          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#005141]" aria-hidden="true" />
+        )}
       </Link>
-    </div>
+    </nav>
   );
 }

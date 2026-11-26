@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { formatCurrency } from '@/shared/utils/formatters';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import confetti from 'canvas-confetti';
 import { CartItem } from './CatalogContainer';
 import { CapacitySlot } from './CapacitySlotPicker';
@@ -91,7 +91,9 @@ Por favor confírmenme la recepción para iniciar la preparación. ¡Muchas grac
       navigator.clipboard.writeText(formattedWhatsAppMessage);
     }
     setCopied(true);
-    toast.success('¡Mensaje para WhatsApp copiado al portapapeles!');
+    notify.success('¡Mensaje para WhatsApp copiado al portapapeles!', {
+      id: notifyKeys.whatsapp(),
+    });
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -109,7 +111,8 @@ Por favor confírmenme la recepción para iniciar la preparación. ¡Muchas grac
     }
 
     setOrderSent(true);
-    toast.success('¡Mensaje enviado al WhatsApp del comercio!', {
+    notify.success('¡Mensaje enviado al WhatsApp del comercio!', {
+      id: notifyKeys.whatsapp(),
       description: `Referencia: ${referenceCode}. Franja ${slotTime} protegida contra sobreventa.`,
     });
 

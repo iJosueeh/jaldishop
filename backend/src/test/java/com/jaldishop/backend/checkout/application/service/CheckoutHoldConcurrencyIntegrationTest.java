@@ -65,6 +65,10 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
                     """);
                 stmt.executeUpdate("""
+                    DELETE FROM fiscal_receipts
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
                     DELETE FROM order_payment_breakdowns
                     WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
                     """);
@@ -115,7 +119,8 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM product_variants
-                    WHERE presentation_name = 'Variante Test' OR sku LIKE 'SKU-%';
+                    WHERE (presentation_name = 'Variante Test' OR sku LIKE 'SKU-%')
+                      AND id NOT IN (SELECT variant_id FROM order_items);
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM user_roles

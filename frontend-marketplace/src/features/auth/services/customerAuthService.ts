@@ -6,7 +6,10 @@ import {
   LoginCredentials,
   RegisterCustomerData,
   RegisterCustomerResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
   ResetPasswordRequest,
+  VerifyEmailRequest,
 } from '../types/auth.types';
 
 export const customerAuthService = {
@@ -63,6 +66,26 @@ export const customerAuthService = {
    */
   resetPassword: (data: ResetPasswordRequest) =>
     apiClient<void>('/api/customer/reset-password', {
+      baseUrl: '',
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /**
+   * Verifies customer email address using the single-use token from email.
+   */
+  verifyEmail: (data: VerifyEmailRequest) =>
+    apiClient<void>('/api/customer/verify-email', {
+      baseUrl: '',
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /**
+   * Requests a new verification email for an unverified customer account.
+   */
+  resendVerification: (data: ResendVerificationRequest) =>
+    apiClient<ResendVerificationResponse>('/api/customer/resend-verification', {
       baseUrl: '',
       method: 'POST',
       body: JSON.stringify(data),

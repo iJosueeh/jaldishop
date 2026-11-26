@@ -8,8 +8,13 @@ import {
   getDistricts,
 } from '@/shared/utils/ubigeo';
 import { Button } from '@/shared/components/ui/Button';
+import { PeruPhoneInput } from '@/shared/components/ui/PeruPhoneInput';
+import {
+  toLocalPeruPhone,
+  validateLocalPeruPhone,
+} from '@/features/auth/utils/validation';
 import { X, MapPin } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -69,7 +74,7 @@ export function AddressModal({
       if (addressToEdit) {
         setAlias(addressToEdit.alias || '');
         setRecipientName(addressToEdit.recipientName || '');
-        setRecipientPhone(addressToEdit.recipientPhone || '');
+        setRecipientPhone(toLocalPeruPhone(addressToEdit.recipientPhone || ''));
         setDepartment(addressToEdit.department || '');
         setProvince(addressToEdit.province || '');
         setDistrict(addressToEdit.district || '');
@@ -135,11 +140,9 @@ export function AddressModal({
       errs.recipientName = 'El nombre no debe exceder 100 caracteres.';
     }
 
-    const cleanPhone = recipientPhone.replace(/[\s-]/g, '');
-    if (!cleanPhone) {
-      errs.recipientPhone = 'Ingresa un teléfono de contacto para el repartidor.';
-    } else if (!/^(?:\+?51)?9\d{8}$/.test(cleanPhone)) {
-      errs.recipientPhone = 'Ingresa un número celular peruano válido (9 dígitos, ej. 987654321).';
+    const phoneErr = validateLocalPeruPhone(recipientPhone, true);
+    if (phoneErr) {
+      errs.recipientPhone = phoneErr;
     }
 
     if (!department) {
@@ -171,7 +174,15 @@ export function AddressModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Revisa los campos obligatorios antes de guardar.');
+      notify.error('Revisa los campos obligatorios antes de guardar.', {
+        id: notifyKeys.address('save'),
+      });
+      requestAnimationFrame(() => {
+        const firstInvalid = document.querySelector<HTMLElement>(
+          '[role="dialog"] [aria-invalid="true"]'
+        );
+        firstInvalid?.focus();
+      });
       return;
     }
 
@@ -179,7 +190,7 @@ export function AddressModal({
       await onSubmit({
         alias: alias.trim(),
         recipientName: recipientName.trim(),
-        recipientPhone: recipientPhone.trim(),
+        recipientPhone: toLocalPeruPhone(recipientPhone),
         department,
         province,
         district,
@@ -254,18 +265,21 @@ export function AddressModal({
               <label htmlFor="address-phone" className="block text-xs font-bold text-stone-700 mb-1">
                 Teléfono de contacto <span className="text-rose-500">*</span>
               </label>
-              <input
+              <PeruPhoneInput
                 id="address-phone"
-                type="tel"
                 value={recipientPhone}
-                onChange={(e) => setRecipientPhone(e.target.value)}
-                placeholder="987654321"
-                className="w-full bg-white border border-stone-200 focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/10 rounded-xl px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 outline-none transition-all"
-                maxLength={15}
+                onChange={(localPhone) => {
+                  setRecipientPhone(localPhone);
+                  if (errors.recipientPhone) {
+                    setErrors((prev) => {
+                      const { recipientPhone: _, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }}
+                error={errors.recipientPhone}
+                required
               />
-              {errors.recipientPhone && (
-                <p className="text-xs text-rose-600 mt-1 font-medium">{errors.recipientPhone}</p>
-              )}
             </div>
           </div>
 

@@ -28,7 +28,9 @@ public class UserPersistenceMapper {
                 roles,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                entity.isPrimaryAdmin()
+                entity.isPrimaryAdmin(),
+                entity.isEmailVerified(),
+                entity.getEmailVerifiedAt()
         );
         user.restoreCredentialsVersion(entity.getCredentialsVersion());
         return user;
@@ -53,7 +55,9 @@ public class UserPersistenceMapper {
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 roles,
-                user.isPrimaryAdmin()
+                user.isPrimaryAdmin(),
+                user.isEmailVerified(),
+                user.getEmailVerifiedAt()
         );
     }
 

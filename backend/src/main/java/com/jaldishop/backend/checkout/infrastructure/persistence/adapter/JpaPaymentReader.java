@@ -45,7 +45,11 @@ public class JpaPaymentReader implements PaymentReader {
                 entity.getDeliveryFeeAmount(),
                 entity.getServiceFeeAmount(),
                 entity.getIncludedTaxAmount(),
-                entity.getItemsSnapshot()
+                entity.getItemsSnapshot(),
+                entity.getRequestedReceiptType(),
+                entity.getCustomerDocType(),
+                entity.getCustomerDocNumber(),
+                entity.getCustomerLegalName()
         );
     }
 

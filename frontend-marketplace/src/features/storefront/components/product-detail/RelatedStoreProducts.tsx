@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { ProductItem, PublicStore } from '../../types/storefront.types';
 import { ProductCard } from '../catalog/ProductCard';
 import { useStorefrontCart } from '../../cart/StorefrontCartProvider';
@@ -31,7 +31,9 @@ export function RelatedStoreProducts({ store, products }: RelatedStoreProductsPr
     if (!store.slug) return;
     selectStore({ id: store.id, name: store.name, slug: store.slug });
     await changeQuantity(item, 1);
-    toast.success(`${item.name} añadido al carrito`);
+    notify.success(`${item.name} añadido al carrito`, {
+      id: notifyKeys.cartAdd(item.id),
+    });
   };
 
   return (

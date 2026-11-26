@@ -18,6 +18,7 @@ public record MerchantOrderSummaryResponse(
         String orderNumber,
         UUID storeId,
         UUID customerUserId,
+        UUID paymentId,
         OrderStatus status,
         DeliveryMode deliveryMode,
         LocalDate serviceDate,
@@ -34,6 +35,35 @@ public record MerchantOrderSummaryResponse(
         Instant updatedAt,
         List<MerchantOrderItemResponse> items
 ) {
+    public MerchantOrderSummaryResponse(
+            UUID id,
+            String orderNumber,
+            UUID storeId,
+            UUID customerUserId,
+            OrderStatus status,
+            DeliveryMode deliveryMode,
+            LocalDate serviceDate,
+            LocalTime serviceStartTime,
+            LocalTime serviceEndTime,
+            String customerName,
+            String customerPhone,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal totalAmount,
+            String currency,
+            int totalItems,
+            Instant confirmedAt,
+            Instant updatedAt,
+            List<MerchantOrderItemResponse> items
+    ) {
+        this(
+                id, orderNumber, storeId, customerUserId, null, status, deliveryMode,
+                serviceDate, serviceStartTime, serviceEndTime, customerName, customerPhone,
+                deliveryAddress, deliveryReference, totalAmount, currency, totalItems,
+                confirmedAt, updatedAt, items
+        );
+    }
+
     public static MerchantOrderSummaryResponse from(Order order) {
         if (order == null) {
             return null;
@@ -62,6 +92,7 @@ public record MerchantOrderSummaryResponse(
                 order.getOrderNumber(),
                 order.getStoreId(),
                 order.getUserId(),
+                order.getPaymentId(),
                 order.getStatus(),
                 order.getDeliveryMode(),
                 order.getServiceDate(),

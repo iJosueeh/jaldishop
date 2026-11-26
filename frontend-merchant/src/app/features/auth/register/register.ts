@@ -106,18 +106,6 @@ export class Register implements OnInit {
     this.step2Data.set(data);
   }
 
-  onStep2Skip(): void {
-    if (!this.step2Data()) {
-      this.step2Data.set({
-        name: 'Mi negocio',
-        businessType: 'Restaurantes y Cafeterías',
-        contactPhone: '999999999',
-      });
-    }
-    this.errorMessage.set(null);
-    this.currentStep.set(3);
-  }
-
   onStep3Back(): void {
     this.errorMessage.set(null);
     this.currentStep.set(2);
@@ -177,6 +165,7 @@ export class Register implements OnInit {
   private buildCreateStorePayload(): CreateStoreRequest {
     const step2 = this.step2Data()!;
     const step3 = this.step3Data();
+    const step4 = this.step4Data();
 
     const rawPhone = step2.contactPhone?.trim();
     const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
@@ -194,6 +183,13 @@ export class Register implements OnInit {
       longitude: step3?.longitude ?? undefined,
       pickupEnabled: step3?.pickupEnabled ?? step2.pickupEnabled ?? true,
       deliveryEnabled: step3?.deliveryEnabled ?? step2.deliveryEnabled ?? true,
+      taxRate: step2.taxRate ?? 0,
+      legalBusinessName: step2.legalBusinessName.trim(),
+      taxIdType: step2.taxIdType,
+      taxIdNumber: step2.taxIdNumber.trim(),
+      taxRegime: step2.taxRegime,
+      canIssueInvoices: step2.taxRegime === 'RUS' || step2.taxRegime === 'NONE' ? false : !!step2.canIssueInvoices,
+      sunatTermsAccepted: !!step4?.sunatTermsAccepted,
     };
 
     if (step2.logoUrl && !step2.logoUrl.startsWith('data:')) {
@@ -281,6 +277,7 @@ export class Register implements OnInit {
     const step1 = this.step1Data()!;
     const step2 = this.step2Data()!;
     const step3 = this.step3Data();
+    const step4 = this.step4Data();
 
     const rawPhone = step2.contactPhone?.trim();
     const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
@@ -303,6 +300,13 @@ export class Register implements OnInit {
       longitude: step3?.longitude ?? null,
       pickupEnabled: step3?.pickupEnabled ?? step2.pickupEnabled ?? true,
       deliveryEnabled: step3?.deliveryEnabled ?? step2.deliveryEnabled ?? true,
+      legalBusinessName: step2.legalBusinessName.trim(),
+      taxIdType: step2.taxIdType,
+      taxIdNumber: step2.taxIdNumber.trim(),
+      taxRegime: step2.taxRegime,
+      canIssueInvoices: step2.taxRegime === 'RUS' || step2.taxRegime === 'NONE' ? false : !!step2.canIssueInvoices,
+      taxRate: step2.taxRate ?? 0,
+      sunatTermsAccepted: !!step4?.sunatTermsAccepted,
     };
 
     if (step2.logoUrl && !step2.logoUrl.startsWith('data:')) {

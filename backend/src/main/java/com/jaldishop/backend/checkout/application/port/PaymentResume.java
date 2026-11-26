@@ -25,8 +25,43 @@ public record PaymentResume(
         BigDecimal deliveryFeeAmount,
         BigDecimal serviceFeeAmount,
         BigDecimal includedTaxAmount,
-        String itemsSnapshot
+        String itemsSnapshot,
+        String requestedReceiptType,
+        String customerDocType,
+        String customerDocNumber,
+        String customerLegalName
 ) {
+    public PaymentResume(
+            UUID paymentId,
+            UUID capacityReservationId,
+            String status,
+            Instant approvedAt,
+            BigDecimal amount,
+            String currency,
+            String fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            BigDecimal productsSubtotalAmount,
+            BigDecimal discountAmount,
+            String discountCode,
+            BigDecimal deliveryFeeAmount,
+            BigDecimal serviceFeeAmount,
+            BigDecimal includedTaxAmount,
+            String itemsSnapshot
+    ) {
+        this(
+                paymentId, capacityReservationId, status, approvedAt, amount, currency,
+                fulfillmentType, customerName, customerPhone, customerEmail, deliveryAddress,
+                deliveryReference, deliveryLatitude, deliveryLongitude, productsSubtotalAmount,
+                discountAmount, discountCode, deliveryFeeAmount, serviceFeeAmount,
+                includedTaxAmount, itemsSnapshot, null, null, null, null
+        );
+    }
     public PaymentResume(
             UUID paymentId,
             UUID capacityReservationId,

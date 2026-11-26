@@ -27,8 +27,40 @@ public record PublicStoreResponse(
         String facebookUrl,
         String whatsappNumber,
         Set<UUID> categoryIds,
-        StoreStatus status
+        StoreStatus status,
+        boolean canIssueInvoices,
+        BigDecimal taxRate
 ) {
+    public PublicStoreResponse(
+            UUID id,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds,
+            StoreStatus status
+    ) {
+        this(
+                id, name, slug, description, contactPhone, address, addressReference,
+                latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount,
+                deliveryFeeCurrency, logoUrl, bannerUrl, instagramUrl, facebookUrl,
+                whatsappNumber, categoryIds, status, false, new BigDecimal("18.00")
+        );
+    }
+
     public static PublicStoreResponse fromDomain(Store store) {
         if (store == null) {
             return null;
@@ -53,7 +85,9 @@ public record PublicStoreResponse(
                 store.getFacebookUrl(),
                 store.getWhatsappNumber(),
                 store.getCategoryIds(),
-                store.getStatus()
+                store.getStatus(),
+                store.isCanIssueInvoices(),
+                store.getTaxRate()
         );
     }
 }

@@ -36,6 +36,14 @@ public class RateLimitWebConfiguration implements WebMvcConfigurer {
                     if (clientIp.enabled())
                         limits.check(policy + "-ip", clientIp.resolve(request), forgot ? 10 : 20, Duration.ofMinutes(15));
                 }
+                if ("POST".equals(request.getMethod()) && (recoveryPath.equals("/api/v1/auth/resend-verification")
+                        || recoveryPath.equals("/api/v1/auth/verify-email"))) {
+                    boolean resend = recoveryPath.endsWith("resend-verification");
+                    String policy = resend ? "resend-verification" : "verify-email";
+                    limits.check(policy + "-global", "all", 100, Duration.ofMinutes(1));
+                    if (clientIp.enabled())
+                        limits.check(policy + "-ip", clientIp.resolve(request), resend ? 10 : 20, Duration.ofMinutes(15));
+                }
                 // Pending verification on Render: do not trust headers or aggregate visitors by proxy.
                 // The separate login-account limit remains active.
                 if (!clientIp.enabled()) return true;

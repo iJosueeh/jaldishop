@@ -29,8 +29,59 @@ public record CreatePaymentPreferenceRequest(
         String deliveryReference,
         BigDecimal deliveryLatitude,
         BigDecimal deliveryLongitude,
-        String returnBaseUrl
+        String returnBaseUrl,
+        String discountCode,
+        String requestedReceiptType,
+        String customerDocType,
+        String customerDocNumber,
+        String customerLegalName
 ) {
+    public CreatePaymentPreferenceRequest(
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String returnBaseUrl,
+            String discountCode
+    ) {
+        this(
+                capacityReservationId, fulfillmentType, customerName, customerPhone, customerEmail,
+                deliveryAddress, deliveryReference, deliveryLatitude, deliveryLongitude,
+                returnBaseUrl, discountCode, null, null, null, null
+        );
+    }
+    public CreatePaymentPreferenceRequest(
+            UUID capacityReservationId,
+            CheckoutFulfillmentType fulfillmentType,
+            String customerName,
+            String customerPhone,
+            String customerEmail,
+            String deliveryAddress,
+            String deliveryReference,
+            BigDecimal deliveryLatitude,
+            BigDecimal deliveryLongitude,
+            String returnBaseUrl
+    ) {
+        this(
+                capacityReservationId,
+                fulfillmentType,
+                customerName,
+                customerPhone,
+                customerEmail,
+                deliveryAddress,
+                deliveryReference,
+                deliveryLatitude,
+                deliveryLongitude,
+                returnBaseUrl,
+                null
+        );
+    }
+
     public CreatePaymentPreferenceRequest(
             UUID capacityReservationId,
             CheckoutFulfillmentType fulfillmentType,
@@ -52,6 +103,7 @@ public record CreatePaymentPreferenceRequest(
                 deliveryReference,
                 deliveryLatitude,
                 deliveryLongitude,
+                null,
                 null
         );
     }

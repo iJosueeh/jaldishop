@@ -1,3 +1,5 @@
+import { TaxIdType, TaxRegime } from './store.models';
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -21,6 +23,13 @@ export interface RegisterMerchantRequest {
   logoUrl?: string;
   bannerUrl?: string;
   categoryIds?: string[];
+  legalBusinessName: string;
+  taxIdType: TaxIdType;
+  taxIdNumber: string;
+  taxRegime: TaxRegime;
+  canIssueInvoices: boolean;
+  taxRate: number;
+  sunatTermsAccepted: boolean;
 }
 
 export interface AuthResult {

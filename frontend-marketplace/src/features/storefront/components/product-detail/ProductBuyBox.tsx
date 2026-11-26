@@ -12,7 +12,7 @@ import {
   Star,
   Store as StoreIcon,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import {
   ProductItem,
   ProductReviewsSummary,
@@ -139,9 +139,13 @@ export function ProductBuyBox({
 
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('Enlace del producto copiado.');
+      notify.success('Enlace del producto copiado.', {
+        id: notifyKeys.shareProduct(product.id),
+      });
     } catch {
-      toast.error('No pudimos copiar el enlace.');
+      notify.error('No pudimos copiar el enlace.', {
+        id: notifyKeys.shareProduct(product.id),
+      });
     }
   };
 

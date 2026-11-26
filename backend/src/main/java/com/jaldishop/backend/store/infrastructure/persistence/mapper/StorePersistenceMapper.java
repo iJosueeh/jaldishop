@@ -82,7 +82,8 @@ public class StorePersistenceMapper {
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                taxProfile
+                taxProfile,
+                entity.getSunatTermsAcceptedAt()
         );
     }
 
@@ -120,6 +121,7 @@ public class StorePersistenceMapper {
         entity.setTaxIdNumber(domain.getTaxIdNumber());
         entity.setTaxRegime(domain.getTaxRegime() != null ? domain.getTaxRegime().name() : "RUS");
         entity.setCanIssueInvoices(domain.isCanIssueInvoices());
+        entity.setSunatTermsAcceptedAt(domain.getSunatTermsAcceptedAt());
         return entity;
     }
 

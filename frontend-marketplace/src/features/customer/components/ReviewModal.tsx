@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Star, X, ShieldCheck, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { useCustomerReviews } from '../hooks/useCustomerReviews';
 import { cn } from '@/shared/utils/cn';
 
@@ -58,7 +58,9 @@ export function ReviewModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating < 1 || rating > 5) {
-      toast.error('Por favor selecciona una calificación entre 1 y 5 estrellas.');
+      notify.error('Por favor selecciona una calificación entre 1 y 5 estrellas.', {
+        id: notifyKeys.review(productId),
+      });
       return;
     }
 
@@ -69,20 +71,24 @@ export function ReviewModal({
           productId,
           payload: { rating, comment: comment.trim() || null },
         });
-        toast.success('Tu opinión ha sido actualizada.');
+        notify.success('Tu opinión ha sido actualizada.', {
+          id: notifyKeys.review(productId),
+        });
       } else {
         await createReview({
           productId,
           payload: { rating, comment: comment.trim() || null },
         });
-        toast.success('¡Gracias por calificar tu producto!');
+        notify.success('¡Gracias por calificar tu producto!', {
+          id: notifyKeys.review(productId),
+        });
       }
 
       onSuccess?.();
       onClose();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'No se pudo guardar la calificación.';
-      toast.error(message);
+      notify.error(message, { id: notifyKeys.review(productId) });
     } finally {
       setSubmitting(false);
     }

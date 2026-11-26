@@ -101,6 +101,28 @@ export interface CreatePaymentPreferencePayload {
   storeId?: string;
   storeName?: string;
   returnBaseUrl?: string;
+  discountCode?: string | null;
+  requestedReceiptType?: 'BOLETA' | 'FACTURA' | null;
+  customerDocType?: 'DNI' | 'RUC' | null;
+  customerDocNumber?: string | null;
+  customerLegalName?: string | null;
+}
+
+export interface ValidatePromoPayload {
+  storeId: string;
+  code: string;
+  subtotal: number;
+}
+
+export interface ValidatePromoResponse {
+  valid: boolean;
+  code?: string | null;
+  discountType?: 'PERCENTAGE' | 'FIXED_AMOUNT' | null;
+  discountValue?: number | null;
+  discountAmount: number;
+  newSubtotal: number;
+  errorCode?: string | null;
+  message?: string | null;
 }
 
 export interface CreatePaymentPreferenceResponse {

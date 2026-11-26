@@ -92,6 +92,9 @@ public class StoreEntity {
     @Column(name = "can_issue_invoices", nullable = false)
     private boolean canIssueInvoices = false;
 
+    @Column(name = "sunat_terms_accepted_at")
+    private Instant sunatTermsAcceptedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -281,5 +284,13 @@ public class StoreEntity {
 
     public void setCanIssueInvoices(boolean canIssueInvoices) {
         this.canIssueInvoices = canIssueInvoices;
+    }
+
+    public Instant getSunatTermsAcceptedAt() {
+        return sunatTermsAcceptedAt;
+    }
+
+    public void setSunatTermsAcceptedAt(Instant sunatTermsAcceptedAt) {
+        this.sunatTermsAcceptedAt = sunatTermsAcceptedAt;
     }
 }

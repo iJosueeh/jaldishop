@@ -1,6 +1,9 @@
 package com.jaldishop.backend.store.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jaldishop.backend.shared.validation.ValidPhone;
+import com.jaldishop.backend.store.domain.enums.TaxIdType;
+import com.jaldishop.backend.store.domain.enums.TaxRegime;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -27,8 +30,47 @@ public record CreateStoreRequest(
         String instagramUrl,
         String facebookUrl,
         @ValidPhone String whatsappNumber,
-        java.util.Set<java.util.UUID> categoryIds
+        java.util.Set<java.util.UUID> categoryIds,
+        @Size(max = 200) String legalBusinessName,
+        TaxIdType taxIdType,
+        @Size(max = 11) String taxIdNumber,
+        TaxRegime taxRegime,
+        Boolean canIssueInvoices,
+        Boolean sunatTermsAccepted
 ) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public CreateStoreRequest {
+    }
+
+    public CreateStoreRequest(
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            java.util.Set<java.util.UUID> categoryIds
+    ) {
+        this(
+                name, slug, description, contactPhone, address, addressReference,
+                latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount,
+                deliveryFeeCurrency, taxRate, logoUrl, bannerUrl, instagramUrl,
+                facebookUrl, whatsappNumber, categoryIds,
+                null, null, null, null, false, null
+        );
+    }
     public CreateStoreRequest(
             String name,
             String slug,

@@ -38,6 +38,7 @@ public class Order {
     private final String origin;
     private final String paymentMethod;
     private final String notes;
+    private String promoFundingSource;
     private final List<OrderItem> items;
     private final List<OrderStatusHistory> statusHistory;
 
@@ -338,6 +339,8 @@ public class Order {
     public String getOrigin() { return origin; }
     public String getPaymentMethod() { return paymentMethod; }
     public String getNotes() { return notes; }
+    public String getPromoFundingSource() { return promoFundingSource; }
+    public void setPromoFundingSource(String promoFundingSource) { this.promoFundingSource = promoFundingSource; }
     public List<OrderItem> getItems() { return Collections.unmodifiableList(items); }
     public List<OrderStatusHistory> getStatusHistory() { return Collections.unmodifiableList(statusHistory); }
 

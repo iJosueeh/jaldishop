@@ -14,8 +14,23 @@ interface CatalogCategoryDto {
 }
 interface PublicProductDto {
   id: string; storeId: string; categoryId?: string; name: string; slug?: string; description?: string;
-  imageUrl?: string; status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'; minPrice?: number | null; maxPrice?: number | null;
+  imageUrl?: string; images?: string[]; status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'; minPrice?: number | null; maxPrice?: number | null;
   variants?: ProductVariantItem[]; createdAt?: string; updatedAt?: string;
+}
+
+export function normalizeProductImages(images?: string[], fallbackImageUrl?: string): string[] {
+  const unique = new Set<string>();
+  if (Array.isArray(images)) {
+    for (const url of images) {
+      if (typeof url === 'string' && url.trim()) {
+        unique.add(url.trim());
+      }
+    }
+  }
+  if (typeof fallbackImageUrl === 'string' && fallbackImageUrl.trim()) {
+    unique.add(fallbackImageUrl.trim());
+  }
+  return Array.from(unique);
 }
 
 export function toProductItem(product: PublicProductDto, categories: CatalogCategoryDto[]): ProductItem {
@@ -23,6 +38,10 @@ export function toProductItem(product: PublicProductDto, categories: CatalogCate
   const activeVariants = product.variants?.filter((variant) => variant.status === 'ACTIVE');
   const price = product.minPrice ?? activeVariants?.[0]?.priceAmount ?? product.variants?.[0]?.priceAmount ?? 0;
   const priceCurrency = activeVariants?.[0]?.priceCurrency ?? product.variants?.[0]?.priceCurrency ?? 'PEN';
+  const normalizedImages = normalizeProductImages(product.images, product.imageUrl);
+  const primaryImageUrl =
+    (typeof product.imageUrl === 'string' && product.imageUrl.trim()) || normalizedImages[0] || undefined;
+
   return {
     id: product.id, slug: product.slug, name: product.name, description: product.description || '',
     price: Number(price), priceCurrency,
@@ -30,7 +49,9 @@ export function toProductItem(product: PublicProductDto, categories: CatalogCate
     maxPrice: product.maxPrice != null ? Number(product.maxPrice) : undefined,
     categoryId: product.categoryId, category: category?.name || '',
     status: product.status,
-    imageUrl: product.imageUrl, imageBg: 'from-amber-700/20 to-stone-800/30',
+    imageUrl: primaryImageUrl,
+    images: normalizedImages,
+    imageBg: 'from-amber-700/20 to-stone-800/30',
     iconText: product.name.substring(0, 2).toUpperCase(), variants: product.variants,
     createdAt: product.createdAt, updatedAt: product.updatedAt,
   };
@@ -299,6 +320,7 @@ export const storeService = {
           price: product.price,
           priceCurrency: product.priceCurrency || 'PEN',
           imageUrl: product.imageUrl,
+          images: product.images,
           category: product.category || store.category || 'Catálogo local',
           storeId: store.id,
           storeName: store.name,

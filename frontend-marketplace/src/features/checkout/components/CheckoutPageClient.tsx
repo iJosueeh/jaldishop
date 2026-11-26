@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ArrowDown, ShoppingBag, FileText, IdCard, Sparkles } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { Container } from '@/shared/components/ui/Container';
 import { formatCurrency } from '@/shared/utils/formatters';
 import { useStorefrontCart } from '@/features/storefront/cart/StorefrontCartProvider';
@@ -33,6 +33,11 @@ import { estimateServiceFee } from '../utils/pricing';
 import { mapDeliveryFormDataToCheckoutFields, parseSlotTimeRange } from '../utils/addressMapper';
 import { customerAddressService } from '@/features/customer/services/customerAddressService';
 import { WhatsAppBridgeModal } from '@/features/storefront/components/WhatsAppBridgeModal';
+import { PeruPhoneInput } from '@/shared/components/ui/PeruPhoneInput';
+import {
+  toLocalPeruPhone,
+  validateLocalPeruPhone,
+} from '@/features/auth/utils/validation';
 
 export function CheckoutPageClient() {
   const searchParams = useSearchParams();
@@ -71,10 +76,32 @@ export function CheckoutPageClient() {
     [recentStores, storeCartQueries]
   );
 
-  const [store, setStore] = useState<PublicStore | null>(null);
-  const [storeSettings, setStoreSettings] = useState<PublicStoreSettings | null>(null);
-  const [isLoadingStore, setIsLoadingStore] = useState(true);
-  const [storeLoadError, setStoreLoadError] = useState<string | null>(null);
+  const {
+    data: store = null,
+    isLoading: isStoreQueryLoading,
+    isError: isStoreQueryError,
+  } = useQuery<PublicStore | null>({
+    queryKey: ['checkout-store', targetSlug],
+    queryFn: () => storeService.getStoreBySlugClient(targetSlug),
+    enabled: Boolean(targetSlug),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const { data: storeSettings = null } = useQuery<PublicStoreSettings | null>({
+    queryKey: ['checkout-store-settings', store?.id],
+    queryFn: () => storeService.getPublicStoreSettingsClient(store!.id).catch(() => null),
+    enabled: Boolean(store?.id),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const isLoadingStore = Boolean(targetSlug) && isStoreQueryLoading;
+  const storeLoadError = isStoreQueryError
+    ? 'No pudimos cargar la información de la tienda.'
+    : Boolean(targetSlug) && !isStoreQueryLoading && !store
+    ? 'No encontramos la tienda solicitada.'
+    : null;
 
   const [fulfillment, setFulfillment] = useState<CheckoutFulfillmentType>('DELIVERY');
   const [selectedDate, setSelectedDate] = useState<string>(() => getBusinessTodayDate());
@@ -91,11 +118,17 @@ export function CheckoutPageClient() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerDocumentNumber, setCustomerDocumentNumber] = useState('');
+  const [requestedReceiptType, setRequestedReceiptType] = useState<'BOLETA' | 'FACTURA'>('BOLETA');
+  const [customerLegalName, setCustomerLegalName] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
   const [discountCode, setDiscountCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  const validatedSubtotalRef = useRef<number | null>(null);
+  const restoredDraftStoreRef = useRef<string | null>(null);
+  const draftSlotIdRef = useRef<string | null>(null);
   const [hasAutofilledFromAccount, setHasAutofilledFromAccount] = useState(false);
-  const [serviceFeeRate, setServiceFeeRate] = useState(0);
-  const [serviceFeeCap, setServiceFeeCap] = useState<number | null>(null);
   const [activePaymentSession, setActivePaymentSession] = useState<{
     paymentId: string;
     initPoint: string;
@@ -125,25 +158,27 @@ export function CheckoutPageClient() {
     return () => clearInterval(interval);
   }, [activePaymentSession?.paymentId, checkActivePaymentStatus]);
 
-  useEffect(() => {
-    let active = true;
-    fetch('/api/platform-settings', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (active && data) {
-          if (typeof data.customerServiceFeeRate === 'number') {
-            setServiceFeeRate(data.customerServiceFeeRate);
-          }
-          if (typeof data.customerServiceFeeCap === 'number') {
-            setServiceFeeCap(data.customerServiceFeeCap);
-          }
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { data: platformSettingsData } = useQuery<{
+    customerServiceFeeRate?: number;
+    customerServiceFeeCap?: number | null;
+  } | null>({
+    queryKey: ['platform-settings'],
+    queryFn: async () => {
+      const res = await fetch('/api/platform-settings', { cache: 'no-store' });
+      return res.ok ? res.json() : null;
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const serviceFeeRate =
+    typeof platformSettingsData?.customerServiceFeeRate === 'number'
+      ? platformSettingsData.customerServiceFeeRate
+      : 0;
+  const serviceFeeCap =
+    typeof platformSettingsData?.customerServiceFeeCap === 'number'
+      ? platformSettingsData.customerServiceFeeCap
+      : null;
 
   const { data: customerProfile } = useCustomerProfile(authenticated);
 
@@ -156,8 +191,9 @@ export function CheckoutPageClient() {
       setCustomerName(fullName);
       applied = true;
     }
-    if (customerProfile.phone && !customerPhone) {
-      setCustomerPhone(customerProfile.phone);
+    const localPhone = toLocalPeruPhone(customerProfile.phone);
+    if (localPhone && !customerPhone) {
+      setCustomerPhone(localPhone);
       applied = true;
     }
     if (customerProfile.email && !customerEmail) {
@@ -176,48 +212,16 @@ export function CheckoutPageClient() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
 
-  // Load store + settings
+  // Sincronizar tienda seleccionada y modalidad por defecto cuando carga la tienda
   useEffect(() => {
-    if (!targetSlug) {
-      setIsLoadingStore(false);
-      return;
+    if (!store) return;
+    selectStore({ id: store.id, name: store.name, slug: store.slug });
+    if (!store.deliveryEnabled && store.pickupEnabled) {
+      setFulfillment('PICKUP');
+    } else if (!store.pickupEnabled && store.deliveryEnabled) {
+      setFulfillment('DELIVERY');
     }
-    let active = true;
-    setIsLoadingStore(true);
-    setStoreLoadError(null);
-
-    storeService
-      .getStoreBySlugClient(targetSlug)
-      .then(async (loadedStore) => {
-        if (!active) return;
-        if (!loadedStore) {
-          setStore(null);
-          setStoreLoadError('No encontramos la tienda solicitada.');
-          return;
-        }
-        setStore(loadedStore);
-        selectStore({ id: loadedStore.id, name: loadedStore.name, slug: loadedStore.slug });
-
-        if (!loadedStore.deliveryEnabled && loadedStore.pickupEnabled) {
-          setFulfillment('PICKUP');
-        } else if (!loadedStore.pickupEnabled && loadedStore.deliveryEnabled) {
-          setFulfillment('DELIVERY');
-        }
-
-        const settings = await storeService.getPublicStoreSettingsClient(loadedStore.id).catch(() => null);
-        if (active) setStoreSettings(settings);
-      })
-      .catch(() => {
-        if (active) setStoreLoadError('No pudimos cargar la información de la tienda.');
-      })
-      .finally(() => {
-        if (active) setIsLoadingStore(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [targetSlug, selectStore]);
+  }, [store, selectStore]);
 
   // Fetch capacity slots
   useEffect(() => {
@@ -235,7 +239,17 @@ export function CheckoutPageClient() {
       .getCapacitySlots(store.id, selectedDate)
       .then((res) => {
         if (!isCurrent) return;
-        setSlots(mapBackendSlotsToPickerSlots(res.slots));
+        const mapped = mapBackendSlotsToPickerSlots(res.slots);
+        setSlots(mapped);
+        if (draftSlotIdRef.current) {
+          const match = mapped.find(
+            (s) => s.id === draftSlotIdRef.current && (s.status === 'available' || s.status === 'few_left')
+          );
+          if (match) {
+            setSelectedSlot(match);
+          }
+          draftSlotIdRef.current = null;
+        }
       })
       .catch((err) => {
         if (!isCurrent) return;
@@ -250,6 +264,75 @@ export function CheckoutPageClient() {
     };
   }, [store?.id, selectedDate, authenticated, count, retryCounter]);
 
+  const clearStoredReservation = useCallback(() => {
+    if (!store?.id || !selectedSlot?.id) return;
+    try {
+      sessionStorage.removeItem(`jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`);
+    } catch { /* Storage is optional */ }
+  }, [store?.id, selectedSlot?.id]);
+
+  // Restaurar borrador de checkout por tienda (horario, modalidad, cupón) al volver a la página
+  useEffect(() => {
+    if (!store?.id || restoredDraftStoreRef.current === store.id) return;
+    restoredDraftStoreRef.current = store.id;
+    try {
+      const raw = sessionStorage.getItem(`jaldishop-checkout-draft:${store.id}`);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as {
+        selectedDate?: string;
+        selectedSlotId?: string | null;
+        fulfillment?: CheckoutFulfillmentType;
+        discountCode?: string;
+        appliedPromo?: { code: string; discountAmount: number } | null;
+        subtotalSnapshot?: number;
+      };
+      if (draft.selectedDate) setSelectedDate(draft.selectedDate);
+      if (draft.selectedSlotId) draftSlotIdRef.current = draft.selectedSlotId;
+      if (
+        draft.fulfillment &&
+        ((draft.fulfillment === 'DELIVERY' && store.deliveryEnabled) ||
+          (draft.fulfillment === 'PICKUP' && store.pickupEnabled))
+      ) {
+        setFulfillment(draft.fulfillment);
+      }
+      if (
+        draft.appliedPromo?.code &&
+        typeof draft.subtotalSnapshot === 'number' &&
+        draft.subtotalSnapshot === subtotal
+      ) {
+        setDiscountCode(draft.appliedPromo.code);
+        setAppliedPromo(draft.appliedPromo);
+        validatedSubtotalRef.current = subtotal;
+      }
+    } catch { /* Storage is optional */ }
+  }, [store?.id, store?.deliveryEnabled, store?.pickupEnabled, subtotal]);
+
+  // Persistir borrador de checkout por tienda
+  useEffect(() => {
+    if (!store?.id || restoredDraftStoreRef.current !== store.id) return;
+    try {
+      sessionStorage.setItem(
+        `jaldishop-checkout-draft:${store.id}`,
+        JSON.stringify({
+          selectedDate,
+          selectedSlotId: selectedSlot?.id ?? null,
+          fulfillment,
+          discountCode,
+          appliedPromo,
+          subtotalSnapshot: subtotal,
+        })
+      );
+    } catch { /* Storage is optional */ }
+  }, [store?.id, selectedDate, selectedSlot?.id, fulfillment, discountCode, appliedPromo, subtotal]);
+
+  useEffect(() => {
+    if (validatedSubtotalRef.current !== null && validatedSubtotalRef.current !== subtotal) {
+      setAppliedPromo(null);
+      setPromoError(null);
+      validatedSubtotalRef.current = null;
+    }
+  }, [subtotal]);
+
   useEffect(() => {
     if (!store?.id || !selectedSlot?.id) return;
     try {
@@ -259,6 +342,13 @@ export function CheckoutPageClient() {
       const expiresMs = parsed?.reservationExpiresAt ? new Date(parsed.reservationExpiresAt).getTime() : 0;
       if (expiresMs > Date.now() + 5000) {
         setCheckoutResponse(parsed);
+        if (parsed.pricing?.discountCode) {
+          setDiscountCode(parsed.pricing.discountCode);
+          setAppliedPromo({
+            code: parsed.pricing.discountCode,
+            discountAmount: Number(parsed.pricing.discountAmount || 0),
+          });
+        }
       } else {
         sessionStorage.removeItem(`jaldishop-checkout-reservation:${store.id}:${selectedSlot.id}`);
       }
@@ -271,8 +361,10 @@ export function CheckoutPageClient() {
   }, []);
 
   const deliveryFee = fulfillment === 'DELIVERY' ? store?.deliveryFeeAmount ?? 0 : 0;
-  const estimatedServiceFee = estimateServiceFee(subtotal, serviceFeeRate, serviceFeeCap);
-  const totalAmount = subtotal + deliveryFee + estimatedServiceFee;
+  const discountPreview = appliedPromo ? Math.min(subtotal, Number(appliedPromo.discountAmount || 0)) : 0;
+  const discountedSubtotal = Math.max(0, subtotal - discountPreview);
+  const estimatedServiceFee = estimateServiceFee(discountedSubtotal, serviceFeeRate, serviceFeeCap);
+  const totalAmount = Math.max(0, discountedSubtotal + deliveryFee + estimatedServiceFee);
 
   const hasUnavailableItems = cart.some((item) => item.available === false);
   const minDeliveryAmount = storeSettings?.minDeliveryAmount ?? null;
@@ -287,7 +379,8 @@ export function CheckoutPageClient() {
 
   const isPickupContactValid =
     fulfillment === 'PICKUP'
-      ? customerName.trim().length >= 2 && customerPhone.trim().length >= 6
+      ? customerName.trim().length >= 2 &&
+        validateLocalPeruPhone(customerPhone, true) === null
       : true;
 
   const canProceed = Boolean(
@@ -337,7 +430,7 @@ export function CheckoutPageClient() {
           .createAddress({
             alias: deliveryData.alias || 'Mi dirección',
             recipientName: deliveryData.recipientName,
-            recipientPhone: deliveryData.recipientPhone,
+            recipientPhone: toLocalPeruPhone(deliveryData.recipientPhone),
             department: deliveryData.department,
             province: deliveryData.province,
             district: deliveryData.district,
@@ -376,7 +469,8 @@ export function CheckoutPageClient() {
         startTime,
         endTime,
         customerName: deliveryFields.customerName || customerName.trim() || null,
-        customerPhone: deliveryFields.customerPhone || customerPhone.trim() || null,
+        customerPhone:
+          toLocalPeruPhone(deliveryFields.customerPhone || customerPhone) || null,
         customerEmail: customerEmail.trim() || null,
         deliveryAddress: deliveryFields.deliveryAddress || null,
         deliveryReference: deliveryFields.deliveryReference || null,
@@ -386,7 +480,9 @@ export function CheckoutPageClient() {
         ...(storeSettings?.allowOrderNotes !== false && orderNotes.trim()
           ? { orderNotes: orderNotes.trim() }
           : {}),
-        ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
+        ...(appliedPromo?.code || discountCode.trim()
+          ? { discountCode: appliedPromo?.code || discountCode.trim() }
+          : {}),
       };
 
       const result = await checkoutService.initiateCheckout(payload);
@@ -406,7 +502,7 @@ export function CheckoutPageClient() {
       }
       const msg = err instanceof Error ? err.message : 'No pudimos iniciar el checkout.';
       setPaymentError(msg);
-      toast.error(msg);
+      notify.error(msg, { id: notifyKeys.checkoutError() });
       return null;
     } finally {
       setIsSubmittingCheckout(false);
@@ -453,6 +549,21 @@ export function CheckoutPageClient() {
         storeId: store.id,
         storeName: store.name,
         returnBaseUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
+        discountCode: appliedPromo?.code || (discountCode.trim() ? discountCode.trim() : null),
+        requestedReceiptType: store.canIssueInvoices ? requestedReceiptType : 'BOLETA',
+        customerDocType:
+          store.canIssueInvoices && requestedReceiptType === 'FACTURA'
+            ? 'RUC'
+            : customerDocumentNumber.trim().length === 11
+              ? 'RUC'
+              : customerDocumentNumber.trim().length === 8
+                ? 'DNI'
+                : null,
+        customerDocNumber: customerDocumentNumber.trim() || null,
+        customerLegalName:
+          store.canIssueInvoices && requestedReceiptType === 'FACTURA' && customerLegalName.trim()
+            ? customerLegalName.trim()
+            : null,
       });
 
       if (!isValidMercadoPagoUrl(pref.initPoint)) {
@@ -471,9 +582,13 @@ export function CheckoutPageClient() {
         popupBlocked,
       });
       if (popupBlocked) {
-        toast.info('Tu navegador bloqueó la nueva pestaña. Usa el enlace directo para abrir Mercado Pago.');
+        notify.info('Tu navegador bloqueó la nueva pestaña. Usa el enlace directo para abrir Mercado Pago.', {
+          id: notifyKeys.mercadoPagoTab(),
+        });
       } else {
-        toast.success('Mercado Pago abierto en una nueva pestaña.');
+        notify.success('Mercado Pago abierto en una nueva pestaña.', {
+          id: notifyKeys.mercadoPagoTab(),
+        });
       }
     } catch (err: unknown) {
       const errorObj = err as { code?: string; status?: number; message?: string };
@@ -482,7 +597,7 @@ export function CheckoutPageClient() {
       }
       const msg = err instanceof Error ? err.message : 'No se pudo generar el enlace de Mercado Pago.';
       setPaymentError(msg);
-      toast.error(msg);
+      notify.error(msg, { id: notifyKeys.checkoutError() });
       setIsRedirectingToMercadoPago(false);
     } finally {
       setIsInitiatingPayment(false);
@@ -716,13 +831,16 @@ export function CheckoutPageClient() {
                     <label htmlFor="pickup-customer-phone" className="block text-xs font-medium text-[#57534e] mb-1.5">
                       Teléfono celular *
                     </label>
-                    <input
+                    <PeruPhoneInput
                       id="pickup-customer-phone"
-                      type="tel"
                       value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="987654321"
-                      className="w-full px-3.5 py-2.5 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
+                      onChange={setCustomerPhone}
+                      error={
+                        customerPhone.length > 0
+                          ? (validateLocalPeruPhone(customerPhone, true) ?? undefined)
+                          : undefined
+                      }
+                      required
                     />
                   </div>
                 </div>
@@ -783,6 +901,72 @@ export function CheckoutPageClient() {
                 )}
               </div>
 
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-[#57534e]">Comprobante de pago:</span>
+                  <div className="inline-flex rounded-lg border border-[#e7e0d6] bg-[#faf7f2] p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setRequestedReceiptType('BOLETA')}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                        requestedReceiptType === 'BOLETA'
+                          ? 'bg-[#005141] text-white'
+                          : 'text-[#57534e] hover:text-[#1c1917]'
+                      }`}
+                    >
+                      Boleta de Venta (03)
+                    </button>
+                    {store?.canIssueInvoices && (
+                      <button
+                        type="button"
+                        onClick={() => setRequestedReceiptType('FACTURA')}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                          requestedReceiptType === 'FACTURA'
+                            ? 'bg-[#005141] text-white'
+                            : 'text-[#57534e] hover:text-[#1c1917]'
+                        }`}
+                      >
+                        Factura Electrónica (01)
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {store?.canIssueInvoices && requestedReceiptType === 'FACTURA' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 rounded-lg bg-[#faf7f2] border border-[#e7e0d6]">
+                    <div>
+                      <label htmlFor="checkout-factura-ruc" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                        RUC del receptor (11 dígitos) *
+                      </label>
+                      <input
+                        id="checkout-factura-ruc"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={11}
+                        value={customerDocumentNumber}
+                        onChange={(e) => setCustomerDocumentNumber(e.target.value.replace(/\D/g, ''))}
+                        placeholder="20100070970"
+                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#e7e0d6] focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] font-mono tabular-nums outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="checkout-factura-razon" className="block text-xs font-medium text-[#57534e] mb-1.5">
+                        Razón Social *
+                      </label>
+                      <input
+                        id="checkout-factura-razon"
+                        type="text"
+                        maxLength={200}
+                        value={customerLegalName}
+                        onChange={(e) => setCustomerLegalName(e.target.value)}
+                        placeholder="EMPRESA S.A.C."
+                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#e7e0d6] focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {storeSettings?.allowOrderNotes !== false && (
                 <div>
                   <label htmlFor="checkout-order-notes" className="text-xs font-medium text-[#57534e] mb-1.5 flex items-center gap-1.5">
@@ -814,14 +998,50 @@ export function CheckoutPageClient() {
               deliveryFee={store.deliveryFeeAmount ?? 0}
               serviceFeeRate={serviceFeeRate}
               serviceFeeCap={serviceFeeCap}
+              taxRate={store.taxRate ?? 0.18}
               fulfillmentType={fulfillment}
               storeSettings={storeSettings}
               checkoutResponse={checkoutResponse}
               discountCode={discountCode}
-              onDiscountCodeChange={setDiscountCode}
-              onApplyDiscount={() => {
+              onDiscountCodeChange={(code) => {
+                setDiscountCode(code);
+                if (promoError) setPromoError(null);
+              }}
+              appliedPromo={appliedPromo}
+              promoError={promoError}
+              isValidatingPromo={isValidatingPromo}
+              onApplyDiscount={async () => {
+                if (!store || !discountCode.trim()) return;
+                setIsValidatingPromo(true);
+                setPromoError(null);
+                try {
+                  const res = await checkoutService.validatePromoCode({
+                    storeId: store.id,
+                    code: discountCode.trim(),
+                    subtotal,
+                  });
+                  if (res.valid && res.code) {
+                    setAppliedPromo({ code: res.code, discountAmount: Number(res.discountAmount || 0) });
+                    validatedSubtotalRef.current = subtotal;
+                    setDiscountCode(res.code);
+                    setCheckoutResponse(null);
+                    clearStoredReservation();
+                  } else {
+                    setAppliedPromo(null);
+                    validatedSubtotalRef.current = null;
+                    setPromoError(res.message || 'El código promocional no es válido.');
+                  }
+                } finally {
+                  setIsValidatingPromo(false);
+                }
+              }}
+              onClearDiscount={() => {
+                setAppliedPromo(null);
+                validatedSubtotalRef.current = null;
+                setDiscountCode('');
+                setPromoError(null);
                 setCheckoutResponse(null);
-                void ensureReservation();
+                clearStoredReservation();
               }}
               onReservationExpired={() => {
                 setCheckoutResponse(null);

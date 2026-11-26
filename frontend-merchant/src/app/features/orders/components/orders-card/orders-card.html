@@ -33,13 +33,13 @@
         <!-- Badge de Canal -->
         @if (order().channelLabel) {
           <span
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-container/10 text-primary-container font-bold text-[10px] uppercase tracking-wider"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-[#005141] border border-emerald-200 font-bold text-[10px] uppercase tracking-wider"
           >
             <ng-icon
               [name]="
                 order().channel === 'WHATSAPP'
                   ? 'matChatOutline'
-                  : order().channel === 'COUNTER'
+                  : order().channel === 'COUNTER' || order().channel === 'WEB_STORE'
                     ? 'matStorefrontOutline'
                     : 'matPhotoCameraOutline'
               "
@@ -51,15 +51,19 @@
 
         <!-- Badge de Estado Actual -->
         <span
-          class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0"
-          [class.bg-secondary-container]="order().status === 'CONFIRMED'"
-          [class.text-secondary-foreground]="order().status === 'CONFIRMED'"
-          [class.bg-surface-container-high]="order().status === 'IN_PREPARATION'"
-          [class.text-on-surface]="order().status === 'IN_PREPARATION'"
-          [class.bg-emerald-500/15]="order().status === 'READY'"
-          [class.text-emerald-700]="order().status === 'READY'"
-          [class.bg-surface-container]="order().status === 'COMPLETED'"
-          [class.text-on-surface-variant]="order().status === 'COMPLETED'"
+          class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 border"
+          [class.bg-amber-100]="order().status === 'CONFIRMED'"
+          [class.text-amber-950]="order().status === 'CONFIRMED'"
+          [class.border-amber-300]="order().status === 'CONFIRMED'"
+          [class.bg-stone-100]="order().status === 'IN_PREPARATION'"
+          [class.text-stone-900]="order().status === 'IN_PREPARATION'"
+          [class.border-stone-300]="order().status === 'IN_PREPARATION'"
+          [class.bg-emerald-50]="order().status === 'READY'"
+          [class.text-emerald-900]="order().status === 'READY'"
+          [class.border-emerald-200]="order().status === 'READY'"
+          [class.bg-stone-100]="order().status === 'COMPLETED'"
+          [class.text-stone-700]="order().status === 'COMPLETED'"
+          [class.border-stone-200]="order().status === 'COMPLETED'"
         >
           {{
             order().status === 'CONFIRMED'

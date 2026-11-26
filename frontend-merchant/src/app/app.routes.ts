@@ -88,6 +88,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/customers/customers').then((m) => m.Customers),
       },
       {
+        path: 'promo-codes',
+        loadComponent: () =>
+          import('./features/promo-codes/merchant-promo-codes').then((m) => m.MerchantPromoCodes),
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
       },

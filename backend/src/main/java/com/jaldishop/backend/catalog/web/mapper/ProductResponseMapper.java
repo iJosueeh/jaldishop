@@ -8,10 +8,13 @@ import com.jaldishop.backend.catalog.web.dto.ProductVariantResponse;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -28,17 +31,26 @@ public class ProductResponseMapper {
     }
 
     public ProductResponse toResponse(Product product) {
-        return toResponse(product, null, Collections.emptyMap());
+        return toResponse(product, null, Collections.emptyMap(), null);
     }
 
     public ProductResponse toResponse(Product product, List<ProductVariant> variants) {
-        return toResponse(product, variants, Collections.emptyMap());
+        return toResponse(product, variants, Collections.emptyMap(), null);
     }
 
     public ProductResponse toResponse(
             Product product,
             List<ProductVariant> variants,
             Map<UUID, Integer> availableQuantitiesByVariantId
+    ) {
+        return toResponse(product, variants, availableQuantitiesByVariantId, null);
+    }
+
+    public ProductResponse toResponse(
+            Product product,
+            List<ProductVariant> variants,
+            Map<UUID, Integer> availableQuantitiesByVariantId,
+            List<String> orderedImages
     ) {
         if (product == null) {
             return null;
@@ -68,6 +80,11 @@ public class ProductResponseMapper {
             }
         }
 
+        List<String> normalizedImages = normalizeImages(orderedImages, product.getImageUrl());
+        String primaryImageUrl = product.getImageUrl() != null && !product.getImageUrl().isBlank()
+                ? product.getImageUrl().trim()
+                : (normalizedImages.isEmpty() ? null : normalizedImages.get(0));
+
         return new ProductResponse(
                 product.getId(),
                 product.getStoreId(),
@@ -75,7 +92,8 @@ public class ProductResponseMapper {
                 product.getName(),
                 product.getSlug(),
                 product.getDescription(),
-                product.getImageUrl(),
+                primaryImageUrl,
+                normalizedImages,
                 product.getStatus().name(),
                 minPrice,
                 maxPrice,
@@ -83,5 +101,20 @@ public class ProductResponseMapper {
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
+    }
+
+    private List<String> normalizeImages(List<String> orderedImages, String fallbackImageUrl) {
+        Set<String> unique = new LinkedHashSet<>();
+        if (orderedImages != null) {
+            for (String url : orderedImages) {
+                if (url != null && !url.isBlank()) {
+                    unique.add(url.trim());
+                }
+            }
+        }
+        if (fallbackImageUrl != null && !fallbackImageUrl.isBlank()) {
+            unique.add(fallbackImageUrl.trim());
+        }
+        return unique.isEmpty() ? Collections.emptyList() : new ArrayList<>(unique);
     }
 }

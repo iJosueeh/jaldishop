@@ -24,6 +24,19 @@ export interface ThermalTicketOrderData {
   deliveryFee?: number;
   totalAmount: number;
   items: ThermalTicketItemData[];
+  // Datos fiscales SUNAT opcionales
+  emitterLegalName?: string;
+  emitterTaxIdType?: string;
+  emitterTaxIdNumber?: string;
+  emitterTaxRegime?: string;
+  receiptTypeCode?: string;
+  receiptTypeName?: string;
+  receiptFullNumber?: string;
+  customerDocType?: string;
+  customerDocNumber?: string;
+  taxableAmount?: number;
+  igvRate?: number;
+  igvAmount?: number;
 }
 
 /**
@@ -95,8 +108,20 @@ export function generateAsciiTicket(
 
   // Encabezado
   lines.push(divider('=', w));
-  lines.push(centerText(storeName.toUpperCase(), w));
-  lines.push(centerText(`COMANDA OPERATIVA ${order.orderNumber}`, w));
+  const headerTitle = (order.emitterLegalName || storeName).toUpperCase();
+  lines.push(centerText(headerTitle, w));
+  if (order.emitterTaxIdNumber) {
+    const docLabel = order.emitterTaxIdType === 'DNI' ? 'DNI' : 'RUC';
+    const regimeTag = order.emitterTaxRegime ? ` · ${order.emitterTaxRegime}` : '';
+    lines.push(centerText(`${docLabel}: ${order.emitterTaxIdNumber}${regimeTag}`, w));
+  }
+  if (order.receiptFullNumber) {
+    const docTitle = (order.receiptTypeName || 'COMPROBANTE DE PAGO').toUpperCase();
+    lines.push(centerText(`${docTitle}`, w));
+    lines.push(centerText(`${order.receiptFullNumber} (Ref ${order.orderNumber})`, w));
+  } else {
+    lines.push(centerText(`COMANDA OPERATIVA ${order.orderNumber}`, w));
+  }
   lines.push(divider('=', w));
 
   // Metadatos operativos
@@ -105,9 +130,16 @@ export function generateAsciiTicket(
   const dateTimeStr = timeStr ? `${dateStr} ${timeStr}` : dateStr;
   const channelStr = order.channelLabel || order.channel || 'DIRECTO';
 
+  const paymentStr = order.paymentMethod === 'MERCADO_PAGO'
+    ? 'MERCADO PAGO'
+    : (order.paymentMethod || 'EFECTIVO');
+
   lines.push(padBetween(`Fecha: ${dateTimeStr}`, `Canal: ${channelStr}`, w));
-  lines.push(padBetween(`Entrega: ${order.deliveryMode}`, `Pago: ${order.paymentMethod || 'EFECTIVO'}`, w));
+  lines.push(padBetween(`Entrega: ${order.deliveryMode}`, `Pago: ${paymentStr}`, w));
   lines.push(`Cliente: ${order.customerName}`);
+  if (order.customerDocNumber) {
+    lines.push(`${order.customerDocType || 'Doc'}: ${order.customerDocNumber}`);
+  }
   if (order.customerPhone) {
     lines.push(`Teléfono: ${order.customerPhone}`);
   }
@@ -158,6 +190,18 @@ export function generateAsciiTicket(
   }
   if (order.deliveryFee != null && order.deliveryFee > 0) {
     lines.push(padBetween('Costo delivery:', `S/ ${order.deliveryFee.toFixed(2)}`, w));
+  }
+  if (order.igvRate != null) {
+    if (order.igvRate === 0) {
+      const base = order.taxableAmount ?? order.totalAmount;
+      lines.push(padBetween('OP. NRUS / EXON.:', `S/ ${base.toFixed(2)}`, w));
+      lines.push(padBetween('IGV (0%):', 'S/ 0.00', w));
+    } else {
+      const base = order.taxableAmount ?? order.totalAmount / (1 + order.igvRate / 100);
+      const igv = order.igvAmount ?? order.totalAmount - base;
+      lines.push(padBetween('OP. GRAVADA:', `S/ ${base.toFixed(2)}`, w));
+      lines.push(padBetween(`IGV (${order.igvRate}%):`, `S/ ${igv.toFixed(2)}`, w));
+    }
   }
   lines.push(padBetween('TOTAL A COBRAR:', `S/ ${order.totalAmount.toFixed(2)}`, w));
 

@@ -1,21 +1,19 @@
 package com.jaldishop.backend.store.application.service;
 
-import com.jaldishop.backend.store.application.command.CreateStoreCommand;
-import com.jaldishop.backend.store.domain.model.Store;
-
 import com.jaldishop.backend.identity.application.port.StoreProvisioning;
 import com.jaldishop.backend.identity.application.port.StoreProvisioningData;
+import com.jaldishop.backend.store.application.command.CreateStoreCommand;
+import com.jaldishop.backend.store.domain.enums.TaxIdType;
+import com.jaldishop.backend.store.domain.enums.TaxRegime;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
  * Implementación del puerto {@link StoreProvisioning} de {@code identity/application}.
- * Adaptador burdo: solo mapea los 20 campos 1:1 hacia {@link CreateStoreCommand} y
- * delega en {@link CreateStoreService} (validaciones, defaults y resolución de slug
- * permanecen allí, intactos). Sin {@link org.springframework.transaction.annotation.Transactional}:
- * no abre transacción propia, por lo que se une a la transacción de
- * RegisterMerchantService y el rollback del registro sigue siendo atómico.
+ * Traduce los tipos simples de {@link StoreProvisioningData} hacia {@link CreateStoreCommand}
+ * y delega en {@link CreateStoreService} dentro de la misma transacción.
  */
 @Component
 public class StoreProvisioningAdapter implements StoreProvisioning {
@@ -28,6 +26,9 @@ public class StoreProvisioningAdapter implements StoreProvisioning {
 
     @Override
     public UUID provisionStore(StoreProvisioningData data) {
+        TaxIdType taxIdType = parseEnum(TaxIdType.class, data.taxIdType());
+        TaxRegime taxRegime = parseEnum(TaxRegime.class, data.taxRegime());
+
         CreateStoreCommand command = new CreateStoreCommand(
                 data.ownerUserId(),
                 data.name(),
@@ -48,8 +49,25 @@ public class StoreProvisioningAdapter implements StoreProvisioning {
                 data.instagramUrl(),
                 data.facebookUrl(),
                 data.whatsappNumber(),
-                data.categoryIds()
+                data.categoryIds(),
+                data.legalBusinessName(),
+                taxIdType,
+                data.taxIdNumber(),
+                taxRegime,
+                data.canIssueInvoices(),
+                data.sunatTermsAcceptedAt()
         );
         return createStoreService.execute(command).getId();
+    }
+
+    private <E extends Enum<E>> E parseEnum(Class<E> enumClass, String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(enumClass, raw.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Valor inválido para " + enumClass.getSimpleName() + ": " + raw);
+        }
     }
 }

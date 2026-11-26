@@ -45,6 +45,9 @@ public class InitiateCheckoutService {
     @Autowired(required = false)
     private PlatformSettingsProvider platformSettingsProvider;
 
+    @Autowired(required = false)
+    private com.jaldishop.backend.promo.application.service.ValidatePromoCodeService validatePromoCodeService;
+
     @Autowired
     public InitiateCheckoutService(
             CartRepository cartRepository,
@@ -138,6 +141,18 @@ public class InitiateCheckoutService {
             }
         }
 
+        BigDecimal rawSubtotal = itemSnapshots.stream()
+                .map(CheckoutItemSnapshot::subtotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String appliedDiscountCode = null;
+        BigDecimal appliedDiscountAmount = BigDecimal.ZERO;
+        if (command.discountCode() != null && !command.discountCode().isBlank() && validatePromoCodeService != null) {
+            var promoResult = validatePromoCodeService.validateOrThrow(command.storeId(), command.discountCode(), rawSubtotal);
+            appliedDiscountCode = promoResult.code();
+            appliedDiscountAmount = promoResult.discountAmount();
+        }
+
         CheckoutPricing pricing = CheckoutPricing.calculate(
                 itemSnapshots,
                 command.fulfillmentType(),
@@ -145,7 +160,9 @@ public class InitiateCheckoutService {
                 store.getTaxRate(),
                 serviceFeeRate,
                 serviceFeeCap,
-                currency
+                currency,
+                appliedDiscountCode,
+                appliedDiscountAmount
         );
 
         // Validación de monto mínimo de entrega

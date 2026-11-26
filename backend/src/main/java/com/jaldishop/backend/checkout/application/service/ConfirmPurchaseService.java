@@ -59,6 +59,12 @@ public class ConfirmPurchaseService {
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
 
+    @Autowired(required = false)
+    private com.jaldishop.backend.promo.application.service.ConsumePromoCodeService consumePromoCodeService;
+
+    @Autowired(required = false)
+    private com.jaldishop.backend.billing.application.service.IssueFiscalReceiptService issueFiscalReceiptService;
+
     @Autowired
     public ConfirmPurchaseService(
             PaymentReader paymentReader,
@@ -194,9 +200,34 @@ public class ConfirmPurchaseService {
         // 4. Comprometer inventario atómicamente
         commitInventoryReservationService.execute(reservation.getStoreId(), reservation.getId());
 
-        // 5. Crear y persistir la orden en PostgreSQL
+        // 5. Consumir código promocional atómicamente y registrar fuente de financiamiento
+        String promoFundingSource = null;
+        if (pricing.discountCode() != null && !pricing.discountCode().isBlank() && consumePromoCodeService != null) {
+            promoFundingSource = consumePromoCodeService.consumeOnOrderConfirmation(pricing.discountCode())
+                    .map(Enum::name)
+                    .orElse(null);
+        }
+
+        // 6. Crear y persistir la orden en PostgreSQL
         Order order = buildOrder(command, payment, reservation, store, pricing, itemSnapshots);
+        order.setPromoFundingSource(promoFundingSource);
         Order savedOrder = orderRepository.save(order);
+
+        if (issueFiscalReceiptService != null) {
+            issueFiscalReceiptService.issueForOrder(
+                    savedOrder.getId(),
+                    payment.paymentId(),
+                    reservation.getUserId(),
+                    store,
+                    savedOrder.getTotalAmount(),
+                    savedOrder.getCurrency(),
+                    savedOrder.getCustomerName(),
+                    payment.requestedReceiptType(),
+                    payment.customerDocType(),
+                    payment.customerDocNumber(),
+                    payment.customerLegalName()
+            );
+        }
 
         // 6. Limpieza selectiva del carrito mutable (únicamente cantidades e ítems comprometidos)
         cleanupCommittedItemsFromCart(reservation.getUserId(), reservation.getStoreId(), itemSnapshots);

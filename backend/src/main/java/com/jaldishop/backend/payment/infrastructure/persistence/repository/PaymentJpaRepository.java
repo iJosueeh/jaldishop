@@ -2,6 +2,7 @@ package com.jaldishop.backend.payment.infrastructure.persistence.repository;
 
 import com.jaldishop.backend.payment.infrastructure.persistence.entity.PaymentEntity;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -27,6 +28,71 @@ public interface PaymentJpaRepository extends JpaRepository<PaymentEntity, UUID>
             ORDER BY p.createdAt DESC
             """)
     List<PaymentEntity> findByCustomerUserId(@Param("customerUserId") UUID customerUserId);
+
+    @Query(value = """
+            SELECT p FROM PaymentEntity p
+            WHERE EXISTS (
+                SELECT cr.id FROM CapacityReservationEntity cr
+                WHERE cr.id = p.capacityReservationId AND cr.userId = :customerUserId
+            )
+            AND (
+                :filter = 'ALL'
+                OR (:filter = 'WITH_ORDER' AND EXISTS (SELECT o.id FROM OrderEntity o WHERE o.paymentId = p.id))
+                OR (:filter = 'NO_ORDER' AND NOT EXISTS (SELECT o.id FROM OrderEntity o WHERE o.paymentId = p.id))
+                OR (:filter = 'APPROVED' AND p.status = 'APPROVED')
+                OR (:filter = 'REFUND' AND p.refundStatus IS NOT NULL AND p.refundStatus NOT IN ('NONE', 'NOT_REQUESTED', 'NOT_REQUIRED'))
+            )
+            AND (
+                :searchPattern IS NULL
+                OR LOWER(CAST(p.id AS string)) LIKE :searchPattern ESCAPE '\\'
+                OR EXISTS (
+                    SELECT o.id FROM OrderEntity o
+                    WHERE o.paymentId = p.id
+                      AND (
+                        LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+                        OR EXISTS (
+                            SELECT s.id FROM StoreEntity s
+                            WHERE s.id = o.storeId AND LOWER(s.name) LIKE :searchPattern ESCAPE '\\'
+                        )
+                      )
+                )
+            )
+            ORDER BY p.createdAt DESC, p.id DESC
+            """, countQuery = """
+            SELECT COUNT(p) FROM PaymentEntity p
+            WHERE EXISTS (
+                SELECT cr.id FROM CapacityReservationEntity cr
+                WHERE cr.id = p.capacityReservationId AND cr.userId = :customerUserId
+            )
+            AND (
+                :filter = 'ALL'
+                OR (:filter = 'WITH_ORDER' AND EXISTS (SELECT o.id FROM OrderEntity o WHERE o.paymentId = p.id))
+                OR (:filter = 'NO_ORDER' AND NOT EXISTS (SELECT o.id FROM OrderEntity o WHERE o.paymentId = p.id))
+                OR (:filter = 'APPROVED' AND p.status = 'APPROVED')
+                OR (:filter = 'REFUND' AND p.refundStatus IS NOT NULL AND p.refundStatus NOT IN ('NONE', 'NOT_REQUESTED', 'NOT_REQUIRED'))
+            )
+            AND (
+                :searchPattern IS NULL
+                OR LOWER(CAST(p.id AS string)) LIKE :searchPattern ESCAPE '\\'
+                OR EXISTS (
+                    SELECT o.id FROM OrderEntity o
+                    WHERE o.paymentId = p.id
+                      AND (
+                        LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+                        OR EXISTS (
+                            SELECT s.id FROM StoreEntity s
+                            WHERE s.id = o.storeId AND LOWER(s.name) LIKE :searchPattern ESCAPE '\\'
+                        )
+                      )
+                )
+            )
+            """)
+    Page<PaymentEntity> findPagedByCustomerUserId(
+            @Param("customerUserId") UUID customerUserId,
+            @Param("filter") String filter,
+            @Param("searchPattern") String searchPattern,
+            Pageable pageable
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM PaymentEntity p WHERE p.id = :id")

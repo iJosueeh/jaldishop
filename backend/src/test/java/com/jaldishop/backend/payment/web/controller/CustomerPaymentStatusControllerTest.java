@@ -7,6 +7,7 @@ import com.jaldishop.backend.payment.web.dto.CustomerPaymentStatusResponse;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.CustomerPageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -119,6 +120,35 @@ class CustomerPaymentStatusControllerTest {
                 .andExpect(jsonPath("$[0].orderNumber").value("ORD-12345"))
                 .andExpect(jsonPath("$[0].token").doesNotExist())
                 .andExpect(jsonPath("$[0].cvv").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/customer/payments/paged retorna página filtrada con storeName y totalItems")
+    void returnsPagedCustomerPaymentHistory() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+        CustomerPaymentHistoryResponse payment = new CustomerPaymentHistoryResponse(
+                paymentId, "APPROVED", "NOT_REQUIRED", new BigDecimal("39.00"), "PEN",
+                "JAL-2026-000001", "IN_PREPARATION", Instant.now(), Instant.now(), null,
+                "Pastelería Dulce Deleite", 2
+        );
+        CustomerPageResponse<CustomerPaymentHistoryResponse> pageResponse = new CustomerPageResponse<>(
+                List.of(payment), 0, 8, 1, 1
+        );
+        when(historyService.executePaged(authenticatedUserId, "WITH_ORDER", "Dulce", 0, 8))
+                .thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/customer/payments/paged")
+                        .param("page", "0")
+                        .param("size", "8")
+                        .param("filter", "WITH_ORDER")
+                        .param("q", "Dulce")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].paymentId").value(paymentId.toString()))
+                .andExpect(jsonPath("$.items[0].storeName").value("Pastelería Dulce Deleite"))
+                .andExpect(jsonPath("$.items[0].totalItems").value(2))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
     }
 
     @Test

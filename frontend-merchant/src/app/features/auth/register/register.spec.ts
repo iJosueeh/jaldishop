@@ -38,6 +38,13 @@ describe('Register (Componente Principal del Flujo de Registro en 4 Pasos)', () 
     logoUrl: 'https://res.cloudinary.com/demo/image/upload/logo.png',
     bannerUrl: 'https://res.cloudinary.com/demo/image/upload/banner.png',
     categoryIds: ['cat-reposteria'],
+    taxRegime: 'RUS',
+    taxIdType: 'RUC_10',
+    taxIdNumber: '10456789019',
+    legalBusinessName: 'Clara Quispe',
+    canIssueInvoices: false,
+    igvExempt: true,
+    taxRate: 0,
   };
 
   const mockStep3: RegisterStep3Data = {
@@ -56,6 +63,7 @@ describe('Register (Componente Principal del Flujo de Registro en 4 Pasos)', () 
     closingTime: '19:00',
     operatingDays: ['L', 'M', 'X', 'J', 'V', 'S'],
     autoPauseOnLimit: true,
+    sunatTermsAccepted: true,
   };
 
   const mockAuthResult: AuthResult = {
@@ -113,15 +121,6 @@ describe('Register (Componente Principal del Flujo de Registro en 4 Pasos)', () 
     component.onStep2Submit(mockStep2);
 
     expect(component.step2Data()).toEqual(mockStep2);
-    expect(component.currentStep()).toBe(3);
-  });
-
-  it('debe asignar datos por defecto y avanzar a paso 3 si se omite el paso 2', () => {
-    component.onStep1Submit(mockStep1);
-    component.onStep2Skip();
-
-    expect(component.step2Data()).toBeTruthy();
-    expect(component.step2Data()?.name).toBe('Mi negocio');
     expect(component.currentStep()).toBe(3);
   });
 
@@ -196,6 +195,13 @@ describe('Register (Componente Principal del Flujo de Registro en 4 Pasos)', () 
         logoUrl: 'https://res.cloudinary.com/demo/image/upload/logo.png',
         bannerUrl: 'https://res.cloudinary.com/demo/image/upload/banner.png',
         categoryIds: ['cat-reposteria'],
+        legalBusinessName: 'Clara Quispe',
+        taxIdType: 'RUC_10',
+        taxIdNumber: '10456789019',
+        taxRegime: 'RUS',
+        canIssueInvoices: false,
+        taxRate: 0,
+        sunatTermsAccepted: true,
       });
 
       expect(component.isLoading()).toBe(false);

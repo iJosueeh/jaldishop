@@ -4,14 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import {
   Eye,
   EyeOff,
   Lock,
   Mail,
   User,
-  Phone,
   AlertCircle,
   ArrowRight,
   ArrowLeft,
@@ -23,10 +22,12 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
 import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
+import { PeruPhoneInput } from '@/shared/components/ui/PeruPhoneInput';
 import { customerAuthService } from '../services/customerAuthService';
 import { getSafeRedirectUrl } from '../utils/safeRedirect';
+import { EmailVerificationPendingCard } from './EmailVerificationPendingCard';
 import {
-  normalizePhone,
+  toLocalPeruPhone,
   validateFirstName,
   validateLastName,
   validateEmailField,
@@ -53,6 +54,7 @@ export function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     firstName?: string;
@@ -159,7 +161,7 @@ export function RegisterForm() {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
-        phone: phone.trim() ? normalizePhone(phone.trim()) : undefined,
+        phone: toLocalPeruPhone(phone) || undefined,
         password,
       });
 
@@ -167,16 +169,21 @@ export function RegisterForm() {
         await queryClient.invalidateQueries({ queryKey: ['customer-session'] });
         await queryClient.invalidateQueries({ queryKey: ['customer-cart'] });
 
-        toast.success(
+        notify.success(
           response.fullName
             ? `¡Bienvenido a JaldiShop, ${response.fullName}!`
-            : '¡Cuenta creada con éxito!'
+            : '¡Cuenta creada con éxito!',
+          { id: notifyKeys.authRegister() }
         );
 
         router.push(redirectUrl);
         router.refresh();
+      } else if (response.requiresEmailVerification) {
+        setPendingVerificationEmail(response.email || email.trim().toLowerCase());
       } else {
-        toast.info('Tu cuenta fue creada con éxito. Por favor inicia sesión.');
+        notify.info('Tu cuenta fue creada con éxito. Por favor inicia sesión.', {
+          id: notifyKeys.authRegister(),
+        });
         router.push(
           `/login?registrado=true&redirect=${encodeURIComponent(redirectUrl)}`
         );
@@ -216,7 +223,7 @@ export function RegisterForm() {
             ? err.message
             : 'Ocurrió un error inesperado al procesar el registro.';
         setGeneralError(message);
-        toast.error(message);
+        notify.error(message, { id: notifyKeys.authRegister() });
       }
     } finally {
       setIsSubmitting(false);
@@ -335,15 +342,27 @@ export function RegisterForm() {
           </div>
 
           {/* Contexto de la tienda si viene de una tienda */}
-          {isFromStore && (
+          {!pendingVerificationEmail && isFromStore && (
             <div className="mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-[#005141] shrink-0" />
               <span>Crea tu cuenta para continuar con tu pedido en esta tienda.</span>
             </div>
           )}
 
-          {/* Título de la vista */}
-          <div className="mb-8">
+          {pendingVerificationEmail ? (
+            <EmailVerificationPendingCard
+              email={pendingVerificationEmail}
+              loginHref={`/login${searchParams.get('redirect') ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
+              onSecondaryAction={() => {
+                setPendingVerificationEmail(null);
+                setGeneralError(null);
+              }}
+              secondaryActionLabel="Registrar otro correo electrónico"
+            />
+          ) : (
+            <>
+              {/* Título de la vista */}
+              <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#1c1917] tracking-tight">
               Crea tu cuenta de cliente
             </h1>
@@ -518,42 +537,23 @@ export function RegisterForm() {
                 </label>
                 <span className="text-[11px] text-stone-500">Para avisos de entrega por WhatsApp</span>
               </div>
-              <div
-                className={`relative flex rounded-xl border bg-white transition-all overflow-hidden ${
-                  fieldErrors.phone
-                    ? 'border-rose-400 focus-within:border-rose-500 focus-within:ring-1 focus-within:ring-rose-400/40'
-                    : 'border-stone-300 hover:border-stone-400 focus-within:border-[#005141] focus-within:ring-1 focus-within:ring-[#005141]'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 px-3 bg-stone-50 border-r border-stone-200 text-stone-600 select-none shrink-0 text-xs font-bold">
-                  <Phone className="h-3.5 w-3.5 text-stone-400" />
-                  <span>+51</span>
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    if (fieldErrors.phone) {
-                      setFieldErrors((prev) => ({ ...prev, phone: undefined }));
-                    }
-                  }}
-                  onBlur={() => handleBlur('phone')}
-                  disabled={isSubmitting}
-                  aria-invalid={Boolean(fieldErrors.phone)}
-                  aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
-                  placeholder="912 345 678"
-                  className="w-full px-3.5 py-2.5 bg-transparent text-sm text-stone-900 placeholder-stone-400 focus:outline-none"
-                />
-              </div>
-              {fieldErrors.phone && (
-                <p id="phone-error" role="alert" className="mt-1 text-xs text-rose-600 font-medium">
-                  {fieldErrors.phone}
-                </p>
-              )}
+              <PeruPhoneInput
+                id="phone"
+                name="phone"
+                autoComplete="tel-national"
+                value={phone}
+                onChange={(localPhone) => {
+                  setPhone(localPhone);
+                  if (fieldErrors.phone) {
+                    setFieldErrors((prev) => ({ ...prev, phone: undefined }));
+                  }
+                }}
+                onBlur={() => handleBlur('phone')}
+                disabled={isSubmitting}
+                error={fieldErrors.phone}
+                errorId="phone-error"
+                placeholder="912345678"
+              />
             </div>
 
             {/* Contraseña */}
@@ -725,6 +725,8 @@ export function RegisterForm() {
               </Link>
             </p>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

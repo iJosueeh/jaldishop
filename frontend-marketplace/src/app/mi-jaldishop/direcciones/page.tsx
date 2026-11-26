@@ -8,18 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function CustomerAddressesPage() {
-  return (
-    <div className="space-y-6 w-full">
-      <div className="pb-5 border-b border-stone-200/80">
-        <h2 className="font-display text-2xl font-bold text-stone-900 tracking-tight">
-          Mis Direcciones
-        </h2>
-        <p className="text-xs sm:text-sm text-stone-600 mt-0.5 leading-relaxed">
-          Administra tus direcciones guardadas para recibir tus pedidos más rápido.
-        </p>
-      </div>
-
-      <AddressesView />
-    </div>
-  );
+  return <AddressesView />;
 }

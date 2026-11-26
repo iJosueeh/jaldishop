@@ -1,8 +1,48 @@
-import { CustomerOrderDetail, CustomerOrderSummary } from '../types/customer.types';
+import {
+  CustomerOrderDetail,
+  CustomerOrderSummary,
+  CustomerPageResponse,
+} from '../types/customer.types';
+
+export interface CustomerOrderPageParams {
+  page?: number;
+  size?: number;
+  tab?: 'ACTIVE' | 'HISTORY';
+  deliveryMode?: 'ALL' | 'DELIVERY' | 'PICKUP';
+  q?: string;
+}
 
 export const customerOrderService = {
   async getOrders(): Promise<CustomerOrderSummary[]> {
     const res = await fetch('/api/customer/orders', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'No fue posible cargar tus pedidos.');
+    }
+
+    return res.json();
+  },
+
+  async getOrdersPaged(
+    params: CustomerOrderPageParams = {}
+  ): Promise<CustomerPageResponse<CustomerOrderSummary>> {
+    const sp = new URLSearchParams();
+    if (typeof params.page === 'number') sp.set('page', String(params.page));
+    if (typeof params.size === 'number') sp.set('size', String(params.size));
+    if (params.tab) sp.set('tab', params.tab);
+    if (params.deliveryMode) sp.set('deliveryMode', params.deliveryMode);
+    if (params.q && params.q.trim()) sp.set('q', params.q.trim());
+
+    const qs = sp.toString();
+    const url = qs ? `/api/customer/orders/paged?${qs}` : '/api/customer/orders/paged';
+    const res = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

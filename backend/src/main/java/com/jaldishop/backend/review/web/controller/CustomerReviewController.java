@@ -4,9 +4,11 @@ import com.jaldishop.backend.review.application.service.CheckReviewEligibilitySe
 import com.jaldishop.backend.review.application.service.CreateProductReviewService;
 import com.jaldishop.backend.review.application.service.DeleteProductReviewService;
 import com.jaldishop.backend.review.application.service.GetCustomerReviewsService;
+import com.jaldishop.backend.review.application.service.GetPendingReviewProductsService;
 import com.jaldishop.backend.review.application.service.UpdateProductReviewService;
 import com.jaldishop.backend.review.web.dto.CreateReviewRequest;
 import com.jaldishop.backend.review.web.dto.CustomerReviewResponse;
+import com.jaldishop.backend.review.web.dto.PendingReviewProductResponse;
 import com.jaldishop.backend.review.web.dto.ReviewEligibilityResponse;
 import com.jaldishop.backend.review.web.dto.UpdateReviewRequest;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
@@ -30,6 +32,9 @@ public class CustomerReviewController {
     private final UpdateProductReviewService updateProductReviewService;
     private final DeleteProductReviewService deleteProductReviewService;
     private final GetCustomerReviewsService getCustomerReviewsService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private GetPendingReviewProductsService getPendingReviewProductsService;
 
     public CustomerReviewController(CheckReviewEligibilityService checkReviewEligibilityService,
                                     CreateProductReviewService createProductReviewService,
@@ -82,5 +87,14 @@ public class CustomerReviewController {
             @AuthenticationPrincipal JwtPrincipal principal) {
         List<CustomerReviewResponse> reviews = getCustomerReviewsService.execute(principal.userId());
         return ResponseEntity.ok(reviews);
+    }
+
+    @GetMapping("/reviews/pending")
+    public ResponseEntity<List<PendingReviewProductResponse>> getPendingReviews(
+            @AuthenticationPrincipal JwtPrincipal principal) {
+        if (getPendingReviewProductsService == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(getPendingReviewProductsService.execute(principal.userId()));
     }
 }

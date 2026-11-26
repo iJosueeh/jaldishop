@@ -6,7 +6,12 @@ import com.jaldishop.backend.catalog.infrastructure.persistence.mapper.ProductPe
 import com.jaldishop.backend.catalog.infrastructure.persistence.repository.ProductJpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,6 +86,46 @@ public class ProductRepositoryAdapter implements ProductRepository {
     @Override
     public List<String> findProductImageUrls(UUID productId) {
         return repository.findProductImageUrls(productId);
+    }
+
+    @Override
+    public List<String> findOrderedImageUrls(UUID productId) {
+        List<String> raw = repository.findOrderedProductImageUrls(productId);
+        if (raw == null || raw.isEmpty()) {
+            return Collections.emptyList();
+        }
+        LinkedHashSet<String> unique = new LinkedHashSet<>();
+        for (String url : raw) {
+            if (url != null && !url.isBlank()) {
+                unique.add(url.trim());
+            }
+        }
+        return unique.isEmpty() ? Collections.emptyList() : new ArrayList<>(unique);
+    }
+
+    @Override
+    public Map<UUID, List<String>> findOrderedImageUrlsByProductIds(List<UUID> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Object[]> rows = repository.findOrderedProductImageRowsByProductIds(productIds);
+        if (rows == null || rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<UUID, LinkedHashSet<String>> grouped = new LinkedHashMap<>();
+        for (Object[] row : rows) {
+            if (row == null || row.length < 2 || row[0] == null || row[1] == null) {
+                continue;
+            }
+            UUID productId = row[0] instanceof UUID uuid ? uuid : UUID.fromString(row[0].toString());
+            String url = row[1].toString().trim();
+            if (!url.isEmpty()) {
+                grouped.computeIfAbsent(productId, ignored -> new LinkedHashSet<>()).add(url);
+            }
+        }
+        Map<UUID, List<String>> result = new LinkedHashMap<>();
+        grouped.forEach((productId, urls) -> result.put(productId, new ArrayList<>(urls)));
+        return result;
     }
 
     @Override

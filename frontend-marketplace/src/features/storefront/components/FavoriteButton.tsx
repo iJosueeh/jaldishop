@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { customerFavoriteService } from '@/features/customer/services/customerFavoriteService';
 import { cn } from '@/shared/utils/cn';
 
@@ -59,8 +59,8 @@ export function FavoriteButton({ productId, variant = 'icon', className }: Favor
 
   const promptLogin = () => {
     const currentUrl = `${window.location.pathname}${window.location.search}`;
-    toast.info('Inicia sesión para guardar este producto en tus favoritos.', {
-      id: `favorite-${productId}`,
+    notify.info('Inicia sesión para guardar este producto en tus favoritos.', {
+      id: notifyKeys.favorite(productId),
       action: {
         label: 'Iniciar sesión',
         onClick: () => router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`),
@@ -90,16 +90,16 @@ export function FavoriteButton({ productId, variant = 'icon', className }: Favor
 
       setIsFavorite(result.isFavorite);
       if (result.isFavorite) {
-        toast.success('Añadido a tus favoritos.', {
-          id: `favorite-${productId}`,
+        notify.success('Añadido a tus favoritos.', {
+          id: notifyKeys.favorite(productId),
           action: {
             label: 'Ver favoritos',
             onClick: () => router.push('/mi-jaldishop/favoritos'),
           },
         });
       } else {
-        toast.success('Retirado de tus favoritos.', {
-          id: `favorite-${productId}`,
+        notify.success('Retirado de tus favoritos.', {
+          id: notifyKeys.favorite(productId),
         });
       }
     } catch (error) {
@@ -109,8 +109,8 @@ export function FavoriteButton({ productId, variant = 'icon', className }: Favor
         promptLogin();
         return;
       }
-      toast.error(error instanceof Error ? error.message : 'No se pudo actualizar el favorito.', {
-        id: `favorite-${productId}`,
+      notify.error(error instanceof Error ? error.message : 'No se pudo actualizar el favorito.', {
+        id: notifyKeys.favorite(productId),
       });
     } finally {
       inFlightRef.current = false;

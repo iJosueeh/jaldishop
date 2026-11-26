@@ -19,13 +19,17 @@ import {
   Star,
   AlertCircle,
   User,
-  Phone,
   ShieldCheck,
   Truck,
   RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { PeruPhoneInput } from '@/shared/components/ui/PeruPhoneInput';
+import {
+  toLocalPeruPhone,
+  validateLocalPeruPhone,
+} from '@/features/auth/utils/validation';
 
 export interface DeliveryAddressSelectorProps {
   store: PublicStore;
@@ -111,8 +115,9 @@ export function DeliveryAddressSelector({
     if (defaultRecipientName && !recipientName) {
       setRecipientName(defaultRecipientName);
     }
-    if (defaultRecipientPhone && !recipientPhone) {
-      setRecipientPhone(defaultRecipientPhone);
+    const localDefaultPhone = toLocalPeruPhone(defaultRecipientPhone);
+    if (localDefaultPhone && !recipientPhone) {
+      setRecipientPhone(localDefaultPhone);
     }
   }, [defaultRecipientName, defaultRecipientPhone, recipientName, recipientPhone]);
 
@@ -158,8 +163,8 @@ export function DeliveryAddressSelector({
       }
     } else {
       // Manual mode validation
-      const cleanPhone = recipientPhone.replace(/[\s-]/g, '');
-      const isPhoneValid = /^(?:\+?51)?9\d{8}$/.test(cleanPhone);
+      const localPhone = toLocalPeruPhone(recipientPhone);
+      const isPhoneValid = validateLocalPeruPhone(localPhone, true) === null;
       const isComplete =
         recipientName.trim().length >= 3 &&
         isPhoneValid &&
@@ -173,7 +178,7 @@ export function DeliveryAddressSelector({
         mode: 'manual',
         alias: alias.trim() || undefined,
         recipientName: recipientName.trim(),
-        recipientPhone: recipientPhone.trim(),
+        recipientPhone: localPhone,
         department,
         province,
         district,
@@ -241,7 +246,7 @@ export function DeliveryAddressSelector({
       const created = await createAddress({
         alias: alias.trim() || 'Mi dirección',
         recipientName: recipientName.trim(),
-        recipientPhone: recipientPhone.trim(),
+        recipientPhone: toLocalPeruPhone(recipientPhone),
         department,
         province,
         district,
@@ -506,19 +511,18 @@ export function DeliveryAddressSelector({
                   <label htmlFor="chk-recipient-phone" className="block text-xs font-medium text-[#57534e] mb-1.5">
                     Teléfono celular <span className="text-rose-600">*</span>
                   </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-[#78716c] absolute left-3 top-2.5 pointer-events-none" aria-hidden="true" />
-                    <input
-                      id="chk-recipient-phone"
-                      type="tel"
-                      value={recipientPhone}
-                      onChange={(e) => setRecipientPhone(e.target.value)}
-                      placeholder="987654321"
-                      disabled={disabled || !store.deliveryEnabled}
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-[#faf7f2] border border-[#e7e0d6] focus:bg-white focus:border-[#005141] focus:ring-2 focus:ring-[#005141]/15 rounded-[8px] text-[#1c1917] placeholder-[#78716c] outline-none transition-colors"
-                      maxLength={15}
-                    />
-                  </div>
+                  <PeruPhoneInput
+                    id="chk-recipient-phone"
+                    value={recipientPhone}
+                    onChange={setRecipientPhone}
+                    disabled={disabled || !store.deliveryEnabled}
+                    error={
+                      recipientPhone.length > 0
+                        ? (validateLocalPeruPhone(recipientPhone, true) ?? undefined)
+                        : undefined
+                    }
+                    required
+                  />
                 </div>
               </div>
 
@@ -673,7 +677,7 @@ export function DeliveryAddressSelector({
                         disabled ||
                         isSavingInline ||
                         !recipientName.trim() ||
-                        !recipientPhone.trim() ||
+                        validateLocalPeruPhone(recipientPhone, true) !== null ||
                         !ubigeoCode ||
                         addressLine.trim().length < 5
                       }

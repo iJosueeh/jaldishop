@@ -29,7 +29,7 @@ public class RefreshTokenService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
-        if (!user.canAuthenticate() || user.getCredentialsVersion() != credentialsVersion) {
+        if (!user.canUseAuthenticatedSession() || user.getCredentialsVersion() != credentialsVersion) {
             throw new org.springframework.security.authentication.BadCredentialsException("Sesión revocada.");
         }
 

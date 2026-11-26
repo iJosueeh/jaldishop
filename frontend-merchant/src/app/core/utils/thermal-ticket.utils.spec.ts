@@ -127,4 +127,55 @@ describe('thermal-ticket.utils', () => {
     expect(mapped.items[0].quantity).toBe(5);
     expect(mapped.items[0].totalPrice).toBe(50.0);
   });
+
+  it('debe incluir datos SUNAT de Boleta Nuevo RUS (IGV 0%) y Factura MYPE (IGV 18%)', () => {
+    const rusTicket = generateAsciiTicket(
+      {
+        ...sampleOrder,
+        emitterLegalName: 'Bodega Luz',
+        emitterTaxIdType: 'RUC_10',
+        emitterTaxIdNumber: '10456789019',
+        emitterTaxRegime: 'RUS',
+        receiptTypeCode: '03',
+        receiptTypeName: 'Boleta de Venta',
+        receiptFullNumber: 'B001-00000012',
+        igvRate: 0,
+        taxableAmount: 197,
+        igvAmount: 0,
+      },
+      'Bodega Luz',
+      42,
+    );
+
+    expect(rusTicket).toContain('RUC: 10456789019');
+    expect(rusTicket).toContain('BOLETA DE VENTA');
+    expect(rusTicket).toContain('B001-00000012');
+    expect(rusTicket).toContain('IGV (0%):');
+
+    const facturaTicket = generateAsciiTicket(
+      {
+        ...sampleOrder,
+        emitterLegalName: 'Gourmet SAC',
+        emitterTaxIdType: 'RUC_20',
+        emitterTaxIdNumber: '20100070970',
+        emitterTaxRegime: 'MYPE',
+        receiptTypeCode: '01',
+        receiptTypeName: 'Factura Electrónica',
+        receiptFullNumber: 'F001-00000005',
+        customerDocType: 'RUC',
+        customerDocNumber: '20131312955',
+        igvRate: 18,
+        taxableAmount: 166.95,
+        igvAmount: 30.05,
+      },
+      'Gourmet SAC',
+      42,
+    );
+
+    expect(facturaTicket).toContain('RUC: 20100070970');
+    expect(facturaTicket).toContain('F001-00000005');
+    expect(facturaTicket).toContain('RUC: 20131312955');
+    expect(facturaTicket).toContain('OP. GRAVADA:');
+    expect(facturaTicket).toContain('IGV (18%):');
+  });
 });

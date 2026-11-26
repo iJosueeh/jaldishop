@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Share2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 
 interface StoreBannerProps {
   bannerUrl?: string;
@@ -17,7 +17,8 @@ export function StoreBanner({ bannerUrl, storeName }: StoreBannerProps) {
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
-      toast.success('¡Enlace de la tienda copiado!', {
+      notify.success('¡Enlace de la tienda copiado!', {
+        id: notifyKeys.shareStore(storeName),
         description: `Compartiendo la tienda de ${storeName}.`,
       });
     }

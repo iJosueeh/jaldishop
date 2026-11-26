@@ -4,7 +4,11 @@ import React, { useContext, useEffect, useState, useCallback, useRef } from 'rea
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { QueryClientContext } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
+import {
+  CUSTOMER_NOTIFICATIONS_QUERY_KEY,
+  UNREAD_NOTIFICATIONS_COUNT_KEY,
+} from '@/features/customer/hooks/useCustomerNotifications';
 import {
   CheckCircle2,
   Clock,
@@ -284,12 +288,14 @@ export const PaymentReturnView: React.FC<PaymentReturnViewProps> = ({ expectedPa
             });
           }
           void queryClient.invalidateQueries({ queryKey: ['customer-cart'] });
-          void queryClient.invalidateQueries({ queryKey: ['customer-notifications'] });
-          void queryClient.invalidateQueries({ queryKey: ['customer-notifications-unread-count'] });
+          void queryClient.invalidateQueries({ queryKey: CUSTOMER_NOTIFICATIONS_QUERY_KEY });
+          void queryClient.invalidateQueries({ queryKey: UNREAD_NOTIFICATIONS_COUNT_KEY });
         }
         if (notifiedOrderRef.current !== res.orderNumber) {
           notifiedOrderRef.current = res.orderNumber;
-          toast.success(`¡Pago confirmado! Pedido #${res.orderNumber} registrado.`);
+          notify.success(`¡Pago confirmado! Pedido #${res.orderNumber} registrado.`, {
+            id: notifyKeys.paymentConfirmed(res.orderNumber),
+          });
         }
         return;
       }

@@ -187,4 +187,28 @@ describe('RegisterForm Component', () => {
       await screen.findByText('Este correo ya se encuentra registrado.')
     ).toBeInTheDocument();
   });
+
+  it('shows pending email verification card when registration requires verification', async () => {
+    vi.mocked(customerAuthService.register).mockResolvedValue({
+      authenticated: false,
+      autoLogin: false,
+      requiresEmailVerification: true,
+      email: 'ana@example.com',
+      fullName: 'Ana',
+    });
+
+    renderRegisterForm();
+
+    fireEvent.change(screen.getByLabelText(/Nombres/i), { target: { value: 'Ana' } });
+    fireEvent.change(screen.getByLabelText(/Apellidos/i), { target: { value: 'Torres' } });
+    fireEvent.change(screen.getByLabelText(/Correo electrónico/i), { target: { value: 'ana@example.com' } });
+    fireEvent.change(screen.getByLabelText(/^Contraseña$/i), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByLabelText(/^Confirmar contraseña$/i), { target: { value: 'password123' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Crear mi cuenta' }));
+
+    expect(await screen.findByTestId('email-verification-pending')).toBeInTheDocument();
+    expect(screen.getByText('an***@example.com')).toBeInTheDocument();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
 });

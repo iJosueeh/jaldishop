@@ -144,6 +144,11 @@ class RegisterMerchantRollbackIntegrationTest {
                 ps.executeUpdate();
             }
             try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM store_receipt_sequences WHERE store_id IN (SELECT id FROM stores WHERE slug = ?)")) {
+                ps.setString(1, STORE_SLUG);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(
                     "DELETE FROM stores WHERE slug = ?")) {
                 ps.setString(1, STORE_SLUG);
                 ps.executeUpdate();
@@ -188,7 +193,20 @@ class RegisterMerchantRollbackIntegrationTest {
                 "Prueba rollback",
                 "987654321",
                 "Av. Principal 123",
+                null,
+                null,
+                null,
                 true,
+                true,
+                null,
+                null,
+                null,
+                "Rollback Owner",
+                "DNI",
+                "12345678",
+                "RUS",
+                false,
+                java.math.BigDecimal.ZERO,
                 true
         );
 
@@ -225,7 +243,20 @@ class RegisterMerchantRollbackIntegrationTest {
                 "Prueba rollback",
                 "911111111",
                 "Calle Secundaria 456",
+                null,
+                null,
+                null,
                 true,
+                true,
+                null,
+                null,
+                null,
+                "Rollback Conflict",
+                "DNI",
+                "87654321",
+                "RUS",
+                false,
+                java.math.BigDecimal.ZERO,
                 true
         );
 

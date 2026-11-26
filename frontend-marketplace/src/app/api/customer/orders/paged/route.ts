@@ -1,0 +1,8 @@
+import { NextRequest } from 'next/server';
+import { customerProxy } from '@/core/api/customerProxy';
+
+export async function GET(request: NextRequest) {
+  const qs = request.nextUrl.searchParams.toString();
+  const path = qs ? `/customer/orders/paged?${qs}` : '/customer/orders/paged';
+  return customerProxy(request, path);
+}

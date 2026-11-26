@@ -98,7 +98,8 @@ class PasswordRecoveryPostgresIntegrationTest {
     @ParameterizedTest @ValueSource(booleans = {false, true})
     void fullFlowWorksForCustomerAndMerchantWithJwtRevocation(boolean merchant) {
         if (merchant) registerMerchant.execute(new RegisterMerchantCommand(email, "old-password", "Recovery", "Test",
-                "987654321", "Recovery " + id, "Test", "987654321", "Av Test 1", true, false));
+                "987654321", "Recovery " + id, "Test", "987654321", "Av Test 1", null, null, null, true, false,
+                null, null, null, "Recovery Test", "RUC_10", "10456789019", "RUS", false, java.math.BigDecimal.ZERO, true));
         var before = login.execute(new LoginCommand(email, "old-password"));
         issueToken();
         assertThat(token).matches("[A-Za-z0-9_-]{43}");
