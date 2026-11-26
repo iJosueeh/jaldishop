@@ -37,6 +37,16 @@ public class UserEntity {
 
     public boolean isPrimaryAdmin() { return isPrimaryAdmin; }
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
+    public boolean isEmailVerified() { return emailVerified; }
+
+    public Instant getEmailVerifiedAt() { return emailVerifiedAt; }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private UserStatus status;
@@ -61,10 +71,14 @@ public class UserEntity {
     }
 
     public UserEntity(UUID id, String firstName, String lastName, String email, String passwordEncoded, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<RoleEntity> roles) {
-        this(id, firstName, lastName, email, passwordEncoded, status, phone, createdAt, updatedAt, roles, false);
+        this(id, firstName, lastName, email, passwordEncoded, status, phone, createdAt, updatedAt, roles, false, true, createdAt);
     }
 
     public UserEntity(UUID id, String firstName, String lastName, String email, String passwordEncoded, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<RoleEntity> roles, boolean isPrimaryAdmin) {
+        this(id, firstName, lastName, email, passwordEncoded, status, phone, createdAt, updatedAt, roles, isPrimaryAdmin, true, createdAt);
+    }
+
+    public UserEntity(UUID id, String firstName, String lastName, String email, String passwordEncoded, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<RoleEntity> roles, boolean isPrimaryAdmin, boolean emailVerified, Instant emailVerifiedAt) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -76,6 +90,8 @@ public class UserEntity {
         this.updatedAt = updatedAt;
         this.roles = roles;
         this.isPrimaryAdmin = isPrimaryAdmin;
+        this.emailVerified = emailVerified;
+        this.emailVerifiedAt = emailVerifiedAt;
     }
 
     public UUID getId() {

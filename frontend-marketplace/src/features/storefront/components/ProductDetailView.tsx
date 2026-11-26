@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, ChevronRight, ShoppingCart } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { Container } from '@/shared/components/ui/Container';
 import {
   ProductItem,
@@ -116,7 +116,9 @@ export function ProductDetailView({
       : product;
 
     await changeQuantity(itemToAdd, quantity);
-    toast.success(`${quantity} × ${product.name} añadido al carrito`);
+    notify.success(`${quantity} × ${product.name} añadido al carrito`, {
+      id: notifyKeys.cartAdd(product.id),
+    });
   };
 
   const mobileDisplayPrice = selected
@@ -169,6 +171,7 @@ export function ProductDetailView({
             <ProductGallery
               name={product.name}
               imageUrl={product.imageUrl}
+              images={product.images}
               category={product.category}
               prepTimeMinutes={product.prepTimeMinutes}
               isAvailable={variants.length > 0}

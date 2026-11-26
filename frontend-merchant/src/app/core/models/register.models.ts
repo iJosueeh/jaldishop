@@ -1,3 +1,5 @@
+import { TaxIdType, TaxRegime } from './store.models';
+
 export interface RegisterStep1Data {
   firstName: string;
   lastName: string;
@@ -17,6 +19,13 @@ export interface RegisterStep2Data {
   logoUrl?: string;
   bannerUrl?: string;
   categoryIds?: string[];
+  taxRegime: TaxRegime;
+  taxIdType: TaxIdType;
+  taxIdNumber: string;
+  legalBusinessName: string;
+  canIssueInvoices: boolean;
+  igvExempt: boolean;
+  taxRate: number;
 }
 
 export interface RegisterStep3Data {
@@ -35,6 +44,7 @@ export interface RegisterStep4Data {
   closingTime: string;
   operatingDays: string[];
   autoPauseOnLimit: boolean;
+  sunatTermsAccepted: boolean;
 }
 
 export interface DayOption {

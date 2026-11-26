@@ -12,6 +12,42 @@ export function normalizePhone(value: string): string {
 }
 
 /**
+ * Extracts canonical 9-digit Peruvian local cellphone number (9XXXXXXXX),
+ * stripping formatting characters and any leading +51 / 51 country code.
+ */
+export function toLocalPeruPhone(value: string | null | undefined): string {
+  if (!value || typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  const hasPlus51 = /^\+\s*51/.test(trimmed);
+  let digits = trimmed.replace(/\D/g, '');
+  if (hasPlus51 && digits.startsWith('51')) {
+    digits = digits.slice(2);
+  } else if (digits.length >= 11 && digits.startsWith('519')) {
+    digits = digits.slice(2);
+  }
+  return digits.slice(0, 9);
+}
+
+/**
+ * Validates a canonical 9-digit local Peruvian cellphone number (9XXXXXXXX).
+ */
+export function validateLocalPeruPhone(
+  phone: string,
+  required = false
+): string | null {
+  const local = toLocalPeruPhone(phone);
+  if (!local) {
+    return required
+      ? 'Ingresa un número celular peruano de 9 dígitos (ej. 987654321).'
+      : null;
+  }
+  if (!/^9\d{8}$/.test(local)) {
+    return 'Ingresa un celular peruano válido (9 dígitos comenzando con 9).';
+  }
+  return null;
+}
+
+/**
  * Validates a Peruvian phone number.
  * Phone is optional: empty or whitespace string is considered valid.
  * If provided, must match ^(\+51)?9\d{8}$ after stripping whitespace and punctuation.

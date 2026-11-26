@@ -1,5 +1,6 @@
 package com.jaldishop.backend.ordering.infrastructure.persistence.repository;
 
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.projection.OrderStatusAggregationProjection;
@@ -26,9 +27,71 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
 
     Optional<OrderEntity> findByPaymentId(UUID paymentId);
 
+    List<OrderEntity> findByPaymentIdIn(List<UUID> paymentIds);
+
     Optional<OrderEntity> findByCapacityReservationId(UUID capacityReservationId);
 
     List<OrderEntity> findByUserIdOrderByConfirmedAtDesc(UUID userId);
+
+    @Query(value = """
+        SELECT o FROM OrderEntity o
+        WHERE o.userId = :userId
+          AND (
+            (:activeOnly = true AND o.status IN (
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.CONFIRMED,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.IN_PREPARATION,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.READY,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.OUT_FOR_DELIVERY
+            ))
+            OR
+            (:activeOnly = false AND o.status IN (
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.COMPLETED,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.CANCELLED
+            ))
+          )
+          AND (:deliveryMode IS NULL OR o.deliveryMode = :deliveryMode)
+          AND (
+            :searchPattern IS NULL
+            OR LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+            OR EXISTS (
+              SELECT s.id FROM StoreEntity s
+              WHERE s.id = o.storeId AND LOWER(s.name) LIKE :searchPattern ESCAPE '\\'
+            )
+          )
+        ORDER BY o.confirmedAt DESC, o.id DESC
+    """, countQuery = """
+        SELECT COUNT(o) FROM OrderEntity o
+        WHERE o.userId = :userId
+          AND (
+            (:activeOnly = true AND o.status IN (
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.CONFIRMED,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.IN_PREPARATION,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.READY,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.OUT_FOR_DELIVERY
+            ))
+            OR
+            (:activeOnly = false AND o.status IN (
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.COMPLETED,
+              com.jaldishop.backend.ordering.domain.enums.OrderStatus.CANCELLED
+            ))
+          )
+          AND (:deliveryMode IS NULL OR o.deliveryMode = :deliveryMode)
+          AND (
+            :searchPattern IS NULL
+            OR LOWER(o.orderNumber) LIKE :searchPattern ESCAPE '\\'
+            OR EXISTS (
+              SELECT s.id FROM StoreEntity s
+              WHERE s.id = o.storeId AND LOWER(s.name) LIKE :searchPattern ESCAPE '\\'
+            )
+          )
+    """)
+    Page<OrderEntity> findPagedByUserId(
+            @Param("userId") UUID userId,
+            @Param("activeOnly") boolean activeOnly,
+            @Param("deliveryMode") DeliveryMode deliveryMode,
+            @Param("searchPattern") String searchPattern,
+            Pageable pageable
+    );
 
     Optional<OrderEntity> findByOrderNumber(String orderNumber);
 
@@ -45,6 +108,17 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, UUID> {
           AND pv.product_id = :productId
     """, nativeQuery = true)
     boolean hasCompletedOrderWithProduct(@Param("userId") UUID userId, @Param("productId") UUID productId);
+
+    @Query(value = """
+        SELECT COUNT(oi.id) > 0
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.id
+        JOIN product_variants pv ON pv.id = oi.variant_id
+        WHERE o.user_id = :userId
+          AND o.status IN ('CONFIRMED', 'IN_PREPARATION', 'READY', 'OUT_FOR_DELIVERY')
+          AND pv.product_id = :productId
+    """, nativeQuery = true)
+    boolean hasInProgressOrderWithProduct(@Param("userId") UUID userId, @Param("productId") UUID productId);
 
     Page<OrderEntity> findByStoreIdOrderByConfirmedAtDescIdDesc(UUID storeId, Pageable pageable);
 

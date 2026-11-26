@@ -17,8 +17,22 @@ export async function POST(request: NextRequest) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }), cache: 'no-store', signal: AbortSignal.timeout(10000),
     });
-    const data = await upstream.json();
-    if (!upstream.ok) return NextResponse.json({ message: upstream.status === 401 ? 'Correo o contraseña incorrectos.' : data.message || 'No pudimos iniciar sesión.' }, { status: upstream.status });
+    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) {
+      const errorResponse = NextResponse.json(
+        {
+          code: data.code,
+          message:
+            upstream.status === 401
+              ? 'Correo o contraseña incorrectos.'
+              : data.message || 'No pudimos iniciar sesión.',
+        },
+        { status: upstream.status }
+      );
+      const retryAfter = upstream.headers.get('Retry-After');
+      if (retryAfter) errorResponse.headers.set('Retry-After', retryAfter);
+      return errorResponse;
+    }
     if (!Array.isArray(data.roles) || !data.roles.includes('CUSTOMER') || typeof data.token !== 'string') return NextResponse.json({ message: 'Ingresa con una cuenta de cliente para usar el carrito.' }, { status: 403 });
     const response = NextResponse.json({ authenticated: true, fullName: data.fullName });
     response.cookies.set(CUSTOMER_COOKIE, data.token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });

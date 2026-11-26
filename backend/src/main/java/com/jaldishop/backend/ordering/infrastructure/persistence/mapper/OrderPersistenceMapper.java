@@ -36,7 +36,7 @@ public class OrderPersistenceMapper {
                 entity.getCurrency()
         );
 
-        return Order.reconstitute(
+        Order order = Order.reconstitute(
                 entity.getId(), entity.getOrderNumber(), entity.getUserId(), entity.getStoreId(),
                 entity.getPaymentId(), entity.getCapacityReservationId(), entity.getDeliveryMode(),
                 entity.getServiceDate(), entity.getServiceStartTime(), entity.getServiceEndTime(),
@@ -46,6 +46,8 @@ public class OrderPersistenceMapper {
                 entity.getItems().stream().map(this::toDomainItem).toList(),
                 entity.getStatusHistory().stream().map(this::toDomainHistory).toList()
         );
+        order.setPromoFundingSource(entity.getPromoFundingSource());
+        return order;
     }
 
     public OrderEntity toEntity(Order domain) {
@@ -66,6 +68,7 @@ public class OrderPersistenceMapper {
         entity.setOrigin(domain.getOrigin());
         entity.setPaymentMethod(domain.getPaymentMethod());
         entity.setNotes(domain.getNotes());
+        entity.setPromoFundingSource(domain.getPromoFundingSource());
         entity.setServiceFeeAmount(domain.getServiceFeeAmount() != null ? domain.getServiceFeeAmount() : java.math.BigDecimal.ZERO);
 
         entity.setItems(domain.getItems().stream()

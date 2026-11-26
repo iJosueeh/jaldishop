@@ -42,9 +42,15 @@
           formControlName="taxIdType"
           class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all cursor-pointer"
         >
-          <option value="DNI">DNI (Persona Natural - 8 dígitos)</option>
-          <option value="RUC_10">RUC 10 (Persona Natural con Negocio - 11 dígitos)</option>
-          <option value="RUC_20">RUC 20 (Persona Jurídica / Empresa - 11 dígitos)</option>
+          @if (allowedDocTypes().includes('DNI')) {
+            <option value="DNI">DNI (Persona Natural - 8 dígitos)</option>
+          }
+          @if (allowedDocTypes().includes('RUC_10')) {
+            <option value="RUC_10">RUC 10 (Persona Natural con Negocio - 11 dígitos)</option>
+          }
+          @if (allowedDocTypes().includes('RUC_20')) {
+            <option value="RUC_20">RUC 20 (Persona Jurídica / Empresa - 11 dígitos)</option>
+          }
         </select>
       </div>
 
@@ -59,7 +65,15 @@
           placeholder="8 u 11 dígitos numéricos"
           class="px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground font-mono focus:outline-hidden focus:ring-2 focus:ring-[#005141]/30 focus:border-[#005141] transition-all"
         />
-        @if (taxForm.get('taxIdNumber')?.touched && taxForm.get('taxIdNumber')?.errors) {
+        @if (taxForm.get('taxIdNumber')?.touched && taxForm.get('taxIdNumber')?.hasError('invalidModulo11')) {
+          <span class="text-[10px] text-rose-600 font-semibold">
+            El RUC no supera la validación SUNAT (dígito verificador Módulo 11 inválido).
+          </span>
+        } @else if (taxForm.get('taxIdNumber')?.touched && taxForm.get('taxIdNumber')?.hasError('invalidRucPrefix')) {
+          <span class="text-[10px] text-rose-600 font-semibold">
+            El RUC debe comenzar con {{ taxForm.get('taxIdType')?.value === 'RUC_20' ? '20' : '10' }}.
+          </span>
+        } @else if (taxForm.get('taxIdNumber')?.touched && taxForm.get('taxIdNumber')?.errors) {
           <span class="text-[10px] text-rose-600 font-semibold">
             Ingresa un documento numérico válido de {{ taxForm.get('taxIdType')?.value === 'DNI' ? '8' : '11' }} dígitos.
           </span>

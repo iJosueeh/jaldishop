@@ -1,11 +1,18 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { customerNotificationService } from '../services/customerNotificationService';
 import { CustomerNotification, UnreadNotificationsCount } from '../types/customer.types';
 
 export const CUSTOMER_NOTIFICATIONS_QUERY_KEY = ['customer', 'notifications'] as const;
 export const UNREAD_NOTIFICATIONS_COUNT_KEY = ['customer', 'notifications', 'unread-count'] as const;
+
+export function invalidateCustomerNotifications(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: CUSTOMER_NOTIFICATIONS_QUERY_KEY }),
+    queryClient.invalidateQueries({ queryKey: UNREAD_NOTIFICATIONS_COUNT_KEY }),
+  ]);
+}
 
 export function useUnreadNotificationsCount(enabled = true) {
   const query = useQuery({
@@ -14,6 +21,8 @@ export function useUnreadNotificationsCount(enabled = true) {
     enabled,
     staleTime: 30_000,
     refetchInterval: enabled ? 60_000 : false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: enabled,
     retry: 1,
   });
 
@@ -32,6 +41,7 @@ export function useCustomerNotifications(page = 0, size = 20) {
     queryKey: listKey,
     queryFn: () => customerNotificationService.listNotifications({ page, size }),
     staleTime: 30_000,
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 
@@ -77,8 +87,7 @@ export function useCustomerNotifications(page = 0, size = 20) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: CUSTOMER_NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_NOTIFICATIONS_COUNT_KEY });
+      void invalidateCustomerNotifications(queryClient);
     },
   });
 
@@ -86,7 +95,12 @@ export function useCustomerNotifications(page = 0, size = 20) {
     notifications: query.data ?? [],
     isLoading: query.isLoading,
     isFetching: query.isFetching,
-    error: query.error instanceof Error ? query.error.message : query.error ? 'Error al cargar notificaciones' : null,
+    error:
+      query.error instanceof Error
+        ? query.error.message
+        : query.error
+          ? 'Error al cargar notificaciones'
+          : null,
     reload: query.refetch,
     markAsRead: markAsReadMutation.mutateAsync,
     isMarkingAsRead: markAsReadMutation.isPending,

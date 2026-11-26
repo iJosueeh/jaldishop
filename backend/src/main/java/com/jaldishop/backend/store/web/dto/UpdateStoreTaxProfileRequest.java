@@ -2,7 +2,11 @@ package com.jaldishop.backend.store.web.dto;
 
 import com.jaldishop.backend.store.domain.enums.TaxIdType;
 import com.jaldishop.backend.store.domain.enums.TaxRegime;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 public record UpdateStoreTaxProfileRequest(
         @Size(max = 200, message = "La razón social no debe exceder 200 caracteres")
@@ -15,5 +19,18 @@ public record UpdateStoreTaxProfileRequest(
 
         TaxRegime taxRegime,
 
-        boolean canIssueInvoices
-) {}
+        boolean canIssueInvoices,
+
+        @DecimalMin("0.00") @DecimalMax("100.00")
+        BigDecimal taxRate
+) {
+    public UpdateStoreTaxProfileRequest(
+            String legalBusinessName,
+            TaxIdType taxIdType,
+            String taxIdNumber,
+            TaxRegime taxRegime,
+            boolean canIssueInvoices
+    ) {
+        this(legalBusinessName, taxIdType, taxIdNumber, taxRegime, canIssueInvoices, null);
+    }
+}

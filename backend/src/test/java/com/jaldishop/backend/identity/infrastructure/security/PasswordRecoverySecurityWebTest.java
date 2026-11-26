@@ -45,6 +45,8 @@ class PasswordRecoverySecurityWebTest {
         @Bean RegisterCustomerService register() { return mock(RegisterCustomerService.class); }
         @Bean RegisterMerchantService merchant() { return mock(RegisterMerchantService.class); }
         @Bean RefreshTokenService refresh(UserRepository users, JwtService jwt) { return new RefreshTokenService(users, jwt); }
+        @Bean VerifyEmailService verifyEmail() { return mock(VerifyEmailService.class); }
+        @Bean ResendVerificationEmailService resendVerification() { return mock(ResendVerificationEmailService.class); }
     }
     @Autowired WebApplicationContext context;
     @Autowired UserRepository users;

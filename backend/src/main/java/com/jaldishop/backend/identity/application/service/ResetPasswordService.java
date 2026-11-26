@@ -42,7 +42,7 @@ public class ResetPasswordService {
             var id = repository.findUserId(hash).orElseThrow(ResetPasswordService::invalidToken);
             var user = repository.lockById(id).orElseThrow(ResetPasswordService::invalidToken);
             Instant now = clock.instant();
-            if (!user.canAuthenticate() || !repository.consume(id, hash, now)) throw invalidToken();
+            if (!user.canUseAuthenticatedSession() || !repository.consume(id, hash, now)) throw invalidToken();
             user.resetPassword(encoder.encode(password));
             repository.updateCredentials(user);
         });

@@ -177,6 +177,17 @@
             <ng-icon name="matBoltOutline" class="text-[18px] text-amber-400" />
             <span>Conciliación de Pagos</span>
           </a>
+
+          <!-- Promociones Globales -->
+          <a
+            routerLink="/admin/promo-codes"
+            routerLinkActive="bg-white/10 text-white font-bold border-l-3 border-primary"
+            (click)="closeSidebar.emit()"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sidebar-muted hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <ng-icon name="matSellOutline" class="text-[18px]" />
+            <span>Promociones</span>
+          </a>
         }
       </div>
 

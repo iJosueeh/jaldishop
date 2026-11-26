@@ -1,15 +1,14 @@
 package com.jaldishop.backend.identity.application.port;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Espejo de los 20 campos de CreateStoreCommand usado en el registro de
- * comerciantes. Los valores por defecto del flujo (slug=null, deliveryFeeAmount=null,
- * "PEN", taxRate=18.00, instagramUrl=null, facebookUrl=null, whatsappNumber=contactPhone)
- * se calculan en RegisterMerchantService, igual que antes de la inversión de
- * dependencia; el adaptador en store/application solo mapea 1:1.
+ * Contrato de aprovisionamiento de tienda usado en el registro de comerciantes.
+ * Mantiene la frontera hexagonal entre identity/application y store/domain
+ * transportando tipos primitivos/simples para los datos fiscales SUNAT.
  */
 public record StoreProvisioningData(
         UUID ownerUserId,
@@ -31,6 +30,41 @@ public record StoreProvisioningData(
         String instagramUrl,
         String facebookUrl,
         String whatsappNumber,
-        Set<UUID> categoryIds
+        Set<UUID> categoryIds,
+        String legalBusinessName,
+        String taxIdType,
+        String taxIdNumber,
+        String taxRegime,
+        boolean canIssueInvoices,
+        Instant sunatTermsAcceptedAt
 ) {
+    public StoreProvisioningData(
+            UUID ownerUserId,
+            String name,
+            String slug,
+            String description,
+            String contactPhone,
+            String address,
+            String addressReference,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            boolean pickupEnabled,
+            boolean deliveryEnabled,
+            BigDecimal deliveryFeeAmount,
+            String deliveryFeeCurrency,
+            BigDecimal taxRate,
+            String logoUrl,
+            String bannerUrl,
+            String instagramUrl,
+            String facebookUrl,
+            String whatsappNumber,
+            Set<UUID> categoryIds
+    ) {
+        this(
+                ownerUserId, name, slug, description, contactPhone, address, addressReference,
+                latitude, longitude, pickupEnabled, deliveryEnabled, deliveryFeeAmount,
+                deliveryFeeCurrency, taxRate, logoUrl, bannerUrl, instagramUrl, facebookUrl,
+                whatsappNumber, categoryIds, null, null, null, null, false, null
+        );
+    }
 }

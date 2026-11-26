@@ -6,5 +6,15 @@ public record ReviewEligibilityResponse(
         UUID productId,
         boolean eligible,
         boolean alreadyReviewed,
-        CustomerReviewResponse currentReview
-) {}
+        CustomerReviewResponse currentReview,
+        boolean hasInProgressOrder
+) {
+    public ReviewEligibilityResponse(
+            UUID productId,
+            boolean eligible,
+            boolean alreadyReviewed,
+            CustomerReviewResponse currentReview
+    ) {
+        this(productId, eligible, alreadyReviewed, currentReview, false);
+    }
+}

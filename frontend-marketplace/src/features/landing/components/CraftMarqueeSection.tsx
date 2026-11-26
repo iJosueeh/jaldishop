@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, Package, Store } from 'lucide-react';
+import { ArrowUpRight, Store } from 'lucide-react';
 import { Badge } from '@/shared/components/ui/Badge';
+import { SafeProductImage } from '@/features/storefront/components/SafeProductImage';
 
 export interface MarqueeItem {
   id: string;
@@ -129,19 +129,16 @@ export function CraftMarqueeSection({
                   className="group shrink-0 block"
                 >
                   <div className="w-72 sm:w-80 bg-[#121618] rounded-[12px] p-3.5 border border-[#1e2426] shadow-sm transition-all duration-300 hover:border-stone-500 hover:-translate-y-1 cursor-pointer relative overflow-hidden">
-                    <div className="relative h-40 w-full rounded-[10px] overflow-hidden bg-stone-900 mb-3 flex items-center justify-center">
-                      {item.imageUrl ? (
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          sizes="320px"
-                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        />
-                      ) : (
-                        <Package className="w-9 h-9 text-stone-600" aria-hidden="true" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+                    <div className="relative h-40 w-full rounded-[10px] overflow-hidden bg-[#faf7f2] mb-3 flex items-center justify-center">
+                      <SafeProductImage
+                        src={item.imageUrl}
+                        alt={item.name}
+                        variant="card"
+                        category={item.category}
+                        sizes="320px"
+                        className="[@media(hover:hover)]:group-hover:scale-105"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
                       {item.badge && (
                         <div className="absolute top-2.5 left-2.5 z-10">

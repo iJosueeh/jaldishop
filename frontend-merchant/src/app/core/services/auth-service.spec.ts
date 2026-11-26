@@ -174,6 +174,13 @@ describe('AuthService', () => {
         address: 'Av. Las Palmeras 123',
         pickupEnabled: true,
         deliveryEnabled: true,
+        legalBusinessName: 'Pastelería Dulce',
+        taxIdType: 'RUC_10',
+        taxIdNumber: '10456789019',
+        taxRegime: 'RUS',
+        canIssueInvoices: false,
+        taxRate: 0,
+        sunatTermsAccepted: true,
       };
 
       service.registerMerchant(registerPayload).subscribe((result) => {

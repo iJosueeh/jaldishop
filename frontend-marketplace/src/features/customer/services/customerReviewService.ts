@@ -1,9 +1,25 @@
 import type {
   CustomerReview,
+  PendingReviewProduct,
   ReviewEligibility,
   CreateReviewPayload,
   UpdateReviewPayload,
 } from '../types/customer.types';
+
+export async function getPendingReviews(): Promise<PendingReviewProduct[]> {
+  const response = await fetch('/api/customer/reviews/pending', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Error al obtener productos pendientes por opinar');
+  }
+
+  return response.json();
+}
 
 export async function getCustomerReviews(): Promise<CustomerReview[]> {
   const response = await fetch('/api/customer/reviews', {

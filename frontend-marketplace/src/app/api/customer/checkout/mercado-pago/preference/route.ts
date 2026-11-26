@@ -159,6 +159,26 @@ export async function POST(request: NextRequest) {
       typeof body.returnBaseUrl === 'string' && body.returnBaseUrl.trim()
         ? body.returnBaseUrl.trim()
         : request.nextUrl.origin,
+    discountCode:
+      typeof body.discountCode === 'string' && body.discountCode.trim()
+        ? body.discountCode.trim().toUpperCase()
+        : null,
+    requestedReceiptType:
+      typeof body.requestedReceiptType === 'string' && body.requestedReceiptType.trim()
+        ? body.requestedReceiptType.trim().toUpperCase()
+        : null,
+    customerDocType:
+      typeof body.customerDocType === 'string' && body.customerDocType.trim()
+        ? body.customerDocType.trim().toUpperCase()
+        : null,
+    customerDocNumber:
+      typeof body.customerDocNumber === 'string' && body.customerDocNumber.trim()
+        ? body.customerDocNumber.trim()
+        : null,
+    customerLegalName:
+      typeof body.customerLegalName === 'string' && body.customerLegalName.trim()
+        ? body.customerLegalName.trim()
+        : null,
   };
 
   try {

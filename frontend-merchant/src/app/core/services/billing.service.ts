@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, finalize, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  FiscalReceiptResponse,
   MerchantBillingSummaryResponse,
   MerchantPayoutBatchResponse,
   MerchantPayoutDestinationResponse,
@@ -25,8 +26,10 @@ export class BillingService {
 
   readonly summary = signal<MerchantBillingSummaryResponse | null>(null);
   readonly batches = signal<MerchantPayoutBatchResponse[]>([]);
+  readonly receipts = signal<FiscalReceiptResponse[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isBatchesLoading = signal<boolean>(false);
+  readonly isReceiptsLoading = signal<boolean>(false);
   readonly isRequestingPayout = signal<boolean>(false);
   readonly error = signal<string | null>(null);
 
@@ -228,6 +231,20 @@ export class BillingService {
         this.toastService.error(errorMsg);
         return throwError(() => err);
       }),
+    );
+  }
+
+  loadReceipts(): Observable<FiscalReceiptResponse[]> {
+    this.isReceiptsLoading.set(true);
+    return this.ensureBaseUrl().pipe(
+      switchMap((url) => this.http.get<FiscalReceiptResponse[]>(`${url}/receipts`)),
+      tap((list) => {
+        this.receipts.set(list);
+      }),
+      catchError((err) => {
+        return throwError(() => err);
+      }),
+      finalize(() => this.isReceiptsLoading.set(false)),
     );
   }
 }

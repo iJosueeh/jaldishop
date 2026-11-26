@@ -49,6 +49,22 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, UUID>
             """, nativeQuery = true)
     List<String> findProductImageUrls(@Param("productId") UUID productId);
 
+    @Query(value = """
+            SELECT image_url
+            FROM product_images
+            WHERE product_id = :productId
+            ORDER BY is_primary DESC, position ASC, created_at ASC
+            """, nativeQuery = true)
+    List<String> findOrderedProductImageUrls(@Param("productId") UUID productId);
+
+    @Query(value = """
+            SELECT product_id, image_url
+            FROM product_images
+            WHERE product_id IN (:productIds)
+            ORDER BY product_id ASC, is_primary DESC, position ASC, created_at ASC
+            """, nativeQuery = true)
+    List<Object[]> findOrderedProductImageRowsByProductIds(@Param("productIds") List<UUID> productIds);
+
     @Modifying
     @Query(value = """
             DELETE FROM cart_items WHERE variant_id IN (SELECT id FROM product_variants WHERE product_id = :productId);

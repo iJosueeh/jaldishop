@@ -10,6 +10,7 @@ import com.jaldishop.backend.shared.exception.BusinessRuleException;
 import com.jaldishop.backend.shared.exception.GlobalExceptionHandler;
 import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.CustomerPageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -121,6 +122,43 @@ class CustomerOrderControllerTest {
                 .andExpect(jsonPath("$[0].deliveryMode").value("DELIVERY"))
                 .andExpect(jsonPath("$[0].totalAmount").value(45.50))
                 .andExpect(jsonPath("$[0].totalItems").value(3));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/customer/orders/paged retorna página filtrada de pedidos")
+    void shouldReturnPagedCustomerOrders() throws Exception {
+        CustomerOrderSummaryResponse summary = new CustomerOrderSummaryResponse(
+                UUID.randomUUID(),
+                "JAL-2026-000002",
+                UUID.randomUUID(),
+                "Pastelería Dulce Deleite",
+                "pasteleria-dulce-deleite",
+                null,
+                OrderStatus.CONFIRMED,
+                DeliveryMode.DELIVERY,
+                LocalDate.of(2026, 11, 23),
+                LocalTime.of(14, 0),
+                LocalTime.of(19, 0),
+                new BigDecimal("17.50"),
+                "PEN",
+                1,
+                Instant.parse("2026-11-10T15:30:00Z")
+        );
+
+        when(getCustomerOrdersService.executePaged(customerUserId, "ACTIVE", "DELIVERY", "Dulce", 0, 6))
+                .thenReturn(new CustomerPageResponse<>(List.of(summary), 0, 6, 1, 1));
+
+        mockMvc.perform(get("/api/v1/customer/orders/paged")
+                        .param("page", "0")
+                        .param("size", "6")
+                        .param("tab", "ACTIVE")
+                        .param("deliveryMode", "DELIVERY")
+                        .param("q", "Dulce")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].orderNumber").value("JAL-2026-000002"))
+                .andExpect(jsonPath("$.items[0].storeName").value("Pastelería Dulce Deleite"))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test

@@ -4,7 +4,7 @@ import './globals.css';
 import { QueryProvider } from '@/core/providers/QueryProvider';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { HashScrollHandler } from '@/shared/components/layout/HashScrollHandler';
-import { Toaster } from 'sonner';
+import { JaldiToaster } from '@/shared/components/ui/JaldiToaster';
 import { StorefrontCartScope } from '@/features/storefront/cart/StorefrontCartProvider';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -68,7 +68,7 @@ export default function RootLayout({
           <HashScrollHandler />
           <Navbar />
           <main className="flex-1">{children}</main>
-          <Toaster richColors position="top-right" />
+          <JaldiToaster />
           </StorefrontCartScope>
         </QueryProvider>
       </body>

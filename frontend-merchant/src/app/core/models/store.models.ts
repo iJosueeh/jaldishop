@@ -66,6 +66,7 @@ export interface CreateStoreRequest {
     taxIdNumber?: string;
     taxRegime?: TaxRegime;
     canIssueInvoices?: boolean;
+    sunatTermsAccepted?: boolean;
 }
 
 export type UpdateStoreRequest = Omit<CreateStoreRequest, 'slug'>;
@@ -76,6 +77,7 @@ export interface UpdateStoreTaxProfileRequest {
     taxIdNumber: string;
     taxRegime: TaxRegime;
     canIssueInvoices: boolean;
+    taxRate?: number;
 }
 
 export interface CloseStoreRequest {

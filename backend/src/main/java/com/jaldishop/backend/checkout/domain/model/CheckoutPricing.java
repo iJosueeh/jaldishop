@@ -72,6 +72,30 @@ public record CheckoutPricing(
             BigDecimal customerServiceFeeCap,
             String currency
     ) {
+        return calculate(
+                items,
+                fulfillmentType,
+                storeDeliveryFee,
+                storeTaxRate,
+                customerServiceFeeRate,
+                customerServiceFeeCap,
+                currency,
+                null,
+                BigDecimal.ZERO
+        );
+    }
+
+    public static CheckoutPricing calculate(
+            List<CheckoutItemSnapshot> items,
+            CheckoutFulfillmentType fulfillmentType,
+            BigDecimal storeDeliveryFee,
+            BigDecimal storeTaxRate,
+            BigDecimal customerServiceFeeRate,
+            BigDecimal customerServiceFeeCap,
+            String currency,
+            String appliedDiscountCode,
+            BigDecimal appliedDiscountAmount
+    ) {
         BigDecimal productsSubtotal = (items != null) ? items.stream()
                 .map(CheckoutItemSnapshot::subtotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
@@ -83,12 +107,19 @@ public record CheckoutPricing(
 
         BigDecimal discountAmount = BigDecimal.ZERO;
         String discountCode = null;
+        if (appliedDiscountCode != null && !appliedDiscountCode.isBlank()
+                && appliedDiscountAmount != null && appliedDiscountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            discountCode = appliedDiscountCode.trim();
+            discountAmount = appliedDiscountAmount.min(productsSubtotal).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal netProductsSubtotal = productsSubtotal.subtract(discountAmount).max(BigDecimal.ZERO);
 
         BigDecimal effectiveServiceFeeRate = (customerServiceFeeRate != null && customerServiceFeeRate.compareTo(BigDecimal.ZERO) > 0)
                 ? customerServiceFeeRate
                 : BigDecimal.ZERO;
         BigDecimal serviceFeeAmount = effectiveServiceFeeRate.compareTo(BigDecimal.ZERO) > 0
-                ? productsSubtotal.multiply(effectiveServiceFeeRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                ? netProductsSubtotal.multiply(effectiveServiceFeeRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
         if (customerServiceFeeCap != null && customerServiceFeeCap.compareTo(BigDecimal.ZERO) >= 0
                 && serviceFeeAmount.compareTo(customerServiceFeeCap) > 0) {
@@ -98,12 +129,12 @@ public record CheckoutPricing(
         BigDecimal taxRate = storeTaxRate != null ? storeTaxRate : new BigDecimal("18.00");
         BigDecimal includedTaxAmount = BigDecimal.ZERO;
 
-        if (taxRate.compareTo(BigDecimal.ZERO) > 0) {
+        if (taxRate.compareTo(BigDecimal.ZERO) > 0 && netProductsSubtotal.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal denominator = BigDecimal.valueOf(100).add(taxRate);
-            includedTaxAmount = productsSubtotal.multiply(taxRate).divide(denominator, 2, RoundingMode.HALF_UP);
+            includedTaxAmount = netProductsSubtotal.multiply(taxRate).divide(denominator, 2, RoundingMode.HALF_UP);
         }
 
-        BigDecimal totalAmount = productsSubtotal.add(deliveryFee).add(serviceFeeAmount).subtract(discountAmount);
+        BigDecimal totalAmount = netProductsSubtotal.add(deliveryFee).add(serviceFeeAmount).max(BigDecimal.ZERO);
         String effectiveCurrency = (currency != null && !currency.isBlank()) ? currency : "PEN";
 
         return new CheckoutPricing(

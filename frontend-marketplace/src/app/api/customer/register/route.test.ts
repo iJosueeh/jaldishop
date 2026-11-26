@@ -26,8 +26,7 @@ const createRegisterRequest = (body: Record<string, unknown>) =>
   });
 
 describe('Customer register route handler (BFF)', () => {
-  it('registers successfully and performs auto-login setting HttpOnly cookie', async () => {
-    // 1. Mock upstream /auth/register -> 201 Created
+  it('registers successfully without auto-login and requires email verification', async () => {
     fetchMock.mockImplementationOnce(() =>
       Promise.resolve(
         new Response(
@@ -37,22 +36,9 @@ describe('Customer register route handler (BFF)', () => {
             firstName: 'Juan',
             lastName: 'Pérez',
             status: 'ACTIVE',
+            emailVerified: false,
           }),
           { status: 201 }
-        )
-      )
-    );
-
-    // 2. Mock upstream /auth/login (auto-login) -> 200 OK with token & CUSTOMER role
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            token: 'valid-jwt-token',
-            roles: ['CUSTOMER'],
-            fullName: 'Juan Pérez',
-          }),
-          { status: 200 }
         )
       )
     );
@@ -69,56 +55,13 @@ describe('Customer register route handler (BFF)', () => {
     expect(response.status).toBe(201);
 
     const data = await response.json();
-    expect(data.authenticated).toBe(true);
-    expect(data.autoLogin).toBe(true);
-    expect(data.fullName).toBe('Juan Pérez');
-
-    expect(response.cookies.get('jaldishop_customer_token')?.value).toBe('valid-jwt-token');
-    expect(response.headers.get('set-cookie')).toContain('HttpOnly');
-    expect(response.headers.get('set-cookie')).toContain('SameSite=lax');
-  });
-
-  it('handles registration success when auto-login fails gracefully without repeating register', async () => {
-    // 1. Upstream /auth/register succeeds
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            id: 'user-uuid',
-            email: 'cliente@example.com',
-            firstName: 'Ana',
-            lastName: 'Gómez',
-          }),
-          { status: 201 }
-        )
-      )
-    );
-
-    // 2. Upstream /auth/login fails (e.g., 500 or timeout)
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({ message: 'Internal server error' }),
-          { status: 500 }
-        )
-      )
-    );
-
-    const request = createRegisterRequest({
-      firstName: 'Ana',
-      lastName: 'Gómez',
-      email: 'cliente@example.com',
-      password: 'password123',
-    });
-
-    const response = await POST(request);
-    expect(response.status).toBe(201);
-
-    const data = await response.json();
     expect(data.authenticated).toBe(false);
     expect(data.autoLogin).toBe(false);
-    expect(data.message).toContain('inicia sesión');
+    expect(data.requiresEmailVerification).toBe(true);
+    expect(data.email).toBe('cliente@example.com');
+    expect(data.fullName).toBe('Juan');
     expect(response.cookies.get('jaldishop_customer_token')).toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('returns 409 when email is already registered', async () => {

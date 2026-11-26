@@ -21,6 +21,7 @@ import {
   matTuneOutline,
   matLogoutOutline,
   matPaymentsOutline,
+  matSellOutline,
 } from '@ng-icons/material-symbols/outline';
 
 @Component({
@@ -39,6 +40,7 @@ import {
       matTuneOutline,
       matLogoutOutline,
       matPaymentsOutline,
+      matSellOutline,
     }),
   ],
   selector: 'app-siderbar',

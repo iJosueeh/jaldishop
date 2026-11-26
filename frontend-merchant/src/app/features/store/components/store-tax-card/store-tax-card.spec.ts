@@ -22,7 +22,7 @@ describe('StoreTaxCard', () => {
     status: 'ACTIVE',
     legalBusinessName: 'Sabor Criollo E.I.R.L.',
     taxIdType: 'RUC_10',
-    taxIdNumber: '10456789012',
+    taxIdNumber: '10456789019',
     taxRegime: 'RUS',
     canIssueInvoices: false,
     createdAt: '2026-11-21T00:00:00Z',

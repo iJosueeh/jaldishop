@@ -259,11 +259,15 @@ describe('OrderAdapter', () => {
       expect(order.items.length).toBe(1);
       expect(order.items[0].name).toBe('Torta de Chocolate');
 
-      // Verificación de no invención
-      expect(order.paymentMethod).toBeUndefined();
-      expect(order.paymentLabel).toBeUndefined();
-      expect(order.channel).toBeUndefined();
-      expect(order.channelLabel).toBeUndefined();
+      // Mapeo real desde paymentId (Mercado Pago vs directo)
+      expect(order.paymentMethod).toBe('MERCADO_PAGO');
+      expect(order.paymentLabel).toBe('Mercado Pago');
+      expect(order.channel).toBe('WEB_STORE');
+      expect(order.channelLabel).toBe('Marketplace');
+
+      const directOrder = mapDetailToMerchantOrder({ ...sampleDetailDelivery, paymentId: null });
+      expect(directOrder.paymentMethod).toBeUndefined();
+      expect(directOrder.channel).toBeUndefined();
     });
   });
 

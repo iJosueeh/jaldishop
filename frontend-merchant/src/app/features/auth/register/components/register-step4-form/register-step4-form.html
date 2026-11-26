@@ -195,8 +195,29 @@
         </div>
       </div>
 
+      <!-- DECLARACIÓN Y TÉRMINOS SUNAT -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 space-y-2">
+        <label class="flex items-start gap-3 cursor-pointer" for="sunat-terms-accepted">
+          <input
+            id="sunat-terms-accepted"
+            type="checkbox"
+            formControlName="sunatTermsAccepted"
+            class="w-4 h-4 mt-0.5 rounded border-stone-300 text-[#005141] focus:ring-[#005141] accent-[#005141] shrink-0"
+          />
+          <span class="text-xs text-stone-700 leading-relaxed">
+            Declaro que los datos tributarios ingresados (DNI / RUC y Régimen SUNAT) son veraces y acepto los
+            <strong>Términos de Uso y Declaración de Datos Tributarios SUNAT</strong> de JaldiShop para la emisión de comprobantes de venta.
+          </span>
+        </label>
+        @if (step4Form.get('sunatTermsAccepted')?.touched && step4Form.get('sunatTermsAccepted')?.invalid) {
+          <p class="text-[11px] text-red-600 font-medium pl-7">
+            Debes aceptar la declaración de datos tributarios SUNAT para finalizar el registro.
+          </p>
+        }
+      </div>
+
       <!-- ACCIONES PRINCIPALES -->
-      <div class="pt-6 space-y-3">
+      <div class="pt-4 space-y-3">
         <button
           type="submit"
           [disabled]="step4Form.invalid || isLoading()"
@@ -224,10 +245,6 @@
             </svg>
           }
         </button>
-
-        <p class="text-center text-[11px] text-stone-600">
-          Al crear tu tienda, aceptas los términos de servicio comercial y políticas de entrega de JaldiShop.
-        </p>
       </div>
     </form>
   </div>

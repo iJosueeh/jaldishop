@@ -7,12 +7,12 @@ import { env } from '@/core/config/env';
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#1e2c31] bg-[#02090a] pt-16 pb-12 text-[#99b3ad]">
-      <Container size="lg">
+    <footer className="w-full border-t border-[#1e2c31] bg-[#02090a] pt-12 sm:pt-16 pb-10 sm:pb-12 text-[#99b3ad]">
+      <Container size="full" className="max-w-[1440px]">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-[#1e2c31]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-12 gap-8 lg:gap-10 pb-10 sm:pb-12 border-b border-[#1e2c31]">
           {/* Brand info (Col 1: 4 cols) */}
-          <div className="sm:col-span-2 lg:col-span-4 space-y-4">
+          <div className="sm:col-span-3 lg:col-span-4 space-y-4">
             <Link href="/" className="inline-block">
               <JaldiShopLogo size="md" variant="light" />
             </Link>
@@ -168,8 +168,8 @@ export function Footer() {
         </div>
 
         {/* Legal & Compliance Strip */}
-        <div className="pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#99b3ad] border-b border-[#1e2c31]">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6 font-normal">
+        <div className="pt-8 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#99b3ad] border-b border-[#1e2c31]">
+          <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 sm:gap-6 font-normal">
             <Link href="/terminos" className="hover:text-[#36f4a4] transition-colors">
               Términos y Condiciones
             </Link>
@@ -191,13 +191,13 @@ export function Footer() {
             </Link>
           </div>
 
-          <div className="text-[11px] text-stone-500 text-center sm:text-right">
+          <div className="text-[11px] text-stone-500 text-left sm:text-right">
             <span>JaldiShop Plataformas Digitales S.A.C. · Lima, Perú</span>
           </div>
         </div>
 
         {/* Bottom credits */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
+        <div className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-stone-500 gap-3 sm:gap-4">
           <p suppressHydrationWarning>© {new Date().getFullYear()} JaldiShop. Plataforma de Capacidad y Pedidos para MYPE.</p>
           <p className="flex items-center gap-1.5 font-normal">
             Hecho para negocios y creadores bajo pedido

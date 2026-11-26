@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { ApiException } from '@/core/api/apiClient';
 import { CartItem, ProductItem } from '../types/storefront.types';
 import { cartService, CartResponse } from './services/cartService';
@@ -138,13 +138,15 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
       setLoginRequired(true);
     }
     setError(message);
-    toast.error(message);
+    notify.error(message, { id: notifyKeys.cartError() });
   };
 
   const mutate = async (operation: (id: string) => Promise<CartResponse>) => {
     if (!authenticated) {
       setLoginRequired(true);
-      toast.info('Inicia sesión en tu cuenta de cliente para guardar tu carrito.');
+      notify.info('Inicia sesión en tu cuenta de cliente para guardar tu carrito.', {
+        id: notifyKeys.cartAuth(),
+      });
       return;
     }
     const storeId = activeStore.current?.id || store?.id;

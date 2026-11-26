@@ -93,6 +93,10 @@ public class PublicProductController {
                 .toList();
 
         Map<UUID, Integer> availableStockMap = loadAvailableStockMap(store.getId());
+        List<String> orderedImages = getProductsService.getOrderedImageUrls(product.getId());
+        if (orderedImages != null && !orderedImages.isEmpty()) {
+            return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants, availableStockMap, orderedImages));
+        }
         if (availableStockMap.isEmpty()) {
             return ResponseEntity.ok(responseMapper.toResponse(product, activeVariants));
         }
@@ -105,9 +109,17 @@ public class PublicProductController {
                 .filter(p -> p.getStatus() == ProductStatus.ACTIVE)
                 .toList();
 
+        List<UUID> productIds = products.stream().map(Product::getId).toList();
+        Map<UUID, List<String>> imagesByProductId = getProductsService.getOrderedImageUrlsByProductIds(productIds);
+
         if (variantRepository == null) {
             return products.stream()
-                    .map(responseMapper::toResponse)
+                    .map(product -> {
+                        List<String> images = imagesByProductId.get(product.getId());
+                        return (images != null && !images.isEmpty())
+                                ? responseMapper.toResponse(product, null, Collections.emptyMap(), images)
+                                : responseMapper.toResponse(product);
+                    })
                     .toList();
         }
 
@@ -120,8 +132,15 @@ public class PublicProductController {
         return products.stream()
                 .map(product -> {
                     List<ProductVariant> vars = variantsByProductId.get(product.getId());
+                    List<String> images = imagesByProductId.get(product.getId());
+                    boolean hasImages = images != null && !images.isEmpty();
                     if (vars == null || vars.isEmpty()) {
-                        return responseMapper.toResponse(product);
+                        return hasImages
+                                ? responseMapper.toResponse(product, null, availableStockMap, images)
+                                : responseMapper.toResponse(product);
+                    }
+                    if (hasImages) {
+                        return responseMapper.toResponse(product, vars, availableStockMap, images);
                     }
                     return availableStockMap.isEmpty()
                             ? responseMapper.toResponse(product, vars)

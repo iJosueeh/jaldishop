@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,6 +67,13 @@ public class RegisterMerchantService {
     }
 
     public AuthResult execute(RegisterMerchantCommand command, boolean bypassRegistrationCheck) {
+        if (!bypassRegistrationCheck && !command.sunatTermsAccepted()) {
+            throw new BusinessRuleException(
+                    "SUNAT_TERMS_REQUIRED",
+                    "Debes aceptar los Términos de Uso y la Declaración de Datos Tributarios SUNAT para registrar tu negocio."
+            );
+        }
+
         if (!bypassRegistrationCheck && platformSettingsProvider != null) {
             PlatformSettings settings = platformSettingsProvider.getSettings();
             if (settings != null && !settings.allowMerchantRegistration()) {
@@ -98,6 +106,13 @@ public class RegisterMerchantService {
                 );
             }
 
+            if (!existingUser.isEmailVerified()) {
+                throw new BusinessRuleException(
+                        "EMAIL_NOT_VERIFIED",
+                        "Debes verificar tu correo electrónico antes de continuar."
+                );
+            }
+
             // No persistimos merchantRole aquí (tendría store_id=NULL, violando el CHECK de base de datos).
             // Se asignará contextualmente con el store_id generado dentro de createStoreService.execute(...).
             user = existingUser;
@@ -121,6 +136,9 @@ public class RegisterMerchantService {
                 ? command.storeContactPhone()
                 : command.phone();
 
+        BigDecimal effectiveTaxRate = resolveInitialTaxRate(command.taxRegime(), command.taxRate());
+        Instant termsAcceptedAt = command.sunatTermsAccepted() ? Instant.now() : null;
+
         StoreProvisioningData provisioningData = new StoreProvisioningData(
                 user.getId(),
                 command.storeName(),
@@ -135,13 +153,19 @@ public class RegisterMerchantService {
                 command.deliveryEnabled(),
                 null,
                 "PEN",
-                new BigDecimal("18.00"),
+                effectiveTaxRate,
                 command.logoUrl(),
                 command.bannerUrl(),
                 null,
                 null,
                 contactPhone,
-                command.categoryIds()
+                command.categoryIds(),
+                command.legalBusinessName(),
+                command.taxIdType(),
+                command.taxIdNumber(),
+                command.taxRegime(),
+                command.canIssueInvoices(),
+                termsAcceptedAt
         );
 
         storeProvisioning.provisionStore(provisioningData);
@@ -160,6 +184,13 @@ public class RegisterMerchantService {
                 user.getFullName(),
                 roleName
         );
+    }
+
+    private BigDecimal resolveInitialTaxRate(String taxRegime, BigDecimal requestedTaxRate) {
+        if ("RUS".equalsIgnoreCase(taxRegime) || "NONE".equalsIgnoreCase(taxRegime)) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+        return requestedTaxRate != null ? requestedTaxRate : new BigDecimal("18.00");
     }
 
 }

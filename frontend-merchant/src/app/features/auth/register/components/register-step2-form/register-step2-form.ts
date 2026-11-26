@@ -16,8 +16,14 @@ import { BusinessAvatar } from '../../../../../shared/components/business-avatar
 import { RegisterStep2Data } from '../../../../../core/models/register.models';
 import { StoreService } from '../../../../../core/services/store.service';
 import { MediaUploadService } from '../../../../../core/services/media-upload.service';
-import { StoreCategory } from '../../../../../core/models/store.models';
+import { StoreCategory, TaxIdType, TaxRegime } from '../../../../../core/models/store.models';
 import { isValidImageUrl } from '../../../../../core/utils/image.utils';
+import {
+  getAllowedDocTypesForRegime,
+  getDefaultTaxRateForRegime,
+  sunatDocumentValidator,
+  TAX_REGIME_OPTIONS,
+} from '../../../../../core/utils/sunat-tax.utils';
 
 const DEFAULT_CATEGORIES: StoreCategory[] = [
   { id: 'cat-restaurantes', name: 'Restaurantes y Cafeterías', slug: 'restaurantes-cafeterias', status: 'ACTIVE' },
@@ -54,7 +60,8 @@ export class RegisterStep2Form implements OnInit {
 
   readonly back = output<void>();
   readonly step2Submit = output<RegisterStep2Data>();
-  readonly skip = output<void>();
+
+  readonly regimeOptions = TAX_REGIME_OPTIONS;
 
   readonly categories = signal<StoreCategory[]>(DEFAULT_CATEGORIES);
   readonly isLoadingCategories = signal<boolean>(false);
@@ -104,13 +111,80 @@ export class RegisterStep2Form implements OnInit {
     address: [''],
     logoUrl: [''],
     bannerUrl: [''],
+    taxRegime: ['RUS' as TaxRegime, [Validators.required]],
+    taxIdType: ['RUC_10' as TaxIdType, [Validators.required]],
+    taxIdNumber: ['', [Validators.required, sunatDocumentValidator(() => this.step2Form?.get('taxIdType')?.value ?? 'RUC_10')]],
+    legalBusinessName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+    canIssueInvoices: [{ value: false, disabled: true }],
+    igvExempt: [{ value: true, disabled: true }],
+    taxRate: [0],
+  });
+
+  readonly allowedDocTypes = computed(() => {
+    const regime = (this.formValues().taxRegime || 'RUS') as TaxRegime;
+    return getAllowedDocTypesForRegime(regime);
+  });
+
+  readonly selectedRegimeInfo = computed(() => {
+    const regime = (this.formValues().taxRegime || 'RUS') as TaxRegime;
+    return this.regimeOptions.find((o) => o.value === regime) ?? this.regimeOptions[0];
   });
 
   ngOnInit(): void {
     this.loadCategories();
     const data = this.initialData();
     if (data) {
-      this.step2Form.patchValue(data);
+      this.step2Form.patchValue(data, { emitEvent: false });
+      this.syncTaxControls(data.taxRegime, data.igvExempt, false);
+    }
+
+    this.step2Form.get('taxRegime')?.valueChanges.subscribe((regime: TaxRegime) => {
+      this.syncTaxControls(regime, this.step2Form.get('igvExempt')?.value, true);
+    });
+
+    this.step2Form.get('taxIdType')?.valueChanges.subscribe(() => {
+      this.step2Form.get('taxIdNumber')?.updateValueAndValidity();
+    });
+
+    this.step2Form.get('igvExempt')?.valueChanges.subscribe((exempt: boolean) => {
+      const regime = (this.step2Form.get('taxRegime')?.value || 'RUS') as TaxRegime;
+      this.step2Form.patchValue(
+        { taxRate: getDefaultTaxRateForRegime(regime, !!exempt) },
+        { emitEvent: false },
+      );
+    });
+  }
+
+  private syncTaxControls(regime: TaxRegime, currentExempt: boolean, resetExemptOnChange: boolean): void {
+    const allowed = getAllowedDocTypesForRegime(regime);
+    const currentType = this.step2Form.get('taxIdType')?.value as TaxIdType;
+    if (!allowed.includes(currentType)) {
+      this.step2Form.patchValue({ taxIdType: allowed[0] }, { emitEvent: false });
+    }
+    this.step2Form.get('taxIdNumber')?.updateValueAndValidity({ emitEvent: false });
+
+    const isRus = regime === 'RUS' || regime === 'NONE';
+    const invoiceCtrl = this.step2Form.get('canIssueInvoices');
+    const exemptCtrl = this.step2Form.get('igvExempt');
+
+    if (isRus) {
+      invoiceCtrl?.setValue(false, { emitEvent: false });
+      invoiceCtrl?.disable({ emitEvent: false });
+      exemptCtrl?.setValue(true, { emitEvent: false });
+      exemptCtrl?.disable({ emitEvent: false });
+      this.step2Form.patchValue({ taxRate: 0 }, { emitEvent: false });
+    } else {
+      invoiceCtrl?.enable({ emitEvent: false });
+      if (resetExemptOnChange) {
+        invoiceCtrl?.setValue(true, { emitEvent: false });
+      }
+      exemptCtrl?.enable({ emitEvent: false });
+      const nextExempt = resetExemptOnChange ? false : !!currentExempt;
+      exemptCtrl?.setValue(nextExempt, { emitEvent: false });
+      this.step2Form.patchValue(
+        { taxRate: getDefaultTaxRateForRegime(regime, nextExempt) },
+        { emitEvent: false },
+      );
     }
   }
 
@@ -312,10 +386,6 @@ export class RegisterStep2Form implements OnInit {
       return;
     }
     this.step2Submit.emit(this.step2Form.getRawValue());
-  }
-
-  handleSkip(): void {
-    this.skip.emit();
   }
 }
 

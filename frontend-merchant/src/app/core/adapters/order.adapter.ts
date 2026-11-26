@@ -40,13 +40,15 @@ export function mapSummaryToMerchantOrder(summary: MerchantOrderSummaryResponse)
     ? summary.items.map(mapOrderItemResponseToOrderItem)
     : [];
 
+  const hasMercadoPago = Boolean(summary.paymentId);
+
   return {
     id: summary.id,
     orderNumber: summary.orderNumber,
     customerName: summary.customerName,
     customerPhone: summary.customerPhone ?? undefined,
-    channel: undefined,
-    channelLabel: undefined,
+    channel: hasMercadoPago ? 'WEB_STORE' : undefined,
+    channelLabel: hasMercadoPago ? 'Marketplace' : undefined,
     deliveryMode: summary.deliveryMode,
     deliveryAddress: summary.deliveryAddress ?? undefined,
     deliveryReference: summary.deliveryReference ?? undefined,
@@ -59,8 +61,8 @@ export function mapSummaryToMerchantOrder(summary: MerchantOrderSummaryResponse)
     isUrgent: false,
     urgentLabel: undefined,
     status: summary.status,
-    paymentMethod: undefined,
-    paymentLabel: undefined,
+    paymentMethod: hasMercadoPago ? 'MERCADO_PAGO' : undefined,
+    paymentLabel: hasMercadoPago ? 'Mercado Pago' : undefined,
     totalAmount: typeof summary.totalAmount === 'number' ? summary.totalAmount : Number(summary.totalAmount) || 0,
     notes: undefined,
     items,
@@ -73,13 +75,15 @@ export function mapDetailToMerchantOrder(detail: MerchantOrderDetailResponse): M
     ? detail.items.map(mapOrderItemResponseToOrderItem)
     : [];
 
+  const hasMercadoPago = Boolean(detail.paymentId);
+
   return {
     id: detail.id,
     orderNumber: detail.orderNumber,
     customerName: detail.customerName,
     customerPhone: detail.customerPhone ?? undefined,
-    channel: undefined,
-    channelLabel: undefined,
+    channel: hasMercadoPago ? 'WEB_STORE' : undefined,
+    channelLabel: hasMercadoPago ? 'Marketplace' : undefined,
     deliveryMode: detail.deliveryMode,
     deliveryAddress: detail.deliveryAddress ?? undefined,
     deliveryReference: detail.deliveryReference ?? undefined,
@@ -92,8 +96,8 @@ export function mapDetailToMerchantOrder(detail: MerchantOrderDetailResponse): M
     isUrgent: false,
     urgentLabel: undefined,
     status: detail.status,
-    paymentMethod: undefined,
-    paymentLabel: undefined,
+    paymentMethod: hasMercadoPago ? 'MERCADO_PAGO' : undefined,
+    paymentLabel: hasMercadoPago ? 'Mercado Pago' : undefined,
     totalAmount: typeof detail.totalAmount === 'number' ? detail.totalAmount : Number(detail.totalAmount) || 0,
     notes: undefined,
     items,

@@ -140,7 +140,14 @@ public class AdminUserController {
                 request.deliveryEnabled(),
                 request.logoUrl(),
                 request.bannerUrl(),
-                request.categoryIds()
+                request.categoryIds(),
+                request.legalBusinessName(),
+                request.taxIdType(),
+                request.taxIdNumber(),
+                request.taxRegime(),
+                request.canIssueInvoices(),
+                request.taxRate(),
+                request.sunatTermsAccepted()
         );
 
         AuthResult result = adminCreateMerchantService.execute(command, adminId);

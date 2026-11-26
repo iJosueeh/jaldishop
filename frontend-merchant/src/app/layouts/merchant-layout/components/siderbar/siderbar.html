@@ -232,6 +232,16 @@
         <ng-icon name="matGroupOutline" class="text-[20px]" />
         <span>Clientes</span>
       </a>
+
+      <a
+        routerLink="/promo-codes"
+        routerLinkActive="bg-primary text-white font-bold shadow-md shadow-primary/30 ring-1 ring-primary-fixed-dim/30"
+        (click)="closeSidebar.emit()"
+        class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-stone-400 hover:bg-white/5 hover:text-white transition-colors text-[13px] font-semibold cursor-pointer"
+      >
+        <ng-icon name="matSellOutline" class="text-[20px]" />
+        <span>Cupones</span>
+      </a>
     </nav>
   </div>
 

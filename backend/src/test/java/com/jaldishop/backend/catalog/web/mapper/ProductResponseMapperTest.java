@@ -38,7 +38,26 @@ class ProductResponseMapperTest {
         assertEquals("cheesecake", response.slug());
         assertEquals("Desc", response.description());
         assertEquals("https://img.png", response.imageUrl());
+        assertEquals(java.util.List.of("https://img.png"), response.images());
         assertEquals("ACTIVE", response.status());
+    }
+
+    @Test
+    @DisplayName("Should normalize ordered images and deduplicate fallback imageUrl")
+    void shouldNormalizeOrderedImages() {
+        UUID storeId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        Product product = Product.create(storeId, categoryId, "Torta", "torta", "Desc", "https://img-1.png");
+
+        ProductResponse response = mapper.toResponse(
+                product,
+                java.util.List.of(),
+                java.util.Collections.emptyMap(),
+                java.util.Arrays.asList(" https://img-1.png ", "", "https://img-2.png", "https://img-1.png")
+        );
+
+        assertEquals("https://img-1.png", response.imageUrl());
+        assertEquals(java.util.List.of("https://img-1.png", "https://img-2.png"), response.images());
     }
 
     @Test

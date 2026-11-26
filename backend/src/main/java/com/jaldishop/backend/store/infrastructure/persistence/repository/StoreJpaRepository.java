@@ -79,7 +79,7 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
             DELETE FROM cart_items WHERE store_id = :storeId;
             DELETE FROM carts WHERE store_id = :storeId;
             DELETE FROM favorites WHERE product_id IN (SELECT id FROM products WHERE store_id = :storeId);
-            DELETE FROM discounts WHERE store_id = :storeId;
+            DELETE FROM promo_codes WHERE store_id = :storeId;
             DELETE FROM product_images WHERE product_id IN (SELECT id FROM products WHERE store_id = :storeId);
             DELETE FROM variant_attributes WHERE variant_id IN (SELECT id FROM product_variants WHERE store_id = :storeId);
             DELETE FROM inventories WHERE variant_id IN (SELECT id FROM product_variants WHERE store_id = :storeId);

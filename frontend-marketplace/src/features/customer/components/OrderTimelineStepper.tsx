@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Clock, Package, Truck, Check, AlertCircle } from 'lucide-react';
 import { CustomerOrderStatusHistory, DeliveryMode, OrderStatus } from '../types/customer.types';
+import { cn } from '@/shared/utils/cn';
 
 interface OrderTimelineStepperProps {
   status: OrderStatus;
@@ -96,12 +97,12 @@ export const OrderTimelineStepper: React.FC<OrderTimelineStepperProps> = ({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-semibold text-sm sm:text-base">Pedido cancelado</h4>
+            <h3 className="font-semibold text-sm sm:text-base">Pedido cancelado</h3>
             <p className="text-xs sm:text-sm text-rose-800">
               {cancelEvent?.reason || 'Este pedido fue cancelado y no continuará su preparación.'}
             </p>
             {cancelEvent?.changedAt && (
-              <p className="text-xs text-rose-600">
+              <p className="text-xs text-rose-700 tabular-nums">
                 Cancelado el {new Date(cancelEvent.changedAt).toLocaleString('es-PE')}
               </p>
             )}
@@ -123,58 +124,49 @@ export const OrderTimelineStepper: React.FC<OrderTimelineStepperProps> = ({
 
   return (
     <div className="w-full">
-      <div className="relative">
-        <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-2">
-          {steps.map((step, idx) => {
-            const isCompleted = idx < currentStepIndex;
-            const isCurrent = idx === currentStepIndex;
-            const StepIcon = step.icon;
+      <ol
+        aria-label="Progreso del pedido"
+        className={cn(
+          'grid grid-cols-1 gap-2.5 sm:grid-cols-2',
+          steps.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'
+        )}
+      >
+        {steps.map((step, idx) => {
+          const isCompleted = idx < currentStepIndex;
+          const isCurrent = idx === currentStepIndex;
+          const StepIcon = step.icon;
+          const historyEntry = statusHistory.find((h) => h.status === step.key);
 
-            // Find history entry for this status if available
-            const historyEntry = statusHistory.find((h) => h.status === step.key);
-
-            return (
-              <div
-                key={step.key}
-                className={`relative flex flex-col p-3 rounded-xl border transition-all ${
-                  isCurrent
-                    ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-300 shadow-xs'
-                    : isCompleted
-                    ? 'bg-stone-50/60 border-stone-200'
-                    : 'bg-white/40 border-stone-200/60 opacity-60'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div
-                    className={`flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0 ${
-                      isCurrent
-                        ? 'bg-[#005141] text-white shadow-xs'
-                        : isCompleted
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-stone-100 text-stone-400'
-                    }`}
-                  >
-                    <StepIcon className="w-4 h-4" />
-                  </div>
-                  <span
-                    className={`text-xs font-semibold uppercase tracking-wider ${
-                      isCurrent
-                        ? 'text-[#005141]'
-                        : isCompleted
-                        ? 'text-stone-800'
-                        : 'text-stone-400'
-                    }`}
-                  >
-                    {step.label}
-                  </span>
+          return (
+            <li
+              key={step.key}
+              aria-current={isCurrent ? 'step' : undefined}
+              className={cn(
+                'min-w-0 flex lg:flex-col items-start gap-3 lg:gap-2.5 p-3.5 sm:p-4 rounded-xl border transition-colors',
+                isCurrent
+                  ? 'bg-[#f0fdfa] border-[#005141]'
+                  : isCompleted
+                  ? 'bg-[#faf7f2] border-[#e7e0d6]'
+                  : 'bg-white border-[#e7e0d6]/80'
+              )}
+            >
+              {/* Icon + (Desktop: timestamp on right) */}
+              <div className="flex items-center justify-between gap-2 shrink-0 lg:w-full">
+                <div
+                  className={cn(
+                    'flex items-center justify-center w-9 h-9 lg:w-8 lg:h-8 rounded-lg shrink-0',
+                    isCurrent
+                      ? 'bg-[#005141] text-white'
+                      : isCompleted
+                      ? 'bg-[#ccfbf1] text-[#005141]'
+                      : 'bg-[#f7f3ec] text-[#57534e]'
+                  )}
+                >
+                  <StepIcon className="w-4 h-4" aria-hidden="true" />
                 </div>
 
-                <p className="text-xs text-stone-600 leading-snug line-clamp-2">
-                  {step.description}
-                </p>
-
                 {historyEntry && (
-                  <span className="mt-2 text-[11px] font-mono text-stone-500">
+                  <span className="hidden lg:inline text-[11px] font-mono tabular-nums text-[#57534e]">
                     {new Date(historyEntry.changedAt).toLocaleTimeString('es-PE', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -182,10 +174,41 @@ export const OrderTimelineStepper: React.FC<OrderTimelineStepperProps> = ({
                   </span>
                 )}
               </div>
-            );
-          })}
-        </div>
-      </div>
+
+              {/* Label + Description + (Mobile: timestamp aligned right on label row) */}
+              <div className="min-w-0 flex-1 lg:w-full space-y-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span
+                    className={cn(
+                      'text-sm font-bold leading-snug break-words',
+                      isCurrent
+                        ? 'text-[#005141]'
+                        : isCompleted
+                        ? 'text-[#1c1917]'
+                        : 'text-[#57534e]'
+                    )}
+                  >
+                    {step.label}
+                  </span>
+
+                  {historyEntry && (
+                    <span className="lg:hidden text-[11px] font-mono tabular-nums text-[#57534e] shrink-0">
+                      {new Date(historyEntry.changedAt).toLocaleTimeString('es-PE', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-[#57534e] leading-relaxed break-words">
+                  {step.description}
+                </p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 };

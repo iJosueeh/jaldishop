@@ -374,6 +374,203 @@
         }
       </div>
 
+      <!-- SECCIÓN 4: IDENTIDAD FISCAL Y RÉGIMEN SUNAT -->
+      <div class="pt-5 border-t border-stone-200 space-y-4">
+        <div>
+          <h3 class="text-sm font-bold text-[#0a0a09] tracking-wide">
+            Identidad fiscal y régimen SUNAT <span class="text-red-500">*</span>
+          </h3>
+          <p class="text-xs text-stone-600 mt-0.5 leading-relaxed">
+            Define cómo emitirá tus comprobantes JaldiShop (Boleta, Factura o Nota de Venta) y el cálculo de IGV en tus ventas.
+          </p>
+        </div>
+
+        <!-- Régimen Tributario SUNAT -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="tax-regime">
+            Régimen tributario SUNAT <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="tax-regime"
+            formControlName="taxRegime"
+            class="w-full h-11 px-3.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors cursor-pointer"
+          >
+            @for (opt of regimeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          <div class="p-3 rounded-xl bg-stone-100/80 border border-stone-200 text-xs text-stone-700 space-y-1">
+            <p class="font-semibold text-[#005141]">
+              {{ selectedRegimeInfo().receiptSummary }} · {{ selectedRegimeInfo().igvSummary }}
+            </p>
+            <p class="text-[11px] text-stone-600">{{ selectedRegimeInfo().example }}</p>
+          </div>
+        </div>
+
+        <!-- Tipo y Número de Documento Fiscal -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="tax-id-type">
+              Tipo de documento <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="tax-id-type"
+              formControlName="taxIdType"
+              class="w-full h-11 px-3.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors cursor-pointer"
+            >
+              @if (allowedDocTypes().includes('RUC_10')) {
+                <option value="RUC_10">RUC 10 (Persona Natural con Negocio)</option>
+              }
+              @if (allowedDocTypes().includes('RUC_20')) {
+                <option value="RUC_20">RUC 20 (Persona Jurídica / Empresa)</option>
+              }
+              @if (allowedDocTypes().includes('DNI')) {
+                <option value="DNI">DNI (En formalización - 8 dígitos)</option>
+              }
+            </select>
+            <p class="text-[11px] text-stone-500 pl-1">
+              {{ step2Form.get('taxRegime')?.value === 'RUS'
+                ? 'Nuevo RUS admite RUC 10 o DNI si aún estás en formalización.'
+                : 'RER, MYPE y General requieren RUC 10 o RUC 20 válido.' }}
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="tax-id-number">
+              Número de {{ step2Form.get('taxIdType')?.value === 'DNI' ? 'DNI' : 'RUC' }} <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="tax-id-number"
+              type="text"
+              inputmode="numeric"
+              formControlName="taxIdNumber"
+              [maxlength]="step2Form.get('taxIdType')?.value === 'DNI' ? 8 : 11"
+              [placeholder]="
+                step2Form.get('taxIdType')?.value === 'DNI'
+                  ? 'Ej. 45678901'
+                  : step2Form.get('taxIdType')?.value === 'RUC_20'
+                    ? 'Ej. 20100070970'
+                    : 'Ej. 10456789019'
+              "
+              class="w-full h-11 px-3.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-mono tabular-nums focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+              [class.border-red-500]="
+                step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.invalid
+              "
+            />
+            @if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('required')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                Ingresa tu número de {{ step2Form.get('taxIdType')?.value === 'DNI' ? 'DNI' : 'RUC' }}.
+              </p>
+            } @else if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('nonNumeric')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                Solo se permiten dígitos numéricos.
+              </p>
+            } @else if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('invalidDniLength')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                El DNI debe tener exactamente 8 dígitos.
+              </p>
+            } @else if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('invalidRucLength')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                El RUC debe tener exactamente 11 dígitos.
+              </p>
+            } @else if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('invalidRucPrefix')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                Debe comenzar con {{ step2Form.get('taxIdType')?.value === 'RUC_20' ? '20' : '10' }}.
+              </p>
+            } @else if (step2Form.get('taxIdNumber')?.touched && step2Form.get('taxIdNumber')?.hasError('invalidModulo11')) {
+              <p class="text-[11px] text-red-600 font-medium pl-1">
+                El RUC no supera la validación SUNAT (dígito verificador Módulo 11 inválido).
+              </p>
+            } @else {
+              <p class="text-[11px] text-stone-500 pl-1">
+                {{ step2Form.get('taxIdType')?.value === 'DNI'
+                  ? '8 dígitos numéricos según RENIEC.'
+                  : '11 dígitos numéricos con dígito verificador SUNAT válido.' }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Razón Social / Nombre del Titular -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-[#0a0a09] tracking-wide" for="legal-business-name">
+            {{ step2Form.get('taxIdType')?.value === 'RUC_20' ? 'Razón Social (según ficha RUC)' : 'Nombre completo del titular o negocio' }}
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="legal-business-name"
+            type="text"
+            formControlName="legalBusinessName"
+            [placeholder]="
+              step2Form.get('taxIdType')?.value === 'RUC_20'
+                ? 'Ej. INVERSIONES GASTRONOMICAS DEL SUR S.A.C.'
+                : 'Ej. María Luz Quispe Mamani'
+            "
+            class="w-full h-11 px-3.5 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#005141] focus:border-[#005141] transition-colors"
+            [class.border-red-500]="
+              step2Form.get('legalBusinessName')?.touched && step2Form.get('legalBusinessName')?.invalid
+            "
+          />
+          @if (step2Form.get('legalBusinessName')?.touched && step2Form.get('legalBusinessName')?.invalid) {
+            <p class="text-[11px] text-red-600 font-medium pl-1">
+              {{ step2Form.get('taxIdType')?.value === 'RUC_20'
+                ? 'La razón social es obligatoria para RUC 20.'
+                : 'El nombre completo del titular es obligatorio.' }}
+            </p>
+          } @else {
+            <p class="text-[11px] text-stone-500 pl-1">
+              Aparecerá como emisor en cada Boleta, Factura o Nota de Venta generada tras una compra.
+            </p>
+          }
+        </div>
+
+        <!-- Condición IGV y Emisión de Facturas -->
+        <div class="p-3.5 rounded-xl bg-white border border-stone-200 space-y-2.5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="block text-xs font-bold text-stone-900">Condición de IGV aplicada</span>
+              <span class="text-[11px] text-stone-600">
+                {{ step2Form.get('taxRegime')?.value === 'RUS'
+                  ? 'Nuevo RUS no discrimina IGV ni otorga crédito fiscal.'
+                  : 'Por defecto afecto al 18% de IGV según ley peruana.' }}
+              </span>
+            </div>
+            <span
+              class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 font-mono"
+              [class]="
+                step2Form.get('taxRate')?.value === 0
+                  ? 'bg-stone-100 text-stone-700 border border-stone-300'
+                  : 'bg-emerald-50 text-[#005141] border border-emerald-200'
+              "
+            >
+              IGV {{ step2Form.get('taxRate')?.value ?? 0 }}%
+            </span>
+          </div>
+
+          @if (step2Form.get('taxRegime')?.value !== 'RUS') {
+            <div class="pt-2 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  formControlName="igvExempt"
+                  class="w-4 h-4 rounded border-stone-300 text-[#005141] focus:ring-[#005141] accent-[#005141]"
+                />
+                <span>Negocio exonerado de IGV (ej. Ley de Amazonía)</span>
+              </label>
+
+              <label class="inline-flex items-center gap-2 text-xs font-medium text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  formControlName="canIssueInvoices"
+                  class="w-4 h-4 rounded border-stone-300 text-[#005141] focus:ring-[#005141] accent-[#005141]"
+                />
+                <span>Habilitar Facturas (01)</span>
+              </label>
+            </div>
+          }
+        </div>
+      </div>
+
       <!-- ACCIONES PRINCIPALES -->
       <div class="pt-6 space-y-3">
         <button
@@ -413,13 +610,6 @@
           <span class="text-xs text-stone-500 font-medium block">
             Siguiente: Paso 3 · Ubicación y modalidades de entrega con mapa
           </span>
-          <button
-            type="button"
-            (click)="handleSkip()"
-            class="mt-2 text-xs font-semibold text-stone-500 hover:text-[#005141] transition-colors underline decoration-stone-300 hover:decoration-[#005141] cursor-pointer"
-          >
-            Configurar esto más tarde (Omitir)
-          </button>
         </div>
       </div>
     </form>

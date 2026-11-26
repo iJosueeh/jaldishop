@@ -12,7 +12,7 @@ describe('FavoritesView Component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders empty state when customer has no favorites with general MYPE ideas', () => {
+  it('renders empty state when customer has no favorites with store exploration CTA', () => {
     vi.mocked(useCustomerFavorites).mockReturnValue({
       favorites: [],
       isLoading: false,
@@ -24,12 +24,15 @@ describe('FavoritesView Component', () => {
     });
 
     render(<FavoritesView />);
+    expect(screen.getByRole('heading', { level: 1, name: /Mis Favoritos/i })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
     expect(
       screen.getByText('Aún no tienes productos guardados en favoritos')
     ).toBeInTheDocument();
-    expect(screen.getByText('Compras recurrentes')).toBeInTheDocument();
-    expect(screen.getByText('Creaciones a medida')).toBeInTheDocument();
-    expect(screen.getByText('Hogar y bienestar')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Explorar comercios locales/i })).toHaveAttribute(
+      'href',
+      '/#tiendas-destacadas'
+    );
   });
 
   it('renders favorite product cards with price, store, and availability', () => {

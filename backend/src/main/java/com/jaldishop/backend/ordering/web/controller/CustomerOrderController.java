@@ -7,6 +7,7 @@ import com.jaldishop.backend.ordering.web.dto.CancelOrderRequest;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderDetailResponse;
 import com.jaldishop.backend.ordering.web.dto.CustomerOrderSummaryResponse;
 import com.jaldishop.backend.shared.security.JwtPrincipal;
+import com.jaldishop.backend.shared.web.dto.CustomerPageResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,21 @@ public class CustomerOrderController {
         validateCustomerPrincipal(principal);
         List<CustomerOrderSummaryResponse> orders = getCustomerOrdersService.execute(principal.userId());
         return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<CustomerPageResponse<CustomerOrderSummaryResponse>> getMyOrdersPaged(
+            @AuthenticationPrincipal JwtPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "ACTIVE") String tab,
+            @RequestParam(defaultValue = "ALL") String deliveryMode,
+            @RequestParam(required = false) String q
+    ) {
+        validateCustomerPrincipal(principal);
+        return ResponseEntity.ok(
+                getCustomerOrdersService.executePaged(principal.userId(), tab, deliveryMode, q, page, size)
+        );
     }
 
     @GetMapping("/{orderNumber}")

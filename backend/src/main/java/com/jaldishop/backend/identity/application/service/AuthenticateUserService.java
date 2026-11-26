@@ -39,6 +39,13 @@ public class AuthenticateUserService {
             throw new BusinessRuleException("USER_INACTIVE", "El usuario se encuentra inactivo.");
         }
 
+        if (!user.isEmailVerified()) {
+            throw new BusinessRuleException(
+                    "EMAIL_NOT_VERIFIED",
+                    "Debes verificar tu correo electrónico antes de iniciar sesión."
+            );
+        }
+
         Set<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().toString())
                 .collect(Collectors.toSet());

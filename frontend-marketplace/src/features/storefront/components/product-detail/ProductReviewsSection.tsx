@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MessageSquarePlus, Pencil, ShieldCheck, Star, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import { ProductReviewsSummary } from '../../types/storefront.types';
 import { useReviewEligibility } from '@/features/customer/hooks/useReviewEligibility';
 import { useCustomerReviews } from '@/features/customer/hooks/useCustomerReviews';
@@ -76,10 +76,14 @@ export function ProductReviewsSection({
     try {
       await deleteReview(productId);
       setConfirmDelete(false);
-      toast.success('Tu reseña ha sido eliminada.');
+      notify.success('Tu reseña ha sido eliminada.', {
+        id: notifyKeys.review(productId),
+      });
       onReviewsChanged?.();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'No pudimos eliminar tu reseña.');
+      notify.error(err instanceof Error ? err.message : 'No pudimos eliminar tu reseña.', {
+        id: notifyKeys.review(productId),
+      });
     }
   };
 
@@ -255,6 +259,22 @@ export function ProductReviewsSection({
               <MessageSquarePlus className="h-4 w-4 text-[#36f4a4]" />
               <span>Escribir mi reseña</span>
             </button>
+          </div>
+        ) : eligibility?.hasInProgressOrder ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-700">
+            <div className="flex items-start gap-2.5">
+              <ShieldCheck className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <p>
+                Tienes un <strong>pedido en curso</strong> con este producto. Podrás publicar tu reseña en cuanto sea{' '}
+                <strong>entregado</strong>.
+              </p>
+            </div>
+            <Link
+              href="/mi-jaldishop/pedidos"
+              className="text-xs font-semibold text-[#005141] hover:underline shrink-0"
+            >
+              Ver mis pedidos
+            </Link>
           </div>
         ) : (
           <div className="flex items-start gap-2.5 text-xs text-stone-600">

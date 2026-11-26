@@ -4,6 +4,8 @@ import {
   isValidPeruPhone,
   isValidResetToken,
   normalizePhone,
+  toLocalPeruPhone,
+  validateLocalPeruPhone,
   validateFirstName,
   validateLastName,
   validateEmailField,
@@ -18,6 +20,26 @@ describe('Validation utilities', () => {
     it('removes spaces, dashes, and parentheses', () => {
       expect(normalizePhone('987 654 321')).toBe('987654321');
       expect(normalizePhone('+51 (987) 654-321')).toBe('+51987654321');
+    });
+  });
+
+  describe('toLocalPeruPhone', () => {
+    it('strips +51 prefix, formatting, and limits to 9 local digits', () => {
+      expect(toLocalPeruPhone('+51987654321')).toBe('987654321');
+      expect(toLocalPeruPhone('+51 (987) 654-321')).toBe('987654321');
+      expect(toLocalPeruPhone('51987654321')).toBe('987654321');
+      expect(toLocalPeruPhone('987 654 321')).toBe('987654321');
+      expect(toLocalPeruPhone('987654321')).toBe('987654321');
+      expect(toLocalPeruPhone(null)).toBe('');
+    });
+  });
+
+  describe('validateLocalPeruPhone', () => {
+    it('validates optional and required local Peruvian phone numbers', () => {
+      expect(validateLocalPeruPhone('')).toBeNull();
+      expect(validateLocalPeruPhone('', true)).toMatch(/9 dígitos/i);
+      expect(validateLocalPeruPhone('+51987654321', true)).toBeNull();
+      expect(validateLocalPeruPhone('812345678', true)).toMatch(/comenzando con 9/i);
     });
   });
 

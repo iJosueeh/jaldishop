@@ -16,6 +16,7 @@ import {
   matBoltOutline,
   matChevronRightOutline,
   matHistoryEduOutline,
+  matSellOutline,
 } from '@ng-icons/material-symbols/outline';
 
 export interface AdminSidebarSections {
@@ -40,6 +41,7 @@ export interface AdminSidebarSections {
       matBoltOutline,
       matChevronRightOutline,
       matHistoryEduOutline,
+      matSellOutline,
     }),
   ],
   selector: 'app-admin-sidebar',
@@ -93,7 +95,7 @@ export class AdminSidebar implements OnInit {
     if (url.includes('/admin/users') || url.includes('/admin/stores') || url.includes('/admin/merchants')) {
       this.openSections.update((s) => ({ ...s, ecosystem: true }));
     }
-    if (url.includes('/admin/reconciliation')) {
+    if (url.includes('/admin/reconciliation') || url.includes('/admin/promo-codes')) {
       this.openSections.update((s) => ({ ...s, finances: true }));
     }
     if (url.includes('/admin/settings') || url.includes('/admin/audit-logs')) {

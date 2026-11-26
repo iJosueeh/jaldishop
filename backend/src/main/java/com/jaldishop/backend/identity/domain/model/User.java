@@ -22,12 +22,18 @@ public class User {
     private final Instant createdAt;
     private Instant updatedAt;
     private boolean primaryAdmin;
+    private boolean emailVerified;
+    private Instant emailVerifiedAt;
 
     public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles) {
-        this(id, firstName, lastName, email, password, status, phone, createdAt, updatedAt, roles, false);
+        this(id, firstName, lastName, email, password, status, phone, createdAt, updatedAt, roles, false, true, createdAt);
     }
 
     public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles, boolean primaryAdmin) {
+        this(id, firstName, lastName, email, password, status, phone, createdAt, updatedAt, roles, primaryAdmin, true, createdAt);
+    }
+
+    public User(UUID id, String firstName, String lastName, String email, String password, UserStatus status, String phone, Instant createdAt, Instant updatedAt, Set<Role> roles, boolean primaryAdmin, boolean emailVerified, Instant emailVerifiedAt) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -39,9 +45,19 @@ public class User {
         this.updatedAt = updatedAt;
         this.roles = new HashSet<>(roles);
         this.primaryAdmin = primaryAdmin;
+        this.emailVerified = emailVerified;
+        this.emailVerifiedAt = emailVerifiedAt;
     }
 
     public static User create(String email, String password, String firstName, String lastName, String phone, Set<Role> roles) {
+        return createInternal(email, password, firstName, lastName, phone, roles, true);
+    }
+
+    public static User createUnverified(String email, String password, String firstName, String lastName, String phone, Set<Role> roles) {
+        return createInternal(email, password, firstName, lastName, phone, roles, false);
+    }
+
+    private static User createInternal(String email, String password, String firstName, String lastName, String phone, Set<Role> roles, boolean emailVerified) {
         validateRequired(email, "email");
         validateRequired(password, "password");
         validateRequired(firstName, "First Name");
@@ -64,7 +80,10 @@ public class User {
                 normalizedPhone,
                 now,
                 now,
-                roles
+                roles,
+                false,
+                emailVerified,
+                emailVerified ? now : null
         );
     }
 
@@ -80,7 +99,7 @@ public class User {
             Instant createdAt,
             Instant updatedAt
     ) {
-        return reconstitute(id, email, password, firstName, lastName, phone, status, roles, createdAt, updatedAt, false);
+        return reconstitute(id, email, password, firstName, lastName, phone, status, roles, createdAt, updatedAt, false, true, createdAt);
     }
 
     public static User reconstitute(
@@ -96,6 +115,24 @@ public class User {
             Instant updatedAt,
             boolean primaryAdmin
     ) {
+        return reconstitute(id, email, password, firstName, lastName, phone, status, roles, createdAt, updatedAt, primaryAdmin, true, createdAt);
+    }
+
+    public static User reconstitute(
+            UUID id,
+            String email,
+            String password,
+            String firstName,
+            String lastName,
+            String phone,
+            UserStatus status,
+            Set<Role> roles,
+            Instant createdAt,
+            Instant updatedAt,
+            boolean primaryAdmin,
+            boolean emailVerified,
+            Instant emailVerifiedAt
+    ) {
         return new User(
                 id,
                 firstName,
@@ -107,7 +144,9 @@ public class User {
                 createdAt,
                 updatedAt,
                 roles,
-                primaryAdmin
+                primaryAdmin,
+                emailVerified,
+                emailVerifiedAt
         );
     }
 
@@ -169,6 +208,29 @@ public class User {
 
     public boolean canAuthenticate() {
         return status == UserStatus.ACTIVE;
+    }
+
+    public boolean canUseAuthenticatedSession() {
+        return canAuthenticate() && emailVerified;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public Instant getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    public void verifyEmail(Instant verifiedAt) {
+        if (verifiedAt == null) {
+            throw new IllegalArgumentException("La fecha de verificación es obligatoria.");
+        }
+        this.emailVerified = true;
+        if (this.emailVerifiedAt == null) {
+            this.emailVerifiedAt = verifiedAt;
+        }
+        this.updatedAt = verifiedAt;
     }
 
     public boolean isPrimaryAdmin() {

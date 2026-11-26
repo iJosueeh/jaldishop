@@ -65,6 +65,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/stores/*/public-settings").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/public/platform-settings").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/public/marketplace/active-banner").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/public/checkout/validate-promo").permitAll()
                         .requestMatchers(
                                 "/api/v1/health",
                                 "/actuator/health",
@@ -72,6 +74,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/reset-password",
+                                "/api/v1/auth/verify-email",
+                                "/api/v1/auth/resend-verification",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/register/**",
                                 "/api/v1/auth/admin-invitations/**",

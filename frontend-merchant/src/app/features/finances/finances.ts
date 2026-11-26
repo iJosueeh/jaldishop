@@ -11,6 +11,7 @@ import { TopProductsCard } from './components/top-products-card/top-products-car
 import { CommercialBreakdown } from './components/commercial-breakdown/commercial-breakdown';
 import { SettlementCard } from './components/settlement-card/settlement-card';
 import { PayoutBatchesTable } from './components/payout-batches-table/payout-batches-table';
+import { FiscalReceiptsTable } from './components/fiscal-receipts-table/fiscal-receipts-table';
 import { PayoutRequestModal } from './components/payout-request-modal/payout-request-modal';
 import { PayoutDestinationModal } from './components/payout-destination-modal/payout-destination-modal';
 
@@ -26,6 +27,7 @@ import { PayoutDestinationModal } from './components/payout-destination-modal/pa
     CommercialBreakdown,
     SettlementCard,
     PayoutBatchesTable,
+    FiscalReceiptsTable,
     PayoutRequestModal,
     PayoutDestinationModal,
   ],
@@ -62,11 +64,15 @@ export class Finances implements OnInit {
         error: () => {},
       });
     }
+    this.billingService.loadReceipts().subscribe({
+      error: () => {},
+    });
   }
 
   retry(): void {
     this.analyticsService.loadSummary().subscribe({ error: () => {} });
     this.billingService.loadSummary().subscribe({ error: () => {} });
+    this.billingService.loadReceipts().subscribe({ error: () => {} });
   }
 
   onDestinationModalClosed(): void {

@@ -7,7 +7,7 @@ export type DeliveryMode = 'PICKUP' | 'DELIVERY';
 
 export type OrderChannel = 'WHATSAPP' | 'INSTAGRAM' | 'COUNTER' | 'WEB_STORE';
 
-export type PaymentMethod = 'YAPE' | 'PLIN' | 'BCP' | 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA';
+export type PaymentMethod = 'YAPE' | 'PLIN' | 'BCP' | 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA' | 'MERCADO_PAGO';
 
 export interface OrderItem {
   name: string;
@@ -81,6 +81,7 @@ export interface MerchantOrderSummaryResponse {
   orderNumber: string;
   storeId: string;
   customerUserId: string;
+  paymentId?: string | null;
   status: OrderStatus;
   deliveryMode: DeliveryMode;
   serviceDate: string;
@@ -108,7 +109,7 @@ export interface MerchantOrderDetailResponse {
   orderNumber: string;
   storeId: string;
   customerUserId: string;
-  paymentId: string;
+  paymentId: string | null;
   capacityReservationId: string;
   status: OrderStatus;
   deliveryMode: DeliveryMode;

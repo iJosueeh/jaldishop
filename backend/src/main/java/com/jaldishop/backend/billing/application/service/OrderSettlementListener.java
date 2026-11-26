@@ -51,7 +51,8 @@ public class OrderSettlementListener {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
                 SELECT id, store_id, user_id, delivery_mode, payment_method,
-                       products_subtotal_amount, delivery_fee_amount, currency
+                       products_subtotal_amount, discount_amount, promo_funding_source,
+                       delivery_fee_amount, currency
                 FROM orders
                 WHERE id = ?
                 """,
@@ -69,8 +70,21 @@ public class OrderSettlementListener {
         DeliveryMode deliveryMode = DeliveryMode.valueOf(orderRow.get("delivery_mode").toString());
         String paymentMethod = orderRow.get("payment_method") != null ? orderRow.get("payment_method").toString() : "ONLINE";
         BigDecimal subtotal = (BigDecimal) orderRow.get("products_subtotal_amount");
+        BigDecimal discountAmount = (BigDecimal) orderRow.get("discount_amount");
+        String promoFundingSource = orderRow.get("promo_funding_source") != null
+                ? orderRow.get("promo_funding_source").toString()
+                : null;
         BigDecimal deliveryFee = (BigDecimal) orderRow.get("delivery_fee_amount");
         String currency = orderRow.get("currency") != null ? orderRow.get("currency").toString() : "PEN";
+
+        BigDecimal effectiveSubtotal = subtotal != null ? subtotal : BigDecimal.ZERO;
+        // Solo los cupones financiados por el comercio (scope = STORE) reducen la base comisionable y el crédito de venta.
+        // Los cupones globales (PLATFORM) protegen el ingreso íntegro del comercio.
+        if ("MERCHANT".equalsIgnoreCase(promoFundingSource)
+                && discountAmount != null
+                && discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            effectiveSubtotal = effectiveSubtotal.subtract(discountAmount).max(BigDecimal.ZERO);
+        }
 
         FeePolicy policy = feePolicyProvider.getEffectivePolicy();
         PaymentBreakdown breakdown = feeCalculatorDomainService.calculateBreakdown(
@@ -79,7 +93,7 @@ public class OrderSettlementListener {
                 userId,
                 deliveryMode,
                 paymentMethod,
-                new Money(subtotal != null ? subtotal : BigDecimal.ZERO, currency),
+                new Money(effectiveSubtotal, currency),
                 new Money(deliveryFee != null ? deliveryFee : BigDecimal.ZERO, currency),
                 policy
         );

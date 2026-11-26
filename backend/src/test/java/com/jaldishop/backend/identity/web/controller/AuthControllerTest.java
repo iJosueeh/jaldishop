@@ -41,6 +41,12 @@ class AuthControllerTest {
     @Mock
     private com.jaldishop.backend.identity.application.service.RefreshTokenService refreshTokenService;
 
+    @Mock
+    private com.jaldishop.backend.identity.application.service.VerifyEmailService verifyEmailService;
+
+    @Mock
+    private com.jaldishop.backend.identity.application.service.ResendVerificationEmailService resendVerificationEmailService;
+
     private MockMvc mockMvc;
     private UUID testUserId;
     private com.jaldishop.backend.shared.security.JwtPrincipal currentPrincipal;
@@ -54,7 +60,9 @@ class AuthControllerTest {
                 authenticateUserService,
                 registerCustomerService,
                 registerMerchantService,
-                refreshTokenService
+                refreshTokenService,
+                verifyEmailService,
+                resendVerificationEmailService
         );
 
         org.springframework.web.method.support.HandlerMethodArgumentResolver authPrincipalResolver =
@@ -196,5 +204,24 @@ class AuthControllerTest {
     private String merchantRequest(String firstName, String lastName, String email) {
         return "{\"email\":\"" + email + "\",\"password\":\"password123\",\"firstName\":\"" + firstName
                 + "\",\"lastName\":\"" + lastName + "\",\"storeName\":\"Mi tienda\",\"pickupEnabled\":true,\"deliveryEnabled\":false}";
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/verify-email - 204 No Content cuando el token es válido")
+    void verifyEmailSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/verify-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"" + "A".repeat(43) + "\"}"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/resend-verification - 202 Accepted con mensaje neutro")
+    void resendVerificationReturnsAccepted() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/resend-verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"ana@example.com\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.message").exists());
     }
 }

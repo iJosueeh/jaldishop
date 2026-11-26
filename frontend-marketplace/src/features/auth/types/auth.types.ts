@@ -20,9 +20,23 @@ export interface AuthSessionResponse {
 export interface RegisterCustomerResponse {
   authenticated: boolean;
   autoLogin: boolean;
+  requiresEmailVerification?: boolean;
+  email?: string;
   fullName?: string;
   message?: string;
   errors?: Record<string, string>;
+}
+
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
 }
 
 export interface ForgotPasswordRequest {

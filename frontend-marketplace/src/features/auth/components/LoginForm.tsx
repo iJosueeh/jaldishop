@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import {
   Eye,
   EyeOff,
@@ -22,10 +22,13 @@ import {
 import { Button } from '@/shared/components/ui/Button';
 import { JaldiShopLogo } from '@/shared/components/ui/JaldiShopLogo';
 import { env } from '@/core/config/env';
+import { ApiException } from '@/core/api/apiClient';
 import { customerAuthService } from '../services/customerAuthService';
+import { mapAuthErrorMessage } from '../utils/authErrors';
 import { getSafeRedirectUrl } from '../utils/safeRedirect';
 import { isValidEmail } from '../utils/validation';
 import { PublicStore } from '@/features/storefront/types/storefront.types';
+import { EmailVerificationPendingCard } from './EmailVerificationPendingCard';
 
 export interface LoginFormProps {
   featuredStore?: PublicStore | null;
@@ -43,6 +46,7 @@ export function LoginForm({ featuredStore = null }: LoginFormProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -107,10 +111,11 @@ export function LoginForm({ featuredStore = null }: LoginFormProps) {
         await queryClient.invalidateQueries({ queryKey: ['customer-session'] });
         await queryClient.invalidateQueries({ queryKey: ['customer-cart'] });
 
-        toast.success(
+        notify.success(
           response.fullName
             ? `¡Bienvenido de vuelta, ${response.fullName}!`
-            : '¡Sesión iniciada con éxito!'
+            : '¡Sesión iniciada con éxito!',
+          { id: notifyKeys.authLogin() }
         );
 
         router.push(redirectUrl);
@@ -119,12 +124,16 @@ export function LoginForm({ featuredStore = null }: LoginFormProps) {
         setErrorMessage(response.message || 'No se pudo iniciar sesión.');
       }
     } catch (err: unknown) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Ocurrió un error inesperado al intentar iniciar sesión.';
+      if (err instanceof ApiException && err.errorData?.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(email.trim().toLowerCase());
+        return;
+      }
+      const message = mapAuthErrorMessage(
+        err,
+        'Ocurrió un error inesperado al intentar iniciar sesión.'
+      );
       setErrorMessage(message);
-      toast.error(message);
+      notify.error(message, { id: notifyKeys.authLogin() });
     } finally {
       setIsSubmitting(false);
     }
@@ -266,8 +275,23 @@ export function LoginForm({ featuredStore = null }: LoginFormProps) {
             </Link>
           </div>
 
-          {/* Título de la vista de autenticación */}
-          <div className="mb-8">
+          {unverifiedEmail ? (
+            <EmailVerificationPendingCard
+              email={unverifiedEmail}
+              title="Verifica tu correo electrónico"
+              description="Tu cuenta aún no ha sido verificada. Revisa tu bandeja o solicita un nuevo enlace para poder iniciar sesión."
+              initialCooldown={0}
+              loginHref={`/login${searchParams.get('redirect') ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
+              onSecondaryAction={() => {
+                setUnverifiedEmail(null);
+                setErrorMessage(null);
+              }}
+              secondaryActionLabel="Intentar con otro correo"
+            />
+          ) : (
+            <>
+              {/* Título de la vista de autenticación */}
+              <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#1c1917] tracking-tight">
               Bienvenido de vuelta
             </h1>
@@ -453,6 +477,8 @@ export function LoginForm({ featuredStore = null }: LoginFormProps) {
               <span>¿Tienes un negocio o tienda local? Accede al portal MYPE ↗</span>
             </a>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

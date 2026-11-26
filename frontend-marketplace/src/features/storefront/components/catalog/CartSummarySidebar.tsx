@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShoppingBag, Plus, Minus, Trash2, AlertTriangle, ArrowRight } from 'lucide-react';
 import { CartItem, ProductItem } from '../../types/storefront.types';
+import { SafeProductImage } from '../SafeProductImage';
 import { formatCurrency } from '@/shared/utils/formatters';
 
 interface CartSummarySidebarProps {
@@ -83,15 +84,13 @@ export function CartSummarySidebar({
               <div key={itemKey} className="pt-3 first:pt-0 flex items-start gap-3">
                 {/* Product thumbnail */}
                 <div className="h-14 w-14 shrink-0 rounded-[8px] border border-[#e7e0d6] bg-[#faf7f2] overflow-hidden flex items-center justify-center">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <ShoppingBag className="h-4 w-4 text-[#78716c]" aria-hidden="true" />
-                  )}
+                  <SafeProductImage
+                    src={product.imageUrl}
+                    alt={product.name}
+                    variant="thumb"
+                    category={product.category}
+                    useNativeImg
+                  />
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-1.5">

@@ -16,7 +16,7 @@ import { useStorefrontCart } from '../cart/StorefrontCartProvider';
 import { useCustomerFavorites } from '@/features/customer/hooks/useCustomerFavorites';
 import { useCustomerProfile } from '@/features/customer/hooks/useCustomerProfile';
 import { formatCurrency } from '@/shared/utils/formatters';
-import { toast } from 'sonner';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 
 export type { ProductItem, ProductVariantItem, CartItem };
 
@@ -91,18 +91,26 @@ export function CatalogContainer({
   const handleToggleFavorite = useCallback(
     async (productId: string) => {
       if (!authenticated) {
-        toast.error('Inicia sesión para guardar productos en tus favoritos');
+        notify.error('Inicia sesión para guardar productos en tus favoritos', {
+          id: notifyKeys.favorite(productId),
+        });
         return;
       }
       try {
         const added = await toggleFavorite(productId);
         if (added) {
-          toast.success('Producto añadido a tus favoritos');
+          notify.success('Producto añadido a tus favoritos', {
+            id: notifyKeys.favorite(productId),
+          });
         } else {
-          toast.info('Producto eliminado de tus favoritos');
+          notify.info('Producto eliminado de tus favoritos', {
+            id: notifyKeys.favorite(productId),
+          });
         }
       } catch {
-        toast.error('No se pudo actualizar favoritos');
+        notify.error('No se pudo actualizar favoritos', {
+          id: notifyKeys.favorite(productId),
+        });
       }
     },
     [authenticated, toggleFavorite]
@@ -219,7 +227,9 @@ export function CatalogContainer({
                 products={paginatedProducts}
                 onAdd={(p) => {
                   if (isOwnStore) {
-                    toast.error('No puedes agregar productos de tu propia tienda al carrito.');
+                    notify.error('No puedes agregar productos de tu propia tienda al carrito.', {
+                      id: notifyKeys.cartOwnStore(),
+                    });
                     return;
                   }
                   void changeQuantity(p, 1);

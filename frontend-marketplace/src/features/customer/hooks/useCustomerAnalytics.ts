@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { notify, notifyKeys } from '@/shared/utils/notify';
 import {
   AnalyticsDateRangeParams,
   customerAnalyticsService,
@@ -16,6 +16,7 @@ export function useCustomerAnalytics(params: AnalyticsDateRangeParams = {}) {
   const query = useQuery({
     queryKey: [...CUSTOMER_ANALYTICS_QUERY_KEY, params.from ?? '', params.to ?? ''],
     queryFn: () => customerAnalyticsService.getSummary(params),
+    placeholderData: keepPreviousData,
     staleTime: 60_000,
     retry: 1,
   });
@@ -33,11 +34,15 @@ export function useCustomerAnalytics(params: AnalyticsDateRangeParams = {}) {
       anchor.click();
       anchor.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Reporte PDF descargado.');
+      notify.success('Reporte PDF descargado.', {
+        id: notifyKeys.analyticsReport(),
+      });
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'No pudimos descargar el reporte PDF.';
-      toast.error(message);
+      notify.error(message, {
+        id: notifyKeys.analyticsReport(),
+      });
     } finally {
       setIsDownloadingPdf(false);
     }

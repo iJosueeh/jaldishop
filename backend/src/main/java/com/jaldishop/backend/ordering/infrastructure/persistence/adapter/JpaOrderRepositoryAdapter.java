@@ -3,6 +3,7 @@ package com.jaldishop.backend.ordering.infrastructure.persistence.adapter;
 import com.jaldishop.backend.ordering.domain.model.Order;
 import com.jaldishop.backend.ordering.domain.model.OrderStatusCounts;
 import com.jaldishop.backend.ordering.domain.repository.OrderRepository;
+import com.jaldishop.backend.ordering.domain.enums.DeliveryMode;
 import com.jaldishop.backend.ordering.domain.enums.OrderStatus;
 import com.jaldishop.backend.ordering.infrastructure.persistence.entity.OrderEntity;
 import com.jaldishop.backend.ordering.infrastructure.persistence.mapper.OrderPersistenceMapper;
@@ -51,6 +52,16 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
     }
 
     @Override
+    public List<Order> findByPaymentIdIn(List<UUID> paymentIds) {
+        if (paymentIds == null || paymentIds.isEmpty()) {
+            return List.of();
+        }
+        return jpaRepository.findByPaymentIdIn(paymentIds).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<Order> findByCapacityReservationId(UUID capacityReservationId) {
         return jpaRepository.findByCapacityReservationId(capacityReservationId).map(mapper::toDomain);
     }
@@ -60,6 +71,18 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
         return jpaRepository.findByUserIdOrderByConfirmedAtDesc(userId).stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<Order> findPagedByUserId(
+            UUID userId,
+            boolean activeOnly,
+            DeliveryMode deliveryMode,
+            String searchPattern,
+            Pageable pageable
+    ) {
+        return jpaRepository.findPagedByUserId(userId, activeOnly, deliveryMode, searchPattern, pageable)
+                .map(mapper::toDomain);
     }
 
     @Override
@@ -78,6 +101,14 @@ public class JpaOrderRepositoryAdapter implements OrderRepository {
             return false;
         }
         return jpaRepository.hasCompletedOrderWithProduct(userId, productId);
+    }
+
+    @Override
+    public boolean hasInProgressOrderWithProduct(UUID userId, UUID productId) {
+        if (userId == null || productId == null) {
+            return false;
+        }
+        return jpaRepository.hasInProgressOrderWithProduct(userId, productId);
     }
 
     @Override

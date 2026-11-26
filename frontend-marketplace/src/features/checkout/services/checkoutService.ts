@@ -5,6 +5,8 @@ import {
   CreatePaymentPreferenceResponse,
   PendingPaymentCorrelation,
   CustomerPaymentStatusResponse,
+  ValidatePromoPayload,
+  ValidatePromoResponse,
 } from '../types/checkout.types';
 
 export const PENDING_PAYMENT_STORAGE_KEY = 'jaldishop_pending_payment';
@@ -84,6 +86,24 @@ export function clearPendingPayment(): void {
 const inFlightPreferenceRequests = new Map<string, Promise<CreatePaymentPreferenceResponse>>();
 
 export const checkoutService = {
+  async validatePromoCode(payload: ValidatePromoPayload): Promise<ValidatePromoResponse> {
+    const res = await fetch('/api/checkout/validate-promo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json().catch(() => ({
+      valid: false,
+      discountAmount: 0,
+      newSubtotal: payload.subtotal,
+      message: 'No se pudo validar el código promocional.',
+    }));
+    return data as ValidatePromoResponse;
+  },
+
   async initiateCheckout(
     payload: InitiateCheckoutPayload
   ): Promise<CheckoutResponse> {

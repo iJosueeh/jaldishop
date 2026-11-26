@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginForm } from './LoginForm';
 import { customerAuthService } from '../services/customerAuthService';
+import { ApiException } from '@/core/api/apiClient';
 
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
@@ -149,5 +150,28 @@ describe('LoginForm Component', () => {
     expect(registerLink.getAttribute('href')).toContain(
       encodeURIComponent('/tienda/artesanias-cusco')
     );
+  });
+
+  it('shows email verification pending card when login returns EMAIL_NOT_VERIFIED', async () => {
+    vi.mocked(customerAuthService.login).mockRejectedValueOnce(
+      new ApiException(422, 'Unprocessable Content', {
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Debes verificar tu correo electrónico antes de iniciar sesión.',
+      })
+    );
+
+    renderLoginForm();
+
+    fireEvent.change(screen.getByLabelText(/Correo electrónico/i), {
+      target: { value: 'maria@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Contraseña$/i), {
+      target: { value: 'password123' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }));
+
+    expect(await screen.findByTestId('email-verification-pending')).toBeInTheDocument();
+    expect(screen.getByText('ma***@example.com')).toBeInTheDocument();
   });
 });

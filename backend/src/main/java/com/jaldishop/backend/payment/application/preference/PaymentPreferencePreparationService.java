@@ -55,6 +55,12 @@ public class PaymentPreferencePreparationService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private com.jaldishop.backend.identity.application.port.PlatformSettingsProvider platformSettingsProvider;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.jaldishop.backend.promo.application.service.ValidatePromoCodeService validatePromoCodeService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @org.springframework.beans.factory.annotation.Autowired
     public PaymentPreferencePreparationService(
             CapacityReservationRepository capacityReservationRepository,
@@ -287,8 +293,21 @@ public class PaymentPreferencePreparationService {
                 serviceFeeCap = platformSettings.customerServiceFeeCap();
             }
         }
+        java.math.BigDecimal rawSubtotal = itemSnapshots.stream()
+                .map(CheckoutItemSnapshot::subtotalAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        String appliedDiscountCode = null;
+        java.math.BigDecimal appliedDiscountAmount = java.math.BigDecimal.ZERO;
+        if (command.discountCode() != null && !command.discountCode().isBlank() && validatePromoCodeService != null) {
+            var promoResult = validatePromoCodeService.validateOrThrow(store.getId(), command.discountCode(), rawSubtotal);
+            appliedDiscountCode = promoResult.code();
+            appliedDiscountAmount = promoResult.discountAmount();
+        }
+
         CheckoutPricing pricing = CheckoutPricing.calculate(
-                itemSnapshots, command.fulfillmentType(), store.getDeliveryFeeAmount(), store.getTaxRate(), serviceFeeRate, serviceFeeCap, currency
+                itemSnapshots, command.fulfillmentType(), store.getDeliveryFeeAmount(), store.getTaxRate(),
+                serviceFeeRate, serviceFeeCap, currency, appliedDiscountCode, appliedDiscountAmount
         );
 
         String itemsSnapshotJson;
@@ -327,6 +346,23 @@ public class PaymentPreferencePreparationService {
                 itemsSnapshotJson
         );
         Payment savedPayment = paymentRepository.save(payment);
+        if (jdbcTemplate != null && (command.requestedReceiptType() != null || command.customerDocNumber() != null || command.customerLegalName() != null)) {
+            jdbcTemplate.update(
+                    """
+                    UPDATE payments
+                    SET requested_receipt_type = ?,
+                        customer_doc_type = ?,
+                        customer_doc_number = ?,
+                        customer_legal_name = ?
+                    WHERE id = ?
+                    """,
+                    command.requestedReceiptType(),
+                    command.customerDocType(),
+                    command.customerDocNumber(),
+                    command.customerLegalName(),
+                    savedPayment.getId()
+            );
+        }
 
         String currentMode = properties.getCheckoutMode() != null ? properties.getCheckoutMode().name() : "PREFERENCES";
         PaymentAttempt attempt = PaymentAttempt.create(
