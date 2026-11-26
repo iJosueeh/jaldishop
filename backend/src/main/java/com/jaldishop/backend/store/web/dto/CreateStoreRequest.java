@@ -1,5 +1,6 @@
 package com.jaldishop.backend.store.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jaldishop.backend.shared.validation.ValidPhone;
 import com.jaldishop.backend.store.domain.enums.TaxIdType;
 import com.jaldishop.backend.store.domain.enums.TaxRegime;
@@ -34,9 +35,13 @@ public record CreateStoreRequest(
         TaxIdType taxIdType,
         @Size(max = 11) String taxIdNumber,
         TaxRegime taxRegime,
-        boolean canIssueInvoices,
+        Boolean canIssueInvoices,
         Boolean sunatTermsAccepted
 ) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public CreateStoreRequest {
+    }
+
     public CreateStoreRequest(
             String name,
             String slug,

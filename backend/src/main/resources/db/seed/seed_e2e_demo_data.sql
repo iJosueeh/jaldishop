@@ -77,7 +77,7 @@ INSERT INTO stores (
     id, owner_user_id, name, slug, description, contact_phone,
     address, address_reference, latitude, longitude,
     pickup_enabled, delivery_enabled, delivery_fee_amount, delivery_fee_currency,
-    tax_rate, status, created_at, updated_at, logo_url, banner_url,
+    tax_rate, tax_regime, status, created_at, updated_at, logo_url, banner_url,
     instagram_url, facebook_url, whatsapp_number
 ) VALUES (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e5',
@@ -90,7 +90,7 @@ INSERT INTO stores (
     'A media cuadra del Parque Salazar',
     -12.128765, -77.029876,
     TRUE, TRUE, 7.50, 'PEN',
-    18.00, 'ACTIVE', NOW() - INTERVAL '45 days', NOW(),
+    18.00, 'MYPE', 'ACTIVE', NOW() - INTERVAL '45 days', NOW(),
     'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300',
     'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200',
     'https://instagram.com/dulcedeleite_pe',
@@ -106,7 +106,7 @@ INSERT INTO stores (
     id, owner_user_id, name, slug, description, contact_phone,
     address, address_reference, latitude, longitude,
     pickup_enabled, delivery_enabled, delivery_fee_amount, delivery_fee_currency,
-    tax_rate, status, created_at, updated_at, logo_url, banner_url,
+    tax_rate, tax_regime, status, created_at, updated_at, logo_url, banner_url,
     instagram_url, facebook_url, whatsapp_number
 ) VALUES (
     '80acf0ba-5a79-4888-b00d-b5aef8fcf9e6',
@@ -119,7 +119,7 @@ INSERT INTO stores (
     'Frente al Bosque El Olivar',
     -12.098765, -77.034567,
     TRUE, TRUE, 6.00, 'PEN',
-    18.00, 'ACTIVE', NOW() - INTERVAL '40 days', NOW(),
+    18.00, 'MYPE', 'ACTIVE', NOW() - INTERVAL '40 days', NOW(),
     'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=300',
     'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=1200',
     'https://instagram.com/aromaygrano_cafe',

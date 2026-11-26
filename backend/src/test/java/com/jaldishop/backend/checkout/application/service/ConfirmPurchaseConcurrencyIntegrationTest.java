@@ -73,7 +73,9 @@ class ConfirmPurchaseConcurrencyIntegrationTest {
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM fiscal_receipts
-                    WHERE order_id IN (SELECT id FROM orders WHERE store_id = ?);
+                    WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
+                    """);
+                stmt.executeUpdate("""
                     DELETE FROM order_payment_breakdowns
                     WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'user-%@example.com'));
                     """);

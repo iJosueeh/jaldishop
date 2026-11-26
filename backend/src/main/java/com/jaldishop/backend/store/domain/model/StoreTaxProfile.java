@@ -84,6 +84,9 @@ public record StoreTaxProfile(
     }
 
     public BigDecimal resolveEffectiveTaxRate(BigDecimal requestedTaxRate) {
+        if (requestedTaxRate != null && (requestedTaxRate.compareTo(BigDecimal.ZERO) < 0 || requestedTaxRate.compareTo(new BigDecimal("100.00")) > 0)) {
+            throw new IllegalArgumentException("La tasa de impuestos (IGV) debe estar entre 0.00% y 100.00%.");
+        }
         if (taxRegime == TaxRegime.RUS || taxRegime == TaxRegime.NONE) {
             if (requestedTaxRate != null && requestedTaxRate.compareTo(BigDecimal.ZERO) > 0) {
                 throw new IllegalArgumentException("El Nuevo RUS no discrimina IGV; la tasa de impuesto debe ser 0.00%.");
@@ -92,9 +95,6 @@ public record StoreTaxProfile(
         }
         if (requestedTaxRate == null) {
             return STANDARD_IGV;
-        }
-        if (requestedTaxRate.compareTo(BigDecimal.ZERO) < 0 || requestedTaxRate.compareTo(new BigDecimal("100.00")) > 0) {
-            throw new IllegalArgumentException("La tasa de IGV debe estar entre 0.00% y 100.00%.");
         }
         return requestedTaxRate.setScale(2, RoundingMode.HALF_UP);
     }

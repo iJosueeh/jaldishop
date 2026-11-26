@@ -136,9 +136,9 @@ public class AuthController {
                 request.taxIdType(),
                 request.taxIdNumber(),
                 request.taxRegime(),
-                request.canIssueInvoices(),
+                Boolean.TRUE.equals(request.canIssueInvoices()),
                 request.taxRate(),
-                request.sunatTermsAccepted()
+                Boolean.TRUE.equals(request.sunatTermsAccepted())
         );
 
         AuthResult result = registerMerchantService.execute(command);

@@ -1,11 +1,13 @@
 package com.jaldishop.backend.identity.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jaldishop.backend.shared.validation.ValidPhone;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -40,12 +42,17 @@ public record RegisterMerchantRequest(
         String taxIdNumber,
         @NotBlank(message = "El régimen tributario SUNAT es obligatorio")
         String taxRegime,
-        boolean canIssueInvoices,
+        Boolean canIssueInvoices,
         @DecimalMin("0.00") @DecimalMax("100.00")
         BigDecimal taxRate,
+        @NotNull(message = "Debes aceptar los Términos de Uso y Declaración de Datos Tributarios SUNAT")
         @AssertTrue(message = "Debes aceptar los Términos de Uso y Declaración de Datos Tributarios SUNAT")
-        boolean sunatTermsAccepted
+        Boolean sunatTermsAccepted
 ) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RegisterMerchantRequest {
+    }
+
     public RegisterMerchantRequest(
             String email,
             String password,

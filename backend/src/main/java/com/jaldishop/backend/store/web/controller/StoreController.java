@@ -107,7 +107,7 @@ public class StoreController {
                 request.taxIdType(),
                 request.taxIdNumber(),
                 request.taxRegime(),
-                request.canIssueInvoices(),
+                Boolean.TRUE.equals(request.canIssueInvoices()),
                 Boolean.TRUE.equals(request.sunatTermsAccepted()) ? java.time.Instant.now() : null
         );
 

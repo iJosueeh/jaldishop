@@ -6,6 +6,8 @@ import com.jaldishop.backend.shared.exception.ResourceNotFoundException;
 import com.jaldishop.backend.store.domain.enums.TaxIdType;
 import com.jaldishop.backend.store.domain.model.Store;
 import com.jaldishop.backend.store.domain.validation.SunatRucValidator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,9 @@ import java.util.UUID;
 public class IssueFiscalReceiptService {
 
     private final JdbcTemplate jdbcTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public IssueFiscalReceiptService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -89,6 +94,10 @@ public class IssueFiscalReceiptService {
 
         UUID receiptId = UUID.randomUUID();
         Instant issuedAt = Instant.now();
+
+        if (entityManager != null) {
+            entityManager.flush();
+        }
 
         jdbcTemplate.update(
                 """

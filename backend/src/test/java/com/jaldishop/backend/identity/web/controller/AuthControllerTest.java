@@ -113,7 +113,14 @@ class AuthControllerTest {
                     "storeContactPhone": "987654321",
                     "address": "Av. Los Fresnos 123",
                     "pickupEnabled": true,
-                    "deliveryEnabled": true
+                    "deliveryEnabled": true,
+                    "legalBusinessName": "Mi Pastelería EIRL",
+                    "taxIdType": "DNI",
+                    "taxIdNumber": "12345678",
+                    "taxRegime": "RUS",
+                    "canIssueInvoices": false,
+                    "taxRate": 0.00,
+                    "sunatTermsAccepted": true
                 }
                 """;
 
@@ -203,7 +210,8 @@ class AuthControllerTest {
 
     private String merchantRequest(String firstName, String lastName, String email) {
         return "{\"email\":\"" + email + "\",\"password\":\"password123\",\"firstName\":\"" + firstName
-                + "\",\"lastName\":\"" + lastName + "\",\"storeName\":\"Mi tienda\",\"pickupEnabled\":true,\"deliveryEnabled\":false}";
+                + "\",\"lastName\":\"" + lastName + "\",\"storeName\":\"Mi tienda\",\"pickupEnabled\":true,\"deliveryEnabled\":false"
+                + ",\"legalBusinessName\":\"Mi Tienda\",\"taxIdType\":\"DNI\",\"taxIdNumber\":\"12345678\",\"taxRegime\":\"RUS\",\"canIssueInvoices\":false,\"taxRate\":0.00,\"sunatTermsAccepted\":true}";
     }
 
     @Test
