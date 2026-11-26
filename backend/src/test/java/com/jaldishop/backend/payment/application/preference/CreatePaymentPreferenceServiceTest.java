@@ -1088,4 +1088,17 @@ class CreatePaymentPreferenceServiceTest {
         assertThat(attempt.getErrorMessage()).contains("ORD-REMOTE-999");
         assertThat(attempt.getRemoteOrderCreationState()).isEqualTo(RemoteOrderCreationState.REJECTED_CONFIRMED);
     }
+
+    @Test
+    @DisplayName("Permite returnBaseUrl de jaldishop.net y rechaza dominios externos hacia el fallback")
+    void resolveBackUrlAcceptsJaldishopNetAndFallsBackForUntrustedHost() {
+        assertThat(service.resolveBackUrl("https://www.jaldishop.net/", "/checkout/success", properties.getBackUrlSuccess()))
+                .isEqualTo("https://www.jaldishop.net/checkout/success");
+        assertThat(service.resolveBackUrl("https://jaldishop.net", "/checkout/pending", properties.getBackUrlPending()))
+                .isEqualTo("https://jaldishop.net/checkout/pending");
+        assertThat(service.resolveBackUrl("https://evil.example.com", "/checkout/success", properties.getBackUrlSuccess()))
+                .isEqualTo(properties.getBackUrlSuccess());
+        assertThat(new MercadoPagoProperties().getBackUrlSuccess())
+                .isEqualTo("https://www.jaldishop.net/checkout/success");
+    }
 }
