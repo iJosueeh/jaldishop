@@ -119,7 +119,8 @@ class CheckoutHoldConcurrencyIntegrationTest {
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM product_variants
-                    WHERE presentation_name = 'Variante Test' OR sku LIKE 'SKU-%';
+                    WHERE (presentation_name = 'Variante Test' OR sku LIKE 'SKU-%')
+                      AND id NOT IN (SELECT variant_id FROM order_items);
                     """);
                 stmt.executeUpdate("""
                     DELETE FROM user_roles

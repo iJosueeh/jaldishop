@@ -205,6 +205,10 @@ class InventoryFullLifecyclePostgresIntegrationTest {
                     ps.setObject(1, orderId);
                     ps.executeUpdate();
                 }
+                try (var ps = conn.prepareStatement("DELETE FROM fiscal_receipts WHERE order_id = ?")) {
+                    ps.setObject(1, orderId);
+                    ps.executeUpdate();
+                }
                 try (var ps = conn.prepareStatement("DELETE FROM orders WHERE id = ?")) {
                     ps.setObject(1, orderId);
                     ps.executeUpdate();
