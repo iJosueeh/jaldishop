@@ -1,0 +1,27 @@
+backend/run-safe-sandbox.sh:110: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:116: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:133: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:137: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:320: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:323: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:326: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:328: trailing whitespace.
++  
+backend/run-safe-sandbox.sh:337: trailing whitespace.
++  
+backend/src/main/java/com/jaldishop/backend/inventory/application/service/UpdateInventoryStockService.java:86: new blank line at EOF.
+backend/src/main/java/com/jaldishop/backend/inventory/application/service/UpdateInventoryThresholdService.java:81: new blank line at EOF.
+docs/04-diseno/api-inventario.md:7: trailing whitespace.
++`📍 Docs` > `04-Diseño` > **API Inventario**  
+docs/06-scrum/sprint-03.md:324: trailing whitespace.
++**Responsable:** Katherine / Josué  
+docs/06-scrum/sprint-03.md:325: trailing whitespace.
++**Estado:** `COMPLETADO` ✅  
+frontend-merchant/src/app/core/models/order.models.ts:190: new blank line at EOF.

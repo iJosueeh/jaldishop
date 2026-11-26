@@ -1,0 +1,5832 @@
+[
+  {
+    "id": "J001",
+    "responsable": "Josue",
+    "modulo": "shared",
+    "endpoint": "GET /api/v1/health",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M001",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M002",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M003",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M004",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M005",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "FORMATO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M006",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M007",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M008",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M009",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M010",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M011",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M012",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M013",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "FORMATO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M014",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M015",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M016",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M017",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M018",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M019",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M020",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M021",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "FORMATO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M022",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "AUSENTE_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M023",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "NULO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M024",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/login",
+    "caso": "VACIO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M025",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/refresh",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M026",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/refresh",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M027",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/users/me",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M028",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/users/me",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M029",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M030",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M031",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "AUSENTE_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M032",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "NULO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M033",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "VACIO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M034",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "EXCEDE_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M035",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "AUSENTE_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M036",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "NULO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M037",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "VACIO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M038",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "PUT /api/v1/users/me",
+    "caso": "EXCEDE_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M039",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M040",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "AUSENTE_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M041",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "NULO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M042",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "VACIO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M043",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "FORMATO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M044",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "AUSENTE_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M045",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "NULO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M046",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "VACIO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M047",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "AUSENTE_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M048",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "NULO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M049",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "VACIO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M050",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "AUSENTE_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M051",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "NULO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M052",
+    "responsable": "Mia",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register",
+    "caso": "VACIO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M053",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "GET /api/v1/customer/addresses",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M054",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "GET /api/v1/customer/addresses",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M055",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "GET /api/v1/customer/addresses",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M056",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M057",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M058",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M059",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M060",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M061",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M062",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M063",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M064",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M065",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M066",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M067",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M068",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M069",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M070",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "FORMATO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M071",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M072",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M073",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M074",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M075",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M076",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M077",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M078",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M079",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M080",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M081",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M082",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M083",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M084",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M085",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M086",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M087",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "AUSENTE_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M088",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "NULO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M089",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "VACIO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M090",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "FORMATO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M091",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "POST /api/v1/customer/addresses",
+    "caso": "EXCEDE_reference",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M092",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M093",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M094",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M095",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M096",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "RECURSO_AJENO",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M097",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "INEXISTENTE",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M098",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M099",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M100",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M101",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_alias",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M102",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M103",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M104",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M105",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_recipientName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M106",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M107",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M108",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M109",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "FORMATO_recipientPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M110",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M111",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M112",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M113",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_streetAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M114",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M115",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M116",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M117",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_department",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M118",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M119",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M120",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M121",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_province",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M122",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M123",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M124",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M125",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_district",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M126",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "AUSENTE_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M127",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "NULO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M128",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "VACIO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M129",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "FORMATO_ubigeoCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M130",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PUT /api/v1/customer/addresses/{id}",
+    "caso": "EXCEDE_reference",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M131",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PATCH /api/v1/customer/addresses/{id}/default",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M132",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PATCH /api/v1/customer/addresses/{id}/default",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M133",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PATCH /api/v1/customer/addresses/{id}/default",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M134",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "PATCH /api/v1/customer/addresses/{id}/default",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M135",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "VALIDO",
+    "http": 204,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M136",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M137",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M138",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M139",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "RECURSO_AJENO",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M140",
+    "responsable": "Mia",
+    "modulo": "address",
+    "endpoint": "DELETE /api/v1/customer/addresses/{id}",
+    "caso": "INEXISTENTE",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K001",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/store-categories",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K002",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/stores/search",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K003",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/stores/featured",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K004",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/stores/slug/{slug}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M141",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/slug/{slug}/categories",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M142",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/slug/{slug}/products",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M143",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/{storeId}/categories",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M144",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/{storeId}/categories",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M145",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/{storeId}/products",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M146",
+    "responsable": "Mia",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/stores/{storeId}/products",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M147",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/products/{productId}/reviews",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M148",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/products/{productId}/reviews",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M149",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M150",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M151",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M152",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products/{productId}/status",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M153",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products/{productId}/status",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M154",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products/{productId}/status",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M155",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "GET /api/v1/customer/favorites/products/{productId}/status",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M156",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "POST /api/v1/customer/favorites/products/{productId}",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M157",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "POST /api/v1/customer/favorites/products/{productId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M158",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "POST /api/v1/customer/favorites/products/{productId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M159",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "POST /api/v1/customer/favorites/products/{productId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M160",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "DELETE /api/v1/customer/favorites/products/{productId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M161",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "DELETE /api/v1/customer/favorites/products/{productId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M162",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "DELETE /api/v1/customer/favorites/products/{productId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M163",
+    "responsable": "Mia",
+    "modulo": "favorite",
+    "endpoint": "DELETE /api/v1/customer/favorites/products/{productId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M164",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "GET /api/v1/cart",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M165",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "GET /api/v1/cart",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M166",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M167",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M168",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "AUSENTE_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M169",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "NULO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M170",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "AUSENTE_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M171",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "POST /api/v1/cart/items",
+    "caso": "NULO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M172",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "PUT /api/v1/cart/items/{variantId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M173",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "PUT /api/v1/cart/items/{variantId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M174",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "PUT /api/v1/cart/items/{variantId}",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M175",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "PUT /api/v1/cart/items/{variantId}",
+    "caso": "AUSENTE_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M176",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "PUT /api/v1/cart/items/{variantId}",
+    "caso": "NULO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M177",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "DELETE /api/v1/cart/items/{variantId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M178",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "DELETE /api/v1/cart/items/{variantId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M179",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "DELETE /api/v1/cart/items/{variantId}",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M180",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "DELETE /api/v1/cart",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M181",
+    "responsable": "Mia",
+    "modulo": "cart",
+    "endpoint": "DELETE /api/v1/cart",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K005",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/slots",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K006",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/slots",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K007",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/availability",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K008",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/availability",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K009",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K010",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K011",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "AUSENTE_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K012",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "NULO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K013",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "AUSENTE_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K014",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "NULO_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K015",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "AUSENTE_startTime",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K016",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "NULO_startTime",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K017",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "AUSENTE_endTime",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K018",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity/reservations",
+    "caso": "NULO_endTime",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K019",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/reservations/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K020",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/reservations/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K021",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/reservations/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K022",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "DELETE /api/v1/capacity/reservations/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K023",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "DELETE /api/v1/capacity/reservations/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K024",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "DELETE /api/v1/capacity/reservations/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J002",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J003",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J004",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "AUSENTE_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J005",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "NULO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J006",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "AUSENTE_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J007",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "NULO_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J008",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_customerName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J009",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_customerPhone",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J010",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_customerEmail",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J011",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_deliveryAddress",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J012",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_deliveryReference",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J013",
+    "responsable": "Josue",
+    "modulo": "checkout",
+    "endpoint": "POST /api/v1/checkout",
+    "caso": "EXCEDE_discountCode",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "J014",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J015",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J016",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "AUSENTE_capacityReservationId",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J017",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "NULO_capacityReservationId",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J018",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "AUSENTE_customerName",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J019",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "NULO_customerName",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J020",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "VACIO_customerName",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J021",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "AUSENTE_customerPhone",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J022",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "NULO_customerPhone",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J023",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "VACIO_customerPhone",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J024",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "AUSENTE_customerEmail",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J025",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "NULO_customerEmail",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J026",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "VACIO_customerEmail",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J027",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/preference",
+    "caso": "FORMATO_customerEmail",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "M182",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/customer/orders",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M183",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/customer/orders",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M184",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/customer/orders/{orderNumber}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M185",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/customer/orders/{orderNumber}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M186",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/customer/orders/{orderNumber}/cancel",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M187",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/customer/orders/{orderNumber}/cancel",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M188",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/products/{productId}/reviews/eligibility",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M189",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/products/{productId}/reviews/eligibility",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M190",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/products/{productId}/reviews/eligibility",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M191",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/products/{productId}/reviews/eligibility",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M192",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/reviews",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M193",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/reviews",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M194",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "GET /api/v1/customer/reviews",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M195",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M196",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M197",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M198",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M199",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "AUSENTE_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M200",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "NULO_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M201",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "FUERA_Min_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M202",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "FUERA_Max_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M203",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "POST /api/v1/customer/products/{productId}/reviews",
+    "caso": "EXCEDE_comment",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M204",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M205",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M206",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M207",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M208",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "AUSENTE_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M209",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "NULO_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M210",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "FUERA_Min_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M211",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "FUERA_Max_rating",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M212",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "PUT /api/v1/customer/products/{productId}/reviews",
+    "caso": "EXCEDE_comment",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M213",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "DELETE /api/v1/customer/products/{productId}/reviews",
+    "caso": "VALIDO",
+    "http": 204,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M214",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "DELETE /api/v1/customer/products/{productId}/reviews",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M215",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "DELETE /api/v1/customer/products/{productId}/reviews",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M216",
+    "responsable": "Mia",
+    "modulo": "review",
+    "endpoint": "DELETE /api/v1/customer/products/{productId}/reviews",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K025",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K026",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "AUSENTE_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K027",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "NULO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K028",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VACIO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K029",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "FORMATO_email",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K030",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "AUSENTE_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K031",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "NULO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K032",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VACIO_password",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K033",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "AUSENTE_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K034",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "NULO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K035",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VACIO_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K036",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "EXCEDE_firstName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K037",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "AUSENTE_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K038",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "NULO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K039",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VACIO_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K040",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "EXCEDE_lastName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K041",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "AUSENTE_storeName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K042",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "NULO_storeName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K043",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "VACIO_storeName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K044",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "EXCEDE_storeName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K045",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "FUERA_DecimalMin_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K046",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "FUERA_DecimalMax_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K047",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "FUERA_DecimalMin_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K048",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "FUERA_DecimalMax_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K049",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "PASSWORD_CORTO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K050",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "EMAIL_FORMATO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K051",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "MERCHANT_DUPLICADO",
+    "http": 409,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K052",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "firstName_100",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K053",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "firstName_101",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K054",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "lastName_100",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K055",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "lastName_101",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K056",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "email_254",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K057",
+    "responsable": "Katherine",
+    "modulo": "identity",
+    "endpoint": "POST /api/v1/auth/register/merchant",
+    "caso": "email_255",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K058",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K059",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K060",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K061",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K062",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K063",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K064",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "EXCEDE_slug",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K065",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMin_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K066",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMax_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K067",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMin_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K068",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMax_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K069",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMin_deliveryFeeAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K070",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "EXCEDE_deliveryFeeCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K071",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMin_taxRate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K072",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "POST /api/v1/stores",
+    "caso": "FUERA_DecimalMax_taxRate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K073",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/stores/me",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K074",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/stores/me",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K075",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K076",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K077",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K078",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K079",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K080",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K081",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMin_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K082",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMax_latitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K083",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMin_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K084",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMax_longitude",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K085",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMin_deliveryFeeAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K086",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "EXCEDE_deliveryFeeCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K087",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMin_taxRate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K088",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "PUT /api/v1/stores/me",
+    "caso": "FUERA_DecimalMax_taxRate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K089",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "DELETE /api/v1/stores/me",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K090",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "DELETE /api/v1/stores/me",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K091",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K092",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K093",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K094",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K095",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K096",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K097",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K098",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K099",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K100",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K101",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K102",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/categories",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K103",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K104",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K105",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K106",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K107",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "UUID_INVALIDO_categoryId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K108",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K109",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K110",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K111",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K112",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "UUID_INVALIDO_categoryId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K113",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K114",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K115",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K116",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/categories/{categoryId}",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K117",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K118",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K119",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K120",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K121",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K122",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K123",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K124",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K125",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "AUSENTE_categoryId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K126",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "NULO_categoryId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K127",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K128",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K129",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K130",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K131",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products",
+    "caso": "EXCEDE_slug",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K132",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K133",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K134",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K135",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K136",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K137",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K138",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K139",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K140",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K141",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K142",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "AUSENTE_categoryId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K143",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "NULO_categoryId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K144",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "AUSENTE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K145",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "NULO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K146",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "VACIO_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K147",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "EXCEDE_name",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K148",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}",
+    "caso": "EXCEDE_slug",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K149",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K150",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K151",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K152",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K153",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K154",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K155",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K156",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K157",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K158",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K159",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "AUSENTE_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K160",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "NULO_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K161",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "VACIO_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K162",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "EXCEDE_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K163",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "EXCEDE_sku",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K164",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "AUSENTE_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K165",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "NULO_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K166",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "FUERA_DecimalMin_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K167",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "AUSENTE_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K168",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "NULO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K169",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "VACIO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K170",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "FORMATO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K171",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_ELEMENTO_NULO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K172",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_NOMBRE_NULO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K173",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_VALOR_VACIO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K174",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_NOMBRE_121",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K175",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_DUPLICADO_TRIM",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K176",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_NOMBRE_120",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K177",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_LISTA_VACIA",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K178",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "ATTR_LISTA_NULA",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K179",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "POST /api/v1/merchants/stores/{storeId}/products/{productId}/variants",
+    "caso": "REPETIR_SKU_EXISTENTE",
+    "http": 409,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K180",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K181",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K182",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K183",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K184",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K185",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K186",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K187",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K188",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K189",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K190",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_productId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K191",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K192",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "AUSENTE_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K193",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "NULO_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K194",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "VACIO_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K195",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "EXCEDE_presentationName",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K196",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "EXCEDE_sku",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K197",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "AUSENTE_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K198",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "NULO_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K199",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "FUERA_DecimalMin_priceAmount",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K200",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "AUSENTE_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K201",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "NULO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K202",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "VACIO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K203",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "FORMATO_priceCurrency",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K204",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_ELEMENTO_NULO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K205",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_NOMBRE_NULO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K206",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_VALOR_VACIO",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K207",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_NOMBRE_121",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K208",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_DUPLICADO_TRIM",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K209",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_NOMBRE_120",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K210",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_LISTA_VACIA",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K211",
+    "responsable": "Katherine",
+    "modulo": "catalog",
+    "endpoint": "PUT /api/v1/merchants/stores/{storeId}/products/{productId}/variants/{variantId}",
+    "caso": "ATTR_LISTA_NULA",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K212",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K213",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K214",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K215",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/variants/{variantId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K216",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/variants/{variantId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K217",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/variants/{variantId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K218",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/variants/{variantId}",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K219",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K220",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K221",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K222",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K223",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "AUSENTE_quantity",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K224",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "NULO_quantity",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K225",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PUT /api/v1/inventory/variants/{variantId}/stock",
+    "caso": "FUERA_Min_quantity",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K226",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PATCH /api/v1/inventory/variants/{variantId}/threshold",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K227",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PATCH /api/v1/inventory/variants/{variantId}/threshold",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K228",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PATCH /api/v1/inventory/variants/{variantId}/threshold",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K229",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PATCH /api/v1/inventory/variants/{variantId}/threshold",
+    "caso": "UUID_INVALIDO_variantId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K230",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "PATCH /api/v1/inventory/variants/{variantId}/threshold",
+    "caso": "FUERA_Min_lowStockThreshold",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K231",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/low-stock",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K232",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/low-stock",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K233",
+    "responsable": "Katherine",
+    "modulo": "inventory",
+    "endpoint": "GET /api/v1/inventory/low-stock",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K234",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity-configurations",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K235",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity-configurations",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K236",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-configurations",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K237",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-configurations",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K238",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-configurations/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K239",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-configurations/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K240",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-configurations/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K241",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/activate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K242",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/activate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K243",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/activate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K244",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/deactivate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K245",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/deactivate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K246",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-configurations/{id}/deactivate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K247",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity-exceptions",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K248",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity-exceptions",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K249",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-exceptions",
+    "caso": "VALIDO",
+    "http": 201,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K250",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-exceptions",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K251",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-exceptions",
+    "caso": "AUSENTE_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K252",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "POST /api/v1/capacity-exceptions",
+    "caso": "NULO_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K253",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-exceptions/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K254",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-exceptions/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K255",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-exceptions/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K256",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-exceptions/{id}",
+    "caso": "AUSENTE_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K257",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PUT /api/v1/capacity-exceptions/{id}",
+    "caso": "NULO_serviceDate",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K258",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/activate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K259",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/activate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K260",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/activate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K261",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/deactivate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K262",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/deactivate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K263",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "PATCH /api/v1/capacity-exceptions/{id}/deactivate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": true
+  },
+  {
+    "id": "K264",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/effective",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "K265",
+    "responsable": "Katherine",
+    "modulo": "capacity",
+    "endpoint": "GET /api/v1/capacity/effective",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": true
+  },
+  {
+    "id": "M217",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M218",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M219",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M220",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M221",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders/{orderId}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M222",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders/{orderId}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M223",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders/{orderId}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M224",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders/{orderId}",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M225",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "GET /api/v1/merchants/stores/{storeId}/orders/{orderId}",
+    "caso": "UUID_INVALIDO_orderId",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M226",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M227",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M228",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M229",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status",
+    "caso": "UUID_INVALIDO_storeId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M230",
+    "responsable": "Mia",
+    "modulo": "ordering",
+    "endpoint": "PATCH /api/v1/merchants/stores/{storeId}/orders/{orderId}/status",
+    "caso": "UUID_INVALIDO_orderId",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K266",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/merchant/customers",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K267",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/merchant/customers",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "K268",
+    "responsable": "Katherine",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/merchant/customers",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J028",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J029",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J030",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J031",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users",
+    "caso": "ADMIN_REVOCADO_TOKEN_ANTERIOR",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J032",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J033",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J034",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users/{id}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J035",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "GET /api/v1/admin/users/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J036",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/roles",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J037",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/roles",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J038",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/roles",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J039",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/roles",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J040",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/suspend",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J041",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/suspend",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J042",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/suspend",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J043",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/suspend",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J044",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/activate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J045",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/activate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J046",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/activate",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J047",
+    "responsable": "Josue",
+    "modulo": "identity",
+    "endpoint": "PATCH /api/v1/admin/users/{id}/activate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J048",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J049",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J050",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J051",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores/{id}",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J052",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores/{id}",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J053",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores/{id}",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J054",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "GET /api/v1/admin/stores/{id}",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "J055",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/suspend",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J056",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/suspend",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J057",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/suspend",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J058",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/suspend",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J059",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/activate",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J060",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/activate",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J061",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/activate",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J062",
+    "responsable": "Josue",
+    "modulo": "store",
+    "endpoint": "PATCH /api/v1/admin/stores/{id}/activate",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "J063",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J064",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J065",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J066",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/reconcile-order",
+    "caso": "UUID_INVALIDO_attemptId",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J067",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J068",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J069",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order",
+    "caso": "ROL_INCORRECTO",
+    "http": 403,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J070",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/admin/payments/attempts/{attemptId}/investigate-order",
+    "caso": "UUID_INVALIDO_attemptId",
+    "http": 400,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J071",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/webhook",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "J072",
+    "responsable": "Josue",
+    "modulo": "payment",
+    "endpoint": "POST /api/v1/checkout/mercado-pago/webhook",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "MANUAL FINANCIERO/FAKE",
+    "compartido": false
+  },
+  {
+    "id": "K269",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K270",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "TIENDA_AJENA",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K271",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "PRODUCTO_SIN_AUTH",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K272",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "CUSTOMER_PRODUCTO",
+    "http": 403,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K273",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "BRANDING_TEMPORAL",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "K274",
+    "responsable": "Katherine",
+    "modulo": "media",
+    "endpoint": "POST /api/v1/media/upload-signature",
+    "caso": "BRANDING_AJENO_ANONIMO",
+    "http": 404,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M231",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "GET /api/v1/notifications",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M232",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "GET /api/v1/notifications",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M233",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "GET /api/v1/notifications/unread/count",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M234",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "GET /api/v1/notifications/unread/count",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "LECTURA",
+    "compartido": false
+  },
+  {
+    "id": "M235",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "PATCH /api/v1/notifications/{id}/read",
+    "caso": "VALIDO",
+    "http": 200,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M236",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "PATCH /api/v1/notifications/{id}/read",
+    "caso": "SIN_AUTH",
+    "http": 401,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  },
+  {
+    "id": "M237",
+    "responsable": "Mia",
+    "modulo": "notification",
+    "endpoint": "PATCH /api/v1/notifications/{id}/read",
+    "caso": "UUID_INVALIDO_id",
+    "http": 400,
+    "riesgo": "ESCRITURA MANUAL",
+    "compartido": false
+  }
+]
